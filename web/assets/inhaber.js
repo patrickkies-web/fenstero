@@ -68,7 +68,7 @@
   async function abmelden() { await U.api('POST', '/api/inhaber/abmelden', {}).catch(() => null); S.stand.angemeldet = false; location.hash = ''; anmeldung(); }
 
   /* ---------- Eingang ---------- */
-  async function eingangLaden() { S.liste = (await U.api('GET', '/api/inhaber/auftraege')).auftraege; }
+  async function eingangLaden() { const r = await U.api('GET', '/api/inhaber/auftraege'); S.liste = r.auftraege; S.kasse = r.kasse || null; }
   function eingang(o) {
     kopf();
     const l = S.liste || [], tun = l.filter(zuTun), live = l.filter((a) => a.stand === 'live');
@@ -84,7 +84,16 @@
     }));
     const auswahl = l.filter((FILTER.find((f) => f.k === S.filter) || FILTER[0]).f);
     const zeilen = auswahl.length ? h('ol', { class: 'a-eingang' }, auswahl.map(zeile)) : h('p', { class: 'a-leer', text: S.filter === 'tun' ? 'Nichts zu tun. Neue Bestellungen erscheinen hier, dazu eine E-Mail an Sie.' : 'Keine Aufträge in dieser Ansicht.' });
-    seite({ frage: U.frage(tun.length ? 'Eingang. *' + (tun.length === 1 ? 'Ein Auftrag' : tun.length + ' Aufträge') + ' für Sie.*' : 'Eingang. *Alles erledigt.*', null), inhalt: [zahlen, filter, U.karte(null, null, zeilen, { class: 'a-karte a-eingang-karte' })], stehen: o && o.stehen });
+    seite({ frage: U.frage(tun.length ? 'Eingang. *' + (tun.length === 1 ? 'Ein Auftrag' : tun.length + ' Aufträge') + ' für Sie.*' : 'Eingang. *Alles erledigt.*', null), inhalt: [zahlen, kasseKarte(), filter, U.karte(null, null, zeilen, { class: 'a-karte a-eingang-karte' })], stehen: o && o.stehen });
+  }
+  /* Paket-Kasse: offen (mit Modus) oder zu, mit den Gründen vom Server; Bestellungen enden sonst als unverbindliche Anfrage */
+  const MODUS = { test: 'Stripe im Testmodus, ohne echtes Geld', live: 'Stripe mit echtem Geld', attrappe: 'Attrappe ohne Stripe' };
+  function kasseKarte() {
+    const k = S.kasse; if (!k) return null;
+    if (k.kasse) return h('p', { class: 'a-hinweis a-kasse', style: 'margin:0 0 4px' }, U.chip('Kasse offen', 'aktiv'), ' ' + (MODUS[k.modus] || '') + '. Bestellungen gehen bis zur Zahlung.');
+    return U.kachel([h('p', { class: 'a-label-klein', style: 'margin:0' }, U.chip('Kasse zu', 'hinweis')), h('h2', { text: 'Bestellungen enden gerade als Anfrage' }),
+      h('ul', { class: 'a-gruende' }, k.gruende.map((g) => h('li', { text: g }))),
+      h('p', { class: 'a-hinweis', style: 'margin:8px 0 0;color:var(--silbergrau)', text: 'Zum Testen genügt der Testschlüssel von Stripe (sk_test_…): damit ist die Kasse immer offen. Mit echtem Schlüssel öffnet sie erst, wenn alles oben erledigt ist.' })], 'a-kasse-zu');
   }
   function zeile(a) {
     const hinweise = [];
@@ -101,7 +110,7 @@
   /* ---------- Ein Auftrag ---------- */
   async function auftragLaden(id) {
     const r = await U.api('GET', '/api/inhaber/auftraege/' + id);
-    S.auftrag = Object.assign(r.auftrag, { prompt: r.prompt, nachrichten: r.nachrichten, paketStand: r.stand, kiStand: r.ki || null });
+    S.auftrag = Object.assign(r.auftrag, { prompt: r.prompt, nachrichten: r.nachrichten, paketStand: r.stand, kiStand: r.ki || null, kasse: r.kasse || null }); if (r.kasse) S.kasse = r.kasse;
     if (r.auftrag.geaendert && r.auftrag.geaendert > (r.auftrag.gesehen || '')) U.api('POST', '/api/inhaber/auftraege/' + id + '/gesehen', {}).catch(() => null);
     const e = (S.liste || []).find((x) => x.id === id); if (e) { e.ungelesen = 0; e.geaendert = false; }
     return S.auftrag;
@@ -117,11 +126,24 @@
   /* Nächster Schritt: Pille mit Blatt */
   function schritt(a) {
     const v = a.vorschau || {};
+    if (a.stand === 'angefragt' && (a.kasse || S.kasse || {}).kasse) return { titel: 'Zur Zahlung einladen', einladen: true };
     if (a.stand === 'bezahlt') return { titel: 'Seite beginnen', nach: 'in_arbeit', text: 'Der Kunde bekommt eine E-Mail „Wir bauen Ihre Seite“. Danach ist kein kostenloser Storno mehr möglich.' };
     if (a.stand === 'in_arbeit') return { titel: v.aenderung ? 'Neue Vorschau bereitstellen' : 'Vorschau bereitstellen', nach: 'vorschau', link: 'Link zur Vorschau', text: 'Der Kunde bekommt den Link per E-Mail und gibt im Kundenbereich frei oder wünscht Änderungen.' };
     if (a.stand === 'vorschau' && v.freigabe) return { titel: 'Live schalten', nach: 'live', link: 'Adresse der fertigen Seite', vorschlag: a.adresse && a.adresse.indexOf('.') > 0 && !/Vorschlag/.test(a.adresse) ? 'https://' + a.adresse + '/' : '', text: 'Das Monatsabo startet jetzt (' + U.euro((a.preise || {}).monat || 0) + ' netto im Monat), der Kunde bekommt eine E-Mail mit dem Link.' };
     if (a.stand === 'pausiert') return { titel: 'Wieder live schalten', nach: 'live', link: 'Adresse der Seite', vorschlag: v.live || '', text: 'Die Seite ist wieder erreichbar.' };
     return null;
+  }
+  /* Anfrage zur Zahlung einladen: Mail mit Link auf „Bestellen“, Satz an den Kunden freiwillig */
+  function einladenBlatt(a) {
+    const text = U.feld({ k: 'text', label: 'Satz an den Kunden', optional: true, zeilen: 3, max: 600, platzhalter: 'z. B. Danke für Ihre Geduld, ab heute können Sie bestellen.' });
+    const ja = U.pille('Einladung senden'), nein = U.ring('Abbrechen');
+    const zu = U.blatt({ titel: 'Zur Zahlung einladen?', text: 'Der Kunde bekommt eine E-Mail mit dem Link zur Bestellung. Dort prüft er seine Angaben, stimmt zu und bezahlt die Einrichtung.', inhalt: h('div', { class: 'a-karte', style: 'margin:0 0 4px' }, text), knoepfe: [ja, nein] });
+    nein.addEventListener('click', zu);
+    ja.addEventListener('click', async () => {
+      if (U.wartet(ja)) return; U.warten(ja, true);
+      try { await U.api('POST', '/api/inhaber/auftraege/' + a.id + '/zahlung-einladen', { text: text.eingabe.value }); zu(); U.toast('Einladung gesendet'); zeigen(await auftragLaden(a.id), { stehen: true }); }
+      catch (e) { U.warten(ja, false); U.fehlerSetzen(text, e.message); }
+    });
   }
   function standBlatt(a, s) {
     const link = s.link ? U.feld({ k: 'link', label: s.link, typ: 'url', modus: 'url', wert: s.vorschlag || '', platzhalter: 'https://' }) : null;
@@ -163,7 +185,9 @@
     if (a.wechsel) hin.push('Wechsel zu ' + P.PAKETE[a.wechsel.paket].name + ' angefragt am ' + U.datum(a.wechsel.zeit) + '. Differenz der Einrichtung und neuen Monatspreis mit dem Kunden klären.');
     if (v.aenderung && a.stand === 'in_arbeit') hin.push('Änderungswunsch vom ' + U.datum(v.aenderung.zeit) + ': „' + v.aenderung.text + '“');
     if (v.freigabe && a.stand === 'vorschau') hin.push('Vorschau am ' + U.zeit(v.freigabe.zeit) + ' freigegeben.');
-    if (a.stand === 'angefragt') hin.push('Unverbindlich angefragt, solange die Kasse zu ist. Sobald PAKETE_OFFEN gesetzt ist, kann der Kunde im Kundenbereich bezahlen.');
+    const kst = a.kasse || S.kasse;
+    if (a.stand === 'angefragt') hin.push(kst && kst.kasse ? 'Unverbindlich angefragt, als die Kasse zu war. Jetzt ist sie offen (' + (MODUS[kst.modus] || '') + '): Laden Sie den Kunden zur Zahlung ein; er bekommt einen Link zur Bestellung und bezahlt dort.'
+      : 'Unverbindlich angefragt. Die Kasse ist zu' + (kst && kst.gruende && kst.gruende.length ? ': ' + kst.gruende.join('; ') : '') + '. Sobald sie offen ist, laden Sie den Kunden hier zur Zahlung ein.');
     if (hin.length) inhalt.push(U.kachel(hin.map((x) => h('p', { class: 'a-hinweis', style: 'margin:6px 0;color:var(--weiss)', text: x })), 'a-hinweise'));
 
     /* Prompt */
@@ -218,7 +242,7 @@
 
     const titel = (b.name || b.firma || 'Ohne Namen') + (a.naechster ? '. *' + a.naechster + '.*' : '');
     seite({ band: h('p', { class: 'a-band-text', text: a.nr + ' · ' + P.PAKETE[a.paket].name + (A.gestaltet(P.merkmale(a.paket) || {}) ? ' · ' + (a.weg === 'schnell' ? 'Seite vorschlagen' : 'Selbst angeben') : '') + ' · bestellt ' + (z.bezahlt_am ? U.datum(z.bezahlt_am) : 'noch nicht') }), buehne: buehne(a),
-      frage: U.frage(titel, null), inhalt: inhalt, fuss: s ? [U.pille(s.titel, { on: { click: () => standBlatt(a, s) } })] : null, stehen: o.stehen });
+      frage: U.frage(titel, null), inhalt: inhalt, fuss: s ? [U.pille(s.titel, { on: { click: () => (s.einladen ? einladenBlatt(a) : standBlatt(a, s)) } })] : null, stehen: o.stehen });
     const liste = wurzel.querySelector('.a-nachrichten'); if (liste) liste.scrollTop = liste.scrollHeight;
   }
 

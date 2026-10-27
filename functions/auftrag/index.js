@@ -38,7 +38,7 @@ import { postDienst, esc, mailOk as mailPruefen } from '../api/post.js';
 import { ablage } from '../api/fotos.js';
 import { PAKET_STAND, paketVerkaufStand, standText, paketPdfs } from '../api/recht.js';
 import { daten } from './daten.js';
-import { codeMail, bestelltMail, inhaberNeuMail, standMail, nachrichtMail, frageMail, rahmen, zahlungMail } from './mails.js';
+import { codeMail, bestelltMail, inhaberNeuMail, standMail, nachrichtMail, frageMail, rahmen, zahlungMail, kasseOffenMail } from './mails.js';
 import { SICHERHEIT, SPERRE, HAUPTADRESSE } from '../seo.js';
 import { kasse, kassePruefen, aboStarten, aboBeenden, portal, erstatten, mwst, kiPosten } from './zahlung.js';
 import { budgetStand, monatsPeriode } from '../api/bremse.js';
@@ -197,6 +197,16 @@ function dateiAntwort(bytes, d, herunter) {
 async function verkaufStand(ctx) {
   const v = await paketVerkaufStand(ctx.k, ctx.env, basis(ctx)).catch(() => ({ bereit: false, fehlt: ['Prüfung fehlgeschlagen'] }));
   return AU().verkauf({ offen: ctx.k.paketeOffen, live: live(ctx.k), bereit: v.bereit });
+}
+/* Für die Zentrale: ist die Paket-Kasse offen, und wenn nicht, warum (statt eines festen Satzes über PAKETE_OFFEN). Im Testmodus von Stripe
+   ist sie immer offen; mit echtem Schlüssel erst mit PAKETE_OFFEN=1 und allem aus paketVerkaufStand (Mail, MWST, Datenbank, Sitzungen,
+   Paketbedingungen ohne Platzhalter, geprüfte Vorlage der Rechtstexte) */
+async function kassenStand(ctx) {
+  const v = await paketVerkaufStand(ctx.k, ctx.env, basis(ctx)).catch(() => ({ bereit: false, fehlt: ['Prüfung fehlgeschlagen'] }));
+  const lv = live(ctx.k), offen = !!ctx.k.paketeOffen, stripe = !!ctx.k.stripe, attrappe = !!ctx.k.zahlungAttrappe;
+  const kasse = (stripe || attrappe) && AU().verkauf({ offen: offen, live: lv, bereit: v.bereit }).kasse;
+  const gruende = kasse ? [] : !stripe && !attrappe ? ['STRIPE_SECRET_KEY fehlt (Secret bei Cloudflare)'] : [offen ? '' : 'Variable PAKETE_OFFEN fehlt oder ist nicht 1'].concat(v.fehlt || []).filter(Boolean);
+  return { kasse: !!kasse, offen: offen, modus: attrappe && !stripe ? 'attrappe' : !stripe ? '' : lv ? 'live' : 'test', gruende: gruende };
 }
 
 /* ---------- Bezahlt festhalten (Rückkehr aus der Kasse und Webhook, auch beide zugleich; nur das erste Mal schickt Mails) ---------- */
@@ -565,13 +575,29 @@ const INHABER = {
   'GET /api/inhaber/auftraege': async (ctx) => {
     await inhaberPflicht(ctx);
     const d = db(ctx), l = await d.auftraegeAlle(), ung = await d.ungelesen('kunde').catch(() => ({}));
-    return { ok: true, auftraege: l.map((a) => { const b = (a.angaben || {}).betrieb || {}; return { id: a.id, nr: a.nr, paket: a.paket, paketName: (P().PAKETE[a.paket] || {}).name, stand: a.stand, weg: a.weg, firma: b.firma || '', name: b.name || '', ort: b.ort || '', adresse: adresseText(a), web: b.web || '', created_at: a.created_at, updated_at: a.updated_at, bezahlt_am: (a.zahlung || {}).bezahlt_am || '', betrag_cent: (a.zahlung || {}).betrag_cent || 0, monat: (a.preise || {}).monat || 0, ungelesen: ung[a.id] || 0, geaendert: !!(a.angaben_geaendert && a.angaben_geaendert > (a.gesehen || '')), freigabe: !!((a.vorschau || {}).freigabe), naechster: naechster(a), dateien: (a.dateien || []).length, wechsel: a.wechsel || null }; }) };
+    return { ok: true, kasse: await kassenStand(ctx), auftraege: l.map((a) => { const b = (a.angaben || {}).betrieb || {}; return { id: a.id, nr: a.nr, paket: a.paket, paketName: (P().PAKETE[a.paket] || {}).name, stand: a.stand, weg: a.weg, firma: b.firma || '', name: b.name || '', ort: b.ort || '', adresse: adresseText(a), web: b.web || '', created_at: a.created_at, updated_at: a.updated_at, bezahlt_am: (a.zahlung || {}).bezahlt_am || '', betrag_cent: (a.zahlung || {}).betrag_cent || 0, monat: (a.preise || {}).monat || 0, ungelesen: ung[a.id] || 0, geaendert: !!(a.angaben_geaendert && a.angaben_geaendert > (a.gesehen || '')), freigabe: !!((a.vorschau || {}).freigabe), naechster: naechster(a), dateien: (a.dateien || []).length, wechsel: a.wechsel || null }; }) };
   },
   'GET /api/inhaber/auftraege/:id': async (ctx) => {
     await inhaberPflicht(ctx);
     const d = db(ctx), a = await auftragFuerInhaber(ctx), kunde = await d.kundeHolen(a.kunde), l = await d.nachrichtenVon(a.id);
     await d.nachrichtenGelesen(a.id, 'kunde').catch(() => null);
-    return { ok: true, auftrag: Object.assign(sicht(a, { inhaber: true, kunde: kunde ? { mail: kunde.mail, seit: kunde.created_at, angemeldet_am: kunde.angemeldet_am || '' } : null }), { naechster: naechster(a), wechsel: a.wechsel || null }), nachrichten: l.map((n) => ({ id: n.id, von: n.von, text: n.text, zeit: n.created_at })), prompt: promptFuer(a, kunde), stand: PAKET_STAND, ki: await kiStand(ctx, a) };
+    return { ok: true, auftrag: Object.assign(sicht(a, { inhaber: true, kunde: kunde ? { mail: kunde.mail, seit: kunde.created_at, angemeldet_am: kunde.angemeldet_am || '' } : null }), { naechster: naechster(a), wechsel: a.wechsel || null }), nachrichten: l.map((n) => ({ id: n.id, von: n.von, text: n.text, zeit: n.created_at })), prompt: promptFuer(a, kunde), stand: PAKET_STAND, kasse: await kassenStand(ctx), ki: await kiStand(ctx, a) };
+  },
+  /* Angefragt, solange die Kasse zu war: ist sie jetzt offen, lädt der Inhaber den Kunden per Mail zur Zahlung ein (Link auf „Bestellen“) */
+  'POST /api/inhaber/auftraege/:id/zahlung-einladen': async (ctx) => {
+    await inhaberPflicht(ctx);
+    const a = await auftragFuerInhaber(ctx), d = db(ctx);
+    if (a.stand !== 'angefragt') throw new ApiFehler('Nur unverbindliche Anfragen lassen sich zur Zahlung einladen.', 409);
+    const k = await kassenStand(ctx);
+    if (!k.kasse) throw new ApiFehler('Die Kasse ist noch zu: ' + k.gruende.join('; ') + '.', 409, { gruende: k.gruende });
+    const post = pd(ctx), kunde = await d.kundeHolen(a.kunde);
+    if (!post || !kunde) throw new ApiFehler('Der Mailversand ist hier noch nicht eingerichtet (MAIL_API_KEY).', 503);
+    const text = kurz((ctx.body || {}).text, 600);
+    const m = kasseOffenMail(a, { paketName: (P().PAKETE[a.paket] || {}).name, text: text, link: basis(ctx) + '/bestellen/#' + a.paket + '/' + a.id + '/bestellen', konto: basis(ctx) + '/konto/#auftrag/' + a.id });
+    const r = await post.senden({ an: kunde.mail, betreff: m.betreff, html: m.html, antwortAn: post.kontakt }).catch(() => false);
+    if (!r) throw new ApiFehler('Die E-Mail ließ sich gerade nicht senden. Bitte gleich noch einmal.', 502);
+    const z2 = await d.auftragAendern(a.id, (z) => { verlauf(z, { von: 'inhaber', text: 'Zur Zahlung eingeladen (Kasse offen)' + (text ? ': ' + text : '') }); });
+    return { ok: true, auftrag: sicht(z2, { inhaber: true }) };
   },
   /* Konfigurator von Hand verknüpfen (Adresse oder Host), falls er beim Live-Schalten nicht gefunden wurde; leer = lösen */
   'POST /api/inhaber/auftraege/:id/instanz': async (ctx) => {

@@ -132,6 +132,10 @@ export default async function (h) {
   const det = await zapi('/api/inhaber/auftraege/' + a1.id);
   ok(zFalsch.status === 401 && /^__Host-inhaber=/.test(Z.cookie) && /Max-Age=28800/.test((zAn.cookies || []).join(' ')) && !!zeile && zeile.naechster === 'Seite beginnen' && zeile.firma === BETRIEB.firma && det.status === 200 && /Fensterbau Prüf GmbH/.test(det.json.prompt) && /docs\/profis\/plus-vorschau\//.test(det.json.prompt) && /werktags ab 16 Uhr/.test(det.json.prompt) && /Bitte nur Holz zeigen/.test(det.json.prompt) && det.json.auftrag.kunde.mail === mailA,
     '26.8 Zentrale: falsches Passwort 401, Sitzung __Host-inhaber für 8 Stunden; der Eingang zeigt den bezahlten Auftrag mit „Seite beginnen“, der Prompt fasst Betrieb, Vorlage, Anruf und Hinweise zusammen');
+  /* Kassenstand für die Zentrale (statt eines festen Satzes über PAKETE_OFFEN); „Zur Zahlung einladen“ nur für Anfragen */
+  const einl = await zapi('/api/inhaber/auftraege/' + a1.id + '/zahlung-einladen', { body: {} });
+  ok(liste.json.kasse && liste.json.kasse.kasse === true && liste.json.kasse.modus === 'attrappe' && Array.isArray(liste.json.kasse.gruende) && !liste.json.kasse.gruende.length && det.json.kasse && det.json.kasse.kasse === true && einl.status === 409,
+    '26.8 Zentrale: Stand der Paket-Kasse mit Modus und Gründen; „Zur Zahlung einladen“ nur für unverbindliche Anfragen (sonst 409)');
   const s1 = await zapi('/api/inhaber/auftraege/' + a1.id + '/stand', { body: { stand: 'in_arbeit' } });
   const ohneLink = await zapi('/api/inhaber/auftraege/' + a1.id + '/stand', { body: { stand: 'vorschau' } });
   const vorV = new Set((await h.post()).map((m) => m.id));
