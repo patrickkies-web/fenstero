@@ -53,14 +53,12 @@
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:net';
-/* Messen im Raum (26.10.2026): „Maß eingeben“ öffnet das Blatt, Ziffern, „Bestätigen“ speichert, dann „Weiter“ im Dock */
+/* Messen (Fassung des Inhabers, 27.10.2026): das Feld unter dem Element antippen, Ziffern über die Tastatur; die Pille erscheint mit
+   dem Wert, „Weiter“ prüft, speichert und geht zum nächsten Maß (nach Maß 4 zu den Rändern, die wie bisher bleiben) */
 async function massTippen(pg, wert) {
-  await pg.waitForSelector('.mess-dock .md-haupt');
-  await pg.click('.mess-dock .md-haupt[data-act$="-auf"]');
-  await pg.waitForSelector('.mess-pad .keypad');
-  for (const z of wert) await pg.click('.mess-pad .keypad button[data-v="' + z + '"]');
-  await pg.click('.mp-ok'); await pg.waitForSelector('.mess-dock .md-haupt[data-act$="-weiter"]');
-  await pg.click('.mess-dock .md-haupt'); await pg.waitForTimeout(200);
+  await pg.waitForSelector('#mess-eingabe');
+  await pg.fill('#mess-eingabe', ''); await pg.click('#mess-feld'); await pg.keyboard.type(wert);
+  await pg.click('#mess-weiter'); await pg.waitForTimeout(550);
 }
 async function randWieMitte(pg) {
   await pg.waitForSelector('.mess-dock [data-act="rest-auf"]'); await pg.click('.mess-dock [data-act="rest-auf"]');
@@ -3484,32 +3482,29 @@ if (teil(16)) {
     /* Gespeichert: keine Gesamtübersicht */
     const fertigK = await sk.evaluate(() => ({ screen: S.screen, t: document.querySelector('.scr').textContent, cream: document.querySelectorAll('.btn.primary').length }));
     ok(fertigK.screen === 'fertig' && !/Alle Angaben|\d mm|Farbe wie|Aus deinen Fotos gelesen/.test(fertigK.t) && /Wie geht es weiter\?/.test(fertigK.t) && fertigK.cream === 1, 'Nach dem Speichern: keine Übersicht aller Angaben, keine Maße und keine Notiztexte, dafür „Wie geht es weiter?“ mit genau einer Hauptaktion');
-    /* Messen im Raum: Dock mit Pfeil zurück, „Maß eingeben“ und Info; das Blatt mit den Zifferntasten kommt erst auf „Maß eingeben“,
-       „Bestätigen“ speichert und schließt es, der Wert steht auf der Linie; Browser-Zurück schließt erst das Blatt und bleibt in der App */
-    await sk.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await sk.waitForTimeout(250);
+    /* Messen (Fassung des Inhabers, 27.10.2026): feste Ansicht je Element statt 3-D, die Überschrift oben in der Bühne, unter dem Element
+       das Feld (Systemtastatur, keine Zifferntasten), Unterzeile und Notiz unter der Bühne; die Pille erscheint erst mit dem Wert,
+       „Weiter“ prüft, speichert und geht zu Maß 2 auf derselben Folie; der Pfeil führt zum vorigen Maß mit seinem Wert; Browser-Zurück bleibt in der App */
+    await sk.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await sk.waitForTimeout(500);
     const adresse = sk.url();
-    const dock = await sk.evaluate(() => ({ teile: Array.from(document.querySelectorAll('.mess-dock button')).map((b) => b.getAttribute('data-act')).join(','), tasten: !!document.querySelector('.keypad'), feld: !!document.querySelector('.w3d-feldlage .fd-knopf, .w3d-feldlage .fd-ph'), kicker: !!document.querySelector('.scr .hd .eyebrow'), notiz: !!document.querySelector('.scr .nz-knopf'), cream: document.querySelectorAll('.scr .btn.primary, .scr .mp-ok').length, ziele: Array.from(document.querySelectorAll('.mess-dock button')).every((b) => b.getBoundingClientRect().height >= 44) }));
-    await sk.click('.mess-dock .md-haupt'); await sk.waitForSelector('.mess-pad .keypad');
-    await sk.goBack(); await sk.waitForTimeout(300);
-    const zuBlatt = await sk.evaluate(() => ({ pad: !!document.querySelector('.mess-pad'), screen: S.screen }));
-    await sk.click('.mess-dock .md-haupt'); await sk.waitForSelector('.mess-pad .keypad');
-    for (const z of ['1', '3', '9', '0']) await sk.click('.mess-pad .keypad [data-v="' + z + '"]');
-    const blatt = await sk.evaluate(() => ({ reihe: Array.from(document.querySelectorAll('.keypad button')).map((b) => b.getAttribute('data-v')).slice(9).join(','), wert: document.getElementById('mp-feld').textContent, ok: (document.querySelector('.mp-ok') || {}).textContent || '', okH: document.querySelector('.mp-ok').getBoundingClientRect().height, dock: !!document.querySelector('.mess-dock'), cream: document.querySelectorAll('.scr .btn.primary, .scr .mp-ok').length }));
-    await sk.click('.mp-ok'); await sk.waitForTimeout(250);
-    const best = await sk.evaluate(() => ({ hm: S.win.mo.hm, step: S.mess.step, pad: !!document.querySelector('.mess-pad'), linie: (document.querySelector('.w3d-feldlage .fd-knopf') || {}).textContent || '', haupt: document.querySelector('.mess-dock .md-haupt').textContent }));
-    await sk.click('.mess-dock .md-haupt'); await sk.waitForTimeout(250);
-    const tasten = await sk.evaluate(() => ({ step: S.mess.step }));
-    await sk.click('.mess-dock [data-v="zurueck"]'); await sk.waitForTimeout(200);
-    const zurueck1 = await sk.evaluate(() => ({ step: S.mess.step, cur: S.mess.cur, linie: (document.querySelector('.w3d-feldlage .fd-knopf') || {}).textContent || '' }));
+    const dock = await sk.evaluate(() => { const st = document.getElementById('mess-buehne'), h1 = document.getElementById('mess-h1'), ein = document.getElementById('mess-eingabe'), fe = document.getElementById('mess-feld').getBoundingClientRect(), b = st.getBoundingClientRect(), u = document.querySelector('.md-unter');
+      return { tasten: document.querySelectorAll('.ez-taste').length, eingabe: !!ein && ein.getAttribute('inputmode') === 'numeric', titelInBuehne: st.contains(h1), feldUnten: fe.bottom <= b.bottom && fe.top > b.top + b.height / 2, unterUnter: !!u && u.getBoundingClientRect().top >= b.bottom - 1 && !!u.querySelector('.lg-notiz-knopf') && !!u.querySelector('#mess-unterzeile'),
+        bild: /\/bilder\/konfigurator\/mess\/fenster\.webp$/.test(document.getElementById('mess-bild').src), w3d: !!document.querySelector('.w3d-stage'), h1: h1.textContent, i: document.getElementById('mess-i').getAttribute('data-k'), pillen: document.querySelectorAll('.scr .lg-fuss .dna-pille').length, pilleWeg: getComputedStyle(document.getElementById('mess-weiter')).visibility === 'hidden', hoch: Math.round(b.height), ziele: Array.from(document.querySelectorAll('#mess-zurueck, #mess-feld, #mess-gross-auf')).every((x) => x.getBoundingClientRect().height >= 44) }; });
+    await sk.click('#mess-feld'); await sk.keyboard.type('1390'); await sk.waitForTimeout(150);
+    const getippt = await sk.evaluate(() => ({ wert: document.getElementById('mess-eingabe').value, zeile: document.getElementById('mess-zeile').textContent, pille: getComputedStyle(document.getElementById('mess-weiter')).visibility + ':' + document.getElementById('mess-weiter').textContent }));
+    await sk.click('#mess-weiter'); await sk.waitForTimeout(900);
+    const best = await sk.evaluate(() => ({ hm: S.win.mo.hm, step: S.mess.step, screen: S.screen, h1: document.getElementById('mess-h1').textContent, wert: document.getElementById('mess-eingabe').value, pilleWeg: document.getElementById('mess-weiter').classList.contains('ist-weg'), cur: S.mess.cur, sperre: document.getElementById('mess-feld').className, zeile: document.getElementById('mess-zeile').textContent }));
+    await sk.click('#mess-zurueck'); await sk.waitForTimeout(300);
+    const zurueck1 = await sk.evaluate(() => ({ step: S.mess.step, wert: document.getElementById('mess-eingabe').value, h1: document.getElementById('mess-h1').textContent }));
     await sk.goBack(); await sk.waitForTimeout(300);
     const zurueck2 = await sk.evaluate(() => ({ screen: S.screen, href: location.href }));
     await sk.click('[data-act="gindex"]'); await sk.waitForSelector('.g-index'); await sk.goBack(); await sk.waitForTimeout(250);
     const zurueck3 = await sk.evaluate(() => ({ screen: S.screen, blatt: !!document.querySelector('.g-index') }));
-    ok(dock.teile === 'key,mess-auf,gloss' && !dock.tasten && !dock.feld && !dock.kicker && !dock.notiz && dock.cream === 1 && dock.ziele && !zuBlatt.pad && zuBlatt.screen === 'messen' &&
-      blatt.reihe === '0,del' && /1\.390\s*mm/.test(blatt.wert) && /Bestätigen/.test(blatt.ok) && blatt.okH >= 44 && !blatt.dock && blatt.cream === 1 &&
-      best.hm === 1390 && best.step === 0 && !best.pad && /1\.390/.test(best.linie) && /Weiter zu Maß 2/.test(best.haupt) &&
-      tasten.step === 1 && zurueck1.step === 0 && zurueck1.cur === '1390' && /1\.390/.test(zurueck1.linie) && zurueck2.screen === 'fotos' && zurueck2.href === adresse && zurueck3.screen === 'fotos' && !zurueck3.blatt,
-      'Messen im Raum: nur die Überschrift über dem Modell, kein Feld und keine Tasten; unten Pfeil zurück, „Maß eingeben“ und Info; das Blatt mit den Zifferntasten kommt erst auf „Maß eingeben“ (Browser-Zurück schließt es), neben dem Feld „Bestätigen“; danach steht der Wert auf der Linie und der Knopf heißt „Weiter zu Maß 2“; der Pfeil führt zum vorigen Maß mit seinem Wert; die Zurück-Taste des Browsers bleibt in der App (Adresse bleibt) und schließt zuerst ein offenes Blatt');
+    const ok16 = !dock.tasten && dock.eingabe && dock.titelInBuehne && dock.feldUnten && dock.unterUnter && dock.bild && !dock.w3d && dock.h1 === 'Höhe der Öffnung.' && dock.i === 'oeffnung-hoehe' && dock.pillen === 1 && dock.pilleWeg && dock.hoch >= 400 && dock.ziele &&
+      getippt.wert === '1.390' && /139\s*cm/.test(getippt.zeile) && /^visible:Weiter zu Maß\s2/.test(getippt.pille) &&
+      best.hm === 1390 && best.step === 1 && best.screen === 'messen' && best.h1 === 'Höhe des Fensters.' && best.wert === '' && best.pilleWeg && /Maß\s1 gespeichert: 1\.390/.test(best.zeile) &&
+      zurueck1.step === 0 && zurueck1.wert === '1.390' && zurueck1.h1 === 'Höhe der Öffnung.' && zurueck2.screen === 'fotos' && zurueck2.href === adresse && zurueck3.screen === 'fotos' && !zurueck3.blatt;
+    ok(ok16, 'Messen (Fassung des Inhabers): Überschrift in der Bühne, Feld unter dem Element mit Systemtastatur statt Zifferntasten, Unterzeile und Notiz unter der Bühne; die Pille erscheint mit dem Wert, „Weiter“ speichert und zeigt Maß 2 auf derselben Folie mit leerem Feld; der Pfeil führt zum vorigen Maß mit seinem Wert; die Zurück-Taste des Browsers bleibt in der App (Adresse bleibt)' + (ok16 ? '' : ' ' + JSON.stringify([dock, getippt, best, zurueck1, zurueck2, zurueck3, adresse])));
     /* Foto groß mit Zoom */
     await sk.evaluate(() => useDemo()); await sk.waitForFunction(() => S.photos.in && S.photos.out, null, { timeout: 8000 }); await sk.evaluate(() => render()); await sk.waitForTimeout(200);
     await sk.click('.ft-bild[data-act="foto-gross"][data-v="in"]'); await sk.waitForSelector('.fz');
@@ -4563,6 +4558,26 @@ if (teil(22)) {
     await p.evaluate((g) => { const w = demoProject()[0]; if (g) { const m = w.mo; m.hl = m.hr = m.hm; m.wt = m.wb = m.wm; } S.win = w; S.editIdx = -1; go('rest'); S.rest.i = 4; render(); }, gleich);
     await p.waitForTimeout(1800); const m = await buehne(); if (m.fehler.length) schilder.push('Ränder ' + (gleich ? 'gleich' : 'ungleich') + ': ' + m.fehler.join(', '));
   }
+  /* Messen (Fassung des Inhabers): Lupen, Chip, „Groß ansehen“, Überschrift und Feld in der Bühne, nichts überdeckt sich; das Feld über dem Fuß */
+  const buehneMd = () => p.evaluate(() => {
+    const st = document.getElementById('mess-buehne'); if (!st) return { fehler: ['keine Bühne'] };
+    const b = st.getBoundingClientRect(), sicht = (e) => { const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity === 0) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+    const t = [];
+    st.querySelectorAll('.ez-mass__ende, #mess-feld, .ez-gross-auf, .ez-glaschip, .md-titel').forEach((e) => { if (sicht(e)) t.push([(e.id || e.className.split(' ')[0]) + ' ' + e.textContent.trim().slice(0, 14), e.getBoundingClientRect()]); });
+    const fehler = [];
+    t.forEach(([n, a], i) => { if (a.left < b.left + 2 || a.right > b.right - 2 || a.top < b.top || a.bottom > b.bottom) fehler.push(n + ' am Rand'); t.slice(i + 1).forEach(([m, c]) => { if (Math.min(a.right, c.right) - Math.max(a.left, c.left) > 1 && Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top) > 1) fehler.push(n + ' über ' + m); }); });
+    const fe = document.getElementById('mess-feld').getBoundingClientRect(), fu = document.querySelector('.lg-fuss').getBoundingClientRect(); if (innerWidth < 1024 && fe.bottom > fu.top + 1) fehler.push('Feld unter dem Fuß'); // am Laptop steht der Fuß rechts in der Spalte
+    return { fehler: fehler };
+  });
+  for (const [W, H] of [[390, 844], [320, 640], [1440, 900]]) {
+    await p.setViewportSize({ width: W, height: H });
+    for (const art of ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw']) for (let n = 0; n < 4; n++) {
+      await p.evaluate(([art, n]) => { const w = demoProject()[0]; artSetzen(w, art); S.win = w; S.editIdx = -1; S.mess.step = n; S.mess.cur = ''; go('messen'); render(true); }, [art, n]);
+      await p.waitForTimeout(260); const m = await buehneMd();
+      if (m.fehler.length) schilder.push(W + ' ' + art + ' Maß ' + (n + 1) + ': ' + m.fehler.join(', '));
+    }
+  }
+  await p.setViewportSize({ width: 390, height: 844 });
   ok(!schilder.length, 'Maße am Modell: alle Schilder mit Abstand in der Bühne, auch bei 4,20 m breiten Elementen und nach den Rändern, nichts überdeckt sich' + (schilder.length ? ' (' + schilder.join(' | ') + ')' : ''));
   // Sonnenschutz: Knöpfe unten rechts in einer Reihe, Beschriftung oben links, Bühne mindestens 220 px, keine Überdeckung (auch klein)
   const sonne = [];
@@ -4808,9 +4823,7 @@ if (teil(22)) {
   /* Feinschliff am Modell (23.10.2026, docs/GESTALTUNG.md): Zifferntasten kleiner mit „Zurück“, Dock rollt nach, Kamera bleibt am Griff,
      Aufsatzkasten auf dem Rahmen samt Blende, Aufteilung am Regler, Haus am Zahnrad, Raffstore-Fahrt als Ganzes */
   await p.evaluate(() => { S.verlassen = null; S.wohin = false; S.notiz = null; S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await p.waitForTimeout(400);
-  const fs1d = await p.evaluate(() => { const z = document.querySelector('.mess-dock .md-rund'), h = document.querySelector('.mess-dock .md-haupt'), st = document.getElementById('w3d').getBoundingClientRect(); return { zur: z.getAttribute('aria-label') || '', zurH: Math.round(z.getBoundingClientRect().height), ok: Math.round(h.getBoundingClientRect().height), voll: Math.round(st.height), breit: Math.round(st.width) === innerWidth }; });
-  await p.click('.mess-dock .md-haupt'); await p.waitForSelector('.mess-pad .keypad');
-  const fs1 = Object.assign(fs1d, await p.evaluate(() => { const k = document.querySelector('.mess-pad .keypad [data-v="5"]').getBoundingClientRect(), st = document.getElementById('w3d').getBoundingClientRect(); return { key: Math.round(k.height), stage: Math.round(st.height) }; }));
+  const fs1 = await p.evaluate(() => { const z = document.getElementById('mess-zurueck'), h = document.getElementById('mess-weiter'), st = document.getElementById('mess-buehne').getBoundingClientRect(), fe = document.getElementById('mess-feld').getBoundingClientRect(), f = document.querySelector('.lg-fuss').getBoundingClientRect(); return { zur: z.getAttribute('aria-label') || '', zurH: Math.round(z.getBoundingClientRect().height), ok: Math.round(h.getBoundingClientRect().height), stage: Math.round(st.height), breit: Math.round(st.width) === innerWidth, feld: Math.round(fe.height), tasten: document.querySelectorAll('.ez-taste').length, frei: fe.bottom <= f.top + 1 }; });
   await frageB('rc', { erreichbar: '' }, 'normal');
   const fs2a = await p.evaluate(() => document.querySelector('.scroll').scrollTop);
   await p.click('.qpanel [data-act="erreichbar"][data-v="ja"]'); await p.waitForTimeout(1200);
@@ -4851,7 +4864,7 @@ if (teil(22)) {
   const fs8b = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, neig: b._relief && b._relief[1], stops: (b.style.background.match(/rgb\(/g) || []).length, rep: /^repeating-linear-gradient\(/.test(b.style.background), lippe: /rgb\(42, 43, 45\)/.test(st.querySelector('[data-r="behang-u"]').style.background) }; });
   await frageB('schlitz', { sart: 'rollladen', roll: 'vorbau', schlitz: 'mit' }, 'genau'); await p.waitForTimeout(500);
   const fs8c = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, schlitz: /^radial-gradient\(/.test(b.style.background) && /repeating-linear-gradient\(/.test(b.style.background) }; });
-  ok(fs1.key >= 40 && fs1.key <= 46 && /^Zurück/.test(fs1.zur) && fs1.zurH >= 44 && fs1.ok >= 44 && fs1.breit && fs1.voll >= 480 && fs1.stage >= 220, 'Messen im Raum: Modell über die ganze Breite ' + fs1.voll + ' px hoch, runder Pfeil zurück neben „Maß eingeben“ ' + fs1.ok + ' px; mit Zifferntasten (' + fs1.key + ' px) bleibt das Modell ' + fs1.stage + ' px hoch');
+  ok(!fs1.tasten && /^Zurück/.test(fs1.zur) && fs1.zurH >= 44 && fs1.ok >= 44 && fs1.breit && fs1.stage >= 400 && fs1.feld >= 44 && fs1.frei, 'Messen: die Bühne über die ganze Breite (' + fs1.stage + ' px hoch), keine Zifferntasten, das Feld (' + fs1.feld + ' px) über dem Fuß, runder Pfeil zurück neben der Pille (' + fs1.ok + ' px) (' + JSON.stringify(fs1) + ')');
   ok(fs2a === 0 && fs2.top > 40 && fs2.sicht, 'Feinschliff, Dock rollt nach der Wahl „Ja, leicht“ nach: Empfehlung und Einbruchschutz-Stufen stehen im Blick (' + fs2.top + ' px)');
   ok(fs3a.z > 2.4 && fs3b.q === 'gf' && fs3b.z === fs3a.z && fs3b.x === fs3a.x && fs3b.y === fs3a.y && fs3c.z > 2.4, 'Feinschliff, Kamera bleibt am Griff: von „Griff“ zur Griff-Farbe kein Zoom auf 1:1 und zurück (' + JSON.stringify([fs3a, fs3b, fs3c]) + ')');
   ok(fs4.raff === 230 && fs4.kasten === 230 && fs4.roll === 200 && fs4.vorbau < 100 && fs4.blende, 'Feinschliff, Aufsatzkasten: das Element endet 230 mm (Raffstore) bzw. 200 mm (Rollladen) unter der Öffnung, beim Vorbau nicht; die Blende ist eine Detailangabe nur beim Aufsatzkasten');

@@ -3109,7 +3109,7 @@ function fotosDna() {
   const tipp = '<p class="ft-tipp"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 10h16M10 7v6"/><circle cx="10" cy="10" r="2.6"/></svg><span>' +
     (tilt != null ? (Math.abs(tilt) <= 2.5 ? 'Dein Foto ist mit ' + String(Math.abs(tilt)).replace('.', ',') + '° fast waagerecht. Passt.' : 'Dein Foto ist etwa ' + String(Math.abs(tilt)).replace('.', ',') + '° schräg. Es geht, gerader wäre besser.')
       : 'Handy <b>gerade</b> halten, ' + (neu ? 'die ganze Stelle' : ding + ' ganz') + ' im Bild, etwas Wand drumherum.') + '</span></p>';
-  const frage = lgFrage(neu ? 'Fotografiere <em>die Stelle.</em>' : 'Fotografiere <em>' + ding + '.</em>', 'einbausituation', neu ? 'Einmal von innen, einmal von außen: die ganze Wand, an die das neue Element soll.' : 'Einmal von innen, einmal von außen. Du musst nichts eintippen.');
+  const frage = lgFrage(neu ? 'Fotografiere <em>die Stelle.</em>' : 'Fotografiere <em>' + ding + '.</em>', 'einbausituation', neu ? 'Einmal von innen, einmal von außen: die ganze Wand, an die das neue Element soll.' : 'Einmal von innen, einmal von außen. Du musst nichts eintippen.', true);
   const karte = '<div class="lg-karte lg-hell ft-karte"><div class="ft-kopf"><span class="dna-label" id="ft-l">Deine Fotos</span><span class="ft-stand">' + n + ' von 2</span></div>' +
     '<div class="ft-plaetze" role="group" aria-labelledby="ft-l">' + ftPlatz('in') + ftPlatz('out') + '</div>' +
     '<p class="ft-text">' + (neu ? 'Danach zeichnest du das Element auf dem Foto ein. Die KI liest Wand, Leitungen und Fassade.' : 'Die KI liest daraus die Einbausituation für deinen Fensterbauer: Rollladenkasten, Laibung, Fensterbänke, Fassade.') + (n ? ' Tipp ein Foto an, um es groß anzusehen.' : '') + '</p>' +
@@ -3382,7 +3382,7 @@ function liveWin(step, cur) {
   if (v >= 250 && v <= 6000) { if (step.who === 'mo') w.mo[step.k] = v; else { w.el[step.k] = v; w[step.k] = v; } }
   return w;
 }
-SCREENS.messen = () => {
+SCREENS.messenAlt = () => {
   const m = S.mess, step = MESS[m.step], fertig = !m.pad && !!messWert(step);
   const html = messKopf(messTitel(step)) + model(liveWin(step, m.cur), messOpts(step, m.cur)) +
     (m.pad ? messPad(m, step.dir, 'mess', '', step.who) : messDock(fertig ? (m.step < 3 ? 'Weiter zu Maß ' + (m.step + 2) : 'Weiter zu den Rändern') : 'Maß eingeben', fertig ? 'mess-weiter' : 'mess-auf', m.step ? 'Voriges Maß' : 'Zurück zu den Fotos', step.g));
@@ -3437,7 +3437,7 @@ function passtMasse(w, d) {
     '<div class="ps-drei"><h2>Dreimal gemessen, das kleinste zählt</h2><div class="ps-spalten">' + spalte('Breite', [['oben', mo.wt], ['Mitte', mo.wm], ['unten', mo.wb]]) + spalte('Höhe', [['links', mo.hl], ['Mitte', mo.hm], ['rechts', mo.hr]]) + '</div>' +
     '<p class="ps-fuss">' + (dev ? 'Höchstens ' + dev + '&nbsp;mm Unterschied, überhöht gezeichnet.' : 'Alle drei Maße sind gleich.') + '</p></div></section>';
 }
-SCREENS.rest = () => {
+SCREENS.restAlt = () => {
   const r = S.rest, rest = r.i < 4 ? REST[r.i] : null;
   if (!rest) {
     const d = derive(S.win), dev = Math.max(d.devW, d.devH);
@@ -3479,6 +3479,38 @@ function restWeiter() {
 }
 function restAuf() { const r = S.rest; PAD_NEU = !r.pad; r.pad = true; r.msg = null; r.cmLive = false; r.cur = ''; render(); }
 function restZu() { const r = S.rest; clearTimeout(cmTimer); r.pad = false; r.msg = null; r.cmLive = false; r.cur = String(restWert(REST[r.i]) || ''); render(); }
+/* ---------- Messen und Ränder im Look der Design-DNA (27.10.2026) ----------
+   Folie „Messen“ der Vorschau (große Bühne mit fester Ansicht je Element, Lupen, Zahl auf der Linie, Großansicht, Zifferntasten offen;
+   „Weiter“ prüft, speichert und geht zum nächsten Maß; danach die vier Ränder und „Passt.“). Gezeichnet und bedient von messen-dna.js
+   (MessenDna); die App liefert Kopf, Notiz, Rechtliches und die Wege und hält Schritt und Werte (S.mess.step, S.rest.i, S.win). */
+function mdWerte() {
+  const w = S.win, mo = w.mo || {}, el = w.el || {};
+  return { hm: num(mo.hm), h: num(el.h), wm: num(mo.wm), w: num(el.w), hl: num(mo.hl), hr: num(mo.hr), wt: num(mo.wt), wb: num(mo.wb) };
+}
+function mdLage() { const rest = S.screen === 'rest', i = rest ? S.rest.i : S.mess.step; return { satz: rest ? 1 : 0, i: Math.min(i, 3), passt: rest && i >= 4 }; }
+function messenDna() {
+  const l = mdLage(), st = l.satz ? REST[l.i] : MESS[l.i];
+  const html = window.MessenDna.html({ kopf: lgKopf(['back', l.satz || l.i ? 'Zurück' : 'Zurück zu den Fotos']), notiz: lgNotiz('ez-notizknopf'), recht: rechtLinks(), satz: l.satz, g: l.satz ? 'raender' : st.g });
+  return { html: html, back: ['Zurück', 'md-zurueck'], dna: true, cls: 'dna md', voll: true };
+}
+function mdAuf(scr) {
+  const l = mdLage(), w = S.win;
+  window.MessenDna.binden(scr.querySelector('#md-folie'), {
+    wid: w.id || w, satz: l.satz, i: l.i, passt: l.passt, cur: l.satz ? S.rest.cur : S.mess.cur, werte: mdWerte,
+    tuer: istTuer(w), art: ST_BILD[w.art] ? w.art : 'fenster', artName: artName(w), scroll: document.querySelector('#app .scroll'),
+    speichern: (k, v) => { if (k === 'h' || k === 'w') { S.win.el[k] = v; S.win[k] = v; } else S.win.mo[k] = v; entwurfMerken(); },
+    schritt: (satz, i) => { if (satz) { S.rest.i = i; S.rest.cur = ''; } else { S.mess.step = i; S.mess.cur = ''; } },
+    sync: (m) => { if (m.satz) S.rest.cur = m.cur; else S.mess.cur = m.cur; },
+    passtSetzen: (an) => { S.rest.i = an ? 4 : 3; },
+    zuRaendern: () => { S.rest.i = 0; S.rest.cur = ''; go('rest'); },
+    zumMessen: () => { S.mess.step = 3; S.mess.cur = ''; go('messen', 'back'); },
+    zurFotos: () => go('fotos', 'back'),
+    zumErgebnis: () => go('ergebnis')
+  });
+}
+SCREENS.messen = messenDna;
+/* Ränder (Schritt 4) bleiben, bis der Inhaber die Folie durchgesehen hat, wie sie online sind */
+SCREENS.rest = SCREENS.restAlt;
 /* ---------- Ergebnis ---------- */
 SCREENS.ergebnis = () => {
   const w = S.win, d = derive(w), ki = S.win.ki, neu = !!w.neu, en = artName(w);
@@ -4721,10 +4753,15 @@ function lgBand(c) {
   return '<div class="lg-stationen" role="group" aria-label="' + esc('Kapitel ' + (ki + 1) + ' von ' + abs.length + ': ' + ab.name + (abs.length > ki + 1 ? '. Danach ' + abs.slice(ki + 1).map((g) => g.name.replace(' & ', ' und ')).join(', ') : '')) + '"><b>' + esc(ab.name) + '</b><span class="lg-band" aria-hidden="true">' + abs.map((g, i) => '<i' + (i === ki ? ' class="ist"' : g.fertig ? ' class="fertig"' : '') + '></i>').join('') + '</span><small>' + (ki + 1) + ' von ' + abs.length + '</small></div>';
 }
 /* Frage mit Erklärung (i) und Notiz */
-function lgFrage(h1, g, sub) {
+function lgNotiz(cls) {
   const ort = notizOrt(), nzDa = !!(ort && notizText(ort)), stelle = ort ? AW.notizStelle(ort[1]) : '';
-  const notiz = ort ? '<button type="button" class="dna-pille dna-pille--leise dna-pille--klein lg-notiz-knopf' + (nzDa ? ' da' : '') + '" data-act="notiz-auf" data-v="' + ort[0] + ':' + esc(ort[1]) + '" aria-label="' + esc((nzDa ? 'Deine Notiz zu „' : 'Notiz zu „') + stelle + (nzDa ? '“ ansehen oder ändern' : '“ anfügen')) + '"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>' + (nzDa ? 'Deine Notiz' : 'Notiz') + '</button>' : '';
-  return '<div class="lg-frage"><div class="lg-frage-kopf"><h1 tabindex="-1">' + h1 + (GLOSS[g] ? '<button type="button" class="lg-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc(GLOSS[g].t) + '">' + LG_I + '</button>' : '') + '</h1>' + notiz + '</div><p>' + esc(sub) + '</p></div>';
+  return ort ? '<button type="button" class="dna-pille dna-pille--leise dna-pille--klein lg-notiz-knopf' + (cls ? ' ' + cls : '') + (nzDa ? ' da' : '') + '" data-act="notiz-auf" data-v="' + ort[0] + ':' + esc(ort[1]) + '" aria-label="' + esc((nzDa ? 'Deine Notiz zu „' : 'Notiz zu „') + stelle + (nzDa ? '“ ansehen oder ändern' : '“ anfügen')) + '"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>' + (nzDa ? 'Deine Notiz' : 'Notiz') + '</button>' : '';
+}
+/* iDaneben: das i steht neben der Überschrift statt in ihrer letzten Zeile (Fotos, wie im Artefakt des Inhabers) */
+function lgFrage(h1, g, sub, iDaneben) {
+  const notiz = lgNotiz(), i = GLOSS[g] ? '<button type="button" class="lg-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc(GLOSS[g].t) + '">' + LG_I + '</button>' : '';
+  if (iDaneben) return '<div class="lg-frage lg-frage--i-daneben"><div class="lg-frage-kopf"><div class="lg-frage-titel"><h1 tabindex="-1">' + h1 + '</h1>' + i + '</div>' + notiz + '</div><p>' + esc(sub) + '</p></div>';
+  return '<div class="lg-frage"><div class="lg-frage-kopf"><h1 tabindex="-1">' + h1 + i + '</h1>' + notiz + '</div><p>' + esc(sub) + '</p></div>';
 }
 /* Unten: die rechtlichen Verweise am Ende des Inhalts, dann zurück als Umriss und „Weiter“ (immer weiß); fehlt etwas, sagt die Zeile darüber was */
 function lgFuss(c) {
@@ -4817,6 +4854,7 @@ function lgGrund() {
 function lgAuf() {
   const scr = document.querySelector('.scr.dna'); if (!scr) return;
   if (scr.classList.contains('st')) return stZeigen();
+  if (scr.classList.contains('md')) return mdAuf(scr);
   lgMass(); scr.classList.add('lg-still'); lgZeigen(); void scr.offsetWidth; requestAnimationFrame(() => scr.classList.remove('lg-still'));
 }
 function lgMass() { const b = document.querySelector('.scr.dna .lg-buehne:not(.lp-buehne)'); if (b && b.clientWidth) b.style.setProperty('--lg-s', Math.min(1, b.clientWidth / LG_B).toFixed(4)); }
@@ -5487,6 +5525,7 @@ function zurueckTaste() {
   const ki = document.querySelector('.fx-dialog .fx-nein'); if (ki) { ki.click(); return true; }
   if (FB.el) { fbZu(true); return true; } // Farbblatt „Alle Farben“ (S2)
   if (HS.el) { hausZu(true); return true; } // Blatt „Haus“ (Fassade)
+  const gross = document.querySelector('dialog.ez-gross[open]'); if (gross) { gross.close(); return true; } // Großansicht beim Messen
   if (S.fotoGross) { S.fotoGross = null; render(); return true; }
   if (S.notiz) { notizZu(); return true; }
   if (S.verlassen) { S.verlassen = null; render(); return true; }
@@ -6631,7 +6670,7 @@ function act(name, el) {
     case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; return go(v);
     /* Übersicht aller Fenster aus den Wünschen (Knopf oben links): bei ungespeicherten Änderungen erst das Blatt „Noch nicht gespeichert“ */
     case 'liste': { S.qMass = null; return verlassen({ art: 'home' }); }
-    case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; S.mess.pad = false; S.mess.msg = null; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
+    case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'md-zurueck') return window.MessenDna.zurueck(); if (b === 'mess-back') { S.mess.step = 3; S.mess.pad = false; S.mess.msg = null; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
     case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: zeit(), aend: 0, ts: zeit() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); S.designVorher = null; persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
     case 'new': if (INST && S.betrieb && S.sent) return instanzWeitere(); if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg());
       if (INST && S.instZu) return go('home');
@@ -7184,7 +7223,7 @@ function boot() {
     /* Tab bleibt im offenen Blatt (das Farbblatt hat seine eigene Falle) */
     if (e.key === 'Tab' && !FB.el) { const sh = $app().querySelector('.sheet[aria-modal="true"]'), z = sh ? fokusZiele(sh) : []; if (z.length) { const i = z.indexOf(document.activeElement); if (e.shiftKey ? i <= 0 : (i < 0 || i === z.length - 1)) { e.preventDefault(); (e.shiftKey ? z[z.length - 1] : z[0]).focus(); } } return; }
     if (S.notiz || S.gloss || S.glossIndex || S.wohin || S.verlassen || S.fotoGross) return;
-    if (S.screen !== 'messen' && S.screen !== 'rest' && !(S.screen === 'frage' && S.qMass)) return;
+    if (S.screen !== 'rest' && !(S.screen === 'frage' && S.qMass)) return; // Messen: messen-dna.js
     const t = e.target, typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA');
     if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
     if (/^\d$/.test(e.key)) { e.preventDefault(); keyIn(e.key); } else if (e.key === 'Backspace') { e.preventDefault(); keyIn('del'); } else if (e.key === 'Enter') { e.preventDefault(); keyIn('ok'); }

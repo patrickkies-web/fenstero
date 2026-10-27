@@ -516,7 +516,17 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     und Waage, antippen öffnet die Kamera für innen; mit Foto zeigt die Bühne das Foto mit „Von innen · KI liest/KI fertig“ (antippen:
     Großansicht). Darunter der Tipp (mit Foto die Neigung), die Frage mit i („Was liest die KI …“) und Notiz, die Fotoplätze auf weißer
     Karte (leer gestrichelt, voll mit Foto, Stand der KI und Entfernen), unten zurück und „Weiter zum Messen“ (neue Öffnung: „Weiter zum
-    Einzeichnen“); ohne Foto zeigt die Pille erst den Bogen „Mit Foto wird dein Aufmaß besser.“.
+    Einzeichnen“); ohne Foto zeigt die Pille erst den Bogen „Mit Foto wird dein Aufmaß besser.“. Überschrift wie im Artefakt des Inhabers:
+    das i neben der zweizeiligen Überschrift, die Notiz rund mit dem Zeichen über dem Wort (`lgFrage(…, true)`).
+  - Messen, Schritt 3 (`messenDna` in app.js, Modul web/assets/messen-dna.js und messen-dna.css; Fassung des Inhabers vom 27.10.2026,
+    nachts): Die Bühne ist so groß wie auf Folie 1 (`--bh`, 560 px auf dem Telefon, am Laptop der ganze Bildschirm links), die feste
+    Ansicht je Element mit Linien und Lupen wie bisher; die Überschrift („Höhe der Öffnung.“) mit i steht oben in der Bühne, Schwarz auf
+    der Wand. Unter dem Element der Wert-Chip: ein echtes Eingabefeld (`inputmode="numeric"`), Antippen holt die Systemtastatur, keine
+    Zifferntasten. Unterzeile und Notiz stehen unter der Bühne, darunter „Maß 1 von 4“ mit dem Hinweis und den Rückfragen der App
+    (Zentimeter, Warnungen). Die Pille „Weiter zu Maß 2“ erscheint erst mit einem Wert; „Weiter“ prüft, speichert und zeigt das nächste
+    Maß auf derselben Folie mit leerem Feld (die Tastatur geht zu und kommt mit dem nächsten Antippen wieder). Ist die Tastatur offen,
+    steht die Pille direkt über ihr (`visualViewport`). Die Ränder (Schritt 4) bleiben bis zur Durchsicht durch den Inhaber wie bisher
+    (`SCREENS.restAlt`).
   - Regel des Inhabers (27.10.2026): Beim Messen eine feste Ansicht je Element, in den Wünschen das ausgearbeitete 3-D-Modell; die
     Wünsche werden nie durch Standbilder ersetzt.
 - **Weiter ist immer weiß.** Fehlt etwas, steht eine Zeile mit Koralle-Punkt darüber („Gib dem Raum einen Namen …“, „Trag die Brüstung

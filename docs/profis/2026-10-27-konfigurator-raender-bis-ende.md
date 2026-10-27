@@ -316,3 +316,20 @@ Am Laptop füllt nur diese Folie den ganzen Bildschirm (`voll` an der Ansicht, K
 unverändert und kommen einzeln dran.
 
 Bilder: docs/profis/bilder/2026-10-27-app-start-neu-tel.jpg, docs/profis/bilder/2026-10-27-app-start-neu-laptop.jpg.
+
+## Schritt 2 und 3, Folie für Folie (27.10.2026, nachts)
+
+Der Inhaber zu Schritt 2: „die zweite Folie kann genauso wie in diesem Artefakt bleiben“. Die Folie in der App entsprach dem Artefakt
+bis auf die Überschrift; jetzt steht wie dort das i neben der zweizeiligen Überschrift und die Notiz rund mit dem Zeichen über dem Wort.
+
+Zu Schritt 3 („Messen“) beschrieb er die Folie so: Überschrift oben in der Bühne wie auf Folie 1; das Element mindestens so groß wie auf
+Folie 1; Einzeichnungen und Linien bleiben; der Chip für den Wert unter dem Element; Notiz und die kleine graue Schrift unter der
+Bühne; keine Tastatur von Anfang an, erst Antippen des Chips holt die Systemtastatur; mit einem Wert erscheint „Weiter zu Maß 2“, die
+Folie bleibt und zeigt das nächste Maß mit neuem Feld. Dazu sein Wort: „Wenn du das verändert hast, dann stellst du das auch online“.
+
+Gebaut auf dem Modul web/assets/messen-dna.js (bisher nur auf dem Arbeitszweig) mit diesen Änderungen; Prüfungen, Rückfragen
+(Zentimeter, Warnungen), Großansicht, Lupen und Wege der App bleiben. Die Ränder (Schritt 4) sind nicht Teil seiner Beschreibung und
+bleiben, wie sie online sind, bis er die Folie durchgesehen hat. Was ohne echtes Telefon nicht geprüft werden konnte: die Lage der
+Pille über der Systemtastatur (iOS und Android rechnen den sichtbaren Bereich verschieden; gebaut mit `visualViewport`).
+
+Bilder: docs/profis/bilder/2026-10-27-app-messen-neu-tel.jpg, docs/profis/bilder/2026-10-27-app-messen-neu-laptop.jpg.
