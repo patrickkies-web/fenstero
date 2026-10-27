@@ -4856,6 +4856,65 @@ function tiefeDna(c) {
     '<p class="lp-satz" aria-live="polite"></p></div><div class="lg-feld"><p class="lg-hilfe">Später änderbar, oben über jeder Frage.</p></div></div>';
   return { html: lgKopf() + lgBand(c) + buehne + frage + karte + lgFuss(c), back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna', qpos: (c.i + 1) / c.list.length };
 }
+/* ---------- Wünsche im Look der Design-DNA (27.10.2026) ----------
+   Nach der Vorschau docs/profis/konfigurator-start-vorschau/ (Folie „Wünsche“, Gremium und Profis: docs/profis/2026-10-27-konfigurator-
+   raender-bis-ende.md): Kopf und Kapitelband wie in der Lage (Tippen aufs Band öffnet „Direkt zu einem Thema“), darunter die Bühne mit
+   dem 3-D-Modell der App (Regel des Inhabers: in den Wünschen das ausgearbeitete 3-D, beim Messen eine feste Ansicht), die Frage mit
+   Stelle, Planungstiefe und Notiz, die Antworten und unten zurück und eine Pille. Antworten, Aktionen, Prüfungen und Texte sind die der
+   Fragen (qCards, qChips usw.); neu ist nur der Look (app.css, Abschnitt „Wünsche“). */
+/* Titel: grau, das gefragte Wort weiß (akH); „innen“ und „außen“ sind immer weiß, je Titel ein weißer Abschnitt, Satzzeichen und die
+   Zahl dahinter gehören dazu; das i hängt am letzten Wort */
+function wzTitel(q) {
+  let t = akH(esc(q.title)).replace(/<span class="ak">([\s\S]*?)<\/span>/, '<em>$1</em>');
+  t = t.replace(/(^|\s)(innen|außen)(?=[\s?.!<]|$)/g, '$1<em>$2</em>').replace(/<\/em>(\s+)<em>/g, '$1');
+  const sek = [], r = /<em>([\s\S]*?)<\/em>/g; let m;
+  while ((m = r.exec(t))) if (/(^|\s)(innen|außen)/.test(m[1])) sek.push([m.index, r.lastIndex]);
+  if (sek.length) { const ohne = (x) => x.replace(/<\/?em>/g, ''), a = sek[0][0], z = sek[sek.length - 1][1]; t = ohne(t.slice(0, a)) + '<em>' + ohne(t.slice(a, z)) + '</em>' + ohne(t.slice(z)); }
+  t = t.replace(/<\/em>\s(\d+)/g, ' $1</em>').replace(/<\/em>([?.!])/g, '$1</em>');
+  if (!q.g || !GLOSS[q.g]) return t;
+  const knopf = '<button type="button" class="lg-i qg" data-act="gloss" data-k="' + q.g + '" aria-label="' + esc('Erklärung: ' + (GLOSS[q.g].s || q.title)) + '">' + LG_I + '</button>';
+  const i = t.lastIndexOf(' '), kopf = i >= 0 ? t.slice(0, i + 1) : '', rest = i >= 0 ? t.slice(i + 1) : t;
+  if (/<\/em>$/.test(rest) && rest.indexOf('<em>') < 0) return kopf + '<span class="wz-nb">' + rest.slice(0, -5) + knopf + '</span></em>';
+  return kopf + '<span class="wz-nb">' + rest + knopf + '</span>';
+}
+/* Band als Knopf: das laufende Kapitel benannt, die übrigen als Punkte; dazu der Bogen „Direkt zu einem Thema“ (q-sprung wie bisher) */
+function wzBand(c) {
+  const abs = qAbschnitte(c), ki = Math.max(0, abs.findIndex((g) => g.jetzt)), ab = abs[ki] || { name: '' };
+  return '<button type="button" class="lg-stationen wz-band" data-act="wz-kapitel" aria-expanded="' + !!S.wzKap + '" aria-label="' + esc('Kapitel ' + (ki + 1) + ' von ' + abs.length + ': ' + ab.name.replace(' & ', ' und ') + '. Direkt zu einem Thema') + '"><b>' + esc(ab.name) + '</b><span class="lg-band" aria-hidden="true">' + abs.map((g, i) => '<i' + (i === ki ? ' class="ist"' : g.fertig ? ' class="fertig"' : '') + '></i>').join('') + '</span><small>' + (ki + 1) + ' von ' + abs.length + '</small></button>';
+}
+function wzKapitel(c) {
+  if (!S.wzKap) return '';
+  const abs = qAbschnitte(c), x = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+  return '<div class="wz-bogen" role="dialog" aria-modal="true" aria-labelledby="wz-kap-t"><button type="button" class="wz-bogen-grund" data-act="wz-kapitel" aria-label="Schließen" tabindex="-1"></button><div class="wz-bogen-blatt">' +
+    '<div class="wz-bogen-kopf"><span id="wz-kap-t">Direkt zu einem Thema</span><button type="button" class="wz-rund" data-act="wz-kapitel" aria-label="Schließen">' + x + '</button></div><div class="wz-kapitel">' +
+    abs.map((g) => '<button type="button" class="ql" data-act="q-sprung" data-v="' + esc(g.id) + '" data-kap="' + g.k + '"' + (g.jetzt ? ' aria-current="step"' : '') + '><i class="' + (g.jetzt ? 'ist' : g.fertig ? 'fertig' : '') + '" aria-hidden="true"></i>' + esc(g.name) + '<small>' + (g.jetzt ? 'jetzt' : g.fertig ? 'erledigt' : '') + '</small></button>').join('') + '</div></div></div>';
+}
+/* Zeichnungen in Kacheln und Formen als Strichzeichnung: Flächen leer, Glas getönt, Striche 1,8 / 1,2 / 1 (gerätunabhängig); fehlt der
+   Hauptstrich (Sonnenschutz), tragen Kasten und Rahmen ihn */
+function wzStrich(html) {
+  return html.replace(/<button type="button" class="(?:qopt|qf)"[\s\S]*?<\/button>/g, (knopf) => knopf.replace(/<svg[\s\S]*?<\/svg>/, (svg) => {
+    svg = svg.replace(/ width="\d+" height="\d+"/, '').replace(/fill="([^"]*)"/g, (m, v) => { v = v.toLowerCase(); if (v === 'none') return m; if (/^#(d6e6f4|cfe0f0|dbe8f5|e3eef8)$/.test(v)) return 'fill="currentColor" fill-opacity=".12"'; if (/^#(ffffff|fff|f5f5f7|fafafa|f2f2f4)$/.test(v)) return 'fill="none"'; return 'fill="currentColor" fill-opacity=".22"'; });
+    svg = svg.replace(/stroke="(?!none)[^"]*"/g, 'stroke="currentColor"').replace(/stroke-width="([\d.]+)"/g, (m, x) => { x = parseFloat(x); return 'stroke-width="' + (x >= 1.2 ? 1.8 : x >= 0.8 ? 1.2 : 1) + '" vector-effect="non-scaling-stroke"'; });
+    if (!/stroke-width="1\.8"/.test(svg)) { let k = 0; svg = svg.replace(/stroke-width="1\.2"/g, (m) => (++k <= 3 ? 'stroke-width="1.8"' : m)); }
+    return svg;
+  }));
+}
+function frageDna(c, q, panel, stage, designFertig, tasten) {
+  panel = wzStrich(panel);
+  const w = S.win, n = c.list.length, last = c.i === n - 1, ab = qAbschnitte(c).find((g) => g.jetzt) || { i0: 0, i1: n - 1 };
+  const steps = stepsFor(w), nr = steps.indexOf('frage') + 1;
+  const buehne = '<div class="wz-buehne">' + stage + '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + Math.max(0.04, (c.i + 1) / n).toFixed(3) + '"></i>Schritt ' + nr + ' · Wünsche</span></div>';
+  const kopf = '<div class="hd wz-frage"><div class="hd-zeile"><p class="eyebrow" id="wz-pos">Frage ' + (c.i - ab.i0 + 1) + ' von ' + (ab.i1 - ab.i0 + 1) + '</p><span class="hd-tools">' + tiefeKnopf(q) + (q.id === 'notiz' ? '' : notizKnopf(notizOrt())) + '</span></div>' +
+    '<h1 tabindex="-1" aria-describedby="wz-pos">' + wzTitel(q) + '</h1>' + (q.sub ? '<p class="wz-sub">' + esc(q.sub) + '</p>' : '') + '</div>';
+  const sichern = istTuer(w) ? 'Tür speichern' : w.art === 'fest' ? 'Verglasung speichern' : 'Fenster speichern';
+  const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
+  const fuss = rechtLinks() + '<div class="lg-fuss qnav"><button type="button" class="lg-zurueck" data-act="qprev" aria-label="Zurück">' + LG_PFEIL_L + '</button>' +
+    (designFertig ? '<button type="button" class="dna-pille dna-pille--leise wz-anpassen" data-act="qnext">Anpassen</button><button type="button" class="dna-pille lg-weiter btn primary" data-act="save">Speichern' + pfeil + '</button>'
+      : '<button type="button" class="dna-pille lg-weiter btn primary" data-act="qnext">' + (last ? sichern : 'Weiter') + pfeil + '</button>') + '</div>';
+  if (tasten) return { html: lgKopf() + wzBand(c) + buehne + tasten, back: ['Zurück', 'qprev'], dna: true, cls: 'dna wz wz-tasten', qpos: (c.i + 1) / n };
+  return { html: lgKopf() + wzBand(c) + buehne + '<div class="qdock wz-dock">' + kopf + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div></div>' + fuss + wzKapitel(c),
+    back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna wz', qpos: (c.i + 1) / n };
+}
 function lpZeigen(rasten) {
   const scr = document.querySelector('.scr.dna'); if (!scr) return;
   const t = (S.proj && S.proj.tiefe) || 'normal', ti = (TIEFE[t] || 2) - 1, d = lpDaten(), q = (sel) => scr.querySelector(sel);
@@ -4930,12 +4989,9 @@ function offenZeile(q) {
 }
 function qText() { return '<div class="rows"><div class="trow"><span>Notiz für den Fensterbauer</span><textarea rows="3" id="t-notiz" data-in="w" data-f="notiz" placeholder="z. B. Fenster klemmt, Zugluft unten links">' + esc(S.win.notiz) + '</textarea></div></div>'; }
 SCREENS.frage = () => {
-  const c = qCurrent(), q = c.q, w = S.win, n = c.list.length, last = c.i === n - 1;
+  const c = qCurrent(), q = c.q, w = S.win;
   if (q.kind === 'lage') return lageDna(c); // Design-DNA: eigener Bildschirm mit Kopf, Bühne und Fuß
   if (q.kind === 'tiefe') return tiefeDna(c);
-  /* Abschnitt statt Fragenzahl (die Zahl der Fragen wächst mit den Antworten): „Farbe · 1 von 2“, darüber die Leiste der Abschnitte */
-  const abs = qAbschnitte(c), ab = abs.find((g) => g.jetzt) || abs[0], sec = ab ? ab.name : qAbschnitt(q);
-  const leiste = '<nav class="qleiste" aria-label="Kapitel der Wünsche">' + abs.map((g) => '<button type="button" class="ql' + (g.fertig ? ' fertig' : '') + '" data-act="q-sprung" data-v="' + esc(g.id) + '" data-kap="' + g.k + '"' + (g.jetzt ? ' aria-current="step"' : '') + '>' + (g.fertig ? CHECK : '') + '<span>' + esc(g.name) + '</span></button>').join('') + '</nav>';
   let panel;
   if (q.kind === 'cards') panel = qCards(q); else if (q.kind === 'formen') panel = qFormen(q); else if (q.kind === 'chips') panel = qChips(q); else if (q.kind === 'multi') panel = qMulti(q); else if (q.kind === 'color') panel = qColor(q);
   else if (q.kind === 'orn') panel = qOrn(); else if (q.kind === 'bars') panel = qBars(); else if (q.kind === 'switches') panel = qSwitches();
@@ -4950,40 +5006,21 @@ SCREENS.frage = () => {
   const isSash = q.sash != null, selIdx = isSash ? q.sash : Math.min(S.selSash, w.sashes.length - 1);
   const view = q.id === 'sprossen' || q.kind === 'bars' ? 'front' : q.view;
   const stage = model(w, { id: 'w3d', view: view, sway: !isSash && q.kind !== 'bars', selectable: isSash, selSash: selIdx, openSash: isSash ? S.openSash : -1, symbols: isSash || q.id === 'richtung', rails: q.kind === 'bars', selBar: S.selBar, formen: q.id === 'form', lupe: !!q.lupe, stageH: 'auto', fitW: q.kind === 'bars' ? 0.76 : view === 'front' ? 0.9 : 0.8, fitH: q.kind === 'bars' ? 0.7 : view === 'front' ? 0.84 : 0.76, hint: q.kind === 'bars' ? '' : (q.hint || '') });
-  /* Eyebrow „Kapitel · i von n“, rechts daneben die Tiefe (Pille) und die Notiz */
-  const title = hd(sec + ' · ' + (c.i - ab.i0 + 1) + ' von ' + (ab.i1 - ab.i0 + 1), esc(q.title) + (q.g ? ' <button type="button" class="qg" aria-label="' + esc('Erklärung: ' + (GLOSS[q.g] ? GLOSS[q.g].s : q.title)) + '" data-act="gloss" data-k="' + q.g + '">' + ICON_I + '</button>' : ''), q.sub ? esc(q.sub) : '', 'compact', '', tiefeKnopf(q) + notizKnopf(notizOrt()));
-  const sichern = istTuer(w) ? 'Tür speichern' : w.art === 'fest' ? 'Verglasung speichern' : 'Fenster speichern';
   /* Das Modell zuerst und immer gleich groß; Frage und Eingabe teilen sich darunter das Dock, das bei Bedarf in sich scrollt.
      Antippen zeichnet neu: dieselbe Frage behält die Stelle im Dock (gemerkt in S.qDock), eine neue Frage beginnt oben. */
   if (S.qDock && (S.qDock.q !== q.id || S.qDock.w !== w)) S.qDock = null;
   if (S.qMass && S.qMass.q !== q.id) S.qMass = null;
   const qm = S.qMass && massCfg(S.qMass.f);
   const dockY = S.qDock ? S.qDock.y : 0;
-  queueMicrotask(() => { leisteZeigen(); const d = document.querySelector('.qdock'); if (!d) return; if (dockY) d.scrollTop = dockY; dockMehr(d); });
-  /* Kapitelleiste (feste Höhe) über dem Modell, dann das Dock */
+  queueMicrotask(() => { const d = document.querySelector('.qdock'); if (!d) return; if (dockY) d.scrollTop = dockY; dockMehr(d); });
+  /* Zifferntasten (Breite eines Flügels, neue Maße): im selben Rahmen, die Bühne bleibt an ihrem Platz, statt des Fußes die Tasten */
   if (qm) {
     const st = S.qMass;
-    return { html: leiste + stage + '<div class="qdock qm-dock"><div class="qm-ein" id="qm-ein" tabindex="-1" role="group" aria-labelledby="qm-t qm-h"><span class="tx"><b id="qm-t">' + esc(qm.t) + '</b><small id="qm-h"' + (st.msg ? ' class="bad"' : '') + ' aria-live="polite">' + esc(st.msg || massHinweis(qm)) + '</small></span><span class="qm-num"><b id="qm-num"' + (st.cur ? '' : ' class="empty"') + ' aria-live="polite">' + (st.cur ? thousand(num(st.cur)) : '0') + '</b><span class="u">mm</span></span></div></div>' +
-      keypad('Übernehmen', 'Zurück zur Frage, ohne Änderung'), back: ['Zurück', 'qprev'], fit: true, qpos: (c.i + 1) / n };
+    return frageDna(c, q, '', stage, false, '<div class="qdock wz-dock qm-dock"><div class="qm-ein" id="qm-ein" tabindex="-1" role="group" aria-labelledby="qm-t qm-h"><span class="tx"><b id="qm-t">' + esc(qm.t) + '</b><small id="qm-h"' + (st.msg ? ' class="bad"' : '') + ' aria-live="polite">' + esc(st.msg || massHinweis(qm)) + '</small></span><span class="qm-num"><b id="qm-num"' + (st.cur ? '' : ' class="empty"') + ' aria-live="polite">' + (st.cur ? thousand(num(st.cur)) : '0') + '</b><span class="u">mm</span></span></div></div>' +
+      keypad('Übernehmen', 'Zurück zur Frage, ohne Änderung'));
   }
-  const html = leiste + stage + '<div class="qdock">' + title + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div></div>' + '<div class="qnav"><button type="button" class="btn ghost" data-act="qprev" aria-label="Zurück">' + '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>' +
-    (designFertig ? '<button type="button" class="btn ghost anpassen" data-act="qnext">Anpassen</button><button type="button" class="btn primary" data-act="save">Speichern</button>' : '<button type="button" class="btn primary" data-act="qnext">' + (last ? sichern : 'Weiter') + '</button>') + '</div>';
-  /* Oben „Fenster“: zur Übersicht aller Fenster (liste, mit Rückfrage bei ungespeicherten Änderungen); der Pfeil unten in der Leiste und die
-     Zurück-Taste des Telefons gehen eine Frage zurück (qprev) */
-  return { html: html, back: ['Fenster', 'qprev', 'liste'], fit: true, qpos: (c.i + 1) / n };
+  return frageDna(c, q, panel, stage, designFertig); // Design-DNA (27.10.2026); nur die Eingabe einer Breite (qm, oben) bleibt im Dock
 };
-/* Kapitelleiste: das aktuelle Kapitel steht ganz sichtbar, möglichst mittig, links beginnt ein ganzer Chip (ohne Gleiten, die Leiste wird
-   bei jedem Antippen neu gezeichnet) */
-function leisteZeigen() {
-  const l = document.querySelector('.qleiste'), a = l && l.querySelector('[aria-current]'); if (!a || l.scrollWidth <= l.clientWidth) return;
-  const lr = l.getBoundingClientRect(), x = (el) => el.getBoundingClientRect().left - lr.left + l.scrollLeft, pad = parseFloat(getComputedStyle(l).paddingLeft) || 0, max = l.scrollWidth - l.clientWidth;
-  const mitte = x(a) + a.offsetWidth / 2 - l.clientWidth / 2;
-  /* Links steht ein ganzer Chip am Innenabstand: Kandidaten sind die Anfänge der Chips, das aktuelle Kapitel muss ganz zu sehen sein;
-     davon der, der der Mitte am nächsten liegt. Am Ende der Leiste (nichts passt) bleibt die Mitte, den Rand blendet app.css aus */
-  const ganz = (s) => x(a) - s >= pad - 1 && x(a) + a.offsetWidth - s <= l.clientWidth - pad + 1;
-  const kand = Array.from(l.children).map((c) => x(c) - pad).filter((s) => s >= 0 && s <= max + 1 && ganz(s));
-  l.scrollLeft = kand.length ? kand.reduce((b, s) => (Math.abs(s - mitte) < Math.abs(b - mitte) ? s : b)) : Math.max(0, Math.min(max, mitte));
-}
 /* Dock: Stelle merken und unten ausblenden, solange darunter noch etwas steht */
 const dockMehr = (d) => { if (d) d.classList.toggle('mehr', d.scrollHeight - d.clientHeight - d.scrollTop > 8); };
 /* Nach einer Wahl im Dock (eine Option mit aria-pressed, nicht „Weiß ich noch nicht“ oder der Standard): Steht unter dem Block noch etwas
@@ -4998,6 +5035,17 @@ function dockNachruecken(el, name) {
     const esc1 = (t) => (window.CSS && CSS.escape ? CSS.escape(t) : String(t).replace(/["\\]/g, '\\$&'));
     const neu = d.querySelector('[data-act="' + esc1(name) + '"]' + (f != null ? '[data-f="' + esc1(f) + '"]' : '') + (v != null ? '[data-v="' + esc1(v) + '"]' : ''));
     const block = neu && neu.closest('.qpanel > *'); if (!block || !block.nextElementSibling) return; // der letzte Block: nichts mehr darunter
+    /* Wünsche im Look der DNA: die Seite rollt statt des Docks, nur so weit, dass der nächste Block über dem Fuß ganz zu sehen ist */
+    if (d.classList.contains('wz-dock')) {
+      const sc = document.querySelector('.scroll'), fuss = document.querySelector('.lg-fuss'); let nb = block.nextElementSibling; if (!sc || !nb) return;
+      while (nb.matches('p, .qrow') && nb.nextElementSibling && !nb.nextElementSibling.matches('.qoffen, .qmehr')) nb = nb.nextElementSibling; // nach einer Überschrift zählt der Block darunter
+      const of = d.querySelector('.qoffen:not(.qstd)'), klebt = of && of !== nb && getComputedStyle(of).position === 'sticky';
+      const unten = Math.min(fuss ? fuss.getBoundingClientRect().top : innerHeight, klebt ? of.getBoundingClientRect().top : Infinity) - 12, ueber = nb.getBoundingClientRect().bottom - unten;
+      const ziel = Math.min(sc.scrollTop + ueber, sc.scrollTop + block.getBoundingClientRect().top - 8);
+      if (ueber <= 0 || ziel <= sc.scrollTop + 2) return;
+      try { sc.scrollTo({ top: ziel, behavior: ruhig() ? 'auto' : 'smooth' }); } catch (e) { sc.scrollTop = ziel; }
+      return;
+    }
     if (d.scrollHeight - d.clientHeight - d.scrollTop <= 8) return; // schon alles zu sehen
     const ziel = Math.max(0, Math.min(d.scrollTop + block.getBoundingClientRect().top - d.getBoundingClientRect().top - 4, d.scrollHeight - d.clientHeight));
     if (ziel <= d.scrollTop + 2) return;
@@ -5427,6 +5475,7 @@ function zurueckTaste() {
   if (S.sendeFrage) { S.sendeFrage = false; render(); return true; }
   if (S.gloss || S.glossIndex) { S.gloss = null; S.glossIndex = false; render(); return true; }
   if (S.wohin) { S.wohin = false; render(); return true; }
+  if (S.wzKap) { S.wzKap = false; render(); const b = document.querySelector('.wz-band'); if (b) b.focus({ preventScroll: true }); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
   if (S.qMass && S.screen === 'frage') { S.qMass = null; render(); return true; } // Zifferntasten in den Wünschen
   if (S.screen === 'messen' && S.mess && S.mess.pad) { messZu(); return true; } // Zifferntasten beim Messen: erst das Blatt zu
@@ -5455,6 +5504,7 @@ function escTaste() {
   if (S.sendeFrage) { S.sendeFrage = false; render(); return true; }
   if (S.gloss || S.glossIndex) { S.gloss = null; S.glossIndex = false; render(); return true; }
   if (S.wohin) { S.wohin = false; render(); return true; }
+  if (S.wzKap) { S.wzKap = false; render(); const b = document.querySelector('.wz-band'); if (b) b.focus({ preventScroll: true }); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
   if (S.qMass && S.screen === 'frage') { S.qMass = null; render(); return true; }
   if (S.screen === 'messen' && S.mess && S.mess.pad) { messZu(); return true; } // Zifferntasten beim Messen
@@ -6604,7 +6654,9 @@ function act(name, el) {
       if (v === 'frage' && S.screen !== 'frage') { S.q = null; S.openSash = -1; S.designVorher = null; S.nameFehler = false; S.lgGrund = null; }
       return go(v, stepsFor(w).indexOf(v) < stepsFor(w).indexOf(S.screen) ? 'back' : 'fwd');
     }
-    case 'q-sprung': { const c = qCurrent(), j = c.list.findIndex((q) => q.id === v); if (j < 0) return; if (j > c.i && c.q.id === 'lage' && lgFehlt(w)) return lgVerlangen(lgFehlt(w)); S.wohin = false; return qStep(j - c.i); }
+    case 'q-sprung': { const c = qCurrent(), j = c.list.findIndex((q) => q.id === v); if (j < 0) return; if (j > c.i && c.q.id === 'lage' && lgFehlt(w)) return lgVerlangen(lgFehlt(w)); S.wohin = false; S.wzKap = false; if (j === c.i) return render(); return qStep(j - c.i); }
+    /* Wünsche (Design-DNA): Tippen aufs Kapitelband öffnet „Direkt zu einem Thema“, Schließen gibt den Fokus ans Band zurück */
+    case 'wz-kapitel': { S.wzKap = !S.wzKap; render(); const z = document.querySelector(S.wzKap ? '.wz-bogen .wz-rund' : '.wz-band'); if (z) z.focus({ preventScroll: true }); return; }
     case 'verlassen-speichern': { const z = S.verlassen && S.verlassen.ziel; S.verlassen = null; saveWin(); if (S.screen === 'fertig' && z) ziehen(z); return; }
     case 'verlassen-entwurf': { const z = S.verlassen && S.verlassen.ziel; S.verlassen = null; entwurfJetzt(); return ziehen(z); }
     case 'verlassen-verwerfen': { const z = S.verlassen && S.verlassen.ziel, g = S.editIdx >= 0 ? S.windows[S.editIdx] : null; S.verlassen = null; entwurfWeg(); if (g) S.win = altAngleichen(Object.assign(baseWin(), kopie(g))); else { S.win = baseWin(); S.editIdx = -1; } ziehen(z); return toast(g ? 'Änderungen verworfen' : 'Fenster verworfen'); }

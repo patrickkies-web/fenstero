@@ -232,3 +232,28 @@ Neue Wortlaute zur Freigabe: „Schritt 6 · Wünsche“ (Chip ohne Endzahl), �
 - Für den Verkauf an Betriebe (Fensterbauer, außerhalb der Liste): Logo des Betriebs im Kopf, in der Anfrage „gewählt“ und „Standard“
   unterscheiden.
 
+
+## Übernahme in die App: Wünsche (27.10.2026, abends)
+
+Auftrag des Inhabers: „Stell mal den überarbeiteten Konfigurator endlich mal online.“ Entscheidung (die Rückfrage wurde nicht
+beantwortet): die Vorschau als Link online (`/vorschau/konfigurator-5269b7215a/`), dann die Folien Abschnitt für Abschnitt in die echte
+App, jeder Abschnitt online, sobald die Prüfsuite grün ist. Erster Abschnitt: die Wünsche, weil sie im Live-Betrieb am längsten dauern.
+
+- Rahmen neu (web/assets/app.js, `frageDna`): Kopf der DNA, Kapitelband mit Stationen als Knopf („Kapitel 3 von 7: Material und Farbe.
+  Direkt zu einem Thema“), darunter die echte 3-D-Bühne mit Chip „Schritt 6 · Wünsche“, Kopfzeile „Frage 1 von 11“ mit „Fragen: Üblich“
+  und Notiz-Rundknopf, Titel 28 px mit weißem Wort und i, Antworten, fester Fuß mit rundem Zurück und einer weißen Pille
+  („Weiter“, am Ende „Fenster speichern“). Der Kapitel-Bogen ersetzt die Reiterleiste, Esc und Zurück schließen ihn.
+- Antworten nur neu gekleidet (web/assets/app.css, Abschnitt „Wünsche im Look der Design-DNA“): Anthrazit-Kacheln mit den
+  Strichzeichnungen der App, gewählt mit violettem Ring, Punkt und Licht; Umschalter, Listen, Zähler und Notiz auf Weiß; Farbtupfen
+  44 px; „Weiß ich noch nicht“ schraffiert. Alle `data-act` bleiben, damit Verhalten, Speichern, Preise und Blatt unverändert sind.
+- Zifferntasten (eigene Maße in den Wünschen) im selben Rahmen; das Modell bleibt dabei stehen.
+- Bühne mit Sonnenschutz: Hinweis und Chip weichen den Sonnenschutz-Knöpfen aus (320 und 390 px geprüft).
+- Prüfsuite angepasst, wo sie das alte Markup abfragte (Formen, Kapitel, Kopfzeile, Dock, Zoom); keine Prüfung gestrichen.
+
+Bild: docs/profis/bilder/2026-10-27-app-wuensche-dna-tel.jpg (acht Fragen der echten App, 390 × 844). Alle 46 Fragen in DNA, Pille bei
+774 px, kein Querscrollen, keine Konsolenfehler.
+
+Prüfsuite: Abschnitte 20 und 22 (Wünsche, Sonnenschutz) 63 von 63; ganze Suite vor dem Online-Stellen. Bekannt und nicht von diesem
+Abschnitt: „Lamellen wenden“ (WebGL in SwiftShader) schwankt.
+
+Offen: Start, Fotos, Messen, Ränder, Ergebnis und Abschluss folgen in derselben Weise.

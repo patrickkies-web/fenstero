@@ -468,11 +468,13 @@ Drei Oberflächen kamen mit den Paketen dazu; sie folgen denselben Regeln wie ob
 
 **Paketbedingungen `/konfigurator-bedingungen/`:** wie die übrigen Rechtsseiten (`recht.css`); offene Stellen als markierte Platzhalter (`mark.ph`), Tabellen aus `pakete.js`. Die PDFs (`scripts/bedingungen-pdf.mjs`) setzen Inter wie das Aufmaßblatt: Titel 20, Abschnitte 13, Text 9,8 pt, Tabellen mit Haarlinien, Kopfzeile „Entwurf zur anwaltlichen Prüfung · Fassung vom …“ in Warnfarbe, solange Platzhalter da sind.
 
-## Design-DNA im Konfigurator (ab 26.10.2026: Lage)
+## Design-DNA im Konfigurator (ab 26.10.2026: Lage; ab 27.10.2026: alle Wünsche)
 
 Der Inhaber stellt den Konfigurator Folie für Folie auf seine Design-DNA um (Vorschauen „Lage neu gedacht“ und „Lage in Violett“,
-Protokoll docs/profis/2026-10-26-lage.md). Bisher umgestellt: das Kapitel „Lage“ mit „Wo ist das Fenster?“ (`lageDna`) und „Wie genau
-möchtest du planen?“ (`tiefeDna`) in app.js.
+Protokoll docs/profis/2026-10-26-lage.md; Folien bis zum Teilen: docs/profis/konfigurator-start-vorschau/, Protokolle
+docs/profis/2026-10-26-konfigurator-start.md und 2026-10-27-konfigurator-raender-bis-ende.md). Bisher umgestellt: das Kapitel „Lage“
+mit „Wo ist das Fenster?“ (`lageDna`) und „Wie genau möchtest du planen?“ (`tiefeDna`) und seit dem 27.10.2026 alle übrigen Fragen der
+Wünsche (`frageDna`) in app.js.
 
 - **Gültigkeit:** nur Bildschirme mit `.scr.dna`; Regeln in app.css, Abschnitt „Design-DNA im Konfigurator“, Klassen `lg-`, `lp-`, `dna-`.
   Alle übrigen Bildschirme behalten Inter, die Schriftrollen 13/15/17/24/32/40, das grüne Wort und die Cream-Pille.
@@ -490,6 +492,17 @@ möchtest du planen?“ (`tiefeDna`) in app.js.
     Leuchten und Schraffur).
   - Wie genau planen: Punktraster je Kapitel, gezählt wie in qTiefe (weiß gefüllt = wählst du, Ring = Standard des Fensterbauers), Zahl
     in Violett und Koralle, die Leuchten wachsen mit dem Anteil; Schalter Kurz · Üblich · Alles mit einem Satz darunter.
+  - Wünsche (`frageDna`, app.css Abschnitt „Wünsche im Look der Design-DNA“): Kapitelband als Knopf (öffnet „Direkt zu einem Thema“,
+    `wz-kapitel`, springt mit `q-sprung`), Bühne mit dem 3-D-Modell der App von Rand zu Rand (Höhe 220 bis 272 px, Werkzeuge als
+    Leiste runder Glasknöpfe rechts, mit Knöpfen am Sonnenschutz die Anordnung der App, Hinweis als Chip), über der Frage „Frage i von n“
+    mit der Planungstiefe („Fragen: Üblich“) und der Notiz als Rundknopf, Titel 28 px grau mit dem gefragten Wort weiß („innen“ und
+    „außen“ immer weiß), das i am letzten Wort. Die Antworten sind die Bausteine der Fragen (qCards, qChips, qSwatch, qList …) mit
+    denselben Aktionen; Auswahl auf Anthrazit-Kacheln mit den Zeichnungen als Strichzeichnung (`wzStrich`), Eingaben auf Weiß
+    (Umschalter und Einfachwahl mit Punkt, Mehrfachwahl mit Haken, Zähler, Schalter, Aufteilung mit Regler), Farben als Tupfen auf
+    Anthrazit (44 px), „Weiß ich noch nicht“ als leise Zeile, gewählt schraffiert, ab 740 px Bildschirmhöhe über dem Fuß klebend. Die
+    Zifferntasten stehen im selben Rahmen unter dem Modell. Nach einer Wahl rollt die Seite nur so weit, dass der nächste Block zu sehen ist.
+  - Regel des Inhabers (27.10.2026): Beim Messen eine feste Ansicht je Element, in den Wünschen das ausgearbeitete 3-D-Modell; die
+    Wünsche werden nie durch Standbilder ersetzt.
 - **Weiter ist immer weiß.** Fehlt etwas, steht eine Zeile mit Koralle-Punkt darüber („Gib dem Raum einen Namen …“, „Trag die Brüstung
   ein …“), das Feld wird koralle umrandet und bekommt den Fokus.
 - **Bewegung:** nur Zustand und Rückmeldung: Fenster, Etikett und Strich gleiten in 400 ms ins Stockwerk, Licht und Schraffur folgen,
