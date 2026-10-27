@@ -243,6 +243,74 @@ export default async function (h) {
   const zu14 = await s4api(KK, '/api/auftrag/' + ak.id + '/ki', { body: { frei: false } });
   ok(zu14.json.ki.frei === false && /Freischaltung weiterer KI-Auswertungen beendet/.test(JSON.stringify((await s4api(KK, '/api/auftrag/ich', { method: 'GET' })).json)), '26.14 Freischaltung lässt sich im Kundenbereich jederzeit beenden (steht im Verlauf)');
 
+  /* ---------- 26.15 Pause und Ende bei Nichtzahlung (Paketbedingungen § 8; eigener Testserver s4, Stripe über /__stripe) ----------
+     Zentrale: Pausieren und wieder live schalten den verknüpften Konfigurator mit. Abbuchung fehlgeschlagen → Mail (einmal), nach 14 Tagen
+     Pause (Konfigurator nimmt nichts an), Zahlung → wieder live; erneut offen, nach 60 Tagen Pause Ende und Konfigurator vom Netz.
+     Kündigung über Stripe (Abo gelöscht) beendet den Vertrag und nimmt den Konfigurator vom Netz. */
+  const ereignis = (type, auftrag, extra) => s4.api('localhost', '/__stripe', { body: { type: type, object: Object.assign({ metadata: { art: 'auftrag', auftrag: auftrag } }, extra || {}) } });
+  const startStatus = async (host) => (await s4.api(host, '/api/instanz/start', { body: {}, origin: true, headers: { 'x-forwarded-for': '10.26.6.' + (++ipN) } })).status;
+  const standVon = async (id) => (await s4api(ZK, '/api/inhaber/auftraege/' + id, { method: 'GET' })).json.auftrag;
+  const neueMails = async (vor) => (await s4.post()).filter((m) => !vor.has(m.id));
+  const zP1 = await s4api(ZK, '/api/inhaber/auftraege/' + ak.id + '/stand', { body: { stand: 'pausiert', mail: false } }), sP1 = await startStatus(kiHost);
+  const zL1 = await s4api(ZK, '/api/inhaber/auftraege/' + ak.id + '/stand', { body: { stand: 'live', link: 'https://' + kiHost + '/', mail: false } }), sL1 = await startStatus(kiHost);
+  ok(zP1.status === 200 && !zP1.json.hinweis && sP1 !== 200 && zL1.status === 200 && sL1 === 200, '26.15 Zentrale: Pausieren schaltet den Konfigurator ab (' + sP1 + '), wieder live schaltet ihn ein (' + sL1 + ')');
+  const vor15 = new Set((await s4.post()).map((m) => m.id));
+  await ereignis('invoice.payment_failed', ak.id); await ereignis('invoice.payment_failed', ak.id);
+  await new Promise((r) => setTimeout(r, 300));
+  const offen = await standVon(ak.id), mOffen = (await neueMails(vor15)).filter((m) => m.an === mailK && /Abbuchung ist fehlgeschlagen/.test(m.betreff));
+  const ichOffen = ((await s4api(KK, '/api/auftrag/ich', { method: 'GET' })).json.auftraege || []).find((x) => x.id === ak.id) || {};
+  ok(offen.stand === 'live' && offen.abo.status === 'zahlung_offen' && !!offen.abo.offen_seit && mOffen.length === 1 && ichOffen.fristen && ichOffen.fristen.kulanzTage === 14,
+    '26.15 Abbuchung fehlgeschlagen: Abo offen, eine Mail an den Betrieb (bei zwei Fehlschlägen), Kundenbereich kennt die Fristen');
+  await s4.uhr(15); const lauf15 = await s4.geplant('17 4 * * *'); await s4.uhr(null);
+  await new Promise((r) => setTimeout(r, 300));
+  const pause = await standVon(ak.id), sPause = await startStatus(kiHost), mPause = await neueMails(vor15);
+  ok(lauf15.nachholen.auftraege.mahnung && lauf15.nachholen.auftraege.mahnung.pausiert === 1 && pause.stand === 'pausiert' && pause.sperre === 'zahlung' && sPause !== 200 &&
+    mPause.some((m) => m.an === mailK && /Konfigurator ist pausiert/.test(m.betreff)) && mPause.some((m) => m.an !== mailK && /Konfigurator pausiert/.test(m.betreff)),
+    '26.15 Nach 14 Tagen offen: Auftrag und Konfigurator pausiert (' + sPause + '), Mails an Betrieb und Inhaber');
+  await ereignis('invoice.paid', ak.id, { lines: { data: [{ period: { end: Math.floor(Date.now() / 1000) + 30 * 86400 } }] } });
+  await new Promise((r) => setTimeout(r, 300));
+  const wieder = await standVon(ak.id), sWieder = await startStatus(kiHost);
+  ok(wieder.stand === 'live' && !wieder.sperre && wieder.abo.status === 'aktiv' && sWieder === 200 && (await neueMails(vor15)).some((m) => m.an === mailK && /wieder online/.test(m.betreff)),
+    '26.15 Zahlung eingegangen: wieder live, Konfigurator nimmt wieder an, Mail an den Betrieb');
+  await ereignis('invoice.payment_failed', ak.id);
+  await s4.uhr(15); await s4.geplant('17 4 * * *'); await s4.uhr(76); const lauf76 = await s4.geplant('17 4 * * *'); await s4.uhr(null);
+  await new Promise((r) => setTimeout(r, 300));
+  const ende = await standVon(ak.id), sEnde = await startStatus(kiHost);
+  ok(lauf76.nachholen.auftraege.mahnung && lauf76.nachholen.auftraege.mahnung.beendet === 1 && ende.stand === 'beendet' && ende.abo.status === 'beendet' && sEnde === 410 &&
+    (await neueMails(vor15)).some((m) => m.an === mailK && /Vertrag ist beendet/.test(m.betreff)),
+    '26.15 60 Tage Pause wegen offener Zahlung: Vertrag beendet, Abo beendet, Konfigurator vom Netz (' + sEnde + ')');
+  /* Kündigung über Stripe: zweiter Auftrag mit eigenem Konfigurator; Abbruch durch Stripe wegen Nichtzahlung: dritter */
+  const liveAuftrag = async (slug) => {
+    const host = slug + '-' + stempel + '.de', a = (await s4api(KK, '/api/auftrag/neu', { body: { paket: 'plus', weg: 'ausfuehrlich' } })).json.auftrag;
+    await s4api(KK, '/api/auftrag/' + a.id, { method: 'PATCH', body: { angaben: { betrieb: BETRIEB, adresse: { art: 'neu', domains: [host], eingang: [mailK] }, auftritt: { farben: ['#1f6f78'] } } } });
+    const kb = await s4api(KK, '/api/auftrag/' + a.id + '/bestellen', { body: { zustimmung: zu } });
+    await s4api(KK, '/api/auftrag/' + a.id + '/kasse?session=' + encodeURIComponent((/kasse=([^&#]+)/.exec(kb.json.url || '') || [])[1] || ''), { method: 'GET' });
+    await s4.saat({ instanzen: [{ slug: slug + '-' + stempel, host: host, paket: 'plus', name: 'Prüf ' + slug, plz: '50667' }] });
+    await s4api(ZK, '/api/inhaber/auftraege/' + a.id + '/stand', { body: { stand: 'in_arbeit', mail: false } });
+    await s4api(ZK, '/api/inhaber/auftraege/' + a.id + '/stand', { body: { stand: 'vorschau', link: 'https://claude.ai/artifact/' + slug + '-' + stempel, mail: false } });
+    await s4api(KK, '/api/auftrag/' + a.id + '/freigabe', { body: { aktion: 'freigeben' } });
+    await s4api(ZK, '/api/inhaber/auftraege/' + a.id + '/stand', { body: { stand: 'live', link: 'https://' + host + '/', mail: false } });
+    return { a: a, host: host };
+  };
+  const lK = await liveAuftrag('kuend'), ak2 = lK.a, k2Host = lK.host;
+  const sK1 = await startStatus(k2Host);
+  await ereignis('customer.subscription.deleted', ak2.id);
+  await new Promise((r) => setTimeout(r, 300));
+  const kuend = await standVon(ak2.id), sK2 = await startStatus(k2Host);
+  ok(sK1 === 200 && kuend.stand === 'beendet' && kuend.abo.status === 'beendet' && sK2 === 410, '26.15 Kündigung über Stripe (Abo gelöscht): Vertrag beendet, Konfigurator vom Netz (' + sK1 + ' → ' + sK2 + ')');
+  const lA = await liveAuftrag('abbruch');
+  await ereignis('invoice.payment_failed', lA.a.id);
+  await ereignis('customer.subscription.deleted', lA.a.id, { cancellation_details: { reason: 'payment_failed' } });
+  const ab1 = await standVon(lA.a.id), sA1 = await startStatus(lA.host);
+  await s4.uhr(15); await s4.geplant('17 4 * * *'); await s4.uhr(null);
+  const ab2 = await standVon(lA.a.id);
+  await ereignis('invoice.paid', lA.a.id);
+  const ab3 = await standVon(lA.a.id);
+  const ab4 = (await s4api(ZK, '/api/inhaber/auftraege/' + lA.a.id + '/stand', { body: { stand: 'live', link: 'https://' + lA.host + '/', mail: false } })).json.auftrag, sA4 = await startStatus(lA.host);
+  ok(ab1.stand === 'live' && ab1.abo.status === 'zahlung_offen' && sA1 === 200 && ab2.stand === 'pausiert' && ab2.sperre === 'zahlung' && ab3.stand === 'pausiert' && ab3.abo.status === 'beendet' &&
+    ab4.stand === 'live' && ab4.abo.status && ab4.abo.status !== 'beendet' && sA4 === 200,
+    '26.15 Stripe bricht das Abo wegen Nichtzahlung ab: Vertrag läuft nach § 8 weiter (Pause nach 14 Tagen), Zahlung allein schaltet nicht frei, „Wieder live“ startet ein neues Abo (' + [ab1.stand, ab2.stand, ab3.stand, ab4.stand].join(' → ') + ')');
+
   /* ---------- Teil B: im Browser ---------- */
   const bild = fs.readFileSync(path.join(h.WURZEL, 'web/bilder/fensterbauer-dna/modell-anthrazit.webp'));
   const tmp = path.join(h.WURZEL, '.pruef-26-bild.webp'); fs.writeFileSync(tmp, bild);

@@ -38,12 +38,14 @@ import { postDienst, esc, mailOk as mailPruefen } from '../api/post.js';
 import { ablage } from '../api/fotos.js';
 import { PAKET_STAND, paketVerkaufStand, standText, paketPdfs } from '../api/recht.js';
 import { daten } from './daten.js';
-import { codeMail, bestelltMail, inhaberNeuMail, standMail, nachrichtMail, frageMail, rahmen } from './mails.js';
-import { SICHERHEIT, SPERRE } from '../seo.js';
+import { codeMail, bestelltMail, inhaberNeuMail, standMail, nachrichtMail, frageMail, rahmen, zahlungMail } from './mails.js';
+import { SICHERHEIT, SPERRE, HAUPTADRESSE } from '../seo.js';
 import { kasse, kassePruefen, aboStarten, aboBeenden, portal, erstatten, mwst, kiPosten } from './zahlung.js';
 import { budgetStand, monatsPeriode } from '../api/bremse.js';
 import { instanzVon } from '../instanz/mandant.js';
 import { speicher } from '../api/speicher.js';
+import { instanzStatus } from '../instanz/verwalten.js';
+import { alarmMail } from '../api/ki.js';
 
 const P = () => globalThis.Pakete;
 const AU = () => globalThis.Auftrag;
@@ -74,7 +76,7 @@ function sicht(a, o) {
     angaben: a.angaben || {}, dateien: (a.dateien || []).map((d) => ({ id: d.id, platz: d.platz, name: d.name, typ: d.typ, bytes: d.bytes, zeit: d.zeit })),
     preise: a.preise || null, adresse: adresseText(a), zustimmung: a.zustimmung || null,
     zahlung: { status: z.status || '', betrag_cent: z.betrag_cent || 0, bezahlt_am: z.bezahlt_am || '', erstattet: !!z.erstattet },
-    abo: { status: (a.abo || {}).status || '', bis: (a.abo || {}).bis || '', seit: (a.abo || {}).seit || '' },
+    abo: { status: (a.abo || {}).status || '', bis: (a.abo || {}).bis || '', seit: (a.abo || {}).seit || '', offen_seit: (a.abo || {}).offen_seit || '' }, sperre: a.sperre || '', fristen: { kulanzTage: globalThis.Instanzregeln.FRISTEN.kulanzTage, pauseMaxTage: globalThis.Instanzregeln.FRISTEN.pauseMaxTage },
     vorschau: { link: v.link || '', seit: v.seit || '', freigabe: v.freigabe || null, aenderung: v.aenderung || null, live: v.live || '' },
     verlauf: (a.verlauf || []).map((x) => ({ zeit: x.zeit, stand: x.stand || '', von: x.von, text: x.text })), created_at: a.created_at, updated_at: a.updated_at,
     geaendert: a.angaben_geaendert || '', ki: { frei: !!(a.ki || {}).frei, frei_seit: (a.ki || {}).frei_seit || '' }, verknuepft: !!a.instanz
@@ -106,6 +108,26 @@ async function instanzZuHost(ctx, adresse) {
   let host = ''; try { host = new URL(/^https?:\/\//i.test(adresse) ? adresse : 'https://' + adresse).hostname.toLowerCase().replace(/^www\./, ''); } catch (e) { return null; }
   const inst = await instanzVon(host, ctx.env, ctx).catch(() => null);
   return inst && inst.id && !inst.stoerung ? { id: inst.id, id8: inst.id8, host: inst.haupthost || host, seit: ZEIT() } : null;
+}
+
+/* Den verknüpften Konfigurator mit dem Stand des Auftrags schalten (Paketbedingungen § 8): Pause zeigt nur Name und Kontakt, Ende nimmt ihn
+   vom Netz. Ohne Verknüpfung oder Speicher bleibt es beim Stand des Auftrags; Rückgabe: Hinweis für die Zentrale oder '' */
+async function konfiguratorSchalten(ctx, a, stand, grund) {
+  const inst = a && a.instanz, ziel = { live: 'aktiv', pausiert: 'pausiert', beendet: 'beendet', storniert: 'beendet' }[stand];
+  if (!ziel || !inst || !inst.id) return '';
+  if (!ctx.sp || !ctx.sp.instanzAendern) return 'Der Konfigurator ist nicht erreichbar; bitte in Cloudflare oder Supabase von Hand schalten.';
+  try { if (!(await ctx.sp.instanzHolen(inst.id))) return ''; await instanzStatus(ctx, inst.id, ziel, grund); return ''; } catch (e) { return 'Der Konfigurator ließ sich nicht umschalten: ' + String((e && e.message) || e).slice(0, 160); }
+}
+const zahlungO = (ctx, a) => { const F = globalThis.Instanzregeln.FRISTEN; return { konto: kontoLink(ctx, a), kulanz: F.kulanzTage, pauseMax: F.pauseMaxTage, loeschen: F.loeschenNachEndeTage }; };
+const kontoLink = (ctx, a) => (ctx.url ? ctx.url.origin : String((ctx.env && ctx.env.KANONISCH) || HAUPTADRESSE).replace(/\/+$/, '')) + '/konto/#auftrag/' + a.id;
+async function zahlungMelden(ctx, a, stufe) {
+  const post = pd(ctx); if (!post) return false;
+  const kunde = await db(ctx).kundeHolen(a.kunde).catch(() => null), m = zahlungMail(stufe, a, zahlungO(ctx, a));
+  const firma = ((a.angaben || {}).betrieb || {}).firma || '';
+  const aufgaben = [];
+  if (kunde && m) aufgaben.push(post.senden({ an: kunde.mail, betreff: m.betreff, html: m.html, antwortAn: post.kontakt }).catch(() => false));
+  if (stufe !== 'wieder') aufgaben.push(alarmMail(ctx.k, 'Zahlung ' + a.nr + ' (' + firma + '): ' + { offen: 'Abbuchung fehlgeschlagen', pausiert: 'Konfigurator pausiert', beendet: 'Vertrag beendet' }[stufe], firma + ', Auftrag ' + a.nr + '. ' + (m ? m.betreff : '')).catch(() => false));
+  return Promise.all(aufgaben);
 }
 
 const verlauf = (z, eintrag) => { (z.verlauf = z.verlauf || []).push(Object.assign({ zeit: ZEIT() }, eintrag)); if (z.verlauf.length > 200) z.verlauf = z.verlauf.slice(-200); };
@@ -572,7 +594,7 @@ const INHABER = {
     if (nach === 'vorschau' && !AU().webAdresse(link)) throw new ApiFehler('Bitte den Link zur Vorschau eintragen.', 400, { felder: { link: 'Bitte einen Link wie https://… eintragen.' } });
     if (nach === 'live' && !AU().webAdresse(link)) throw new ApiFehler('Bitte die Adresse der fertigen Seite eintragen.', 400, { felder: { link: 'Bitte die Adresse wie https://… eintragen.' } });
     let abo = null, erstattung = null;
-    if (nach === 'live' && !((a.abo || {}).id)) { const kunde = await d.kundeHolen(a.kunde); abo = await aboStarten(ctx, a, kunde || {}); }
+    if (nach === 'live' && (!((a.abo || {}).id) || (a.abo || {}).geloescht)) { const kunde = await d.kundeHolen(a.kunde); abo = await aboStarten(ctx, a, kunde || {}); }
     /* Live: den Konfigurator unter dieser Adresse mit dem Auftrag verknüpfen (KI-Kontingent, Abrechnung); fehlt er, bleibt es offen */
     const inst = nach === 'live' && !a.instanz ? await instanzZuHost(ctx, AU().webAdresse(link)) : null;
     if (nach === 'storniert') erstattung = await erstatten(ctx, a);
@@ -581,14 +603,21 @@ const INHABER = {
       if (!AU().uebergang(z.stand, nach, 'inhaber')) return false;
       z.stand = nach;
       if (nach === 'vorschau') z.vorschau = Object.assign({}, z.vorschau, { link: AU().webAdresse(link), seit: ZEIT(), freigabe: null, aenderung: null });
-      if (nach === 'live') { z.vorschau = Object.assign({}, z.vorschau, { live: AU().webAdresse(link) }); if (abo) z.abo = Object.assign({}, z.abo, { id: abo.id, status: abo.status, bis: abo.bis, seit: ZEIT() }); if (inst) z.instanz = inst; }
+      /* aus Kulanz wieder live, obwohl die Zahlung noch offen ist: neue Frist bis zur nächsten Pause (FRISTEN.kulanzTage) */
+      if (nach === 'live' && z.sperre === 'zahlung' && (z.abo || {}).status === 'zahlung_offen') z.abo = Object.assign({}, z.abo, { offen_seit: ZEIT() });
+      if (nach === 'live') { z.vorschau = Object.assign({}, z.vorschau, { live: AU().webAdresse(link) }); if (abo) z.abo = Object.assign({}, z.abo, { id: abo.id, status: abo.status, bis: abo.bis, seit: ZEIT(), geloescht: null, offen_seit: null }); if (inst) z.instanz = inst; z.sperre = null; z.pause_seit = null; }
+      if (nach === 'pausiert') { z.sperre = 'inhaber'; z.pause_seit = ZEIT(); }
       if (nach === 'storniert' && erstattung && !erstattung.ohne) z.zahlung = Object.assign({}, z.zahlung, { erstattet: true, erstattet_cent: erstattung.cent || 0 });
       if (nach === 'beendet') z.abo = Object.assign({}, z.abo, { status: 'beendet', ende: ZEIT() });
       verlauf(z, { stand: nach, von: 'inhaber', text: AU().STAND_TITEL[nach] + (text ? ': ' + text : '') });
     });
     if (z2 === false) throw new ApiFehler('Gerade gleichzeitig geändert. Bitte neu laden.', 409);
+    /* Pause, wieder live und Ende gelten auch für den verknüpften Konfigurator (Paketbedingungen § 8) */
+    const bisEnde = nach === 'beendet' && !b.sofort && Date.parse((z2.abo || {}).bis || '') > Date.now();
+    const schalt = bisEnde ? '' : await konfiguratorSchalten(ctx, z2, nach, 'Zentrale: ' + AU().STAND_TITEL[nach] + (text ? ', ' + text : ''));
+    if (!bisEnde && z2.instanz && ['beendet', 'storniert'].indexOf(nach) >= 0 && !schalt) await d.auftragAendern(z2.id, (z) => { z.instanz = Object.assign({}, z.instanz, { aus: ZEIT() }); }).catch(() => null);
     if (b.mail !== false) ctx.waitUntil(kundeMelden(ctx, z2, nach, { vorschau: (z2.vorschau || {}).link, live: (z2.vorschau || {}).live, text: text }).catch(() => false));
-    return { ok: true, auftrag: sicht(z2, { inhaber: true }), hinweis: nach === 'live' && !z2.instanz ? 'Unter dieser Adresse wurde kein Konfigurator gefunden; das KI-Kontingent ist nicht verknüpft. Verknüpfen unter „KI-Auswertungen“.' : '' };
+    return { ok: true, auftrag: sicht(z2, { inhaber: true }), hinweis: schalt || (nach === 'live' && !z2.instanz ? 'Unter dieser Adresse wurde kein Konfigurator gefunden; das KI-Kontingent ist nicht verknüpft. Verknüpfen unter „KI-Auswertungen“.' : '') };
   },
   'POST /api/inhaber/auftraege/:id/nachricht': async (ctx) => {
     await inhaberPflicht(ctx);
@@ -627,13 +656,63 @@ export async function auftragEreignis(ctx, ev) {
     await d.auftragAendern(a.id, (z) => { if ((z.zahlung || {}).status === 'bezahlt') return false; z.zahlung = Object.assign({}, z.zahlung, { status: 'fehlgeschlagen' }); verlauf(z, { von: 'system', text: 'Lastschrift fehlgeschlagen' }); });
   } else if (ev.type === 'invoice.paid' || ev.type === 'invoice.payment_succeeded') {
     const ende = o.lines && o.lines.data && o.lines.data[0] && o.lines.data[0].period ? o.lines.data[0].period.end : 0;
-    await d.auftragAendern(a.id, (z) => { z.abo = Object.assign({}, z.abo, { status: 'aktiv', bis: ende ? new Date(ende * 1000).toISOString() : (z.abo || {}).bis || '' }); });
+    let wieder = false;
+    const z2 = await d.auftragAendern(a.id, (z) => {
+      z.abo = Object.assign({}, z.abo, { status: 'aktiv', offen_seit: null, bis: ende ? new Date(ende * 1000).toISOString() : (z.abo || {}).bis || '' });
+      /* Pause wegen offener Zahlung: mit der Zahlung wieder live (Paketbedingungen § 8 Abs. 2) */
+      if ((z.abo || {}).geloescht) { z.abo.status = 'beendet'; if (['live', 'pausiert'].indexOf(z.stand) >= 0) verlauf(z, { von: 'system', text: 'Offene Zahlung eingegangen; das Abo bei Stripe ist beendet: „Wieder live schalten“ in der Zentrale startet ein neues' }); return; }
+      if (z.stand === 'pausiert' && z.sperre === 'zahlung' && AU().uebergang('pausiert', 'live', 'system')) { z.stand = 'live'; z.sperre = null; z.pause_seit = null; wieder = true; verlauf(z, { stand: 'live', von: 'system', text: 'Zahlung eingegangen, wieder live' }); }
+    });
+    if (wieder && z2) { await konfiguratorSchalten(ctx, z2, 'live', 'Zahlung eingegangen'); await zahlungMelden(ctx, z2, 'wieder'); }
   } else if (ev.type === 'invoice.payment_failed') {
-    await d.auftragAendern(a.id, (z) => { z.abo = Object.assign({}, z.abo, { status: 'zahlung_offen' }); verlauf(z, { von: 'system', text: 'Abbuchung des Monatsabos fehlgeschlagen' }); });
+    let erst = false;
+    const z2 = await d.auftragAendern(a.id, (z) => { erst = !(z.abo || {}).offen_seit; z.abo = Object.assign({}, z.abo, { status: 'zahlung_offen', offen_seit: (z.abo || {}).offen_seit || new Date().toISOString() }); verlauf(z, { von: 'system', text: 'Abbuchung des Monatsabos fehlgeschlagen' }); });
+    if (erst && z2) await zahlungMelden(ctx, z2, 'offen'); // Stripe versucht es mehrfach; gemeldet wird nur der erste Fehlschlag
+  } else if (ev.type === 'customer.subscription.deleted' && /^payment_(failed|disputed)$/.test((o.cancellation_details || {}).reason || '')) {
+    /* Stripe bricht das Abo nach den Fehlversuchen ab (Einstellung „Abo kündigen“, nötig für die Altkonten): der Vertrag endet nicht sofort,
+       es gilt § 8 (Pause nach FRISTEN.kulanzTage, Ende nach FRISTEN.pauseMaxTage, mahnlauf). Zahlt der Betrieb, startet „Wieder live“ ein neues Abo. */
+    const z2 = await d.auftragAendern(a.id, (z) => {
+      const laeuft = ['live', 'pausiert'].indexOf(z.stand) >= 0;
+      z.abo = Object.assign({}, z.abo, laeuft ? { status: 'zahlung_offen', offen_seit: (z.abo || {}).offen_seit || new Date().toISOString(), geloescht: new Date().toISOString() } : { status: 'beendet', ende: new Date().toISOString() });
+      verlauf(z, { von: 'system', text: laeuft ? 'Monatsabo von Stripe nach fehlgeschlagenen Abbuchungen beendet; es gilt § 8 (Pause, danach Ende)' : 'Monatsabo bei Stripe beendet' });
+    });
+    if (z2 && ['live', 'pausiert'].indexOf(z2.stand) >= 0) await alarmMail(ctx.k, 'Zahlung ' + z2.nr + ': Abo bei Stripe abgebrochen', (((z2.angaben || {}).betrieb || {}).firma || '') + ', Auftrag ' + z2.nr + '. Stripe hat das Monatsabo nach fehlgeschlagenen Abbuchungen beendet. Der Server pausiert und beendet nach § 8; zahlt der Betrieb, startet „Wieder live schalten“ in der Zentrale ein neues Abo.').catch(() => false);
   } else if (ev.type === 'customer.subscription.deleted') {
-    await d.auftragAendern(a.id, (z) => { z.abo = Object.assign({}, z.abo, { status: 'beendet', ende: new Date().toISOString() }); verlauf(z, { von: 'system', text: 'Monatsabo bei Stripe beendet' }); });
+    let neu = false;
+    const z2 = await d.auftragAendern(a.id, (z) => {
+      z.abo = Object.assign({}, z.abo, { status: 'beendet', ende: new Date().toISOString() });
+      if (['live', 'pausiert'].indexOf(z.stand) >= 0 && AU().uebergang(z.stand, 'beendet', 'system')) { z.stand = 'beendet'; neu = true; verlauf(z, { stand: 'beendet', von: 'system', text: 'Monatsabo bei Stripe beendet, Vertrag beendet' }); }
+      else verlauf(z, { von: 'system', text: 'Monatsabo bei Stripe beendet' });
+    });
+    /* Der Konfigurator läuft nicht ohne Abo weiter (Kündigung im Kundenportal zum Monatsende, Abbruch nach Mahnungen) */
+    if (z2 && z2.instanz && !z2.instanz.aus && ['beendet', 'storniert'].indexOf(z2.stand) >= 0 && !(await konfiguratorSchalten(ctx, z2, 'beendet', 'Monatsabo beendet'))) await d.auftragAendern(z2.id, (z) => { z.instanz = Object.assign({}, z.instanz, { aus: new Date().toISOString() }); }).catch(() => null);
+    if (neu && z2) ctx.waitUntil ? ctx.waitUntil(kundeMelden(ctx, z2, 'beendet', {}).catch(() => false)) : await kundeMelden(ctx, z2, 'beendet', {}).catch(() => false);
   }
   return { ok: true };
+}
+
+/* Zahlungsausfall (Paketbedingungen § 8): Monatsbeitrag seit FRISTEN.kulanzTage offen → Auftrag und Konfigurator pausieren;
+   Pause wegen Zahlung seit FRISTEN.pauseMaxTage → Abo sofort beenden, Vertrag beendet, Konfigurator vom Netz. Mails an Betrieb und Inhaber. */
+async function mahnlauf(k, sp, env, d, jetzt, alle) {
+  const F = globalThis.Instanzregeln.FRISTEN, TAG = 864e5, ctx = { k: k, sp: sp, env: env }, out = { pausiert: 0, beendet: 0 };
+  for (const a of alle) {
+    const abo = a.abo || {};
+    if (a.stand === 'live' && abo.status === 'zahlung_offen' && abo.offen_seit && jetzt - Date.parse(abo.offen_seit) >= F.kulanzTage * TAG) {
+      const z2 = await d.auftragAendern(a.id, (z) => { if (z.stand !== 'live' || (z.abo || {}).status !== 'zahlung_offen') return false; z.stand = 'pausiert'; z.sperre = 'zahlung'; z.pause_seit = new Date(jetzt).toISOString(); verlauf(z, { stand: 'pausiert', von: 'system', text: 'Pausiert: Monatsbeitrag seit ' + F.kulanzTage + ' Tagen offen (Paketbedingungen § 8)' }); });
+      if (z2) { await konfiguratorSchalten(ctx, z2, 'pausiert', 'Zahlung seit ' + F.kulanzTage + ' Tagen offen'); await zahlungMelden(ctx, z2, 'pausiert'); out.pausiert++; }
+    } else if (['beendet', 'storniert'].indexOf(a.stand) >= 0 && a.instanz && a.instanz.id && !a.instanz.aus && !(Date.parse(abo.bis || '') > jetzt)) {
+      /* Vertrag zum Monatsende beendet: nach dem bezahlten Monat geht der Konfigurator vom Netz */
+      if (!(await konfiguratorSchalten(ctx, a, 'beendet', 'Vertrag beendet'))) { await d.auftragAendern(a.id, (z) => { z.instanz = Object.assign({}, z.instanz, { aus: new Date(jetzt).toISOString() }); }).catch(() => null); out.aus = (out.aus || 0) + 1; }
+    } else if (a.stand === 'pausiert' && a.sperre === 'zahlung' && abo.status === 'zahlung_offen' && a.pause_seit && jetzt - Date.parse(a.pause_seit) >= F.pauseMaxTage * TAG) {
+      await aboBeenden(ctx, a, true).catch(() => null);
+      const z2 = await d.auftragAendern(a.id, (z) => { if (z.stand !== 'pausiert' || z.sperre !== 'zahlung' || (z.abo || {}).status !== 'zahlung_offen') return false; z.stand = 'beendet'; z.abo = Object.assign({}, z.abo, { status: 'beendet', ende: new Date(jetzt).toISOString() }); verlauf(z, { stand: 'beendet', von: 'system', text: 'Beendet: ' + F.pauseMaxTage + ' Tage pausiert wegen offener Zahlung (Paketbedingungen § 8)' }); });
+      if (z2) {
+        if (z2.instanz && !(await konfiguratorSchalten(ctx, z2, 'beendet', 'Zahlung ' + F.pauseMaxTage + ' Tage offen'))) await d.auftragAendern(z2.id, (z) => { z.instanz = Object.assign({}, z.instanz, { aus: new Date(jetzt).toISOString() }); }).catch(() => null);
+        await zahlungMelden(ctx, z2, 'beendet'); out.beendet++;
+      }
+    }
+  }
+  return out;
 }
 
 async function kiAbrechnen(k, sp, env, d, jetzt) {
@@ -671,6 +750,7 @@ export async function auftraegeLauf(k, sp, env) {
   const ordnerWeg = async (a) => { if (ab) await ab.ordnerLoeschen('auftrag/' + a.id).catch(() => false); };
   const endeVon = (a) => { const e = (a.verlauf || []).filter((v) => v.stand === a.stand).pop(); return Date.parse((e && e.zeit) || a.updated_at) || jetzt; };
   const alle = await d.auftraegeAlle();
+  try { out.mahnung = await mahnlauf(k, sp || (k.daten ? speicher(k) : null), env || {}, d, jetzt, alle); } catch (e) { out.mahnung = 'Fehler: ' + String(e && e.message || e).slice(0, 120); }
   for (const a of alle) {
     if (out.entwuerfe + out.dateien + out.auftraege >= 50) break;
     if (VOR_ZAHLUNG.indexOf(a.stand) >= 0) {

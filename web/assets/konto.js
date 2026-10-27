@@ -116,8 +116,11 @@
         /* erst ansehen, dann freigeben: die Pille öffnet die Vorschau, Freigeben steht als Ring daneben (Gremium 27.10.2026) */
         return { t: 'Ihre Vorschau *ist fertig.*', p: 'Sehen Sie sich Ihre Seite in Ruhe an. Passt alles, geben Sie sie frei; sonst schreiben Sie uns, was wir ändern sollen.', pille: v.link ? U.pille('Vorschau öffnen', { href: v.link, target: '_blank', rel: 'noopener' }) : U.pille('Freigeben', { on: { click: (e) => freigeben(a, e.currentTarget) } }) };
       case 'live':
+        if ((a.abo || {}).status === 'zahlung_offen') return { t: 'Ihr Monatsbeitrag *ist offen.*', p: 'Die Abbuchung hat nicht geklappt. Bitte prüfen Sie Ihr Zahlungsmittel; ist die Zahlung ' + (a.fristen || {}).kulanzTage + ' Tage nach dem ersten Versuch nicht da, pausieren wir Ihre Seite.', pille: U.pille('Zahlungsmittel prüfen', { on: { click: (e) => portal(e.currentTarget) } }) };
         return { t: 'Ihre Seite *ist live.*', p: 'Ihre Kunden planen jetzt unter ' + (a.adresse || 'Ihrer Adresse') + '. Jede Anfrage kommt als Aufmaßblatt-PDF per E-Mail.', pille: v.live ? U.pille('Seite öffnen', { href: v.live, target: '_blank', rel: 'noopener' }) : null };
-      case 'pausiert': return { t: 'Ihre Seite *ist pausiert.*', p: 'Ihre Kunden sehen in dieser Zeit Ihre Kontaktdaten. Schreiben Sie uns, wenn Sie Fragen haben.' };
+      case 'pausiert':
+        if (a.sperre === 'zahlung') return { t: 'Ihre Seite *ist pausiert.*', p: 'Ihr Monatsbeitrag ist offen. Sobald die Zahlung da ist, ist Ihre Seite wieder online. Nach ' + (a.fristen || {}).pauseMaxTage + ' Tagen Pause endet der Vertrag.', pille: U.pille('Zahlungsmittel prüfen', { on: { click: (e) => portal(e.currentTarget) } }) };
+        return { t: 'Ihre Seite *ist pausiert.*', p: 'Ihre Kunden sehen in dieser Zeit Ihre Kontaktdaten. Schreiben Sie uns, wenn Sie Fragen haben.' };
       case 'beendet': return { t: 'Ihr Vertrag *ist beendet.*', p: 'Ihre Seite ist offline. Danke, dass Sie eeziframes genutzt haben.' };
       case 'storniert': return { t: 'Bestellung *storniert.*', p: z.erstattet ? 'Die Einrichtung haben wir auf Ihr Zahlungsmittel erstattet.' : 'Diese Bestellung ist storniert.' };
       default: return { t: A.STAND_TITEL[a.stand] || a.stand, p: '' };

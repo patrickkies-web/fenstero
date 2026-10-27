@@ -112,7 +112,7 @@ function supabase(k) {
       for (let i = 0; i < 4; i++) {
         const r = eins(await sb('auftraege?id=eq.' + q(id) + '&select=*')); if (!r) throw new ApiFehler('Auftrag nicht gefunden.', 404);
         const z = kopie(r), out = await fn(z); if (out === false) return false;
-        const felder = {}; ['paket', 'weg', 'stand', 'angaben', 'dateien', 'preise', 'zahlung', 'abo', 'vorschau', 'zustimmung', 'verlauf', 'notiz', 'adresse', 'angaben_geaendert', 'gesehen', 'wechsel', 'instanz', 'ki'].forEach((s) => { if (JSON.stringify(z[s]) !== JSON.stringify(r[s])) felder[s] = z[s] === undefined ? null : z[s]; });
+        const felder = {}; ['paket', 'weg', 'stand', 'angaben', 'dateien', 'preise', 'zahlung', 'abo', 'vorschau', 'zustimmung', 'verlauf', 'notiz', 'adresse', 'angaben_geaendert', 'gesehen', 'wechsel', 'instanz', 'ki', 'sperre', 'pause_seit'].forEach((s) => { if (JSON.stringify(z[s]) !== JSON.stringify(r[s])) felder[s] = z[s] === undefined ? null : z[s]; });
         felder.version = (r.version || 0) + 1; felder.updated_at = jetzt();
         const neu = eins(await schreiben('auftraege?id=eq.' + q(id) + '&version=eq.' + (r.version || 0), 'PATCH', felder));
         if (neu) return neu;

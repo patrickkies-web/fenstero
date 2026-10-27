@@ -37,6 +37,7 @@ Fensterplanung, easy gemacht: die Aufmaß-App für Fenster. Der Name wird immer 
 | `docs/ONLINE-STELLEN.md` | Schritt-für-Schritt-Anleitung (Stufe 3: Konfigurator-Pakete einrichten) |
 | `docs/INSTANZEN.md` | Konfigurator-Instanzen: Verträge zwischen den Teilen (Teil 1) und Betrieb (Teil 2: Einrichtung je Kunde, Zustände, Fristen, Rechtstexte der Instanzen, Fehlerbilder) |
 | `docs/BESTELLUNG.md` | Bestellung der Pakete: Ablauf bis Live, Stripe, Verkauf an- und ausschalten (`PAKETE_OFFEN`), Paketbedingungen und ihre PDFs, Preise ändern |
+| `docs/VERTRAG.md` | Paketbedingungen aus Sicht des Anbieters: Ziele des Inhabers, was im Vertrag steht, Angriffspunkte der Gegenseite mit Stand, offene Fragen an die Anwältin |
 | `docs/ABRECHNUNG.md` | Preise und Abrechnungsregeln: was gezählt wird, wo die Paywalls sitzen, Nachbesserung, Schranken, was der Server erzwingt |
 | `docs/KI.md` | Die KI-Auswertung: was sie aus den Fotos liest (Einbausituation, nicht das alte Fenster), in welcher Reihenfolge, warum (mit Quellen), Fachangaben für den Fensterbauer, Maße gegen das Foto, Modell und Kosten |
 | `docs/SEO.md` | Auffindbarkeit in Suchmaschinen und KI-Assistenten: Recherche mit Quellen, Suchbegriffe für Deutschland, was umgesetzt ist, Freigabe, was danach zu tun ist |
