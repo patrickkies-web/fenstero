@@ -189,7 +189,7 @@
       teile.push(reihe(k, k.genutzt, k.kontingent, tausend(inkl) + ' von ' + tausend(k.kontingent) + ' Fotos ausgewertet'));
       if (k.frei || k.mehr) teile.push(h('div', { class: 'a-ki-weitere' }, reihe(k, k.mehr, k.kontingent, tausend(k.mehr) + ' von höchstens ' + tausend(k.kontingent) + ' weiteren', 'mehr', neu ? 'neu' : ''),
         h('p', { class: 'a-ki-mehr' }, h('b', { text: '+' + tausend(k.mehr) + ' weitere' }), ' · bisher ' + U.euro(k.mehrCent / 100) + ' netto, höchstens\u00a0' + U.euro(k.hoechstCent / 100) + '\u00a0netto')));
-    } else teile.push(h('p', { class: 'a-ki-satz', text: tausend(k.kontingent) + ' KI-Auswertungen im Monat sind inklusive, eine je Foto, je Fenster meist zwei. Der Zähler startet, sobald Ihre Seite live ist.' }));
+    } else teile.push(h('p', { class: 'a-ki-satz', text: tausend(k.kontingent) + ' KI-Auswertungen im Monat sind inklusive, eine je Foto, je Fenster meist zwei. ' + (['live', 'pausiert'].indexOf(a.stand) >= 0 ? 'Der Zähler läuft, sobald wir Ihren Konfigurator mit diesem Auftrag verbunden haben.' : 'Der Zähler startet, sobald Ihre Seite live ist.') }));
     const kern = k.frei ? 'Freigeschaltet' + (k.frei_seit ? ' seit ' + U.datum(k.frei_seit) : '') + ', gilt jeden Monat, bis Sie es beenden.'
       : pause ? 'Die KI pausiert bis ' + bis + '. Ihr Konfigurator läuft weiter.' : 'Bei 100 % pausiert nur die KI bis ' + bis + '. Ihr Konfigurator läuft weiter.';
     const rest = k.frei ? (oben ? 'Die ' + tausend(k.kontingent) + ' weiteren sind erreicht; die KI pausiert bis ' + bis + ', Ihr Konfigurator läuft weiter.'

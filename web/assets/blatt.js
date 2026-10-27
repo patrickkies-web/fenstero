@@ -127,6 +127,9 @@
     const rr = (x, y0, w, h2, r, mode) => doc.roundedRect(x, y0, w, h2, r, r, mode || 'F');
     const dash = (d) => { try { doc.setLineDashPattern(d || [], 0); } catch (err) { /* ok */ } };
     const num = AW.num, th = AW.th;
+    /* Preise für Betriebe aus der Abrechnung (modell.js; mit Server aus /api/status), nie fest im Text; fehlen sie, nennt das Blatt keinen Preis */
+    const PREIS = (G.Abrechnung && typeof G.Abrechnung.preise === 'function' && G.Abrechnung.preise()) || {}, FREI = num(PREIS.frei) > 0 ? num(PREIS.frei) : 0, JE = num(PREIS.projekt) > 0 ? num(PREIS.projekt) : 0;
+    const euroN = (v) => String(v).replace('.', ',') + ' €';
     const nE = wins.reduce((a, x) => a + (num(x.anzahl) || 1), 0), nF = wins.reduce((a, x) => a + (num(x.fotos) || 0), 0);
     /* „ausgewertet“ nur, wo die Auswertung auch im Blatt steht (Befund oder Fachangaben); sonst ehrlich nur die Zahl der Fotos */
     const nA = wins.reduce((a, x) => a + (x.ki && ((x.ki.rows || []).length || (x.ki.fach && Object.keys(x.ki.fach).length)) ? num(x.fotos) || 0 : 0), 0);
@@ -140,19 +143,21 @@
     const kennung = e.beispiel ? 'AM-BEISPIEL' : BKOPF && bt.nr ? String(bt.nr) : (() => { const q = String(e.code || (pr.name || '') + heute + wins.length); let a = 2166136261; for (let i = 0; i < q.length; i++) { a ^= q.charCodeAt(i); a = Math.imul(a, 16777619); } const Z = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let o = ''; for (let i = 0; i < 6; i++) o += Z[(a >>> (i * 5)) & 31]; return 'AM-' + o; })();
     /* Autor und Ersteller: bei kennzeichnung 'keine' nur der Betrieb, nie eeziframes */
     const ohneEezi = BKOPF && KZ === 'keine';
-    try { doc.setDocumentProperties({ title: laufTitel, subject: 'Fenster-Aufmaß ' + kennung + (titelName ? ' · ' + titelName : ''), author: BKOPF ? (bt.name || (ohneEezi ? '' : 'eeziframes')) : 'eeziframes', keywords: 'Aufmaß, Fenster, Maße in mm, ' + kennung, creator: ohneEezi ? (bt.name || '') : 'eeziframes' }); doc.setLanguage('de-DE'); if (doc.viewerPreferences) doc.viewerPreferences({ DisplayDocTitle: true }); } catch (err) { /* ohne Eigenschaften weiter */ }
+    try { doc.setDocumentProperties({ title: laufTitel, subject: (ANF ? 'Anfrage ' : 'Fenster-Aufmaß ') + kennung + (titelName ? ' · ' + titelName : '') + (ANF ? ' · Durchschrift ohne Maße' : ''), author: BKOPF ? (bt.name || (ohneEezi ? '' : 'eeziframes')) : 'eeziframes', keywords: (ANF ? 'Anfrage, Fenster, Durchschrift, ' : 'Aufmaß, Fenster, Maße in mm, ') + kennung, creator: ohneEezi ? (bt.name || '') : 'eeziframes' }); doc.setLanguage('de-DE'); if (doc.viewerPreferences) doc.viewerPreferences({ DisplayDocTitle: true }); } catch (err) { /* ohne Eigenschaften weiter */ }
     const bnK = bt.name || (sie ? 'Ihr Fensterbauer' : 'dein Fensterbauer');
     const stand = e.klaerStand || {}, geklaert = (r) => (r.ids || [r.id]).every((id) => !!(stand[id] && stand[id].ok));
     /* Gleiche Punkte an mehreren Positionen (z. B. „Strom am Fenster klären“) stehen in einer Zeile mit allen Codes; doppelte fallen weg */
     const kl = (() => {
       const roh = Array.isArray(e.klaerung) ? e.klaerung : AW.klaerung(wins, pr), out = [];
-      const liste = (r) => (typeof r.pos === 'number' ? [r.pos] : Array.isArray(r.pos) ? r.pos.slice() : null);
+      /* Punkte ohne Position, deren Kennzeichen aus der Klärung „Pos. 1“ oder „Pos. 1, 3“ lautet, bekommen ihre Positionen zurück (dann Codes statt Nummern) */
+      const ausK = (k) => { const m = /^Pos\. (\d+(?:, \d+)*)(?:\s|$)/.exec(String(k || '')); if (!m) return null; const q = m[1].split(', ').map((x) => +x - 1); return q.every((i) => i >= 0 && i < wins.length) ? q : null; };
+      const liste = (r) => (typeof r.pos === 'number' ? [r.pos] : Array.isArray(r.pos) ? r.pos.slice() : ausK(r.k));
       roh.forEach((r) => {
         const pl = liste(r), da = pl && out.find((x) => x._pl && x.gruppe === r.gruppe && x.v === r.v);
         if (da) { pl.forEach((q) => { if (da._pl.indexOf(q) < 0) da._pl.push(q); }); if (da.ids.indexOf(r.id) < 0) da.ids.push(r.id); }
         else out.push(Object.assign({}, r, { ids: [r.id], _pl: pl }));
       });
-      out.forEach((r) => { if (r._pl && r._pl.length > 1) r.pos = r._pl.slice().sort((a, b) => a - b); });
+      out.forEach((r) => { if (r._pl && r._pl.length > 1) r.pos = r._pl.slice().sort((a, b) => a - b); else if (r._pl && r._pl.length === 1 && r.pos == null) r.pos = r._pl[0]; });
       return out;
     })();
 
@@ -283,7 +288,7 @@
       if (!STREIFEN) return;
       const x0 = W - STREIFEN, y0 = bandH, y1 = H - 12, len = y1 - y0;
       fill(BUEHNE); doc.rect(x0, y0, STREIFEN, len, 'F');
-      const text = 'eeziframes  ·  Fenster ausmessen. Selbst. eezi.  ·  ' + HOST + '  ·  Für Fensterbauer: Aufmaß per Code in Ihr Konto holen' + (codeSeite ? ', Seite ' + codeSeite : '') + '  ·  3 Projekte kostenlos';
+      const text = 'eeziframes  ·  Fenster ausmessen. Selbst. eezi.  ·  ' + HOST + '  ·  Für Fensterbauer: Aufmaß per Code in Ihr Konto holen' + (codeSeite ? ', Seite ' + codeSeite : '') + (FREI ? '  ·  ' + FREI + ' Projekte kostenlos' : '');
       let size = 6.8; font('bold', size, HELL);
       while (tw(text) > len - 16 && size > 5.2) { size -= 0.2; font('bold', size, HELL); }
       const tl = tw(text), ty = y1 - 9 - (len - 16 - tl) / 2;
@@ -529,7 +534,7 @@
       y = wy + 21;
       /* Links Eckdaten, rechts die Box für den Fensterbauer, mit einer Spitze am letzten Schritt angeschlossen */
       const fbW = 82, ekW = CW - fbW - 5, fbX = XR - fbW, oFb = { lw: 19, fs: 8 }, oEk = { lw: 25, fs: FS };
-      const fbZeilen = (seite) => kontaktZ.concat([['Maße', 'in mm, Breite × Höhe, Ansicht von innen; Maueröffnung: kleinstes von drei Maßen'], ['Digital', '„Code vom Kunden einfügen“ in eeziframes, Code auf Seite ' + seite + '; die ersten 3 Projekte sind frei'], ['Danach', 'Angebot, vor der Fertigung Feinaufmaß vor Ort']]);
+      const fbZeilen = (seite) => kontaktZ.concat([['Maße', 'in mm, Breite × Höhe, Ansicht von innen; Maueröffnung: kleinstes von drei Maßen'], ['Digital', '„Code vom Kunden einfügen“ in eeziframes, Code auf Seite ' + seite + (FREI ? '; die ersten ' + FREI + ' Projekte sind frei' : '')], ['Danach', 'Angebot, vor der Fertigung Feinaufmaß vor Ort']]);
       const fbTitel = V === 'kunde' ? 'Für deinen Fensterbauer' : 'Für Sie als Fensterbauer';
       const hFb = 11 + zeilenH(fbZeilen(99), fbW - 8, oFb) + 3, hEk = 11 + zeilenH(eck, ekW - 8, oEk) + 3, hb = Math.max(hFb, hEk);
       karteRand(M, y, ekW, hb); kicker('Eckdaten zum Projekt', M + 4, y + 6, GREY); zeilen(eck, M + 4, y + 9, ekW - 8, oEk);
@@ -677,6 +682,7 @@
     const klText = (r) => {
       if (!ANF) return r.v;
       const id = String((r.ids || [r.id])[0] || ''), w = typeof r.pos === 'number' ? wins[r.pos] : null, ihr = sie ? 'Ihnen' : 'dir';
+      if (/^absturz-/.test(id) && w && r.gruppe !== 'pflicht') return 'Absturzhöhe prüfen' + (AW.etageText(w) ? ' (' + AW.etageText(w) + ')' : '') + ': Liegt das Fenster mehr als 12 m über dem Boden draußen, verlangt die Bauordnung eine höhere Brüstung. ' + bnK + ' prüft das vor Ort; das ist kein Messfehler.';
       if (/^absturz-/.test(id) && w) return 'Absturzsicherung nötig' + (AW.etageText(w) ? ' (' + AW.etageText(w) + ')' : '') + ': ' + (w.absturz ? AW.lab('absturz', w.absturz) || 'gewählt' : 'bitte beraten') + '. ' + (istTuer(w) ? 'Vor einer Tür ohne Balkon verlangt die Bauordnung eine Sicherung.' : 'Die Brüstung ist niedriger, als die Bauordnung hier verlangt.') + ' Das ist kein Messfehler; ' + bnK + ' plant die Sicherung mit ' + ihr + '.';
       if (/^gross-/.test(id)) return 'Großes Element: Transport, Gerüst oder Hebegerät plant ' + bnK + ' ein.';
       if (MASS_ID.test(id)) return (r.kurz || 'Maße') + ': prüft ' + bnK + ' beim Feinaufmaß bei ' + ihr + ' vor Ort. Das ist üblich und kein Fehler von ' + ihr + '.';
@@ -711,7 +717,9 @@
       /* Karte zuerst messen und zeichnen, dann den Inhalt darüber: so bleibt der Rand unter dem Text */
       const zeichnen = [];
       const flush = () => { schliessen(); zeichnen.forEach((f) => f()); zeichnen.length = 0; };
-      if (y + 30 > unten()) neueSeite();
+      /* Überschrift nie allein: Platz für Kopf, erste Gruppe und ersten Punkt, sonst neue Seite */
+      const erstH = gruppen.length && gruppen[0].punkte.length ? 6.5 + 6.5 + klaerPunktH(gruppen[0].punkte[0], iw) + 3 : 30;
+      if (y + Math.max(30, erstH) > unten()) neueSeite();
       SEITEN.abschnitt.klaerung = seiteNr();
       kopf(false);
       gruppen.forEach((g) => {
@@ -898,24 +906,30 @@
     /* „Förderwert“ ist das Ziel für die Förderung, kein Wert des Fensters */
     const kName = (k) => (k === 'Förderwert' ? 'Förderziel' : k);
     function kopieKarten() {
-      platz(60);
-      sektion('Je Position · Ausstattung und Wünsche · ohne Maße', sie ? 'Ihre Positionen.' : 'Deine Positionen.', bt.name ? 'Maße bei ' + bt.name : '');
       const P = 5, iw = CW - 2 * P, sp = (iw - 6) / 2, oG = { lw: 25, fs: 8, lfs: 7.8, lc: INK2 };
       const zText = (z) => ohneMass(sie ? String(z.t).replace(AW.STD_TEXT, 'nach Standard des Fensterbauers') : z.t);
       /* je Gruppe eine Zeile: „außen Anthrazitgrau · innen Verkehrsweiß“; offen in Koralle */
       const zeileG = (g) => { const zz = g.zeilen.filter((z) => !(g.id === 'fenster' && z.k === 'Element')); return [g.titel, zz.map((z) => ((zz.length > 1 || z.k !== g.titel) && String(z.t).toLowerCase().indexOf(String(z.k).toLowerCase()) !== 0 ? kName(z.k) + ' ' : '') + zText(z)).join(' · '), zz.some((z) => z.offen) ? { offen: true } : null]; };
       const gH = (g) => zeilenH([zeileG(g)], sp, oG);
+      /* Maße einer Karte: Wünsche in zwei Spalten, Satz, Chips der offenen Punkte */
+      const karte = (i) => {
+        const w = wins[i], Wn = AW.wuensche(w, pr), n = num(w.anzahl) || 1, G = Wn.gruppen.filter((g) => g.zeilen.length);
+        const hs = G.map(gH), half = Math.ceil(G.length / 2), hl0 = hs.slice(0, half).reduce((a, x) => a + x, 0), hr0 = hs.slice(half).reduce((a, x) => a + x, 0);
+        font('bold', 9.2); const satz = wrap(Wn.satz + '.', iw);
+        let chipsH = 0; if (Wn.offen.length) { let cx = 0; chipsH = 7.2; Wn.offen.forEach((x) => { font('bold', 7.2); const c = tw(x + ' offen') + 9; if (cx + c > iw && cx > 0) { cx = 0; chipsH += 7.2; } cx += c + 2; }); chipsH += 1; }
+        return { w: w, Wn: Wn, n: n, G: G, hs: hs, half: half, satz: satz, chipsH: chipsH, hh: P + 13 + satz.length * 4.1 + 2.5 + chipsH + Math.max(hl0, hr0) + P - 2 };
+      };
+      /* Überschrift nie allein am Seitenende: Platz für sie, das erste Geschoss und die erste Karte */
+      const erste = BEREICHE.length && BEREICHE[0].idx.length ? karte(BEREICHE[0].idx[0]) : null;
+      platz(Math.max(60, 15 + 9 + (erste ? erste.hh : 0) + 2));
+      sektion('Je Position · Ausstattung und Wünsche · ohne Maße', sie ? 'Ihre Positionen.' : 'Deine Positionen.', bt.name ? 'Maße bei ' + bt.name : '');
       BEREICHE.forEach((bb) => {
         let schonB = false;
         const kopfB = () => { fill(LINE_F); doc.rect(M, y, CW, 6.4, 'F'); font('extra', 8.6, INK); txt(bb.name + (schonB ? ', Fortsetzung' : ''), M + 2, y + 4.4); schonB = true; font('normal', 7.2, GREY); txt(bb.idx.length + (bb.idx.length === 1 ? ' Position' : ' Positionen'), XR - 2, y + 4.4, { align: 'right' }); y += 9; };
         let ersteB = true;
         bb.idx.forEach((i) => {
-          const w = wins[i], Wn = AW.wuensche(w, pr), n = num(w.anzahl) || 1, G = Wn.gruppen.filter((g) => g.zeilen.length);
-          const hs = G.map(gH), half = Math.ceil(G.length / 2), hl0 = hs.slice(0, half).reduce((a, x) => a + x, 0), hr0 = hs.slice(half).reduce((a, x) => a + x, 0);
-          font('bold', 9.2); const satz = wrap(Wn.satz + '.', iw);
+          const { w, Wn, n, G, hs, half, satz, chipsH, hh } = karte(i);
           const zeile2 = [ARTNAME[w.art] || 'Fenster', AW.oeffnungKurz(w), n + ' Stück'].join(' · ');
-          let chipsH = 0; if (Wn.offen.length) { let cx = 0; chipsH = 7.2; Wn.offen.forEach((x) => { font('bold', 7.2); const c = tw(x + ' offen') + 9; if (cx + c > iw && cx > 0) { cx = 0; chipsH += 7.2; } cx += c + 2; }); chipsH += 1; }
-          const hh = P + 13 + satz.length * 4.1 + 2.5 + chipsH + Math.max(hl0, hr0) + P - 2;
           if (y + (ersteB ? 9 : 0) + hh > unten()) { neueSeite(); ersteB = true; }
           if (ersteB) { kopfB(); ersteB = false; }
           if (SEITEN.pos[i] == null) SEITEN.pos[i] = seiteNr();
@@ -970,7 +984,7 @@
       if (!e.code && !e.beispiel) return;
       platz(70);
       codeSeite = seiteNr(); SEITEN.abschnitt.code = codeSeite;
-      sektion('Für Fensterbauer · kostenlos bis 3 Projekte', 'Aufmaß digital übernehmen.');
+      sektion('Für Fensterbauer' + (FREI ? ' · kostenlos bis ' + FREI + ' Projekte' : ''), 'Aufmaß digital übernehmen.');
       const qs = 28, qx = XR - qs;
       [['Kostenlos registrieren', HOST + ' oder den QR-Code scannen'], ['„Code vom Kunden einfügen“', 'den Aufmaß-Code unten einsetzen, Leerzeichen und Umbrüche stören nicht'], ['Projekt ist da', 'je Position mit Zeichnung, Klärungsliste und Bestellmaß nach Ihrem Abzug']].forEach((st, k) => { fill(INK); doc.circle(M + 4, y + 4 + k * 10.5, 4, 'F'); font('extra', 9, '#ffffff'); txt(String(k + 1), M + 4, y + 5.4 + k * 10.5, { align: 'center' }); font('bold', 9.2, INK); txt(st[0], M + 11, y + 3.4 + k * 10.5); font('normal', 8, INK2); txt(st[1], M + 11, y + 7.6 + k * 10.5); });
       qr(qx, y - 2, qs); font('normal', 7.2, INK2); txt('Scannen: Anmeldung', qx + qs / 2, y + qs + 2, { align: 'center' });
@@ -1001,7 +1015,7 @@
       font('extra', 11.5, INK); const t1 = wrap('Ihre Kunden messen selbst. Sie fahren erst zum Feinaufmaß.', tw2); txt(t1, tx, y0 + 12.8, { lineHeightFactor: 1.1 });
       let yy = y0 + 12.8 + t1.length * 4.6 + 0.6;
       font('normal', 8, INK2); const t2 = wrap('Projekt in eeziframes anlegen, Aufmaß-Link per WhatsApp oder E-Mail schicken. Zurück kommt ein Aufmaß wie dieses: 8 Maße je Fenster, Fotos mit Auswertung, alle Wünsche, Bestellmaß nach Ihrem Abzug, das Blatt mit Ihrem Logo.', tw2); txt(t2, tx, yy, { lineHeightFactor: 1.22 }); yy += t2.length * 3.45 + 1.6;
-      font('bold', 8, INK); txt('3 Projekte kostenlos · danach 9 € netto je Projekt mit eingegangenem Aufmaß · keine Grundgebühr', tx, yy); yy += 4.2;
+      if (FREI || JE) { font('bold', 8, INK); txt([FREI ? FREI + ' Projekte kostenlos' : '', JE ? (FREI ? 'danach ' : '') + euroN(JE) + ' netto je Projekt mit eingegangenem Aufmaß' : '', 'keine Grundgebühr'].filter(Boolean).join(' · '), tx, yy); yy += 4.2; }
       font('normal', 7, GREY); txt(wrap('Zum Vergleich: Eine Meisterstunde kostet im Schnitt 65,14 € netto (Preisatlas Handwerk 2024).', tw2)[0], tx, yy);
       qr(qx, qy, qs); font('normal', 7, INK2); txt('Scannen: Projekt anlegen', qx + qs / 2, qy + qs + 3.4, { align: 'center' }); font('bold', 7, INK); txt(HOST, qx + qs / 2, qy + qs + 6.8, { align: 'center' });
       y += EIGENE_H + 6;

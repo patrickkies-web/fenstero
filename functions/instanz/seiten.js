@@ -76,6 +76,7 @@ export function fehlerSeite(status, inst, o) {
   const html = '<!doctype html>\n<html lang="de">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>' + esc(T[0] + (mitName ? ' · ' + name : '')) + '</title>\n' +
     '<meta name="robots" content="noindex">\n<link rel="stylesheet" href="/fonts/fonts.css">\n<style>' + STIL + '</style>\n</head>\n<body>\n<main>\n' +
     (mitName ? '<p class="klein">' + esc(name) + '</p>\n' : '') + '<h1>' + esc(T[1]) + '</h1>\n' + (T[2] ? '<p>' + esc(T[2]) + '</p>\n' : '') + kontakt +
+    (art === 'pausiert' ? '<p class="klein">Haben Sie hier schon geplant? Ihre Planung bleibt auf Ihrem Gerät gespeichert; sobald der Fensterplaner wieder erreichbar ist, geht es dort weiter.</p>\n' : '') +
     (art === 'fehlt' && inst ? '<p><a class="knopf" href="/">Zur Startseite</a></p>\n' : '') +
     (inst && art !== 'fehlt' ? '<p class="klein"><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a></p>\n' : '') + '</main>\n</body>\n</html>\n';
   return antwort(o.method === 'HEAD' ? null : html, status, { extra: status === 503 ? { 'Retry-After': '600' } : null });

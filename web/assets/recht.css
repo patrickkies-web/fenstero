@@ -1,5 +1,7 @@
 /* eeziframes · Rechtsseiten (Impressum, Datenschutz, AGB, Nutzungsbedingungen, Cookies, Vertrag widerrufen, 404) */
 /* Dieselbe Bühne wie überall (docs/GESTALTUNG.md): dunkler Grund, Flächen mit Rand, Grün als Signal; nur eine Stimmung */
+/* hidden gilt immer, auch gegen display von .formular (sonst blieb das Widerrufsformular nach dem Senden mit „Wird gesendet …“ stehen) */
+[hidden] { display: none !important }
 :root {
   --bg: #161616; --surface: #1f1f1f; --fg: #f3f2ee; --fg2: #c9c8c3; --muted: #93928d; --line: #2b2b2b;
   --accent: #8fd694; --ph-bg: rgba(240, 179, 90, .14); --ph-fg: #f0b35a; --bad: #ff7b72; --ok-bg: rgba(143, 214, 148, .14);
