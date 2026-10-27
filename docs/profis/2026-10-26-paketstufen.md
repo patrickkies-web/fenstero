@@ -309,6 +309,12 @@ Regel (keine Aufbewahrung bis Vertragsende): 24.9 und 29.4.
 **Offen:** Essential-Unteradressen kann der Server noch nicht (docs/INSTANZEN.md), die Bestellung fragt weiter nach einer Domain;
 die Farbstufen gibt es nur in den Vorlagen, die Instanzen setzen die Firmenfarbe als Akzent; Stand der Paketbedingungen bleibt
 23.10.2026 (Entwurf, Bestellung noch zu), vor dem Freischalten neu datieren; prüfen, ob fensterbau-brandt.de einem echten Betrieb
-gehört, bevor die Beispielseiten online gehen; online nur auf das Ja des Inhabers.
+gehört, bevor die Beispielseiten online gehen (im Container nicht prüfbar, kein DNS nach außen).
 
 Bilder: docs/profis/bilder/2026-10-27-paketbereich-tel.jpg, -desk.jpg.
+
+**Online gestellt** am 27.10.2026 auf Wort des Inhabers („Jetzt stell das alles mal online“): Arbeitszweig claude/signature-vorlage
+in main zusammengeführt (schneller Vorlauf, main war unverändert), Cloudflare baut main mit `npx wrangler deploy`. Damit gehen auch
+die Paket-Vorlagen als Beispielseiten unter /vorschau/paket-beispiel/ (noindex) und die geänderten Paketbedingungen (Entwurf, Stand
+23.10.2026) online. Der Container erreicht eeziframes.com nicht; den Bau im Cloudflare-Dashboard prüfen (Workers & Pages → fenstero →
+Deployments; hängt er in „Initializing“, dort „Retry deployment“).
