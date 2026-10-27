@@ -251,7 +251,7 @@ export function promptFuer(a, kunde) {
   z.push('Adresse: ' + (m.domain ? (ad.art === 'eigene' ? 'Domain des Kunden, nach Absprache anbinden (Paketbedingungen § 6 Abs. 3): ' : 'neu registrieren (bis 25 € netto im Jahr): ') + ((ad.domains || []).join(', ') || 'Domain vorschlagen') + (ad.vorschlaege ? ' (Kunde wünscht Vorschläge)' : '') : (ad.name ? ad.name + '.eeziframes.com' : '–')));
   if (b.rueckruf) z.push('Anruf nach der Zahlung (Paketbedingungen § 5): „' + b.rueckruf + '“');
   if (b.web) z.push('Website des Kunden: ' + b.web + (a.weg === 'schnell' || t.ausWebsite ? ' — Texte, Bilder und Farben von dort übernehmen, wo unten etwas fehlt' : ''));
-  if (AU().gestaltet(m)) z.push('Weg: ' + (a.weg === 'schnell' ? 'Schnell (der Kunde hat nur das Nötigste angegeben; Texte und Bildauswahl übernehme ich)' : 'Ausführlich'));
+  if (AU().gestaltet(m)) z.push('Seite: ' + (a.weg === 'schnell' ? 'Seite vorschlagen (der Kunde hat nur das Nötigste angegeben; Texte, Farben und Bildauswahl übernehme ich)' : 'Selbst angeben (Logo, Farben, Fotos und Texte gibt der Kunde im Kundenbereich vor; was fehlt, ergänze ich)'));
   if (AU().gestaltet(m)) {
     z.push('Farben: ' + ((t.farben || []).join(', ') || 'keine angegeben') + (t.farbenWebsite ? ' (von der Website übernehmen)' : '') + ' · Stufe: ' + (m.farbwelt === 'voll' ? 'ganze Seite in der Palette des Betriebs' : 'zur Hälfte in der Palette des Betriebs') + ' (Muster docs/profis/werkzeuge/farben-brandt.css)');
     z.push('Texte: Überschrift „' + (t.ueberschrift || '–') + '“; Einleitung „' + (t.einleitung || '–') + '“; Leistungen „' + (t.leistungTitel || '–') + '“ / „' + (t.leistungText || '–') + '“' + (m.einladungslinks ? '; Einladungstext „' + (t.einladung || '–') + '“' : ''));
@@ -410,7 +410,8 @@ const KUNDE = {
     const kunde = await kundeVon(ctx), a = await eigener(ctx, kunde), d = db(ctx), m = P().merkmale(a.paket);
     if (VOR_ZAHLUNG.indexOf(a.stand) < 0) throw new ApiFehler('Dieser Auftrag ist schon bestellt.', 409);
     if ((a.zahlung || {}).status === 'laeuft') throw new ApiFehler('Ihre Lastschrift ist unterwegs. Wir melden uns, sobald sie da ist.', 409);
-    const r = AU().pruefen(a.angaben, m, null, a.weg);
+    /* vor der Kasse nur das Nötigste (Betrieb und Adresse); Impressum, Texte und Bilder folgen nach der Zahlung im Kundenbereich */
+    const r = AU().pruefen(a.angaben, m, ['betrieb', 'adresse'], a.weg, 'bestellung');
     if (!r.ok) { const erster = Object.keys(r.fehler)[0].split('.')[0]; throw new ApiFehler('Es fehlen noch Angaben.', 400, { felder: r.fehler, station: erster }); }
     if (!m.domain && (await d.adresseBelegt(r.wert.adresse.name, a.id))) throw new ApiFehler(r.wert.adresse.name + '.eeziframes.com ist inzwischen vergeben. Bitte einen anderen Namen wählen.', 409, { felder: { 'adresse.name': 'Schon vergeben.' }, station: 'adresse' });
     const z = AU().zustimmung((ctx.body || {}).zustimmung, PAKET_STAND);

@@ -3,7 +3,7 @@
    Felder: feld() liefert ein Element mit data-k, damit Fehler aus Auftrag.pruefen() und vom Server an der richtigen Stelle stehen.
    Vorschau: vorschau() zeigt die künftige Landingpage in einem kleinen Browser, so wie die Vorlagen der Pakete (Beispiel Fensterbau
    Brandt) sie aufbauen: Essential dunkel im eeziframes-Design, Plus hell mit der Firmenfarbe als Akzent, Signature ganz in der
-   Firmenfarbe mit persönlicher Einladung. */
+   Firmenfarbe. Gezeigt wird immer die echte Startseite, nie die persönliche Einladung (Wunsch des Inhabers, 27.10.2026). */
 (function () {
   'use strict';
   const A = () => window.Auftrag, P = () => window.Pakete;
@@ -137,7 +137,8 @@
   }
   function fehlerSetzen(f, text) {
     if (!f) return;
-    const p = f.querySelector(':scope > .a-fehler'), e = f.eingabe || f.querySelector('input,select,textarea');
+    /* f kann selbst die Fehlerzeile sein (Hinweis zu einer ganzen Gruppe, z. B. „Bitte eine Wunsch-Domain nennen“) */
+    const p = f.classList.contains('a-fehler') ? f : f.querySelector(':scope > .a-fehler'), e = f.eingabe || (p === f ? null : f.querySelector('input,select,textarea'));
     f.classList.toggle('fehlt', !!text);
     if (p) { p.textContent = text || ''; p.hidden = !text; }
     if (e) { if (text) e.setAttribute('aria-invalid', 'true'); else e.removeAttribute('aria-invalid'); }
@@ -272,22 +273,20 @@
       wurzel.setAttribute('aria-label', 'Vorschau Ihrer Seite unter ' + adrB.textContent + adrR.textContent);
       wurzel.style.setProperty('--a-firma', farbe); wurzel.style.setProperty('--a-auf-firma', aufFarbe(farbe));
       wurzel.style.setProperty('--a-knopf', eigen ? farbe : '#ffffff'); wurzel.style.setProperty('--a-auf-knopf', eigen ? aufFarbe(farbe) : '#07090a');
-      leeren(seite); seite.className = 'a-vorschau-seite' + (eigen ? ' hell' : '');
+      leeren(seite); seite.className = 'a-vorschau-seite' + (eigen ? ' hell' : '') + (sig ? ' voll' : '');
       const zeichen = h('span', { class: 'a-vs-zeichen' });
       if (eigen && d.logo) zeichen.appendChild(h('img', { src: d.logo, alt: '' })); else zeichen.textContent = initialen(firma).slice(0, 1);
       seite.appendChild(h('div', { class: 'a-vs-kopf' }, zeichen, h('span', { class: 'a-vs-name' }, sig ? h('small', { text: 'Fensterbau · ' + ort }) : null, firma)));
       let titel, kicker, text;
-      if (sig) { kicker = 'Beispiel einer persönlichen Einladung von ' + firma; titel = [h('span', { style: 'color:var(--a-firma)', text: 'Guten Tag, ' }), h('br'), 'Familie Muster.']; text = d.einladung || 'Für Ihr Angebot brauche ich die Maße Ihrer Fenster. Messen Sie in Ruhe selbst, danach melde ich mich.'; }
-      else if (eigen) { kicker = firma + ' – ' + ort; const z = zerlegen(d.ueberschrift) || ['Neue Fenster, ', 'gut geplant.']; titel = [z[0], h('em', { text: z[1] })]; text = d.einleitung || 'Beratung, Aufmaß und Einbau in ' + ort + '. Mit dem Konfigurator beginnen Sie zu Hause.'; }
+      if (eigen) { kicker = firma + ' – ' + ort; const z = zerlegen(d.ueberschrift) || ['Neue Fenster, ', 'gut geplant.']; titel = [z[0], h('em', { text: z[1] })]; text = d.einleitung || 'Beratung, Aufmaß und Einbau in ' + ort + '. Mit dem Konfigurator beginnen Sie zu Hause.'; }
       else { kicker = 'Fenster planen und anfragen'; titel = ['Ihre neuen Fenster, ', h('em', { text: 'Ihr Angebot.' })]; text = 'Für Ihr Angebot brauchen wir die Maße Ihrer Fenster. Messen Sie hier selbst, danach melden wir uns.'; }
       seite.appendChild(h('p', { class: 'a-vs-kicker', text: kicker }));
       seite.appendChild(h('p', { class: 'a-vs-titel' }, titel));
       seite.appendChild(h('p', { class: 'a-vs-text', text: text }));
       const person = h('span', { class: 'a-vs-person' }, h('span', null, eigen && d.portrait ? h('img', { src: d.portrait, alt: '' }) : initialen(d.ap || firma)), h('span', null, h('b', { text: d.ap || 'Ansprechperson' }), d.rolle || (firma + ', ' + (d.ort || 'Ort'))));
-      seite.appendChild(h('div', { class: 'a-vs-zeile' }, h('span', { class: 'a-vs-pille' }, 'Fenster planen', h('i')), sig ? null : person));
-      if (sig) seite.appendChild(h('div', { class: 'a-vs-zeile', style: 'margin-top:10px' }, person));
+      seite.appendChild(h('div', { class: 'a-vs-zeile' }, h('span', { class: 'a-vs-pille' }, 'Fenster planen', h('i')), person));
       /* Schraffur heißt „fehlt noch“; eine Seite, die live ist, zeigt statt einer schraffierten Kachel keine (Gremium 27.10.2026) */
-      if (eigen && !sig && (d.buehne || !d.live)) {
+      if (eigen && (d.buehne || !d.live)) {
         const b = h('div', { class: 'a-vs-bild' + (d.buehne ? '' : ' leer') }); if (d.buehne) b.appendChild(h('img', { src: d.buehne, alt: '' }));
         seite.appendChild(h('div', { class: 'a-vs-raster' }, b, h('div', { class: 'a-vs-kachel' }, h('small', { text: 'Im Konfigurator' }), h('b', { text: 'Alles, was Sie planen.' }))));
       }

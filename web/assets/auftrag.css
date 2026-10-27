@@ -122,6 +122,8 @@ html.au-html, html.au-html body { background: #07090a; }
 .a-vorschau-leiste b { font-weight: 500; color: var(--weiss); }
 .a-vorschau-seite { position: relative; padding: 14px 16px 16px; min-height: 0; color: var(--weiss); background: radial-gradient(90% 70% at 85% 10%, #1b1b1d, var(--schwarz) 70%); }
 .a-vorschau-seite.hell { color: var(--schwarz); background: radial-gradient(90% 70% at 85% 10%, #fff, color-mix(in srgb, var(--a-firma, var(--violett)) 8%, #fff) 80%); }
+/* Signature: die ganze Seite in der Firmenfarbe (wie die echte Seite: heller Hero in einem Ton der Firma, Kachel in der Firmenfarbe) */
+.a-vorschau-seite.hell.voll { background: radial-gradient(90% 70% at 85% 10%, color-mix(in srgb, var(--a-firma, var(--violett)) 8%, #fff), color-mix(in srgb, var(--a-firma, var(--violett)) 20%, #fff) 85%); box-shadow: inset 0 3px 0 var(--a-firma, var(--violett)); }
 .a-vs-kopf { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
 .a-vs-zeichen { width: 30px; height: 30px; flex: none; border-radius: 9px; display: grid; place-items: center; background: var(--a-firma, var(--violett)); color: var(--a-auf-firma, var(--schwarz)); font: 600 14px/1 var(--font-sans); overflow: hidden; }
 .a-vs-zeichen img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
@@ -212,7 +214,10 @@ html.au-html, html.au-html body { background: #07090a; }
 /* Anreiz zum nächsten Paket */
 .a-anreiz { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; align-items: end; }
 .a-anreiz .a-label-klein { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; font: 500 13px/1 var(--font-sans); letter-spacing: .02em; color: var(--silbergrau); }
-.a-anreiz h3 { grid-column: 1 / -1; }
+.a-anreiz :is(h2, h3) { grid-column: 1 / -1; }
+.a-anreiz .a-knoepfe { grid-column: 1 / -1; align-items: center; }
+.a-anreiz .a-link { gap: 8px; color: var(--silbergrau); font-size: 14px; }
+.a-link > svg { width: 13px; height: 13px; flex: none; }
 .a-anreiz ul { grid-column: 1 / 2; margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
 .a-anreiz li { display: flex; gap: 10px; align-items: baseline; font: 400 15px/1.4 var(--font-sans); color: var(--weiss); }
 .a-anreiz li::before { content: ""; flex: none; width: 12px; height: 7px; border-left: 1.8px solid var(--violett); border-bottom: 1.8px solid var(--violett); transform: translateY(-3px) rotate(-45deg); }

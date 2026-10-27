@@ -126,8 +126,11 @@
   });
 
   /* ---------- Prüfung je Teil: (daten) → { ok, wert (bereinigt), fehler: { feld: 'Satz' } } ---------- */
-  /* weg 'schnell': Rechtsform, Vertretung und Bundesland klären wir im Telefonat (Gremium der Fensterbauer, 27.10.2026) */
-  function betrieb(d, m, weg) {
+  /* Zwei Stufen (Wunsch des Inhabers, 27.10.2026): vor der Kasse ('bestellung') nur das Nötigste, das auf der Maske „Ihr Betrieb“ steht
+     (BESTELLUNG_FELDER); Impressum, Texte und Bilder folgen nach der Zahlung im Kundenbereich ('voll', Vorgabe). weg 'schnell' („Seite
+     vorschlagen“): Rechtsform, Vertretung und Bundesland klären wir im Telefonat (Gremium der Fensterbauer, 27.10.2026) */
+  const BESTELLUNG_FELDER = ['firma', 'name', 'ap', 'tel', 'mail', 'web', 'strasse', 'plz', 'ort'];
+  function betrieb(d, m, weg, stufe) {
     d = d && typeof d === 'object' ? d : {};
     const schnell = weg === 'schnell';
     const w = {
@@ -153,6 +156,8 @@
     if (w.vertretung.length < 2 && !schnell) f.vertretung = 'Bitte angeben, wer das Unternehmen vertritt.';
     if (w.ust && !/^DE\d{9}$/.test(w.ust)) f.ust = 'Die USt-IdNr. beginnt mit DE und hat 9 Ziffern.';
     ['firma', 'name', 'ort', 'region', 'erreichbar', 'vertretung'].forEach((k) => zuLang(d, k, f));
+    /* vor der Kasse nur Fehler zu Feldern, die dort auch stehen (sonst meldet die Bestellung Lücken, die man nicht findet) */
+    if (stufe === 'bestellung') Object.keys(f).forEach((k) => { if (BESTELLUNG_FELDER.indexOf(k) < 0) delete f[k]; });
     return ergebnis(w, f);
   }
   /* m: Merkmale des Pakets (Pakete.merkmale) */
@@ -168,14 +173,15 @@
          gehört, binden wir nach Absprache an (§ 6 Abs. 3), dann genau eine Adresse und keine Vorschläge */
       w.art = d.art === 'eigene' ? 'eigene' : 'neu';
       w.domains = w.domains.slice(0, w.art === 'eigene' ? 1 : GRENZEN.domains); w.vorschlaege = w.art === 'neu' && !!d.vorschlaege;
-      if (!w.domains.length && !w.vorschlaege && !Object.keys(f).length) f.domains = w.art === 'eigene' ? 'Bitte Ihre Domain oder die gewünschte Unteradresse nennen, z. B. fenster.ihre-firma.de.' : 'Bitte eine Wunsch-Domain nennen oder „Schlagen Sie mir Namen vor“ wählen.';
+      /* der Hinweis steht am ersten Feld, damit es beim Sprung dorthin rot markiert ist (nicht nur als Zeile darunter) */
+      if (!w.domains.length && !w.vorschlaege && !Object.keys(f).length) f['domains.0'] = w.art === 'eigene' ? 'Bitte Ihre Domain oder die gewünschte Unteradresse nennen, z. B. fenster.ihre-firma.de.' : 'Bitte eine Wunsch-Domain nennen oder „Schlagen Sie mir Namen vor“ wählen.';
     } else {
       const r = unteradresse(d.name); w.name = r.name;
       if (!r.ok) f.name = r.fehler;
     }
     const liste = (v, max, feld) => { const out = []; (Array.isArray(v) ? v : []).slice(0, max + 2).forEach((x, i) => { const a = String(x || '').trim().toLowerCase(); if (!a) return; if (!mailOk(a)) f[feld + '.' + i] = 'Bitte eine gültige E-Mail-Adresse eingeben.'; else if (out.indexOf(a) < 0) out.push(a); }); return out.slice(0, max); };
     w.eingang = liste(d.eingang, GRENZEN.eingang, 'eingang');
-    if (!w.eingang.length && !Object.keys(f).some((k) => /^eingang\./.test(k))) f.eingang = 'Bitte mindestens eine Adresse für die Anfragen Ihrer Kunden nennen.';
+    if (!w.eingang.length && !Object.keys(f).some((k) => /^eingang\./.test(k))) f['eingang.0'] = 'Bitte mindestens eine Adresse für die Anfragen Ihrer Kunden nennen.';
     if (m.dashboard) w.team = liste(d.team, Number(m.zugaenge) || 0, 'team');
     return ergebnis(w, f);
   }
@@ -199,26 +205,28 @@
   }
 
   /* ---------- Stationen der Bestellung je Paket ----------
-     Ohne eigene Gestaltung (Essential) entfällt „Auftritt“: Die Seite steht im eeziframes-Design mit Namen, Ort und Ansprechperson. */
+     Vor der Kasse: Paket, Konto, Ihr Betrieb (das Nötigste), Adresse (Wunsch-Domain und Empfänger der Anfragen), Bestellen.
+     Nach der Zahlung (nachZahlung, Kundenbereich „Seite einrichten“): Ihr Betrieb mit Impressum, Adresse mit Team, Auftritt (Logo, Farben,
+     Fotos, Texte; nur mit eigener Gestaltung, Essential steht im eeziframes-Design mit Namen, Ort und Ansprechperson). */
   const gestaltet = (m) => !!(m && (m.logo || m.farbe || m.fotos || m.startansicht));
-  function stationen(paket) {
-    const m = P().merkmale(paket) || {}, l = [{ k: 'paket', t: 'Paket' }, { k: 'konto', t: 'Konto' }, { k: 'betrieb', t: 'Ihr Betrieb' }, { k: 'adresse', t: 'Adresse' }];
-    if (gestaltet(m)) l.push({ k: 'auftritt', t: 'Auftritt' });
-    l.push({ k: 'bestellen', t: 'Bestellen' });
-    return l;
+  function stationen(paket, nachZahlung) {
+    const m = P().merkmale(paket) || {}, mitte = [{ k: 'betrieb', t: 'Ihr Betrieb' }, { k: 'adresse', t: 'Adresse' }];
+    if (nachZahlung) return mitte.concat(gestaltet(m) ? [{ k: 'auftritt', t: 'Auftritt' }] : []);
+    return [{ k: 'paket', t: 'Paket' }, { k: 'konto', t: 'Konto' }].concat(mitte, [{ k: 'bestellen', t: 'Bestellen' }]);
   }
-  /* Ganze Angaben prüfen; teile: nur diese Teile (sonst alle, die das Paket hat); weg: 'schnell' fragt im Betrieb weniger (betrieb) */
-  function pruefen(angaben, m, teile, weg) {
+  /* Ganze Angaben prüfen; teile: nur diese Teile (sonst alle der Stufe: vor der Kasse Betrieb und Adresse, danach dazu der Auftritt);
+     weg: 'schnell' fragt im Betrieb weniger; stufe: 'bestellung' oder 'voll' (Vorgabe) */
+  function pruefen(angaben, m, teile, weg, stufe) {
     angaben = angaben || {};
-    const t = teile || ['betrieb', 'adresse'].concat(gestaltet(m) ? ['auftritt'] : []);
+    const t = teile || ['betrieb', 'adresse'].concat(stufe !== 'bestellung' && gestaltet(m) ? ['auftritt'] : []);
     const fn = { betrieb: betrieb, adresse: adresse, auftritt: auftritt }, fehler = {}, wert = {};
-    t.forEach((k) => { const r = fn[k](angaben[k], m, k === 'betrieb' ? weg : undefined); wert[k] = r.wert; Object.keys(r.fehler).forEach((x) => { fehler[k + '.' + x] = r.fehler[x]; }); });
+    t.forEach((k) => { const r = fn[k](angaben[k], m, k === 'betrieb' ? weg : undefined, k === 'betrieb' ? stufe : undefined); wert[k] = r.wert; Object.keys(r.fehler).forEach((x) => { fehler[k + '.' + x] = r.fehler[x]; }); });
     return ergebnis(wert, fehler);
   }
-  /* Erster Teil mit Lücken ('' wenn alles da ist) */
+  /* Erster Teil mit Lücken vor der Kasse ('' wenn alles da ist) */
   function offen(angaben, m, weg) {
     const t = ['betrieb', 'adresse'];
-    for (let i = 0; i < t.length; i++) if (!pruefen(angaben, m, [t[i]], weg).ok) return t[i];
+    for (let i = 0; i < t.length; i++) if (!pruefen(angaben, m, [t[i]], weg, 'bestellung').ok) return t[i];
     return '';
   }
 
@@ -263,7 +271,7 @@
   const A = {
     STAND: STAND, STAND_TITEL: STAND_TITEL, LEISTE: LEISTE, UEBERGAENGE: UEBERGAENGE, GRENZEN: GRENZEN, FOTO_PLAETZE: FOTO_PLAETZE, PLAETZE: PLAETZE,
     BUNDESLAENDER: BUNDESLAENDER, RESERVIERT: RESERVIERT, BASIS: BASIS,
-    uebergang: uebergang, stationen: stationen, gestaltet: gestaltet, leer: leer, betrieb: betrieb, adresse: adresse, auftritt: auftritt, zustimmung: zustimmung,
+    uebergang: uebergang, stationen: stationen, gestaltet: gestaltet, BESTELLUNG_FELDER: BESTELLUNG_FELDER, leer: leer, betrieb: betrieb, adresse: adresse, auftritt: auftritt, zustimmung: zustimmung,
     pruefen: pruefen, offen: offen, unteradresse: unteradresse, unteradresseVon: unteradresseVon, vorschlag: vorschlag, domain: domain, farbe: farbe,
     anpassbar: anpassbar, naechstes: naechstes, verkauf: verkauf, mailOk: mailOk, telOk: telOk, webAdresse: webAdresse
   };

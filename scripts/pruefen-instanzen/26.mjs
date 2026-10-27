@@ -105,6 +105,17 @@ export default async function (h) {
   const mails2 = (await h.post()).filter((m) => !vorZahl.has(m.id));
   ok(kasse.status === 200 && kasse.json.bezahlt === true && kasse.json.auftrag.stand === 'bezahlt' && kasse.json.auftrag.zahlung.betrag_cent === Math.round(globalThis.Pakete.preis('plus').einrichtung * 119) && fremdeKasse.json.bezahlt === true && mails2.some((m) => m.an === mailA && /Ihre Zahlung ist da/.test(m.betreff)) && mails2.some((m) => m.an !== mailA && /Neue Bestellung/.test(m.betreff)),
     '26.6 Rückkehr aus der Kasse: bezahlt (Einrichtung Plus zzgl. 19 %), danach nur noch „bezahlt“ zurück; Mail „Ihre Zahlung ist da“ an den Kunden und „Neue Bestellung“ an den Inhaber');
+  /* Vor der Kasse nur das Nötigste (Wunsch des Inhabers, 27.10.2026): ohne Impressum, Team und Auftritt bestellt; nach der Zahlung verlangt
+     „Ihr Betrieb“ das Impressum vollständig */
+  const sg = b3.json.auftrag, MIN = { firma: BETRIEB.firma, name: BETRIEB.name, ap: BETRIEB.ap, tel: BETRIEB.tel, mail: BETRIEB.mail, strasse: BETRIEB.strasse, plz: BETRIEB.plz, ort: BETRIEB.ort };
+  await A.api('/api/auftrag/' + sg.id, { method: 'PATCH', body: { angaben: { betrieb: MIN, adresse: { art: 'neu', domains: ['sig-minimal-' + stempel + '.de'], eingang: [mailA] } } } });
+  const b3best = await A.api('/api/auftrag/' + sg.id + '/bestellen', { body: { zustimmung: zu } });
+  const sgSess = b3best.json && b3best.json.url ? new URL(b3best.json.url, h.base()).searchParams.get('kasse') : '';
+  const sgBezahlt = await A.api('/api/auftrag/' + sg.id + '/kasse?session=' + encodeURIComponent(sgSess), { method: 'GET' });
+  const ohneImp = await A.api('/api/auftrag/' + sg.id, { method: 'PATCH', body: { angaben: { betrieb: Object.assign({}, MIN, { tel: '0221 7654321' }) } } });
+  const mitImp = await A.api('/api/auftrag/' + sg.id, { method: 'PATCH', body: { angaben: { betrieb: BETRIEB } } });
+  ok(b3best.status === 200 && !!sgSess && sgBezahlt.json.bezahlt === true && ohneImp.status === 400 && !!ohneImp.json.felder['betrieb.rechtsform'] && !!ohneImp.json.felder['betrieb.vertretung'] && mitImp.status === 200,
+    '26.6 Vor der Kasse nur das Nötigste: ohne Impressum, Team und Auftritt bestellt und bezahlt; danach verlangt „Ihr Betrieb“ das Impressum (' + [b3best.status, ohneImp.status, mitImp.status].join(' ') + ')');
 
   /* ---------- 26.7 Fremde Aufträge, Zentrale nur angemeldet ---------- */
   const B = await kunde('kunde-b-' + stempel + '@pruef-fenster.de', '10.26.0.2');
@@ -340,27 +351,48 @@ export default async function (h) {
       await station('3-betrieb');
       await page.click('.a-fuss .a-pille'); await page.waitForTimeout(500);
       const fehlerZahl = await page.locator('.a-feld.fehlt').count(), fokus = await page.evaluate(() => !!document.activeElement.closest('.a-feld.fehlt'));
-      for (const k of ['firma', 'ap', 'tel', 'mail', 'strasse', 'plz', 'ort', 'vertretung']) await page.fill('[data-k="' + k + '"] input', BETRIEB[k]);
-      await page.locator('[data-k="firma"] input').blur(); await page.selectOption('[data-k="bundesland"] select', 'NW');
-      const name1 = await page.inputValue('[data-k="name"] input'), form1 = await page.inputValue('[data-k="rechtsform"] input');
+      /* vor der Kasse nur das Nötigste: kein Impressum, kein Einzugsgebiet */
+      const ohneImpressum = (await page.locator('[data-k="rechtsform"], [data-k="vertretung"], [data-k="bundesland"], [data-k="region"]').count()) === 0;
+      for (const k of ['firma', 'ap', 'tel', 'mail', 'strasse', 'plz', 'ort']) await page.fill('[data-k="' + k + '"] input', BETRIEB[k]);
+      await page.locator('[data-k="firma"] input').blur();
+      const name1 = await page.inputValue('[data-k="name"] input');
       await page.click('.a-fuss .a-pille'); await page.waitForSelector('[data-k="domains.0"] input');
       await station('4-adresse');
+      /* Sprung aus „Es fehlen noch Angaben“ markiert das Feld (Befund des Inhabers, 27.10.2026) */
+      await page.evaluate(() => { location.hash = location.hash.replace(/\/adresse$/, '/bestellen'); });
+      await page.waitForSelector('.a-luecke .a-ring', { timeout: 8000 }); await page.click('.a-luecke .a-ring'); await page.waitForSelector('[data-k="domains.0"] input');
+      const markiert = await page.evaluate(() => { const f = document.querySelector('[data-k="domains.0"]'); return !!f && f.classList.contains('fehlt') && !!(f.querySelector('.a-fehler') || {}).textContent; });
       await page.fill('[data-k="domains.0"] input', 'fensterbau-browser-' + stempel + '.de');
-      await page.click('.a-fuss .a-pille'); await page.waitForSelector('[data-platz="buehne"] input[type=file]', { state: 'attached' });
-      await page.setInputFiles('[data-platz="buehne"] input[type=file]', tmp); await page.waitForSelector('[data-platz="buehne"].voll', { timeout: 8000 });
-      const vorschauBild = await page.evaluate(() => !!document.querySelector('.a-vorschau .a-vs-bild img'));
-      await station('5-auftritt');
       await page.click('.a-fuss .a-pille'); await page.waitForSelector('[data-k="unternehmer"] input');
-      await station('6-bestellen');
+      const frageGroesser = await page.evaluate(() => (document.querySelector('.a-anreiz h2') || {}).textContent || '');
+      await station('5-bestellen');
       await page.click('.a-fuss .a-pille'); await page.waitForTimeout(300);
       const hakenFehlen = await page.locator('.a-haken.fehlt').count();
       for (const k of ['unternehmer', 'agb', 'avv']) await page.check('[data-k="' + k + '"] input');
       await Promise.all([page.waitForURL(/\/konto\//, { timeout: 10000 }), page.click('.a-fuss .a-pille')]);
       await page.waitForSelector('.a-leiste li[aria-current="step"]', { timeout: 8000 });
       const konto = await page.evaluate(() => ({ suche: location.search, text: document.body.innerText }));
-      await h.foto(page, 'auftrag-7-konto-' + (name === 'Telefon' ? 'telefon' : 'desktop'));
-      ok(fehlerZahl >= 8 && fokus && name1 === 'Fensterbau Prüf' && form1 === 'GmbH' && vorschauBild && hakenFehlen === 3 && konto.suche === '' && /Wir beginnen mit Ihrer Seite/.test(konto.text),
-        '26.B ' + name + ': Fehler am Feld mit Fokus, Name und Rechtsform aus der Firma, Foto erscheint in der Vorschau, Haken vor dem Bestellen, nach der Kasse der Kundenbereich mit „Wir beginnen mit Ihrer Seite“');
+      await h.foto(page, 'auftrag-6-konto-' + (name === 'Telefon' ? 'telefon' : 'desktop'));
+      /* nach der Zahlung: Seite einrichten, erst das Impressum, dann Logo, Fotos und Texte */
+      await Promise.all([page.waitForURL(/\/bestellen\/#plus\/.*\/betrieb$/, { timeout: 8000 }), page.click('.a-fuss .a-pille')]);
+      await page.waitForSelector('[data-k="vertretung"] input'); await station('7-einrichten-betrieb');
+      await page.fill('[data-k="vertretung"] input', BETRIEB.vertretung); await page.selectOption('[data-k="bundesland"] select', 'NW');
+      const form1 = await page.inputValue('[data-k="rechtsform"] input');
+      await Promise.all([page.waitForURL(/\/konto\//, { timeout: 8000 }), page.click('.a-fuss .a-pille')]);
+      await page.waitForSelector('.a-fuss .a-pille', { timeout: 8000 });
+      await Promise.all([page.waitForURL(/\/auftritt$/, { timeout: 8000 }), page.click('.a-fuss .a-pille')]);
+      await page.waitForSelector('[data-platz="buehne"] input[type=file]', { state: 'attached' });
+      await page.setInputFiles('[data-platz="buehne"] input[type=file]', tmp); await page.waitForSelector('[data-platz="buehne"].voll', { timeout: 8000 });
+      await page.setInputFiles('[data-platz="logo"] input[type=file]', tmp); await page.waitForSelector('[data-platz="logo"].voll', { timeout: 8000 });
+      await page.fill('[data-k="ueberschrift"] input', 'Fenster aus Köln, gut geplant.');
+      const vorschauBild = await page.evaluate(() => !!document.querySelector('.a-vorschau .a-vs-bild img'));
+      await station('8-einrichten-auftritt');
+      await Promise.all([page.waitForURL(/\/konto\//, { timeout: 8000 }), page.click('.a-fuss .a-pille')]);
+      await page.waitForFunction(() => /Wir beginnen mit Ihrer Seite/.test(document.body.innerText), null, { timeout: 8000 });
+      await h.foto(page, 'auftrag-9-konto-eingerichtet-' + (name === 'Telefon' ? 'telefon' : 'desktop'));
+      ok(fehlerZahl >= 8 && fokus && ohneImpressum && name1 === 'Fensterbau Prüf' && markiert && /Lieber gleich Signature/.test(frageGroesser) && hakenFehlen === 3 && konto.suche === '' && /Jetzt richten Sie Ihre Seite ein/.test(konto.text) && form1 === 'GmbH' && vorschauBild,
+        '26.B ' + name + ': vor der Kasse nur das Nötigste (Fehler am Feld mit Fokus, Name aus der Firma), Sprung aus „Es fehlen noch Angaben“ markiert das Feld, Frage nach Signature vor dem Bezahlen, Haken vor dem Bestellen; danach „Seite einrichten“: Impressum (Rechtsform aus der Firma), Logo, Foto in der Vorschau, Texte, dann „Wir beginnen mit Ihrer Seite“' +
+        ' (' + JSON.stringify({ fehlerZahl, fokus, ohneImpressum, name1, markiert, frageGroesser, hakenFehlen, form1, vorschauBild }) + ')');
       ok(!befund.length, '26.B ' + name + ': je Station genau eine volle Pille, ein h1, Ziele ab 44 px, Schrift ab 13 px, kein Querscrollen' + (befund.length ? ': ' + befund.join(' | ') : ''));
       /* Zentrale */
       const zc = await h.browser.newContext(opts), zp = await h.neueSeite(zc, h.base());
