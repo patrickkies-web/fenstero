@@ -10,6 +10,35 @@ keine Tiere, keine Astronauten (B2), keine erfundenen Siegel, Firmenschilder ode
 Personen nur, wo der Platz sie braucht (Team, Montage, Porträt), natürlich und nicht gestellt, Gesichter nie ganz scharf im Vordergrund
 außer beim Porträt. Kein Text im Bild, kein Wasserzeichen.
 
+## Stand 27.10.2026
+
+Geliefert vom Inhaber und eingebaut (Plus und Signature, beide Betriebe; Brandt hat seit dem 27.10. eine Petrol-Palette, darum passen
+dieselben Bilder zu beiden): Foto 1 Bühne (Eichenboden mit Fensterkreuz), Foto 2 Werkstatt, Foto 3 Montage, Foto 4 Team,
+Foto 6 Referenz. Abgelegt als WebP in zwei Breiten unter `bilder/betrieb/` der Vorschau-Ordner plus- und signature-vorschau.
+
+Es fehlen noch: **Foto 5 Ausstellung** und die **Porträts** der Ansprechpersonen (Jonas Ostermann, Petra Brandt). Fertige Prompts zum
+Kopieren (Stil und Farbzeile schon enthalten) stehen im nächsten Abschnitt.
+
+### Fehlende Bilder: Prompts zum Kopieren
+
+**Foto 5, Ausstellung** (4 : 3, mindestens 1200 × 900; eines für beide Betriebe)
+```
+A small, calm window showroom of a craft business: three window samples in different frame colours (white, anthracite, natural oak) mounted side by side on a light grey plaster wall, one sample with a deep petrol teal handle as the only colour accent, polished concrete floor, hard natural daylight from a high skylight casting crisp diagonal shadows, no people, no price tags, no text. Photorealistic editorial photograph, real materials, almost monochrome palette of charcoal, anthracite, white plaster and silver grey, shallow depth of field, 35 mm lens, subtle film grain, subject centred with quiet space at the top left and at the bottom, no logos, no signage, no watermark. 4:3.
+```
+
+**Porträt Fenster Ostermann, Jonas Ostermann, Inhaber** (1 : 1, mindestens 768 × 768)
+```
+Head-and-shoulders portrait of a friendly window craftsman in his early forties, short dark beard, dark work jacket, standing in the open doorway of a window workshop, soft natural side light, background dark and softly blurred with hints of aluminium profiles, looking slightly past the camera, approachable and calm, a deep petrol teal beanie or collar as the only colour accent. Photorealistic editorial photograph, almost monochrome palette of charcoal and anthracite, 85 mm lens, subtle film grain, face sharp and centred, no text, no logos, no watermark. Square 1:1.
+```
+
+**Porträt Fensterbau Brandt, Petra Brandt, Geschäftsführung** (1 : 1, mindestens 768 × 768)
+```
+Head-and-shoulders portrait of a confident woman in her mid fifties who runs a window company, short grey hair, dark knitted cardigan over a white shirt, standing in a bright workshop office with window samples softly blurred behind her, soft natural side light, warm and calm expression, looking slightly past the camera, a deep petrol teal scarf as the only colour accent. Photorealistic editorial photograph, almost monochrome palette of white, light grey and charcoal, 85 mm lens, subtle film grain, face sharp and centred, no text, no logos, no watermark. Square 1:1.
+```
+
+Das Porträt erscheint rund und klein (36 bis 52 px) neben dem Namen im Hero und im Kontakt, statt der Initialen; nur in Plus und
+Signature (Fotos des Betriebs). Ob es zu den sechs Fotos zählt, entscheidet der Inhaber.
+
 ## Ablage und Formate
 
 | Platz | Datei | Format, mindestens | Was im Bild passiert | Was die Seite darüberlegt |

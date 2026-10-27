@@ -718,3 +718,12 @@ html:not(.ez-js) .ez-modus, html:not(.ez-js) .ez-ml .ez-schalter { display: none
   .ez-leiste.ist-da, .ez-leiste.ist-schmal { opacity: 1; visibility: visible; transition: opacity 220ms ease, visibility 0s; }
   .ez-leiste .ez-huelle > :not(.dna-pille), .ez-leiste.ist-da .ez-huelle > :not(.dna-pille) { transition: none; }
 }
+
+/* Fotos des Betriebs in den Kacheln (sobald geliefert): das Bild füllt die Kachel, die Vignette (::after) hält die Beschriftung lesbar */
+.ez-foto__bild { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; object-fit: cover; display: block; }
+.ez-foto--echt { background: var(--anthrazit); }
+.ez-foto[data-foto="6"] .ez-foto__bild { object-position: 50% 60%; }
+/* Beschriftung auf echten Fotos: Verlauf in der dunklen Farbe der Seite unter dem Text (helle Fassaden, helle Werkbank) */
+.ez-foto--echt::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 58%; z-index: 1; pointer-events: none;
+  background: linear-gradient(to top, color-mix(in srgb, var(--schwarz) 82%, transparent), color-mix(in srgb, var(--schwarz) 40%, transparent) 45%, transparent); }
+.ez-foto--echt .ez-foto__text b { color: #fff; text-shadow: 0 1px 2px rgba(7,9,10,.45); }

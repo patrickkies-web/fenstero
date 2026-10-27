@@ -258,3 +258,13 @@ kommt sie ganz zurück, am Seitenanfang ist sie weg. Die Pille bleibt eine leise
 Pille bleibt. Bei Brandt (Plus und Signature) ist das Glas Schieferblau. Geprüft: Zustände beim Herunter- und Hochscrollen, Zeitlupe
 (docs/profis/bilder/2026-10-27-leiste-schmal.png), Treffer neben dem Knopf gehen an die Seite, ruhige Fassung ohne Bewegung, keine
 laufende Animation nach dem Laden, Layoutsprung 0, keine Konsolenfehler.
+
+## Fotos des Inhabers eingebaut, 27.10.2026
+
+Geliefert: Bühne (Eichenboden mit Fensterkreuz), Werkstatt, Montage, Team, Referenz (Straße mit Altbauten). Eingebaut in Plus und
+Signature beider Betriebe (Essential behält die Bühne von eeziframes, Paket ohne Fotos), als WebP in zwei Breiten mit srcset
+(Bühne 1000/720 px, vorab geladen; Kacheln 1200/720 px, Referenz 1600/900 px, erst beim Scrollen geladen), je Datei höchstens 190 kB,
+zusammen 630 kB. Beschriftungen auf den Fotos liegen auf einem Verlauf in der dunklen Farbe der Seite (vorher auf hellen Fassaden kaum
+lesbar). Es fehlen noch Foto 5 Ausstellung und die Porträts; Prompts in docs/profis/2026-10-26-paketvorlagen-bildprompts.md.
+Messwerte: Layoutsprung 0, eine volle Pille je Bildschirm, keine laufende Animation, keine Konsolenfehler, Laden 0,8 bis 1,0 s bei
+vierfach gedrosselter CPU. Bild: docs/profis/bilder/2026-10-27-fotos-eingebaut.jpg.
