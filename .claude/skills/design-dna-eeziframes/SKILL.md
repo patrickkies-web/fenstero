@@ -70,6 +70,12 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   derselben Stelle, Preis aus pakete.js), gebaut von docs/profis/werkzeuge/paketvorlagen.py; geändert wird in den drei Vorschau-Ordnern
   (essential-, plus-, signature-vorschau), dann neu gebaut. Die Palette eines Betriebs gilt in Plus und Signature; Essential bleibt im
   eeziframes-Violett, bis der Inhaber pakete.js ändert. Protokoll docs/profis/2026-10-26-paketstufen.md.
+- Paket-Vorlagen, Korrekturen des Inhabers (27.10.2026): Essential läuft immer unter firmenname.eeziframes.com, nie unter einer eigenen
+  Domain; die eigene Domain ist dort ein Etikett „Ab Plus“. Im Daten-Abschnitt steht kein ausdrücklicher Satz, dass der Betrieb vor dem
+  Senden nichts sieht; es steht nur, dass mit dem Konfigurator von eeziframes geplant wird (Signature: „von <Betrieb>“, ohne den Namen
+  eeziframes) und dass der Betrieb die Anfrage bekommt, sobald gesendet wird. Unterlagen für die Vertragsdauer und eine Ablage im
+  Dashboard kommen in keinem Paket vor, weder im Text noch in Etiketten. Statt der Kachel „Für große Türen eine zweite Person“ steht
+  „Ihre Wünsche zu Farbe und Glas“. Jedes Etikett passt in seine Pille, einzeilig oder im Fluss umbrechend, geprüft bei 390 und 1280 px.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

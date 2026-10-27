@@ -41,6 +41,7 @@ BETRIEBE = {
             ('<b>Brandt</b><small>Fensterbau · Köln</small>', '<b>Ostermann</b><small>Fenster + Türen · Bremen</small>'),
             ('<b id="kontakt-karte">Brandt</b><small>Fensterbau · <span data-vorlage="firma.ort">Köln</span></small>', '<b id="kontakt-karte">Ostermann</b><small>Fenster + Türen · <span data-vorlage="firma.ort">Bremen</span></small>'),
             ('Fensterbau Brandt', 'Fenster Ostermann'),
+            ('<b>fensterbau-brandt</b>.eeziframes.com', '<b>fenster-ostermann</b>.eeziframes.com'),  # Essential: Firmenname bei eeziframes
             ('fensterbau-brandt', 'ostermann-fenster'),
             ('Musterstraße&nbsp;12, 50667&nbsp;Köln', 'Am Deich&nbsp;7, 28199&nbsp;Bremen'),
             ('Musterstraße 12, 50667 Köln', 'Am Deich 7, 28199 Bremen'),

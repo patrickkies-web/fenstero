@@ -21,12 +21,12 @@
 
 | Merkmal | Essential | Plus | Signature |
 | --- | --- | --- | --- |
-| Eigene Domain | ja, Etikett „fensterbau-brandt.de“ | ja | ja |
+| Adresse | immer firmenname.eeziframes.com (Korrektur 27.10.) | eigene Domain | eigene Domain |
 | Gestaltung | eeziframes-Violett, Initiale und Name | Logo, Firmenfarbe | Logo, Firmenfarbe |
 | Fotos des Betriebs | nein (mit Etiketten: Rahmen „ab Plus: bis zu 6 Fotos“) | Bühne und Foto-Bento, bis zu 6 | wie Plus |
 | Eigene Startansicht und Texte | nein, Standardtext | ja | ja |
 | Hinweis auf eeziframes | deutlich (Kopf, Fuß, Daten-Satz) | eine Zeile im Fuß, Daten-Satz nennt „technischer Dienstleister“ | keiner, auch nicht im Aufmaßblatt und in E-Mails |
-| Aufbewahrung | 30 Tage nach Zustellung | 30 Tage nach Zustellung | Vertragsdauer, Originalfotos ein Jahr (`fotosSignatureTage` 365) |
+| Aufbewahrung | 30 Tage nach Zustellung | 30 Tage nach Zustellung | auf der Seite nicht genannt (Korrektur 27.10.) |
 | Einladungslinks, Begrüßung mit Namen | nein | nein (Etikett „Erst in Signature“) | ja, Seite öffnet im Einladungszustand |
 | Dashboard, Fortschritt, Zugänge | nein | nein | ja, 5 Zugänge (Vorschau mit Etiketten) |
 | Preis (netto, vorläufig) | 29 € im Monat, 99 € einmalig | 39 €, 199 € | 64 €, 279 € |
@@ -172,3 +172,29 @@ Dashboard-Einträge sind erfunden und als Muster gekennzeichnet. Fotos fehlen no
 
 - docs/profis/bilder/2026-10-26-paketstufen-brandt-tel.jpg, -tel-etiketten.jpg, -desk.jpg
 - docs/profis/bilder/2026-10-26-paketstufen-ostermann-tel.jpg, -tel-etiketten.jpg, -desk.jpg
+
+## Korrekturen des Inhabers, 27.10.2026
+
+Wortlaut: „Bei essential ist die domain immer firmenname.eeziframes.com außerdem passen da manchen chips nicht. Ich will unten nicht
+ausdrücklich den hinweis dass der betrieb nichts von der anfrage sieht sondern einfach unter der nutzung des eeziframes Konfigurator
+und dann halt die info dass der fensterbauer das erhält sobald man das verschickt. Unterlagen für vertragsdauer lassen wir raus will
+ich in keinem paket irgendwie enthalten haben. Wofür zwei personen bei großen türen den hinweis lässte weg und machst irgendwie was mit
+ihre wünsche oderso“
+
+| Wo | Was | Stand |
+| --- | --- | --- |
+| Essential, Bühne und Fuß | Adresse fensterbau-brandt.eeziframes.com bzw. fenster-ostermann.eeziframes.com; Etikett „Ab Plus: Ihre eigene Domain“ | umgesetzt |
+| Essential, Etiketten | Bühnen-Etikett lief aus der Pille, jetzt „Ab Plus: Ihr Foto, Ihr Logo, Ihre Farbe“ einzeilig; Etikett zur Vertragsdauer entfernt; Fuß-Etikett neu; Legende ohne „in allen Paketen“; Adresse im Fuß bricht nicht mehr | umgesetzt |
+| Plus | „Ihre Domain“ jetzt als „neu in Plus“ (Koralle) | umgesetzt |
+| Daten-Abschnitt, alle | „Sie planen mit dem Konfigurator von eeziframes. Sobald Sie senden, bekommt <Betrieb> Ihre Anfrage mit dem Aufmaßblatt als PDF …“; Signature nennt den Betrieb statt eeziframes und einen technischen Dienstleister | umgesetzt |
+| Weg der Anfrage | Satz „Bevor Sie senden, sieht … nichts davon“ gestrichen; Signature-Innenkarte ohne „Keine Maße, keine Fotos“ | umgesetzt |
+| Signature | Aufbewahrung, Ablage und „griffbereit“ gestrichen, Etikett „Aufmaßblatt bleibt im Dashboard“ entfernt, Dashboard-Zeile „Aufmaßblatt per E-Mail“ | umgesetzt |
+| „Das brauchen Sie“, alle | Kachel „Ihre Wünsche zu Farbe und Glas“ mit Farbpaletten-Zeichen statt „Für große Türen eine zweite Person“ | umgesetzt |
+
+Messwerte danach: Pille im ersten Telefonbildschirm in allen sechs Seiten (709–775 px), Layoutsprung 0, Laden 578–717 ms, jedes Ziel
+erreichbar, keine Konsolenfehler.
+
+Offen, Entscheidung des Inhabers: web/assets/pakete.js sagt weiter, dass Essential eine eigene Domain hat und Signature Anfragen bis
+zum Vertragsende aufbewahrt (`domain: true`, `aufbewahrung: 'vertrag'`, `pdfAblage: true`). Danach richten sich die Pakettabelle der
+Website, die Datenschutztexte der Instanzen (functions/instanz/recht.js), der Löschlauf (functions/api/eingang.js) und die Prüfsuite.
+Geändert habe ich nur die Vorlagen (Regel „nur der genannte Bereich“).

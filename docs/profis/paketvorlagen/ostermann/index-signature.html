@@ -14,7 +14,7 @@
   Gegenüber Essential Plus: eeziframes erscheint nirgends (nicht auf der Seite, nicht im Aufmaßblatt, nicht in E-Mails; im Datenschutz
   nur „technischer Dienstleister“), der Betrieb lädt Kunden mit persönlichen Links ein (Anrede mit Namen; die Nummer P-JJJJ-NNN bleibt im Dashboard), sieht
   im Dashboard unter seiner Domain, wie weit jede Planung ist (eingeladen, in Bearbeitung, eingereicht), hat bis zu fünf Zugänge für
-  sein Team, und die Unterlagen bleiben dort abrufbar. Dazu wie Plus: Logo, Firmenfarbe, bis zu sechs Fotos, eigene Startseite,
+  sein Team. Dazu wie Plus: Logo, Firmenfarbe, bis zu sechs Fotos, eigene Startseite,
   eigenes Zeichen in der App, Startseite in Suchmaschinen.
   Die Seite hat zwei Zustände (data-modus am Hauptelement): „website“ (Besucher kommt über die Website des Betriebs) und
   „einladung“ (Kunde öffnet seinen persönlichen Link). Elemente mit ez-nur-web und ez-nur-einladung gehören nur zu einem Zustand.
@@ -319,19 +319,19 @@
         <div class="ez-text">
           <span class="dna-label">Ihre Daten<i class="ez-label__wert">&nbsp;– vor und nach dem Senden</i></span>
           <h2 class="dna-titel" id="weg-titel">Ihre Anfrage geht nur an <em class="ez-ak"><span data-vorlage="firma.name">Fenster Ostermann</span>.</em></h2>
-          <p class="dna-text ez-nur-web">Bevor Sie senden, sieht <span data-vorlage="firma.name">Fenster Ostermann</span> nichts von Ihrer Planung. Ihre Anfrage übermittelt ein technischer Dienstleister, der nur im Auftrag des Betriebs arbeitet, ohne Werbung und ohne andere Anbieter. Ihre Anfrage und das Aufmaßblatt bleiben danach bei <span data-vorlage="firma.name">Fenster Ostermann</span> für die Dauer seines Vertrags abrufbar, die Originalfotos ein Jahr. Mehr im Datenschutz.</p>
-          <p class="dna-text ez-nur-einladung">Bevor Sie senden, sieht <span data-vorlage="firma.ansprechpartner">Jonas Ostermann</span> über Ihren Link nur, wie weit Sie sind: keine Maße, keine Fotos. Ihre Anfrage übermittelt ein technischer Dienstleister, der nur im Auftrag des Betriebs arbeitet, ohne Werbung und ohne andere Anbieter. Ihre Anfrage und das Aufmaßblatt bleiben danach bei <span data-vorlage="firma.name">Fenster Ostermann</span> für die Dauer seines Vertrags abrufbar, die Originalfotos ein Jahr. Mehr im Datenschutz.</p>
+          <p class="dna-text ez-nur-web">Sie planen mit dem Konfigurator von <span data-vorlage="firma.name">Fenster Ostermann</span>. Sobald Sie senden, bekommt <span data-vorlage="firma.name">Fenster Ostermann</span> Ihre Anfrage mit dem Aufmaßblatt als PDF. Übermittelt wird über einen technischen Dienstleister, nur im Auftrag des Betriebs, ohne Werbung und ohne andere Anbieter. Mehr im Datenschutz.</p>
+          <p class="dna-text ez-nur-einladung">Sie planen über Ihren persönlichen Link mit dem Konfigurator von <span data-vorlage="firma.name">Fenster Ostermann</span>. Sobald Sie senden, bekommt <span data-vorlage="firma.ansprechpartner">Jonas Ostermann</span> Ihre Anfrage mit dem Aufmaßblatt als PDF. Übermittelt wird über einen technischen Dienstleister, nur im Auftrag des Betriebs, ohne Werbung und ohne andere Anbieter. Mehr im Datenschutz.</p>
         </div>
         <ol class="ez-route" data-theme="dunkel" aria-label="Der Weg Ihrer Anfrage">
           <li class="ez-route__stelle ez-route__stelle--stand">
             <span class="ez-route__knoten ez-route__knoten--sie" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18h3"/></svg></span>
-            <span class="ez-route__text"><b>Sie planen</b><span>auf Ihrem Gerät, in Ruhe und mit Pausen</span><span class="ez-nur-web">Bevor Sie senden, sieht <span data-vorlage="firma.name">Fenster Ostermann</span> nichts davon.</span>
+            <span class="ez-route__text"><b>Sie planen</b><span>auf Ihrem Gerät, in Ruhe und mit Pausen</span>
               <!-- Dunkle Innenkarte (G8), nur mit Einladungslink: der eine Wert, den der Betrieb vor dem Senden sieht, als Kapselreihe (G11) -->
               <span class="ez-stand ez-nur-einladung" role="group" aria-label="Beispiel: Was Jonas Ostermann über Ihren Link sieht">
                 <span class="ez-muster ez-muster--stand" aria-hidden="true">Fortschritt im Dashboard · nur Signature</span>
                 <span class="ez-stand__kopf"><small><span class="ez-beispiel">Beispiel</span> Was <span data-vorlage="firma.ansprechpartner">Jonas Ostermann</span> sieht</small><span class="ez-zustand"><i aria-hidden="true"></i>In Bearbeitung</span></span>
                 <span class="ez-stand__wert"><span class="ez-stand__zahl"><small>Fenster</small>2<small>von 4</small></span><span class="ez-kapseln" aria-hidden="true"><i class="voll"></i><i class="ist"></i><i></i><i></i></span></span>
-                <span class="ez-stand__fuss">Keine Maße, keine Fotos, bis Sie senden. <span data-vorlage="firma.ansprechpartner">Jonas Ostermann</span> sieht nur, wie weit Sie sind, und hilft, wenn Sie hängen.</span>
+                <span class="ez-stand__fuss"><span data-vorlage="firma.ansprechpartner">Jonas Ostermann</span> sieht, wie weit Sie sind, und hilft, wenn Sie hängen.</span>
               </span>
             </span>
           </li>
@@ -341,8 +341,7 @@
           </li>
           <li class="ez-route__stelle ez-route__stelle--ziel">
             <span class="ez-route__knoten ez-route__knoten--firma" aria-hidden="true"><svg class="ez-logo__zeichen" viewBox="0 0 64 64" data-vorlage="firma.zeichen"><rect width="64" height="64" rx="16" fill="var(--firma)"/><path d="M17 52V31a15 15 0 0 1 30 0v21z" fill="#07090a"/><rect x="30.6" y="14" width="2.8" height="40" fill="var(--firma)"/><rect x="15" y="34.6" width="34" height="2.8" fill="var(--firma)"/></svg></span>
-            <span class="ez-route__text"><b data-vorlage="firma.name">Fenster Ostermann</b><span>bekommt das Aufmaßblatt ins Postfach und in seine Ablage, wo es griffbereit bleibt</span><span class="ez-hinweis">Offenes klärt der Betrieb mit Ihnen</span></span>
-            <span class="ez-muster ez-muster--ablage" aria-hidden="true">Aufmaßblatt bleibt im Dashboard · nur Signature</span>
+            <span class="ez-route__text"><b data-vorlage="firma.name">Fenster Ostermann</b><span>bekommt das Aufmaßblatt als PDF in sein Postfach, sobald Sie senden</span><span class="ez-hinweis">Offenes klärt der Betrieb mit Ihnen</span></span>
           </li>
           <li class="ez-route__trenner" aria-hidden="true"><span class="dna-label">Danach</span></li>
           <li class="ez-route__stelle ez-route__stelle--klein">
@@ -367,7 +366,7 @@
         <ul class="ez-dash__liste">
           <li><span class="ez-dash__name"><b>Familie Hansen</b><small>P-2026-001 · eingeladen von Jonas Ostermann</small></span><span class="ez-zustand"><i></i>In Bearbeitung</span><span class="ez-dash__wert">Fenster 2 von 4</span></li>
           <li><span class="ez-dash__name"><b>Herr Yıldız</b><small>P-2026-003 · Link verschickt</small></span><span class="ez-dash__chip">Eingeladen</span><span class="ez-dash__wert">noch nicht angefangen</span></li>
-          <li><span class="ez-dash__name"><b>Familie Schröder</b><small>P-2026-002 · über die Website</small></span><span class="ez-dash__chip ez-dash__chip--fertig">Eingereicht</span><span class="ez-dash__wert">Aufmaßblatt im Dashboard</span></li>
+          <li><span class="ez-dash__name"><b>Familie Schröder</b><small>P-2026-002 · über die Website</small></span><span class="ez-dash__chip ez-dash__chip--fertig">Eingereicht</span><span class="ez-dash__wert">Aufmaßblatt per E-Mail</span></li>
         </ul>
       </div>
 
@@ -379,7 +378,7 @@
             <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15.5 15.5 3l5.5 5.5L8.5 21z"/><path d="M7 11.5l2.4 2.4M9.8 8.7l2.4 2.4M12.6 5.9l2.4 2.4M11.5 13.2l2.4 2.4M14.3 10.4l2.4 2.4"/></svg></span>Zollstock oder Maßband</li>
             <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18h3"/></svg></span>Ihr Handy</li>
             <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M12 3v18M4 12h16"/></svg></span>Platz vor dem Fenster</li>
-            <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.6A4.5 4.5 0 0 1 21 19"/></svg></span>Für große Türen eine zweite Person</li>
+            <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.8-1.7 1.7-1.7H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11.5" r=".9"/><circle cx="10" cy="7.5" r=".9"/><circle cx="14.5" cy="7.5" r=".9"/></svg></span>Ihre Wünsche zu Farbe und Glas</li>
           </ul>
           <p class="ez-klein ez-nur-desk ez-handy ez-nur-web">Am Computer? Öffnen Sie <span class="ez-url"><b>ostermann-fenster</b>.de</span> auf Ihrem Handy.</p>
           <p class="ez-klein ez-nur-desk ez-handy ez-nur-einladung">Am Computer? Öffnen Sie Ihren Link auf dem Handy, Ihre Planung reist mit.</p>

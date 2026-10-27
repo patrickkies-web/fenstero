@@ -342,7 +342,7 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-fuss { display: grid; gap: var(--raum-5); padding-block: 0 var(--raum-6); }
 .ez-fuss__marken { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--raum-4); padding-bottom: var(--raum-5); border-bottom: 1px solid color-mix(in srgb, var(--silbergrau) 30%, transparent); }
 .ez-fuss__satz { margin: 0; max-width: 56ch; font: 400 14px/1.55 var(--font-sans); color: var(--tinte-2); }
-.ez-fuss__adresse { color: var(--tinte-2); overflow-wrap: anywhere; }
+.ez-fuss__adresse { color: var(--tinte-2); white-space: nowrap; }
 .ez-fuss__adresse b { color: var(--tinte); font-weight: 500; }
 .ez-fuss__recht { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px 24px; flex-wrap: wrap; }
 .ez-fuss__recht a { display: inline-block; padding-block: 15px; color: var(--tinte-2); font: 400 14px/1 var(--font-sans); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
