@@ -389,8 +389,8 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
 /* Großansicht: die Bühne füllt den Platz zwischen Frage und Pille; Zahl und Lupen größer */
 .ez-gross { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; overflow: hidden; background: var(--schwarz); color: var(--weiss); }
 .ez-gross[open] { display: flex; flex-direction: column; }
-.ez-gross.kommt[open] { animation: ez-gross-auf 240ms var(--dna-auftritt) both; }
-.ez-gross.kommt[open]::backdrop { animation: ez-folgt 240ms var(--dna-auftritt) both; }
+.ez-gross.kommt[open] { animation: ez-gross-auf 240ms var(--dna-auftritt) backwards; }
+.ez-gross.kommt[open]::backdrop { animation: ez-folgt 240ms var(--dna-auftritt) backwards; }
 html:has(.ez-gross[open]) { overflow: hidden; overscroll-behavior: none; }
 .ez-gross, .ez-folie[data-folie="messen"] { --fokus: var(--weiss); }
 .ez-gross::backdrop { background: rgba(7,9,10,.88); }
@@ -428,13 +428,13 @@ html:has(.ez-gross[open]) { overflow: hidden; overscroll-behavior: none; }
 .ez-mass__feld.is-fehler { box-shadow: 0 0 0 1.8px var(--koralle), inset 0 -2px 0 rgba(7,9,10,.06), var(--putz-schatten); }
 .ez-mass__feld.is-fehler .ez-mass__marke { background: var(--koralle); }
 /* Nächstes Maß: die Linie läuft in 320 ms von Kappe zu Kappe (Clip über ihre eigene Strecke), Kappe A sofort, Enden und Feld folgen */
-.ez-buehne--mess.zieht .ez-mass { animation: ez-zieht-v 320ms var(--dna-druck) var(--verz, 0ms) both; }
+.ez-buehne--mess.zieht .ez-mass { animation: ez-zieht-v 320ms var(--dna-druck) var(--verz, 0ms) backwards; }
 .ez-buehne--mess.zieht[data-r="h"] .ez-mass { animation-name: ez-zieht-h; }
 @keyframes ez-zieht-v { from { clip-path: inset(0 0 calc(100% - var(--a, 0%)) 0); } to { clip-path: inset(0 0 calc(100% - var(--b, 100%) - 4px) 0); } }
 @keyframes ez-zieht-h { from { clip-path: inset(0 calc(100% - var(--a, 0%)) 0 0); } to { clip-path: inset(0 calc(100% - var(--b, 100%) - 4px) 0 0); } }
-.ez-buehne--mess.zieht #mess-kappe-a, .ez-buehne--mess.zieht #mess-ende-a, .ez-buehne--mess.zieht #mess-fuehrung-a, .ez-buehne--mess.zieht #mess-fuehrung-a-halo { animation: ez-folgt 160ms var(--dna-druck) var(--verz, 0ms) both; }
-.ez-buehne--mess.zieht #mess-kappe-b, .ez-buehne--mess.zieht #mess-ende-b, .ez-buehne--mess.zieht #mess-fuehrung-b, .ez-buehne--mess.zieht #mess-fuehrung-b-halo { animation: ez-folgt 160ms var(--dna-druck) calc(120ms + var(--verz, 0ms)) both; }
-.ez-buehne--mess.zieht .ez-mass__feld { animation: ez-folgt 150ms var(--dna-druck) both; }
+.ez-buehne--mess.zieht #mess-kappe-a, .ez-buehne--mess.zieht #mess-ende-a, .ez-buehne--mess.zieht #mess-fuehrung-a, .ez-buehne--mess.zieht #mess-fuehrung-a-halo { animation: ez-folgt 160ms var(--dna-druck) var(--verz, 0ms) backwards; }
+.ez-buehne--mess.zieht #mess-kappe-b, .ez-buehne--mess.zieht #mess-ende-b, .ez-buehne--mess.zieht #mess-fuehrung-b, .ez-buehne--mess.zieht #mess-fuehrung-b-halo { animation: ez-folgt 160ms var(--dna-druck) calc(120ms + var(--verz, 0ms)) backwards; }
+.ez-buehne--mess.zieht .ez-mass__feld { animation: ez-folgt 150ms var(--dna-druck) backwards; }
 @keyframes ez-folgt { from { opacity: 0; } }
 /* Karte mit den Zifferntasten (G14: tonaler Abfall, Kanten) */
 .ez-karte--tasten { gap: 8px; padding: 12px 16px 16px; background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss))); box-shadow: inset 0 -1px 0 rgba(7,9,10,.06), 0 30px 56px -22px rgba(0,0,0,.85), 0 2px 6px rgba(0,0,0,.4); }
@@ -505,7 +505,7 @@ html:has(.ez-gross[open]) { overflow: hidden; overscroll-behavior: none; }
 /* ---------- Schritt 4 „Ränder“ und „Passt.“ (dieselbe Folie wie „Messen“) ---------- */
 /* „Hier auch … gemessen?“: im leeren Feld der einzige Satz über den Tasten (wie die App), Umriss-Pille über die ganze Zeile; das
    gestrichelte Linienstück davor ist die Legende der Mitte (blass auf der Bühne) */
-.ez-zeile__gleich { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; height: 44px; border: 0; padding: 0 16px; border-radius: var(--rund-pille); background: var(--weiss); color: var(--schwarz); font: 500 .9375rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; transition: transform 160ms var(--dna-druck); }
+.ez-zeile__gleich { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; height: 48px; border: 0; padding: 0 16px; border-radius: var(--rund-pille); background: var(--weiss); color: var(--schwarz); font: 500 .9375rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; transition: transform 160ms var(--dna-druck); }
 .ez-zeile__gleich i { flex: none; width: 14px; height: 1.2px; background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 6px); box-shadow: 0 0 0 .6px rgba(7,9,10,.18); }
 .ez-zeile__gleich:active { transform: scale(.97); transition-duration: 0s; }
 .ez-zeile__gleich:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; }
@@ -517,20 +517,24 @@ html:has(.ez-gross[open]) { overflow: hidden; overscroll-behavior: none; }
 .ez-folie.ist-passt #mess-linie, .ez-folie.ist-passt #mess-neben, .ez-folie.ist-passt .ez-mass__kappe, .ez-folie.ist-passt .ez-mass__ende, .ez-folie.ist-passt .ez-mass__feld, .ez-folie.ist-passt .ez-gross-auf, .ez-folie.ist-passt .ez-karte--tasten { display: none; }
 .ez-folie.ist-passt .ez-buehne--mess { cursor: default; }
 .ez-passt-linien line { vector-effect: non-scaling-stroke; stroke-linecap: butt; }
-.ez-passt__halo { stroke: rgba(7,9,10,.26); stroke-width: 3; stroke-dasharray: 4px 4px; }
-.ez-passt__linie { stroke: var(--koralle); stroke-width: 1.2; stroke-dasharray: 4px 4px; opacity: .85; }
-.ez-passt-linien g.ist-zaehlt .ez-passt__halo { stroke: rgba(7,9,10,.42); stroke-width: 3.6; stroke-dasharray: 6px 4px; }
-.ez-passt-linien g.ist-zaehlt .ez-passt__linie { stroke-width: 1.8; stroke-dasharray: 6px 4px; opacity: 1; }
-.ez-passt-linien.zieht g { animation: ez-folgt 220ms var(--dna-druck) calc(var(--n, 0) * 50ms) both; }
+.ez-passt__halo { stroke: rgba(7,9,10,.14); stroke-width: 2.6; stroke-dasharray: var(--strich, 4px) 4px; }
+.ez-passt__linie { stroke: var(--koralle); stroke-width: 1.2; stroke-dasharray: var(--strich, 4px) 4px; opacity: .45; }
+.ez-passt__kappe-halo { stroke: rgba(7,9,10,.14); stroke-width: 2.6; }
+.ez-passt__kappe { stroke: var(--koralle); stroke-width: 1.2; opacity: .45; }
+.ez-passt-linien g.ist-zaehlt .ez-passt__halo { stroke: rgba(7,9,10,.42); stroke-width: 3.6; }
+.ez-passt-linien g.ist-zaehlt .ez-passt__linie { stroke-width: 1.8; opacity: 1; }
+.ez-passt-linien g.ist-zaehlt .ez-passt__kappe-halo { stroke: rgba(7,9,10,.42); stroke-width: 3.6; }
+.ez-passt-linien g.ist-zaehlt .ez-passt__kappe { stroke-width: 1.8; opacity: 1; }
+.ez-passt-linien.zieht g { animation: ez-folgt 220ms var(--dna-druck) calc(var(--n, 0) * 50ms) backwards; }
 /* Wert am Maß, das zählt: kleine dunkle Kapsel wie die Lupen-Etiketten, Zahl hell, „mm“ Silbergrau */
 .ez-passt__schild { position: absolute; z-index: 4; align-items: baseline; gap: 4px; height: 30px; padding: 0 12px; border-radius: var(--rund-pille); line-height: 30px; background: linear-gradient(180deg, rgba(52,52,55,.95), rgba(26,26,28,.95)); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), var(--putz-schatten); pointer-events: none; white-space: nowrap; }
 .ez-passt__schild b { font: 500 .9375rem/30px var(--font-sans); color: var(--weiss); letter-spacing: -.01em; }
 .ez-passt__schild small { font: 400 .75rem/30px var(--font-sans); color: var(--silbergrau); }
-.ez-passt-linien.zieht ~ .ez-passt__schild { animation: ez-folgt 220ms var(--dna-druck) 300ms both; }
+.ez-passt-linien.zieht ~ .ez-passt__schild { animation: ez-folgt 220ms var(--dna-druck) 300ms backwards; }
 /* Karte „Passt.“: das Maß, das zählt, als Zahl (G3), das Element darunter, je Richtung drei Kapseln (G11) */
 .ez-karte--passt { display: none; gap: 0; padding: 12px 16px 14px; background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss))); box-shadow: inset 0 -1px 0 rgba(7,9,10,.06), 0 30px 56px -22px rgba(0,0,0,.85), 0 2px 6px rgba(0,0,0,.4); }
 .ez-folie.ist-passt .ez-karte--passt { display: grid; }
-.ez-karte--passt.kommt { animation: ez-folgt 220ms var(--dna-druck) both; }
+.ez-karte--passt.kommt { animation: ez-folgt 220ms var(--dna-druck) backwards; }
 .ez-passt__haken { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--schwarz); color: var(--weiss); }
 .ez-passt__haken svg { width: 14px; height: 14px; }
 .ez-passt__zahl { display: flex; align-items: baseline; gap: 6px; margin: 2px 0 0; }
@@ -550,7 +554,7 @@ html:has(.ez-gross[open]) { overflow: hidden; overscroll-behavior: none; }
 .ez-passt__reihe.ist-klein i::before { background: var(--koralle); }
 .ez-passt__reihe.ist-klein i::after { content: ""; position: absolute; top: 50%; left: var(--l, 100%); width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 30%, transparent); }
 .ez-passt__reihe.ist-klein b { font-weight: 600; }
-.ez-karte--passt.kommt .ez-passt__reihe i::before { animation: ez-kapsel 320ms var(--dna-druck) calc(80ms + var(--n, 0) * 20ms) both; }
+.ez-karte--passt.kommt .ez-passt__reihe i::before { animation: ez-kapsel 320ms var(--dna-druck) calc(80ms + var(--n, 0) * 20ms) backwards; }
 @keyframes ez-kapsel { from { transform: scaleX(.12); } }
 .ez-passt__fuss { margin: 10px 0 0; font: 400 .8125rem/1.35 var(--font-sans); color: var(--textgrau); }
 @media (prefers-reduced-motion: reduce) { .ez-zeile__gleich { transition: none; } .ez-passt-linien.zieht g, .ez-passt-linien.zieht ~ .ez-passt__schild, .ez-karte--passt.kommt, .ez-karte--passt.kommt .ez-passt__reihe i::before { animation: none; } }
@@ -629,3 +633,92 @@ html:has(.ez-gross[open]) { overflow: hidden; overscroll-behavior: none; }
 @media (prefers-reduced-motion: reduce) { .ez-erg__chevron::before, .ez-erg__rund { transition: none; } }
 /* Liegt die Linie tief (Breite unten), steht „Groß ansehen“ oben rechts */
 .ez-buehne--mess.knopf-oben .ez-gross-auf { top: 10px; bottom: auto; left: auto; right: 10px; }
+/* Gremium K: „Hier auch …“ mit Zentimetern; getippt steht die Umrechnung oben, der Hinweis leise darunter mit seiner Legende */
+.ez-zeile__gleich small { margin-left: 6px; font: 400 .8125rem/1 var(--font-sans); color: var(--textgrau); }
+.ez-zeile__text--wert b { font-weight: 500; }
+.ez-zeile__leise { position: relative; display: block; padding-left: 0; font: 400 .8125rem/1.3 var(--font-sans); color: var(--textgrau); }
+.ez-folie[data-folie="messen"] .ez-zeile__text--wert .ez-zeile__leise::before { content: ""; position: absolute; left: -18px; top: calc(.65em - .9px); width: 12px; height: 1.8px; background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 6px); }
+.ez-folie[data-folie="messen"] .ez-zeile[data-wer="el"] .ez-zeile__text--wert .ez-zeile__leise::before { background: var(--violett); }
+.ez-folie[data-folie="messen"] .ez-zeile__knopf { height: 48px; }
+/* Ergebnis: Ansicht wie in der App (Gremium G, Veto: Funktionen bleiben): drei Rundknöpfe unten rechts (G13), „Zum Drehen ziehen“ unten links */
+.ez-erg__knoepfe { position: absolute; z-index: 5; right: 10px; bottom: 10px; display: flex; gap: 8px; }
+.ez-erg__rundknopf { display: grid; place-items: center; width: 44px; height: 44px; border: 0; padding: 0; border-radius: 50%; color: var(--weiss); background: radial-gradient(at 30% 20%, rgba(255,255,255,.16), rgba(255,255,255,.04) 70%), var(--schwarz); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--silbergrau) 55%, transparent), var(--putz-schatten); cursor: pointer; transition: transform 160ms var(--dna-druck); }
+.ez-erg__rundknopf svg { width: 18px; height: 18px; }
+.ez-erg__rundknopf:active:not(:disabled) { transform: scale(.94); transition-duration: 0s; }
+.ez-erg__rundknopf:disabled { color: var(--silbergrau); opacity: .55; cursor: default; }
+.ez-erg__rundknopf:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; }
+.ez-erg__drehen { left: 12px; bottom: 16px; }
+.ez-buehne--erg { cursor: grab; }
+/* „Falls zur Hand“ geschlossen als Anthrazit-Zeile (G14), erst offen weiß: kein weißer Block direkt über der Pille */
+.ez-erg__hand:not([open]) { background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
+.ez-erg__hand:not([open]) .ez-erg__hand-titel { color: var(--weiss); }
+.ez-erg__hand:not([open]) .ez-erg__hand-titel small { color: var(--silbergrau); }
+.ez-erg__hand:not([open]) .ez-erg__chevron { box-shadow: inset 0 0 0 1.5px var(--silbergrau); }
+.ez-erg__hand:not([open]) .ez-erg__chevron::before { background: var(--weiss); }
+.ez-erg__hand:not([open]) summary:focus-visible { outline-color: var(--weiss); }
+/* Felder nie unter dem Fuß (Gremium G) */
+html { scroll-padding-bottom: 120px; }
+#app { scroll-padding-bottom: 120px; }
+@media (prefers-reduced-motion: reduce) { .ez-erg__rundknopf { transition: none; } }
+
+/* ---------- Umsetzung Gremium, Detail-Profis und Vorlagen (27.10.2026, Schritte 4 bis Ende) ---------- */
+/* Ergebnis: die Öffnung ist die eine schwere Sache (Typografie Hebel 1, Material Hebel 2): Leuchtkachel über die volle Breite, die Zahl in
+   der Stimme von „Passt.“; das Element als zweite Kachel ohne Heldenzahl */
+.ez-erg__kachel--held, .ez-erg__kachel--zwei { grid-column: 1 / -1; }
+.ez-erg__kachel--held { isolation: isolate; overflow: hidden; padding: 14px 16px 16px; border-radius: var(--rund-l); }
+.ez-erg__kachel--held::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(60% 78% at 92% 0%, var(--violett), color-mix(in srgb, var(--violett) 42%, transparent) 34%, transparent 72%), radial-gradient(44% 56% at 4% 100%, var(--indigo), transparent 72%); }
+.ez-erg__kachel--held::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle, var(--silbergrau) 1px, transparent 1.4px) 7px 7px / 14px 14px; -webkit-mask-image: radial-gradient(56% 70% at 100% 0%, #000 26%, transparent 72%); mask-image: radial-gradient(56% 70% at 100% 0%, #000 26%, transparent 72%); opacity: .55; }
+.ez-erg__kachel--held .ez-erg__zahl { margin-top: 2px; gap: 4px; }
+.ez-erg__kachel--held .ez-erg__zahl b { font: 300 3rem/.95 var(--font-sans); letter-spacing: -.03em; white-space: nowrap; }
+.ez-erg__kachel--zwei .ez-erg__zahl b { font: 400 1.25rem/1.2 var(--font-sans); letter-spacing: -.01em; }
+.ez-erg__kachel--held .ez-erg__tag { margin-top: 8px; }
+@media (max-width: 374px) { .ez-erg__kachel--held .ez-erg__zahl b { font-size: 2.625rem; } }
+.ez-erg__wert { align-items: baseline; }
+.ez-erg__wert i { align-self: center; }
+/* „Passt.“: Licht oben rechts und Punktraster wie die Preis-Kachel der Startseite (Material Hebel 2); Etikett → Zahl 6 px */
+.ez-karte--passt { position: relative; isolation: isolate; overflow: hidden; }
+.ez-karte--passt::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(52% 58% at 96% 0%, color-mix(in srgb, var(--violett) 70%, var(--weiss)), color-mix(in srgb, var(--violett) 26%, transparent) 34%, transparent 72%); }
+.ez-karte--passt::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle, var(--silbergrau) 1px, transparent 1.4px) 7px 7px / 14px 14px; -webkit-mask-image: radial-gradient(60% 70% at 100% 0%, #000 30%, transparent 72%); mask-image: radial-gradient(60% 70% at 100% 0%, #000 30%, transparent 72%); }
+.ez-passt__zahl { margin-top: -2px; }
+.ez-passt__zahl b { line-height: .95; }
+/* Luft nach Hierarchie (Typografie Hebel 3) auf Ergebnis und den Folien danach: Titel → Text 12 px, Text → erste Karte 24 bis 32 px */
+.ez-folie[data-folie="ergebnis"] .ez-unterzeile { margin-top: 10px; }
+.ez-folie[data-folie="ergebnis"] .ez-erg__werte { margin-top: 24px; }
+.ez-folie.ez-ab .ez-frage .ez-unterzeile { margin-top: 12px; }
+.ez-folie.ez-ab .ez-frage + * { margin-top: 28px; }
+/* Etiketten auf weißen Karten 12 px wie auf Anthrazit (eine Stimme je Rolle) */
+.ez-karte .dna-label, .ez-karte--tasten .dna-label { font-size: .75rem; letter-spacing: .03em; }
+
+/* ---------- Detail-Profis Bewegung, Zeichen und UX (27.10.2026, Schritte 4 bis Ende) ---------- */
+/* Bewegung 3: der Haken geht sofort, wenn das Feld ein neues Maß zeigt; er kommt weiter in 150 ms */
+.ez-mass__feld:not(.ist-gespeichert) .ez-mass__haken { transition-duration: 0s; }
+/* UX 4: bei den Rändern kein Beispiel im leeren Feld, nur Schreibmarke und Einheit */
+.ez-mass__feld.ist-ohne .ez-mass__zb { display: none; }
+.ez-mass__feld.ist-ohne .ez-mass__marke { margin-left: 0; }
+/* UX 2: nach „Hier auch …“ blendet derselbe Knopf im nächsten Rand erst nach einer Pause ein (taub bis dahin) */
+.ez-zeile__gleich.ist-spaet { animation: ez-folgt 160ms var(--dna-druck) 540ms backwards; }
+/* Zeichen 7: eine Legende je Bedeutung; Öffnung 6/4 bei 1,8, Mitte blass 4/4 bei 1,2 */
+.ez-zeile__gleich i { width: 16px; background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 8px); }
+.ez-erg__wert i { width: 16px; background: repeating-linear-gradient(90deg, var(--koralle) 0 6px, transparent 6px 10px); }
+/* Bewegung 7: der violette Punkt markiert das kleinste Maß erst, wenn der Balken angekommen ist */
+.ez-karte--passt.kommt .ez-passt__reihe.ist-klein i::after { animation: ez-folgt 160ms var(--dna-druck) calc(340ms + var(--n, 0) * 20ms) backwards; }
+/* Bewegung 8: alle neuen Bedienelemente drücken gleich (0,97) */
+.ez-erg__rund:active, .ez-erg__rundknopf:active:not(:disabled) { transform: scale(.97); }
+.ez-erg__hand summary { transition: transform 160ms var(--dna-druck); }
+.ez-erg__hand summary:active { transform: scale(.97); transition-duration: 0s; }
+@media (prefers-reduced-motion: reduce) { .ez-zeile__gleich.ist-spaet, .ez-karte--passt.kommt .ez-passt__reihe.ist-klein i::after { animation: none; } .ez-erg__hand summary { transition: none; } }
+/* Frontend 2 (Vorlagen-Abgleich): „Passt.“ als ein Zustand: Linien, Schilder am Modell und Karte kommen gemeinsam in 180 ms; nur die
+   Kapselreihe füllt sich von links (G11), der Punkt folgt, wenn der Balken angekommen ist */
+.ez-passt-linien.zieht g, .ez-passt-linien.zieht ~ .ez-passt__schild { animation: ez-folgt 180ms var(--dna-druck) backwards; }
+.ez-karte--passt.kommt .ez-passt__reihe i::before { animation: ez-kapsel 320ms var(--dna-druck) calc(var(--n, 0) * 20ms) backwards; }
+.ez-karte--passt.kommt .ez-passt__reihe.ist-klein i::after { animation: ez-folgt 160ms var(--dna-druck) calc(300ms + var(--n, 0) * 20ms) backwards; }
+/* Typografie (Detail-Profi, 27.10.2026) */
+/* 3: „Hier auch … gemessen?“ bleibt unter 390 px einzeilig */
+@media (max-width: 389px) { .ez-zeile__gleich { gap: 8px; padding: 0 12px; font-size: .875rem; white-space: nowrap; } .ez-zeile__gleich small { margin-left: 2px; font-size: .75rem; } }
+/* 6: das Handlungswort im Notiz-Knopf 13 px */
+.ez-frage .dna-pille.ez-notizknopf { font-size: .8125rem; }
+/* 7: Platzhalter im Messfeld mit 3,6:1 (groß, 36/300), klar heller als ein getipptes Maß */
+.ez-mass__feld.is-leer b { color: color-mix(in srgb, var(--silbergrau) 50%, var(--textgrau)); }
+.ez-karte--passt.kommt { animation-duration: 180ms; }
+/* Ergebnis: die Bühne wächst auf 320 px, das Modell steht zwischen Chip und Knopfleiste in derselben Größe wie vorher (Bildfläche vor Dichte) */
+.ez-buehne--erg { height: 320px; }

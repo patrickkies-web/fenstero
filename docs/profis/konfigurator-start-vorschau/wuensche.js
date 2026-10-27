@@ -283,8 +283,10 @@
   $('wz-tiefe').addEventListener('click', function () { zeigeSchritt('tiefe', -1); });
 
   /* ---------- Schritte und Fuß ---------- */
+  /* Nach jedem Schritt ist die Pille 450 ms taub für Zeigerklicks (Doppeltipp, UX 1); Tastatur gleitet nicht (Bewegung 4) */
+  var schrittBis = 0, tastatur = function () { return V.tastatur ? V.tastatur() : false; };
   function zeigeSchritt(name, richtung) {
-    stand.schritt = name;
+    stand.schritt = name; if (richtung) schrittBis = Date.now() + 450;
     Object.keys(schritte).forEach(function (k) { schritte[k].hidden = k !== name; });
     var fr = name === 'frage';
     bandSetzen();
@@ -295,13 +297,15 @@
     $('wz-zurueck').setAttribute('aria-label', zur); folie.querySelector('[data-wz-zurueck]').setAttribute('aria-label', zur);
     if (richtung) { var app = d.getElementById('app'); if (app && app.scrollHeight > app.clientHeight) app.scrollTop = 0; window.scrollTo(0, 0); }
     var h = (fr ? schritte.frage : schritte[name]).querySelector('h1'); if (h && richtung) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
-    if (richtung && !V.ruhig()) { var ziel = fr ? schritte.frage : schritte[name]; ziel.classList.remove('ez-wz-kommt'); void ziel.offsetWidth; ziel.classList.add('ez-wz-kommt'); }
-    if (fr) { var q = D.fragen[stand.i]; V.status(stelle(q) + ': ' + $('wz-h1').textContent); vorladen(); }
+    if (richtung && !V.ruhig() && !tastatur()) { var ziel = fr ? schritte.frage : schritte[name]; ziel.classList.remove('ez-wz-kommt'); void ziel.offsetWidth; ziel.classList.add('ez-wz-kommt'); }
+    if (fr) { var q = D.fragen[stand.i]; V.status(stelle(q) + ': ' + $('wz-h1').textContent); }
+    /* auch aus Lage und Tiefe die erste Frage vorladen (Frontend 6) */
+    vorladen();
   }
   /* Bilder der nächsten Frage im Leerlauf laden (keine lazy-Bilder, aber auch nicht alle auf einmal) */
-  function vorladen() { var L = liste(), k = L.indexOf(stand.i), n = L[k + 1]; if (n == null) return; var q = D.fragen[n]; if (q.bild) { var im = new Image(); im.decoding = 'async'; im.src = q.bild.src; } }
+  function vorladen() { var L = liste(), k = stand.schritt === 'frage' ? L.indexOf(stand.i) : -1, n = L[k + 1]; if (n == null) return; var q = D.fragen[n]; if (q.bild) { var im = new Image(); im.decoding = 'async'; im.src = q.bild.src; vorladen.im = im; if (im.decode) im.decode().catch(function () {}); } }
   function weiter() {
-    if (stand.schritt === 'lage') { var f = lgFehlt(); if (f) { lgGrundJetzt = f; lgGrund(); var el = $(f === 'name' ? 't-name' : 'f-bru'); if (el) { el.focus({ preventScroll: true }); var box = el.closest('.lg-feld'); if (box && box.scrollIntoView) box.scrollIntoView({ block: 'center', behavior: V.ruhig() ? 'auto' : 'smooth' }); } return; } V.fenster.name = F.name; return zeigeSchritt('tiefe', 1); }
+    if (stand.schritt === 'lage') { var f = lgFehlt(); if (f) { lgGrundJetzt = f; lgGrund(); var el = $(f === 'name' ? 't-name' : 'f-bru'); if (el) { el.focus({ preventScroll: true }); var box = el.closest('.lg-feld'); if (box && box.scrollIntoView) box.scrollIntoView({ block: 'center', behavior: V.ruhig() || tastatur() ? 'auto' : 'smooth' }); } return; } V.fenster.name = F.name; return zeigeSchritt('tiefe', 1); }
     if (stand.schritt === 'tiefe') { var L0 = liste(); if (stand.i < L0[0]) stand.i = L0[0]; return zeigeSchritt('frage', 1); }
     var L = liste(), k = L.indexOf(stand.i);
     if (k < L.length - 1) { stand.i = L[k + 1]; return zeigeSchritt('frage', 1); }
@@ -316,7 +320,7 @@
     if (k > 0) { stand.i = L[k - 1]; return zeigeSchritt('frage', -1); }
     zeigeSchritt('tiefe', -1);
   }
-  $('wz-weiter').addEventListener('click', weiter);
+  $('wz-weiter').addEventListener('click', function (e) { if (e.detail !== 0 && Date.now() < schrittBis) return; weiter(); });
   $('wz-zurueck').addEventListener('click', zurueck);
   folie.querySelector('[data-wz-zurueck]').addEventListener('click', zurueck);
   /* Enter am Rechner wie „Weiter“ (nicht in Feldern und nicht auf Knöpfen) */

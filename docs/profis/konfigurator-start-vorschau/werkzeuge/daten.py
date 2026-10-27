@@ -31,6 +31,8 @@ for art in lage:
 if abs(lage['fenster'][1][1]-268.2) < 0.2: lage['fenster'][1][1]=264.5
 if 'fenster' in lage and abs(lage['fenster'][2][2]-1482.6) < 0.2: lage['fenster'][2][2]=1475.5
 s=open(JS,encoding='utf-8').read()
+# Nachmessung im Bild (Zeichen 4, 27.10.2026): Breite Mitte des Fensters von Mauerkante zu Mauerkante wie die Ränder
+if 'fenster' in lage: lage['fenster'][2]=[667.0,702.3,1480.0,702.3]
 s,n=re.subn(r'var MESS_LAGE = \{.*?\};','var MESS_LAGE = '+json.dumps(lage,separators=(',',':'))+';\n  var MESS_RAHMEN = '+json.dumps(rahmen,separators=(',',':'))+';',s,count=1,flags=re.S); assert n==1
 s=re.sub(r'(\n  var MESS_RAHMEN = \{.*?\};)\n  var MESS_RAHMEN = \{.*?\};', r'\1', s, count=1, flags=re.S)
 open(JS,'w',encoding='utf-8').write(s)

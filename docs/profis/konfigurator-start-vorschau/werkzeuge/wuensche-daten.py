@@ -3,7 +3,16 @@ from PIL import Image
 SP='/tmp/claude-0/-home-user-fenstero/97099377-e5e3-521d-870b-9fed47c94459/scratchpad/'
 V='/home/user/fenstero/docs/profis/konfigurator-start-vorschau/'
 R=SP+(sys.argv[1] if len(sys.argv)>1 else 'wunsch-render')+'/'
-F=json.load(open(R+'fragen.json')); G=json.load(open(SP+'wunsch-gloss.json')); T=json.load(open(SP+'app-lage/tiefe.json'))
+F=json.load(open(R+'fragen.json'));
+# Formen: Kurzbeschreibung je Form wie OPT.form der App in der Kachel; die Zeile „Rechteck · der Standard“ entfällt (steht in der Kachel)
+FORM_SUB={'rechteck':'der Standard','rundbogen':'Halbkreis oben','segment':'flacher Bogen oben','schraeg':'eine Seite höher','rund':'fest verglast, ohne Flügel','trapez':'beide Ecken schräg','dreieck':'Giebel, fest verglast'}
+for _q in F:
+    if _q.get('id')=='form':
+        for _b in _q['bloecke']:
+            if _b['typ']=='karten':
+                for _o in _b['opts']: _o['sb']=FORM_SUB.get(_o['v'],'')
+        _q['bloecke']=[_b for _b in _q['bloecke'] if _b['typ']!='aktuell']
+G=json.load(open(SP+'wunsch-gloss.json')); T=json.load(open(SP+'app-lage/tiefe.json'))
 os.makedirs(V+'bilder/wuensche',exist_ok=True)
 def bild(name):
     if not name: return None
@@ -11,7 +20,7 @@ def bild(name):
     if not os.path.exists(src): return None
     ziel='bilder/wuensche/'+name+'.webp'
     im=Image.open(src).convert('RGB')
-    w=1074
+    w=1170
     if im.size[0]>w: im=im.resize((w, round(im.size[1]*w/im.size[0])), Image.LANCZOS)
     im.save(V+ziel,'WEBP',quality=78,method=6)
     return {'src':ziel,'w':im.size[0],'h':im.size[1]}

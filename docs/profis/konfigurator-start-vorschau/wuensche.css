@@ -354,7 +354,7 @@
 .ez-wz-kapitel button[aria-current="step"] { box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1.8px var(--violett); }
 .ez-wz-kapitel button[aria-current="step"]::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 30%, transparent); }
 .ez-wz-kapitel button:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; }
-.ez-wz-kommt { animation: ez-folgt 220ms var(--dna-druck) both; }
+.ez-wz-kommt { animation: ez-folgt 220ms var(--dna-druck) backwards; }
 @media (prefers-reduced-motion: reduce) { .ez-wz-kachel, .ez-wz-kachel::before, .ez-wz-umschalter button, .ez-wz-haken, .ez-wz-haken svg, .ez-wz-stepper button, .ez-wz-schalter, .ez-wz-schalter::before, .ez-wz-tupfen button, .ez-wz-umriss, .ez-wz-leise, .ez-wz__bild.blendet.ist-an { transition: none !important; } .ez-wz-kommt { animation: none; } }
 @media (max-width: 374px) { .ez-wz-kacheln[data-spalten="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ez-wz-tupfen { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 /* Leuchten der Lage ohne Weichzeichner (Prüfung B5, G14 „Leuchten ohne Weichzeichner“): dieselben Verläufe mit längerem Auslauf statt

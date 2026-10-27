@@ -29,5 +29,5 @@ Die Pfade der Skripte sind die der Arbeitssitzung (Ordner `mess-render/`); vor d
   DOM und nimmt das Modell der Bühne auf, bei Auswahlfragen je Option (`DPR=4`; `OHNE_OPT=1` nur Inhalte und ein Bild je Frage).
 - `wunsch-gloss.mjs`: die Erklärungen (GLOSS der App) zu allen genannten Schlüsseln.
 - `wuensche-daten.py`: Bilder nach bilder/wuensche/ (WebP, 1074 px), Zeichnungen der App als Strichzeichnung, schreibt wuensche-daten.js.
-- `abschluss-html.py`: baut abschluss.html (Gespeichert, Fürs Angebot 1–3, Aufmaßblatt, E-Mail, Kasse, Freigeschaltet, Teilen).
+- Die Folien Gespeichert bis Teilen stehen in index.html (ursprünglich als eigenes Fragment gebaut, seit der Übernahme dort gepflegt).
 - Die Pfade sind die der Arbeitssitzung (Scratchpad); vor dem nächsten Lauf anpassen.

@@ -10,15 +10,16 @@
   var NB = ' ';
 
   /* ---------- Werte der App ---------- */
-  var PREIS = 7.99, MWST = true, EINF = { ende: '2026-11-17T23:00:00Z', bis: '17. November', danach: 12.99 }, GRENZE_FREI_TAGE = 7;
+  var PREIS = 7.99, MWST = true, EINF = { ende: '2026-11-17T23:00:00Z', bis: '17. November', danach: 12.99 }, GRENZE_FREI_TAGE = 7;
   var euro = function (n) { return n.toFixed(2).replace('.', ',') + NB + '€'; };
-  var einfText = function () { return Date.now() < Date.parse(EINF.ende) ? 'Einführungspreis bis ' + EINF.bis + ', danach ' + EINF.danach.toFixed(2).replace('.', ',') + ' €' : ''; };
-  var datumKurz = function (ms) { try { return new Date(ms).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return ''; } };
+  var einfText = function () { return Date.now() < Date.parse(EINF.ende) ? 'Einführungspreis bis ' + EINF.bis + ', danach ' + euro(EINF.danach) : ''; };
+  /* Daten wie Blatt und Kasse: „3. November“ mit geschütztem Leerzeichen (Typografie 2) */
+  var datumKurz = function (ms) { try { return new Date(ms).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' }).replace(' ', NB); } catch (e) { return ''; } };
   var ART_LABEL = { fenster: 'Fenster', balkon: 'Balkon- oder Terrassentür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Faltschiebewand' };
   var LAB = {
     gebaeude: { efh: 'Einfamilienhaus', dh: 'Doppelhaushälfte', rh: 'Reihenhaus', mfh: 'Mehrfamilienhaus', etw: 'Eigentumswohnung', denkmal: 'Denkmalschutz' },
-    zeit: { asap: 'So bald wie möglich', '3m': 'In 1 bis 3 Monaten', '6m': 'In 3 bis 6 Monaten', '12m': 'Später, erst Angebote' },
-    budget: { b1: 'bis 5.000 €', b2: '5.000 bis 10.000 €', b3: '10.000 bis 20.000 €', b4: 'über 20.000 €', b0: 'Weiß ich noch nicht' }
+    zeit: { asap: 'So bald wie möglich', '3m': 'In 1 bis 3 Monaten', '6m': 'In 3 bis 6 Monaten', '12m': 'Später, erst Angebote' },
+    budget: { b1: 'bis 5.000 €', b2: '5.000 bis 10.000 €', b3: '10.000 bis 20.000 €', b4: 'über 20.000 €', b0: 'Weiß ich noch nicht' }
   };
   /* Was der gewählte Förderweg bedeutet (FOERD_HINWEIS der App) und die Zahl dazu auf der Bühne */
   var FOERD_HINWEIS = {
@@ -26,7 +27,8 @@
     steuer: '20 % der Kosten über drei Jahre von der Steuer abziehen, wenn du selbst im Haus wohnst und es älter als zehn Jahre ist. Dein Fensterbauer stellt die Bescheinigung aus; die Fenster müssen gut dämmen (Uw höchstens 0,95).',
     offen: 'Dein Fensterbauer zeigt dir beide Wege: Zuschuss vom BAFA oder Steuerbonus. Für den Zuschuss muss der Antrag vor Beginn gestellt sein.'
   };
-  var FOERD_ZAHL = { bafa: ['15', 'Zuschuss vom BAFA'], steuer: ['20', 'Steuerbonus über drei Jahre'] };
+  /* Förderung als Zahl nur mit Bedingung (Veto im Gremium: keine Zusage ohne Bedingung) */
+  var FOERD_ZAHL = { bafa: ['15', 'Zuschuss vom BAFA, nur unter Bedingungen'], steuer: ['20', 'Steuerbonus über drei Jahre, nur unter Bedingungen'] };
   /* Erklärungen (GLOSS der App) */
   var GLOSS = {
     angaben: { t: 'Wozu die Angaben zum Haus?', x: ['Gebäude und Baujahr helfen deinem Fensterbauer, das Richtige anzubieten: Im Altbau ist mehr zu erwarten, im Baudenkmal gelten eigene Regeln. Aus der Zahl aller Fenster ergibt sich, ob ein Lüftungskonzept nötig wird.', 'Zeit, Budget und Förderung zeigen ihm, wie er planen soll. Alles ist freiwillig.'], tipp: 'Bist du unsicher, wähle die nächstliegende Antwort. Dein Fensterbauer fragt ohnehin noch einmal nach.' },
@@ -84,7 +86,7 @@
       var k = g.getAttribute('data-ab-wahl'), v = b.getAttribute('data-v'), f = g.closest('.ez-folie');
       if (k === 'pay') { kauf.pay = v; delete kauf.err.pay; } else proj[k] = v;
       wahlSetzen(f); var n = f.getAttribute('data-folie');
-      if (n === 'anfrage') hausSetzen(true); else if (n === 'anfrage2') zeitSetzen(); else if (n === 'anfrage3') papiereSetzen(); else if (n === 'kasse') fehlerSetzen();
+      if (n === 'anfrage') hausSetzen(false); else if (n === 'anfrage2') zeitSetzen(); else if (n === 'anfrage3') papiereSetzen(); else if (n === 'kasse') fehlerSetzen();
     });
   });
 
@@ -121,7 +123,7 @@
   Array.prototype.forEach.call(folien.fertig.querySelectorAll('[data-ab-akt]'), function (b) {
     b.addEventListener('click', function () {
       var a = b.getAttribute('data-ab-akt'), f = folien.fertig;
-      if (a === 'masse') wohin('ergebnis', -1);
+      if (a === 'masse') { E.ergVon = 'fertig'; wohin('ergebnis', -1); }
       else if (a === 'wuensche') { if (!wohin('wuensche', -1)) toast(f, 'Vorschau: In der App öffnen sich jetzt die Wünsche dieses Fensters.'); }
       else if (a === 'kopie') toast(f, 'Kopiert, Maße prüfen. Vorschau: In der App geht es mit „' + fName() + ' (Kopie)“ zum Ergebnis.');
       else if (a === 'weg') toast(f, 'Vorschau: Die App löscht das Fenster jetzt und zeigt die Liste („Fenster gelöscht“).');
@@ -132,9 +134,12 @@
   });
   $('ab-alle').addEventListener('click', function () { toast(folien.fertig, 'Vorschau: In der App öffnet sich hier die Liste deiner Fenster.'); });
   $('ab-fertig-weiter').addEventListener('click', function () { E.zeigeFolie('anfrage', 1); });
+  /* Mehr erfahren in den Hinweisen: Trefferfläche 44 px über ::after (UX 9), Klick wie bisher */
+  /* Gremium K (Muss): die drei Seiten „Fürs Angebot“ sind freiwillig, „Überspringen“ führt direkt zum Aufmaßblatt (Vorschlag, in der App neu) */
+  d.querySelectorAll('[data-ab-ueberspringen]').forEach(function (b) { b.addEventListener('click', function () { E.zeigeFolie(kauf.paid ? 'teilen' : 'blatt', 1); }); });
 
   /* ---------- Fürs Angebot 1: Haus ---------- */
-  var kapseln = $('ab-kapseln');
+  var kapseln = $('ab-kapseln'), kapselnVorher = 0;
   function hausSetzen(fuellt) {
     var f = folien.anfrage, n = fAnzahl(), t = E.num(proj.total), ueber = t && n > t / 3, h = '', i;
     setze(f, 'getauscht', String(n)); setze(f, 'von', t ? 'von ' + t : 'getauscht');
@@ -144,6 +149,8 @@
     else { for (i = 0; i < Math.min(n, 12); i++) h += '<i class="ist-getauscht" style="--n:' + i + '"></i>'; h += '<i class="ist-offen" style="--n:' + i + '"></i>'; }
     kapseln.innerHTML = h; kapseln.classList.toggle('ist-ueber', !!ueber);
     kapseln.classList.remove('fuellt'); if (fuellt && !E.ruhig()) { void kapseln.offsetWidth; kapseln.classList.add('fuellt'); }
+    else if (!E.ruhig()) Array.prototype.forEach.call(kapseln.querySelectorAll('i'), function (k, i) { if (i >= kapselnVorher) k.classList.add('ist-neu'); });
+    kapselnVorher = kapseln.querySelectorAll('i').length;
     setze(f, 'geb', LAB.gebaeude[proj.gebaeude]);
     var bj = f.querySelector('[data-ab="bj"]'); bj.hidden = !proj.baujahr; bj.textContent = proj.baujahr ? 'Baujahr ' + proj.baujahr : '';
     setze(f, 'bildtext-haus', 'Du tauschst ' + n + (t ? ' von ' + t + ' Fenstern' : ' Fenster') + '. ' + LAB.gebaeude[proj.gebaeude] + (proj.baujahr ? ', Baujahr ' + proj.baujahr : '') + '.');
@@ -154,7 +161,7 @@
   }
   $('ab-lueftung').addEventListener('click', function (e) { var b = e.target.closest('[data-ab-gloss2]'); if (b) folien.anfrage.querySelector('[data-ab-gloss="lueftung"]').click(); });
   Array.prototype.forEach.call(folien.anfrage.querySelectorAll('[data-ab-bump]'), function (b) {
-    b.addEventListener('click', function () { proj.total = String(Math.max(1, Math.min(999, E.num(proj.total) + Number(b.getAttribute('data-ab-bump'))))); hausSetzen(true); E.status('Fenster im ganzen Haus: ' + proj.total); });
+    b.addEventListener('click', function () { proj.total = String(Math.max(1, Math.min(999, E.num(proj.total) + Number(b.getAttribute('data-ab-bump'))))); hausSetzen(false); E.status('Fenster im ganzen Haus: ' + proj.total); });
   });
   $('ab-total').addEventListener('input', function () { var z = this.value.replace(/\D/g, '').slice(0, 3); if (z !== this.value) this.value = z; proj.total = z && Number(z) > 0 ? String(Math.min(999, Number(z))) : ''; hausSetzen(false); });
   $('ab-anfrage-weiter').addEventListener('click', function () { E.zeigeFolie('anfrage2', 1); });
@@ -217,18 +224,19 @@
   function fehlerSetzen() {
     [['pay', 'ab-pay-fehler', folien.kasse.querySelector('[data-ab-wahl="pay"]')], ['bedingungen', 'ab-agb-fehler', $('ab-agb').closest('.ez-ab-haken')], ['widerruf', 'ab-widerruf-fehler', $('ab-widerruf').closest('.ez-ab-haken')]].forEach(function (z) {
       var e = kauf.err[z[0]], p = $(z[1]); p.hidden = !e; p.textContent = e || ''; z[2].classList.toggle('ist-fehler', !!e);
+      var inp = z[2].querySelector('input'); if (inp) { if (e) inp.setAttribute('aria-invalid', 'true'); else inp.removeAttribute('aria-invalid'); }
     });
   }
   $('ab-agb').addEventListener('change', function () { kauf.bedingungen = this.checked; if (this.checked) delete kauf.err.bedingungen; fehlerSetzen(); });
   $('ab-widerruf').addEventListener('change', function () { kauf.widerruf = this.checked; if (this.checked) delete kauf.err.widerruf; fehlerSetzen(); });
-  $('ab-kaufen').addEventListener('click', function () {
+  $('ab-kaufen').addEventListener('click', function (ev) {
     kauf.err = {};
     if (!kauf.pay) kauf.err.pay = 'Bitte eine Zahlungsart wählen.';
     if (!kauf.bedingungen) kauf.err.bedingungen = 'Bitte stimme den AGB zu.';
     if (!kauf.widerruf) kauf.err.widerruf = 'Für die sofortige Lieferung brauchen wir deine Zustimmung.';
     if (Object.keys(kauf.err).length) {
       fehlerSetzen(); var erst = !kauf.pay ? folien.kasse.querySelector('[data-ab-wahl="pay"] button') : !kauf.bedingungen ? $('ab-agb') : $('ab-widerruf');
-      erst.focus({ preventScroll: true }); if (erst.scrollIntoView) erst.scrollIntoView({ block: 'center', behavior: E.ruhig() ? 'auto' : 'smooth' });
+      erst.focus({ preventScroll: true }); if (erst.scrollIntoView) erst.scrollIntoView({ block: 'center', behavior: E.ruhig() || ev.detail === 0 ? 'auto' : 'smooth' });
       E.status(Object.keys(kauf.err).map(function (k) { return kauf.err[k]; }).join(' ')); return;
     }
     kauf.paid = true; kauf.when = Date.now(); E.zeigeFolie('gekauft', 1);
@@ -282,8 +290,8 @@
 
   /* ---------- Anmelden: beim Zeigen füllen, die Notiz der Gruppe zeigen ---------- */
   var ZEIGEN = {
-    fertig: fertigZeigen, anfrage: function () { hausSetzen(true); }, anfrage2: zeitSetzen, anfrage3: function () { Array.prototype.forEach.call(folien.anfrage3.querySelectorAll('[data-ab-p]'), function (i) { i.value = proj[i.getAttribute('data-ab-p')]; }); papierSetzen(folien.anfrage3, false); },
-    blatt: function () { if (kauf.paid) return E.zeigeFolie('teilen'); blattZeigen(); }, konto: function () { $('ab-k-mail').value = kauf.mail; kontoSetzen(); }, kasse: kasseSetzen, gekauft: gekauftZeigen, teilen: teilenSetzen
+    fertig: fertigZeigen, anfrage: function (r) { kapselnVorher = 0; hausSetzen(!!r); }, anfrage2: zeitSetzen, anfrage3: function () { Array.prototype.forEach.call(folien.anfrage3.querySelectorAll('[data-ab-p]'), function (i) { i.value = proj[i.getAttribute('data-ab-p')]; }); papierSetzen(folien.anfrage3, false); },
+    blatt: function () { if (kauf.paid) return E.zeigeFolie('teilen'); blattZeigen(); }, konto: function () { if (!kauf.mail && proj.mail.trim()) kauf.mail = proj.mail.trim(); $('ab-k-mail').value = kauf.mail; kontoSetzen(); }, kasse: kasseSetzen, gekauft: gekauftZeigen, teilen: teilenSetzen
   };
   Object.keys(folien).forEach(function (n) {
     if (!folien[n]) return;

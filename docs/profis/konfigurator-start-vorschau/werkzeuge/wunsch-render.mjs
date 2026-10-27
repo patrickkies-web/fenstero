@@ -30,10 +30,13 @@ const lesen = () => page.evaluate(() => {
   const bloecke = [];
   if (panel) [...panel.children].forEach((el) => {
     const c = el.className || '';
-    if (/qcards|qformen|formen/.test(c) || el.querySelector(':scope > .qo')) bloecke.push({ typ: 'karten', cls: c, opts: [...el.querySelectorAll('.qo')].map((o) => { const b = o.querySelector('.qopt'); return { act: ar(b, 'data-act'), f: ar(b, 'data-f'), v: ar(b, 'data-v'), lbl: t(b.querySelector('.lbl')) || ar(b, 'aria-label') || t(b), sb: t(b.querySelector('.sb')), pr: t(b.querySelector('.pr')), an: ar(b, 'aria-pressed') === 'true', info: info(o), ico: b.querySelector('svg') ? b.querySelector('svg').outerHTML : '' }; }) });
+    /* Formen: Symbolknöpfe .qf statt Karten .qo (vorher leer ausgelesen) */
+    if (/qformen/.test(c)) bloecke.push({ typ: 'karten', cls: c, opts: [...el.querySelectorAll('.qf')].map((b) => ({ act: ar(b, 'data-act'), f: ar(b, 'data-f'), v: ar(b, 'data-v'), lbl: ar(b, 'aria-label'), sb: '', pr: '', an: ar(b, 'aria-pressed') === 'true', info: null, ico: (b.querySelector('svg') || {}).outerHTML || '' })) });
+    else if (/qcards|qformen|formen/.test(c) || el.querySelector(':scope > .qo')) bloecke.push({ typ: 'karten', cls: c, opts: [...el.querySelectorAll('.qo')].map((o) => { const b = o.querySelector('.qopt'); return { act: ar(b, 'data-act'), f: ar(b, 'data-f'), v: ar(b, 'data-v'), lbl: t(b.querySelector('.lbl')) || ar(b, 'aria-label') || t(b), sb: t(b.querySelector('.sb')), pr: t(b.querySelector('.pr')), an: ar(b, 'aria-pressed') === 'true', info: info(o), ico: b.querySelector('svg') ? b.querySelector('svg').outerHTML : '' }; }) });
     else if (/qswatches/.test(c)) bloecke.push({ typ: 'tupfen', label: ar(el, 'aria-label'), opts: [...el.querySelectorAll('.qsw')].map((b) => ({ act: ar(b, 'data-act'), side: ar(b, 'data-side'), v: ar(b, 'data-v'), name: ar(b, 'aria-label'), farbe: (b.querySelector('.c') || {}).style ? b.querySelector('.c').style.background : '', an: ar(b, 'aria-pressed') === 'true' })) });
     else if (/fw-zeile/.test(c)) bloecke.push({ typ: 'aktuell', b: t(el.querySelector('b')), small: t(el.querySelector('small')), aktion: [...el.querySelectorAll('button')].map((b) => ({ act: ar(b, 'data-act'), v: ar(b, 'data-v'), lbl: t(b) })) });
-    else if (/qlist/.test(c)) bloecke.push({ typ: 'liste', multi: /mehrfach/i.test(t(s.querySelector('.hd > p:not(.eyebrow)'))), opts: [...el.querySelectorAll('.qli')].map((o) => { const b = o.querySelector('button:not(.qci-i)'); return { act: ar(b, 'data-act'), v: ar(b, 'data-v'), lbl: t(b), an: ar(b, 'aria-pressed') === 'true', info: info(o), ico: b.querySelector('svg') ? b.querySelector('svg').outerHTML : '' }; }) });
+    /* Liste ohne Begriffe: die Knöpfe stehen direkt in .qlist (vorher leer ausgelesen, z. B. „Öffnet nach innen oder außen?“) */
+    else if (/qlist/.test(c)) bloecke.push({ typ: 'liste', multi: /mehrfach/i.test(t(s.querySelector('.hd > p:not(.eyebrow)'))), opts: [...(el.querySelector('.qli') ? el.querySelectorAll('.qli') : el.querySelectorAll(':scope > button'))].map((o) => { const b = o.matches('button') ? o : o.querySelector('button:not(.qci-i)'); return { act: ar(b, 'data-act'), v: ar(b, 'data-v'), lbl: t(b), an: ar(b, 'aria-pressed') === 'true', info: info(o), ico: b.querySelector('svg') ? b.querySelector('svg').outerHTML : '' }; }) });
     else if (/qsteps/.test(c)) bloecke.push({ typ: 'zaehler', opts: [...el.querySelectorAll('.qstep')].map((o) => ({ b: t(o.querySelector('.t b')), small: t(o.querySelector('.t small')), wert: t(o.querySelector('.stepper b')), d: ar(o.querySelector('button'), 'data-d'), act: ar(o.querySelector('button'), 'data-act') })) });
     else if (/seg/.test(c)) bloecke.push({ typ: 'segment', opts: [...el.querySelectorAll('button')].map((b) => ({ act: ar(b, 'data-act'), f: ar(b, 'data-f'), v: ar(b, 'data-v'), lbl: t(b), an: ar(b, 'aria-pressed') === 'true' })) });
     else if (/qchips/.test(c)) bloecke.push({ typ: 'chips', cls: c, opts: [...el.querySelectorAll('.chip')].map((b) => ({ act: ar(b, 'data-act'), f: ar(b, 'data-f'), v: ar(b, 'data-v'), lbl: t(b), an: ar(b, 'aria-pressed') === 'true', info: info(b.parentNode) })) });
@@ -66,7 +69,7 @@ for (let n = 0; n < 40; n++) {
   if (q.id !== 'lage' && q.id !== 'tiefe' && tun) {
     q.bild = await bild(`${nn}-${q.id}`);
     if (!OHNE_OPT) for (const b of q.bloecke) {
-      if (!['karten', 'chips', 'segment', 'tupfen'].includes(b.typ)) continue;
+      if (!['karten', 'chips', 'segment', 'tupfen'].includes(b.typ) && !(b.typ === 'liste' && !b.multi)) continue;
       const opts = b.typ === 'tupfen' ? b.opts.slice(0, 8) : b.opts, orig = b.opts.find((o) => o.an);
       for (const o of opts) {
         if (o.an) { o.bild = q.bild; continue; }

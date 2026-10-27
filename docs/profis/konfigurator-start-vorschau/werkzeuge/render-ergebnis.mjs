@@ -35,7 +35,9 @@ for (const art of Object.keys(WERTE)) {
     await page.click('button[data-act="rest-weiter"]'); await page.waitForTimeout(900);
   }
   await page.click('button[data-act="go"][data-v="ergebnis"]'); await page.waitForTimeout(2500);
-  const lage = await page.evaluate(() => {
+  /* Die Lagen erst lesen, wenn die Kamera steht: bei Faktor 6 rechnet SwiftShader langsam, nach 2,5 s fährt die Kamera noch (Zeichen 1,
+     27.10.2026). Darum nach der Aufnahme lesen; die Überdeckung ist nur unsichtbar, ihre Lage zählt weiter. */
+  const lagenLesen = () => page.evaluate(() => {
     const st = document.getElementById('w3d'), r0 = st.getBoundingClientRect();
     const rel = (el) => { const r = el.getBoundingClientRect(); return [+(r.x - r0.x).toFixed(1), +(r.y - r0.y).toFixed(1), +r.width.toFixed(1), +r.height.toFixed(1)]; };
     const o = { stage: [+r0.width.toFixed(1), +r0.height.toFixed(1)], dims: {} };
@@ -49,6 +51,7 @@ for (const art of Object.keys(WERTE)) {
   const r = await page.evaluate(() => { const st = document.getElementById('w3d'); st.scrollIntoView({ block: 'center' }); const b = st.getBoundingClientRect(); return { x: b.left, y: b.top, width: b.width, height: b.height }; });
   await page.waitForTimeout(1500);
   await page.screenshot({ path: `${OUT}/${art}.png`, clip: r, timeout: 240000, animations: 'disabled' });
+  const lage = await lagenLesen();
   writeFileSync(`${OUT}/lage-${art}.json`, JSON.stringify(lage, null, 1));
   console.log(art, JSON.stringify(info), Object.keys(lage.dims).join(','));
   await ctx.close();

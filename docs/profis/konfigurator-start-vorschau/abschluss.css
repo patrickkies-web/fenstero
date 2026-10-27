@@ -39,7 +39,7 @@
 .ez-ab-kapselreihe i.ist-getauscht { background: linear-gradient(180deg, color-mix(in srgb, var(--violett) 82%, var(--weiss)), var(--violett)); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
 /* Schraffur heißt „noch offen“ (G1): solange die Zahl aller Fenster fehlt */
 .ez-ab-kapselreihe i.ist-offen { flex: 6 1 0; background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--silbergrau) 40%, transparent) 0 1.3px, transparent 1.3px 6px), color-mix(in srgb, var(--anthrazit) 70%, var(--schwarz)); box-shadow: inset 0 0 0 1px rgba(168,164,169,.28); }
-.ez-ab-kapselreihe.fuellt i { animation: ez-ab-kapsel 260ms var(--dna-druck) calc(var(--n, 0) * 16ms) both; }
+.ez-ab-kapselreihe.fuellt i { animation: ez-ab-kapsel 260ms var(--dna-druck) calc(var(--n, 0) * 16ms) backwards; }
 @keyframes ez-ab-kapsel { from { transform: scaleY(.35); opacity: .3; } }
 /* Marke ein Drittel: ab hier verlangt die Norm ein Lüftungskonzept (Regel der App, DIN 1946-6) */
 .ez-ab-drittel { position: absolute; top: -18px; bottom: -4px; width: 0; border-left: 1.2px dashed var(--silbergrau); pointer-events: none; }
@@ -126,11 +126,11 @@
 .ez-ab-okmark svg { width: 100%; height: 100%; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .ez-ab-okmark circle { stroke: var(--violett); stroke-width: 2; stroke-dasharray: 176; }
 .ez-ab-okmark path { stroke: var(--weiss); stroke-width: 3.2; stroke-dasharray: 40; }
-.ez-ab-okmark.zeichnet circle { animation: ez-ab-strich 420ms var(--dna-druck) both; }
-.ez-ab-okmark.zeichnet path { animation: ez-ab-haken 260ms var(--dna-druck) 300ms both; }
+.ez-ab-okmark.zeichnet circle { animation: ez-ab-strich 420ms var(--dna-druck) backwards; }
+.ez-ab-okmark.zeichnet path { animation: ez-ab-haken 260ms var(--dna-druck) 300ms backwards; }
 @keyframes ez-ab-strich { from { stroke-dashoffset: 176; } }
 @keyframes ez-ab-haken { from { stroke-dashoffset: 40; } }
-.ez-buehne--blatt.oeffnet .ez-ab-papier__mass, .ez-buehne--blatt.oeffnet .ez-ab-papier__oeffnung, .ez-buehne--blatt.oeffnet [data-p="mo"], .ez-buehne--blatt.oeffnet [data-p="el"] { animation: ez-ab-rastet 220ms var(--dna-druck) 360ms both; }
+.ez-buehne--blatt.oeffnet .ez-ab-papier__mass, .ez-buehne--blatt.oeffnet .ez-ab-papier__oeffnung, .ez-buehne--blatt.oeffnet [data-p="mo"], .ez-buehne--blatt.oeffnet [data-p="el"] { animation: ez-ab-rastet 220ms var(--dna-druck) 360ms backwards; }
 @keyframes ez-ab-rastet { from { opacity: 0; } }
 
 /* ---------- Karten auf Schwarz: Anthrazit (G14), nie weiß ---------- */
@@ -283,3 +283,80 @@
 .ez-ab-modell.ist-objekt { width: auto; height: 78%; top: 54%; transform: translate(-50%, -50%); }
 /* Telefon: kurze Folien (E-Mail, Freigeschaltet) füllen den Bildschirm, die Pille steht unten wie überall */
 @media (max-width: 759px) { .ez-folie.ez-ab { min-height: 100svh; } }
+
+/* „bis zu“ vor der Förderzahl: klein wie die Einheit (Veto im Gremium gegen eine Zusage ohne Bedingung) */
+.ez-ab-bis { margin-right: 4px; }
+/* „Überspringen“ als Textknopf in der Unterzeile (keine zweite Pille), Ziel 44 px über ::after */
+.ez-ab-ueberspringen { position: relative; border: 0; padding: 0; background: transparent; color: var(--weiss); font: 500 .875rem/1.4 var(--font-sans); text-decoration: underline; text-decoration-color: var(--silbergrau); text-underline-offset: 3px; cursor: pointer; }
+.ez-ab-ueberspringen::after { content: ""; position: absolute; left: -8px; right: -8px; top: -12px; bottom: -12px; }
+.ez-ab-ueberspringen:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; border-radius: 4px; }
+.ez-ab-kosten b { font-weight: 500; color: inherit; }
+
+/* ---------- Umsetzung Gremium und Vorlagen (27.10.2026) ---------- */
+/* Fürs Angebot 1 und 2: derselbe Boden im Fensterlicht wie Seite 3, darüber ein Schleier; Kapseln und Stationen als Gegenstände mit
+   Lichtkante und Kontaktschatten, Licht unter dem Gewählten (Material Hebel 1) */
+.ez-buehne--zaehler .ez-ab-boden, .ez-buehne--zeit .ez-ab-boden { opacity: .42; object-position: 20% 30%; }
+.ez-buehne--zaehler .ez-ab-teich, .ez-buehne--zeit .ez-ab-teich { background: linear-gradient(180deg, rgba(7,9,10,.18) 0, rgba(7,9,10,.52) 44%, rgba(7,9,10,.84) 100%), radial-gradient(40% 36% at 24% 92%, color-mix(in srgb, var(--indigo) 46%, transparent), transparent 70%); }
+.ez-ab-kapselreihe i { background: linear-gradient(180deg, #3a3a3d, #2a2a2c 45%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), 0 1px 0 rgba(7,9,10,.9), 0 10px 12px -8px rgba(7,9,10,.95); }
+.ez-ab-kapselreihe i.ist-getauscht { position: relative; background: linear-gradient(180deg, color-mix(in srgb, var(--violett) 62%, var(--weiss)), var(--violett) 48%, color-mix(in srgb, var(--violett) 72%, var(--indigo))); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 1px 0 rgba(7,9,10,.9), 0 10px 12px -8px rgba(7,9,10,.95); }
+.ez-ab-station i { background: radial-gradient(at 30% 25%, #4a4a4d, var(--anthrazit) 70%); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 1.5px var(--silbergrau), 0 3px 4px -1px rgba(7,9,10,.9); }
+.ez-ab-station.ist-dran i { background: radial-gradient(at 30% 25%, color-mix(in srgb, var(--violett) 55%, var(--weiss)), var(--violett) 60%); box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 3px 4px -1px rgba(7,9,10,.9); }
+/* Förderung nicht als Heldenziffer (Veto F, Gremium G): klein, mit „bis zu“ und der Bedingung */
+.ez-ab-foerd b { font: 300 2rem/1 var(--font-sans); letter-spacing: -.02em; }
+.ez-ab-foerd span { font-size: .8125rem; }
+/* Aufmaßblatt: der Preis steht zuerst in der Karte und bekommt das Licht (Material Hebel 3, Typografie Hebel 2) */
+.ez-ab-preis { position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; }
+.ez-ab-preis .ez-ab-preis__zeile { order: -1; margin: 0 0 14px; padding: 0 0 14px; border-top: 0; border-bottom: 1px solid rgba(168,164,169,.22); }
+.ez-ab-preis .ez-ab-preis__zahl b { font: 200 4rem/.9 var(--font-sans); letter-spacing: -.04em; }
+.ez-ab-preis__licht { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(60% 44% at 90% 0%, var(--violett), color-mix(in srgb, var(--violett) 40%, transparent) 34%, transparent 72%); }
+/* Kasse: das € klebt an der Zahl */
+.ez-ab-betrag { grid-template-columns: auto 1fr; }
+/* Blatt als Gegenstand: harter Schlagschatten zur Lichtrichtung, Kontaktlinie, leichtere Schraffur (Material Hebel 4) */
+.ez-ab-papier { box-shadow: inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 0 rgba(168,164,169,.7), 0 0 0 .5px rgba(168,164,169,.5), 0 1px 1px rgba(7,9,10,.7), 9px 12px 4px -3px rgba(7,9,10,.72); }
+.ist-zu .ez-ab-papier__zeichnung, .ist-zu .ez-ab-papier__zeilen i { background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--silbergrau) 46%, var(--weiss)) 0 1px, transparent 1px 5px), var(--weiss); }
+
+/* ---------- Detail-Profis Bewegung, Zeichen und UX (27.10.2026) ---------- */
+/* Bewegung 5: die Welle läuft nur beim Hinkommen und beginnt bei 60 Prozent; bei +/− bewegt sich nur die neue Kapsel */
+@keyframes ez-ab-kapsel { from { transform: scaleY(.6); opacity: .3; } }
+.ez-ab-kapselreihe i.ist-neu { animation: ez-ab-kapsel 160ms var(--dna-druck) backwards; }
+/* Bewegung 6: der Haken zeichnet sich auf der stehenden Folie, von 12 Uhr an; Zeichen 8: Ring und Haken 1,8 */
+.ez-ab-okmark circle { stroke-width: 1.8; transform-box: fill-box; transform-origin: center; transform: rotate(-90deg); }
+.ez-ab-okmark path { stroke-width: 1.8; }
+.ez-ab-okmark.zeichnet circle { animation: ez-ab-strich 480ms cubic-bezier(.65,0,.35,1) 220ms backwards; }
+.ez-ab-okmark.zeichnet path { animation: ez-ab-haken 240ms var(--dna-druck) 620ms backwards; }
+/* Bewegung 8: Rundknöpfe 0,97, Zeilen drücken mit */
+.ez-ab-rund:active { transform: scale(.97); }
+.ez-ab-zeile { transition: transform 160ms var(--dna-druck); }
+.ez-ab-zeile:active { transform: scale(.97); transition-duration: 0s; }
+/* Bewegung 9: der Hinweis kommt von der Pille (180 ms) und geht schneller, nur über die Deckkraft (140 ms) */
+.ez-ab-toast { transition: opacity 180ms var(--dna-auftritt), transform 180ms var(--dna-auftritt); }
+@starting-style { .ez-ab-toast { opacity: 0; transform: translate(-50%, 4px); } }
+.ez-ab-toast.geht { transition: opacity 140ms var(--dna-druck); }
+/* Zeichen 8: Haken auf Violett immer Schwarz */
+.ez-ab-haken input:checked + .ez-ab-haken__kasten { color: var(--schwarz); }
+/* Zeichen 10: Einführungspreis ist eine Auskunft, kein „jetzt handeln“: Listenpunkt 6 px in Silbergrau; Papier-Zeichnung 1,2 mit 4/4 */
+.ez-ab-preis__einf::before { background: var(--silbergrau); }
+.ez-ab-papier__oeffnung { border: 0; background: linear-gradient(90deg, var(--koralle) 50%, transparent 0) 0 0 / 8px 1.2px repeat-x, linear-gradient(90deg, var(--koralle) 50%, transparent 0) 0 100% / 8px 1.2px repeat-x, linear-gradient(180deg, var(--koralle) 50%, transparent 0) 0 0 / 1.2px 8px repeat-y, linear-gradient(180deg, var(--koralle) 50%, transparent 0) 100% 0 / 1.2px 8px repeat-y; }
+.ez-ab-papier__element { border-width: 1.2px; }
+/* UX 9: „Mehr erfahren“ mit Trefferfläche 44 px */
+.ez-ab-mehr { position: relative; }
+.ez-ab-mehr::after { content: ""; position: absolute; inset: -12px -4px; }
+/* UX 5: die Links zum Nachlesen stehen unter den Haken, mit Luft nach oben */
+.ez-ab-recht .ez-ab-klein { margin-top: 10px; line-height: 1.9; }
+@media (prefers-reduced-motion: reduce) { .ez-ab-kapselreihe i.ist-neu, .ez-ab-okmark.zeichnet circle, .ez-ab-okmark.zeichnet path { animation: none; } .ez-ab-zeile, .ez-ab-toast { transition: none; } }
+/* Typografie (Detail-Profi, 27.10.2026) */
+/* 4: die Unterzeile spricht von Schritt 4 bis Teilen mit einer Stimme (14/1,4) */
+.ez-folie.ez-ab .ez-unterzeile { font-size: .875rem; line-height: 1.4; }
+/* 5: Formular-Etiketten 12 px wie alle Etiketten (G15) */
+.ez-ab-form .dna-label { font-size: .75rem; }
+/* 8: vier gleiche Kacheln, kein Umbruch in „Wünsche ändern“ */
+.ez-ab-kachel { gap: 8px; padding: 10px 12px; }
+.ez-ab-kachel span { white-space: nowrap; }
+/* 9: Karten in drei Ebenen (Label, Titel, Meta oder Pille), die Sätze stehen darunter */
+.ez-ab-weiter-karte .ez-ab-weg__titel { display: block; margin: 6px 0 14px; }
+.ez-ab-karte__meta { margin: 8px 0 0; font: 400 .875rem/1.4 var(--font-sans); color: var(--silbergrau); text-wrap: pretty; }
+.ez-ab-hilfe + .ez-ab-hilfe { margin-top: 6px; }
+.ez-ab-hilfe--weg { margin: 10px 2px 14px; }
+/* 10: 48 px ist eine kleine Zahl: Gewicht 300, Einheit 14 */
+.ez-ab-betrag b { font-weight: 300; }
+.ez-ab-betrag small { font-size: .875rem; }
