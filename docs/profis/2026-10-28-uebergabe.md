@@ -10,7 +10,7 @@ ist, und gibt keinen neuen Auftrag. Den Auftrag schickt der Inhaber im neuen Cha
   - Basis: main bei `1bba0d8` („Merge branch 'claude/fensterbauer-ohne-anker'“).
   - `b54f9b7`: Bestandsaufnahme, erste Fassung (nur erster Bildschirm je Seite).
   - `b5c936b`: zweite Fassung nach Korrektur des Inhabers (jede Seite in voller Länge, Ratgeber einzeln, Fensterbau Brandt).
-  - danach: diese Übergabedatei.
+  - danach: diese Übergabedatei (`c5ee892`) und eine Korrektur der Seitentitel in den Tabellen.
 - **Dateien auf dem Zweig:**
   - `docs/profis/2026-10-28-altes-design.md`: ausführliches Protokoll (Methode, Befund, Tabelle je Seite).
   - `docs/profis/2026-10-28-uebergabe.md`: diese Datei.
