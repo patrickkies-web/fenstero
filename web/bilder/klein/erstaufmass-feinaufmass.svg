@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 384" width="480" height="384">
+
+
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#07090a"/></marker></defs>
+<rect width="480" height="384" rx="16" fill="#ffffff"/>
+<g stroke-width="6.6">
+<rect x="16" y="16" width="448" height="84" rx="10" fill="#ecebec" stroke="#f88962"/>
+<rect x="16" y="128" width="448" height="84" rx="10" fill="#ecebec" stroke="#f88962"/>
+<rect x="16" y="240" width="448" height="84" rx="10" fill="#eceef1" stroke="#897efc"/>
+</g>
+<g stroke="#07090a" stroke-width="4.4">
+<line x1="240" y1="101" x2="240" y2="126"/><line x1="240" y1="213" x2="240" y2="238"/>
+</g>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+
+
+
+
+
+
+
+</g>
+</svg>

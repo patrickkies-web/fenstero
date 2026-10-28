@@ -36,14 +36,14 @@ Die drei Motive aus den Beiträgen können direkt wiederverwendet werden: der Wa
 | `beispiel/essential`, `beispiel/plus`, `beispiel/signature` | 640 × 400 | Seite /fuer-fensterbauer/, Paketkarten, Bereich „Beispiel · erfundener Betrieb“: echte Aufnahmen von Beispiel-Instanzen des erfundenen Betriebs Fensterbau Brandt (Gold #e3b75a), aufgenommen im Vorschau-Server mit `DATEN_ATTRAPPE=1` bei 1280 × 800 (`/__saat` mit den Instanzen brandt-e, brandt-p, brandt-s; Plus mit eigener Startseite, Signature im Dashboard mit drei eingeladenen Kunden); je unter 30 KB | – | – |
 | `beispiel/start-telefon` | 600 × 1240 | Seite /fuer-fensterbauer/, Bühne „So funktioniert es“, Bildschirm 1, und am Telefon über der ersten Schrittkarte: die Startseite der Plus-Instanz von Fensterbau Brandt bei 390 × 806, zweifach | – | – |
 | `fuer-fensterbauer` | 1200 × 1500 | nicht mehr eingebaut (früheres Startbild der Seite, Astronaut mit Zollstock); bleibt als Vorlage liegen | – | – |
-| `ratgeber` | 1600 × 1000 | Übersicht /ratgeber/, über dem Weg | Prüfen · Entscheiden · Auswählen · Ausmessen · Vergleichen · Einbauen | 2 |
-| `weg-pruefen` | 1600 × 1000 | Ratgeber, Schritt 1 (Übersicht; in den Seiten als Bild in „Nächster Schritt“) | – | 2 |
-| `weg-entscheiden` | 1600 × 1000 | Ratgeber, Schritt 2 | – | 2 |
-| `weg-auswaehlen` | 1600 × 1000 | Ratgeber, Schritt 3 | – | 2 |
-| `weg-ausmessen` | 1600 × 1000 | Ratgeber, Schritt 4 | – | 2 |
-| `weg-vergleichen` | 1600 × 1000 | Ratgeber, Schritt 5 | – | 2 |
-| `weg-einbauen` | 1600 × 1000 | Ratgeber, Schritt 6 | – | 2 |
-| `fehler` | 1600 × 1000 | Fehlerseite 404 | – | 3 |
+| `ratgeber` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-pruefen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-entscheiden` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-auswaehlen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-ausmessen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-vergleichen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-einbauen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `fehler` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): die Fehlerseite zeigt ein Fenster aus dem 3-D-Modell der App (`/bilder/start/reihe/trapez.webp`) auf einer Bühne | – | – |
 
 ## Prompts
 
@@ -88,6 +88,10 @@ ohne Bildschirm wählen oder den Bildschirm leer lassen).
   dort bleiben die Zeichnungen.
 - Die Prüfsuite verlangt für Bilder in Ratgebern Breite, Höhe und einen Alternativtext ab 40 Zeichen; Fotos unter `/bilder/foto/`
   dürfen WebP sein, Zeichnungen bleiben SVG.
+- Zeichnungen (`web/bilder/*.svg`, seit 28.10.2026): `python3 scripts/zeichnungen-dna.py` bringt sie in die Druckpalette der DNA, bettet
+  je Datei eine Teilmenge von Outfit ein (ein SVG als `<img>` lädt keine Schrift der Seite, sonst erschiene Arial) und schreibt
+  Kleinbilder ohne Schrift, gestrichelte Linien und Pfeilspitzen mit 2,2-mal so kräftigen Strichen nach `web/bilder/klein/` (für die
+  Zeilen der Übersicht, 96 px breit). Ein zweiter Lauf ändert nichts. Braucht fontTools und brotli (`pip install fonttools brotli`).
 
 ## Plätze für die Fensterbauer-Seiten (Konfigurator-Pakete, Wunsch des Inhabers vom 23.10.2026)
 

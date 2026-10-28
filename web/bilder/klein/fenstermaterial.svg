@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400">
+
+
+<rect width="480" height="400" rx="16" fill="#ffffff"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+<!-- Kunststoff -->
+<g transform="translate(24 24)">
+<rect width="204" height="160" rx="10" fill="#f6f6f7"/>
+<rect x="20" y="14" width="64" height="80" fill="#ffffff" stroke="#07090a" stroke-width="4.4"/>
+<path d="M41 14V94M62 14V94M20 41H84M20 67H84" stroke="#07090a" stroke-width="3.3" fill="none"/>
+<rect x="84" y="28" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="3.3"/>
+<rect x="84" y="48" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="3.3"/>
+<rect x="84" y="68" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="3.3"/>
+
+
+</g>
+<!-- Holz -->
+<g transform="translate(252 24)">
+<rect width="204" height="160" rx="10" fill="#f6f6f7"/>
+<rect x="20" y="14" width="64" height="80" fill="#efeeef" stroke="#07090a" stroke-width="4.4"/>
+<path d="M28 20C40 38 30 64 44 90M52 18C62 40 52 66 64 92M72 20C78 38 70 64 78 88" stroke="#07090a" stroke-width="2.2" stroke-opacity=".45" fill="none"/>
+<rect x="84" y="28" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="3.3"/>
+<rect x="84" y="48" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="3.3"/>
+<rect x="84" y="68" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="3.3"/>
+
+
+</g>
+<!-- Holz-Alu -->
+<g transform="translate(24 208)">
+<rect width="204" height="160" rx="10" fill="#f6f6f7"/>
+<rect x="20" y="14" width="64" height="80" fill="#efeeef" stroke="#07090a" stroke-width="4.4"/>
+<path d="M30 20C42 38 32 64 46 90M56 18C66 40 56 66 68 92" stroke="#07090a" stroke-width="2.2" stroke-opacity=".45" fill="none"/>
+<rect x="8" y="10" width="12" height="88" rx="2" fill="#c4c1c5" stroke="#07090a" stroke-width="3.3"/>
+<rect x="84" y="28" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="3.3"/>
+<rect x="84" y="48" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="3.3"/>
+<rect x="84" y="68" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="3.3"/>
+
+
+</g>
+<!-- Aluminium -->
+<g transform="translate(252 208)">
+<rect width="204" height="160" rx="10" fill="#f6f6f7"/>
+<rect x="20" y="14" width="26" height="80" fill="#c4c1c5" stroke="#07090a" stroke-width="4.4"/>
+<rect x="46" y="14" width="12" height="80" fill="#07090a"/>
+<rect x="58" y="14" width="26" height="80" fill="#c4c1c5" stroke="#07090a" stroke-width="4.4"/>
+<rect x="84" y="28" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="3.3"/>
+<rect x="84" y="48" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="3.3"/>
+<rect x="84" y="68" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="3.3"/>
+
+
+</g>
+</g>
+</svg>

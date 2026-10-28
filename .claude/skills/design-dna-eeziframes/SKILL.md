@@ -219,6 +219,15 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Fensterbau Brandt aus der Paket-Vorschau, lokal nachgestellt, und das in der Lieferung sagen. Bilder in einer Liste laden sofort
   (kein `loading="lazy"`). Werkzeug: `docs/profis/werkzeuge/altes-design.mjs`. Vorschlag für seine DNA (Abschnitt 7):
   „Geprüft heißt: jede Seite ganz gesehen, mit Beispielen, die der Inhaber kennt.“
+- Ratgeber einheitlich, Inhalte bleiben, Konfigurator bleibt (Inhaber, 28.10.2026: „die Inhalte so zu lassen wie sie sind aber das
+  Design zu verändern … so dass der Ratgeber einheitlich aussieht“; „den Konfigurator der Seite sowie die Seiten, die bereits dem neuen
+  Design entsprechen, lässt du, wie sie sind“; „die Links zu überprüfen, ob die Wege auch passend sind“): Alle 24 Ratgeber, die 5 Seiten
+  Wissen für Fensterbauer, die Rechtstexte und die Fehlerseite stehen in einer Vorlage (Generatoren `scripts/ratgeber-bausteine.mjs` und
+  `scripts/recht-bausteine.mjs`); ihr Text bleibt Wort für Wort, nur Auszeichnung (Etikett, geschütztes Leerzeichen, kräftiger erster
+  Satz eines Fehlers) und Navigation kommen dazu. Konfigurator beim Fensterbauer (Start, Signature-Dashboard) und Seiten im neuen Look
+  werden nicht angefasst, auch wenn die Bestandsaufnahme sie als alt führt; das steht in der Lieferung als offen. Jede Lieferung prüft
+  die Links der berührten Seiten (intern alle, extern mit Status). Protokoll docs/profis/2026-10-28-ratgeber-dna.md. Vorschlag für seine
+  DNA (Abschnitt 7): „Überarbeiten heißt: Gestalt neu, Wortlaut gleich, Wege geprüft.“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

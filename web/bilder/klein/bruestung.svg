@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 380" width="480" height="380">
+
+
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#f88962"/></marker></defs>
+<rect width="480" height="380" rx="16" fill="#ffffff"/>
+<rect x="16" y="196" width="254" height="14" fill="#a8a4a9"/>
+<rect x="250" y="24" width="44" height="60" fill="#d2d0d3"/>
+<rect x="262" y="84" width="20" height="62" fill="#eceef1" stroke="#897efc" stroke-width="6.6"/>
+<rect x="250" y="146" width="44" height="220" fill="#d2d0d3"/>
+<rect x="236" y="142" width="22" height="6" fill="#a8a4a9"/>
+<line x1="294" y1="350" x2="464" y2="350" stroke="#07090a" stroke-width="6.6"/>
+
+<line x1="226" y1="195" x2="226" y2="143" stroke="#f88962" stroke-width="5.5"/>
+
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+
+
+
+
+
+
+
+</g>
+</svg>

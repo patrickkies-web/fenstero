@@ -1,48 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360" role="img" aria-labelledby="t d"><style id="schrift">@font-face{font-family:"Outfit";font-weight:400 699;src:url(data:font/woff2;base64,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) format("woff2")}@font-face{font-family:"Outfit";font-weight:700 900;src:url(data:font/woff2;base64,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) format("woff2")}</style>
 <title id="t">Fenster beschlagen: innen, zwischen den Scheiben oder außen</title>
 <desc id="d">Drei Schnitte durch eine Isolierscheibe, links jeweils der Raum, rechts draußen. Tropfen auf der Raumseite bedeuten zu feuchte Luft, Tropfen zwischen den Scheiben einen undichten Randverbund, Tropfen außen gut dämmendes Glas.</desc>
 <rect width="480" height="360" rx="16" fill="#ffffff"/>
-<rect x="68" y="64" width="36" height="10" fill="#141414"/>
-<rect x="68" y="234" width="36" height="10" fill="#141414"/>
-<rect x="68" y="74" width="36" height="160" fill="#f4f8fd"/>
-<rect x="60" y="64" width="8" height="180" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
-<rect x="104" y="64" width="8" height="180" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
-<circle cx="51" cy="98" r="5.5" fill="#c2410c"/>
-<circle cx="51" cy="126" r="5.5" fill="#c2410c"/>
-<circle cx="51" cy="154" r="5.5" fill="#c2410c"/>
-<circle cx="51" cy="182" r="5.5" fill="#c2410c"/>
-<circle cx="51" cy="210" r="5.5" fill="#c2410c"/>
-<rect x="222" y="64" width="36" height="10" fill="#141414"/>
-<rect x="222" y="234" width="36" height="10" fill="#141414"/>
-<rect x="222" y="74" width="36" height="160" fill="#f4f8fd"/>
-<rect x="214" y="64" width="8" height="180" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
-<rect x="258" y="64" width="8" height="180" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
-<circle cx="247" cy="98" r="5.5" fill="#c2410c"/>
-<circle cx="233" cy="126" r="5.5" fill="#c2410c"/>
-<circle cx="247" cy="154" r="5.5" fill="#c2410c"/>
-<circle cx="233" cy="182" r="5.5" fill="#c2410c"/>
-<circle cx="247" cy="210" r="5.5" fill="#c2410c"/>
-<rect x="376" y="64" width="36" height="10" fill="#141414"/>
-<rect x="376" y="234" width="36" height="10" fill="#141414"/>
-<rect x="376" y="74" width="36" height="160" fill="#f4f8fd"/>
-<rect x="368" y="64" width="8" height="180" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
-<rect x="412" y="64" width="8" height="180" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
-<circle cx="429" cy="98" r="5.5" fill="#c2410c"/>
-<circle cx="429" cy="126" r="5.5" fill="#c2410c"/>
-<circle cx="429" cy="154" r="5.5" fill="#c2410c"/>
-<circle cx="429" cy="182" r="5.5" fill="#c2410c"/>
-<circle cx="429" cy="210" r="5.5" fill="#c2410c"/>
-<g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414" text-anchor="middle">
+<rect x="68" y="64" width="36" height="10" fill="#07090a"/>
+<rect x="68" y="234" width="36" height="10" fill="#07090a"/>
+<rect x="68" y="74" width="36" height="160" fill="#f5f6f8"/>
+<rect x="60" y="64" width="8" height="180" fill="#eceef1" stroke="#897efc" stroke-width="2"/>
+<rect x="104" y="64" width="8" height="180" fill="#eceef1" stroke="#897efc" stroke-width="2"/>
+<circle cx="51" cy="98" r="5.5" fill="#f88962"/>
+<circle cx="51" cy="126" r="5.5" fill="#f88962"/>
+<circle cx="51" cy="154" r="5.5" fill="#f88962"/>
+<circle cx="51" cy="182" r="5.5" fill="#f88962"/>
+<circle cx="51" cy="210" r="5.5" fill="#f88962"/>
+<rect x="222" y="64" width="36" height="10" fill="#07090a"/>
+<rect x="222" y="234" width="36" height="10" fill="#07090a"/>
+<rect x="222" y="74" width="36" height="160" fill="#f5f6f8"/>
+<rect x="214" y="64" width="8" height="180" fill="#eceef1" stroke="#897efc" stroke-width="2"/>
+<rect x="258" y="64" width="8" height="180" fill="#eceef1" stroke="#897efc" stroke-width="2"/>
+<circle cx="247" cy="98" r="5.5" fill="#f88962"/>
+<circle cx="233" cy="126" r="5.5" fill="#f88962"/>
+<circle cx="247" cy="154" r="5.5" fill="#f88962"/>
+<circle cx="233" cy="182" r="5.5" fill="#f88962"/>
+<circle cx="247" cy="210" r="5.5" fill="#f88962"/>
+<rect x="376" y="64" width="36" height="10" fill="#07090a"/>
+<rect x="376" y="234" width="36" height="10" fill="#07090a"/>
+<rect x="376" y="74" width="36" height="160" fill="#f5f6f8"/>
+<rect x="368" y="64" width="8" height="180" fill="#eceef1" stroke="#897efc" stroke-width="2"/>
+<rect x="412" y="64" width="8" height="180" fill="#eceef1" stroke="#897efc" stroke-width="2"/>
+<circle cx="429" cy="98" r="5.5" fill="#f88962"/>
+<circle cx="429" cy="126" r="5.5" fill="#f88962"/>
+<circle cx="429" cy="154" r="5.5" fill="#f88962"/>
+<circle cx="429" cy="182" r="5.5" fill="#f88962"/>
+<circle cx="429" cy="210" r="5.5" fill="#f88962"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a" text-anchor="middle">
 <text x="86" y="46" font-size="20" font-weight="700">innen</text>
-<text x="86" y="276" font-weight="700" fill="#c2410c">Luft zu</text>
-<text x="86" y="300" font-weight="700" fill="#c2410c">feucht</text>
+<text x="86" y="276" font-weight="700" fill="#b4502f">Luft zu</text>
+<text x="86" y="300" font-weight="700" fill="#b4502f">feucht</text>
 <text x="240" y="46" font-size="20" font-weight="700">zwischen</text>
-<text x="240" y="276" font-weight="700" fill="#c2410c">Randverbund</text>
-<text x="240" y="300" font-weight="700" fill="#c2410c">undicht</text>
+<text x="240" y="276" font-weight="700" fill="#b4502f">Randverbund</text>
+<text x="240" y="300" font-weight="700" fill="#b4502f">undicht</text>
 <text x="394" y="46" font-size="20" font-weight="700">außen</text>
-<text x="394" y="276" font-weight="700" fill="#1d4ed8">gutes Glas,</text>
-<text x="394" y="300" font-weight="700" fill="#1d4ed8">kein Mangel</text>
+<text x="394" y="276" font-weight="700" fill="#3c3a66">gutes Glas,</text>
+<text x="394" y="300" font-weight="700" fill="#3c3a66">kein Mangel</text>
 <text x="240" y="340">links der Raum, rechts draußen</text>
 </g>
-<line x1="163" y1="24" x2="163" y2="306" stroke="#ecebe6" stroke-width="2"/><line x1="317" y1="24" x2="317" y2="306" stroke="#ecebe6" stroke-width="2"/>
+<line x1="163" y1="24" x2="163" y2="306" stroke="#ecebec" stroke-width="2"/><line x1="317" y1="24" x2="317" y2="306" stroke="#ecebec" stroke-width="2"/>
 </svg>
