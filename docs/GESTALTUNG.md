@@ -513,7 +513,7 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     das Element), unten zurück und „Weiter zu den Fotos“. Am Laptop füllt die Folie den ganzen Bildschirm (`view.voll`, Klasse
     `dna-voll` an html): Bühne links, rechts eine Spalte von 380 px mit Kacheln, Stelle und Pille. Wischen auf der Bühne und Pfeiltasten
     wechseln das Element; es blendet in 220 ms aus der Wischrichtung ein, Tastatur und „weniger Bewegung“ ohne Übergang.
-  - Fotos (`fotosDna`, app.css Abschnitt „Fotos im Look der Design-DNA“): Bühne mit Beispielfoto (`beispiel-innen.webp`), Sucherecken
+  - Fotos (`fotosDna`, app.css Abschnitt „Fotos im Look der Design-DNA“): Bühne mit Beispielfoto (`beispiel-innen-v2.webp`), Sucherecken
     und Waage, antippen öffnet die Kamera für innen; mit Foto zeigt die Bühne das Foto mit „Von innen · KI liest/KI fertig“ (antippen:
     Großansicht). Darunter der Tipp (mit Foto die Neigung), die Frage mit i („Was liest die KI …“) und Notiz, die Fotoplätze auf weißer
     Karte (leer gestrichelt, voll mit Foto, Stand der KI und Entfernen), unten zurück und „Weiter zum Messen“ (neue Öffnung: „Weiter zum

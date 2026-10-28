@@ -3192,7 +3192,7 @@ function fotosDna() {
   const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
   const chipUnten = p ? '<b>' + (seite === 'in' ? 'Von innen' : 'Von außen') + '</b>' + (p.demo ? ' · Beispiel' : '') + (ftKi(seite) ? ' · ' + ftKi(seite) : '') : '<b>Beispiel</b> · so sieht ein gutes Foto aus';
   const buehne = '<button type="button" class="ft-buehne" data-stand="' + (p ? 'foto' : 'beispiel') + '" data-act="' + (p ? 'foto-gross' : 'foto-auf') + '" data-v="' + (seite || 'in') + '" aria-label="' + esc(p ? (seite === 'in' ? 'Von innen' : 'Von außen') + ': Foto groß ansehen' : 'Beispielfoto. Antippen öffnet die Kamera für das Foto von innen.') + '">' +
-    '<img class="ft-foto" src="' + (p ? p.url : '/bilder/konfigurator/beispiel-innen.webp') + '" width="1000" height="750" alt="" decoding="async" draggable="false">' +
+    '<img class="ft-foto" src="' + (p ? p.url : '/bilder/konfigurator/beispiel-innen-v2.webp') + '" width="1000" height="750" alt="" decoding="async" draggable="false">' +
     '<span class="ft-kante" aria-hidden="true"></span>' + (p ? '' : '<span class="ft-sucher" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="ft-waage" aria-hidden="true"><i class="ft-spur"><b></b></i><span class="ft-wort">gerade</span></span>') +
     '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / steps.length).toFixed(4) + '"></i>Schritt ' + nr + ' von ' + steps.length + ' · Fotos</span>' +
     '<span class="ft-chip" aria-hidden="true">' + chipUnten + '</span></button>';
