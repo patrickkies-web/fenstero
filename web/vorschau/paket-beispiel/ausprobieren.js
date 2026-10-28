@@ -1,7 +1,8 @@
 /* Testansicht für Fensterbauer auf der Beispielseite von Fensterbau Brandt (28.10.2026, Wunsch des Inhabers): „Selbst ausprobieren“ auf
    der Seite für Fensterbauer öffnet <paket>.html?ausprobieren. Beim Ankommen liegt die Seite abgedunkelt im Hintergrund, davor ein
-   Kästchen: Das ist die Seite, die der Fensterbauer im Paket bekommt, angepasst mit seinen Bildern, seinem Logo, seinen Farben und
-   Texten; „Fenster planen“ spielt den Besuch seines Kunden durch. Einmal je Tab; die Seite zeigt den Weg „Über die Website“ (der Kunde
+   Kästchen: Diese Landingpage gestalten wir auf Wunsch mit, angepasst mit seinen Bildern, seinem Logo, seinen Farben und Texten;
+   „Fenster planen“ auf der Seite oder gleich „Fenster konfigurieren“ im Kästchen spielt den Besuch seines Kunden durch (Inhaber,
+   28.10.2026, nachmittags). Einmal je Tab; die Seite zeigt den Weg „Über die Website“ (der Kunde
    kommt von der Website des Betriebs, nicht mit einem Einladungslink). Nur in den Seiten unter web/vorschau/paket-beispiel/
    (docs/profis/werkzeuge/paketvorlagen.py --web kopiert diese Datei als ausprobieren.js). */
 (function () {
@@ -31,11 +32,13 @@
     '<div class="ez-probe__karte">' +
       '<span class="ez-probe__etikett">Vorschau für Fensterbauer</span>' +
       '<h2 id="ez-probe-t" tabindex="-1">So sieht Ihre Seite aus. <span>Im Paket ' + (namen[paket] || 'Signature') + '.</span></h2>' +
-      '<p id="ez-probe-s">Fensterbau Brandt ist ein erfundener Betrieb. Ihre Seite bekommt Ihre Bilder, Ihr Logo, Ihre Farben und Ihre Texte.</p>' +
-      '<p>Tippen Sie auf „Fenster planen“ und spielen Sie den Besuch Ihres Kunden durch. Gesendet wird nichts.</p>' +
+      '<p id="ez-probe-s">Diese Landingpage gestalten wir auf Wunsch mit Ihnen, mit Ihren Bildern, Ihrem Logo, Ihren Farben und Ihren Texten. ' +
+        'Fensterbau Brandt ist ein erfundener Betrieb.</p>' +
+      '<p>Auf der Seite startet „Fenster planen“ den Konfigurator, so wie bei Ihren Kunden. Oder Sie konfigurieren gleich hier. Gesendet wird nichts.</p>' +
       '<div class="ez-probe__knoepfe">' +
-        '<button type="button" class="ez-probe__pille" data-zu>Seite ansehen</button>' +
-        '<a class="ez-probe__leise" href="/app/?ausprobieren=' + paket + '">Gleich Fenster planen</a>' +
+        '<a class="ez-probe__pille" href="/app/?ausprobieren=' + paket + '">Fenster konfigurieren<span class="ez-probe__pfeil" aria-hidden="true">' +
+          '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>' +
+        '<button type="button" class="ez-probe__leise" data-zu>Seite ansehen</button>' +
       '</div>' +
     '</div>';
   d.body.appendChild(dlg);

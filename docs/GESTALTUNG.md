@@ -591,8 +591,9 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     Seit dem Nachmittag (Inhaber: den ganzen Ablauf von der Landingpage bis zum Absenden, danach wieder abgeholt, „Einflüsse … von meiner
     vorherigen Geschäftsausrichtung und dessen Design … möcht ich halt nicht in diesen Schritten sehen“): „Selbst ausprobieren“ öffnet die
     Beispielseite Signature von Fensterbau Brandt; die Seite liegt abgedunkelt (Schwarz zu 58 %) hinter einem Kästchen in der Palette von
-    eeziframes (Anthrazit-Karte mit Lichtkante, Etikett mit violettem Punkt, weiße Pille „Seite ansehen“, Umriss „Gleich Fenster planen“,
-    320 ms ease-out, Grund 220 ms). Die Auswahl am Ende steht in den Farben des Beispielbetriebs und ist eine Fläche (Gremium G):
+    eeziframes (Anthrazit-Karte mit Lichtkante, Etikett mit violettem Punkt, weiße Pille „Fenster konfigurieren“ mit Pfeilkreis, Umriss
+    „Seite ansehen“, 320 ms ease-out, Grund 220 ms). Der Text sagt, dass wir die Landingpage auf Wunsch mitgestalten, und erklärt „Fenster
+    planen“ auf der Seite (Inhaber, 28.10.2026). Die Auswahl am Ende steht in den Farben des Beispielbetriebs und ist eine Fläche (Gremium G):
     Signature auf Schieferblau mit der einen gefüllten Karte „Pakete ansehen“ in Petrol mit Aquatürkis als Licht, Plus mit dieser Karte
     in Schiefer, Essential im Look von eeziframes. Die beiden anderen Wege stehen als Zeilen mit Trennlinie darunter, der Punkt am
     Etikett bleibt violett, die Karte nennt den Preis des gezeigten Pakets und „ab …“ mit dem kleinsten (pakete.js). Am Telefon sitzt

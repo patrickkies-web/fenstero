@@ -1,6 +1,6 @@
 /* Hinweis-Kästchen der Testansicht auf der Beispielseite (ausprobieren-hinweis.js). Hier spricht eeziframes zum Fensterbauer, darum in
    der Palette von eeziframes, nicht in der des Beispielbetriebs: die Seite dahinter abgedunkelt, davor eine Anthrazit-Karte mit
-   Lichtkante (G14), Etikett mit violettem Punkt, eine weiße Pille, ein Umriss. Auftritt 220 ms (Grund) und 320 ms (Karte, ease-out). */
+   Lichtkante (G14), Etikett mit violettem Punkt, weiße Pille „Fenster konfigurieren“ mit Pfeilkreis, Umriss „Seite ansehen“. Auftritt 220 ms (Grund) und 320 ms (Karte, ease-out). */
 .ez-probe { --pr-font: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; width: min(520px, calc(100% - 32px)); max-width: none; max-height: calc(100% - 32px);
   margin: auto; padding: 0; border: 0; background: transparent; color: #fff; overflow: visible }
 .ez-probe::backdrop { background: rgba(7, 9, 10, .58) }
@@ -19,7 +19,9 @@
 .ez-probe__knoepfe { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px }
 .ez-probe__pille, .ez-probe__leise { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 24px; border: 0; border-radius: 999px;
   font: 500 15px/1 var(--pr-font); text-decoration: none; cursor: pointer; transition: transform 160ms cubic-bezier(.2, .7, .2, 1) }
-.ez-probe__pille { background: #fff; color: #07090a }
+.ez-probe__pille { gap: 14px; padding: 0 6px 0 24px; background: #fff; color: #07090a }
+.ez-probe__pfeil { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #07090a; color: #fff }
+.ez-probe__pfeil svg { width: 14px; height: 14px }
 .ez-probe__leise { background: transparent; color: #fff; box-shadow: inset 0 0 0 1.5px #a8a4a9 }
 .ez-probe__pille:active, .ez-probe__leise:active { transform: scale(.97); transition-duration: 0s }
 .ez-probe__pille:focus-visible, .ez-probe__leise:focus-visible { outline: 2px solid #fff; outline-offset: 3px }

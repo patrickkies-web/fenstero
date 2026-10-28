@@ -106,6 +106,21 @@ Nicht übernommen, weil es dem Wort des Inhabers widerspricht: Auswahl ohne Betr
 Offen: Satz zu Serverstandort und KI, Hinweis „der Betrieb prüft die Maße“, Zeigemodus ohne Preisleiste, gelegentlicher Sprung im Hero
 der Beispielseite (bestand schon vorher).
 
+## Nachtrag 3: Kästchen mit „Fenster konfigurieren“
+
+Inhaber: „Ich hätte gerne in der Meldung die Bestätigung … oder die Erklärung, dass das die Landing Pages, die auch mit geplant werden
+kann auf Wunsch, und dass man in dem Landingpage auf Fenster konfigurieren drücken kann oder sogar schon in der Meldung selbst auf Fenster
+konfigurieren.“
+
+| Wo | Was | Stand |
+| --- | --- | --- |
+| Kästchen | „Diese Landingpage gestalten wir auf Wunsch mit Ihnen, mit Ihren Bildern, Ihrem Logo, Ihren Farben und Ihren Texten. Fensterbau Brandt ist ein erfundener Betrieb.“ | geändert |
+| Kästchen | „Auf der Seite startet „Fenster planen“ den Konfigurator, so wie bei Ihren Kunden. Oder Sie konfigurieren gleich hier. Gesendet wird nichts.“ | geändert |
+| Kästchen | Weiße Pille „Fenster konfigurieren“ mit Pfeilkreis (in die Testansicht), Umriss „Seite ansehen“ | geändert |
+
+Das Gremium wurde nicht gefragt: Wortlaut und Knöpfe hat der Inhaber vorgegeben. Ziele 48 px, keine Fehler, kein waagrechter Scroll bei
+320, 390 und 1440 px.
+
 ## Gremium (eine Runde, drei Agenten, blind X/Y)
 
 - **Gestalter:**

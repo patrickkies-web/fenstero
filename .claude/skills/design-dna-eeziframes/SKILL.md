@@ -208,7 +208,9 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Design … möcht ich halt nicht in diesen Schritten sehen“): Ein Test für Fensterbauer beginnt auf der Beispielseite Signature von
   Fensterbau Brandt (Kästchen davor in der Palette von eeziframes), geht durch den Konfigurator bis zum Senden und endet mit der Auswahl
   in den Farben des Betriebs, die zurück zu den Paketen führt. Jede Seite, die dabei erreichbar ist (Liste, Seite nach dem Senden,
-  Rückwege), steht im neuen Look; ein Rückweg führt nie auf eine Seite im früheren Design. Vorschlag für seine DNA (Abschnitt 9):
+  Rückwege), steht im neuen Look; ein Rückweg führt nie auf eine Seite im früheren Design. Das Kästchen sagt, dass wir die Landingpage
+  auf Wunsch mitgestalten, erklärt „Fenster planen“ auf der Seite und bietet „Fenster konfigurieren“ gleich im Kästchen (Inhaber, später
+  am selben Tag). Vorschlag für seine DNA (Abschnitt 9):
   „Ein Ablauf ist erst fertig, wenn jeder erreichbare Bildschirm darin im neuen Look steht.“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
