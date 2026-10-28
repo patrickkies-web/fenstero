@@ -573,6 +573,10 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     Gespeichert vollflächig). Beispielfoto neu aus dem Modell in 2000 × 1500. Kein Hereinfahren ganzer Folien (`.scr.dna`), kein
     Milchglas über dem drehbaren Modell, ohne WebGL kein Selbstschwingen. Gemessen bei vierfach gedrosselter CPU ohne WebGL:
     Folienwechsel 0,1–0,25 s statt 0,7–6,2 s, Drehen p90 33 ms statt 517 ms.
+  - Klinker und Gewebe ohne WebGL (Foto des Inhabers, 28.10.2026: „das gängige Klinker-Problem“): Auf Rechnern ohne WebGL zeigt das
+    CSS-Modell den Klinker als Muster in Millimetern (`klinkerCss`: Normalformat, Läuferverband, Ton je Stein, skaliert mit `--mm`) und
+    das Gewebe des Insektenschutzes als gleichmäßigen Schleier (`meshCss`); die WebGL-Bühne liest weiter `facadeBg` und `meshBg` (_bg).
+    Farbblatt und Fassade am Zahnrad im Look der Bögen, am Laptop rechts als Spalte angedockt.
   - Restliche Folien (Wunsch des Inhabers, 28.10.2026: „Die anderen Bereiche machst du auch. Musst selber gucken, welche Folien da noch
     fehlen.“): „Deine Fenster“ (Bühne mit den Fenstern als Strichzeichnungen, Stand mit Balken, Karten auf Anthrazit), „Fürs Angebot“
     1–3 (Haus mit Kapselreihe der getauschten Fenster, Zeitleiste und Budget, Aufmaßblatt, das sich beim Tippen füllt), Aufmaßblatt,
