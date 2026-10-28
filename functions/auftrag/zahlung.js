@@ -1,6 +1,6 @@
 /* eeziframes · Geld der Aufträge über Stripe (REST, stripe.js) oder die Attrappe (ZAHLUNG_ATTRAPPE=1 ohne Schlüssel)
-   - Einrichtung beim Bestellen: Checkout (Karte oder SEPA-Lastschrift), Betrag aus pakete.js netto zzgl. Steuersatz, Rechnung von
-     Stripe, Zahlungsmittel bleibt für das Abo hinterlegt. Metadaten art: 'auftrag', auftrag: <id> (zahlung.js leitet die Ereignisse her).
+   - Einrichtung beim Bestellen: Checkout (Karte oder SEPA-Lastschrift), Betrag aus pakete.js netto zzgl. Steuersatz, Gutscheincodes
+     aus dem Stripe-Dashboard an der Kasse, Rechnung von Stripe, Zahlungsmittel bleibt für das Abo hinterlegt. Metadaten art: 'auftrag', auftrag: <id> (zahlung.js leitet die Ereignisse her).
    - Monatsabo ab Live: Preis über lookup_key je Paket und Betrag (eine Preisänderung in pakete.js legt einen neuen Preis an, laufende
      Abos behalten ihren), Steuersatz wie oben.
    - Kundenportal (Rechnungen, Zahlungsmittel, Kündigung), Erstattung der Einrichtung beim Storno.
@@ -54,11 +54,12 @@ export async function kasse(ctx, a, kunde, o) {
      dann öffnet sie nur mit Karte (Befund des Inhabers, 27.10.2026) */
   const kasseMit = (arten, zusatz) => s.post('/checkout/sessions', {
     mode: 'payment', locale: 'de', customer: kid, line_items: [posten], payment_method_types: arten,
+    allow_promotion_codes: true, // Gutscheincodes aus dem Stripe-Dashboard (z. B. 50 % auf die Einrichtung); den Betrag nach Rabatt liefert kassePruefen (amount_total)
     payment_intent_data: { setup_future_usage: 'off_session', metadata: { art: 'auftrag', auftrag: a.id, nr: a.nr } },
     invoice_creation: { enabled: true, invoice_data: { description: 'Einrichtung ' + name + ' · Auftrag ' + a.nr, metadata: { art: 'auftrag', auftrag: a.id } } },
     customer_update: { address: 'auto', name: 'auto' }, success_url: o.zurueck.replace('{SESSION}', '{CHECKOUT_SESSION_ID}'), cancel_url: o.abbruch,
     metadata: { art: 'auftrag', auftrag: a.id, nr: a.nr, paket: a.paket, agb: (a.zustimmung || {}).agb || '' }, client_reference_id: a.id
-  }, { idem: 'auftrag-kasse-' + a.id + '-' + (a.version || 0) + zusatz });
+  }, { idem: 'auftrag-kasse-' + a.id + '-' + (a.version || 0) + '-g' + zusatz }); // -g: seit den Gutscheincodes andere Angaben, also ein neuer Schlüssel
   let sess;
   try { sess = await kasseMit(['card', 'sepa_debit'], ''); }
   catch (e) { if (!ohneSepa(e)) throw e; sess = await kasseMit(['card'], '-karte'); }

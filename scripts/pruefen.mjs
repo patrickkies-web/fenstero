@@ -2130,6 +2130,15 @@ if (teil(11)) {
     st.fehlerBei(null);
     const zOk = await zRufe('/api/zentrale/betriebe/' + zb.id + '/abrechnen', {}, zKeks), zNach = await sp.betriebHolen(zb.id), zProt = (await sp.protokollLesen({ betrieb: zb.id, anzahl: 10 })) || [];
     ok(/^__Host-zentrale=/.test(zKeks) && zFehl._status === 502 && /^Abrechnung fehlgeschlagen: /.test(zFehl.fehler || '') && zVor.daten.book[0].status === 'offen' && zOk._status === 200 && zOk.ergebnis.rechnungen === 1 && zNach.daten.book[0].status === 'berechnet' && zProt.some((e) => e.art === 'abrechnung' && e.text === 'Abrechnung fehlgeschlagen') && zProt.some((e) => e.art === 'abrechnung' && e.text === 'Sammelrechnung erstellt'), 'Zentrale „Jetzt abrechnen“: Scheitert Stripe, stehen der Grund im Dialog und „Abrechnung fehlgeschlagen“ im Protokoll, die Buchung bleibt offen; der nächste Versuch rechnet ab');
+    // Gutscheincodes: die Kasse der Einrichtung (Pakete) nimmt Codes aus dem Stripe-Dashboard an; der Betrag nach Rabatt kommt aus der Kasse
+    await import(new URL('../web/assets/pakete.js', import.meta.url).href);
+    const zahl11 = await import('../functions/auftrag/zahlung.js'), gsN = st.log.length;
+    const gsA = { id: 'auf_gutschein', nr: 'A-0099', paket: 'essential', angaben: { betrieb: { firma: 'Gutschein Fensterbau', plz: '50667', ort: 'Köln' } } };
+    const gsK = await zahl11.kasse({ k: k, env: {} }, gsA, { id: 'kd_gutschein', mail: 'gutschein@beispiel.de' }, { zurueck: B + '/bestellen/?kasse={SESSION}', abbruch: B + '/bestellen/' });
+    const gsP = (kassenSeit(gsN)[0] || {}).p || {}, gsVoll = Math.round(globalThis.Pakete.preis('essential').einrichtung * 100 * 1.19);
+    st.abschliessen(gsK.id, { betrag: Math.round(gsVoll / 2) });
+    const gsR = await zahl11.kassePruefen({ k: k, env: {} }, gsK.id);
+    ok(String(gsP.allow_promotion_codes) === 'true' && gsP.metadata.art === 'auftrag' && gsR.bezahlt && gsR.betragCent === Math.round(gsVoll / 2) && kassenSeit(0).length > 1 && !kassenSeit(0).some((e) => (e.p.metadata || {}).art !== 'auftrag' && String(e.p.allow_promotion_codes) === 'true'), 'Gutscheincodes: die Kasse der Einrichtung zeigt das Codefeld von Stripe, nach 50 % Rabatt zählt der bezahlte Betrag (' + (gsR.betragCent / 100).toFixed(2) + ' € statt ' + (gsVoll / 100).toFixed(2) + ' €); die Kasse des Aufmaßblatts bleibt ohne Codes');
     if (process.env.STRIPE_PROTOKOLL) (await import('node:fs')).writeFileSync(process.env.STRIPE_PROTOKOLL, JSON.stringify(st.log, null, 1));
   } catch (e) {
     ok(false, 'Stripe-Anbindung ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
