@@ -3816,15 +3816,16 @@ function anfrage2Dna() {
   return { html: lgKopf(['back', 'Zurück: Haus']) + dnaTisch(abZeitBuehne(pr, anfrageHead(2, lk)), frage + karte + abFuss('Zurück: Haus', weiter[0], weiter[1], weiter[2])), back: ['Haus', 'anfrage'], dna: true, cls: 'dna ab dt', voll: true };
 }
 /* Kontakt: das Aufmaßblatt als Objekt im Fensterlicht; was getippt wird, steht sofort oben auf dem Blatt (abLive), Maße als Punkte */
-function abPapier() {
-  const pr = S.proj, n = S.windows.length, el = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), pkt = (v) => (v ? thousand(v).replace(/\d/g, '•') : '•.•••');
+function abPapier(offen, schloss) {
+  const pr = S.proj, n = S.windows.length, el = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), pkt = (v) => (!v ? '•.•••' : offen ? thousand(v) : thousand(v).replace(/\d/g, '•'));
   const kontakt = [pr.ort, pr.tel, pr.mail].map((t) => String(t || '').trim()).filter(Boolean);
   return '<div class="ab-papier" aria-hidden="true"><div class="ab-papier-band">' + LOGO(10) + '<span class="ab-wm" translate="no"><b>eezi</b>frames</span><span class="ab-papier-art">Aufmaßblatt</span></div><div class="ab-papier-in">' +
     '<p class="ab-papier-h" data-p="name">' + esc(String(pr.name || '').trim() || 'Dein Aufmaß') + '</p>' +
     '<p class="ab-papier-kontakt" data-p="kontakt">' + (kontakt.length ? esc(kontakt.join(' · ')) : '<i class="ab-leer" style="--b: 38%"></i><i class="ab-leer" style="--b: 30%"></i>') + '</p>' +
     '<p class="ab-papier-s">' + n + (n === 1 ? ' Position' : ' Positionen') + ' · ' + el + (el === 1 ? ' Element' : ' Elemente') + (pr.gebaeude ? ' · ' + esc(lab('gebaeude', pr.gebaeude)) : '') + '</p>' +
     '<table class="ab-papier-tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr>' + S.windows.slice(0, 4).map((x, i) => { const d = derive(x); return '<tr><td><b>' + (i + 1) + '</b></td><td>' + esc(x.name || 'Fenster') + '</td><td>' + pkt(d.moW) + ' × ' + pkt(d.moH) + '</td><td>' + pkt(d.elW) + ' × ' + pkt(d.elH) + '</td></tr>'; }).join('') + '</table>' +
-    '<div class="ab-papier-zeichnung"><span class="ab-papier-oeffnung"><span class="ab-papier-element"></span></span></div><div class="ab-papier-zeilen"><i></i><i class="k"></i><i></i></div></div></div>';
+    '<div class="ab-papier-zeichnung"><span class="ab-papier-oeffnung"><span class="ab-papier-element"></span></span></div><div class="ab-papier-zeilen"><i></i><i class="k"></i><i></i></div></div>' +
+    (schloss ? '<span class="ab-schloss">' + LOCK + '</span>' : '') + '</div>';
 }
 function abLive() {
   const p = document.querySelector('.scr.dna.ab .ab-papier'); if (!p) return;
@@ -4044,6 +4045,36 @@ SCREENS.gekauft = () => {
   const html = '<div class="center" style="padding-top: 48px; display: flex; flex-direction: column; align-items: center; gap: 14px"><div class="okmark-l" data-lottie="fertig"><span class="lottie-still"><svg class="okmark" viewBox="0 0 64 64" width="96" height="96" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--ok-soft)"></circle><path class="tick" d="M19 33l9 9 18-20" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div><h1 style="margin: 8px 0 0">Freigeschaltet.</h1><p style="margin: 0">Dein Aufmaßblatt gehört dir.' + (k.mail ? ' Die Rechnung kommt an ' + esc(k.mail) + '.' : '') + '</p></div>' + dateiCard();
   return { html: html, bar: { label: 'Weiter: Blatt teilen', act: 'go', v: 'teilen' } };
 };
+/* ---------- Aufmaßblatt, Konto, Kasse, Freigeschaltet, Teilen, Gesendet, Sichern, Dein Konto, Anmeldelink im Look der Design-DNA
+   (28.10.2026, Wunsch des Inhabers: „die anderen Bereiche machst du auch“) ----------
+   Inhalt, Felder, Häkchen, Rechtstexte und Aktionen bleiben, wie sie sind (Kasse, Recht, Konto); abRahmen setzt sie in den Rahmen der
+   neuen Folien: Kopf, Bühne (das Aufmaßblatt im Fensterlicht, gesperrt mit Schloss, nach dem Freischalten offen; bei Konto und Sichern
+   die Fenster als Strichzeichnungen), Titel, Karten auf Anthrazit und Fuß mit der Pille aus der alten Leiste. Instanzen bleiben unberührt. */
+function abBlattBuehne(chip, offen, extra) { return abBuehne('ab-blatt', chip, abPapier(offen, !offen) + (extra || '')); }
+function abSymBuehne(chip, extra) {
+  const n = S.windows.length, sym = S.windows.slice(0, 6).map((x, i) => '<span class="li-sym"><span class="li-kachel"><b>' + (i + 1) + '</b>' + zuStrich(svgIcon(miniWin(x), 64)) + '</span><small>' + esc(x.name || 'Fenster ' + (i + 1)) + '</small></span>').join('') + (n > 6 ? '<span class="li-sym li-mehr"><span class="li-kachel">+' + (n - 6) + '</span><small>weitere</small></span>' : '');
+  return abBuehne('ab-sym' + (n > 4 ? ' li-viele' : ''), chip, (n ? '<div class="li-reihe" aria-hidden="true">' + sym + '</div>' : '') + (extra || ''));
+}
+const abBetrag = () => { const p = PREIS(); return p > 0 ? '<div class="ab-betrag" aria-hidden="true"><b>' + euro(p).replace(/\s*€$/, '') + '</b><small>€</small><span>einmalig' + (MWST() ? ', inkl. MwSt.' : '') + '</span></div>' : ''; };
+const abEtikett = (klein, wert) => '<div class="ab-etikett" aria-hidden="true"><span class="ab-etikett-punkt"></span><span><small>' + esc(klein) + '</small><b>' + esc(wert) + '</b></span></div>';
+function abRahmen(view, buehne) {
+  if (!view || view.dna || INST) return view;
+  const b = view.bar, back = view.back, zur = back ? 'Zurück: ' + back[0] : '';
+  const pille = b ? '<button type="button" class="dna-pille lg-weiter btn ' + (b.ghost ? 'ghost dna-pille--leise' : 'primary') + '" data-act="' + b.act + '"' + (b.v ? ' data-v="' + b.v + '"' : '') + (b.dis ? ' disabled' : '') + '>' + b.label + (b.ghost ? '' : abPfeil) + '</button>' : '';
+  const fuss = rechtLinks() + (b ? '<div class="lg-fuss' + (b.sec ? ' ab-fuss-zwei' : '') + '">' + (back ? '<button type="button" class="lg-zurueck" data-act="back" aria-label="' + esc(zur) + '">' + LG_PFEIL_L + '</button>' : '') + (b.sec ? '<button type="button" class="dna-pille dna-pille--leise ab-zweit" data-act="' + b.secAct + '">' + esc(b.sec) + '</button>' : '') + pille + '</div>' : '');
+  return Object.assign({}, view, { html: lgKopf(back ? ['back', zur] : false) + dnaTisch(buehne, '<div class="ab-inhalt">' + view.html + '</div>' + fuss), dna: true, cls: 'dna ab ab2 dt' + (view.cls ? ' ' + view.cls : ''), voll: true, bar: null });
+}
+const AB_ALT = { blatt: SCREENS.blatt, teilen: SCREENS.teilen, konto: SCREENS.konto, kasse: SCREENS.kasse, gekauft: SCREENS.gekauft, gesendet: SCREENS.gesendet, sichern: SCREENS.sichern, meinkonto: SCREENS.meinkonto, linkanmelden: SCREENS.linkanmelden };
+SCREENS.teilen = () => { const v = AB_ALT.teilen(), f = FREI(); if (!f && !INST) v.html = v.html.replace(blattVorschau(), ''); /* das Blatt steht auf der Bühne */ return abRahmen(v, abBlattBuehne(f ? (KUNDE_FREI() ? 'Fertig gemessen' : 'Freigeschaltet') : 'Fertig gemessen', f, f ? '' : abBetrag())); };
+SCREENS.datei = () => SCREENS.teilen();
+SCREENS.konto = () => { const k = kauf(); return abRahmen(AB_ALT.konto(), abBlattBuehne('Schritt 1 von 2', false, abEtikett('Rechnung an', k.mail || 'deine E-Mail-Adresse'))); };
+SCREENS.kasse = () => { const k = kauf(); if (!k.mail) return SCREENS.konto(); return abRahmen(AB_ALT.kasse(), abBlattBuehne('Schritt 2 von 2', false, abBetrag())); };
+SCREENS.gekauft = () => abRahmen(AB_ALT.gekauft(), abBlattBuehne('Freigeschaltet', true));
+SCREENS.gesendet = () => abRahmen(AB_ALT.gesendet(), abBlattBuehne('Gesendet', false));
+SCREENS.sichern = () => { const z = S.sichern || {}, v = AB_ALT.sichern(); return abRahmen(v, abSymBuehne(z.zweck === 'anmelden' ? 'Anmelden' : z.zweck === 'kauf' ? 'Schritt 1 von 2' : 'Aufmaß sichern', z.mail && z.schritt === 2 ? abEtikett('Code an', z.mail) : '')); };
+SCREENS.meinkonto = () => { const v = AB_ALT.meinkonto(); return KS && S.screen === 'meinkonto' ? abRahmen(v, abSymBuehne('Dein Konto', abEtikett('Angemeldet als', KS.mail))) : v; };
+SCREENS.linkanmelden = () => { const v = AB_ALT.linkanmelden(), r = S.linkAnmeldung; return r && S.screen === 'linkanmelden' ? abRahmen(v, abSymBuehne('Anmelden', abEtikett('Anmelden als', r.mail))) : v; };
+SCREENS.blatt = () => { const v = AB_ALT.blatt(); return S.betrieb && !S.sent ? abRahmen(v, abSymBuehne('Prüfen')) : v; };
 /* Kauf über den Server: Kasse starten, nach der Rückkehr prüfen */
 async function kaufStarten(nochmal) {
   const k = kauf();
@@ -4982,7 +5013,8 @@ const LG_I = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><c
 /* Kopf: zurück zur Liste der Fenster, die Marke (im Kundenlink einer Instanz deren Zeichen), Übersicht und Begriffe */
 function lgKopf(zurueck) {
   const z = zurueck === false ? null : zurueck || ['liste', 'Zurück: Fenster']; // false: ohne Zurück (Liste der Fenster)
-  const marke = S.betrieb ? (INST ? instKopf() : '') : '<span class="lg-marke" role="img" aria-label="eeziframes">' + LOGO(26) + WM() + '</span>';
+  /* ohne Zurück (Liste der Fenster) ist das Logo wie bisher der Weg zur Startseite der Website */
+  const marke = S.betrieb ? (INST ? instKopf() : '') : z ? '<span class="lg-marke" role="img" aria-label="eeziframes">' + LOGO(26) + WM() + '</span>' : '<a class="lg-marke hdr-logo" href="' + PORTAL_URL + '" aria-label="eeziframes, zur Startseite">' + LOGO(26) + WM() + '</a>';
   return '<div class="lg-kopf"><span class="lg-kopf-l">' + (z ? '<button type="button" class="lg-kopf-zurueck" data-act="' + z[0] + '" aria-label="' + z[1] + '">' + LG_PFEIL_L + '</button>' : '') + marke + '</span>' +
     '<span class="lg-kopf-r"><button type="button" data-act="wohin" aria-label="Übersicht: Schritte, Fenster und Startseite"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button><button type="button" class="lg-kopf-icon" data-act="gindex" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5-1.5h5z"/></svg></button></span></div>';
 }
@@ -7658,7 +7690,8 @@ async function anfragePdf() {
   finally { S.pdfLaeuft = false; render(); }
 }
 const gesendetOrig = SCREENS.gesendet;
-SCREENS.gesendet = () => {
+SCREENS.gesendet = () => abRahmen(gesendetPilot(), abBlattBuehne('Senden', false)); // Design-DNA: Rahmen der neuen Folien (abRahmen)
+function gesendetPilot() {
   if (INST && S.betrieb) return instGesendet();
   if (!PILOT) return gesendetOrig();
   const bn = S.betrieb && S.betrieb.name ? S.betrieb.name : '', dat = bn || 'deinem Fensterbauer', nom = bn || 'dein Fensterbauer';
@@ -7675,7 +7708,7 @@ SCREENS.gesendet = () => {
     '<div class="card" style="gap: 12px"><p class="eyebrow">So geht\'s weiter</p><div class="steps mini"><div class="step"><span class="n">1</span><div><b>Angebot</b><p>von ' + esc(bn || 'deinem Fensterbauer') + '</p></div></div><div class="step"><span class="n">2</span><div><b>Feinaufmaß</b><p>ein Termin vor Ort</p></div></div><div class="step"><span class="n">3</span><div><b>Fertigung und Einbau</b><p>Termin nach Absprache</p></div></div></div></div>' +
     dateiCard();
   return { html: html, cls: 'tight', bar: { label: 'Fertig', act: 'go', v: 'home', ghost: true } };
-};
+}
 /* ---------- Server (Stufe 2): /api/status sagt, was eingerichtet ist ----------
    daten:   Aufmaße gehen direkt an den Betrieb, ohne Code-Umweg; der Link wird beim Öffnen geprüft
    zahlung: das Aufmaßblatt wird über Stripe bezahlt */

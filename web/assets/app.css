@@ -1540,6 +1540,8 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna .lg-marke { display: inline-flex; align-items: center; gap: 8px; font: 400 17px/1 var(--font-sans); letter-spacing: -.01em; color: var(--tinte); white-space: nowrap }
 .dna .lg-marke .fi-logo { width: 26px; height: 26px }
 .dna .lg-marke .wm b { font-weight: 700 }
+.dna a.lg-marke { min-height: 44px; padding: 0 6px; border-radius: 12px; text-decoration: none } /* Logo auf der Liste: Link zur Startseite */
+.dna a.lg-marke:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px }
 .dna .lg-marke .fi-rand { stroke: var(--anthrazit); stroke-opacity: 1 }
 .dna .lg-kopf .hdr-inst { padding-left: 0; max-width: none; color: var(--tinte) }
 .dna .lg-kopf .hdr-inst .hdr-name { font: 500 15px/1.15 var(--font-sans) }
@@ -2631,4 +2633,105 @@ html.dna-voll body { background: #07090a }
   .dna.dt .li-sym, .dna.dt .li-kachel { width: 150px } .dna.dt .li-kachel { height: 150px; border-radius: 28px } .dna.dt .li-kachel svg { width: 116px; height: 116px }
   .dna.dt .li-sym small { font-size: 15px }
   .dna.dt .dna-rechts > .li-kopf:first-child { padding-top: 0 }
+}
+
+/* ---------- Aufmaßblatt, Konto, Kasse, Freigeschaltet, Teilen, Gesendet, Sichern, Dein Konto, Anmeldelink (28.10.2026) ----------
+   Rahmen der neuen Folien um den bisherigen Inhalt (abRahmen): Bühne mit dem Aufmaßblatt bzw. den Fenstern, Titel mit zweiter Stimme,
+   Karten auf Anthrazit, Felder und Häkchen auf Weiß, Rückmeldungen mit Koralle-Punkt, eine weiße Pille. */
+.dna .ab-sym { background: linear-gradient(rgba(7, 9, 10, .45), rgba(7, 9, 10, .7)), url(/bilder/konfigurator/buehne.webp) 42% 30% / cover no-repeat var(--anthrazit) }
+.dna .ab-sym .li-reihe { bottom: 22px }
+.dna .ab-schloss { position: absolute; z-index: 2; right: 8px; top: 26px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: var(--weiss); background: var(--schwarz); box-shadow: 0 6px 14px -6px rgba(7, 9, 10, .8) }
+.dna .ab-schloss svg { width: 16px; height: 16px }
+.dna .ab-betrag { position: absolute; z-index: 4; left: 16px; bottom: 16px; display: grid; grid-template-columns: auto auto; align-items: baseline; justify-content: start; column-gap: 4px; padding: 10px 14px 10px 12px; border-radius: 20px; background: rgba(7, 9, 10, .78); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12) }
+.dna .ab-betrag b { font: 200 44px/.95 var(--font-sans); letter-spacing: -.035em; color: var(--weiss); font-variant-numeric: tabular-nums }
+.dna .ab-betrag small { font: 400 15px/1 var(--font-sans); color: var(--silbergrau) }
+.dna .ab-betrag span { grid-column: 1 / -1; margin-top: 4px; font: 400 13px/1.2 var(--font-sans); color: var(--silbergrau) }
+.dna .ab-etikett { position: absolute; z-index: 4; left: 12px; bottom: 14px; display: flex; align-items: center; gap: 10px; max-width: 70%; padding: 8px 14px 8px 12px; border-radius: 20px; background: rgba(7, 9, 10, .82); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12) }
+.dna .ab-etikett-punkt { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px var(--indigo) }
+.dna .ab-etikett small { display: block; font: 400 12px/1.2 var(--font-sans); color: var(--silbergrau) }
+.dna .ab-etikett b { display: block; font: 500 14px/1.25 var(--font-sans); color: var(--weiss); overflow-wrap: anywhere }
+/* Inhalt: Titel, Text, Karten */
+.dna.ab2 .ab-inhalt { display: grid; gap: 12px; padding-top: 18px }
+.dna.ab2 .ab-inhalt > * { margin: 0 }
+.dna.ab2 .hd { padding: 0; margin: 0; background: none }
+.dna.ab2 .hd .eyebrow { display: none } /* steht im Chip der Bühne */
+.dna.ab2 h1 { margin: 0; font: 500 30px/1.1 var(--font-sans); letter-spacing: -.025em; color: var(--weiss); text-wrap: balance }
+.dna.ab2 h1 .ak { color: var(--silbergrau) }
+.dna.ab2 .hd p, .dna.ab2 .center p { margin: 8px 0 0; font: 400 15px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna.ab2 .hd p b, .dna.ab2 .hd p .mail { color: var(--weiss); font-weight: 500 }
+.dna.ab2 .center { padding: 0 !important; align-items: flex-start !important; text-align: left; gap: 8px !important }
+.dna.ab2 .okmark-l { width: 72px; height: 72px }
+.dna.ab2 .okmark circle { fill: color-mix(in srgb, var(--violett) 22%, var(--anthrazit)) }
+.dna.ab2 .okmark .tick { stroke: var(--violett) }
+.dna.ab2 .sub, .dna.ab2 p.sub { margin: 0; padding: 0 2px !important; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) !important }
+.dna.ab2 .sub b, .dna.ab2 .sub .mail { color: var(--weiss); font-weight: 500 }
+.dna.ab2 .ulink { color: var(--weiss); font-weight: 500; text-decoration: underline; text-underline-offset: 3px }
+.dna.ab2 .card { display: grid; gap: 10px; margin: 0; padding: 16px; border: 0; border-radius: var(--rund-l); color: var(--weiss); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+.dna.ab2 .card .eyebrow { margin: 0; font: 400 13px/1.3 var(--font-sans); letter-spacing: .02em; text-transform: none; color: var(--silbergrau) }
+.dna.ab2 .card h2, .dna.ab2 .share-way h2 { margin: 0; font: 500 17px/1.25 var(--font-sans); letter-spacing: -.01em; color: var(--weiss) }
+.dna.ab2 .card b { font-weight: 500; color: var(--weiss) }
+.dna.ab2 .card small { font: 400 13px/1.4 var(--font-sans); color: var(--silbergrau) }
+.dna.ab2 .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 }
+.dna.ab2 .pill, .dna.ab2 .btn.ghost:not(.lg-weiter) { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--weiss); font: 500 15px/1 var(--font-sans); text-decoration: none; box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna.ab2 .pill.danger { color: var(--koralle); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--koralle) 55%, transparent) }
+.dna.ab2 .ab-inhalt .btn.primary { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border: 0; border-radius: 999px; background: var(--weiss); color: var(--schwarz); font: 500 16px/1 var(--font-sans) }
+.dna.ab2 .incl { display: grid; gap: 8px } .dna.ab2 .incl p { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--weiss) } .dna.ab2 .incl svg { color: var(--violett) }
+.dna.ab2 .price-row { padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, .08) }
+.dna.ab2 .price-row b { font: 300 32px/1.05 var(--font-sans); letter-spacing: -.03em; color: var(--weiss) }
+.dna.ab2 .price-row small, .dna.ab2 .order small { color: var(--silbergrau) !important; font-weight: 400 !important }
+.dna.ab2 .price-row small.einf, .dna.ab2 .order small.einf { color: var(--weiss) !important; font-weight: 500 !important }
+.dna.ab2 .order { font: 400 15px/1.4 var(--font-sans); color: var(--weiss) } .dna.ab2 .order > b { flex: none; font: 300 24px/1 var(--font-sans); letter-spacing: -.02em; white-space: nowrap }
+.dna.ab2 .order.sum { border-top: 1px solid rgba(255, 255, 255, .08); color: var(--silbergrau) }
+/* Felder und Häkchen auf Weiß */
+.dna.ab2 .kform { background: var(--weiss); color: var(--schwarz); gap: 12px }
+.dna.ab2 .kf > span { font: 400 13px/1.3 var(--font-sans); letter-spacing: .02em; color: var(--textgrau) }
+.dna.ab2 .kf input { min-height: 52px; border: 0; border-radius: 999px; padding: 0 18px; background: color-mix(in srgb, var(--silbergrau) 14%, var(--weiss)); color: var(--schwarz); font: 400 17px/52px var(--font-sans) }
+.dna.ab2 .kf input:focus { box-shadow: inset 0 0 0 2px var(--violett) }
+.dna.ab2 .kf.bad input { background: color-mix(in srgb, var(--koralle) 12%, var(--weiss)); box-shadow: inset 0 0 0 2px var(--koralle) }
+.dna.ab2 .kf small, .dna.ab2 .kerr { color: var(--koralle); font: 500 13px/1.35 var(--font-sans) }
+.dna.ab2 .kerr { margin-top: -6px; padding: 0 4px }
+.dna.ab2 .kcheck { padding: 12px 14px; border-radius: 20px; background: color-mix(in srgb, var(--silbergrau) 12%, var(--weiss)); box-shadow: none; color: var(--schwarz); font: 400 14px/1.45 var(--font-sans) }
+.dna.ab2 .kcheck input { accent-color: var(--schwarz) }
+.dna.ab2 .kcheck.bad { background: color-mix(in srgb, var(--koralle) 12%, var(--weiss)); box-shadow: inset 0 0 0 2px var(--koralle) }
+.dna.ab2 .kform .ulink, .dna.ab2 .kform .sub .ulink { color: var(--schwarz) }
+.dna.ab2 .kform .sub, .dna.ab2 .kasse-wr { color: var(--textgrau) !important }
+.dna.ab2 .pay .chip { min-height: 48px; border: 0; border-radius: 999px; background: var(--weiss); color: var(--schwarz); font: 500 15px/1 var(--font-sans) }
+.dna.ab2 .pay .chip[aria-pressed="true"] { background: var(--schwarz); color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--weiss) }
+.dna.ab2 .pay.bad .chip { box-shadow: inset 0 0 0 2px var(--koralle) }
+/* Teilen: Wege als Karten, erledigt mit Haken im Ring */
+.dna.ab2 .share-way.done { box-shadow: inset 0 0 0 1.5px var(--violett), inset 0 1px 0 rgba(255, 255, 255, .10) }
+.dna.ab2 .share-way.done .eyebrow { color: var(--weiss) }
+.dna.ab2 .way-tick { background: transparent; box-shadow: inset 0 0 0 1.5px var(--silbergrau); color: var(--weiss) }
+.dna.ab2 .way-tick.on { background: var(--violett); box-shadow: none; color: var(--schwarz) }
+.dna.ab2 .sec-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 0 0 }
+.dna.ab2 .sec-title { margin: 0; font: 400 13px/1.3 var(--font-sans); letter-spacing: .02em; color: var(--silbergrau) }
+.dna.ab2 .sec-head .link { color: var(--weiss) }
+.dna.ab2 .copybox { border: 0; border-radius: 20px; background: var(--weiss); color: var(--schwarz); font: 400 13px/1.45 ui-monospace, monospace; padding: 12px 14px }
+/* Rückmeldungen und Listen */
+.dna.ab2 .msg, .dna.ab2 .note { position: relative; padding: 12px 14px 12px 32px; border-radius: 20px; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10); color: var(--weiss); font: 400 14px/1.45 var(--font-sans) }
+.dna.ab2 .msg::before, .dna.ab2 .note::before { content: ""; position: absolute; left: 14px; top: 19px; width: 8px; height: 8px; border-radius: 50%; background: var(--silbergrau) }
+.dna.ab2 .msg.warn::before, .dna.ab2 .msg.bad::before, .dna.ab2 .note.warn::before { background: var(--koralle) }
+.dna.ab2 .wincard { width: 100%; min-height: 76px; padding: 12px 14px 12px 12px; gap: 14px; border-radius: 22px; color: var(--weiss); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+.dna.ab2 .wincard .ic { background: rgba(7, 9, 10, .4); color: var(--weiss) }
+.dna.ab2 .wincard .pos { color: var(--silbergrau); font: 500 12px/1.2 var(--font-sans); letter-spacing: .04em }
+.dna.ab2 .wincard .ti { font: 500 16px/1.25 var(--font-sans); color: var(--weiss) }
+.dna.ab2 .wincard .di, .dna.ab2 .wincard .me { font: 400 13px/1.35 var(--font-sans); color: var(--silbergrau) !important }
+.dna.ab2 .liste-in { display: grid; gap: 10px }
+.dna.ab2 .dashed { min-height: 52px; border: 0; border-radius: 999px; background: transparent; color: var(--weiss); font: 500 15px/1 var(--font-sans); gap: 8px; box-shadow: inset 0 0 0 1.5px rgba(168, 164, 169, .55) }
+.dna.ab2 .konto-weg { background: transparent; color: var(--koralle); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--koralle) 45%, transparent); border-radius: 20px }
+.dna.ab2 .steps.mini .step .n { color: var(--weiss); font-weight: 300 } .dna.ab2 .steps.mini .step b { color: var(--weiss); font-weight: 500 } .dna.ab2 .steps.mini .step p { color: var(--silbergrau) }
+.dna.ab2 details.card summary { list-style: none; cursor: pointer } .dna.ab2 details.card summary b { display: block }
+.dna.ab2 .datei-card { display: flex; gap: 14px; flex-wrap: wrap } .dna.ab2 .dc-row { display: flex; gap: 12px } .dna.ab2 .dc-ic { width: 44px; height: 44px; border-radius: 14px; background: rgba(7, 9, 10, .4); color: var(--weiss); display: grid; place-items: center; flex: none }
+.dna.ab2 .dc-row small { display: block; margin-top: 4px }
+.dna .ab-fuss-zwei .ab-zweit { flex: none; height: 52px; padding: 0 16px; font-size: 15px }
+.dna.ab2 .lg-weiter.dna-pille--leise { flex: 1; justify-content: center }
+.dna.ab2 .lg-weiter:disabled { opacity: .45 }
+@media (min-width: 1024px) {
+  .dna.dt .dna-links > .ab-buehne { flex: 1; height: auto; margin: 0; border-radius: 0 }
+  .dna.dt .ab-betrag, .dna.dt .ab-etikett { left: 40px; bottom: 40px }
+  .dna.dt .ab-betrag b { font-size: 64px }
+  .dna.dt .ab-sym .li-reihe { top: 50%; bottom: auto; transform: translateY(-50%); flex-wrap: wrap; align-content: center; justify-content: center; gap: 24px }
+  .dna.dt .ab-sym .li-sym, .dna.dt .ab-sym .li-kachel { width: 150px } .dna.dt .ab-sym .li-kachel { height: 150px; border-radius: 28px } .dna.dt .ab-sym .li-kachel svg { width: 116px; height: 116px }
+  .dna.dt .ab-schloss { width: 48px; height: 48px; right: 14px; top: 46px } .dna.dt .ab-schloss svg { width: 22px; height: 22px }
+  .dna.ab2 .dna-rechts > .ab-inhalt:first-child { padding-top: 0 }
 }
