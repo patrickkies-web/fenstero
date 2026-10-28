@@ -1772,11 +1772,12 @@ if (teil(10)) {
   ok(kv.preise.aufmass === 7.99 && kv.preise.abo.grund === 49 && kv.preise.plus === 79 && kv.einfuehrung && kv.einfuehrung.danach.aufmass === 12.99 && kn.preise.aufmass === 12.99 && kn.preise.abo.grund === 69 && kn.preise.plus === 119 && kn.preise.projekt === 0 && kn.preise.frei === 0 && kab.preise.projekt === 9 && kab.preise.frei === 3 && kn.einfuehrung === null && ke.einfuehrung === null && ke.hinweise.some((h) => /^PREIS_ABO:/.test(h)), 'Einführungspreis: bis 17.11. 7,99 €, 49 € und 79 €, ab 18.11. 0:00 Uhr 12,99 €, 69 € und 119 €; Betriebskonto ohne Projektpreis (kostenlos), 9 € nur mit BETRIEBE_ABRECHNUNG=1; gesetzte PREIS_… schalten den Wechsel ab und stehen als Hinweis in /api/status');
   /* Seit 28.10.2026: Betriebskonto kostenlos (ohne BETRIEBE_ABRECHNUNG). Modell bucht kostenlos, nie gesperrt, keine Tarife; Nutzungsbedingungen ohne alte Preise */
   {
+    await import('../web/assets/modell.js');
     const XK = globalThis.Abrechnung, vorher = JSON.parse(JSON.stringify(XK.preise()));
     XK.setPreise(kn.preise);
     const ak = { links: [], konto: 'service' }, jetztK = Date.now();
     for (let i = 0; i < 5; i++) { const l = { id: 'lk' + i, kunde: 'Kunde ' + i, nr: 'K' + i }; ak.links.unshift(l); XK.receiveAufmass(ak, l, { windows: [{}], fotos: 0 }, 'Link', jetztK); }
-    const wk = XK.planWechsel(ak, 'plus', jetztK), nbK = await roh('/nutzungsbedingungen/', B3);
+    const wk = XK.planWechsel(ak, 'plus', jetztK), nbK = await roh('/nutzungsbedingungen/');
     ok(XK.kostenlos() && XK.lockedLinks(ak).length === 0 && ak.book.every((b) => b.betrag === 0 && b.badge === 'kostenlos') && wk.art === 'kostenlos' && XK.konto(ak) === 'service' &&
       /Ihr Konto ist kostenlos/.test(nbK.text) && !/9&nbsp;€|9 € je Projekt|Abo 10/.test(nbK.text.replace(/§ 6 Frühere Tarife[\s\S]*?<\/p>/, '')),
       'Betriebskonto kostenlos (ohne BETRIEBE_ABRECHNUNG): fünf Aufmaße kostenlos und sichtbar, kein Tarifwechsel; Nutzungsbedingungen ohne 9 € und Abo (außer § 6 Frühere Tarife)');
@@ -1794,12 +1795,13 @@ if (teil(10)) {
     if (ohneBand ? (vor.status !== 200 || vor.etag || /einf-bar/.test(vor.text)) : mitBanner ? (vor.status !== 200 || vor.etag || !/<a class="einf-bar" href="[^"]+"><span><span class="txt"><b>Einführungspreise? bis 17\. November:<\/b>[\s\S]*?<span class="rest">Nur noch heute<\/span>/.test(vor.text)) : vor.status !== 304) einfFehler.push(s10.pfad + (ohneBand ? ' (vorher Banner oder ETag)' : mitBanner ? ' (vorher kein Banner mit Countdown oder alte Fassung aus dem Browser-Cache möglich)' : ' (vorher kein 304)'));
     if (/einf-bar/.test(nach.text)) einfFehler.push(s10.pfad + ' (Banner nach dem Stichtag)');
     if (nach.status !== 200 || (nach.etag && !recht)) einfFehler.push(s10.pfad + ' (danach alte Fassung aus dem Browser-Cache möglich)');
-    if (recht) { if (!/7,99 € bei Kauf bis einschließlich 17\. November 2026|49 € im Monat bei Abschluss bis einschließlich 17\. November 2026/.test(nach.text) || !/12,99 €|69 € im Monat bei Abschluss ab dem 18\. November 2026/.test(nach.text)) einfFehler.push(s10.pfad + ' (nennt nicht beide Zeiträume)'); continue; }
+    /* AGB nennen beide Zeiträume des Aufmaßblatts; die Nutzungsbedingungen haben seit 28.10.2026 keine Preise mehr (Betriebskonto kostenlos) */
+    if (recht) { if (s10.pfad === '/agb/' ? !/7,99 € bei Kauf bis einschließlich 17\. November 2026/.test(nach.text) || !/12,99 €/.test(nach.text) : /(49|69|79|119)(&nbsp;|\u00a0| )€ im Monat|9(&nbsp;|\u00a0| )€ je Projekt/.test(nach.text)) einfFehler.push(s10.pfad + (s10.pfad === '/agb/' ? ' (nennt nicht beide Zeiträume)' : ' (nennt noch Preise des Betriebskontos)')); continue; }
     if (/7,99|class="einf"|49(&nbsp;|\u00a0| )€ im Monat|79(&nbsp;|\u00a0| )€|"price":"(7\.99|49\.00|79\.00)"/.test(nach.text)) einfFehler.push(s10.pfad + ' (alter Preis nach dem Stichtag)');
     if (/7,99/.test(roh10) && !/12,99/.test(nach.text)) einfFehler.push(s10.pfad + ' (neuer Preis fehlt)');
   }
   const startRoh = fs10.readFileSync(path10.join(WURZEL, 'web/index.html'), 'utf8'), fbRoh = fs10.readFileSync(path10.join(WURZEL, 'web/fuer-fensterbauer/index.html'), 'utf8');
-  ok(!einfFehler.length && /class="einf"> \(Einführungspreis bis 17\. November 2026, danach 12,99&nbsp;€\)/.test(startRoh) && !/Einführungspreis|class="einf"/.test(fbRoh), 'Einführungspreis auf den Seiten: vorher mit Hinweis, ab dem Stichtag reguläre Preise ohne Hinweis und ohne ETag (kein veralteter Stand aus dem Browser-Cache); AGB und Nutzungsbedingungen nennen beide Zeiträume; die Seite für Fensterbauer hat keinen Einführungspreis mehr' + (einfFehler.length ? ' (' + einfFehler.join(', ') + ')' : ''));
+  ok(!einfFehler.length && /class="einf"> \(Einführungspreis bis 17\. November 2026, danach 12,99&nbsp;€\)/.test(startRoh) && !/Einführungspreis|class="einf"/.test(fbRoh), 'Einführungspreis auf den Seiten: vorher mit Hinweis, ab dem Stichtag reguläre Preise ohne Hinweis und ohne ETag (kein veralteter Stand aus dem Browser-Cache); AGB nennen beide Zeiträume, die Nutzungsbedingungen keine Preise mehr (Konto kostenlos); die Seite für Fensterbauer hat keinen Einführungspreis mehr' + (einfFehler.length ? ' (' + einfFehler.join(', ') + ')' : ''));
   const llVor = seo.llms('https://eeziframes.com', { JETZT: VOR }), llNach = seo.llms('https://eeziframes.com', { JETZT: NACH });
   ok(/Einführungspreis bis 17\.11\.2026/.test(llVor) && !/Einführungspreis/.test(llNach) && llNach.includes('12,99 €') && llNach.includes(PK.preis('essential').monat + ' € im Monat') && !/Abo 10|119 € im Monat/.test(llVor + llNach), 'llms.txt: Einführungspreis des Aufmaßblatts mit Stichtag, danach nur der reguläre Preis; für Fensterbauer die Paketpreise, keine Tarife des Betriebsbereichs');
 
