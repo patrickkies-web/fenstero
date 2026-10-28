@@ -2997,3 +2997,32 @@ html.dna-voll .fz-wert { font: 500 15px/1 var(--font-sans); color: var(--silberg
 .dna .tr-schloss svg { flex: none; width: 14px; height: 14px }
 /* Überschrift aus einem Wort: keine zweite Stimme (das Wort bleibt als .ak markiert, nur ohne Farbe) */
 .dna :is(h1, h2) .ak.ak-ganz, html.dna-voll .sheet:not(.ofoto-dna) h2 .ak.ak-ganz { color: inherit }
+
+/* ---------- Laptop: Bühne im Container, ein Viertel kleiner; schneller auf langsamen Rechnern (Wunsch des Inhabers, 28.10.2026) ----------
+   „Auf dem Desktop … das Bild sehr unscharf … mir reicht das auch, wenn der Konfigurator bzw. das Bild im Container stattfindet, so 25 %
+   kleiner, und auf PCs, die langsamer sind, läuft der Editor beim Folienwechsel und beim Drehen nicht flüssig.“
+   1. Kein Hereinfahren ganzer Folien: Bei jedem Wechsel fuhr die Folie samt 3-D-Modell 20 px herein; ohne Grafikbeschleunigung musste
+      dafür das ganze Modell je Bild neu gezeichnet werden (gemessen mit vierfach gedrosselter CPU: 0,7 bis 6 s statt 0,1 bis 0,2 s).
+      Folienwechsel sind häufig: Sie stehen sofort (emil-design-eng: Häufiges nicht animieren).
+   2. Kein Milchglas über dem drehbaren Modell: backdrop-filter rechnet beim Drehen jedes Bild nach; die Knöpfe sind deckend.
+   3. Ohne WebGL (CSS-Modell) schwingt das Modell nicht von selbst; sonst zeichnet der Rechner das Modell dauernd neu.
+   4. Am Laptop steht die Bühne als Karte im Container, je Richtung ein Viertel kleiner (gut die Hälfte der Bildpunkte): schärfere
+      Bilder, weniger Arbeit für Grafik und WebGL. Start und Gespeichert bleiben vollflächig (Betonboden über die ganze Fläche, nur
+      ruhende Bilder). */
+.scr.dna, .scr.dna.mit-buehne > :not(.w3d-stage), .scr.dna.mit-buehne.is-back > :not(.w3d-stage) { animation: none }
+.dna.wz #w3d .w3d-zoom .w3d-knopf, .dna.wz #w3d .w3d-haus .w3d-knopf { background: rgba(32, 32, 34, .9); -webkit-backdrop-filter: none; backdrop-filter: none }
+.dna .zn-buehne .zhint { background: rgba(7, 9, 10, .82); -webkit-backdrop-filter: none; backdrop-filter: none }
+.w3d-stage.is-live:not(.gl) .w3d-sway { animation: none }
+@media (min-width: 1024px) {
+  .dna { --bx: clamp(24px, calc((100vw - 380px) * .125), 220px); --by: clamp(20px, calc((100svh - 60px) * .125), 130px) }
+  /* Folien mit dnaTisch (Fotos, Lage, Wünsche, Einzeichnen, Abschluss, Liste, App-Start, Führung) */
+  .dna.dt .dna-links { padding: var(--by) var(--bx) }
+  .dna.dt .dna-links > :is(.ft-buehne, .wz-buehne, .ab-buehne, .li-buehne, .zn-buehne, .wl-buehne, .tr-buehne, .lg-buehne) { border-radius: var(--rund-l); box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .9), inset 0 0 0 1px rgba(255, 255, 255, .06) }
+  .dna.dt .dna-links > .lg-stationen { margin: 0 0 12px }
+  .dna.dt .dna-links > .lg-buehne { margin: 0 }
+  .dna.dt .dna-links > .wz-band { margin: 0 0 12px }
+  /* Ergebnis, Wunschmaße */
+  .dna .er-buehne { top: calc(60px + var(--by)); height: calc(max(560px, 100svh - 60px) - 2 * var(--by)); margin: var(--by) var(--bx); border-radius: var(--rund-l) }
+  /* Messen und Ränder */
+  .dna .ez-folie[data-folie="messen"] > #mess-buehne { margin: var(--by) var(--bx); min-height: calc(560px - 2 * var(--by)); border-radius: var(--rund-l) }
+}
