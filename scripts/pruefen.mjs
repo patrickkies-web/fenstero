@@ -182,36 +182,45 @@ if (teil(2)) {
   const ctxA = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const pa = await neueSeite(ctxA);
   /* Ansicht Hauseigentümer: Kopf und Ansicht stehen im Baustein (Schatten-DOM von #startseite), Fensterbauer: im Kopf der eingebetteten Seite (.vk-einbettung .ez-kopf); auf den übrigen Seiten für Betriebe in der Kopfzeile des Portals */
-  const zustand = () => pa.evaluate(() => { const sr = (document.getElementById('startseite') || {}).shadowRoot || null, top = document.querySelector('.top'), ek = document.querySelector('.vk-einbettung .ez-kopf'); return { a: ((sr ? sr.querySelector('.ez-kopf nav.ez-ansicht a[aria-current]') : ek ? ek.querySelector('nav.ez-ansicht a[aria-current]') : document.querySelector('.top .ansicht [aria-pressed="true"]')) || { textContent: '' }).textContent.trim(), n: sr ? sr.querySelectorAll('.ez-kopf nav.ez-ansicht a').length : ek ? ek.querySelectorAll('nav.ez-ansicht a').length : document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].concat(sr ? [...sr.querySelectorAll('h1')] : []).map((h) => h.textContent.replace(/\s+/g, ' ').trim()), b2c: !!sr, b2b: !!document.querySelector('.hero.b2b'), vk: !!document.querySelector('.vk-einbettung .fb #hero'), still: !!top && top.classList.contains('cta-still'), top: sr ? [...sr.querySelectorAll('.ez-kopf a.dna-pille')].map((b) => b.innerText.trim()) : ek ? [...ek.querySelectorAll('a.dna-pille')].map((b) => b.innerText.trim()) : [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), portalKopf: !!top, portalFuss: !!document.querySelector('footer.foot'), hash: location.hash, screen: S.screen }; });
+  const zustand = () => pa.evaluate(() => { const sr = (document.getElementById('startseite') || {}).shadowRoot || null, top = document.querySelector('.top'), ek = document.querySelector('.vk-einbettung .ez-kopf'); return { a: ((sr ? sr.querySelector('.ez-kopf nav.ez-ansicht a[aria-current]') : ek ? ek.querySelector('nav.ez-ansicht a[aria-current]') : document.querySelector('.top .ansicht [aria-pressed="true"]')) || { textContent: '' }).textContent.trim(), n: sr ? sr.querySelectorAll('.ez-kopf nav.ez-ansicht a').length : ek ? ek.querySelectorAll('nav.ez-ansicht a').length : document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].concat(sr ? [...sr.querySelectorAll('h1')] : []).map((h) => h.textContent.replace(/\s+/g, ' ').trim()), b2c: !!sr, b2b: !!document.querySelector('.hero.b2b'), vk: !!document.querySelector('.vk-einbettung .fb #hero'), still: !!top && top.classList.contains('cta-still'), top: sr ? [...sr.querySelectorAll('.ez-kopf a.dna-pille')].map((b) => b.innerText.trim()) : ek ? [...ek.querySelectorAll('a.dna-pille')].map((b) => b.innerText.trim()) : [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), portalKopf: !!top, portalFuss: !!document.querySelector('footer.foot'), hash: location.hash, pfad: location.pathname, screen: S.screen }; });
   /* Ansicht Fensterbauer: portal.js lädt die Paket-Landingpage /fuer-fensterbauer/ nach und bettet sie ein; darauf warten */
   const einbettung = async () => { await pa.waitForSelector('.vk-einbettung .fb[data-fb-an="1"], .vk-einbettung.vk-rueckfall', { timeout: 8000 }).catch(() => null); await pa.waitForTimeout(300); };
   await pa.goto(BASE + '/', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   let z = await zustand();
   ok(z.n === 2 && z.a === 'Hauseigentümer' && z.b2c && !z.b2b && !z.vk && z.h1.length === 1 && /Fensterplanung ganz eezi/.test(z.h1[0]) && z.top.includes('Jetzt konfigurieren') && !z.top.some((t) => /Anmelden|starten/i.test(t)), 'Ansicht Hauseigentümer (Standard): Ansicht oben im Baustein, nur Inhalte für Hauseigentümer, Knopf „Jetzt konfigurieren“, kein Anmelden oder Starten für Betriebe');
-  ok(await pa.locator('.ez-kopf a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.ez-hero a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.ez-fb a[href="/#fensterbauer"]').count() === 1 && await pa.locator('.ez-ratgeber a[href="/ratgeber/fenster-ausmessen/"]').count() === 1, 'Hauseigentümer: „Jetzt konfigurieren“ führt in die App, gleich in den ersten Schritt (#ausmessen), Ratgeber verlinkt, am Ende der Weg zur Ansicht für Fensterbauer');
-  await pa.click('.ez-kopf nav.ez-ansicht a[href="/#fensterbauer"]'); await einbettung();
+  ok(await pa.locator('.ez-kopf a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.ez-hero a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.ez-fb a[href="/fensterbauer"]').count() === 1 && await pa.locator('.ez-ratgeber a[href="/ratgeber/fenster-ausmessen/"]').count() === 1, 'Hauseigentümer: „Jetzt konfigurieren“ führt in die App, gleich in den ersten Schritt (#ausmessen), Ratgeber verlinkt, am Ende der Weg zur Ansicht für Fensterbauer');
+  await pa.click('.ez-kopf nav.ez-ansicht a[href="/fensterbauer"]'); await einbettung();
   z = await zustand();
-  ok(z.a === 'Fensterbauer' && z.n === 2 && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Anfragen mit Aufmaß/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Paket anfragen') && !z.top.some((t) => /Anmelden|starten|ausmessen/i.test(t)) && !z.portalKopf && !z.portalFuss, 'Ansicht Fensterbauer: Anker #fensterbauer, die Paket-Landingpage eingebettet mit ihrem eigenen Kopf (Umschalter, „Paket anfragen“), genau einem h1 und eigener Fußzeile; keine Kopf- oder Fußzeile des Portals, keine Startbilder der Ansichten');
-  ok(await pa.locator('.vk-einbettung .ez-kopf nav.ez-ansicht a[href="/#hauseigentuemer"]').count() === 1 && await pa.locator('.vk-einbettung .ez-kopf nav.ez-ansicht a[aria-current][href="/#fensterbauer"]').count() === 1 && await pa.locator('.vk-einbettung .ez-wissen a.ez-linkzeile[href="/#hauseigentuemer"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, oben der Umschalter (Fensterbauer bleibt in der Ansicht), am Ende der Weg zu den Hauseigentümern');
+  ok(z.a === 'Fensterbauer' && z.n === 2 && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Anfragen mit Aufmaß/.test(z.h1[0]) && z.pfad === '/fensterbauer' && !z.hash && z.top.includes('Paket anfragen') && !z.top.some((t) => /Anmelden|starten|ausmessen/i.test(t)) && !z.portalKopf && !z.portalFuss, 'Ansicht Fensterbauer: Adresse /fensterbauer ohne Anker, die Paket-Landingpage eingebettet mit ihrem eigenen Kopf (Umschalter, „Paket anfragen“), genau einem h1 und eigener Fußzeile; keine Kopf- oder Fußzeile des Portals, keine Startbilder der Ansichten');
+  ok(await pa.locator('.vk-einbettung .ez-kopf nav.ez-ansicht a[href="/#hauseigentuemer"]').count() === 1 && await pa.locator('.vk-einbettung .ez-kopf nav.ez-ansicht a[aria-current][href="/fensterbauer"]').count() === 1 && await pa.locator('.vk-einbettung .ez-wissen a.ez-linkzeile[href="/#hauseigentuemer"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, oben der Umschalter (Fensterbauer bleibt in der Ansicht), am Ende der Weg zu den Hauseigentümern');
   ok(await pa.locator('.vk-einbettung .ez-paket').count() === 3 && await pa.locator('.vk-einbettung form#anfrage-form[action="/api/auftrag/frage"]').count() === 1 && await pa.locator('.vk-einbettung .ez-livegang').count() === 1 && await pa.locator('.vk-einbettung .fb .ez-kopf').isVisible() && await pa.locator('.vk-einbettung .fb .ez-fuss .ez-fuss__pilot').count() === 1 && await pa.evaluate(() => getComputedStyle(document.querySelector('.vk-einbettung .fb .ez-leiste')).position === 'fixed' && getComputedStyle(document.querySelector('.vk-einbettung .fb .dna-szene')).position === 'sticky'), 'Einbettung: drei Paketkarten, das Anfrageformular und der Livegang sind da, dazu Kopf, Leiste, Vorhang und Fußzeile der Seite wie auf /fuer-fensterbauer/');
   await pa.click('.vk-einbettung .ez-aktionen a[href="#pakete"]'); await pa.waitForTimeout(1800);
-  const sprung = await pa.evaluate(() => { const h = document.getElementById('pakete'), r = h ? h.getBoundingClientRect() : null; return { screen: S.screen, hash: location.hash, oben: !!r && r.top >= -1 && r.top < 80 }; });
-  ok(sprung.screen === 'landing' && sprung.hash === '#fensterbauer' && sprung.oben, 'Knopf „Pakete ansehen“ im Startbild scrollt den Abschnitt an den oberen Rand; Ansicht und Anker #fensterbauer bleiben');
+  const sprung = await pa.evaluate(() => { const h = document.getElementById('pakete'), r = h ? h.getBoundingClientRect() : null; return { screen: S.screen, hash: location.hash, pfad: location.pathname, oben: !!r && r.top >= -1 && r.top < 80 }; });
+  ok(sprung.screen === 'landing' && sprung.pfad === '/fensterbauer' && !sprung.hash && sprung.oben, 'Knopf „Pakete ansehen“ im Startbild scrollt den Abschnitt an den oberen Rand; Ansicht und Adresse /fensterbauer bleiben');
   await pa.reload({ waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   ok((await zustand()).a === 'Fensterbauer', 'Gewählte Ansicht bleibt nach dem Neuladen');
   await pa.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   z = await zustand();
-  ok(z.a === 'Hauseigentümer' && z.b2c && !z.vk, 'Anker /#hauseigentuemer öffnet die Ansicht für Hauseigentümer');
+  ok(z.a === 'Hauseigentümer' && z.b2c && !z.vk && z.pfad === '/' && !z.hash, 'Anker /#hauseigentuemer öffnet die Ansicht für Hauseigentümer, die Adresse wird / ohne Anker');
+  await pa.goto(BASE + '/fensterbauer', { waitUntil: 'networkidle' }); await einbettung();
+  z = await zustand();
+  ok(z.a === 'Fensterbauer' && z.vk && z.pfad === '/fensterbauer' && !z.hash, 'Adresse /fensterbauer öffnet die Ansicht für Fensterbauer direkt');
+  await pa.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await einbettung();
+  z = await zustand();
+  ok(z.a === 'Fensterbauer' && z.vk && z.pfad === '/fensterbauer' && !z.hash, 'Früherer Anker /#fensterbauer öffnet die Ansicht und wird zu /fensterbauer');
+  await pa.click('.vk-einbettung .ez-kopf nav.ez-ansicht a[href="/#hauseigentuemer"]'); await pa.waitForTimeout(400);
+  z = await zustand();
+  ok(z.a === 'Hauseigentümer' && z.b2c && z.pfad === '/' && !z.hash, 'Von /fensterbauer per Umschalter zu den Hauseigentümern: Adresse /, ohne Neuladen');
   await pa.goto(BASE + '/#betriebe', { waitUntil: 'networkidle' }); await einbettung();
   z = await zustand();
-  ok(z.a === 'Fensterbauer' && z.vk && z.hash === '#fensterbauer', 'Früherer Anker /#betriebe öffnet die Ansicht für Fensterbauer');
+  ok(z.a === 'Fensterbauer' && z.vk && z.pfad === '/fensterbauer' && !z.hash, 'Früherer Anker /#betriebe öffnet die Ansicht für Fensterbauer');
   await pa.goto(BASE + '/#wie', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   await pa.click('.top [data-act="go"][data-v="preise"]'); await pa.waitForTimeout(300);
   z = await zustand();
   ok(z.screen === 'preise' && z.a === 'Fensterbauer' && z.portalKopf && z.top.includes('Anmelden'), 'Preise gehören zur Ansicht Fensterbauer; dort zeichnet das Portal die Kopfzeile mit Umschalter und „Anmelden“ für Bestandsbetriebe');
   await pa.click('.top .ansicht [data-v="kunde"]'); await pa.waitForTimeout(300);
   z = await zustand();
-  ok(z.screen === 'landing' && z.a === 'Hauseigentümer' && z.b2c && z.hash === '#hauseigentuemer', 'Von den Preisen per Umschalter zur Startseite der Hauseigentümer');
+  ok(z.screen === 'landing' && z.a === 'Hauseigentümer' && z.b2c && z.pfad === '/' && !z.hash, 'Von den Preisen per Umschalter zur Startseite der Hauseigentümer');
   await pa.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
   await pa.goto(BASE + '/?von=pdf', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   z = await zustand();
@@ -236,7 +245,7 @@ if (teil(2)) {
   ok(kopf.zeile && kopf.voll && kopf.passt && kopf.hoehe <= 140, 'Telefon: Ansicht als eigene Zeile unter Marke und Pille, beide Wörter ganz lesbar, Ziele ab 44 px (Kopf ' + kopf.hoehe + ' px)');
   /* „Mehr erfahren“ gleitet zu „So geht es“, ohne die Adresse zu ändern (Sprungmarken im Schatten-DOM, startseite.js) */
   await mp.evaluate(() => document.getElementById('startseite').shadowRoot.querySelector('.ez-hero a[href="#so"]').click()); await mp.waitForTimeout(1500);
-  const so2 = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot, so = sr.getElementById('so'), r = so.getBoundingClientRect(); return { oben: Math.round(r.top), hash: location.hash, screen: S.screen }; });
+  const so2 = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot, so = sr.getElementById('so'), r = so.getBoundingClientRect(); return { oben: Math.round(r.top), hash: location.hash, pfad: location.pathname, screen: S.screen }; });
   ok(so2.oben > -40 && so2.oben < 120 && so2.hash === '' && so2.screen === 'landing', '„Mehr erfahren“ springt zu „So geht es“, Adresse und Ansicht bleiben (' + JSON.stringify(so2) + ')');
   /* Vorhang im Schatten-DOM: Szenen höher als der Bildschirm kleben erst mit ihrem Ende (--dna-szene-oben), sonst bliebe ihr unterer Teil
      unerreichbar (Fehler vom 26.10.2026: Schritt 3 und 4 von „So geht es“ und „Was im Aufmaß steckt“ waren am Telefon nie zu sehen) */
@@ -629,7 +638,7 @@ if (teil(6)) {
   await page.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
   const start = await page.evaluate(() => { const r = document.getElementById('startseite'); return (document.body.textContent + ' ' + (r && r.shadowRoot ? r.shadowRoot.textContent : '')).replace(/\s+/g, ' '); });
   ok(/Fensterplanung ganz eezi\./.test(start) && !/Anfragen mit Aufmaß/.test(start) && await page.locator('.ez-hero a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await page.locator('.ez-fuss-satz a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: konfigurieren (gleich in den ersten Schritt der App, #ausmessen) oder Führung, nichts für Betriebe');
-  await page.click('.ez-kopf nav.ez-ansicht a[href="/#fensterbauer"]'); await page.waitForSelector('.vk-einbettung .fb[data-fb-an="1"]', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
+  await page.click('.ez-kopf nav.ez-ansicht a[href="/fensterbauer"]'); await page.waitForSelector('.vk-einbettung .fb[data-fb-an="1"]', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
   const startB = await page.evaluate(() => document.body.textContent);
   ok(/Anfragen mit Aufmaß\. Unter Ihrer Marke\./.test(startB.replace(/\s+/g, ' ')) && !/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c, .hero.b2b').count() === 0, 'Startseite, Ansicht Fensterbauer: die Paket-Landingpage eingebettet, nichts für Hauseigentümer, keine Werbung mehr für Aufmaß-Links');
   ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test((start + startB).replace(/Kein Portal und kein Marktplatz/g, '')), 'Kein Marktplatz mehr auf der Startseite');
@@ -1458,7 +1467,7 @@ if (teil(9)) {
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
   const fuehrungDa = await page.locator('.ez-fuss-satz a[href$="/app/#fuehrung"]').count() === 1;
-  await page.click('.ez-kopf nav.ez-ansicht a[href="/#fensterbauer"]'); await page.waitForTimeout(300);
+  await page.click('.ez-kopf nav.ez-ansicht a[href="/fensterbauer"]'); await page.waitForTimeout(300);
   ok(fuehrungDa && await page.locator('.vk-einbettung').count() === 1 && await page.locator('.hero.b2b [data-act="tour"]').count() === 0, 'Startseite: „Führung starten“ in der Ansicht für Hauseigentümer; die Ansicht für Fensterbauer zeigt die Paket-Landingpage und wirbt nicht mehr für die Tour (sie bleibt über „Anmelden“ und /#tour erreichbar)');
   /* ohne die eingebettete Verkaufsseite: ihre „Live-Demos“ sind echte Konfigurator-Instanzen der Pakete, keine Demo-Konten */
   const ohneDemo = async (wo) => { const t = await page.evaluate(() => { const b = document.body.cloneNode(true); b.querySelectorAll('.vk-einbettung').forEach((e) => e.remove()); return b.textContent; }); return !/\bDemo\b|Demo-Zugang|Beispieldaten|Beispiel-IBAN|Demo-Ansicht/.test(t) && await page.locator('[data-act="demo-as"], [data-act="reg-fill"], [data-act="pay-fill"], [data-act="l-sim"], [data-act="demo-project"], [data-act="demo"]').count() === 0 ? true : wo; };
@@ -1618,16 +1627,16 @@ if (teil(10)) {
   const fuss = await page.$$eval('footer a', (as) => as.map((a) => a.getAttribute('href')));
   ok(fuss.includes('/ratgeber/') && fuss.includes('/fuer-fensterbauer/'), 'Fußzeile der Startseite verlinkt Ratgeber und die Seite für Fensterbauer');
   /* Die Seite für Fensterbauer verkauft die Konfigurator-Pakete (Bauplan E28); Tour und Registrierung des Betriebsbereichs bleiben
-     über /#tour und /#fensterbauer erreichbar, werden dort aber nicht mehr beworben */
+     über /#tour und /fensterbauer erreichbar, werden dort aber nicht mehr beworben */
   await page.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
-  const fbAlt = await page.evaluate(() => document.querySelectorAll('a[href="/#tour"], a[href="/#fensterbauer"], a[href$="/#tour"], a[href$="/#fensterbauer"]').length + (/Kostenlos starten/.test(document.body.innerText) ? 1 : 0));
+  const fbAlt = await page.evaluate(() => document.querySelectorAll('a[href="/#tour"], a[href="/#fensterbauer"], a[href="/fensterbauer"], a[href$="/#tour"], a[href$="/#fensterbauer"], a[href$="/fensterbauer"]').length + (/Kostenlos starten/.test(document.body.innerText) ? 1 : 0));
   await page.goto(BASE + '/#tour', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
   const tour1 = fbAlt === 0 && await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour');
   await page.evaluate(() => tourEnde()); await page.waitForTimeout(300); // Tour beenden räumt den eigenen Eintrag im Verlauf ab (Zurück im Browser, S6)
   await page.evaluate(() => { location.hash = 'tour'; }); await page.waitForTimeout(400);
   ok(tour1 && await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour'), 'Seite für Fensterbauer ohne Tour, Registrierung und „Kostenlos starten“ des Betriebsbereichs; /#tour öffnet die Tour weiterhin, auch als Sprungmarke auf der Startseite');
   await page.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
-  ok(await page.locator('.vorab').count() === 0 && await page.locator('a[href$="/ratgeber/fenster-ausmessen/"]').count() >= 1 && await page.locator('a[href$="/#fensterbauer"]').count() >= 1, 'App mit JavaScript: Textfassung weg, Anleitung verlinkt, Fensterbauer kommen in ihre Ansicht');
+  ok(await page.locator('.vorab').count() === 0 && await page.locator('a[href$="/ratgeber/fenster-ausmessen/"]').count() >= 1 && await page.locator('a[href$="/fensterbauer"]').count() >= 1, 'App mit JavaScript: Textfassung weg, Anleitung verlinkt, Fensterbauer kommen in ihre Ansicht');
   sauber(page, 'Startseite und App mit Textfassung ohne Fehler');
   await ctx.close();
   const nojs = await browser.newContext(Object.assign({}, telefon, { javaScriptEnabled: false })), np = await nojs.newPage();
@@ -1761,6 +1770,8 @@ if (teil(10)) {
   const um = (a, m) => { const r = seo.umleitung(new Request(a, { method: m || 'GET' })); return r ? r.status + ' ' + r.headers.get('location') : null; };
   const httpKan = await probe('http://eeziframes.com/ratgeber/', { INDEXIERUNG: '1' });
   ok(um('http://eeziframes.com/ratgeber/?x=1') === '301 https://eeziframes.com/ratgeber/?x=1' && um('https://www.eeziframes.com/app/') === '301 https://eeziframes.com/app/' && um('http://www.eeziframes.com/') === '301 https://eeziframes.com/' && um('https://eeziframes.com/') === null && um('http://localhost:8788/') === null && um('http://eeziframes.com/', 'POST') === null && um('http://eeziframes.com/verifyforzoho.html') === null && um('https://eeziframes.com/ratgeber') === '301 https://eeziframes.com/ratgeber/' && um('https://eeziframes.com/ratgeber/fenster-ausmessen?x=1') === '301 https://eeziframes.com/ratgeber/fenster-ausmessen/?x=1' && um('https://eeziframes.com/index.html') === '301 https://eeziframes.com/' && um('http://www.eeziframes.com/app/index.html') === '301 https://eeziframes.com/app/' && um('https://eeziframes.com/assets/app.js') === null && um('https://eeziframes.com/bilder/messpunkte.svg') === null && um('https://eeziframes.com/zentrale') === null && ['/app', '/ratgeber', '/fuer-fensterbauer', '/impressum'].every((p) => routen.includes(p)) && httpKan.link === '<https://eeziframes.com/ratgeber/>; rel="canonical"' && httpKan.text.includes('content="https://eeziframes.com/og.png"'), 'Domain: http://, www., Seiten ohne Schrägstrich und …/index.html leiten dauerhaft (301) auf https://eeziframes.com/…/ um (nicht lokal, nicht POST, nicht die Bestätigungsdatei, keine Dateien); Canonical immer mit https');
+  let fbHolt = ''; const fbAdr = await seo.behandeln(new Request('https://eeziframes.com/fensterbauer'), { INDEXIERUNG: '1' }, async (r) => { fbHolt = new URL(r.url).pathname; return new Response('<!doctype html><head><title>x</title></head>', { headers: { 'content-type': 'text/html; charset=utf-8' } }); });
+  ok(fbAdr && fbAdr.status === 200 && fbHolt === "/" && fbAdr.headers.get('link') === '<https://eeziframes.com/fuer-fensterbauer/>; rel="canonical"' && (await fbAdr.text()).includes('<link rel="canonical" href="https://eeziframes.com/fuer-fensterbauer/">') && !seo.SEITEN.some((x) => x.pfad === '/fensterbauer') && routen.includes('/fensterbauer'), 'Adresse /fensterbauer: liefert die Startseite (Ansicht Fensterbauer ohne Anker), kanonisch /fuer-fensterbauer/, nicht in der Sitemap, Route im Worker');
   ok(wdev.robots === seo.SPERRE && /User-agent: \*\nDisallow: \/\n/.test(rbDev), 'Domain: die Cloudflare-Testadresse (…workers.dev) bleibt auch mit Freigabe gesperrt');
 
   /* Einführungspreis (EINFUEHRUNG in functions/api/umgebung.js): bis 17.11.2026 Startpreise und Hinweise, ab 18.11. 0:00 Uhr von selbst die regulären */
@@ -2130,6 +2141,15 @@ if (teil(11)) {
     st.fehlerBei(null);
     const zOk = await zRufe('/api/zentrale/betriebe/' + zb.id + '/abrechnen', {}, zKeks), zNach = await sp.betriebHolen(zb.id), zProt = (await sp.protokollLesen({ betrieb: zb.id, anzahl: 10 })) || [];
     ok(/^__Host-zentrale=/.test(zKeks) && zFehl._status === 502 && /^Abrechnung fehlgeschlagen: /.test(zFehl.fehler || '') && zVor.daten.book[0].status === 'offen' && zOk._status === 200 && zOk.ergebnis.rechnungen === 1 && zNach.daten.book[0].status === 'berechnet' && zProt.some((e) => e.art === 'abrechnung' && e.text === 'Abrechnung fehlgeschlagen') && zProt.some((e) => e.art === 'abrechnung' && e.text === 'Sammelrechnung erstellt'), 'Zentrale „Jetzt abrechnen“: Scheitert Stripe, stehen der Grund im Dialog und „Abrechnung fehlgeschlagen“ im Protokoll, die Buchung bleibt offen; der nächste Versuch rechnet ab');
+    // Gutscheincodes: die Kasse der Einrichtung (Pakete) nimmt Codes aus dem Stripe-Dashboard an; der Betrag nach Rabatt kommt aus der Kasse
+    await import(new URL('../web/assets/pakete.js', import.meta.url).href);
+    const zahl11 = await import('../functions/auftrag/zahlung.js'), gsN = st.log.length;
+    const gsA = { id: 'auf_gutschein', nr: 'A-0099', paket: 'essential', angaben: { betrieb: { firma: 'Gutschein Fensterbau', plz: '50667', ort: 'Köln' } } };
+    const gsK = await zahl11.kasse({ k: k, env: {} }, gsA, { id: 'kd_gutschein', mail: 'gutschein@beispiel.de' }, { zurueck: B + '/bestellen/?kasse={SESSION}', abbruch: B + '/bestellen/' });
+    const gsP = (kassenSeit(gsN)[0] || {}).p || {}, gsVoll = Math.round(globalThis.Pakete.preis('essential').einrichtung * 100 * 1.19);
+    st.abschliessen(gsK.id, { betrag: Math.round(gsVoll / 2) });
+    const gsR = await zahl11.kassePruefen({ k: k, env: {} }, gsK.id);
+    ok(String(gsP.allow_promotion_codes) === 'true' && gsP.metadata.art === 'auftrag' && gsR.bezahlt && gsR.betragCent === Math.round(gsVoll / 2) && kassenSeit(0).length > 1 && !kassenSeit(0).some((e) => (e.p.metadata || {}).art !== 'auftrag' && String(e.p.allow_promotion_codes) === 'true'), 'Gutscheincodes: die Kasse der Einrichtung zeigt das Codefeld von Stripe, nach 50 % Rabatt zählt der bezahlte Betrag (' + (gsR.betragCent / 100).toFixed(2) + ' € statt ' + (gsVoll / 100).toFixed(2) + ' €); die Kasse des Aufmaßblatts bleibt ohne Codes');
     if (process.env.STRIPE_PROTOKOLL) (await import('node:fs')).writeFileSync(process.env.STRIPE_PROTOKOLL, JSON.stringify(st.log, null, 1));
   } catch (e) {
     ok(false, 'Stripe-Anbindung ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
@@ -3020,14 +3040,14 @@ if (teil(15)) {
     await s1.evaluate((m) => localStorage.setItem('aufmass.kunde.anfrage', JSON.stringify({ mail: m, zweck: 'anmelden', at: Date.now() })), mail6);
     await s1.goto(linkAdr(tok6), { waitUntil: 'networkidle' });
     await s1.waitForFunction(() => KS && S.windows.length > 0, null, { timeout: 8000 }); await s1.waitForTimeout(200);
-    const link = await s1.evaluate(() => ({ hash: location.hash, mail: KS.mail, n: S.windows.length, screen: S.screen, anfrage: localStorage.getItem('aufmass.kunde.anfrage') }));
+    const link = await s1.evaluate(() => ({ hash: location.hash, pfad: location.pathname, mail: KS.mail, n: S.windows.length, screen: S.screen, anfrage: localStorage.getItem('aufmass.kunde.anfrage') }));
     ok(link.hash === '' && link.mail === mail6 && link.n >= 1 && link.screen === 'home' && !link.anfrage, 'Anmeldelink im Browser, der den Code angefordert hat: ohne Rückfrage angemeldet, zuletzt bearbeitetes Aufmaß geladen, Adresse bereinigt');
     // Ein Link, den dieser Browser nicht angefordert hat (etwa untergeschoben): erst die Rückfrage mit der Adresse des Kontos
     const c3 = await browser.newContext(telefon), s3 = await neueSeite(c3, B6);
     await s3.goto(B6 + '/app/', { waitUntil: 'networkidle' }); await fensterAnlegen(s3, [['Gast-Bad', 600, 800]]); await s3.waitForTimeout(250);
     const vorLink = (await fetch(B6 + '/api/kunde/aufmasse', { headers: { authorization: 'Bearer ' + tok6, accept: 'application/json' } }).then((r) => r.json())).aufmasse.length;
     await s3.goto(linkAdr(tok6), { waitUntil: 'networkidle' }); await s3.waitForFunction(() => S.screen === 'linkanmelden', null, { timeout: 8000 }); await s3.waitForTimeout(200);
-    const frageL = await s3.evaluate(() => ({ hash: location.hash, ks: !!KS, gespeichert: localStorage.getItem('aufmass.kunde'), text: document.body.innerText }));
+    const frageL = await s3.evaluate(() => ({ hash: location.hash, pfad: location.pathname, ks: !!KS, gespeichert: localStorage.getItem('aufmass.kunde'), text: document.body.innerText }));
     await foto(s3, 'app-link-rueckfrage');
     await s3.click('[data-act="link-anmelden-nein"]'); await s3.waitForTimeout(300);
     const nein = await s3.evaluate(() => ({ ks: !!KS, gespeichert: localStorage.getItem('aufmass.kunde'), n: S.windows.length, screen: S.screen }));
