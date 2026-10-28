@@ -2995,3 +2995,5 @@ html.dna-voll .fz-wert { font: 500 15px/1 var(--font-sans); color: var(--silberg
 /* Führung: was das Schloss heißt */
 .dna .tr-schloss { display: flex; align-items: center; gap: 8px; margin: 0; font: 400 13px/1.4 var(--font-sans); color: var(--silbergrau) }
 .dna .tr-schloss svg { flex: none; width: 14px; height: 14px }
+/* Überschrift aus einem Wort: keine zweite Stimme (das Wort bleibt als .ak markiert, nur ohne Farbe) */
+.dna :is(h1, h2) .ak.ak-ganz, html.dna-voll .sheet:not(.ofoto-dna) h2 .ak.ak-ganz { color: inherit }
