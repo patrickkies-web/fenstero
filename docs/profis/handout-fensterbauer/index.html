@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>eeziframes für Fensterbauer</title>
+<link rel="stylesheet" href="handout.css">
+</head>
+<body>
+<!-- Handout für Fensterbauer (Wunsch des Inhabers, 28.10.2026): zwei Seiten zum Lesen, danach drei Seiten Beispiel-Aufmaß.
+     Erzeugen: node scripts/handout-fensterbauer.mjs (Preise aus web/assets/pakete.js, Beispielseiten aus web/beispiele/). -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="marke" viewBox="0 0 64 64"><rect class="fi-kachel" width="64" height="64" rx="10" fill="#000"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect class="fi-rand" x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#000" stroke-opacity=".1"/></symbol>
+  <symbol id="haken" viewBox="0 0 16 16"><path d="M3.5 8.4 6.6 11.2 12.5 4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="pfeil" viewBox="0 0 14 14"><path d="M2 7h10M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<!-- ============ Seite 1 ============ -->
+<section class="h-seite">
+  <header class="h-kopf">
+    <span class="h-marke"><svg><use href="#marke"/></svg><span><b>eezi</b>frames</span></span>
+    <span class="h-kopf-r">Für Fensterbauer und Fensterhändler</span>
+  </header>
+
+  <div class="h-held">
+    <div>
+      <span class="h-label">Ihr eigener Fenster-Konfigurator</span>
+      <h1>Anfragen mit Aufmaß. <span class="h-zweit">Unter Ihrer Marke.</span></h1>
+      <p class="h-lead">Ihre Kunden planen und messen ihre Fenster selbst, auf Ihrer Website und unter Ihrem Namen. <b>Sie bekommen jede Anfrage als Aufmaßblatt-PDF fürs erste Angebot.</b></p>
+      <div class="h-chips">
+        <span class="h-chip"><svg><use href="#haken"/></svg><span data-ab>Ab 39 € im Monat, netto</span></span>
+        <span class="h-chip"><svg><use href="#haken"/></svg>Keine Mindestlaufzeit</span>
+        <span class="h-chip"><svg><use href="#haken"/></svg>Ihr Kunde zahlt nichts</span>
+      </div>
+    </div>
+    <div class="h-buehne">
+      <div class="h-telefon"><img src="bilder/konfigurator-telefon.jpg" alt="Der Konfigurator von Fensterbau Brandt am Telefon, erste Folie „Was planst du?“"></div>
+      <div class="h-anfrage">
+        <small>Neue Anfrage · Beispiel</small>
+        <b>Familie Mustermann</b>
+        <div class="h-zahl"><strong>13</strong><span>Positionen</span></div>
+        <div class="h-datei"><i></i>Aufmaßblatt_Mustermann.pdf</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="h-ablauf">
+    <div class="h-ablauf-kopf">
+      <h2>Vom ersten Klick <span class="h-zweit">zum Aufmaß.</span></h2>
+      <span class="h-label">Ihr Kunde braucht kein Konto</span>
+    </div>
+    <div class="h-schritte">
+      <div class="h-schritt"><span class="h-nr">01<i></i></span><b>Klicken</b><p>Ihr Kunde tippt auf Ihrer Website auf „Fenster planen“.</p></div>
+      <div class="h-schritt"><span class="h-nr">02<i></i></span><b>Planen</b><p>Er misst selbst: Fotos, drei Breiten, drei Höhen, Wünsche am 3-D-Modell.</p></div>
+      <div class="h-schritt"><span class="h-nr">03<i></i></span><b>Senden</b><p>Er bekommt eine Bestätigung und eine Durchschrift, ohne Maße.</p></div>
+      <div class="h-schritt"><span class="h-nr">04<i></i></span><b>Aufmaßblatt</b><p>Sie bekommen das PDF per E-Mail und rechnen Ihr Angebot.</p></div>
+    </div>
+  </div>
+
+  <div class="h-vorhang h-hell">
+    <div class="h-ankommt">
+      <div>
+        <span class="h-label">Was bei Ihnen ankommt</span>
+        <h2>Ein Aufmaßblatt, <span class="h-zweit">mit dem Sie rechnen können.</span></h2>
+        <ul class="h-liste">
+          <li><b>Maueröffnung:</b> drei Breiten und drei Höhen, das kleinste Maß zählt</li>
+          <li><b>Altes Fenster</b> mit Rahmen, dazu Brüstung und Laibung</li>
+          <li><b>Fotos</b> innen und außen; mit Einwilligung liest die KI die Einbausituation</li>
+          <li><b>Wünsche:</b> Öffnung, Material, Farbe, Glas, Sonnenschutz, Montage</li>
+          <li><b>Zu klären:</b> Absturzsicherung, Lüftungskonzept, Förderung</li>
+          <li><b>Das Feinaufmaß</b> vor der Fertigung bleibt bei Ihnen</li>
+        </ul>
+      </div>
+      <div class="h-blatt">
+        <img src="bilder/blatt.jpg" alt="Seite 1 des Beispiel-Aufmaßblatts">
+        <span class="h-blatt-chip" style="left: -14px; top: 96px"><i></i>Öffnung · kleinstes Maß</span>
+        <span class="h-blatt-chip k" style="right: -10px; top: 40px"><i></i>15 zu klären</span>
+      </div>
+    </div>
+    <div class="h-fuss"><span>eeziframes.com/fuer-fensterbauer</span><span>Beispiel-Aufmaß ab Seite 3</span><span>1 / 5</span></div>
+  </div>
+</section>
+
+<!-- ============ Seite 2 ============ -->
+<section class="h-seite">
+  <div class="h-oben h-hell">
+    <header class="h-kopf">
+      <span class="h-marke"><svg><use href="#marke"/></svg><span><b>eezi</b>frames</span></span>
+      <span class="h-kopf-r">Für Fensterbauer und Fensterhändler</span>
+    </header>
+    <div class="h-pakete-kopf">
+      <span class="h-label">Drei Pakete</span>
+      <h2>Ein Konfigurator. <span class="h-zweit">Drei Auftritte.</span></h2>
+      <p>Alle drei: der volle Konfigurator und jede Anfrage als Aufmaßblatt-PDF per E-Mail. Der Unterschied ist, wie sehr er Ihre Marke trägt.</p>
+    </div>
+    <div class="h-pakete">
+      <article class="h-paket" data-paket="essential">
+        <div class="h-paket-bild"><img src="bilder/paket-essential.jpg" alt=""></div>
+        <div class="h-paket-text">
+          <span class="h-paket-name">EEZI</span><h3>Essential</h3>
+          <div class="h-preis"><strong data-monat>39 €</strong><span>im Monat<br>netto</span></div>
+          <p class="h-einr"><span data-einr>dazu 99 € Einrichtung</span><br><span data-ki>1.000 KI-Auswertungen im Monat</span></p>
+          <ul><li>Unter ihr-name.eeziframes.com</li><li>eeziframes-Design mit Ihrem Namen</li><li>Hinweis „Powered by EEZIframes“</li></ul>
+        </div>
+      </article>
+      <article class="h-paket h-empf" data-paket="plus">
+        <div class="h-paket-bild"><img src="bilder/paket-plus.jpg" alt=""></div>
+        <div class="h-paket-text">
+          <span class="h-paket-name">EEZI<em>Empfohlen</em></span><h3>Essential Plus</h3>
+          <div class="h-preis"><strong data-monat>69 €</strong><span>im Monat<br>netto</span></div>
+          <p class="h-einr"><span data-einr>dazu 150 € Einrichtung</span><br><span data-ki>1.500 KI-Auswertungen im Monat</span></p>
+          <ul><li>Ihre eigene Domain</li><li>Ihr Logo, bis zu 6 Fotos, eigene Startseite</li><li>Zur Hälfte in Ihren Farben</li></ul>
+        </div>
+      </article>
+      <article class="h-paket" data-paket="signature">
+        <div class="h-paket-bild"><img src="bilder/paket-signature.jpg" alt=""></div>
+        <div class="h-paket-text">
+          <span class="h-paket-name">EEZI</span><h3>Signature</h3>
+          <div class="h-preis"><strong data-monat>99 €</strong><span>im Monat<br>netto</span></div>
+          <p class="h-einr"><span data-einr>dazu 239 € Einrichtung</span><br><span data-ki>2.000 KI-Auswertungen im Monat</span></p>
+          <ul><li>Ganz in Ihren Farben, ohne eeziframes</li><li>Dashboard mit 5 Zugängen</li><li>Persönliche Einladungslinks</li></ul>
+        </div>
+      </article>
+    </div>
+    <p class="h-alle"><b>Keine Mindestlaufzeit, monatlich kündbar.</b> Einrichtung einmalig vorab. Alle Preise netto zzgl. MwSt., nur für Unternehmer. Weitere KI-Auswertungen je <span data-kipreis>0,08 €</span> netto, nur wenn Sie sie freischalten. Ihr Kunde zahlt nie etwas.</p>
+  </div>
+
+  <div class="h-dunkel">
+    <div class="h-zwei">
+      <div>
+        <span class="h-label">Ihr Start</span>
+        <h2>Vorschau in <span class="h-zweit">3 bis 5 Werktagen.</span></h2>
+        <p class="h-klein">Ab vollständigen Angaben. Eine eigene Website brauchen Sie nicht.</p>
+        <ol class="h-stationen">
+          <li><b>Bestellt</b>Paket, Firma, Wunsch-Domain</li>
+          <li><b>Bezahlt</b>Einrichtung vorab</li>
+          <li><b>Einrichtung</b>Anruf zu Ihrer Wunschzeit</li>
+          <li><b>Domain</b>gesichert, mit Zertifikat</li>
+          <li><b>Freigabe</b>Sie testen über einen Vorschau-Link</li>
+          <li><b>Live</b>erst jetzt beginnt das Monatsabo</li>
+        </ol>
+      </div>
+      <div>
+        <span class="h-label">Kundenschutz</span>
+        <h2>Ihre Kunden <span class="h-zweit">bleiben Ihre Kunden.</span></h2>
+        <ul class="h-liste">
+          <li><b>Nur Ihr Betrieb.</b> Keine anderen Anbieter, keine Werbung.</li>
+          <li><b>Nur an Sie.</b> Jede Anfrage an Ihre bestätigten Adressen.</li>
+          <li><b>Kein Weiterverkauf.</b> Wir sprechen Ihre Kunden nicht an.</li>
+          <li><b>In Frankfurt.</b> Im Auftrag verarbeitet, mit AV-Vertrag.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="h-aufruf">
+      <div>
+        <h3>Selbst ausprobieren.</h3>
+        <p>Den Besuch Ihres Kunden durchspielen, auf der Beispielseite von Fensterbau Brandt. Gesendet wird nichts.</p>
+        <a class="h-pille" href="https://eeziframes.com/fuer-fensterbauer/">eeziframes.com/fuer-fensterbauer<i><svg><use href="#pfeil"/></svg></i></a>
+      </div>
+      <div class="h-qr" data-qr="https://eeziframes.com/fuer-fensterbauer/"></div>
+      <div class="h-kontakt">
+        <small>Fragen?</small>
+        <b>Patrick Kies</b>
+        <a href="mailto:ask@eeziframes.com" style="color:inherit;text-decoration:none">ask@eeziframes.com</a><br>
+        <a href="tel:+4915256950998" style="color:inherit;text-decoration:none">0152 56950998</a><br>
+        <span style="color:var(--textgrau)">Antwort meist innerhalb eines Werktags</span>
+      </div>
+    </div>
+
+    <div class="h-weiter"><svg><use href="#pfeil"/></svg><span><b>Auf den nächsten drei Seiten:</b> ein Beispiel-Aufmaß, wie es bei Ihnen ankommt (Seiten 1, 2 und 6 von 18). Fensterbau Brandt und Familie Mustermann sind erfunden.</span></div>
+    <div class="h-fuss"><span>eeziframes · Patrick Kies · Postweg 35 · 33442 Herzebrock-Clarholz</span><span data-stand>Stand 28.10.2026</span><span>2 / 5</span></div>
+  </div>
+</section>
+
+<script src="../../../web/vendor/qrcode.js"></script>
+<script src="../../../web/assets/pakete.js"></script>
+<script>
+/* Preise allein aus pakete.js; QR-Code zur Seite für Fensterbauer */
+(function () {
+  var P = window.Pakete; if (!P) return;
+  var tsd = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
+  var min = Math.min.apply(null, P.LISTE.map(function (k) { return P.preis(k).monat; }));
+  document.querySelectorAll('[data-ab]').forEach(function (e) { e.textContent = 'Ab ' + P.euro(min) + ' im Monat, netto'; });
+  document.querySelectorAll('[data-paket]').forEach(function (karte) {
+    var k = karte.getAttribute('data-paket'), p = P.preis(k);
+    karte.querySelector('[data-monat]').textContent = P.euro(p.monat);
+    karte.querySelector('[data-einr]').textContent = 'dazu ' + P.euro(p.einrichtung) + ' Einrichtung, einmalig';
+    karte.querySelector('[data-ki]').textContent = tsd(P.PAKETE[k].kiMonat) + ' KI-Auswertungen im Monat';
+  });
+  document.querySelectorAll('[data-kipreis]').forEach(function (e) { e.textContent = P.euro(P.preis('plus').ki); });
+  document.querySelectorAll('[data-qr]').forEach(function (e) {
+    var q = qrcode(0, 'M'); q.addData(e.getAttribute('data-qr')); q.make();
+    e.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  });
+  document.documentElement.setAttribute('data-fertig', '1');
+})();
+</script>
+</body>
+</html>
