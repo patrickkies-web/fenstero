@@ -2188,7 +2188,7 @@ if (teil(13)) {
   console.log('13. Zentrale des Inhabers');
   const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), ze = await import('../functions/api/zentrale.js'), stat = await import('../functions/api/statistik.js');
   const B = 'https://eeziframes.com', PW = 'pruef-passwort-zentrale-13', GEHEIM = 'JBSWY3DPEHPK3PXPJBSWY3DP', stempel = Date.now().toString(36), seoSperre = (await import('../functions/seo.js')).SPERRE;
-  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef13' }, env2 = Object.assign({}, env, { ZENTRALE_2FA: GEHEIM });
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef13', BETRIEBE_ABRECHNUNG: '1' }, env2 = Object.assign({}, env, { ZENTRALE_2FA: GEHEIM });
   let ipNr = 1; const neueIp = () => '198.51.100.' + (ipNr++);
   const rufe = async (pfad, o) => {
     o = o || {}; const h = Object.assign({ accept: 'application/json', origin: B, 'cf-connecting-ip': o.ip || '192.0.2.10' }, o.kopf || {});
@@ -2426,7 +2426,7 @@ if (teil(14)) {
   console.log('14. Fortsetzen, Paywall, Grenzen, Zwischenstand beim Kundenlink');
   const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), ze = await import('../functions/api/zentrale.js');
   const X = globalThis.Abrechnung, B = 'https://eeziframes.com', PW = 'pruef-passwort-zentrale-14', TAG = 864e5, stempel = Date.now().toString(36);
-  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef14' };
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef14', BETRIEBE_ABRECHNUNG: '1' };
   const sp = spM.speicher(umg.konfig(env));
   let ipNr = 1; const neueIp = () => '198.51.100.' + (60 + (ipNr++ % 150));
   const rufe = async (pfad, o) => {
@@ -2846,7 +2846,7 @@ if (teil(15)) {
   console.log('15. Konten für Hauseigentümer (Gast, Aufmaß sichern, Anmelden, Kauf nur mit Konto)');
   const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), ze = await import('../functions/api/zentrale.js');
   const B = 'https://eeziframes.com', TAG = 864e5, stempel = Date.now().toString(36), t = Date.now();
-  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef15' };
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef15', BETRIEBE_ABRECHNUNG: '1' };
   const sp = spM.speicher(umg.konfig(env));
   let ipNr = 1;
   const rufe = async (pfad, o) => {
@@ -4047,7 +4047,7 @@ if (teil(19)) {
   const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js');
   const fo = await import('../functions/api/fotos.js'), ze = await import('../functions/api/zentrale.js'), auth = await import('../functions/api/auth.js');
   const B = 'https://eeziframes.com', TAG = 864e5, stempel = Date.now().toString(36);
-  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef19' }, k19 = umg.konfig(env), sp = spM.speicher(k19), ab = fo.ablage(k19);
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef19', BETRIEBE_ABRECHNUNG: '1' }, k19 = umg.konfig(env), sp = spM.speicher(k19), ab = fo.ablage(k19);
   let ipNr = 1; const hinten = [];
   const rufe = async (pfad, o) => {
     o = o || {}; const h = { accept: 'application/json', origin: B, 'cf-connecting-ip': '203.0.113.' + (10 + (ipNr++ % 200)) };
