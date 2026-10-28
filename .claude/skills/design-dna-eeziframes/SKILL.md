@@ -200,6 +200,9 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Regel: Ein Hinweis, der für eine ganze Ansicht gilt, steht als Fläche in der Folie selbst (Anthrazit mit Lichtkante, Etikett mit
   violettem Punkt, ein Satz, ein Weg), nicht als Bogen oder Karte vor dem Inhalt und nicht auf noch nicht überarbeiteten Seiten.
   Vorschlag für seine DNA: in Abschnitt 9 „Hinweise als Fläche in der Folie, nie als Schicht davor“.
+- Ein Ablauf, ein Look (Korrektur des Inhabers, 28.10.2026, Kontakt auf einer Instanz neben der neuen Bestätigung: „Das passt ja nicht
+  überein. Nimm das neue Design“): Was der Kunde in einem Zug durchläuft, steht ganz im neuen Look, auch auf Instanzen. Wird eine
+  Folie neu, werden ihre Nachbarn im selben Ablauf mitgezogen oder ausdrücklich als offen genannt.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

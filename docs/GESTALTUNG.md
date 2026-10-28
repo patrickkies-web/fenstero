@@ -590,7 +590,11 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     Durchschrift), Chip „Gesendet“, Etikett mit der Nummer. Rechts Nummer mit violettem Punkt, „Danke, gesendet.“ mit zweiter Stimme,
     wer sich meldet; die Durchschrift als PDF auf einer Anthrazit-Fläche mit der einen vollen Pille (nur jetzt zu haben), die drei
     Stationen, „Fragen?“ mit Ansprechpartner und runden Knöpfen für Telefon und E-Mail, „Auf diesem Gerät“ mit „Weitere Anfrage starten“
-    (Umriss) und „Auf diesem Gerät vergessen“, unten „Fertig“ als Umriss-Pille. Inhalt und Aktionen wie bisher.
+    (Umriss) und „Jetzt von diesem Gerät löschen“ mit „Deine Anfrage bei … bleibt bestehen.“, am Ende der Folie „Fertig“ als
+    Umriss-Pille (nicht angeheftet, damit die Durchschrift vor dem Ausgang steht). Die Nummer steht einmal, die Maße auf dem Blatt
+    sind ruhige Balken, keine Station ist schon erledigt. Inhalt und Aktionen wie bisher. Gremium: docs/profis/2026-10-28-testansicht.md.
+  - Kontakt und „Prüfen und senden“ einer Instanz (28.10.2026, Inhaber: „Das passt ja nicht überein. Nimm das neue Design“): im Rahmen
+    der Abschluss-Folien wie im Kundenlink; Pflichtfelder mit Stern, Fehler am Feld mit Ring und Text im dunklen Ton der Koralle.
   - Restliche Folien (Wunsch des Inhabers, 28.10.2026: „Die anderen Bereiche machst du auch. Musst selber gucken, welche Folien da noch
     fehlen.“): „Deine Fenster“ (Bühne mit den Fenstern als Strichzeichnungen, Stand mit Balken, Karten auf Anthrazit), „Fürs Angebot“
     1–3 (Haus mit Kapselreihe der getauschten Fenster, Zeitleiste und Budget, Aufmaßblatt, das sich beim Tippen füllt), Aufmaßblatt,

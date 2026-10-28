@@ -2442,14 +2442,15 @@ const STORE = 'aufmass.v1';
 /* Testansicht für Fensterbauer (/app/?ausprobieren[=<paket>]: „Selbst ausprobieren“ auf der Seite für Fensterbauer, „Fenster planen“ in
    den Paket-Beispielen): der Konfigurator so, wie ihn die Kunden eines Betriebs mit diesem Paket auf dessen Website erleben, am Beispiel
    des erfundenen Betriebs Fensterbau Brandt (wie die Beispiele der Seite), ganz im Browser. Merkmale aus pakete.js (ohne Angabe Plus),
-   Firmenfarbe Aquatürkis der Brandt-Palette, wo das Paket eine Farbe hat. Kein Aufruf an den Server der Instanzen (kein Code vom Server,
+   Firmenfarbe Aquatürkis der Brandt-Palette, wo das Paket eine Farbe hat; Anrede „du“ wie in den Folien (Gremium 28.10.2026: du und Sie
+   gemischt zeigt kein Fensterbauer seinem Kunden). Kein Aufruf an den Server der Instanzen (kein Code vom Server,
    kein Zwischenstand, keine Fotos hinauf), Senden ist eine Simulation (probeSenden). Auf einer echten Instanz (KONFIG.instanz vom
    Server) gibt es sie nicht. */
 const PROBE = (() => { try { return new URLSearchParams(location.search).has('ausprobieren'); } catch (e) { return false; } })() && !(window.KONFIG && window.KONFIG.instanz);
 const PROBE_PAKET = (() => { if (!PROBE) return ''; let p = ''; try { p = String(new URLSearchParams(location.search).get('ausprobieren') || '').toLowerCase(); } catch (e) { p = ''; } const P = window.Pakete; return P && P.gueltig(p) ? p : 'plus'; })();
 if (PROBE) {
   const P = window.Pakete, m = P ? P.oeffentlich(P.merkmale(PROBE_PAKET)) : { kopieKunde: true }, farbe = m.farbe ? '#2ab4bd' : '';
-  (window.KONFIG = window.KONFIG || {}).instanz = { id: 'muster01', v: 1, host: location.host, name: 'Fensterbau Brandt', du: false, status: 'aktiv', vorschau: false, demo: true, probe: true, m: m,
+  (window.KONFIG = window.KONFIG || {}).instanz = { id: 'muster01', v: 1, host: location.host, name: 'Fensterbau Brandt', du: true, status: 'aktiv', vorschau: false, demo: true, probe: true, m: m,
     auftritt: { logo: '', grund: 'dunkel', col: farbe, gruss: { sie: '', du: '' }, ap: 'Petra Brandt', foto: '', tel: '', mail: '', web: '', ort: '', tiefe: '', std: '' },
     start: { kicker: '', ueberschrift: '', text: '', bilder: [] }, farbe: farbe, akzent: farbe, kontakt: { tel: '', mail: '' }, logo: '', grenzen: { fenster: 50 } };
   /* Firmenfarbe wie auf der Seite einer Instanz (der Server setzt dort --accent im Kopf, functions/instanz/seiten.js) */
@@ -3926,8 +3927,8 @@ function anfrage2Dna() {
   return { html: lgKopf(['back', 'Zurück: Haus']) + dnaTisch(abZeitBuehne(pr, anfrageHead(2, lk)), frage + karte + abFuss('Zurück: Haus', weiter[0], weiter[1], weiter[2])), back: ['Haus', 'anfrage'], dna: true, cls: 'dna ab dt', voll: true };
 }
 /* Kontakt: das Aufmaßblatt als Objekt im Fensterlicht; was getippt wird, steht sofort oben auf dem Blatt (abLive), Maße als Punkte */
-function abPapier(offen, schloss, betrieb) { // betrieb: Name im Kopfband statt eeziframes (Testansicht: das Blatt, wie es beim Betrieb ankommt)
-  const pr = S.proj, n = S.windows.length, el = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), pkt = (v) => (!v ? '•.•••' : offen ? thousand(v) : thousand(v).replace(/\d/g, '•'));
+function abPapier(offen, schloss, betrieb, balken) { // betrieb: Name im Kopfband statt eeziframes; balken: Maße als ruhige Balken (Bestätigung, Durchschrift ohne Maße)
+  const pr = S.proj, n = S.windows.length, el = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), pkt = (v) => (balken ? '<i class="ab-leer" style="--b: 72%"></i>' : !v ? '•.•••' : offen ? thousand(v) : thousand(v).replace(/\d/g, '•'));
   const kontakt = [pr.ort, pr.tel, pr.mail].map((t) => String(t || '').trim()).filter(Boolean);
   return '<div class="ab-papier" aria-hidden="true"><div class="ab-papier-band">' + (betrieb ? '<span class="ab-papier-betrieb">' + esc(betrieb) + '</span>' : LOGO(10) + '<span class="ab-wm" translate="no"><b>eezi</b>frames</span>') + '<span class="ab-papier-art">Aufmaßblatt</span></div><div class="ab-papier-in">' +
     '<p class="ab-papier-h" data-p="name">' + esc(String(pr.name || '').trim() || 'Dein Aufmaß') + '</p>' +
@@ -4169,7 +4170,7 @@ function abSymBuehne(chip, extra) {
 const abBetrag = () => { const p = PREIS(); return p > 0 ? '<div class="ab-betrag" aria-hidden="true"><b>' + euro(p).replace(/\s*€$/, '') + '</b><small>€</small><span>einmalig' + (MWST() ? ', inkl. MwSt.' : '') + '</span></div>' : ''; };
 const abEtikett = (klein, wert) => '<div class="ab-etikett" aria-hidden="true"><span class="ab-etikett-punkt"></span><span><small>' + esc(klein) + '</small><b>' + esc(wert) + '</b></span></div>';
 function abRahmen(view, buehne) {
-  if (!view || view.dna || INST) return view;
+  if (!view || view.dna) return view; // seit 28.10.2026 auch auf Instanzen (Prüfen und senden; die Bestätigung ist schon eine Folie)
   const b = view.bar, back = view.back, zur = back ? 'Zurück: ' + back[0] : '';
   const pille = b ? '<button type="button" class="dna-pille lg-weiter btn ' + (b.ghost ? 'ghost dna-pille--leise' : 'primary') + '" data-act="' + b.act + '"' + (b.v ? ' data-v="' + b.v + '"' : '') + (b.dis ? ' disabled' : '') + '>' + b.label + (b.ghost ? '' : abPfeil) + '</button>' : '';
   const fuss = rechtLinks() + (b ? '<div class="lg-fuss' + (b.sec ? ' ab-fuss-zwei' : '') + '">' + (back ? '<button type="button" class="lg-zurueck" data-act="back" aria-label="' + esc(zur) + '">' + LG_PFEIL_L + '</button>' : '') + (b.sec ? '<button type="button" class="dna-pille dna-pille--leise ab-zweit" data-act="' + b.secAct + '">' + esc(b.sec) + '</button>' : '') + pille + '</div>' : '');
@@ -7711,15 +7712,18 @@ function kontaktFeld(label, field, ph, mode, auto, fehler, pflicht) {
   if (fehler === true) return '<div class="trow bad"><span>' + esc(label) + '</span><input type="' + (mode === 'email' ? 'email' : mode === 'tel' ? 'tel' : 'text') + '" id="' + id + '" inputmode="' + (mode || 'text') + '" autocomplete="' + auto + '" data-in="p" data-f="' + field + '" value="' + esc(v || '') + '" placeholder="' + esc(ph || '') + '" aria-invalid="true" aria-describedby="t-mail-f"></div>';
   return '<div class="trow' + (fehler ? ' bad' : '') + '"><span>' + esc(label) + (pflicht ? '<i class="pfl" aria-hidden="true"> *</i>' : '') + '</span><input type="' + (mode === 'email' ? 'email' : mode === 'tel' ? 'tel' : 'text') + '" id="' + id + '" inputmode="' + (mode || 'text') + '" autocomplete="' + auto + '" data-in="p" data-f="' + field + '" value="' + esc(v || '') + '" placeholder="' + esc(ph || '') + '"' + (fehler ? ' aria-invalid="true" aria-describedby="' + id + '-f"' : '') + (pflicht ? ' aria-required="true"' : '') + '>' + (fehler ? '<small class="trow-f" id="' + id + '-f">' + esc(fehler) + '</small>' : '') + '</div>';
 }
+/* Kontakt auf der Website einer Instanz im Look der Design-DNA (28.10.2026, Inhaber: „Das passt ja nicht überein. Nimm das neue Design“):
+   wie anfrage3Dna (Bühne mit dem Blatt, das sich beim Tippen füllt, Kopfband mit dem Namen des Betriebs), aber mit Pflicht: Name und
+   Telefon oder E-Mail (kontaktPruefen, Fehler am Feld), „Prüfen und senden“ (kontakt-weiter). Texte und Prüfung wie bisher */
 function instAnfrage3() {
   const pr = S.proj, d = lkDaten(), bn = d.name, C = window.KONFIG || {};
   const f = S.kontaktFehler ? Object.assign(kontaktPruefen(), { alle: true }) : {};
-  let html = hd(anfrageHead(3, true), anr('Wie erreicht Sie ', 'Wie erreicht dich ') + esc(bn) + '?', 'Name und Telefon oder E-Mail brauchen wir, damit ' + esc(bn) + ' sich mit dem Angebot melden kann. ' + anr('Ihre', 'Deine') + ' Angaben gehen nur an ' + esc(bn) + '; mehr dazu im <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>.', '', '', schrittTools('kontakt'));
-  if (PROBE) html += '<p class="probe-zeile" role="note"><span><b>Testansicht:</b> Hier dürfen Sie auch ausgedachte Angaben eintragen. Nichts wird gesendet, alles bleibt auf diesem Gerät.</span></p>';
-  html += '<div class="sec"><div class="rows kontakt-felder">' + kontaktFeld('Name', 'name', 'Vor- und Nachname', 'text', 'name', f.name, true) + kontaktFeld('Telefon', 'tel', 'Für Rückfragen', 'tel', 'tel', f.tel || !!f.weg, false) + kontaktFeld('E-Mail', 'mail', 'name@beispiel.de', 'email', 'email', f.mail || f.weg, false) + kontaktFeld('PLZ und Ort', 'ort', 'z. B. 50667 Köln', 'text', 'postal-code address-level2', '', false) + '</div>' +
-    '<p class="sub kontakt-hinweis">* Pflicht. Dazu Telefon oder E-Mail, eins genügt.</p></div>';
-  html += '<div class="sec">' + secHead('Wann am besten erreichbar?', null, 'Freiwillig.') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div>';
-  return { html: html, back: ['Zurück', 'anfrage2'], cls: 'tight', bar: { label: 'Prüfen und senden', act: 'kontakt-weiter', zurueck: true } };
+  const frage = lgFrage(anr('Wie erreicht Sie ', 'Wie erreicht dich ') + '<em>' + esc(bn) + '?</em>', 'kontakt', 'Name und Telefon oder E-Mail brauchen wir, damit ' + bn + ' sich mit dem Angebot melden kann. ' + anr('Ihre', 'Deine') + ' Angaben gehen nur an ' + bn + '.');
+  const probe = PROBE ? '<p class="probe-zeile" role="note"><span><b>Testansicht:</b> Hier dürfen Sie auch ausgedachte Angaben eintragen. Nichts wird gesendet, alles bleibt auf diesem Gerät.</span></p>' : '';
+  const karte = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Kontakt') + '<div class="rows ab-felder kontakt-felder">' + kontaktFeld('Name', 'name', 'Vor- und Nachname', 'text', 'name', f.name, true) + kontaktFeld('Telefon', 'tel', 'Für Rückfragen', 'tel', 'tel', f.tel || !!f.weg, false) + kontaktFeld('E-Mail', 'mail', 'name@beispiel.de', 'email', 'email', f.mail || f.weg, false) +
+    kontaktFeld('PLZ und Ort', 'ort', 'z. B. 50667 Köln', 'text', 'postal-code address-level2', '', false) + '</div><p class="ab-pflicht">* Pflicht. Dazu Telefon oder E-Mail, eins genügt. Mehr im <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>.</p></div>' +
+    '<div class="ab-teil">' + abKopf('Am besten erreichbar · freiwillig') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div></div>';
+  return { html: lgKopf(['back', 'Zurück: Zeit und Budget']) + dnaTisch(abBuehne('ab-blatt', anfrageHead(3, true), abPapier(false, false, bn)), frage + probe + karte + abFuss('Zurück: Zeit und Budget', 'kontakt-weiter', '', 'Prüfen und senden')), back: ['Zurück', 'anfrage2'], dna: true, cls: 'dna ab dt', voll: true };
 }
 /* „Auf anderem Gerät weitermachen“: dieselbe Planung über https://<host>/#k-<code> */
 const instWeiterLink = () => location.origin + '/#k-' + (S.betrieb ? S.betrieb.code : '');
@@ -7742,10 +7746,9 @@ function probeEinstieg() {
 /* Infobereich der Testansicht in der Folie selbst: auf der ersten Folie („start“) und auf der Bestätigung („ende“) */
 function probeInfo(art) {
   if (!PROBE) return '';
-  const zurueck = '<a class="probe-info-link" href="' + PROBE_FB + '">Zurück zur Seite für Fensterbauer</a>';
   if (art === 'ende') return '<section class="probe-info" aria-label="Testansicht für Fensterbauer"><span class="dna-label">Testansicht · Ende</span><p><b>So sieht Ihr Kunde den Abschluss auf Ihrer Website.</b> Gesendet wurde nichts.</p>' +
-    '<div class="probe-info-knoepfe"><a class="dna-pille dna-pille--leise" href="' + PROBE_FB + '#pakete">Pakete ansehen</a><button type="button" class="probe-info-link" data-act="probe-betrieb">So käme die Anfrage bei Ihnen an</button><button type="button" class="probe-info-link" data-act="probe-neu">Noch einmal ausprobieren</button></div></section>';
-  return '<section class="probe-info" aria-label="Testansicht für Fensterbauer"><span class="dna-label">Testansicht für Fensterbauer</span><p><b>So erleben Ihre Kunden Ihren Konfigurator.</b> Am Beispiel von Fensterbau Brandt, einem erfundenen Betrieb, im Paket ' + esc(probePaketName()) + '. Probieren Sie alles aus bis zum Absenden; gesendet wird nichts.</p>' + zurueck + '</section>';
+    '<div class="probe-info-knoepfe"><button type="button" class="dna-pille dna-pille--leise" data-act="probe-betrieb">So käme die Anfrage bei Ihnen an</button><a class="dna-pille dna-pille--leise" href="' + PROBE_FB + '#pakete">Pakete ansehen</a><button type="button" class="probe-info-link" data-act="probe-neu">Noch einmal ausprobieren</button></div></section>';
+  return '<section class="probe-info kurz" aria-label="Testansicht für Fensterbauer"><div class="probe-info-zeile"><span class="dna-label">Testansicht für Fensterbauer</span><a class="probe-info-link" href="' + PROBE_FB + '" aria-label="Zurück zur Seite für Fensterbauer">Zurück</a></div><p><b>So erleben Ihre Kunden Ihren Konfigurator</b> (Fensterbau Brandt, ' + esc(probePaketName()) + '). Gesendet wird nichts.</p></section>';
 }
 /* Startseite einer Instanz in allen Zuständen (erste Seite, Liste, gesendet, Planung nicht mehr da, Nachbesserung einer Einladung) */
 function instHome() {
@@ -7851,7 +7854,7 @@ async function probeBlatt() {
 function instGesendet() {
   if (!S.sent || S.sent.kurz) return instHome();
   const d = lkDaten(), name = d.name, du = d.du, T = (sie, x) => (du ? x : sie), test = S.sent.art === 'test', p = d.p || {}, nr = S.sent.nr || '';
-  const buehne = abBuehne('ab-blatt gs-buehne', 'Gesendet', abPapier(false, false, name) + (nr ? abEtikett(test ? 'Testanfrage' : 'Anfrage', nr) : ''));
+  const buehne = abBuehne('ab-blatt gs-buehne', 'Gesendet', abPapier(false, false, name, true));
   const titel = '<div class="lg-frage gs-titel"><span class="dna-label">' + (test ? 'Testanfrage ' : 'Anfrage ') + '<span class="inst-nr-wert">' + esc(nr) + '</span></span><div class="lg-frage-kopf"><h1 tabindex="-1">Danke, <span class="ak">gesendet.</span></h1></div>' +
     '<p>' + esc(name) + T(' hat jetzt Ihre Maße, Fotos und Wünsche und meldet sich bei Ihnen.', ' hat jetzt deine Maße, Fotos und Wünsche und meldet sich bei dir.') + '</p></div>';
   const testNote = test ? '<p class="ab-note">Vorschau: Das war eine Testanfrage. Sie geht mit „[Test]“ im Betreff an den Betrieb, zählt nicht mit und ist nach einem Tag gelöscht.</p>' : '';
@@ -7867,10 +7870,10 @@ function instGesendet() {
   const kontakt = '<section class="gs-kontakt"><span class="dna-label">Fragen?</span><div class="gs-ap"><span class="gs-ap-bild" aria-hidden="true">' + esc(String(p.ap || name || '?').trim().charAt(0).toUpperCase()) + '</span><span><b>' + esc(p.ap || name) + '</b>' + (p.ap ? '<small>' + esc(name) + '</small>' : '') + '</span></div>' +
     (tel || mail ? '<div class="gs-k-reihe">' + (tel ? rund('tel:' + telH, IC_TEL, tel) : '') + (mail ? rund('mailto:' + mail, IC_MAIL, mail) : '') + '</div>' : '<p>' + esc(name) + T(' meldet sich nach Ihrer Anfrage bei Ihnen.', ' meldet sich nach deiner Anfrage bei dir.') + '</p>') + '</section>';
   const geraet = '<section class="gs-geraet"><span class="dna-label">Auf diesem Gerät</span><p>' + T('Sobald Sie diese Seite verlassen oder schließen, löschen wir Maße, Fotos und Kontaktdaten von diesem Gerät. Es bleiben nur Nummer und Datum Ihrer Anfrage.', 'Sobald du diese Seite verlässt oder schließt, löschen wir Maße, Fotos und Kontaktdaten von diesem Gerät. Es bleiben nur Nummer und Datum deiner Anfrage.') + '</p>' +
-    '<div class="gs-geraet-knoepfe"><button type="button" class="dna-pille dna-pille--leise" data-act="inst-weitere">Weitere Anfrage starten</button><button type="button" class="probe-info-link" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>';
-  const fertig = PROBE ? '<a class="dna-pille dna-pille--leise lg-weiter" href="' + PROBE_FB + '">Fertig</a>' : '<button type="button" class="dna-pille dna-pille--leise lg-weiter" data-act="go" data-v="home">Fertig</button>';
+    '<div class="gs-geraet-knoepfe"><button type="button" class="dna-pille dna-pille--leise" data-act="inst-weitere">Weitere Anfrage starten</button><button type="button" class="probe-info-link" data-act="inst-vergessen">Jetzt von diesem Gerät löschen</button></div><p class="gs-bleibt">' + T('Ihre Anfrage bei ', 'Deine Anfrage bei ') + esc(name) + ' bleibt bestehen.</p></section>';
+  const fertig = PROBE ? '<a class="dna-pille dna-pille--leise" href="' + PROBE_FB + '">Fertig</a>' : '<button type="button" class="dna-pille dna-pille--leise" data-act="go" data-v="home">Fertig</button>';
   const inhalt = titel + testNote + probeInfo('ende') + pdf + weiter + kontakt + geraet;
-  return { html: lgKopf(false) + dnaTisch(buehne, '<div class="ab-inhalt">' + inhalt + '</div>' + rechtLinks() + '<div class="lg-fuss gs-fuss">' + fertig + '</div>'), dna: true, cls: 'dna ab ab2 dt gs', voll: true, bar: null };
+  return { html: lgKopf(false) + dnaTisch(buehne, '<div class="ab-inhalt">' + inhalt + '<div class="gs-fuss">' + fertig + '</div></div>' + rechtLinks()), dna: true, cls: 'dna ab ab2 dt gs', voll: true, bar: null };
 }
 /* Logo der Instanz fürs PDF: Bild von /marke/<v>/logo.png als Data-URL mit Maßen */
 async function logoFuerBlatt(url) {

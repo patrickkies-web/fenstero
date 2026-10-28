@@ -3087,6 +3087,9 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .dna .probe-info-knoepfe { display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px; padding: 6px 0 4px }
 .dna .probe-info-knoepfe .dna-pille, .dna.gs .gs-geraet-knoepfe .dna-pille { height: 44px; padding: 0 18px; font-size: 14px }
 .dna.dt .st-rechts > .probe-info { margin-bottom: 14px }
+.dna .probe-info.kurz { gap: 2px; padding: 4px 8px 12px 16px }
+.dna .probe-info-zeile { display: flex; align-items: center; justify-content: space-between; gap: 12px }
+.dna .probe-info.kurz .probe-info-link { padding: 0 8px }
 .dna.gs .ab-inhalt > .probe-info { margin: 4px 0 0 }
 /* Kontaktdaten (Seite der Instanz, noch im bisherigen Look): eine Zeile statt einer Karte */
 .probe-zeile { display: flex; align-items: baseline; gap: 8px; margin: 0 0 14px; padding: 0 6px; font: 400 15px/1.45 "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; color: #a8a4a9 }
@@ -3113,8 +3116,18 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .dna.gs .gs-k-rund svg { width: 18px; height: 18px }
 .dna.gs .gs-geraet { display: grid; gap: 8px; margin-top: 12px; padding: 0 2px }
 .dna.gs .gs-geraet-knoepfe { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px }
-.dna.gs .gs-fuss { justify-content: flex-start }
-.dna.gs .gs-fuss .lg-weiter { flex: 0 1 200px }
+.dna.gs .gs-fuss { display: flex; margin-top: 20px }
+.dna.gs .gs-fuss .dna-pille { flex: 1 }
+.dna.gs .gs-bleibt { font-size: 13px }
+.dna.gs .wl-station:first-child .wl-nr { color: var(--weiss); background: none; box-shadow: inset 0 0 0 1.5px var(--silbergrau) } /* nichts ist schon erledigt */
+/* Kontakt einer Instanz (instAnfrage3): Pflicht und Fehler am Feld */
+.dna .ab-felder .trow .pfl { font-style: normal; color: var(--textgrau) }
+.dna .ab-felder .trow.bad > span, .dna .ab-felder .trow.bad > span .pfl { color: #b5532f }
+.dna .ab-felder .trow.bad input { box-shadow: inset 0 0 0 2px var(--koralle) }
+.dna .ab-felder .trow-f { padding: 2px 14px 0; font: 500 13px/1.35 var(--font-sans); color: #b5532f }
+.dna .ab-pflicht { margin: 10px 4px 0; font: 400 13px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna .ab-pflicht .ulink { color: var(--weiss) }
+.dna .probe-zeile { padding: 0 2px; font-size: 14px }
 /* Ende: die E-Mail an den Betrieb (Weiß nur für diese eine Karte), Anhang als Zeile zum Antippen, danach der Weg zurück */
 .dna.probe-ende .lg-frage { display: grid; gap: 8px }
 .dna.probe-ende .lg-frage .dna-label { display: inline-flex; align-items: center; gap: 8px; font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; margin-bottom: -2px }

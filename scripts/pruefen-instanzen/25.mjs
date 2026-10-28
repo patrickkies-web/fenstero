@@ -313,7 +313,7 @@ export default async (h) => {
     Object.assign(S.proj, { name: 'Familie Probe', tel: '0171 2345678', ort: '50823 Köln' }); S.editIdx = -1; S.win = baseWin(); persist(); go('anfrage3');
   }, MO);
   await sT.waitForTimeout(400);
-  const t3 = await sT.evaluate(() => (document.querySelector('.probe-hinweis') || {}).innerText || '');
+  const t3 = await sT.evaluate(() => (document.querySelector('.scr.dna .probe-zeile') || {}).innerText || '');
   await sT.evaluate(() => act('send', document.body));
   const gesendet = await bis(sT, () => S.screen === 'gesendet' && !!S.sent, 10000);
   const t4 = await sT.evaluate(() => ({ nr: S.sent && S.sent.nr, art: S.sent && S.sent.art, text: document.querySelector('.scr').innerText }));
@@ -322,7 +322,7 @@ export default async (h) => {
   const t5 = await sT.evaluate(() => ({ mail: (document.querySelector('.probe-mail') || {}).innerText || '', text: document.querySelector('.scr').innerText, pakete: (document.querySelector('.probe-aktionen a.dna-pille') || {}).getAttribute ? document.querySelector('.probe-aktionen a.dna-pille').getAttribute('href') : '', pillen: document.querySelectorAll('.scr .dna-pille:not(.dna-pille--leise)').length }));
   const [dlT] = await Promise.all([sT.waitForEvent('download', { timeout: 20000 }), sT.click('[data-act="probe-blatt"]')]);
   const fT = path.join(ordner, 'probe-' + Math.random().toString(36).slice(2) + '.pdf'); await dlT.saveAs(fT); const pdfT = pdfText(fs.readFileSync(fT));
-  ok(t1.id === 'muster01' && t1.probe && t1.web && !t1.tour && t1.screen === 'start' && /Testansicht für Fensterbauer/.test(t1.hinweis) && /Paket EEZI Essential Plus/.test(t1.hinweis) && /gesendet wird nichts/.test(t1.hinweis) && /\/fuer-fensterbauer\/$/.test(t1.zurueck) && /Fensterbau Brandt/.test(t1.text) && !/Führung starten|7,99/.test(t1.text),
+  ok(t1.id === 'muster01' && t1.probe && t1.web && !t1.tour && t1.screen === 'start' && /Testansicht für Fensterbauer/.test(t1.hinweis) && /EEZI Essential Plus\)/.test(t1.hinweis) && /Gesendet wird nichts/.test(t1.hinweis) && /\/fuer-fensterbauer\/$/.test(t1.zurueck) && /Fensterbau Brandt/.test(t1.text) && !/Führung starten|7,99/.test(t1.text),
     '25.11 Testansicht: gleich die erste Folie „Was planst du?“ wie auf der Website eines Betriebs mit Paket Plus (Fensterbau Brandt), Infobereich in der Folie mit Weg zurück, keine Führung, keine Preise');
   ok(/^t[a-z0-9]{9}$/.test(String(t2.code || '')) && t2.screen === 'start' && !t2.blatt && /Testansicht/.test(t2.kopf) && /ausgedachte Angaben/.test(t3), '25.11 Testansicht: kein Bogen über der Folie, „Testansicht“ im Kopf der Folien, Code der Planung nur auf dem Gerät (' + t2.code + '), Hinweis bei den Kontaktdaten');
   ok(gesendet && t4.art === 'probe' && /^TEST-/.test(t4.nr) && /So sieht Ihr Kunde den Abschluss/.test(t4.text) && /Gesendet wurde nichts/.test(t4.text) && /Danke, gesendet/.test(t4.text), '25.11 Testansicht: Senden als Simulation, am Ende die Bestätigung, wie sie der Kunde sieht (' + t4.nr + ')');
@@ -336,7 +336,7 @@ export default async (h) => {
   const ctxPE = await desktop(), sPE = await h.neueSeite(ctxPE, X.base('localhost'));
   await sPE.goto(X.base('localhost') + '/app/?ausprobieren=essential', { waitUntil: 'networkidle' }); await sPE.waitForTimeout(300);
   const tPE = await sPE.evaluate(() => ({ paket: PROBE_PAKET, farbe: !!INST.m.farbe, kz: INST.m.kennzeichnung, hinweis: (document.querySelector('.st-rechts .probe-info') || {}).innerText || '' }));
-  ok(tPE.paket === 'essential' && !tPE.farbe && tPE.kz === 'deutlich' && /Paket EEZI Essential\./.test(tPE.hinweis), '25.11 Testansicht im Paket Essential: Merkmale aus pakete.js (ohne Firmenfarbe, Kennzeichnung deutlich)');
+  ok(tPE.paket === 'essential' && !tPE.farbe && tPE.kz === 'deutlich' && /EEZI Essential\)/.test(tPE.hinweis), '25.11 Testansicht im Paket Essential: Merkmale aus pakete.js (ohne Firmenfarbe, Kennzeichnung deutlich)');
   h.sauber(sPE, '25.11 Testansicht Essential ohne Fehler'); await ctxPE.close();
   const fbSeite = await X.api('localhost', '/fuer-fensterbauer/');
   ok((String(fbSeite.text).match(/href="\/app\/\?ausprobieren"/g) || []).length === 2, '25.11 Seite für Fensterbauer: „Selbst ausprobieren“ führt zweimal in die Testansicht');
