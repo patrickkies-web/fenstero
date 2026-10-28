@@ -1565,10 +1565,12 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna .lg-haus .strich.lang { stroke: var(--weiss) }
 .dna .lg-haus text { font: 600 13px/1 var(--font-sans); fill: var(--silbergrau); letter-spacing: .02em }
 .dna .lg-haus text.ist { fill: var(--weiss) }
-/* Schraffur der nicht gewählten Stockwerke; das gewählte ist frei */
-.dna .lg-haus .schnitt { transition: opacity 320ms var(--dna-druck) }
-.dna .lg-haus .schnitt.frei { opacity: 0 }
-.dna .lg-glut { position: absolute; top: 0; left: 40px; width: 320px; height: 132px; z-index: 0; pointer-events: none; background: radial-gradient(50% 50% at 50% 50%, var(--violett) 0, var(--violett) 56%, var(--indigo) 74%, transparent 90%); filter: blur(8px); transition: transform 200ms var(--dna-druck) }
+/* Das gewählte Stockwerk (frei) leicht aufgehellt, die übrigen leer; Erde dunkler als die Bühne, der Keller im Schnitt wie die Räume.
+   Keine Schraffur und kein violettes Leuchten (Wunsch des Inhabers, 28.10.2026). */
+.dna .lg-haus .schnitt { fill: rgba(255, 255, 255, .07); opacity: 0; transition: opacity 320ms var(--dna-druck) }
+.dna .lg-haus .schnitt.frei { opacity: 1 }
+.dna .lg-haus .erde { fill: rgba(7, 9, 10, .5) }
+.dna .lg-haus .keller { fill: var(--anthrazit) }
 .dna .lg-stock { position: absolute; z-index: 2; left: 48px; right: 12px; border: 0; background: none; padding: 0; cursor: pointer; border-radius: 12px }
 .dna .lg-stock:focus-visible { outline: 2px solid var(--fokus); outline-offset: -2px }
 .dna .lg-fenster { position: absolute; top: 0; z-index: 3; width: 56px; left: 228px; transition: transform 400ms var(--dna-auftritt), width 400ms var(--dna-auftritt); filter: drop-shadow(0 10px 10px rgba(7, 9, 10, .4)); pointer-events: none }
@@ -1580,7 +1582,7 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna .lg-erkannt { position: absolute; z-index: 3; right: 14px; top: 12px; gap: 7px; height: 28px; background: var(--koralle); color: var(--schwarz) }
 .dna .lg-erkannt::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--schwarz) }
 .dna .lg-tippen { position: absolute; z-index: 3; left: 12px; top: 10px; padding: 5px 10px; border-radius: 999px; background: var(--schwarz); font: 500 13px/1 var(--font-sans); color: var(--weiss) }
-.dna.lg-still .lg-fenster, .dna.lg-still .lg-etikett, .dna.lg-still .lg-strich, .dna.lg-still .lg-glut, .dna.lg-still .schnitt, .dna.lg-still .lp-punkte i, .dna.lg-still .lp-glut, .dna.lg-still .lp-sonne { transition: none !important }
+.dna.lg-still .lg-fenster, .dna.lg-still .lg-etikett, .dna.lg-still .lg-strich, .dna.lg-still .schnitt, .dna.lg-still .lp-punkte i, .dna.lg-still .lp-glut, .dna.lg-still .lp-sonne { transition: none !important }
 
 /* Frage */
 .dna .lg-frage { padding: 20px 0 16px }
@@ -1595,7 +1597,7 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna .lg-i::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: var(--anthrazit); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
 .dna .lg-i svg { position: relative; width: 14px; height: 14px }
 
-/* Karten: Felder auf Weiß, Stockwerk als Kachel in Anthrazit, Anzahl als schwarze Kachel mit Kontur, Leuchten und Schraffur */
+/* Karten: Felder auf Weiß, Stockwerk als Kachel in Anthrazit, Anzahl als schwarze Kachel mit Kontur (ohne Leuchten und Schraffur) */
 .dna .lg-karte { border-radius: var(--rund-l); background: var(--flaeche); color: var(--tinte); padding: 6px 16px }
 .dna .lg-karte + .lg-karte { margin-top: 12px }
 .dna .lg-feld { padding: 16px 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px }
@@ -1612,6 +1614,8 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna .lg-stockwahl.lp-wahl { grid-template-columns: repeat(3, minmax(0, 1fr)) }
 .dna .lg-stockwahl button { height: 44px; border: 0; border-radius: 999px; background: transparent; color: var(--tinte-2); font: 500 15px/1 var(--font-sans); cursor: pointer; transition: background-color 320ms var(--dna-druck), color 320ms var(--dna-druck) }
 .dna .lg-stockwahl button[aria-pressed="true"], .dna .lg-ogwahl button[aria-pressed="true"], .dna .lg-boden[aria-pressed="true"] { background: var(--violett); color: var(--schwarz); box-shadow: none }
+/* Stockwerk auf der dunklen Kachel: gewählt weiß mit schwarzer Schrift (Wunsch des Inhabers, 28.10.2026) */
+.dna .lg-kachel .lg-stockwahl button[aria-pressed="true"], .dna .lg-kachel .lg-ogwahl button[aria-pressed="true"] { background: var(--weiss); color: var(--schwarz); box-shadow: none }
 .dna .lg-stocktext { font: 400 15px/1.4 var(--font-sans); color: var(--tinte-2) }
 .dna .lg-ogwahl { display: none; align-items: center; gap: 6px; flex-wrap: wrap }
 .dna[data-stock="og"] .lg-ogwahl { display: flex }
@@ -1631,8 +1635,6 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna .lg-warn::before, .dna .lg-grund::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--koralle); vertical-align: 1px }
 .dna .lg-markiert { box-shadow: inset 0 0 0 2px var(--koralle) !important }
 .dna .lg-kontur { position: relative; overflow: hidden; isolation: isolate; background: var(--schwarz); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
-.dna .lg-kontur::before { content: ""; position: absolute; z-index: -1; left: -30px; top: 30px; width: 170px; height: 120px; background: radial-gradient(closest-side, var(--violett) 0, var(--violett) 40%, var(--indigo) 70%, transparent); filter: blur(10px); opacity: .95; pointer-events: none }
-.dna .lg-kontur::after { content: ""; position: absolute; z-index: -1; left: 46%; right: 0; top: 0; bottom: 40%; background: repeating-linear-gradient(-45deg, var(--silbergrau) 0 1.2px, transparent 1.2px 5px); -webkit-mask-image: linear-gradient(90deg, transparent, #000 45%); mask-image: linear-gradient(90deg, transparent, #000 45%); pointer-events: none }
 .dna .lg-anzahl { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px }
 .dna .lg-zahl { display: flex; align-items: baseline; gap: 6px }
 .dna .lg-zahl output { font: 250 56px/1 var(--font-sans); letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--weiss); display: inline-block; transition: transform 320ms var(--dna-feder) }
@@ -1687,7 +1689,7 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna .lg-zurueck { width: 52px; height: 52px; flex: none; border-radius: 50%; border: 0; background: transparent; color: var(--tinte); box-shadow: inset 0 0 0 1.5px var(--silbergrau); display: grid; place-items: center; cursor: pointer }
 .dna .lg-zurueck svg { width: 16px; height: 16px }
 .dna .lg-grund { order: -1; flex: 0 0 100%; margin: 0 0 2px; text-align: center }
-@media (prefers-reduced-motion: reduce) { .dna .lg-fenster, .dna .lg-etikett, .dna .lg-strich, .dna .lg-glut, .dna .lg-haus .schnitt, .dna .lg-zahl output, .dna .lg-stockwahl button, .dna .dna-pille, .dna .lp-punkte i, .dna .lp-glut, .dna .lp-sonne, .dna .lp-zahl output { transition: none !important } }
+@media (prefers-reduced-motion: reduce) { .dna .lg-fenster, .dna .lg-etikett, .dna .lg-strich, .dna .lg-haus .schnitt, .dna .lg-zahl output, .dna .lg-stockwahl button, .dna .dna-pille, .dna .lp-punkte i, .dna .lp-glut, .dna .lp-sonne, .dna .lp-zahl output { transition: none !important } }
 
 /* ---------- Wünsche im Look der Design-DNA (27.10.2026; Vorschau docs/profis/konfigurator-start-vorschau/, Folie „Wünsche“) ----------
    Rahmen aus app.js (frageDna): Kopf, Kapitelband als Knopf, Bühne mit dem 3-D-Modell der App, Frage, Antworten, Fuß mit einer Pille.

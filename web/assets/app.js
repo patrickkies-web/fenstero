@@ -4818,12 +4818,13 @@ function lgFuss(c) {
 function lageDna(c) {
   const w = S.win, tuer = istTuer(w), fest = w.art === 'fest';
   const nomen = tuer ? ['die', 'Tür'] : fest ? ['die', 'Verglasung'] : ['das', 'Fenster'];
-  /* Bühne: das Haus im Schnitt (Feinzeichnung), die übrigen Stockwerke schraffiert, Leuchten am gewählten, Koralle am Fenster */
+  /* Bühne: das Haus im Schnitt (Feinzeichnung), das gewählte Stockwerk leicht aufgehellt, Koralle am Fenster; ohne Schraffur und ohne
+     violettes Leuchten (Wunsch des Inhabers, 28.10.2026) */
   const stockKn = [['dg', 47, 44, 'Dachgeschoss'], ['og', 91, 50, 'Obergeschoss'], ['eg', 141, 49, 'Erdgeschoss'], ['kg', 190, 45, 'Keller']].map((s) => '<button type="button" class="lg-stock" data-act="lg-stock" data-v="' + s[0] + '" style="top: ' + s[1] + 'px; height: ' + s[2] + 'px" aria-label="' + s[3] + ' wählen"></button>').join('');
-  const buehne = '<div class="lg-buehne"><div class="lg-buehne-in"><div class="lg-glut" aria-hidden="true"></div>' +
-    '<svg class="lg-haus" viewBox="0 0 358 250" aria-hidden="true"><defs><pattern id="lg-schnitt" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><line x1="0" y1="0" x2="0" y2="5" stroke="#a8a4a9" stroke-width="1.3"/></pattern><pattern id="lg-erde" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#a8a4a9" stroke-width="1.6"/></pattern></defs><g class="lg-skala">' + lgSkala() + '</g>' +
-    '<path class="schnitt" data-s="dg" fill="url(#lg-schnitt)" d="M92 91V89L199 25 306 89V91Z"/><rect class="schnitt" data-s="og" fill="url(#lg-schnitt)" x="92" y="91" width="214" height="50"/><rect class="schnitt" data-s="eg" fill="url(#lg-schnitt)" x="92" y="141" width="214" height="49"/>' +
-    '<rect x="48" y="190" width="310" height="60" fill="url(#lg-erde)"/><rect x="92" y="190" width="214" height="45" fill="#07090a"/><rect class="schnitt" data-s="kg" fill="url(#lg-schnitt)" x="92" y="190" width="214" height="45"/>' +
+  const buehne = '<div class="lg-buehne"><div class="lg-buehne-in">' +
+    '<svg class="lg-haus" viewBox="0 0 358 250" aria-hidden="true"><g class="lg-skala">' + lgSkala() + '</g>' +
+    '<path class="schnitt" data-s="dg" d="M92 91V89L199 25 306 89V91Z"/><rect class="schnitt" data-s="og" x="92" y="91" width="214" height="50"/><rect class="schnitt" data-s="eg" x="92" y="141" width="214" height="49"/>' +
+    '<rect class="erde" x="0" y="190" width="358" height="60"/><rect class="keller" x="92" y="190" width="214" height="45"/><rect class="schnitt" data-s="kg" x="92" y="190" width="214" height="45"/>' +
     '<path class="wand" d="M92 235V91H306V235Z"/><path class="wand" d="M80 96 199 24 318 96"/><path class="fein" d="M92 91H306M92 141H306M92 190H306"/><path class="fein" d="M120 91 199 43 278 91"/><line class="boden" x1="48" y1="190" x2="346" y2="190"/>' +
     '<text x="12" y="75" data-t="dg">DG</text><text x="12" y="120" data-t="og">OG</text><text x="12" y="170" data-t="eg">EG</text><text x="12" y="217" data-t="kg">KG</text></svg>' + stockKn +
     '<div class="lg-strich"></div><div class="lg-etikett"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b class="lg-et-name"></b></span></div><div class="lg-fenster"><img src="/bilder/app/lage-fenster.webp" alt="" width="412" height="420" decoding="async"></div>' +
@@ -4862,7 +4863,6 @@ function lgZeigen() {
   const fe = q('.lg-fenster'); if (fe) { fe.style.width = st.w + 'px'; fe.style.transform = 'translateY(' + (st.y - fh / 2 - 2).toFixed(1) + 'px)'; }
   const et = q('.lg-etikett'); if (et) et.style.transform = 'translateY(' + (st.y - 19) + 'px)';
   const sr = q('.lg-strich'); if (sr) sr.style.transform = 'translateY(' + st.y + 'px)';
-  const gl = q('.lg-glut'); if (gl) gl.style.transform = 'translateY(' + (st.y - 66) + 'px)';
   qa('.lg-haus .schnitt').forEach((p) => p.classList.toggle('frei', p.getAttribute('data-s') === s));
   qa('[data-act="lg-stock"]').forEach((b) => { if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === s)); });
   qa('.lg-haus text[data-t]').forEach((t) => { const k = t.getAttribute('data-t'); t.setAttribute('class', k === s ? 'ist' : ''); if (k === 'og') t.textContent = s === 'og' && w.ogNr > 0 ? w.ogNr + '. OG' : 'OG'; });
