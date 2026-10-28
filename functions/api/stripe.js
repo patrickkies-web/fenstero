@@ -250,7 +250,7 @@ export function zahlungsdienst(k) {
     },
     /* Objekt zu einem Thin-Ereignis holen: related_object.url aus dem unterschriebenen Ereignis, nur die Arten, die der Webhook braucht */
     async objekt(url) {
-      if (!s || !/^\/v1\/(checkout\/sessions|invoices|subscriptions|disputes)\/[A-Za-z0-9_]+$/.test(String(url || ''))) return null;
+      if (!s || !/^\/v1\/(checkout\/sessions|invoices|subscriptions|disputes|payment_intents)\/[A-Za-z0-9_]+$/.test(String(url || ''))) return null;
       return s.get(String(url).slice(3));
     },
     /* Sammelrechnung für offene Projektbuchungen eines Betriebs (o.posten: { buchung, betrag, text }).

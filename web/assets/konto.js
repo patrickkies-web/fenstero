@@ -133,7 +133,7 @@
       case 'vorschau':
         if (v.freigabe) return { t: 'Freigegeben. *Wir schalten Ihre Seite live.*', p: 'Danke für Ihre Freigabe. Sobald die Seite online ist, bekommen Sie eine E-Mail.' };
         /* erst ansehen, dann freigeben: die Pille öffnet die Vorschau, Freigeben steht als Ring daneben (Gremium 27.10.2026) */
-        return { t: 'Ihre Vorschau *ist fertig.*', p: 'Sehen Sie sich Ihre Seite in Ruhe an. Passt alles, geben Sie sie frei; sonst schreiben Sie uns, was wir ändern sollen.', pille: v.link ? U.pille('Vorschau öffnen', { href: v.link, target: '_blank', rel: 'noopener' }) : U.pille('Freigeben', { on: { click: (e) => freigeben(a, e.currentTarget) } }) };
+        return { t: 'Ihre Vorschau *ist fertig.*', p: 'Sehen Sie sich Ihre Seite in Ruhe an. Passt alles, geben Sie sie frei; sonst schreiben Sie uns, was wir ändern sollen.' + (v.frist ? ' Bitte bis ' + U.datum(v.frist) + ': Nennen Sie bis dahin keinen Mangel, gilt die Einrichtung als abgenommen (Paketbedingungen § 5 Abs. 5).' : ''), pille: v.link ? U.pille('Vorschau öffnen', { href: v.link, target: '_blank', rel: 'noopener' }) : U.pille('Freigeben', { on: { click: (e) => freigeben(a, e.currentTarget) } }) };
       case 'live':
         if ((a.abo || {}).status === 'zahlung_offen') return { t: 'Ihr Monatsbeitrag *ist offen.*', p: 'Die Abbuchung hat nicht geklappt. Bitte prüfen Sie Ihr Zahlungsmittel; ist die Zahlung ' + (a.fristen || {}).kulanzTage + ' Tage nach dem ersten Versuch nicht da, pausieren wir Ihre Seite.', pille: U.pille('Zahlungsmittel prüfen', { on: { click: (e) => portal(e.currentTarget) } }) };
         return { t: 'Ihre Seite *ist live.*', p: 'Ihre Kunden planen jetzt unter ' + (a.adresse || 'Ihrer Adresse') + '. Jede Anfrage kommt als Aufmaßblatt-PDF per E-Mail.', pille: v.live ? U.pille('Seite öffnen', { href: v.live, target: '_blank', rel: 'noopener' }) : null };
@@ -350,7 +350,7 @@
   function gefahrZeile(a) {
     if (a.stand === 'bezahlt') return h('div', { class: 'a-knoepfe a-gefahr' }, U.ring('Bestellung stornieren', { class: 'gefahr klein', on: { click: () => stornieren(a) } }));
     if (vorZahlung(a) && ['laeuft'].indexOf((a.zahlung || {}).status) < 0) return h('div', { class: 'a-knoepfe a-gefahr' }, U.ring('Bestellung verwerfen', { class: 'gefahr klein', on: { click: () => verwerfen(a) } }));
-    if (a.stand === 'live' || a.stand === 'pausiert') return h('p', { class: 'a-fusszeile' }, U.aenderbar('Kündigen können Sie jederzeit zum Monatsende, unter „Rechnungen und Zahlungsmittel“ oder per Nachricht.'));
+    if (a.stand === 'live' || a.stand === 'pausiert') return h('p', { class: 'a-fusszeile' }, U.aenderbar('Kündigen können Sie jederzeit zum Ende des laufenden Abrechnungsmonats (er beginnt am Tag des Livegangs), unter „Rechnungen und Zahlungsmittel“ oder per Nachricht.'));
     return null;
   }
   function bestaetigen(titel, text, knopfText, fn, gefahr) {

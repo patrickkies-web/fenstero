@@ -203,7 +203,8 @@
       firma: kurz(d.firma, 100), strasse: kurz(d.strasse, 100), plz: String(d.plz || '').replace(/\s/g, '').slice(0, 5), ort: kurz(d.ort, 80), land: 'DE',
       bundesland: Object.prototype.hasOwnProperty.call(BUNDESLAENDER, d.bundesland) ? d.bundesland : '',
       ust: String(d.ust || '').replace(/\s/g, '').toUpperCase().slice(0, 11), web: webAdresse(d.web), ap: kurz(d.ap, 80), rolle: kurz(d.rolle, 80), tel: kurz(d.tel, 40),
-      rechtsform: kurz(d.rechtsform, 60), vertretung: kurz(d.vertretung, 200), register: kurz(d.register, 120), kammer: kurz(d.kammer, 120), beruf: kurz(d.beruf, 120)
+      rechtsform: kurz(d.rechtsform, 60), vertretung: kurz(d.vertretung, 200), register: kurz(d.register, 120), kammer: kurz(d.kammer, 120), beruf: kurz(d.beruf, 120),
+      schlichtung: kurz(d.schlichtung, 300), dsb: kurz(d.dsb, 200)
     };
     const f = {};
     if (w.firma.length < 2) f.firma = 'Bitte den Namen des Unternehmens eingeben.';

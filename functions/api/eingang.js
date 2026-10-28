@@ -26,6 +26,7 @@ import { tokenSignieren } from './sitzung.js';
 import { blattBauen, logoLaden, base64 } from './blatt-server.js';
 import { instanzAusZeile, pruefStoerung } from '../instanz/mandant.js';
 import { pseudoKonto, stempelBerlin, datumBerlin, zeitenBerlin } from '../instanz/adapter.js';
+import { tagBerlin } from './statistik.js';
 export { textPdf } from './blatt-server.js';
 
 const X = () => globalThis.Abrechnung;
@@ -311,6 +312,8 @@ export async function anfragenAufraeumen(k, sp) {
       }
     }
   } catch (e) { out.ok = false; }
+  /* Fehlversuche bei der Anmeldung zum Dashboard (Prüfwert der E-Mail-Adresse, dashboard.js): nach 2 Tagen weg (AV-Vertrag § 11) */
+  try { if (sp.zaehlerAltLoeschen) out.anmeldeFehler = await sp.zaehlerAltLoeschen(tagBerlin(new Date(jetzt - 2 * TAG)), 'budget:otpfehl:'); } catch (e) { out.ok = false; }
   return out;
 }
 
@@ -355,7 +358,7 @@ async function postEreignis(ctx, sp, ev) {
       else { v.status = 'bounce'; v.bounce = iso(jetzt); x.versand = v; }
     });
     await hinweis(sp, 'instanz_versand', z.betrieb, 'Anfrage ' + (z.nr || z.code) + (inst ? ' bei ' + inst.name : '') + ' kam nicht an (Bounce)' + (nochmal ? ', neuer Versuch ohne Fotos' : ''), { code: z.code, status: 'bounce' });
-    if (pd) ctx.waitUntil(pd.senden({ an: pd.kontakt, betreff: 'Anfrage nicht zugestellt: ' + (inst ? inst.name : '') + ' · ' + (z.nr || z.code), html: mailRahmen('Anfrage nicht zugestellt', absatz('Die Mail zur Anfrage ' + esc(z.nr || z.code) + (inst ? ' an ' + esc(inst.name) + ' (' + esc(inst.haupthost) + ')' : '') + ' kam beim Empfänger nicht an. ' + (nochmal ? 'Der Server versucht es einmal ohne Fotos.' : 'Bitte die Eingangsadresse in der Zentrale prüfen.')), pd.kontakt) }).catch(() => false));
+    if (pd) ctx.waitUntil(pd.senden({ an: pd.kontakt, betreff: 'Anfrage nicht zugestellt: ' + (inst ? inst.name : '') + ' · ' + (z.nr || z.code), html: mailRahmen('Anfrage nicht zugestellt', absatz('Die Mail zur Anfrage ' + esc(z.nr || z.code) + (inst ? ' an ' + esc(inst.name) + ' (' + esc(inst.haupthost) + ')' : '') + ' kam beim Empfänger nicht an. ' + (nochmal ? 'Der Server versucht es einmal ohne Fotos.' : 'Bitte die Eingangsadresse in der Zentrale prüfen.') + ' Den Betrieb darüber informieren (Paketbedingungen § 11 Abs. 2); die Anfrage liegt bereit.'), pd.kontakt) }).catch(() => false));
     return { ok: true, status: nochmal ? 'offen' : 'bounce', nochmal: nochmal };
   }
   if (typ === 'email.complained') {

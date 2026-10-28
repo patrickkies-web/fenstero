@@ -16,9 +16,21 @@ import { kontenDa, eigenesBezahlt, kaufNachweis, entfernt } from './eigene.js';
 import { kaufBestaetigen } from './bestaetigung.js';
 import { AGB_STAND, ZUSTIMMUNG, verkaufStand } from './recht.js';
 import { istAuftragEreignis, auftragEreignis } from '../auftrag/index.js';
+import { alarmMail } from './ki.js';
 
 const str = (v, n) => String(v == null ? '' : v).trim().slice(0, n || 200);
 const kennungOk = (s) => /^[A-Za-z0-9_-]{6,40}$/.test(s);
+
+/* Rückbuchung: Betrag, Grund, Zahlung an den Inhaber; gehört die Zahlung zu einem Auftrag (metadata der Zahlung), Vermerk dort */
+async function rueckbuchung(ctx, d) {
+  const pi = d.payment_intent && ctx.zd ? await ctx.zd.objekt('/v1/payment_intents/' + (typeof d.payment_intent === 'string' ? d.payment_intent : d.payment_intent.id)).catch(() => null) : null;
+  const meta = (pi && pi.metadata) || {}, betrag = ((Number(d.amount) || 0) / 100).toFixed(2).replace('.', ',') + ' €';
+  await alarmMail(ctx.k, 'Rückbuchung über ' + betrag, 'Stripe meldet eine Rückbuchung (' + betrag + (d.reason ? ', Grund: ' + d.reason : '') + ', Zahlung ' + ((pi && pi.id) || d.payment_intent || d.charge || '–') + ')' +
+    (meta.art === 'auftrag' ? ' zum Auftrag ' + (meta.nr || meta.auftrag) + '.' : '. Zu welchem Auftrag oder Betrieb sie gehört, steht bei Stripe.') +
+    ' Kunden informieren; ist das Geld nach 14 Tagen nicht da, in der Zentrale pausieren (Paketbedingungen § 8, Nutzungsbedingungen § 7).').catch(() => false);
+  if (meta.art === 'auftrag' && meta.auftrag) await auftragEreignis(ctx, { type: 'charge.dispute.created', data: { object: { metadata: { art: 'auftrag', auftrag: meta.auftrag }, amount: d.amount, reason: d.reason } } });
+}
+
 export const nachweis = kaufNachweis;
 
 /* Eine Zahlung ist bezahlt (Rückkehr aus der Kasse oder Webhook, auch beide zugleich): festhalten und, nur beim ersten Mal, zählen und
@@ -110,6 +122,14 @@ export const ZAHLUNG = {
       ev = { id: ev.id, type: String(ev.type).replace(/^v1\./, ''), data: { object: voll || {} } };
     }
     const obj = ev.data && ev.data.object ? ev.data.object : {};
+    /* Rückbuchung (Rücklastschrift, Kartenrückbuchung; Paketbedingungen § 8 Abs. 1, Nutzungsbedingungen § 7): Alarm an den Inhaber, beim
+       Auftrag ein Vermerk. Kunden informieren und pausieren tut der Inhaber in der Zentrale. Der Webhook bekommt das Ereignis nur, wenn es
+       bei Stripe ausgewählt ist (docs/ONLINE-STELLEN.md) */
+    if (ev.type === 'charge.dispute.created') {
+      await rueckbuchung(ctx, obj).catch(() => false);
+      if (ctx.sp) await ctx.sp.ereignisNeu(ev.id);
+      return { ok: true };
+    }
     /* Aufträge (functions/auftrag/): Kasse der Einrichtung und Monatsabo mit metadata.art auftrag; nie ein Betrieb oder ein Aufmaßblatt.
        Alles andere läuft unverändert weiter */
     if (istAuftragEreignis(ev)) await auftragEreignis(ctx, ev);

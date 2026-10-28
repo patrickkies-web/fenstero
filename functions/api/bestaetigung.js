@@ -58,7 +58,7 @@ export async function kaufBestaetigen(ctx, kauf) {
     zeile('Preis', esc(euro(preis)) + ', ' + esc(steuer)) +
     zeile('Gekauft am', esc(zeitText(kauf.zeit ? new Date(kauf.zeit) : new Date()))) +
     zeile('Zahlung', 'über Stripe; die Rechnung erhalten Sie von Stripe per E-Mail') + '</table>' +
-    absatz('<b>Ihre Zustimmung beim Kauf</b>' + (z.zeit ? ' (' + esc(zeitText(new Date(z.zeit))) + ')' : '') + ': Auf der Kassenseite haben Sie diesen Satz angehakt: „' + esc(z.text) + '“ Mit der Bereitstellung des Aufmaßblatts ist Ihr Widerrufsrecht deshalb erloschen.') +
+    absatz('<b>Ihre Zustimmung beim Kauf</b>' + (z.zeit ? ' (' + esc(zeitText(new Date(z.zeit))) + ')' : '') + ': Auf der Kassenseite haben Sie diesen Satz angehakt: „' + esc(z.text) + '“ Mit der Bereitstellung des Aufmaßblatts und dieser Bestätigung erlischt Ihr Widerrufsrecht deshalb (§ 356 Abs. 5 BGB).') +
     absatz('Ihr Aufmaßblatt ist in der App freigeschaltet, auf jedem Gerät, auf dem Sie sich mit dieser E-Mail-Adresse anmelden: <a href="' + origin + '/app/">' + esc(origin.replace(/^https?:\/\//, '')) + '/app/</a>') +
     absatz('Unten finden Sie unsere Allgemeinen Geschäftsbedingungen (Stand ' + esc(standText(agb.stand || z.agb || AGB_STAND)) + ') mit Widerrufsbelehrung und Muster-Widerrufsformular in der Fassung, die bei Ihrem Kauf galt.') +
     '<hr style="border:0;border-top:1px solid #d2d2d7;margin:20px 0"><div style="font-size:14px">' + agb.html + '</div>',

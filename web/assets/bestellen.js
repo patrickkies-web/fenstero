@@ -357,12 +357,14 @@
       betriebFeld({ k: 'erreichbar', label: 'Erreichbar', platzhalter: 'Mo bis Fr, 8 bis 17 Uhr', optional: true }),
       web
     ]);
-    const optional = ['register', 'ust', 'kammer', 'beruf'];
-    const mehr = h('details', { class: 'a-mehr', open: optional.some((k) => b[k]) || null }, h('summary', null, 'Register, USt-IdNr., Kammer und Beruf', h('span', { class: 'a-optional', text: 'falls vorhanden' })),
+    const optional = ['register', 'ust', 'kammer', 'beruf', 'schlichtung', 'dsb'];
+    const mehr = h('details', { class: 'a-mehr', open: optional.some((k) => b[k]) || null }, h('summary', null, 'Register, USt-IdNr., Kammer, Beruf, Schlichtung', h('span', { class: 'a-optional', text: 'falls vorhanden' })),
       betriebFeld({ k: 'register', label: 'Registergericht und Nummer', platzhalter: 'Amtsgericht Köln, HRB 12345', optional: true }),
       betriebFeld({ k: 'ust', label: 'USt-IdNr.', platzhalter: 'DE123456789', optional: true, auto: 'off' }),
       betriebFeld({ k: 'kammer', label: 'Kammer', platzhalter: 'Handwerkskammer zu Köln', optional: true }),
-      betriebFeld({ k: 'beruf', label: 'Berufsbezeichnung', platzhalter: 'Tischlermeister, verliehen in Deutschland', optional: true }));
+      betriebFeld({ k: 'beruf', label: 'Berufsbezeichnung', platzhalter: 'Tischlermeister, verliehen in Deutschland', optional: true }),
+      betriebFeld({ k: 'schlichtung', label: 'Verbraucherschlichtung (§ 36 VSBG)', platzhalter: 'Wir nehmen teil: Name und Adresse der Stelle', optional: true, hilfe: 'Leer lassen, wenn Sie nicht teilnehmen. Dann steht im Impressum: nicht bereit und nicht verpflichtet.' }),
+      betriebFeld({ k: 'dsb', label: 'Datenschutzbeauftragter', platzhalter: 'Name, E-Mail', optional: true, hilfe: 'Nur, wenn Sie einen benannt haben.' }));
     const impressum = U.karte('Impressum und Rechnung', 'Pflichtangaben für Ihre Seite', [
       betriebFeld({ k: 'strasse', label: 'Straße und Hausnummer', auto: 'street-address', platzhalter: 'Werkstattweg 12' }),
       h('div', { class: 'a-plz' }, betriebFeld({ k: 'plz', label: 'PLZ', modus: 'numeric', auto: 'postal-code', platzhalter: '50667', max: 5 }), betriebFeld({ k: 'ort', label: 'Ort', auto: 'address-level2', platzhalter: 'Köln' })),
@@ -583,7 +585,7 @@
     inhalt.push(U.kachel([h('p', { class: 'a-label-klein', style: 'margin:0 0 10px' }, U.chip(P.PAKETE[S.paket].name, 'aktiv')),
       h('div', { class: 'a-summe' }, h('span', { class: 'gross' }, String(pr.einrichtung), h('small', { text: '€ Einrichtung, netto' })), h('span', { style: grau, text: kasse ? 'heute, einmalig' : 'einmalig' })),
       mwst ? h('p', { class: 'a-heute' }, h('b', { text: (kasse ? 'Heute bei Stripe: ' : 'Mit Umsatzsteuer: ') + brutto(pr.einrichtung) }), ' inkl. 19 % USt.') : h('p', { style: grau, text: 'Kein Ausweis der Umsatzsteuer nach § 19 UStG.' }),
-      h('p', { text: 'Danach ' + U.euro(pr.monat) + ' netto im Monat' + (mwst ? ' (' + brutto(pr.monat) + ' inkl. USt.)' : '') + ', erst ab dem Tag, an dem Ihre Seite live geht. Ohne Mindestlaufzeit, kündbar zum Monatsende.' }),
+      h('p', { text: 'Danach ' + U.euro(pr.monat) + ' netto im Monat' + (mwst ? ' (' + brutto(pr.monat) + ' inkl. USt.)' : '') + ', erst ab dem Tag, an dem Ihre Seite live geht. Ohne Mindestlaufzeit, kündbar zum Ende jedes Abrechnungsmonats; er beginnt am Tag des Livegangs.' }),
       h('p', { style: grau, text: P.kiText(S.paket) + ' netto, nur wenn Sie weitere im Kundenbereich freischalten.' }),
       h('p', { style: grau, text: 'Bis wir mit der Einrichtung beginnen, stornieren Sie im Kundenbereich kostenlos; die Einrichtung erstatten wir dann vollständig.' })], 'leucht'));
     /* Zustimmung direkt unter dem Preis, je Haken ein Satz in Alltagsdeutsch; die Zeile über der Pille zählt, was fehlt */

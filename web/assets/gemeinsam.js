@@ -43,8 +43,8 @@
     return new Promise(function (resolve) {
       var bg = el('div', 'fx-bg');
       /* Instanz: neutral im Namen des Betriebs; eeziframes nur, wo das Paket es nennt (rechtNennung 'name'), sonst „technischer Dienstleister“ */
-      var weg = !INST ? 'an unseren Dienstleister Anthropic übertragen und dort ausgewertet (Anthropic Ireland, Ltd.; verarbeitet auch in den USA). eeziframes speichert deine Fotos nicht; Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben spätestens nach 30 Tagen.'
-        : (INST.m && INST.m.rechtNennung === 'name' ? 'über eeziframes, den technischen Dienstleister von ' + esc(INST.name) + ',' : 'über unseren technischen Dienstleister') + ' an den KI-Dienst Anthropic übertragen und dort ausgewertet (Anthropic Ireland, Ltd.; verarbeitet auch in den USA). Für die Auswertung werden sie dort nicht gespeichert: Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben spätestens nach 30 Tagen.';
+      var weg = !INST ? 'an unseren Dienstleister Anthropic übertragen und dort ausgewertet (Anthropic Ireland, Ltd.; verarbeitet auch in den USA). Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben in der Regel nach 30 Tagen. Eine eigene Kopie für die KI legt eeziframes nicht an; gespeichert sind deine Fotos nur dort, wo dein Aufmaß liegt.'
+        : (INST.m && INST.m.rechtNennung === 'name' ? 'über eeziframes, den technischen Dienstleister von ' + esc(INST.name) + ',' : 'über unseren technischen Dienstleister') + ' an den KI-Dienst Anthropic übertragen und dort ausgewertet (Anthropic Ireland, Ltd.; verarbeitet auch in den USA). Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben in der Regel nach 30 Tagen.';
       var box = el('div', 'fx-dialog',
         '<h2 id="fx-t">Fotos von der KI auswerten lassen?</h2>' +
         '<p>Die KI liest auf deinen Fotos die Einbausituation: Rollladenkasten, Laibung, Fensterbänke, Fassade und was ' + (INST ? esc(INST.name) : 'dein Fensterbauer') + ' sonst noch wissen muss. Dafür werden die Fotos verkleinert ' + weg + '</p>' +

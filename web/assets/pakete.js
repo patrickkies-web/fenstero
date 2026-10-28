@@ -107,7 +107,7 @@
     einladungslinks: { titel: 'Persönliche Einladungslinks', text: 'Kunden gezielt einladen, auf Ihrer Domain', art: 'janein', vergleich: true },
     fortschritt: { titel: 'Fortschritt sehen', text: 'eingeladen, in Bearbeitung, eingereicht', art: 'janein', vergleich: true },
     zugaenge: { titel: 'Zugänge zum Dashboard', art: 'zahl', vergleich: true },
-    kiMonat: { titel: 'KI-Auswertungen im Monat inklusive', text: 'eine je Foto, meist zwei je Fenster; bei 100 % pausiert die KI bis Monatsende, außer Sie schalten weitere frei (je zum Preis des Pakets, höchstens das Doppelte im Monat)', art: 'ki', vergleich: true },
+    kiMonat: { titel: 'KI-Auswertungen im Monat inklusive', text: 'eine je Foto, meist zwei je Fenster; bei 100 % pausiert die KI bis Monatsende, außer Sie schalten weitere frei (zum Preis je weiterer Auswertung, höchstens das Doppelte im Monat)', art: 'ki', vergleich: true },
     anfragenTag: { titel: 'Anfragen am Tag (Richtwert)', art: 'zahl' }
   };
 

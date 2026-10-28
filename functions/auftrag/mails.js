@@ -3,6 +3,7 @@
    Rahmen: weiße Karte auf hellem Grund, Systemschrift (Mailprogramme laden keine eigenen Schriften), eine schwarze Pille als Handlung,
    Violett nur als Zustand. Kein Bild, kein nachgeladener Inhalt, kein Tracking. */
 import { esc } from '../api/post.js';
+import { ANBIETER } from '../api/anbieter.js';
 
 const SCHRIFT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 const pille = (url, text) => '<a href="' + esc(url) + '" style="display:inline-block;padding:14px 22px;border-radius:999px;background:#07090a;color:#ffffff;font:600 15px/1 ' + SCHRIFT + ';text-decoration:none">' + esc(text) + '</a>';
@@ -16,7 +17,7 @@ export function rahmen(titel, inhalt, fuss) {
     '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;background:#ffffff;border-radius:24px"><tr><td style="padding:30px 26px 26px">' +
     '<p style="margin:0 0 22px;font:400 17px/1 ' + SCHRIFT + ';color:#07090a;letter-spacing:-.01em"><b style="font-weight:800">eezi</b>frames</p>' +
     '<h1 style="margin:0 0 16px;font:600 24px/1.2 ' + SCHRIFT + ';color:#07090a;letter-spacing:-.02em">' + esc(titel) + '</h1>' + inhalt +
-    '</td></tr></table><p style="margin:18px 0 0;font:400 12px/1.5 ' + SCHRIFT + ';color:#6b676c;max-width:520px">' + (fuss || 'eeziframes · Konfigurator für Ihre Website') + '</p></td></tr></table></body></html>';
+    '</td></tr></table><p style="margin:18px 0 0;font:400 12px/1.5 ' + SCHRIFT + ';color:#6b676c;max-width:520px">' + (fuss || esc('eeziframes · ' + ANBIETER.name + ' · ' + ANBIETER.strasse + ' · ' + ANBIETER.ort + ' · ' + ANBIETER.mail)) + '</p></td></tr></table></body></html>';
 }
 
 export function codeMail(code) {
@@ -59,6 +60,12 @@ export function standMail(a, stand, o) {
 export function kasseOffenMail(a, o) {
   return { betreff: 'Ihre Bestellung ' + a.nr + ': Sie können jetzt bezahlen', html: rahmen('Unsere Kasse ist offen', absatz(esc('Sie haben ' + (o.paketName || 'ein Paket') + ' unverbindlich angefragt. Jetzt können Sie die Einrichtung bezahlen; Ihre Angaben sind gespeichert. Bitte prüfen Sie sie kurz und bestellen Sie dann verbindlich.')) +
     (o.text ? absatz(esc(o.text)) : '') + '<p style="margin:0 0 14px">' + pille(o.link, 'Jetzt bestellen') + '</p>' + absatz('<a href="' + esc(o.konto) + '" style="color:#07090a">Zum Kundenbereich</a>')) };
+}
+/* Frist zur Freigabe der Vorschau (Paketbedingungen § 5 Abs. 5): Hinweis auf die Folge, ausdrücklich */
+export function freigabeFristMail(a, o) {
+  return { betreff: 'Ihre Vorschau ' + a.nr + ': bitte bis ' + o.bis + ' freigeben', html: rahmen('Ihre Vorschau wartet auf Sie', absatz(esc('Ihre Seite ist als Vorschau fertig. Bitte sehen Sie sie an und geben Sie sie bis zum ' + o.bis + ' im Kundenbereich frei, oder nennen Sie uns dort Ihre Änderungswünsche.')) +
+    absatz('<b>Wichtig:</b> ' + esc('Nennen Sie uns bis zum ' + o.bis + ' keinen Mangel, gilt die Einrichtung als abgenommen (§ 640 Abs. 2 BGB, Paketbedingungen § 5 Abs. 5). Wir dürfen Ihre Seite dann live schalten, und das Monatsabo beginnt. Die Sachaussagen der Seite (etwa Leistungen, Erfahrung, Zahlen) prüfen Sie bitte trotzdem; Fehler, die Sie uns danach nennen, berichtigen wir.')) +
+    (o.text ? absatz(esc(o.text)) : '') + (o.vorschau ? absatz('<a href="' + esc(o.vorschau) + '" style="color:#07090a">Vorschau ansehen</a>') : '') + '<p style="margin:0 0 14px">' + pille(o.konto, 'Freigeben oder Änderungen nennen') + '</p>') };
 }
 export function nachrichtMail(a, text, o) {
   /* o.titel: Ereignis im Betreff an den Inhaber (Freigabe, Änderungswunsch, Paketwechsel, Storno), damit es im Postfach nicht wie eine Nachricht aussieht */

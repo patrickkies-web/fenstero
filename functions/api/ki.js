@@ -212,6 +212,11 @@ export async function kiInstanz({ request, env, instanz, waitUntil }) {
     r.meta = Object.assign({}, mt, { ki: schon + 1 }); frei = true; return true;
   });
   if (!frei) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'code' }, 429);
+  /* Testanfragen in der Vorschau zählen nicht ins Kontingent (Paketbedingungen § 2 Abs. 2); es bleiben die Grenze je Code und das Tagesbudget */
+  if (globalThis.Instanzregeln.anfrageArt(instanz.status, { vorschau: instanz.vorschau }) === 'test') {
+    if (!(await tagesBudget(ctx))) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'tag' }, 429);
+    return auswerten(request, env, url);
+  }
   /* je Instanz und Monat: Kontingent aus pakete.js, ohne Freischaltung Schluss bei 100 %, mit Freischaltung (oder ohne Auftrag) beim Doppelten */
   const m = instanz.m || {}, richt = Math.max(1, Number(m.kiMonat) || 600), auf = await kiAuftrag(ctx, instanz);
   const mehrFrei = !auf || !!(auf.ki || {}).frei, grenze = mehrFrei ? richt * 2 : richt, okKey = 'inst:' + instanz.id8 + ':kiok';

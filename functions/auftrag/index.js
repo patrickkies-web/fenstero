@@ -38,7 +38,7 @@ import { postDienst, esc, mailOk as mailPruefen } from '../api/post.js';
 import { ablage } from '../api/fotos.js';
 import { PAKET_STAND, paketVerkaufStand, standText, paketPdfs } from '../api/recht.js';
 import { daten } from './daten.js';
-import { codeMail, bestelltMail, inhaberNeuMail, standMail, nachrichtMail, frageMail, rahmen, zahlungMail, kasseOffenMail } from './mails.js';
+import { codeMail, bestelltMail, inhaberNeuMail, standMail, nachrichtMail, frageMail, rahmen, zahlungMail, kasseOffenMail, freigabeFristMail } from './mails.js';
 import { SICHERHEIT, SPERRE, HAUPTADRESSE } from '../seo.js';
 import { kasse, kassePruefen, aboStarten, aboBeenden, portal, erstatten, mwst, kiPosten } from './zahlung.js';
 import { budgetStand, monatsPeriode } from '../api/bremse.js';
@@ -77,7 +77,7 @@ function sicht(a, o) {
     preise: a.preise || null, adresse: adresseText(a), zustimmung: a.zustimmung || null,
     zahlung: { status: z.status || '', betrag_cent: z.betrag_cent || 0, bezahlt_am: z.bezahlt_am || '', erstattet: !!z.erstattet },
     abo: { status: (a.abo || {}).status || '', bis: (a.abo || {}).bis || '', seit: (a.abo || {}).seit || '', offen_seit: (a.abo || {}).offen_seit || '' }, sperre: a.sperre || '', fristen: { kulanzTage: globalThis.Instanzregeln.FRISTEN.kulanzTage, pauseMaxTage: globalThis.Instanzregeln.FRISTEN.pauseMaxTage },
-    vorschau: { link: v.link || '', seit: v.seit || '', freigabe: v.freigabe || null, aenderung: v.aenderung || null, live: v.live || '' },
+    vorschau: { link: v.link || '', seit: v.seit || '', freigabe: v.freigabe || null, aenderung: v.aenderung || null, live: v.live || '', frist: v.frist || '' },
     verlauf: (a.verlauf || []).map((x) => ({ zeit: x.zeit, stand: x.stand || '', von: x.von, text: x.text })), created_at: a.created_at, updated_at: a.updated_at,
     geaendert: a.angaben_geaendert || '', ki: { frei: !!(a.ki || {}).frei, frei_seit: (a.ki || {}).frei_seit || '' }, verknuepft: !!a.instanz
   };
@@ -270,7 +270,7 @@ export function promptFuer(a, kunde) {
   if (m.dashboard) z.push('Team für das Dashboard: ' + ((ad.team || []).join(', ') || '–'));
   z.push('Anfragen gehen an: ' + ((ad.eingang || []).join(', ') || '–'));
   if (t.notiz) z.push('Hinweise des Kunden: ' + t.notiz);
-  z.push('Impressum: ' + [b.firma, b.rechtsform && String(b.firma || '').toLowerCase().replace(/[\s.]/g, '').indexOf(b.rechtsform.toLowerCase().replace(/[\s.]/g, '')) < 0 ? b.rechtsform : '', 'vertreten durch ' + (b.vertretung || '–'), b.register, b.ust ? 'USt-IdNr. ' + b.ust : '', b.kammer, b.beruf].filter(Boolean).join(' · ') + ' · Bundesland ' + (AU().BUNDESLAENDER[b.bundesland] || '–'));
+  z.push('Impressum: ' + [b.firma, b.rechtsform && String(b.firma || '').toLowerCase().replace(/[\s.]/g, '').indexOf(b.rechtsform.toLowerCase().replace(/[\s.]/g, '')) < 0 ? b.rechtsform : '', 'vertreten durch ' + (b.vertretung || '–'), b.register, b.ust ? 'USt-IdNr. ' + b.ust : '', b.kammer, b.beruf, b.schlichtung ? 'Schlichtung: ' + b.schlichtung : '', b.dsb ? 'Datenschutzbeauftragter: ' + b.dsb : ''].filter(Boolean).join(' · ') + ' · Bundesland ' + (AU().BUNDESLAENDER[b.bundesland] || '–'));
   z.push('Kunde: ' + ((kunde && kunde.mail) || '–') + ' · Auftrag in der Zentrale: /zentrale/#auftrag/' + a.id);
   z.push('');
   z.push('Danach: Vorschau als Artifact, Link in der Zentrale unter „Vorschau“ eintragen. MASTER-ANHÄNGSEL anhängen.');
@@ -460,7 +460,7 @@ const KUNDE = {
     const z2 = await d.auftragAendern(a.id, (z) => {
       if (z.stand !== 'vorschau') return false;
       if (b.aktion === 'freigeben') { z.vorschau = Object.assign({}, z.vorschau, { freigabe: { zeit: ZEIT(), link: (z.vorschau || {}).link || '' }, aenderung: null }); verlauf(z, { von: 'kunde', text: 'Vorschau freigegeben' }); }
-      else { z.vorschau = Object.assign({}, z.vorschau, { aenderung: { zeit: ZEIT(), text: text }, freigabe: null }); z.stand = 'in_arbeit'; verlauf(z, { stand: 'in_arbeit', von: 'kunde', text: 'Änderungen gewünscht' }); }
+      else { z.vorschau = Object.assign({}, z.vorschau, { aenderung: { zeit: ZEIT(), text: text }, freigabe: null, frist: null }); z.stand = 'in_arbeit'; verlauf(z, { stand: 'in_arbeit', von: 'kunde', text: 'Änderungen gewünscht' }); }
     });
     if (z2 === false) throw new ApiFehler('Gerade gibt es keine Vorschau zum Freigeben.', 409);
     const nt = b.aktion === 'freigeben' ? 'Ich gebe die Vorschau frei.' : 'Bitte ändern: ' + text;
@@ -599,6 +599,21 @@ const INHABER = {
     const z2 = await d.auftragAendern(a.id, (z) => { verlauf(z, { von: 'inhaber', text: 'Zur Zahlung eingeladen (Kasse offen)' + (text ? ': ' + text : '') }); });
     return { ok: true, auftrag: sicht(z2, { inhaber: true }) };
   },
+  /* Vorschau ohne Antwort: Frist zur Freigabe per Mail, 14 Tage (Paketbedingungen § 5 Abs. 5, § 640 Abs. 2 BGB); danach darf live geschaltet werden */
+  'POST /api/inhaber/auftraege/:id/freigabe-frist': async (ctx) => {
+    await inhaberPflicht(ctx);
+    const a = await auftragFuerInhaber(ctx), d = db(ctx), v = a.vorschau || {};
+    if (a.stand !== 'vorschau' || v.freigabe) throw new ApiFehler('Eine Frist gibt es nur für eine Vorschau, die noch nicht freigegeben ist.', 409);
+    const post = pd(ctx), kunde = await d.kundeHolen(a.kunde);
+    if (!post || !kunde) throw new ApiFehler('Der Mailversand ist hier noch nicht eingerichtet (MAIL_API_KEY).', 503);
+    const text = kurz((ctx.body || {}).text, 600), jetzt = ctx.k.jetzt || Date.now();
+    const bis = new Date(jetzt + 14 * 864e5), bisText = bis.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' });
+    const m = freigabeFristMail(a, { bis: bisText, text: text, vorschau: v.link || '', konto: basis(ctx) + '/konto/#auftrag/' + a.id });
+    const r = await post.senden({ an: kunde.mail, betreff: m.betreff, html: m.html, antwortAn: post.kontakt }).catch(() => false);
+    if (!r) throw new ApiFehler('Die E-Mail ließ sich gerade nicht senden. Bitte gleich noch einmal.', 502);
+    const z2 = await d.auftragAendern(a.id, (z) => { z.vorschau = Object.assign({}, z.vorschau, { frist: bis.toISOString() }); verlauf(z, { von: 'inhaber', text: 'Frist zur Freigabe gesetzt bis ' + bisText + (text ? ': ' + text : '') }); });
+    return { ok: true, auftrag: sicht(z2, { inhaber: true }) };
+  },
   /* Konfigurator von Hand verknüpfen (Adresse oder Host), falls er beim Live-Schalten nicht gefunden wurde; leer = lösen */
   'POST /api/inhaber/auftraege/:id/instanz': async (ctx) => {
     await inhaberPflicht(ctx);
@@ -640,7 +655,7 @@ const INHABER = {
     const z2 = await d.auftragAendern(a.id, (z) => {
       if (!AU().uebergang(z.stand, nach, 'inhaber')) return false;
       z.stand = nach;
-      if (nach === 'vorschau') z.vorschau = Object.assign({}, z.vorschau, { link: AU().webAdresse(link), seit: ZEIT(), freigabe: null, aenderung: null });
+      if (nach === 'vorschau') z.vorschau = Object.assign({}, z.vorschau, { link: AU().webAdresse(link), seit: ZEIT(), freigabe: null, aenderung: null, frist: null });
       /* aus Kulanz wieder live, obwohl die Zahlung noch offen ist: neue Frist bis zur nächsten Pause (FRISTEN.kulanzTage) */
       if (nach === 'live' && z.sperre === 'zahlung' && (z.abo || {}).status === 'zahlung_offen') z.abo = Object.assign({}, z.abo, { offen_seit: ZEIT() });
       if (nach === 'live') { z.vorschau = Object.assign({}, z.vorschau, { live: AU().webAdresse(link) }); if (abo) z.abo = Object.assign({}, z.abo, { id: abo.id, status: abo.status, bis: abo.bis, seit: ZEIT(), geloescht: null, offen_seit: null }); if (inst) z.instanz = inst; z.sperre = null; z.pause_seit = null; }
@@ -702,6 +717,9 @@ export async function auftragEreignis(ctx, ev) {
       if (z.stand === 'pausiert' && z.sperre === 'zahlung' && AU().uebergang('pausiert', 'live', 'system')) { z.stand = 'live'; z.sperre = null; z.pause_seit = null; wieder = true; verlauf(z, { stand: 'live', von: 'system', text: 'Zahlung eingegangen, wieder live' }); }
     });
     if (wieder && z2) { await konfiguratorSchalten(ctx, z2, 'live', 'Zahlung eingegangen'); await zahlungMelden(ctx, z2, 'wieder'); }
+  } else if (ev.type === 'charge.dispute.created') {
+    /* Rückbuchung (functions/api/zahlung.js, rueckbuchung): Vermerk; Kunde informieren und Pause setzt der Inhaber (Paketbedingungen § 8 Abs. 1) */
+    await d.auftragAendern(a.id, (z) => { z.zahlung = Object.assign({}, z.zahlung, { rueckbuchung: new Date().toISOString() }); verlauf(z, { von: 'system', text: 'Rückbuchung gemeldet (' + ((Number(o.amount) || 0) / 100).toFixed(2).replace('.', ',') + ' €' + (o.reason ? ', ' + o.reason : '') + '): Kunden informieren, nach 14 Tagen pausieren (Paketbedingungen § 8)' }); });
   } else if (ev.type === 'invoice.payment_failed') {
     let erst = false;
     const z2 = await d.auftragAendern(a.id, (z) => { erst = !(z.abo || {}).offen_seit; z.abo = Object.assign({}, z.abo, { status: 'zahlung_offen', offen_seit: (z.abo || {}).offen_seit || new Date().toISOString() }); verlauf(z, { von: 'system', text: 'Abbuchung des Monatsabos fehlgeschlagen' }); });

@@ -1206,12 +1206,13 @@
     const lockedLinks = (a) => (a.links || []).filter((l) => l.status === 'eingegangen' && l.locked && !l.demo);
     const aboGenutzt = (a, now) => { const k = monthKey(now); return ledger(a).filter((b) => b.kind === 'aufmass' && b.inkl && b.month === k).length; };
     const aboFrei = (a, now) => Math.max(0, PREISE.abo.inkl - aboGenutzt(a, now));
-    function bookAufmass(a, l, extra, now) {
+    function bookAufmass(a, l, extra, now, alsStart) {
       const book = a.book || (a.book = []), ref = extra ? l.id + '#' + extra : l.id;
       if (book.some((b) => b.kind === 'aufmass' && b.ref === ref)) return true;
       const am = l.aufmass || {}, sub = [((l.log || {}).eingegangen || stamp(now)), l.nr, am.windows ? nW(am.windows.length, 'Position', 'Positionen') : '', extra ? 'anderes Aufmaß in Runde ' + extra : ''].filter(Boolean).join(' · ');
       let betrag = 0, badge, inkl = false;
-      const k = konto(a);
+      /* alsStart: ein gesperrtes Aufmaß kam unter Start an (ohne Zahlungsart gibt es kein Abo) und wird zu diesem Tarif gebucht (Regel 1) */
+      const k0 = konto(a), k = alsStart && k0 !== 'instanz' ? 'service' : k0;
       if (k === 'instanz') badge = 'im Paket';
       else if (k === 'plus') badge = 'inklusive (Plus)';
       else if (k === 'abo') {
@@ -1233,8 +1234,8 @@
       const size = nW(aufmass.windows.length, 'Position', 'Positionen') + ' mit ' + nW(aufmass.fotos || 0, 'Foto', 'Fotos');
       return { ok: !l.locked, notif: l.locked ? { t: 'Aufmaß eingegangen: ' + l.kunde, s: size + '. Zum Ansehen eine Zahlungsart hinterlegen; Ihre kostenlosen Aufmaße sind verbraucht.', to: ['link', l.id] } : { t: 'Aufmaß eingegangen: ' + l.kunde, s: size + '. ' + (l.nr || ''), to: ['link', l.id] } };
     }
-    /* Nach Zahlungsart oder Tarifwechsel: wartende Aufmaße freischalten, ältestes zuerst */
-    function unlockWaiting(a, now) { let n = 0; lockedLinks(a).slice().reverse().forEach((l) => { if (bookAufmass(a, l, null, now)) { l.locked = false; n++; } }); return n; }
+    /* Nach Zahlungsart oder Tarifwechsel: wartende Aufmaße freischalten, ältestes zuerst, zum Tarif beim Eingang (Start; Nutzungsbedingungen § 5 Abs. 1) */
+    function unlockWaiting(a, now) { let n = 0; lockedLinks(a).slice().reverse().forEach((l) => { if (bookAufmass(a, l, null, now, true)) { l.locked = false; n++; } }); return n; }
     function bookPlan(a, k, now) {
       const key = monthKey(now), preis = k === 'plus' ? PREISE.plus : PREISE.abo.grund;
       const schon = ledger(a).filter((b) => (b.kind === 'plus' || b.kind === 'abo') && b.month === key);

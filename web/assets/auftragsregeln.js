@@ -38,7 +38,7 @@
   /* ---------- Grenzen ---------- */
   const GRENZEN = {
     firma: 100, name: 60, ort: 60, region: 80, strasse: 100, mail: 120, tel: 40, web: 200, ap: 80, rolle: 60, erreichbar: 200,
-    rechtsform: 60, vertretung: 200, register: 120, kammer: 120, beruf: 120, rueckruf: 120,
+    rechtsform: 60, vertretung: 200, register: 120, kammer: 120, beruf: 120, schlichtung: 300, dsb: 200, rueckruf: 120,
     domains: 3, eingang: 3, farben: 3,
     ueberschrift: 60, einleitung: 220, leistungTitel: 80, leistungText: 260, einladung: 320, notiz: 1500,
     dateiBytes: 4000000, logoBytes: 2000000, dateienJeAuftrag: 16, nachricht: 2000, offeneEntwuerfe: 3
@@ -120,7 +120,7 @@
 
   /* ---------- Leere Angaben (Formular und neuer Auftrag) ---------- */
   const leer = () => ({
-    betrieb: { firma: '', name: '', ort: '', region: '', strasse: '', plz: '', bundesland: '', tel: '', mail: '', web: '', ap: '', rolle: '', erreichbar: '', rechtsform: '', vertretung: '', register: '', ust: '', kammer: '', beruf: '', rueckruf: '' },
+    betrieb: { firma: '', name: '', ort: '', region: '', strasse: '', plz: '', bundesland: '', tel: '', mail: '', web: '', ap: '', rolle: '', erreichbar: '', rechtsform: '', vertretung: '', register: '', ust: '', kammer: '', beruf: '', schlichtung: '', dsb: '', rueckruf: '' },
     adresse: { name: '', art: 'neu', domains: ['', '', ''], vorschlaege: false, eingang: ['', '', ''], team: [''] },
     auftritt: { farben: [''], farbenWebsite: false, ausWebsite: false, ueberschrift: '', einleitung: '', leistungTitel: '', leistungText: '', einladung: '', notiz: '' }
   });
@@ -139,7 +139,7 @@
       tel: kurz(d.tel, GRENZEN.tel), mail: kurz(d.mail, GRENZEN.mail).toLowerCase(), web: webAdresse(d.web), ap: kurz(d.ap, GRENZEN.ap), rolle: kurz(d.rolle, GRENZEN.rolle),
       erreichbar: kurz(d.erreichbar, GRENZEN.erreichbar), rechtsform: kurz(d.rechtsform, GRENZEN.rechtsform), vertretung: kurz(d.vertretung, GRENZEN.vertretung),
       register: kurz(d.register, GRENZEN.register), ust: String(d.ust || '').replace(/\s/g, '').toUpperCase().slice(0, 11), kammer: kurz(d.kammer, GRENZEN.kammer), beruf: kurz(d.beruf, GRENZEN.beruf),
-      rueckruf: kurz(d.rueckruf, GRENZEN.rueckruf)
+      schlichtung: kurz(d.schlichtung, GRENZEN.schlichtung), dsb: kurz(d.dsb, GRENZEN.dsb), rueckruf: kurz(d.rueckruf, GRENZEN.rueckruf)
     };
     const f = {};
     if (w.firma.length < 2) f.firma = 'Bitte den Namen des Unternehmens eingeben, wie er auf Ihren Rechnungen steht.';
