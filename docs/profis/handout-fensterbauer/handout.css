@@ -1,146 +1,178 @@
-/* Handout für Fensterbauer (A4, zwei Seiten, danach drei Seiten Beispiel-Aufmaß). Design-DNA, Palette „Task-App dunkel“, Formensprache
-   der Startseite und der Seite für Fensterbauer: dunkle Szene, weiße Szene mit runder Kante, Anthrazit-Kacheln mit Lichtkante (G14),
-   Etikett mit violettem Punkt, Überschrift mit zweiter Stimme in Silbergrau, Zahlen dünn und groß, eine weiße Pille. Präfix h-. */
+/* Handout für Fensterbauer (A4, vier Seiten, danach drei Seiten Beispiel-Aufmaß). Design-DNA, Palette „Task-App dunkel“, Formensprache
+   der Startseite und der Seite für Fensterbauer: dunkle und helle Seiten, Anthrazit-Kacheln mit Lichtverlauf (G14), Etikett mit violettem
+   Punkt, Überschrift mit zweiter Stimme, Zahlen dünn und groß, Pakete wie auf der Seite für Fensterbauer.
+   Robust in jedem PDF-Betrachter (Korrektur des Inhabers, 28.10.2026: „komische Vierecke“): nur deckende Farben, keine Transparenz, keine
+   weichen Schatten, keine CSS-Masken; Leuchten als deckender Verlauf, der in die Grundfarbe ausläuft; Zeichen als eingebettetes SVG. Präfix h-. */
 @font-face { font-family: 'Outfit'; font-weight: 200 700; src: url(../../../web/fonts/outfit.woff2) format('woff2'); }
 @font-face { font-family: 'Inter'; font-weight: 100 900; src: url(../../../web/fonts/inter-latin-wght-normal.woff2) format('woff2'); }
 @page { size: A4; margin: 0 }
 :root { --schwarz: #07090a; --weiss: #ffffff; --anthrazit: #202022; --silber: #a8a4a9; --textgrau: #6b676c; --violett: #897efc; --koralle: #f88962; --indigo: #3c3a66;
-  --kachel: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e);
-  --kante: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045);
-  --rand-hell: 0 0 0 1px #e6e4e8, 0 18px 40px -26px rgba(7, 9, 10, .35);
+  --tinte: #111113; --text-hell: #3e3c40; --linie-hell: #e4e2e6; --linie-dunkel: #2c2c2f;
+  --kachel: radial-gradient(120% 90% at 18% 0%, #343436, var(--anthrazit) 55%, #1c1c1e);
+  --hof-dunkel: #27244a; --hof-hell: #e9e7fe;
   --f: 'Outfit', 'Avenir Next', 'Segoe UI', system-ui, sans-serif }
 * { box-sizing: border-box }
 html, body { margin: 0; padding: 0; background: #3a3a3c; -webkit-print-color-adjust: exact; print-color-adjust: exact }
 body { font-family: var(--f); color: var(--weiss); font-size: 13px; line-height: 1.45 }
-.h-seite { position: relative; width: 210mm; height: 297mm; overflow: hidden; background: var(--schwarz); page-break-after: always; break-after: page; margin: 0 auto }
-.h-seite + .h-seite { margin-top: 0 }
-@media screen { .h-seite { margin: 24px auto } }
 p { margin: 0 }
 h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.03em }
+a { color: inherit; text-decoration: none }
+.h-seite { position: relative; width: 210mm; height: 297mm; overflow: hidden; background: var(--schwarz); break-after: page; margin: 0 auto; padding: 34px 44px 0 }
+.h-seite.h-hell { background: var(--weiss); color: var(--tinte) }
+@media screen { .h-seite { margin: 24px auto } }
 .h-zweit { color: var(--silber) }
 .h-hell .h-zweit { color: var(--textgrau) }
 
-/* Etikett mit violettem Punkt (G15: 12 px, 400, .03em) */
-.h-label { display: inline-flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 400; letter-spacing: .03em; color: var(--silber) }
-.h-label::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 4px rgba(137, 126, 252, .18); flex: none }
-.h-hell .h-label { color: var(--textgrau) }
+/* Etikett mit violettem Punkt */
+.h-label { display: inline-flex; align-items: center; gap: 10px; font-size: 11.5px; font-weight: 400; letter-spacing: .03em; color: var(--silber) }
+.h-label::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 4px var(--hof-dunkel); flex: none; margin-left: 4px }
+.h-hell .h-label { color: var(--textgrau) } .h-hell .h-label::before { box-shadow: 0 0 0 4px var(--hof-hell) }
 
-/* Kopf */
-.h-kopf { display: flex; justify-content: space-between; align-items: center; padding: 34px 44px 0 }
-.h-marke { display: inline-flex; align-items: center; gap: 10px; font-family: 'Inter', var(--f); font-size: 18px; color: var(--weiss); letter-spacing: -.01em }
+/* Kopf und Fuß */
+.h-kopf { display: flex; justify-content: space-between; align-items: center; height: 30px }
+.h-marke { display: inline-flex; align-items: center; gap: 10px; font-family: 'Inter', var(--f); font-size: 18px; letter-spacing: -.01em }
 .h-marke svg { width: 26px; height: 26px; display: block }
-.h-marke svg .fi-kachel { fill: var(--schwarz) } .h-marke svg .fi-rand { stroke: #fff; stroke-opacity: .16 }
 .h-marke b { font-weight: 900 } .h-marke span { font-weight: 500 }
 .h-kopf-r { font-size: 11.5px; letter-spacing: .03em; color: var(--silber) }
+.h-hell .h-kopf-r { color: var(--textgrau) }
+.h-fuss { position: absolute; left: 44px; right: 44px; bottom: 0; display: flex; justify-content: space-between; align-items: center; height: 46px; border-top: 1px solid var(--linie-dunkel); font-size: 10.5px; color: var(--silber) }
+.h-hell .h-fuss { border-top-color: var(--linie-hell); color: var(--textgrau) }
 
-/* Seite 1: Held */
-.h-held { display: grid; grid-template-columns: 1fr 236px; gap: 24px; padding: 30px 44px 0; align-items: start }
-.h-held h1 { margin-top: 12px; font-size: 50px; line-height: .95; letter-spacing: -.035em }
-.h-lead { margin-top: 16px; max-width: 36ch; font-size: 15.5px; line-height: 1.5; color: var(--silber) }
+/* Haken (eingebettetes SVG, Farbe über currentColor) */
+.h-hk { flex: none; display: block; width: 14px; height: 14px; color: var(--violett) }
+.h-hell .h-hk { color: var(--tinte) }
+.h-haken { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px }
+.h-haken li { display: grid; grid-template-columns: 16px 1fr; gap: 8px; font-size: 12px; line-height: 1.4 }
+.h-haken li .h-hk { margin-top: 2px }
+
+/* ---------- Seite 1 ---------- */
+.h-held { margin-top: 40px }
+.h-held h1 { margin-top: 14px; font-size: 60px; line-height: .96; letter-spacing: -.037em }
+.h-reihe { display: grid; grid-template-columns: 1fr 262px; gap: 26px; margin-top: 26px }
+.h-reihe > div:first-child { position: relative; z-index: 2 }
+.h-lead { max-width: 33ch; font-size: 16.5px; line-height: 1.5; color: var(--silber) }
 .h-lead b { color: var(--weiss); font-weight: 500 }
-.h-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px }
-.h-chip { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px 0 10px; border-radius: 999px; background: var(--kachel); box-shadow: var(--kante); font-size: 12.5px; color: var(--weiss) }
-.h-chip svg { width: 14px; height: 14px; color: var(--violett) }
-
-/* Telefon auf violettem Licht, Karte „Neue Anfrage“ ragt heraus (G12) */
-.h-buehne { position: relative; height: 470px }
-.h-buehne::before { content: ""; position: absolute; inset: 40px -60px 10px -90px; background: radial-gradient(48% 46% at 55% 48%, rgba(137, 126, 252, .55), rgba(60, 58, 102, .35) 42%, transparent 72%); z-index: 0 }
-.h-telefon { position: absolute; right: 0; top: 0; width: 214px; height: 463px; border-radius: 34px; padding: 7px; background: linear-gradient(160deg, #3b3b3e, #141416 60%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.14), 0 40px 70px -30px rgba(0,0,0,.9); z-index: 1 }
-.h-telefon img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 28px }
-.h-anfrage { position: absolute; left: -64px; bottom: 26px; width: 196px; padding: 14px 16px 14px; border-radius: 20px; background: rgba(28, 28, 30, .985); box-shadow: inset 0 1px 0 rgba(255,255,255,.18), inset 0 0 0 1px rgba(255,255,255,.08), 0 24px 40px -18px rgba(0,0,0,.85); z-index: 2 }
+.h-chips { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 24px }
+.h-chip { display: inline-flex; align-items: center; gap: 9px; height: 34px; padding: 0 16px 0 12px; border-radius: 999px; background: #1a1a1c; border: 1px solid #323235; font-size: 13px; color: var(--weiss) }
+.h-anfrage { position: relative; z-index: 2; width: 252px; margin: 40px -60px 0 auto; padding: 16px 18px 16px; border-radius: 22px; background: #1d1d1f; border: 1px solid #39393c; border-top-color: #4a4a4e }
 .h-anfrage small { display: block; font-size: 10.5px; letter-spacing: .03em; color: var(--silber) }
-.h-anfrage b { display: block; margin-top: 4px; font-size: 15px; font-weight: 600; letter-spacing: -.01em }
-.h-anfrage .h-zahl { display: flex; align-items: baseline; gap: 6px; margin-top: 6px }
-.h-anfrage .h-zahl strong { font-size: 40px; font-weight: 250; line-height: 1; letter-spacing: -.03em }
-.h-anfrage .h-zahl span { font-size: 12px; color: var(--silber) }
-.h-anfrage .h-datei { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 11px; color: var(--silber) }
-.h-anfrage .h-datei i { width: 6px; height: 6px; border-radius: 50%; background: var(--koralle) }
-
-/* Vier Schritte */
-.h-ablauf { padding: 4px 44px 0 }
+.h-anfrage b { display: block; margin-top: 4px; font-size: 16px; font-weight: 600; letter-spacing: -.01em }
+.h-anfrage .h-zahl { display: flex; align-items: baseline; gap: 7px; margin-top: 6px }
+.h-anfrage .h-zahl strong { font-size: 48px; font-weight: 250; line-height: 1; letter-spacing: -.035em }
+.h-anfrage .h-zahl span { font-size: 13px; color: var(--silber) }
+.h-anfrage .h-datei { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #333336; font-size: 11.5px; color: var(--silber) }
+.h-anfrage .h-datei i { width: 7px; height: 7px; border-radius: 50%; background: var(--koralle); flex: none }
+.h-buehne { position: relative; height: 566px }
+.h-licht { position: absolute; left: -190px; right: -110px; top: 40px; bottom: -40px; background: radial-gradient(50% 44% at 55% 50%, #463f80, #2a2650 36%, #141323 58%, var(--schwarz) 78%) }
+.h-telefon { position: absolute; right: 0; top: 0; width: 262px; height: 566px; border-radius: 40px; padding: 8px; background: linear-gradient(160deg, #3f3f42, #18181a 55%, #232325); border: 1px solid #4a4a4e }
+.h-telefon img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 32px }
+.h-ablauf { margin-top: 34px }
 .h-ablauf-kopf { display: flex; align-items: baseline; justify-content: space-between }
-.h-ablauf h2 { font-size: 22px }
+.h-ablauf h2 { font-size: 24px }
 .h-schritte { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px }
-.h-schritt { padding: 14px 14px 16px; border-radius: 20px; background: var(--kachel); box-shadow: var(--kante); min-height: 112px }
+.h-schritt { padding: 15px 15px 17px; border-radius: 20px; background: var(--kachel); border: 1px solid var(--linie-dunkel); border-top-color: #3a3a3e }
 .h-schritt .h-nr { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--silber); letter-spacing: .03em }
-.h-schritt .h-nr i { width: 7px; height: 7px; border-radius: 50%; background: #3a3a3e }
-.h-schritt:last-child .h-nr i { background: var(--violett); box-shadow: 0 0 0 4px rgba(137, 126, 252, .18) }
-.h-schritt b { display: block; margin-top: 12px; font-size: 16px; font-weight: 600; letter-spacing: -.015em }
-.h-schritt p { margin-top: 4px; font-size: 11.5px; line-height: 1.4; color: var(--silber) }
+.h-schritt .h-nr i { width: 7px; height: 7px; border-radius: 50%; background: #3e3e42 }
+.h-schritt:last-child .h-nr i { background: var(--violett); box-shadow: 0 0 0 4px var(--hof-dunkel) }
+.h-schritt b { display: block; margin-top: 14px; font-size: 17px; font-weight: 600; letter-spacing: -.015em }
+.h-schritt p { margin-top: 5px; font-size: 12px; line-height: 1.4; color: var(--silber) }
 
-/* Weiße Szene unten (Vorhang mit runder Kante) */
-.h-vorhang { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 30px 30px 0 0; background: var(--weiss); color: #111113; padding: 30px 44px 0 }
-.h-hell { color: #111113 }
-.h-ankommt { display: grid; grid-template-columns: 1fr 268px; gap: 26px; align-items: start }
-.h-ankommt h2 { margin-top: 10px; font-size: 26px; line-height: 1.05 }
-.h-liste { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 7px }
-.h-dunkel .h-liste { margin-top: 10px; gap: 5px }
-.h-liste li { position: relative; padding-left: 16px; font-size: 12.5px; line-height: 1.4; color: #3e3c40 }
-.h-liste li b { color: #111113; font-weight: 600 }
-.h-liste li::before { content: ""; position: absolute; left: 0; top: 7px; width: 6px; height: 6px; border-radius: 50%; background: #c9c6cc }
-.h-dunkel .h-liste li { color: var(--silber) } .h-dunkel .h-liste li b { color: var(--weiss) } .h-dunkel .h-liste li::before { background: #4a4a4e }
-.h-blatt { position: relative; margin-top: -2px }
-.h-blatt img { display: block; width: 100%; border-radius: 14px; box-shadow: var(--rand-hell) }
-.h-blatt-chip { position: absolute; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 11px 0 8px; border-radius: 999px; background: rgba(7, 9, 10, .86); color: #fff; font-size: 11px; box-shadow: 0 10px 24px -12px rgba(0,0,0,.6) }
-.h-blatt-chip i { width: 6px; height: 6px; border-radius: 50%; background: var(--violett) }
-.h-blatt-chip.k i { background: var(--koralle) }
-.h-fuss { display: flex; justify-content: space-between; align-items: center; height: 46px; margin-top: 18px; border-top: 1px solid #ecebef; font-size: 10.5px; color: var(--textgrau) }
-.h-dunkel .h-fuss { height: 30px; margin-top: 8px;  border-top-color: rgba(255,255,255,.08); color: var(--silber) }
+/* ---------- Seite 2 ---------- */
+.h-titel { margin-top: 36px }
+.h-titel h2 { margin-top: 12px; font-size: 34px; line-height: 1.02 }
+.h-titel p { margin-top: 12px; max-width: 54ch; font-size: 14px; line-height: 1.5; color: var(--textgrau) }
+.h-zahlen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 24px }
+.h-kz { padding: 16px 18px 16px; border-radius: 20px; background: var(--kachel); border: 1px solid #2c2c2f; color: var(--weiss) }
+.h-kz strong { display: flex; align-items: baseline; gap: 7px; font-size: 56px; font-weight: 200; line-height: 1; letter-spacing: -.04em }
+.h-kz strong small { font-size: 14px; font-weight: 400; letter-spacing: 0; color: var(--silber) }
+.h-kz p { margin-top: 8px; font-size: 12px; line-height: 1.4; color: var(--silber) }
+.h-kz.h-kz-v { background: radial-gradient(90% 120% at 100% 100%, #3b3672, #29264a 38%, #1c1c1e 74%) }
+.h-ankommt { display: grid; grid-template-columns: 1fr 300px; gap: 28px; margin-top: 28px; align-items: start }
+.h-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px }
+.h-liste li { display: grid; grid-template-columns: 16px 1fr; gap: 9px; font-size: 12.5px; line-height: 1.42; color: var(--text-hell) }
+.h-liste li b { display: block; color: var(--tinte); font-weight: 600 }
+.h-liste li i { width: 6px; height: 6px; margin: 6px 0 0 4px; border-radius: 50%; background: #c4c1c7 }
+.h-liste li:last-child i { width: 7px; height: 7px; background: var(--koralle); box-shadow: 0 0 0 4px #feeee8 }
+.h-blatt { position: relative }
+.h-blatt img { display: block; width: 100%; border-radius: 14px; border: 1px solid var(--linie-hell) }
+.h-etikett { position: absolute; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 12px 0 10px; border-radius: 999px; background: var(--tinte); color: #fff; font-size: 11.5px; white-space: nowrap }
+.h-etikett i { width: 6px; height: 6px; border-radius: 50%; background: var(--violett) }
+.h-etikett.k i { background: var(--koralle) }
+.h-etikett span { color: var(--silber) }
+.h-klaer { position: relative; margin: -30px -12px 0 34px; padding: 15px 17px 16px; border-radius: 20px; background: var(--kachel); border: 1px solid #2c2c2f; color: #fff }
+.h-klaer .h-label { color: var(--silber) } .h-klaer .h-label::before { box-shadow: 0 0 0 4px var(--hof-dunkel) }
+.h-klaer ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 7px }
+.h-klaer li { display: flex; gap: 9px; align-items: baseline; font-size: 12px; color: #e9e8ea }
+.h-klaer li::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--koralle); transform: translateY(-1px) }
+.h-band { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: center; margin-top: 26px; padding: 14px 18px; border-radius: 18px; background: #f4f3f6; font-size: 12.5px; line-height: 1.45; color: var(--text-hell) }
+.h-band b { color: var(--tinte); font-weight: 600 }
+.h-band svg { width: 20px; height: 20px; color: var(--tinte) }
 
-/* Seite 2: Pakete auf Weiß */
-.h-oben { background: var(--weiss); color: #111113; padding: 32px 44px 22px; border-radius: 0 0 30px 30px }
-.h-oben .h-kopf { padding: 0 }
-.h-oben .h-marke { color: #111113 } .h-oben .h-marke svg .fi-kachel { fill: #111113 } .h-oben .h-kopf-r { color: var(--textgrau) }
-.h-pakete-kopf { margin-top: 16px }
-.h-pakete-kopf h2 { margin-top: 8px; font-size: 28px; line-height: 1.02 }
-.h-pakete-kopf p { margin-top: 8px; max-width: 58ch; font-size: 13px; color: var(--textgrau) }
-.h-pakete { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; align-items: stretch }
-.h-paket { position: relative; display: flex; flex-direction: column; border-radius: 22px; background: var(--weiss); box-shadow: var(--rand-hell); overflow: hidden }
-.h-paket-bild { height: 76px; overflow: hidden; background: #eef0f2 }
-.h-paket-bild img { width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block }
-.h-paket-text { padding: 10px 14px 12px; display: flex; flex-direction: column; flex: 1 }
-.h-paket-name { display: flex; align-items: center; justify-content: space-between; font-size: 11px; letter-spacing: .03em; color: var(--textgrau) }
-.h-paket-name em { font-style: normal; display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 8px; border-radius: 999px; background: var(--indigo); color: #fff; font-size: 10px }
-.h-paket h3 { margin-top: 2px; font-size: 18px; letter-spacing: -.02em }
-.h-preis { display: flex; align-items: baseline; gap: 6px; margin-top: 8px }
-.h-preis strong { font-size: 40px; font-weight: 250; letter-spacing: -.035em; line-height: 1 }
-.h-preis span { font-size: 11.5px; color: var(--textgrau); line-height: 1.2 }
-.h-einr { margin-top: 6px; font-size: 11px; color: var(--textgrau) }
-.h-paket ul { list-style: none; margin: 8px 0 0; padding: 8px 0 0; border-top: 1px solid #ecebef; display: grid; gap: 5px }
-.h-paket li { position: relative; padding-left: 18px; font-size: 11.5px; line-height: 1.35; color: #2b2a2e }
-.h-paket li::before { content: ""; position: absolute; left: 0; top: 3px; width: 11px; height: 11px; background: currentColor; color: #111113;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.3 5 8.6 9.6 3.6' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.3 5 8.6 9.6 3.6' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat }
-.h-paket.h-empf { background: var(--kachel); box-shadow: var(--kante), 0 26px 50px -26px rgba(7,9,10,.8); color: #fff }
-.h-paket.h-empf::after { content: ""; position: absolute; left: 10%; right: 10%; bottom: -30px; height: 90px; background: radial-gradient(50% 60% at 50% 40%, rgba(137, 126, 252, .45), transparent 72%); pointer-events: none }
-.h-paket.h-empf .h-paket-name, .h-paket.h-empf .h-preis span, .h-paket.h-empf .h-einr { color: var(--silber) }
-.h-paket.h-empf ul { border-top-color: rgba(255,255,255,.1) } .h-paket.h-empf li { color: #e9e8ea } .h-paket.h-empf li::before { color: var(--violett) }
-.h-paket.h-empf .h-paket-bild { background: #18181a }
-.h-alle { margin-top: 10px; font-size: 11px; line-height: 1.45; color: var(--textgrau) }
-.h-alle b { color: #111113; font-weight: 600 }
+/* ---------- Seite 3: Pakete wie auf der Seite für Fensterbauer ---------- */
+.h-pakete { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; align-items: start }
+.h-paket { display: flex; flex-direction: column; border-radius: 24px; background: var(--weiss); border: 1px solid #dddbe0; overflow: hidden }
+.h-mini { display: block; background: var(--schwarz) }
+.h-mini-leiste { display: flex; align-items: center; gap: 4px; height: 24px; padding: 0 10px; border-bottom: 1px solid #26262a; font-size: 9.5px; color: var(--silber); white-space: nowrap }
+.h-mini-leiste i { width: 6px; height: 6px; border-radius: 50%; background: #3a3a3e }
+.h-mini-leiste svg { width: 9px; height: 9px; margin-left: 6px; flex: none }
+.h-mini-leiste b { font-weight: 500; color: #fff }
+.h-mini img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover }
+.h-paket-text { padding: 18px 18px 22px; display: flex; flex-direction: column }
+.h-paket-name { display: flex; align-items: center; justify-content: space-between; height: 22px; font-size: 12px; font-weight: 500; letter-spacing: .02em; color: var(--tinte) }
+.h-paket-name em { font-style: normal; display: inline-flex; align-items: center; height: 22px; padding: 0 10px; border-radius: 999px; background: var(--indigo); color: #fff; font-size: 10.5px; font-weight: 500; letter-spacing: .01em }
+.h-satz { margin-top: 8px; font-size: 13.5px; line-height: 1.42; color: var(--text-hell) }
+.h-preis { display: flex; align-items: baseline; gap: 6px; margin-top: 14px }
+.h-preis strong { font-size: 48px; font-weight: 250; letter-spacing: -.04em; line-height: 1 }
+.h-preis span { font-size: 12px; color: var(--text-hell) }
+.h-einr { margin-top: 8px; font-size: 11px; line-height: 1.45; color: var(--textgrau) }
+.h-paket .h-haken { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--linie-hell); gap: 9px }
+.h-paket .h-haken li { font-size: 12.5px; line-height: 1.38; color: #2b2a2e }
+.h-paket .h-haken li.h-dazu { display: block; font-weight: 600; color: var(--tinte) }
+.h-paket.h-empf { background: radial-gradient(90% 55% at 88% 100%, #3d3878, #2a2750 34%, #1e1e20 68%); border-color: #2c2c2f; color: var(--weiss) }
+.h-paket.h-empf .h-mini { background: var(--schwarz) }
+.h-paket.h-empf .h-paket-name, .h-paket.h-empf .h-paket .h-dazu { color: var(--weiss) }
+.h-paket.h-empf .h-satz, .h-paket.h-empf .h-preis span { color: var(--silber) }
+.h-paket.h-empf .h-einr { color: var(--silber) }
+.h-paket.h-empf .h-preis strong { font-size: 60px }
+.h-paket.h-empf .h-haken { border-top-color: #38383c }
+.h-paket.h-empf .h-haken li { color: #e9e8ea } .h-paket.h-empf .h-haken li.h-dazu { color: var(--weiss) }
+.h-paket.h-empf .h-hk { color: var(--violett) }
+.h-klein { margin-top: 18px; padding: 14px 18px; border-radius: 18px; background: #f4f3f6; font-size: 11px; line-height: 1.55; color: var(--text-hell) }
+.h-klein b { color: var(--tinte); font-weight: 600 }
 
-/* Seite 2: dunkle Szene mit Start, Kundenschutz und Aufruf */
-.h-dunkel { padding: 24px 44px 0 }
-.h-zwei { display: grid; grid-template-columns: 1fr 1fr; gap: 26px }
-.h-zwei h2 { margin-top: 8px; font-size: 21px; line-height: 1.05 }
-.h-zwei .h-klein { margin-top: 8px; font-size: 12px; color: var(--silber); max-width: 38ch }
-.h-stationen { list-style: none; margin: 10px 0 0; padding: 0; position: relative }
-.h-stationen::before { content: ""; position: absolute; left: 4px; top: 8px; bottom: 8px; width: 1px; background: #3a3a3e }
-.h-stationen li { position: relative; display: flex; gap: 12px; padding: 2px 0; font-size: 11.5px; color: var(--silber) }
-.h-stationen li::before { content: ""; flex: none; width: 9px; height: 9px; margin-top: 4px; border-radius: 50%; background: var(--schwarz); box-shadow: inset 0 0 0 1.5px #6b676c; position: relative; z-index: 1 }
-.h-stationen li b { color: #fff; font-weight: 500; min-width: 82px }
-.h-stationen li:last-child::before { background: var(--violett); box-shadow: 0 0 0 4px rgba(137, 126, 252, .18) }
-.h-aufruf { display: grid; grid-template-columns: 1fr auto auto; gap: 20px; align-items: center; margin-top: 16px; padding: 16px 20px; border-radius: 26px; background: var(--weiss); color: #111113 }
-.h-aufruf h3 { font-size: 22px; letter-spacing: -.025em; line-height: 1.05 }
-.h-aufruf p { margin-top: 6px; font-size: 12px; color: var(--textgrau); max-width: 36ch }
-.h-pille { display: inline-flex; align-items: center; gap: 12px; height: 40px; margin-top: 12px; padding: 0 5px 0 18px; border-radius: 999px; background: #111113; color: #fff; font-size: 12.5px; font-weight: 500; text-decoration: none }
-.h-pille i { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #fff; color: #111113 }
-.h-pille svg { width: 13px; height: 13px }
-.h-qr { width: 88px; height: 88px; padding: 6px; border-radius: 14px; box-shadow: 0 0 0 1px #e6e4e8 }
+/* ---------- Seite 4 ---------- */
+.h-idee { margin-top: 36px }
+.h-idee h2 { margin-top: 12px; font-size: 34px; line-height: 1.02 }
+.h-vergleich { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px }
+.h-vergleich li { padding: 15px 16px 16px; border-radius: 20px; border: 1px solid var(--linie-dunkel); font-size: 12px; line-height: 1.4; color: var(--silber) }
+.h-vergleich li b { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 14px; font-weight: 500; color: var(--weiss) }
+.h-vergleich li b::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #4a4a4e; flex: none }
+.h-vergleich li.h-wahl { background: var(--kachel); border-color: #3a3a3e; color: #e9e8ea }
+.h-vergleich li.h-wahl b::before { width: 7px; height: 7px; background: var(--violett); box-shadow: 0 0 0 4px var(--hof-dunkel); margin-left: 3px }
+.h-zwei { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 36px }
+.h-zwei h2 { margin-top: 12px; font-size: 22px; line-height: 1.05 }
+.h-zwei .h-unter { margin-top: 8px; font-size: 12px; line-height: 1.45; color: var(--silber); max-width: 36ch }
+.h-stationen { list-style: none; margin: 16px 0 0; padding: 0; position: relative }
+.h-stationen::before { content: ""; position: absolute; left: 4px; top: 10px; bottom: 10px; width: 1px; background: #3a3a3e }
+.h-stationen li { position: relative; display: grid; grid-template-columns: 9px 88px 1fr; gap: 12px; align-items: baseline; padding: 4px 0; font-size: 12px; color: var(--silber) }
+.h-stationen li i { position: relative; z-index: 1; width: 9px; height: 9px; border-radius: 50%; background: var(--schwarz); border: 1.5px solid #6b676c; transform: translateY(1px) }
+.h-stationen li b { color: #fff; font-weight: 500 }
+.h-stationen li:last-child i { background: var(--violett); border-color: var(--violett); box-shadow: 0 0 0 4px var(--hof-dunkel) }
+.h-schutz { margin-top: 16px }
+.h-schutz li { font-size: 12.5px; color: var(--silber) }
+.h-schutz li b { color: var(--weiss); font-weight: 500 }
+.h-aufruf { display: grid; grid-template-columns: 1fr auto; gap: 26px; align-items: center; margin-top: 38px; padding: 24px 26px; border-radius: 28px; background: var(--weiss); color: var(--tinte) }
+.h-aufruf h3 { font-size: 28px; letter-spacing: -.03em; line-height: 1.02 }
+.h-aufruf p { margin-top: 10px; font-size: 13px; line-height: 1.5; color: var(--textgrau); max-width: 40ch }
+.h-aufruf p b { color: var(--tinte); font-weight: 500 }
+.h-pille { display: inline-flex; align-items: center; gap: 14px; height: 46px; margin-top: 16px; padding: 0 6px 0 20px; border-radius: 999px; background: var(--tinte); color: #fff; font-size: 13.5px; font-weight: 500 }
+.h-pille i { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #fff; color: var(--tinte) }
+.h-pille svg { width: 14px; height: 14px }
+.h-frage { margin-top: 14px; font-size: 12px; color: var(--textgrau) }
+.h-frage b { color: var(--tinte); font-weight: 500 }
+.h-qr { width: 120px; height: 120px; padding: 8px; border-radius: 18px; border: 1px solid var(--linie-hell); background: #fff }
 .h-qr svg { display: block; width: 100%; height: 100% }
-.h-kontakt { font-size: 12px; line-height: 1.55; color: #2b2a2e; border-left: 1px solid #ecebef; padding-left: 20px }
-.h-kontakt small { display: block; font-size: 11px; color: var(--textgrau); letter-spacing: .03em }
-.h-kontakt b { display: block; margin: 2px 0 4px; font-size: 14px; font-weight: 600; color: #111113 }
-.h-weiter { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 9px 14px; border-radius: 16px; background: var(--kachel); box-shadow: var(--kante); font-size: 12px; color: var(--silber) }
+.h-qr-text { margin-top: 7px; font-size: 10.5px; text-align: center; color: var(--textgrau) }
+.h-weiter { display: grid; grid-template-columns: 18px 1fr; gap: 12px; align-items: center; margin-top: 14px; padding: 13px 18px; border-radius: 18px; background: var(--kachel); border: 1px solid #2c2c2f; font-size: 12px; line-height: 1.45; color: var(--silber) }
 .h-weiter b { color: #fff; font-weight: 500 }
-.h-weiter svg { flex: none; width: 16px; height: 16px; color: var(--violett) }
+.h-weiter svg { width: 16px; height: 16px; color: var(--violett) }
