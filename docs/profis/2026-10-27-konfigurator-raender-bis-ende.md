@@ -407,3 +407,25 @@ Umgesetzt für diese vier: Kopf 60 px fest, links die Bühne über die ganze Hö
 bei 390 × 844: 0 Pixel Unterschied). Noch nicht so: die Liste der Fenster und die Anfrage-Seiten; sie sind noch nicht überarbeitet und
 bekommen die Ansicht mit ihrer Überarbeitung.
 
+
+## Restliche Folien und Bögen (28.10.2026)
+
+Der Inhaber: „Die anderen Bereiche machst du auch. Musst selber gucken, welche Folien da noch fehlen.“ Bestand: Alle Schritte des
+Konfigurators waren neu, nicht aber, was davor und danach kommt. Gefunden und in vier Paketen umgesetzt (Bilder:
+docs/profis/bilder/2026-10-28-app-restliche-folien-tel-a.jpg, -tel-b.jpg, -laptop-a.jpg, -laptop-b.jpg):
+
+| Nr. | Folie | Was neu ist | Zweck |
+| --- | --- | --- | --- |
+| 1 | Deine Fenster | Bühne mit den Fenstern als Strichzeichnungen, Titel, Stand mit Balken, Karten auf Anthrazit, eine Pille | Blickführung, Marke |
+| 2–4 | Fürs Angebot 1–3 | Haus mit Kapselreihe der getauschten Fenster; Zeitleiste und Budget; Aufmaßblatt, das sich beim Tippen füllt | Verständnis |
+| 5, 9 | Aufmaßblatt | Blatt im Fensterlicht als Bühne, gesperrt mit Schloss und Preis, nach dem Kauf offen | Vertrauen |
+| 6–8, 10 | E-Mail, Kasse, Freigeschaltet, Sichern, Konto, Anmeldelink, Gesendet | Gemeinsamer Rahmen um den bisherigen Inhalt (Rechtstexte, Felder, Häkchen unverändert) | Vertrauen, Technik |
+| 11 | Wunschmaße (neue Öffnung) | Rahmen der Ergebnis-Folie, Maße auf weißer Karte, − / + als Rundknöpfe | Verständnis |
+| 12 | Einzeichnen | Foto im eigenen Format als Bühne, Rahmen und Ecken violett, Werkzeuge als leise Pillen | Blickführung |
+| 13 | App-Start ohne Fenster | Foto der Waschbären mit Glas-Chips, ein Titel, Führung als leise Pille, Modell, drei Stationen | Marke, Blickführung |
+| 14–16 | Führung | Bühne mit Modell, Fotos oder Aufmaßblatt; Auswahl wie die Wünsche; „Gut zu wissen“ auf Anthrazit | Marke |
+| 17–18 | Bögen (Übersicht, Begriffe, Erklärung, Notiz, Verlassen, Großansicht) | nur CSS: Palette, Etikett mit Punkt, zweite Stimme Silbergrau, weiße Pille | Marke |
+
+Alle mit Laptop-Raster wie die Start-Folie; am Laptop rechnen die Chips mit der rechten Spalte (380 px), sonst wurden Beschriftungen
+abgeschnitten. Grün kommt nicht mehr vor (Haken violett). Bewusst nicht angefasst: die Einladungsseite eines Betriebs im Kundenlink
+und die Bildschirme in Instanzen auf der Website eines Fensterbauers (eigene Marke des Betriebs); das Aufmaßblatt selbst (blatt.js).

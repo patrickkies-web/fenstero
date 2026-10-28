@@ -656,7 +656,7 @@ if (teil(6)) {
   await p2.evaluate(() => { S.windows[0].name = 'Nachträglich geändert'; S.proj.notiz = 'anders'; render(true); }); await p2.waitForTimeout(200);
   ok(!!code1 && await codeAusNachricht(p2) === code1, 'Der Aufmaß-Code bleibt nach dem Senden eingefroren');
   // Scroll-Reveal: Blöcke tragen .rev und sind sichtbar
-  ok(await p2.evaluate(() => { const k = document.querySelectorAll('.scr > .rev'); return k.length >= 3 && Array.from(k).slice(0, 2).every((e) => e.classList.contains('in')); }), 'Blöcke erscheinen nacheinander (Scroll-Reveal aktiv)');
+  ok(await p2.evaluate(() => { if (document.querySelector('.scr.dna')) return !document.querySelector('.scr .rev:not(.in)'); const k = document.querySelectorAll('.scr > .rev'); return k.length >= 3 && Array.from(k).slice(0, 2).every((e) => e.classList.contains('in')); }), 'Blöcke erscheinen nacheinander (Scroll-Reveal aktiv); Folien im Look der Design-DNA stehen sofort, nichts bleibt verborgen');
   // Alle Maße da: die Maßlinien zeichnen sich nacheinander
   await p2.evaluate(() => { S.betrieb = null; });
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
