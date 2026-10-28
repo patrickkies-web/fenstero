@@ -449,7 +449,7 @@ if (teil(4)) {
   // Link-Kunde: keine Kopie mit Maßen, die gibt der Betrieb weiter (Zusage „Ihr Kunde bleibt Ihr Kunde“)
   ok(await page.locator('.datei-card [data-act="k-dl"]').count() === 0 && /Frag Fensterbau Brandt/.test(text), 'Link-Kunde bekommt keine PDF, sondern den Hinweis auf seinen Betrieb');
 
-  await page.click('.bb .btn[data-act="go"][data-v="home"]'); // Fertig (ghost: Cream nur für „Per WhatsApp senden“)
+  await page.click('.bb .btn[data-act="go"][data-v="home"], .scr.dna .lg-fuss [data-act="go"][data-v="home"]'); // Fertig (ghost: Cream nur für „Per WhatsApp senden“)
   await page.waitForTimeout(300);
   text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('Fast erledigt.') && text.includes('Code senden'), 'Startseite erinnert ans Code-Senden');
@@ -646,10 +646,10 @@ if (teil(6)) {
   await p2.evaluate(() => { const w = demoProject(); const halb = Object.assign({}, w[0], { name: 'Halb gemessen', w: '', h: '', el: { h: '', w: '' }, mo: { hm: 1200, wm: 1000, hl: '', hr: '', wt: '', wb: '' } }); localStorage.setItem('aufmass.k.pruef1', JSON.stringify({ windows: [halb], proj: {}, name: 'Test Betrieb' })); });
   await p2.reload({ waitUntil: 'networkidle' });
   await p2.evaluate(() => { S.screen = 'blatt'; render(true); }); await p2.waitForTimeout(300);
-  ok(await p2.locator('.bb .btn.primary[disabled]').count() === 1 && /kein Fenster ist vollständig/.test(await p2.evaluate(() => document.body.innerText)), 'Senden gesperrt, solange kein Fenster vollständig ist');
+  ok(await p2.locator('.bb .btn.primary[disabled], .scr.dna .lg-weiter[disabled]').count() === 1 && /kein Fenster ist vollständig/.test(await p2.evaluate(() => document.body.innerText)), 'Senden gesperrt, solange kein Fenster vollständig ist');
   await foto(p2, 'app-senden-gesperrt');
   await p2.evaluate(() => { S.windows.push(Object.assign({}, demoProject()[1], { name: 'Komplett' })); persist(); render(true); }); await p2.waitForTimeout(300);
-  ok(await p2.locator('.bb .btn.primary[disabled]').count() === 0 && /trotzdem senden/.test(await p2.evaluate(() => document.body.innerText)), 'Mit einem vollständigen Fenster geht Senden, Lücke wird genannt');
+  ok(await p2.locator('.bb .btn.primary[disabled], .scr.dna .lg-weiter[disabled]').count() === 0 && /trotzdem senden/.test(await p2.evaluate(() => document.body.innerText)), 'Mit einem vollständigen Fenster geht Senden, Lücke wird genannt');
   await p2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await p2.waitForSelector('[data-screen="gesendet"]'); await p2.waitForTimeout(400);
   const code1 = await codeAusNachricht(p2);
   ok(await p2.evaluate(() => { const e = document.querySelector('.okmark-l[data-lottie="senden"]'); return !!(e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0); }), 'Abschicken: der Flieger fliegt (Lottie)');

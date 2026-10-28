@@ -568,6 +568,18 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     Ränder, „Passt.“, Ergebnis und Gespeichert haben dafür eigene Raster; Fotos, Lage, „Wie genau planen?“ und die Wunsch-Fragen nutzen
     `dnaTisch(links, rechts)` (Klasse `dt`): Am Telefon sind die Hüllen `display: contents`, die Folie bleibt pixelgleich. Das Foto füllt
     die Bühne, das Haus der Lage wächst mit ihr (`lgMass`), das Punktraster der Tiefe steht 1,45-fach, das 3-D-Modell füllt die Bühne.
+  - Restliche Folien (Wunsch des Inhabers, 28.10.2026: „Die anderen Bereiche machst du auch. Musst selber gucken, welche Folien da noch
+    fehlen.“): „Deine Fenster“ (Bühne mit den Fenstern als Strichzeichnungen, Stand mit Balken, Karten auf Anthrazit), „Fürs Angebot“
+    1–3 (Haus mit Kapselreihe der getauschten Fenster, Zeitleiste und Budget, Aufmaßblatt, das sich beim Tippen füllt), Aufmaßblatt,
+    E-Mail, Kasse, Freigeschaltet, Teilen, Gesendet, Sichern, Konto und Anmeldelink (gemeinsamer Rahmen `abRahmen` um den bisherigen
+    Inhalt: Kopf, Bühne mit dem Aufmaßblatt im Fensterlicht, gesperrt mit Schloss und Preis, nach dem Kauf offen), Wunschmaße der neuen
+    Öffnung (Rahmen der Ergebnis-Folie, Maße auf weißer Karte mit − / + als Rundknöpfen), Einzeichnen (Foto im eigenen Format als
+    Bühne, Ecken violett), App-Start ohne Fenster (Foto der Waschbären mit Glas-Chips, ein Titel, Führung als leise Pille, Modell, drei
+    Stationen), Führung (Bühne mit Modell, Fotos oder Aufmaßblatt, Auswahl wie die Wünsche, „Gut zu wissen“ auf Anthrazit) und die
+    Bögen auf allen Folien (Übersicht, Begriffe, Erklärung, Notiz, Verlassen, Großansicht: nur CSS, Aufbau und Aktionen unverändert).
+    Alle mit Laptop-Raster. Grün gibt es dort nicht mehr: Haken der alten Bausteine violett (`--ok`), Hinweise mit Koralle-Punkt.
+    Unverändert im alten Look: die Einladungsseite eines Betriebs im Kundenlink (`linkHome`) und alle Bildschirme in Instanzen auf der
+    Website eines Fensterbauers (eigene Marke). Die alten Fassungen bleiben als `SCREENS.*Alt` bzw. `AB_ALT` im Code.
   - Regel des Inhabers (27.10.2026): Beim Messen eine feste Ansicht je Element, in den Wünschen das ausgearbeitete 3-D-Modell; die
     Wünsche werden nie durch Standbilder ersetzt.
 - **Weiter ist immer weiß.** Fehlt etwas, steht eine Zeile mit Koralle-Punkt darüber („Gib dem Raum einen Namen …“, „Trag die Brüstung

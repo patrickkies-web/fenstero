@@ -2899,3 +2899,71 @@ html.dna-voll body { background: #07090a }
   .dna.dt .tr-buehne.tr-blatt .tb-stapel { width: min(70%, 420px) }
   .dna.dt.tr .dna-rechts > .tr-frage:first-child { padding-top: 4px }
 }
+
+/* ---------- Bögen auf den Folien im Look der Design-DNA (28.10.2026) ----------
+   Übersicht, Begriffe, Erklärung, Notiz, Verlassen, Senden-Rückfrage und Großansicht des Fotos: Aufbau und Aktionen unverändert, nur die
+   Form. Die alten Größen der App werden auf die Palette umgelegt (Fläche Anthrazit, Text Weiß/Silbergrau, Akzent Violett, Warnung
+   Koralle), Etiketten klein mit violettem Punkt, die farbigen Wörter werden zur zweiten Stimme in Silbergrau, eine weiße Pille. */
+html.dna-voll :is(.sheet, .fz) { --schwarz: #07090a; --anthrazit: #202022; --weiss: #ffffff; --silbergrau: #a8a4a9; --textgrau: #6b676c; --violett: #897efc; --koralle: #f88962; --indigo: #3c3a66;
+  --font-sans: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; --surface: #161618; --surface2: var(--anthrazit); --ground: var(--schwarz); --ink: var(--weiss); --ink2: var(--silbergrau); --muted: var(--silbergrau);
+  --line2: rgba(168, 164, 169, .34); --accent: var(--violett); --accent-soft: var(--indigo); --ok: var(--violett); --bad: var(--koralle); --bad-soft: color-mix(in srgb, var(--koralle) 16%, transparent);
+  --primary: var(--weiss); --on-primary: var(--schwarz); --primary-hover: #ececef; --ring: inset 0 0 0 1px rgba(255, 255, 255, .06); font-family: var(--font-sans); color: var(--weiss) }
+html.dna-voll .sheet-bg { background: rgba(7, 9, 10, .72) }
+html.dna-voll .sheet { background: radial-gradient(120% 50% at 18% 0%, #2a2a2c, #161618 60%); border-radius: 28px 28px 0 0; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), 0 -20px 60px -20px rgba(0, 0, 0, .8) }
+html.dna-voll .sheet .grip { background: rgba(168, 164, 169, .45) }
+html.dna-voll .sheet .eyebrow { display: flex; align-items: center; gap: 8px; font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; text-transform: none; color: var(--silbergrau) }
+html.dna-voll .sheet .eyebrow.kicker::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 4px color-mix(in srgb, var(--violett) 22%, transparent) }
+html.dna-voll .sheet h2 { font: 500 28px/1.1 var(--font-sans); letter-spacing: -.025em; color: var(--weiss) }
+html.dna-voll .sheet h2 .ak, html.dna-voll .sheet .ak { color: var(--silbergrau) }
+html.dna-voll .sheet .xbtn, html.dna-voll .fz .xbtn { border-radius: 50%; color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+html.dna-voll .sheet .btn { min-height: 52px; font: 500 16px/1 var(--font-sans); letter-spacing: 0 }
+html.dna-voll .sheet .btn.ghost { min-height: 48px; font-size: 15px; box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+html.dna-voll .sheet .btn:active:not([disabled]) { transform: scale(.97) }
+html.dna-voll .sheet .link, html.dna-voll .sheet .ulink { font-weight: 500; color: var(--weiss); text-decoration-color: var(--silbergrau) }
+html.dna-voll .sheet :is(.nz-weg, .vl-weg) { color: var(--koralle) }
+html.dna-voll .sheet p.x { font: 400 16px/1.55 var(--font-sans); color: var(--silbergrau) }
+html.dna-voll .sheet .ico { border-radius: var(--rund-l, 28px); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+html.dna-voll .sheet .g-tipp { border-left: 0; border-radius: 20px; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+html.dna-voll .sheet .g-tipp .eyebrow { color: var(--silbergrau) } html.dna-voll .sheet .g-tipp .eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--koralle) }
+html.dna-voll .sheet .g-tipp p:not(.eyebrow) { color: var(--silbergrau) }
+html.dna-voll .sheet .see { font: 400 15px/1.4 var(--font-sans); color: var(--silbergrau) }
+html.dna-voll .sheet .g-such input { background: var(--weiss); color: var(--schwarz); box-shadow: none; font: 400 16px/1 var(--font-sans) }
+html.dna-voll .sheet .g-such input::placeholder { color: var(--textgrau) }
+html.dna-voll .sheet .g-such input:focus { box-shadow: inset 0 0 0 2px var(--violett) }
+html.dna-voll .sheet .g-such-ic { color: var(--textgrau) }
+html.dna-voll .sheet .gindex { border-radius: 20px; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+html.dna-voll .sheet .gindex button { background: transparent; border-bottom-color: rgba(168, 164, 169, .18); color: var(--weiss); font-family: var(--font-sans) }
+html.dna-voll .sheet .gindex b { font-size: 16px; font-weight: 500 } html.dna-voll .sheet .gindex small { color: var(--silbergrau) }
+html.dna-voll .sheet .wo-schritt { border-radius: 16px; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045); font: 500 15px/1.2 var(--font-sans); color: var(--weiss) }
+html.dna-voll .sheet .wo-schritt .wo-n { box-shadow: inset 0 0 0 1.5px var(--silbergrau); font: 500 13px/1 var(--font-sans); color: var(--weiss) }
+html.dna-voll .sheet .wo-schritt.fertig .wo-n { background: var(--indigo); box-shadow: none }
+html.dna-voll .sheet .wo-schritt.fertig .wo-n svg path { stroke: var(--weiss) }
+html.dna-voll .sheet .wo-schritt.jetzt { box-shadow: inset 0 0 0 1.5px var(--violett), inset 0 1px 0 rgba(255, 255, 255, .10) }
+html.dna-voll .sheet .wo-schritt.jetzt .wo-n { background: var(--weiss); color: var(--schwarz); box-shadow: none }
+html.dna-voll .sheet .wo-abschnitte .chip { min-height: 40px; border: 0; border-radius: 999px; background: transparent; color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau); font: 500 14px/1 var(--font-sans) }
+html.dna-voll .sheet .wo-abschnitte .chip[aria-current="true"] { background: var(--weiss); color: var(--schwarz); box-shadow: none }
+html.dna-voll .sheet .wo-fenster .wo-ic { background: var(--schwarz) }
+html.dna-voll .sheet .wo-fenster button[aria-current="true"] { box-shadow: inset 3px 0 0 var(--violett) }
+html.dna-voll .sheet .nz-sub, html.dna-voll .sheet .vl-sub { font: 400 15px/1.45 var(--font-sans); color: var(--silbergrau) }
+html.dna-voll .sheet.nz-blatt h2 { font-size: 26px }
+html.dna-voll .sheet.nz-blatt textarea { border-radius: 20px; background: var(--weiss); color: var(--schwarz); box-shadow: none; font: 400 16px/1.45 var(--font-sans) }
+html.dna-voll .sheet.nz-blatt textarea::placeholder { color: var(--textgrau) }
+html.dna-voll .sheet.nz-blatt textarea:focus { box-shadow: inset 0 0 0 2px var(--violett) }
+html.dna-voll .sheet .nz-zahl { color: var(--silbergrau) }
+html.dna-voll .sheet .foot-links.recht .link { color: var(--silbergrau); font-weight: 400 }
+html.dna-voll .fz { background: var(--schwarz) }
+html.dna-voll .fz-kopf { font: 500 17px/1.2 var(--font-sans); color: var(--weiss) }
+html.dna-voll .fz-k { background: radial-gradient(at 30% 20%, rgba(255, 255, 255, .16), rgba(255, 255, 255, .04) 70%), var(--anthrazit); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), inset 0 0 0 1px var(--silbergrau); color: var(--weiss); font: 400 24px/1 var(--font-sans) }
+html.dna-voll .fz-wert { font: 500 15px/1 var(--font-sans); color: var(--silbergrau) }
+/* Angefangenes Fenster (Entwurf) auf „Deine Fenster“ und der leeren Startansicht: Anthrazit-Karte, Etikett mit Koralle-Punkt, leise Pille */
+.dna .entwurf-karte.card { display: grid; gap: 12px; margin: 16px 0 0; padding: 14px 16px 16px; border: 0; border-radius: 20px; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045); color: var(--weiss) }
+.dna .entwurf-karte .eyebrow { display: flex; align-items: center; gap: 8px; margin: 0; font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; text-transform: none; color: var(--silbergrau) }
+.dna .entwurf-karte .eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--koralle) }
+.dna .entwurf-karte .ic { flex: 0 0 52px; height: 52px; border-radius: 16px; background: var(--schwarz) }
+.dna .entwurf-karte b { font: 500 16px/1.25 var(--font-sans); color: var(--weiss) }
+.dna .entwurf-karte small { font: 400 13px/1.35 var(--font-sans); color: var(--silbergrau) }
+.dna .entwurf-karte .btn.ghost { min-height: 44px; padding: 0 18px; border-radius: 999px; background: transparent; color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau); font: 500 15px/1 var(--font-sans) }
+.dna .entwurf-karte .ek-weg { color: var(--silbergrau); font: 500 15px/1 var(--font-sans); text-decoration-color: var(--silbergrau) }
+.dna.wl .wl-kopf { padding-top: 20px }
+.dna.wl .entwurf-karte.card { margin: 16px 0 4px }
+.scr.dna { --ok: var(--violett) } /* Haken der alten Bausteine (CHECK) in Violett statt Grün */
