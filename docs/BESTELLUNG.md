@@ -52,12 +52,13 @@ Gespeichert wird nach jeder Eingabe (kurz verzögert, beim Verlassen der Seite n
 
 ## Preise und KI-Auswertungen
 
-Preise des Inhabers vom 27.10.2026, alle netto, einzige Stelle `web/assets/pakete.js` (`preis`, `kiMonat`, `PREIS_STAND`):
+Preise des Inhabers vom 27.10.2026, Einrichtung Essential Plus seit 28.10.2026 150 € statt 50 € (Stand `2026-10-28`), alle netto, einzige
+Stelle `web/assets/pakete.js` (`preis`, `kiMonat`, `PREIS_STAND`):
 
 | Paket | Einrichtung | Monat | KI-Auswertungen im Monat inklusive | jede weitere |
 |---|---|---|---|---|
 | Essential | 99 € | 39 € | 1.000 (etwa 20 Kundenanfragen mit je 25 Fenstern) | 0,08 € |
-| Essential Plus | 50 € | 69 € | 1.500 | 0,08 € |
+| Essential Plus | 150 € | 69 € | 1.500 | 0,08 € |
 | Signature | 239 € | 99 € | 2.000 | 0,08 € |
 
 Eine KI-Auswertung ist ein Foto (je Fenster meist zwei). Der Preis jeder weiteren steht im Preisstand des Auftrags (`auftraege.preise.ki`) und gilt für diesen Vertrag.

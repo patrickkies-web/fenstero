@@ -15,8 +15,9 @@
 (function (root) {
   'use strict';
 
-  /* Stand der Preise (auftraege.preise.stand); ändert sich ein Preis, ändert sich der Stand. 27.10.2026: Preise des Inhabers */
-  const PREIS_STAND = '2026-10-27';
+  /* Stand der Preise (auftraege.preise.stand); ändert sich ein Preis, ändert sich der Stand. 27.10.2026: Preise des Inhabers;
+     28.10.2026: Einrichtung Essential Plus 150 € statt 50 € (Inhaber) */
+  const PREIS_STAND = '2026-10-28';
   /* true nur, solange Preise nicht vom Inhaber bestätigt sind: Verkaufsseite und Bestellung sagen dann „vorläufige Preise“ */
   const VORLAEUFIG = false;
   /* Rechengröße des Inhabers für die Verkaufsseite: 1.000 KI-Auswertungen sind etwa 20 Kundenanfragen mit je 25 Fenstern (innen und
@@ -61,7 +62,7 @@
       dashboard: false, einladungslinks: false, fortschritt: false, zugaenge: 0, kiMonat: 1000, anfragenTag: 50
     },
     plus: {
-      name: 'EEZI Essential Plus', preis: { monat: 69, einrichtung: 50, ki: 0.08 },
+      name: 'EEZI Essential Plus', preis: { monat: 69, einrichtung: 150, ki: 0.08 },
       domain: true, konfigurator: true, eingangMail: true,
       gestaltung: 'eigen', logo: true, farbe: true, farbwelt: 'akzent', fotos: 6, startansicht: true, icons: 'betrieb',
       kennzeichnung: 'dezent', pdfKennzeichnung: 'dezent', mailKennzeichnung: 'dezent', absender: 'instanz', rechtNennung: 'name',
