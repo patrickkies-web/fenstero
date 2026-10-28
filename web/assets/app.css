@@ -2177,3 +2177,110 @@ html.dna-voll body { background: #07090a }
 .dna.ft .foot-links.recht { margin: 24px 0 48px }
 @media (max-width: 359px) { .dna .ft-wort { display: none } .dna .ft-waage { padding: 0 9px } } /* 320 px: Waage ohne Wort neben dem Schritt-Chip */
 @media (prefers-reduced-motion: reduce) { .dna .ft-buehne, .dna .ft-platz, .dna .ft-bild, .dna .ft-weg span { transition: none !important } }
+
+
+/* ---------- Ergebnis im Look der Design-DNA (28.10.2026, Wunsch des Inhabers: „ähnlich der Folien, in denen man die Maße eingibt“) ----------
+   Die Bühne von Messen (so hoch, das Fenster nicht kleiner als bisher) mit dem 3-D-Modell der App; Chip und Überschrift oben in der Bühne
+   (.md-titel aus messen-dna.css), Werkzeuge als Leiste runder Glasknöpfe rechts, „Zum Drehen ziehen“ unten links. Die Maße am Modell
+   tragen die Farben von Messen: Maueröffnung Koralle gestrichelt, Fenster mit Rahmen Violett; die Schilder sind dunkle Kapseln mit
+   derselben Legende wie die Karte darunter. */
+.scr.dna.er { padding-bottom: 0 }
+.dna.er { --bh: clamp(380px, calc(100svh - 400px), 460px); --mo: var(--koralle); --el: var(--violett) } /* flacher als Messen: die Karte mit den Werten steht auf dem ersten Bildschirm, das Fenster bleibt größer als bisher */
+.dna .er-buehne { position: relative; z-index: 1; height: var(--bh); margin: 0 -16px; border-radius: 0 0 var(--rund-l) var(--rund-l); overflow: hidden; isolation: isolate; background: #e9e2d7 }
+.dna .er-buehne > .w3d-stage { position: absolute !important; inset: 0; width: 100% !important; height: 100% !important; min-height: 0; max-height: none; margin: 0 !important; border-radius: 0 !important; animation: none !important; opacity: 1 !important; transform: none !important }
+.dna .er-buehne > .wz-chip { z-index: 7 }
+.dna .er-buehne > .md-titel { z-index: 7 }
+.dna.er .md-titel .lg-i { margin: -8px -8px -8px 0; color: var(--schwarz); pointer-events: auto }
+.dna.er .md-titel .lg-i::before { background: rgba(255, 255, 255, .45); box-shadow: inset 0 0 0 1.5px var(--schwarz) }
+/* Werkzeuge der Bühne wie in den Wünschen: rechts oben als Leiste runder Glasknöpfe, der Hinweis als Chip unten links */
+.dna.er #w3d .w3d-knopf { min-height: 44px; min-width: 44px; color: var(--weiss); font-family: var(--font-sans) }
+.dna.er #w3d .w3d-knopf:active:not(:disabled) { transform: scale(.97) }
+.dna.er #w3d .w3d-knopf:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px }
+.dna.er #w3d .w3d-zoom { left: auto !important; right: 12px !important; top: auto !important; bottom: 12px !important; flex-direction: row; gap: 8px }
+.dna.er #w3d .w3d-haus { top: auto !important; right: 12px !important; bottom: 12px !important; left: auto !important }
+.dna.er #w3d:has(.w3d-haus) .w3d-zoom { right: 64px !important }
+.dna.er #w3d .w3d-zoom .w3d-knopf, .dna.er #w3d .w3d-haus .w3d-knopf { width: 44px; height: 44px; background: rgba(32, 32, 34, .55); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, .18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 -1px 0 rgba(7, 9, 10, .4), 0 10px 24px -12px rgba(7, 9, 10, .6) }
+.dna.er #w3d .w3d-zoom .w3d-knopf:disabled { opacity: 1; color: rgba(255, 255, 255, .38) }
+.dna.er #w3d .w3d-hint { left: 12px; bottom: 12px; padding: 0 12px; height: 30px; border-radius: 999px; font: 500 13px/30px var(--font-sans); color: var(--weiss); background: linear-gradient(180deg, rgba(56, 56, 59, .92), rgba(28, 28, 30, .92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 0 0 1px rgba(255, 255, 255, .06); white-space: nowrap; z-index: 6 }
+/* Maße am Modell: dunkle Kapseln mit Legende (Öffnung Koralle gestrichelt, Rahmen Violett), Linie der Öffnung gestrichelt */
+.dna.er #w3d .w3d-dim-lab { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 12px 0 10px; border-radius: 999px; color: var(--weiss); font: 500 14px/30px var(--font-sans); letter-spacing: -.005em;
+  background: linear-gradient(180deg, rgba(52, 52, 55, .95), rgba(26, 26, 28, .95)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 1px 1px rgba(7, 9, 10, .28), 4px 12px 20px -10px rgba(7, 9, 10, .5) }
+.dna.er #w3d .w3d-dim-lab::before { content: ""; flex: none; width: 14px; height: 2px; border-radius: 1px; background: var(--el) }
+.dna.er #w3d .w3d-dim.mo .w3d-dim-lab::before { background: repeating-linear-gradient(90deg, var(--mo) 0 4px, transparent 4px 6px) }
+.dna.er #w3d .w3d-dim.is-active .w3d-dim-lab { padding: 0 12px 0 10px; box-shadow: inset 0 0 0 1.5px var(--weiss), inset 0 1px 0 rgba(255, 255, 255, .16) }
+.dna.er #w3d .w3d-dim.mo.h .w3d-dim-line { background: repeating-linear-gradient(90deg, var(--dc) 0 6px, transparent 6px 10px) }
+.dna.er #w3d .w3d-dim.mo.v .w3d-dim-line { background: repeating-linear-gradient(180deg, var(--dc) 0 6px, transparent 6px 10px) }
+/* Karte mit den Eingaben: zwei Zeilen, je Breite × Höhe als Zahl (G3), Legende wie am Modell, darunter welches Maß es ist */
+.dna .er-rechts { position: relative; z-index: 1; display: flex; flex-direction: column }
+.dna .er-karte { display: grid; margin-top: 12px; padding: 4px 16px; border-radius: var(--rund-l); color: var(--schwarz); background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss)));
+  box-shadow: inset 0 -1px 0 rgba(7, 9, 10, .06), 0 30px 56px -22px rgba(0, 0, 0, .85), 0 2px 6px rgba(0, 0, 0, .4) }
+.dna .er-reihe { display: grid; gap: 1px; padding: 10px 0 11px }
+.dna .er-reihe + .er-reihe { border-top: 1px solid color-mix(in srgb, var(--silbergrau) 34%, var(--weiss)) }
+.dna .er-lab { display: inline-flex; align-items: center; gap: 8px; font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--textgrau) }
+.dna .er-lab i { flex: none; width: 14px; height: 2px; border-radius: 1px; background: var(--violett) }
+.dna .er-reihe[data-wer="mo"] .er-lab i { background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 6px) }
+.dna .er-zahl { display: flex; align-items: baseline; gap: 6px; margin: 2px 0 0 }
+.dna .er-zahl b { font: 300 34px/1.05 var(--font-sans); letter-spacing: -.03em; color: var(--schwarz); white-space: nowrap; font-variant-numeric: tabular-nums }
+.dna .er-reihe[data-wer="el"] .er-zahl b { font-size: 28px }
+.dna .er-zahl small { font: 400 14px/1 var(--font-sans); color: var(--textgrau) }
+.dna .er-unter { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 2px 0 0; font: 400 13px/1.3 var(--font-sans); color: var(--textgrau) }
+.dna .er-tag { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; font: 500 12px/1 var(--font-sans); letter-spacing: .02em; color: var(--schwarz); background: color-mix(in srgb, var(--violett) 16%, var(--weiss)); white-space: nowrap }
+.dna .er-reihe[data-wer="mo"] .er-tag { background: color-mix(in srgb, var(--koralle) 18%, var(--weiss)) }
+.dna .er-winkel { margin: 0 0 12px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--silbergrau) 34%, var(--weiss)); font: 400 13px/1.4 var(--font-sans); color: var(--textgrau) }
+.dna .er-winkel::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--koralle); vertical-align: 1px }
+/* Prüfung gegen das Foto, Lage auf dem Foto, „Falls zur Hand“: Anthrazit-Karten (G14) mit leisen Pillen */
+.dna .er-pruef, .dna .er-plan, .dna .er-falls { margin-top: 12px; border-radius: var(--rund-l); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+.dna .er-pruef, .dna .er-plan { display: grid; gap: 10px; padding: 14px 16px 16px }
+.dna .er-pruef p { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna .er-pruef p b { display: block; margin-bottom: 2px; font: 500 15px/1.3 var(--font-sans); color: var(--weiss) }
+.dna .er-pruef p b::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--koralle); vertical-align: 1px }
+.dna .er-knoepfe { display: flex; flex-wrap: wrap; gap: 8px }
+.dna .er-knopf { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: transparent; color: var(--weiss); font: 500 15px/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--silbergrau); cursor: pointer; transition: transform 160ms var(--dna-druck) }
+.dna .er-knopf:active { transform: scale(.97); transition-duration: 0s }
+.dna .er-plan .plan-gross { position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: 20px; overflow: hidden; background: none; cursor: zoom-in }
+.dna .er-plan .plan-bild { display: block; width: 100%; height: auto }
+.dna .er-ki { display: flex; gap: 10px; align-items: flex-start; margin: 12px 2px 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna .er-ki svg { flex: none; width: 14px; height: 14px; margin-top: 4px; color: var(--weiss) }
+.dna .er-ki b { font-weight: 500; color: var(--weiss) }
+.dna .er-falls { padding: 0 16px; color: var(--weiss) }
+.dna .er-falls summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 60px; padding: 12px 0; list-style: none; cursor: pointer }
+.dna .er-falls summary::-webkit-details-marker { display: none }
+.dna .er-falls summary > span { display: grid; gap: 2px }
+.dna .er-falls summary b { font: 500 15px/1.3 var(--font-sans); color: var(--weiss) }
+.dna .er-falls summary small { font: 400 13px/1.35 var(--font-sans); color: var(--silbergrau) }
+.dna .er-falls summary::after { content: ""; flex: none; width: 10px; height: 10px; border-right: 1.8px solid var(--silbergrau); border-bottom: 1.8px solid var(--silbergrau); transform: rotate(45deg) translateY(-3px); transition: transform 160ms var(--dna-druck) }
+.dna .er-falls[open] summary::after { transform: rotate(-135deg) translateY(-1px) }
+.dna .er-falls .fold-body { padding: 0 0 14px }
+.dna .er-falls .rows { display: grid; gap: 8px; margin: 0; padding: 0; background: none; box-shadow: none }
+.dna .er-falls .row { display: flex; align-items: center; gap: 6px; margin: 0; padding: 0; border: 0; background: none }
+.dna .er-falls .row > label { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 52px; padding: 4px 6px 4px 14px; border-radius: 999px; background: var(--weiss); color: var(--schwarz) }
+.dna .er-falls .row .lbl { display: inline-flex; align-items: center; gap: 8px; font: 400 15px/1.2 var(--font-sans); color: var(--schwarz) }
+.dna .er-falls .row .badge { height: 22px; padding: 0 8px; border-radius: 999px; font: 500 12px/22px var(--font-sans); color: var(--schwarz); background: color-mix(in srgb, var(--violett) 18%, var(--weiss)) }
+.dna .er-falls .row .val { display: inline-flex; align-items: baseline; gap: 4px }
+.dna .er-falls .row input { width: 5.2em; height: 44px; border: 0; border-radius: 999px; padding: 0 10px; background: color-mix(in srgb, var(--silbergrau) 16%, var(--weiss)); color: var(--schwarz); font: 400 17px/1 var(--font-sans); text-align: right; outline: none }
+.dna .er-falls .row input:focus { box-shadow: inset 0 0 0 2px var(--violett) }
+.dna .er-falls .row .unit { font: 400 13px/1 var(--font-sans); color: var(--textgrau) }
+.dna .er-falls .row .ibtn { flex: none; width: 44px; height: 44px; border: 0; padding: 0; border-radius: 50%; background: transparent; color: var(--silbergrau); display: grid; place-items: center; cursor: pointer }
+.dna .er-falls .row .ibtn svg { width: 22px; height: 22px }
+.dna.er .foot-links.recht { margin: 24px 0 48px }
+@media (max-width: 374px) { .dna .er-zahl b { font-size: 30px } .dna .er-reihe[data-wer="el"] .er-zahl b { font-size: 24px } }
+/* Laptop: die Folie füllt den Bildschirm; Bühne links über die ganze Höhe, rechts Unterzeile, Notiz, Karte, Hinweise und Pille */
+@media (min-width: 1024px) {
+  .scr.dna.er { max-width: none; padding-inline: 0 }
+  .dna.er .lg-kopf { position: sticky; top: 0; z-index: 8; height: 60px; padding: 0 28px; background: var(--schwarz) }
+  .dna .er-tisch { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 380px }
+  .dna .er-buehne { position: sticky; top: 60px; align-self: start; height: max(560px, calc(100svh - 60px)); margin: 0; border-radius: 0 } /* bleibt stehen, wenn rechts mehr steht als ein Bildschirm (Lage auf dem Foto) */
+  .dna .er-buehne > .wz-chip { left: 16px; top: 16px }
+  .dna .er-buehne > .md-titel { left: 24px; top: 58px }
+  .dna .er-rechts { padding: 20px 32px 24px 24px }
+  .dna .er-rechts .md-unter { padding-top: 0 }
+  .dna .er-rechts .lg-fuss { position: static; order: 1; margin: auto 0 0; padding: 16px 0 0; background: none; justify-content: stretch }
+  .dna .er-rechts .lg-fuss .dna-pille { flex: 1 }
+  .dna.er .er-rechts .foot-links.recht { order: 2; margin: 12px 0 0 }
+}
+@media (prefers-reduced-motion: reduce) { .dna .er-knopf, .dna .er-falls summary::after { transition: none !important } }
+
+.dna.er .md-unter { padding-top: 12px }
+.dna.er .md-unter .ez-unterzeile { font-size: 14px; line-height: 1.4 }

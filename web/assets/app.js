@@ -3539,6 +3539,49 @@ SCREENS.ergebnis = () => {
   return { html: html, back: einstiegHier() ? ['Fenster', 'fertig', 'liste'] : neu ? ['Maße', 'planmasse'] : ['Ränder', 'rest'], cls: 'tight', bar: { label: istTuer(w) ? 'Weiter: Wunschtür' : 'Weiter: Wünsche', act: 'wuensche', zurueck: true } };
 };
 
+/* ---------- Ergebnis im Look der Design-DNA (28.10.2026, Wunsch des Inhabers) ----------
+   „Ähnlich der Folien, in denen man die Maße eingibt“: die große Bühne von Messen mit dem 3-D-Modell der App (dasselbe Programm, das
+   Fenster nicht kleiner als bisher), Schritt-Chip und Überschrift in der Bühne; darunter Unterzeile und Notiz, dann die Karte mit den
+   Eingaben in zwei Zeilen (Maueröffnung Koralle wie die gestrichelte Linie beim Messen, Fenster mit Rahmen Violett wie die Rahmenlinie),
+   je Zeile Breite × Höhe als Zahl und der Hinweis, welches Maß es ist. Prüfung gegen das Foto, Stand der KI, Lage auf dem Foto (neue
+   Öffnung) und „Falls zur Hand“ wie bisher; unten zurück und „Weiter: Wünsche“. Am Laptop Bühne links über die ganze Höhe. */
+const ER_CHECK = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>';
+function ergebnisDna() {
+  const w = S.win, d = derive(w), ki = w.ki, neu = !!w.neu, en = artName(w), tuer = istTuer(w);
+  const steps = stepsFor(w), nr = Math.max(1, steps.indexOf('ergebnis') + 1);
+  const tMo = neu ? 'Wunschmaß Rohbau' : 'kleinstes von 3', tEl = neu ? 'rechnerisch, mit Rahmen' : 'sichtbar mit Rahmen';
+  const g = GLOSS.rahmenmass ? '<button type="button" class="lg-i" data-act="gloss" data-k="rahmenmass" aria-label="' + esc(GLOSS.rahmenmass.t) + '">' + LG_I + '</button>' : '';
+  /* Bühne: das Modell der App füllt sie (Schilder an den vier Hauptmaßen), oben Chip und Überschrift */
+  const buehne = '<div class="er-buehne">' + model(w, { id: 'w3d', view: 'result', sway: true, dims: ['hm', 'wm', 'eh', 'ew'], labels: ergebnisLabels(w, d), stageH: 'auto', fitW: 0.6, fitH: 0.56, cls: 'dims-all', bg: photoBg(), hint: 'Zum Drehen ziehen' }) +
+    '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / steps.length).toFixed(4) + '"></i>Schritt ' + nr + ' von ' + steps.length + '</span>' +
+    '<div class="md-titel er-titel"><h1 tabindex="-1">' + (neu ? 'Dein Wunsch <em>steht.</em>' : 'Dein Aufmaß <em>steht.</em>') + '</h1>' + g + '</div></div>';
+  const sub = neu ? 'Rohbauöffnung und Element als Wunschmaße' + (w.plan && w.plan.bild ? ', die Lage auf deinem Foto' : '') + '. Das endgültige Maß legt der Fachbetrieb nach der Statik fest.' : 'Maueröffnung und ' + elName() + ', so wie der Fensterbauer sie fürs Angebot braucht.';
+  const unter = '<div class="md-unter"><p class="ez-unterzeile">' + esc(sub) + '</p>' + lgNotiz('ez-notizknopf') + '</div>';
+  /* Karte: die Eingaben in zwei Zeilen; die Farbe ist die der Linie am Modell */
+  const reihe = (wer, lab, b, h, tag) => '<div class="er-reihe" data-wer="' + wer + '"><span class="er-lab"><i aria-hidden="true"></i>' + esc(lab) + '</span>' +
+    '<p class="er-zahl"><b><span class="er-b" aria-label="' + esc('Breite ' + thousand(b) + ' Millimeter') + '">' + thousand(b) + '</span> × <span class="er-h" aria-label="' + esc('Höhe ' + thousand(h) + ' Millimeter') + '">' + thousand(h) + '</span></b><small>mm</small></p>' +
+    '<p class="er-unter"><span>Breite × Höhe</span><span class="er-tag">' + esc(tag) + '</span></p></div>';
+  const karte = '<div class="er-karte" role="group" aria-label="Ergebnis">' + reihe('mo', neu ? 'Rohbauöffnung' : 'Maueröffnung', d.moW, d.moH, tMo) + reihe('el', en + ' mit Rahmen', d.elW, d.elH, tEl) +
+    (!neu && (d.devW > 10 || d.devH > 10) ? '<p class="er-winkel">Bis ' + Math.max(d.devW, d.devH) + '&nbsp;mm außer Winkel, alle sechs Einzelmaße stehen im Aufmaßblatt.</p>' : '') + '</div>';
+  /* Maße gegen das Foto: vertauscht oder stark abweichend? Dann fragen, bevor es weitergeht (nie bei der neuen Öffnung) */
+  const mp = !neu && !w.massOk ? AW.massPruef(w) : null;
+  const pruef = mp ? '<div class="er-pruef mass-pruef" role="status"><p><b>' + (mp.typ === 'tausch' ? 'Breite und Höhe vertauscht?' : 'Bitte nachmessen.') + '</b>' + (mp.typ === 'tausch' ? 'Auf dem Foto ist ' + (tuer ? 'die Tür' : 'das Fenster') + ' eher ' + (mp.rk < 1 ? 'hoch als breit' : 'breit als hoch') + ', deine Maße sagen das Gegenteil.' : 'Das Foto wirkt anders proportioniert als deine Maße.') + '</p>' +
+    '<div class="er-knoepfe">' + (mp.typ === 'tausch' ? '<button type="button" class="er-knopf" data-act="mass-tausch">Tauschen</button>' : '<button type="button" class="er-knopf" data-act="mass-nach">Nachmessen</button>') + '<button type="button" class="er-knopf" data-act="mass-ok">Stimmt so</button></div></div>' : '';
+  /* Aus den Fotos: nur die Zahl, kein Inhalt (die Auswertung steht im Aufmaßblatt bzw. geht an den Betrieb) */
+  const teaser = ki && ((ki.rows || []).length || (ki.chips || []).length) ? '<p class="er-ki ki-zahl">' + ER_CHECK + '<span><b>Aus deinen Fotos:</b> ' + esc(kiAnzahl(ki) + (/^1 /.test(kiAnzahl(ki)) ? (S.betrieb ? ' geht' : ' steht') : (S.betrieb ? ' gehen' : ' stehen')) + (S.betrieb ? ' mit deinem Aufmaß an ' + (S.betrieb.name || 'deinen Fensterbauer') + '.' : ' in deinem Aufmaßblatt.')) + '</span></p>'
+    : (S.ai.in && S.ai.in.status === 'running' ? '<p class="er-ki"><span class="spin"></span><span>Die KI liest noch die Einbausituation aus den Fotos.</span></p>' : '');
+  const plan = neu && w.plan && w.plan.bild ? '<div class="er-plan plan-card"><span class="dna-label">Lage auf deinem Foto</span><button type="button" class="plan-gross" data-act="foto-gross" data-v="plan" aria-label="Lage auf dem Foto groß ansehen"><img class="plan-bild" src="' + w.plan.bild + '" alt="Foto der Wand mit eingezeichneter Lage"><span class="tile-lupe" aria-hidden="true">' + LUPE_S + '</span></button><div class="er-knoepfe"><button type="button" class="er-knopf" data-act="go" data-v="zeichnen">Lage ändern</button><button type="button" class="er-knopf" data-act="go" data-v="planmasse">Maße ändern</button></div></div>' : '';
+  const falls = '<details class="er-falls fold"><summary><span><b>Falls zur Hand</b><small>Brüstungshöhe und Laibungstiefe, sonst beim Feinaufmaß</small></span></summary><div class="fold-body"><div class="rows">' + fieldRow('Brüstungshöhe', 'bru', 'mm', 10, 'bruestung') + fieldRow('Laibungstiefe innen', 'laib', 'mm', 5, 'laibung', ki && ki.laib && !w.e_laib ? 'KI-Schätzung' : '') + '</div></div></details>';
+  const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
+  const zur = einstiegHier() ? 'Zurück: Fenster' : neu ? 'Zurück: Maße' : 'Zurück: Ränder';
+  const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="' + zur + '">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="wuensche">' + (tuer ? 'Weiter: Wunschtür' : 'Weiter: Wünsche') + pfeil + '</button></div>';
+  const html = lgKopf(['back', zur]) + '<div class="er-tisch">' + buehne + '<div class="er-rechts">' + unter + karte + pruef + teaser + plan + falls + rechtLinks() + fuss + '</div></div>';
+  /* über „Maße ändern“ geöffnet: oben „Fenster“ zur Übersicht aller Fenster (wie in den Wünschen), die Zurück-Taste zur Seite des Fensters */
+  return { html: html, back: einstiegHier() ? ['Fenster', 'fertig', 'liste'] : neu ? ['Maße', 'planmasse'] : ['Ränder', 'rest'], dna: true, cls: 'dna er', voll: true };
+}
+SCREENS.ergebnisAlt = SCREENS.ergebnis;
+SCREENS.ergebnis = ergebnisDna;
+
 /* ---------- Wunschfenster: das Modell wird konfiguriert ---------- */
 /* ---------- Zusammenfassung, Anfrage, Aufmaßblatt ---------- */
 const MAL = ['keinmal', 'einmal', 'zweimal', 'dreimal', 'viermal'];
@@ -4858,6 +4901,7 @@ function lgAuf() {
   const scr = document.querySelector('.scr.dna'); if (!scr) return;
   if (scr.classList.contains('st')) return stZeigen();
   if (scr.classList.contains('md')) return mdAuf(scr);
+  if (scr.classList.contains('er')) return; // Ergebnis: das Modell bindet die App selbst
   lgMass(); scr.classList.add('lg-still'); lgZeigen(); void scr.offsetWidth; requestAnimationFrame(() => scr.classList.remove('lg-still'));
 }
 function lgMass() { const b = document.querySelector('.scr.dna .lg-buehne:not(.lp-buehne)'); if (b && b.clientWidth) b.style.setProperty('--lg-s', Math.min(1, b.clientWidth / LG_B).toFixed(4)); }

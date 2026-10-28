@@ -531,6 +531,19 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
   - Bogen „Mit Foto wird dein Aufmaß besser.“ (`ohneFotoBlatt`, app.css „.ofoto-dna“) wie im Artefakt des Inhabers: dunkles Blatt, Titel
     mit rundem Schließen, drei Haken, „Es geht auch ohne …“, das Häkchen „Diesen Hinweis nicht mehr anzeigen“ (gewählt Violett), zwei
     leise Pillen „Foto machen“ und „Ohne Foto weiter“.
+  - Ergebnis, Schritt 5 (`ergebnisDna` in app.js, app.css „Ergebnis im Look der Design-DNA“; Wunsch des Inhabers vom 28.10.2026:
+    „intuitive Darstellung und Übersichtlichkeit der Eingaben, Fenster darf nicht kleiner werden, ähnlich den Folien zum Maße-Eingeben“):
+    gebaut wie Messen. Die Bühne läuft randlos über die Breite (`--bh` bis 460 px, am Laptop links über die ganze Höhe und stehend beim
+    Scrollen) und trägt das 3-D-Modell der App unverändert (Drehen, Zoom, Zahnrad); das Fenster ist größer als vorher. Oben in der Bühne
+    Schritt-Chip und Überschrift „Dein Aufmaß steht.“ mit i. Die Maßschilder am Modell sind dunkle Kapseln mit Legende: gestrichelt
+    Koralle = Maueröffnung (die Linie gestrichelt wie beim Messen), Strich Violett = Fenster mit Rahmen. Werkzeuge als Reihe runder
+    Glasknöpfe unten rechts, „Zum Drehen ziehen“ unten links. Unter der Bühne Unterzeile und Notiz, dann die weiße Karte mit den
+    Eingaben in zwei Zeilen: je „Breite × Höhe“ als eine Zahl (34 bzw. 28 px, 300), Einheit klein, Legende wie am Modell, darunter
+    „Breite × Höhe“ und der Chip „kleinstes von 3“ / „sichtbar mit Rahmen“ (neue Öffnung: „Wunschmaß Rohbau“ / „rechnerisch, mit
+    Rahmen“), bei Winkelabweichung eine Zeile mit Koralle-Punkt. Darunter, wenn nötig, „Breite und Höhe vertauscht?“ bzw.
+    „Bitte nachmessen.“ als Anthrazit-Karte mit leisen Pillen („Tauschen“/„Nachmessen“, „Stimmt so“), „Aus deinen Fotos“ als Zeile
+    mit Haken, die Lage auf dem Foto (neue Öffnung) und „Falls zur Hand“ als Anthrazit-Karte zum Aufklappen. Unten zurück und
+    „Weiter: Wünsche“ (Tür: „Weiter: Wunschtür“). Die alte Fassung bleibt als `SCREENS.ergebnisAlt` im Code.
   - Regel des Inhabers (27.10.2026): Beim Messen eine feste Ansicht je Element, in den Wünschen das ausgearbeitete 3-D-Modell; die
     Wünsche werden nie durch Standbilder ersetzt.
 - **Weiter ist immer weiß.** Fehlt etwas, steht eine Zeile mit Koralle-Punkt darüber („Gib dem Raum einen Namen …“, „Trag die Brüstung
