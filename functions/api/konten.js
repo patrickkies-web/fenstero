@@ -515,7 +515,7 @@ export async function abrechnungslauf(k, sp, zd, nurId) {
      Plus wird einmal zum Ende seines Abrechnungsmonats gekündigt (Nutzungsbedingungen § 6), danach meldet Stripe das Ende wie sonst */
   if (X().kostenlos()) {
     let abos = 0;
-    if (!nurId) for (const row of (await sp.betriebeAlle().catch(() => [])) || []) {
+    if (!nurId && typeof sp.betriebeAlle === 'function') for (const row of (await sp.betriebeAlle().catch(() => [])) || []) {
       if (!row.stripe_subscription || (row.daten || {}).aboAuslauf) continue;
       const merken = () => sp.betriebAendern(row.id, (a) => { a.aboAuslauf = new Date(k.jetzt || Date.now()).toISOString(); });
       try { await zd.aboKuendigen(row.stripe_subscription); await merken(); abos++; }
