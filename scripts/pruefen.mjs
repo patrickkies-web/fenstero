@@ -316,7 +316,7 @@ if (teil(3)) {
   await page.evaluate(() => { S.win.name = 'Wohnzimmer'; saveWin(); S.screen = 'teilen'; render(true); }); await page.waitForTimeout(400); // der Name ist Pflicht (Frage „Wo ist das Fenster?“)
   let t3 = await page.evaluate(() => document.body.textContent);
   ok(/Dein Aufmaßblatt ist fertig/.test(t3) && /Freischalten · 7,99 €/.test(t3) && /inkl\. MwSt\./.test(t3) && /Messen, Fotos und 3-D-Modell bleiben kostenlos/.test(t3), 'Paywall: Aufmaßblatt für 7,99 € inkl. MwSt., Messen bleibt kostenlos');
-  ok(!/AM1\./.test(t3) && !/Code kopieren/.test(t3) && await page.locator('[data-act="k-dl"], [data-act="teil-pdf"]').count() === 0 && await page.locator('.dv-blur').count() === 1 && await page.locator('.dv-tab tr').count() === 2, 'Vor der Zahlung: Vorschau mit Übersicht, Positionen verschwommen, kein Code, keine Datei');
+  ok(!/AM1\./.test(t3) && !/Code kopieren/.test(t3) && await page.locator('[data-act="k-dl"], [data-act="teil-pdf"]').count() === 0 && await page.locator('.dv-blur, .ab-papier .ab-schloss').count() === 1 && await page.locator('.dv-tab tr, .ab-papier-tab tr').count() === 2, 'Vor der Zahlung: Vorschau mit Übersicht, Positionen verschwommen, kein Code, keine Datei');
   await foto(page, 'app-paywall');
   await page.evaluate(() => go('home')); await page.waitForTimeout(300);
   ok(/Dein Aufmaßblatt · 7,99 €/.test(await page.evaluate(() => document.body.textContent)) && await page.locator('[data-act="k-dl"]').count() === 0, 'Startseite: Karte mit Preis statt kostenloser Datei');
@@ -1330,7 +1330,7 @@ if (teil(8)) {
   const kctx2 = await browser.newContext({ ...telefon, acceptDownloads: true }), kp2 = await neueSeite(kctx2, BASE2);
   await kp2.goto(BASE2 + '/app/', { waitUntil: 'networkidle' }); await kp2.waitForTimeout(400);
   await kp2.evaluate(() => { S.windows = demoProject(); Object.assign(S.proj, { name: 'Haus Prüf', ort: '50667 Köln' }); persist(); go('teilen'); }); await kp2.waitForTimeout(400);
-  ok(await kp2.evaluate(() => SERVER.zahlung && SERVER.attrappe && PREIS() === 7.99 && !FREI()) && await kp2.locator('.dv-blur').count() === 1, 'App kennt die Kasse des Servers, Blatt ist noch gesperrt');
+  ok(await kp2.evaluate(() => SERVER.zahlung && SERVER.attrappe && PREIS() === 7.99 && !FREI()) && await kp2.locator('.dv-blur, .ab-papier .ab-schloss').count() === 1, 'App kennt die Kasse des Servers, Blatt ist noch gesperrt');
   await kp2.click('[data-act="k-start"]'); await kp2.waitForSelector('#s-mail'); // Freischalten nur mit Konto: E-Mail und Code
   ok(await kp2.evaluate(() => S.screen === 'sichern' && S.sichern.zweck === 'kauf' && /brauchst du ein Konto/.test(document.body.innerText)), 'Freischalten im Servermodus: erst das Aufmaß sichern (E-Mail und Code, kein Passwort)');
   await kp2.fill('#s-mail', 'kaeufer@beispiel.de'); await kp2.click('[data-in="sc"][data-f="agb"]'); await kp2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp2.waitForSelector('#s-code');
@@ -2608,7 +2608,7 @@ if (teil(14)) {
     await foto(page, 'app-fenster-gesperrt');
     const mFertig = await messenApp(page);
     await page.evaluate(() => go('teilen')); await page.waitForTimeout(300);
-    const tab = await page.evaluate(() => Array.from(document.querySelectorAll('.dv-tab tr')).slice(1).map((tr) => Array.from(tr.children).slice(2).map((td) => td.textContent).join(' ')));
+    const tab = await page.evaluate(() => Array.from(document.querySelectorAll('.dv-tab tr, .ab-papier-tab tr')).slice(1).map((tr) => Array.from(tr.children).slice(2).map((td) => td.textContent).join(' ')));
     ok(tab.length === 3 && tab.every((z) => !/\d/.test(z) && /•/.test(z)), 'Vorschau des Blatts: Positionen und Räume, die Maße nur als Platzhalter');
     await page.evaluate(() => { const k = kauf(); k.paid = true; k.test = true; persist(); go('home'); }); await page.waitForTimeout(250);
     const nachKauf = await page.evaluate(() => document.querySelector('.liste-in').textContent);
