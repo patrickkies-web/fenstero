@@ -359,7 +359,7 @@ function login(role, id, msg) { S.role = 'betrieb'; S.cur = id; S.sheet = null; 
    ein Bildschirm unter der Übersicht, ein offenes Blatt, ein Schritt in Registrierung, neuem Projekt oder Tour. Zurück im Browser
    landet auf dem Eintrag darunter; das fangen wir ab, gehen in der Seite einen Schritt zurück (Blatt zu, Schritt zurück, Bildschirm
    zurück) und stellen die Wache wieder auf, solange es noch weiter zurück geht. Auf der Übersicht ohne Blatt gibt es keine Wache,
-   dann verlässt Zurück die Seite. Die Anker der Startseite (#hauseigentuemer, #fensterbauer) ersetzen weiter nur die Adresse. */
+   dann verlässt Zurück die Seite. Die Ansichten der Startseite (/ und /fensterbauer, früher #hauseigentuemer und #fensterbauer) ersetzen weiter nur die Adresse. */
 const WACHE = 'eeziBetrieb';
 let wacheLeise = false, wacheAdresse = '';
 const wacheDa = () => { try { return !!(history.state && history.state[WACHE]); } catch (e) { return false; } };
@@ -409,7 +409,12 @@ const ANKER = { kunde: 'hauseigentuemer', betrieb: 'fensterbauer' };
 function ansicht() { return FB_SCREENS.includes(S.screen) ? 'betrieb' : (S.ansicht === 'betrieb' ? 'betrieb' : 'kunde'); }
 function ansichtMerken(neu) {
   S.ansicht = neu === 'betrieb' ? 'betrieb' : 'kunde';
-  try { if (location.hash !== '#' + ANKER[S.ansicht]) history.replaceState(history.state, '', location.pathname + location.search + '#' + ANKER[S.ansicht]); } catch (e) { /* ohne Verlauf */ }
+  /* Adresse ohne Anker: /fensterbauer bzw. / (der Worker liefert unter /fensterbauer die Startseite); auf anderen Pfaden wie bisher der Anker */
+  try {
+    const start = /^\/(index\.html|fensterbauer\/?)?$/.test(location.pathname), soll = S.ansicht === 'betrieb' ? '/fensterbauer' : '/';
+    if (start) { if (location.pathname !== soll || location.hash) history.replaceState(history.state, '', soll + location.search); }
+    else if (location.hash !== '#' + ANKER[S.ansicht]) history.replaceState(history.state, '', location.pathname + location.search + '#' + ANKER[S.ansicht]);
+  } catch (e) { /* ohne Verlauf */ }
 }
 /* Wechsel der Ansicht (Umschalter im Kopf, Karten am Ende, Baustein der Startseite) */
 function zurAnsicht(v) {
@@ -1989,7 +1994,7 @@ root.addEventListener('change', (e) => { const el = e.target; if (el && el.getAt
 tick();
 setInterval(tick, 60000);
 /* Direktlink zur Tour (/#tour), etwa von der Seite für Fensterbauer */
-/* Anker: /#tour öffnet die Tour, /#fensterbauer (auch #betriebe) und /#hauseigentuemer wählen die Ansicht; wer über den
+/* Anker: /#tour öffnet die Tour, /fensterbauer, /#fensterbauer (auch #betriebe) und /#hauseigentuemer wählen die Ansicht; wer über den
    QR-Code eines Aufmaßblatts kommt, ist Fensterbauer */
 const ankerLink = () => {
   const h = location.hash;
@@ -1999,7 +2004,7 @@ const ankerLink = () => {
   if (h === '#wie' && !S.role) { history.replaceState(null, '', location.pathname + location.search); ansichtMerken('betrieb'); S.hist = []; S.screen = 'wie'; S.sheet = null; render(); window.scrollTo(0, 0); return true; }
   const pm = /^#projekt-([a-z0-9]{1,40})$/i.exec(h);
   if (pm) { ankerProjekt = pm[1]; history.replaceState(history.state, '', location.pathname + location.search); if (!projektAnkerOeffnen()) render(); return true; }
-  const a = h === '#fensterbauer' || h === '#betriebe' ? 'betrieb' : h === '#hauseigentuemer' ? 'kunde' : '';
+  const a = h === '#fensterbauer' || h === '#betriebe' ? 'betrieb' : h === '#hauseigentuemer' ? 'kunde' : !h && /^\/fensterbauer\/?$/.test(location.pathname) ? 'betrieb' : '';
   if (!a) return false;
   ansichtMerken(a);
   if (!S.role) { if (S.screen === 'tour') { clearTimeout(tourTimer); S.tour = null; } S.hist = []; S.screen = 'landing'; S.sheet = null; }
@@ -2009,5 +2014,14 @@ const ankerLink = () => {
 if (vonPdf()) ansichtMerken('betrieb');
 if (!ankerLink()) render();
 window.addEventListener('hashchange', ankerLink);
+/* Links auf die Ansichten (/fensterbauer, /#fensterbauer, /#hauseigentuemer, auch im Schatten-DOM der Startseite und in der eingebetteten
+   Seite für Fensterbauer) wechseln in der Seite, statt sie neu zu laden: die Adresse ist ja nicht mehr nur ein anderer Anker */
+document.addEventListener('click', (e) => {
+  if (INST || S.role || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = (e.composedPath ? e.composedPath() : [e.target]).find((n) => n && n.tagName === 'A' && n.hasAttribute('href'));
+  const v = a && ({ '/fensterbauer': 'betrieb', '/#fensterbauer': 'betrieb', '/#hauseigentuemer': 'kunde' })[a.getAttribute('href')];
+  if (!v || !/^\/(index\.html|fensterbauer\/?)?$/.test(location.pathname)) return;
+  e.preventDefault(); zurAnsicht(v);
+});
 Server.start().then((an) => { if (an === 'ohne') return render(); if (an) { render(); setInterval(() => Server.aktualisieren(), 30000); } else { window.PilotHinweis(); if (Server.status) render(); } projektAnkerOeffnen(); });
 

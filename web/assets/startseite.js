@@ -100,11 +100,11 @@
     }
 
     /* Sprungmarken im Schatten-DOM: der Browser findet die Ziele nicht selbst, und Hashes steuern auf der Startseite die Ansicht.
-       Stationen gleiten in die Mitte (bei „weniger Bewegung“ und Tastatur sofort); /#fensterbauer wechselt die Ansicht (portal.js). */
+       Stationen gleiten in die Mitte (bei „weniger Bewegung“ und Tastatur sofort); /fensterbauer wechselt die Ansicht (portal.js). */
     root.addEventListener('click', (e) => {
       const a = e.target && e.target.closest ? e.target.closest('a[href]') : null; if (!a || e.defaultPrevented) return;
       const href = a.getAttribute('href') || '', sofort = reduziert || e.detail === 0;
-      if (href === '/#fensterbauer' && d.zuBetrieb) { e.preventDefault(); d.zuBetrieb(); return; }
+      if ((href === '/fensterbauer' || href === '/#fensterbauer') && d.zuBetrieb) { e.preventDefault(); d.zuBetrieb(); return; }
       if (href === '#hauseigentuemer' || href === '/#hauseigentuemer') { e.preventDefault(); w.scrollTo({ top: 0, behavior: sofort ? 'auto' : 'smooth' }); return; }
       if (href.charAt(0) !== '#') return;
       const ziel = root.getElementById(href.slice(1)); if (!ziel) return;

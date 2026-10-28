@@ -45,7 +45,7 @@
     if (eingebettet) {
       /* im Portal: der Umschalter bleibt in der Ansicht (Hash), die Bausteine der DNA starten für den nachgeladenen Rahmen */
       rahmen.classList.add('eingebettet');
-      $$('.ez-ansicht a[aria-current]').forEach(function (a) { a.setAttribute('href', '/#fensterbauer'); });
+      $$('.ez-ansicht a[aria-current]').forEach(function (a) { a.setAttribute('href', '/fensterbauer'); });
       if (w.DNA && w.DNA.start) w.DNA.start(rahmen);
     }
 
