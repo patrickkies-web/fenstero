@@ -188,6 +188,13 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   unten, darunter die rechtlichen Verweise. Neue Folien bekommen diese Ansicht von Anfang an (`dnaTisch` oder eigenes Raster).
   Vorschlag für seine DNA: in Abschnitt 9 (App-Rahmen) den Satz „Schreibtisch: Bühne links über die ganze Höhe, rechts die Spalte mit
   der Pille“ ergänzen.
+- Bühne im Container, scharf und flüssig (Inhaber, 28.10.2026, Foto der Fotos-Folie am Desktop: „das Bild sehr unscharf … mir reicht
+  das auch, wenn der Konfigurator bzw. das Bild im Container stattfindet, so 25 % kleiner“; auf langsameren PCs ruckelten Folienwechsel
+  und Drehen): Am Laptop steht die Bühne als Karte im Container, je Richtung ein Viertel kleiner (Abstand `--bx`, `--by`); Start und
+  Gespeichert bleiben vollflächig. Bilder der Bühne mindestens in doppelter Anzeigegröße (Beispielfoto 2000 × 1500). Folien fahren
+  nicht herein, über dem drehbaren Modell kein Milchglas (`backdrop-filter`), ohne WebGL schwingt das Modell nicht von selbst. Prüfen
+  mit vierfach gedrosselter CPU, auch ohne WebGL: Folienwechsel unter 0,3 s. Vorschlag für seine DNA (Abschnitt 9): „Bewegung nur
+  für Zustand und Rückmeldung; Folienwechsel stehen sofort; kein Glas über bewegten 3-D-Bühnen“.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

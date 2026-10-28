@@ -568,6 +568,11 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     Ränder, „Passt.“, Ergebnis und Gespeichert haben dafür eigene Raster; Fotos, Lage, „Wie genau planen?“ und die Wunsch-Fragen nutzen
     `dnaTisch(links, rechts)` (Klasse `dt`): Am Telefon sind die Hüllen `display: contents`, die Folie bleibt pixelgleich. Das Foto füllt
     die Bühne, das Haus der Lage wächst mit ihr (`lgMass`), das Punktraster der Tiefe steht 1,45-fach, das 3-D-Modell füllt die Bühne.
+  - Container und Leistung (Wunsch des Inhabers, 28.10.2026: Bild am Desktop unscharf, Bühne darf 25 % kleiner im Container stehen,
+    langsame PCs ruckelten): Am Laptop ist die Bühne eine Karte im Container (`--bx`, `--by`, je Richtung ein Viertel kleiner; Start und
+    Gespeichert vollflächig). Beispielfoto neu aus dem Modell in 2000 × 1500. Kein Hereinfahren ganzer Folien (`.scr.dna`), kein
+    Milchglas über dem drehbaren Modell, ohne WebGL kein Selbstschwingen. Gemessen bei vierfach gedrosselter CPU ohne WebGL:
+    Folienwechsel 0,1–0,25 s statt 0,7–6,2 s, Drehen p90 33 ms statt 517 ms.
   - Restliche Folien (Wunsch des Inhabers, 28.10.2026: „Die anderen Bereiche machst du auch. Musst selber gucken, welche Folien da noch
     fehlen.“): „Deine Fenster“ (Bühne mit den Fenstern als Strichzeichnungen, Stand mit Balken, Karten auf Anthrazit), „Fürs Angebot“
     1–3 (Haus mit Kapselreihe der getauschten Fenster, Zeitleiste und Budget, Aufmaßblatt, das sich beim Tippen füllt), Aufmaßblatt,
