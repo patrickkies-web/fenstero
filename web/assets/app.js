@@ -2452,13 +2452,19 @@ if (PROBE) {
   const P = window.Pakete, m = P ? P.oeffentlich(P.merkmale(PROBE_PAKET)) : { kopieKunde: true }, farbe = m.farbe ? '#2ab4bd' : '';
   (window.KONFIG = window.KONFIG || {}).instanz = { id: 'muster01', v: 1, host: location.host, name: 'Fensterbau Brandt', du: true, status: 'aktiv', vorschau: false, demo: true, probe: true, m: m,
     auftritt: { logo: '', grund: 'dunkel', col: farbe, gruss: { sie: '', du: '' }, ap: 'Petra Brandt', foto: '', tel: '', mail: '', web: '', ort: '', tiefe: '', std: '' },
-    start: { kicker: '', ueberschrift: '', text: '', bilder: [] }, farbe: farbe, akzent: farbe, kontakt: { tel: '', mail: '' }, logo: '', grenzen: { fenster: 50 } };
+    start: { kicker: '', ueberschrift: '', text: '', bilder: [] }, farbe: farbe, akzent: farbe, kontakt: { tel: '', mail: '' }, logo: '', grenzen: { fenster: 50 },
+    abzug: { seite: 15, oben: 15, unten: 30, untenT: 0 } }; // Abzug fürs Richtmaß wie im Beispiel des Betriebs (web/beispiele/mustermann)
   /* Firmenfarbe wie auf der Seite einer Instanz (der Server setzt dort --accent im Kopf, functions/instanz/seiten.js) */
   if (farbe) { try { document.documentElement.style.setProperty('--accent', farbe); document.documentElement.style.setProperty('--accent-soft', 'rgba(42, 180, 189, .14)'); } catch (e) { /* ok */ } }
 }
 /* Rückweg: Kam der Fensterbauer über die Beispielseite (Paket in der Adresse), führt „Zurück“ dorthin, sonst zur Seite für Fensterbauer */
 const PROBE_LANDING = (() => { if (!PROBE) return ''; let p = ''; try { p = String(new URLSearchParams(location.search).get('ausprobieren') || '').toLowerCase(); } catch (e) { p = ''; } return window.Pakete && window.Pakete.gueltig(p) ? '/vorschau/paket-beispiel/' + p + '.html?ausprobieren' : ''; })();
 let PROBE_DA = false; // nach dem Einstieg: eine leere Startseite führt zurück zur Beispielseite
+/* Testansicht mit dem Beispiel (…?ausprobieren&beispiel): das Projekt Familie Mustermann aus web/beispiele/mustermann/projekt.json, aus
+   dem auch das Beispiel-PDF der Website entsteht (scripts/blatt-beispiel.mjs); der Fensterbauer ändert es im Konfigurator und sieht im
+   Aufmaßblatt, was davon ankommt */
+const PROBE_BEISPIEL = PROBE && (() => { try { return new URLSearchParams(location.search).has('beispiel'); } catch (e) { return false; } })();
+const BEISPIEL_ORDNER = '/beispiele/mustermann/';
 const probePaketName = () => { const P = window.Pakete; return (P && P.PAKETE && P.PAKETE[PROBE_PAKET] && P.PAKETE[PROBE_PAKET].name) || PROBE_PAKET; };
 const INST = window.KONFIG && window.KONFIG.instanz && typeof window.KONFIG.instanz === 'object' && /^[a-z0-9]{8}$/.test(String(window.KONFIG.instanz.id || '')) ? window.KONFIG.instanz : null;
 const INST_M = INST ? INST.m || {} : {};
@@ -7798,8 +7804,24 @@ function instGesendetKurz(weg) {
    Folie „Was planst du?“. Ein angefangenes Fenster wird fortgesetzt; ein abgeschlossener Test beginnt neu */
 function probeEinstieg() {
   if (S.sent) instanzVergessen(true);
+  if (PROBE_BEISPIEL) return probeBeispiel(); // PROBE_DA erst nach dem Laden: vorher ist die Liste leer und führte zurück zur Beispielseite
   if (entwurfLesen()) entwurfFortsetzen(); else act('new', document.body);
   PROBE_DA = true;
+}
+/* Das Beispielprojekt laden, wie die App ein Projekt hält (Standard und Abweichungen, wie unpackProject), mit seinen Bildern im
+   Speicher der Fotos; danach die Liste der Fenster. Schlägt das Laden fehl, beginnt die Testansicht wie sonst */
+async function probeBeispiel() {
+  try {
+    const r = await fetch(BEISPIEL_ORDNER + 'projekt.json', { cache: 'no-cache' }); if (!r.ok) throw new Error('kein Beispiel');
+    const d = await r.json(), jetzt = Date.now();
+    if (!d || d.v !== 1 || !Array.isArray(d.w)) throw new Error('Beispiel unlesbar');
+    S.windows = d.w.map((x) => { const w = altAngleichen(Object.assign(baseWin(), JSON.parse(JSON.stringify(x)), { t0: jetzt, ts: jetzt, aend: 0 })); if (!x.sashes) w.sashes = sashesFor(w.teilung); return w; }).slice(0, GRENZE.fenster);
+    S.proj = Object.assign(S.proj || {}, d.p || {}); S.editIdx = -1; S.win = baseWin();
+    for (const w of S.windows) for (const id of bilderVon(w)) {
+      try { const f = await fetch(BEISPIEL_ORDNER + id + '.jpg', { cache: 'force-cache' }); if (f.ok) await Fotos.ablegen(id, await f.blob(), 0, 0); } catch (e) { /* ohne dieses Bild */ }
+    }
+    PROBE_DA = true; persist(); go('home'); toast('Beispiel geladen: Familie Mustermann, ' + S.windows.length + ' Positionen. Ändere, was du willst, und sende ab.');
+  } catch (e) { act('new', document.body); PROBE_DA = true; }
 }
 /* Infobereich der Testansicht in der ersten Folie */
 function probeInfo() {
@@ -7910,7 +7932,9 @@ async function probeBlatt() {
     await blattSchrift();
     const d = lkDaten(), pr = S.proj, fotos = await fotosFuerBlatt(S.windows);
     const kunde = { name: pr.name || '', kontakt: pr.tel || pr.mail || '', adresse: pr.ort || '', mehr: AW.kundeKontakt({ kontakt: pr.tel || pr.mail || '', aufmass: { proj: pr } }) };
-    const pdf = window.Blatt ? window.Blatt.pdf({ variante: 'betrieb', kennzeichnung: INST_M.pdfKennzeichnung, fenster: S.windows, projekt: pr, kunde: kunde, klaerung: AW.klaerung(S.windows, pr, {}), klaerStand: {}, portalKurz: location.host, nr: S.sent.nr || '', fotos: fotos || {}, betrieb: { name: d.name, nr: S.sent.nr || '', eingegangen: '' }, h: BLATT_H }) : null;
+    /* wie beim Server (functions/api/blatt-server.js): Abzug und Logo des Betriebs, hier die des Beispielbetriebs */
+    const logo = await logoFuerBlatt(BEISPIEL_ORDNER + 'logo.png');
+    const pdf = window.Blatt ? window.Blatt.pdf({ variante: 'betrieb', kennzeichnung: INST_M.pdfKennzeichnung, fenster: S.windows, projekt: pr, kunde: kunde, klaerung: AW.klaerung(S.windows, pr, {}), klaerStand: {}, portalKurz: location.host, nr: S.sent.nr || '', fotos: fotos || {}, betrieb: { name: d.name, nr: S.sent.nr || '', eingegangen: '', abzug: (INST && INST.abzug) || null, logo: logo ? Object.assign(logo, { grund: 'hell' }) : null }, h: BLATT_H }) : null;
     if (!pdf) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); return; }
     await dateiSpeichern(pdf, 'Aufmassblatt-' + (String(S.sent.nr || '').replace(/[^A-Za-z0-9-]/g, '') || 'Test') + '.pdf');
   } catch (e) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); }

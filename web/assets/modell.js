@@ -18,14 +18,14 @@
       spross: { wiener: 'Wiener Sprosse', szr: 'Innenliegende Sprossen', auf: 'Aufgesetzte Sprossen', echt: 'Glasteilende Sprossen' },
       aufseite: { beide: 'innen und außen', aussen: 'nur außen', innen: 'nur innen' },
       glas: { '2': '2-fach', '3': '3-fach' },
-      glasfn: { schall: 'Schallschutz', vsg: 'Sicherheitsglas', sicht: 'Sichtschutz', sonne: 'Sonnenschutz', extraklar: 'Weißglas (extraklar)', vogel: 'Vogelschutzglas', selbstr: 'selbstreinigend' },
+      glasfn: { schall: 'Schallschutz', vsg: 'Verbundsicherheitsglas (VSG)', sicht: 'Sichtschutz', sonne: 'Sonnenschutz', extraklar: 'Weißglas (extraklar)', vogel: 'Vogelschutzglas', selbstr: 'selbstreinigend' },
       griff: { standard: 'Standard', abschliessbar: 'abschließbar', druckknopf: 'mit Druckknopf', ohne: 'ohne Griff (verdeckt oder elektrisch)', motor: 'elektrisch' },
       hstGriff: { standard: 'Hebegriff', abschliessbar: 'Hebegriff, abschließbar', motor: 'elektrisch (Taster oder App)' },
       art: { fenster: 'Fenster', balkon: 'Balkon- oder Terrassentür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür (Parallel-Schiebe-Kipp)', fsw: 'Faltschiebewand' },
       pskSchema: { A: '2-teilig (1 Schiebeflügel vor 1 Festteil)', A3: '3-teilig (1 Schiebeflügel vor 2 Festteilen)', C: '4-teilig (2 Schiebeflügel mittig vor 2 Festteilen)' },
       griffA: { keiner: 'kein Griff außen', ziehgriff: 'Ziehgriff mit Schnäpper', abschliessbar: 'abschließbar, Schlüssel außen' },
       boden: { bleibt: 'Fußboden bleibt, wie er ist', neu: 'Fußboden wird erneuert' },
-      absturz: { balkon: 'Balkon oder Terrasse davor, keine nötig', gelaender: 'Geländer außen (französischer Balkon)', glas: 'Glasbrüstung in der Laibung', fest: 'unteres Feld fest, Sicherheitsglas' },
+      absturz: { balkon: 'Balkon oder Terrasse davor, keine nötig', gelaender: 'Geländer außen (französischer Balkon)', glas: 'Glasbrüstung in der Laibung', fest: 'unteres Feld fest, Verbundsicherheitsglas (VSG)' },
       erreichbar: { ja: 'leicht erreichbar', nein: 'nicht leicht erreichbar' },
       erreich: { vm: 'vormittags', nm: 'nachmittags', ab: 'abends' }, // wann der Kunde am besten erreichbar ist (Kontakt in der App)
       foerdweg: { bafa: 'BAFA-Zuschuss (BEG EM)', steuer: 'Steuerbonus (§ 35c EStG)', keine: 'keine', offen: 'noch offen' },
@@ -517,6 +517,30 @@
       if (w.neu) return [!d.moW ? 'Breite' : '', !d.moH ? 'Höhe' : ''].filter(Boolean);
       return Object.keys(MASS_NAME).filter((k) => !num(mo[k])).map((k) => MASS_NAME[k]).concat(!d.elW || !d.elH ? ['Element'] : []);
     }
+    /* Rettungsfenster grob nachgerechnet: lichte Öffnung des größten Flügels etwa Element je Flügel minus 120 mm Profil (Blendrahmen und
+       Flügel beidseitig), Höhe ohne Oberlicht; beim Stulpfenster beide Flügel zusammen (ohne Pfosten in der Mitte). Nur eine Schätzung fürs
+       Gespräch, verbindlich ist das Feinaufmaß. Rückgabe { ok, b, h, text } in m */
+    /* Laibung laut Foto gefliest (Befund der KI in Worten) */
+    const laibungGefliest = (w) => { const k = w && w.ki; if (!k) return false; return /flies/i.test([].concat(k.chips || [], (k.rows || []).filter((r) => /laibung/i.test(r[0])).map((r) => r[1])).join(' ')); };
+    /* Fuge: Elemente ab 2,5 m oder dunkle Profile ab 2 m Breite brauchen eine Fuge nach Größe und Farbe, nicht den pauschalen Abzug */
+    function fugeHinweis(w) {
+      const d = derive(w), b = d.elW || d.moW || 0, hex = farbe(w, 'aussen')[2] || '', c = /^#?([0-9a-f]{6})$/i.exec(hex), n = c ? parseInt(c[1], 16) : 0xffffff;
+      const hell = c ? (0.2126 * (n >> 16) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255 : 1, dunkel = hell < 0.35;
+      if (b >= 2500) return 'Element ' + th(b) + ' mm breit' + (dunkel ? ', dunkles Profil' : '');
+      if (dunkel && b >= 2000 && !istOffen(w, 'fa')) return 'Dunkles Profil außen, ' + th(b) + ' mm breit';
+      return '';
+    }
+    const PROFIL_MM = 120;
+    function rettung(w) {
+      const d = derive(w), S = (w.sashes || sashesFor(w.teilung)).filter((x) => !x.st), auf = S.filter((x) => x.t !== 'F' && x.t !== 'K');
+      const m = (v) => String(Math.round(v / 10) / 100).replace('.', ',');
+      if (!d.elW || !d.elH) return { ok: null, text: 'Ohne Maße des Fensters nicht nachzurechnen.' };
+      if (!auf.length) return { ok: false, text: 'Laut Angaben ohne Drehflügel: als Rettungsweg ungeeignet.' };
+      const stulp = S.some((x) => x.steh), b = (stulp ? d.elW : d.elW / S.length) - PROFIL_MM, h = d.elH - (w.ol ? Math.round(d.elH * 0.28) : 0) - (w.ul ? num(w.ulH) || 400 : 0) - PROFIL_MM;
+      const bru = num(w.bru), zuHoch = bruDa(w) && bru > 1200, ok = b >= 900 && h >= 1200 && !zuHoch;
+      const fehlt = [b < 900 ? 'zu schmal' : '', h < 1200 ? 'zu niedrig' : '', zuHoch ? 'Brüstung ' + m(bru) + ' m zu hoch' : ''].filter(Boolean);
+      return { ok: ok, b: b, h: h, text: 'Laut Maßen etwa ' + m(b) + ' × ' + m(h) + ' m im Lichten' + (stulp ? ' (beide Flügel)' : '') + ': ' + (ok ? 'reicht, beim Feinaufmaß bestätigen.' : fehlt.join(', ') + '; als Rettungsweg ein größeres Fenster oder ein Dachfenster einplanen.') };
+    }
     function klaerung(wins, p, l) {
       p = p || {}; l = l || {}; wins = (wins || []).map((w) => nachTiefe(w, p));
       const out = [], pos = (w, i) => 'Pos. ' + (i + 1) + (w.name ? ' ' + w.name : '');
@@ -533,15 +557,20 @@
         if (!absturzFrage(w) || w.absturz === 'balkon') return;
         const wahl = w.absturz ? lab('absturz', w.absturz) + (gelText(w) ? ', ' + gelText(w) : '') : '', grenz = absturzGrenz(w);
         if (grenz) dazu(pos(w, i), 'Absturzhöhe prüfen (' + (etageText(w) || 'OG') + bruText(w) + '): bis 12 m Absturzhöhe genügen 80 cm Brüstung, darüber sind 90 cm nötig. ' + (wahl ? 'Gewählt: ' + wahl + '.' : 'Über 12 m eine Absturzsicherung einplanen.'), 'pruefen', 'Absturzhöhe', i, 'absturz-' + wk(w, i), 'Bauordnung (§ 38 MBO): Brüstung mindestens 80 cm, über 12 m Absturzhöhe 90 cm.');
-        else dazu(pos(w, i), 'Absturzsicherung nötig (' + (etageText(w) || 'OG') + bruText(w) + '): ' + (wahl || 'bitte beraten'), 'pflicht', 'Absturzsicherung', i, 'absturz-' + wk(w, i), 'Bauordnung (§ 38 MBO): Brüstung mindestens 80 cm, über 12 m Absturzhöhe 90 cm; Türen ohne Balkon davor immer.');
+        else dazu(pos(w, i), 'Absturzsicherung nötig (' + (etageText(w) || 'OG') + bruText(w) + '): ' + (wahl ? wahl + ', im Angebot einplanen' : 'bitte beraten'), 'pflicht', 'Absturzsicherung', i, 'absturz-' + wk(w, i), 'Bauordnung (§ 38 MBO): Brüstung mindestens 80 cm, über 12 m Absturzhöhe 90 cm; Türen ohne Balkon davor immer.');
       });
       const nE = wins.reduce((a, x) => a + (num(x.anzahl) || 1), 0), tot = num(p.total);
       const lu = []; wins.forEach((w, i) => { if (detailGilt(w, 'luefter') && w.luefter && w.luefter !== 'ohne') lu.push(i); });
       if (tot && nE > tot / 3) dazu('Lüftung', 'Lüftungskonzept nach DIN 1946-6 erforderlich: ' + nE + ' von ' + tot + ' Fenstern werden getauscht, mehr als ein Drittel.' + (lu.length ? ' Die gewünschten Lüfter (' + (lu.length === wins.length && wins.length > 1 ? 'alle Positionen' : 'Pos. ' + lu.map((i) => i + 1).join(', ')) + ') im Konzept nennen.' : ''), 'pflicht', 'Lüftungskonzept', null, 'lueftung', 'Dichte neue Fenster: ohne Konzept drohen Feuchte und Schimmel.');
       wins.forEach((w, i) => { if (w.neu) dazu(pos(w, i), 'Neue Öffnung: Sturz und Statik vor dem Durchbruch klären.', 'pflicht', 'Sturz und Statik', i, 'statik-' + wk(w, i), 'Durchbruch in der Außenwand, die Wand trägt oft.'); });
       if (geb === 'denkmal' || lgeb === 'denkmal') dazu('Gebäude', 'Baudenkmal: Genehmigung der Denkmalbehörde vor dem Auftrag einholen; Teilung, Sprossen und Farben sind oft vorgegeben.', 'bau', 'Denkmalschutz', null, 'denkmal', 'Ohne Genehmigung drohen Rückbau und Bußgeld.');
-      const dg = []; wins.forEach((w, i) => { if (w.etage === 'dg' && (w.art || 'fenster') === 'fenster') dg.push(i); });
-      if (dg.length) dazu(mehrere(dg), 'Dachgeschoss: Ist ein Fenster zweiter Rettungsweg, braucht es im Lichten mindestens 0,90 × 1,20 m und höchstens 1,20 m Brüstung.', 'bau', 'Rettungsweg', dg.length === 1 ? dg[0] : dg, 'rettung', 'Landesbauordnung (§ 35 MBO), wenn es keine zweite Treppe gibt.');
+      /* Rettungsweg im Dachgeschoss (§ 37 Abs. 5 MBO, in den Ländern die eigene Bauordnung): je Fenster mit den gemessenen Maßen grob
+         nachgerechnet (rettung()), damit das Blatt sagt, ob es reicht, statt nur zu fragen */
+      wins.forEach((w, i) => {
+        if (w.etage !== 'dg' || (w.art || 'fenster') !== 'fenster') return;
+        const r = rettung(w);
+        dazu(pos(w, i), 'Dachgeschoss: Ist ein Fenster zweiter Rettungsweg, braucht es im Lichten mindestens 0,90 × 1,20 m und höchstens 1,20 m Brüstung. ' + r.text, 'bau', 'Rettungsweg', i, 'rettung-' + wk(w, i), 'Bauordnung (§ 37 Abs. 5 MBO, z. B. § 37 BauO NRW), wenn es keine zweite Treppe gibt.');
+      });
       /* Mit dem Kunden: Förderung, Glas, Einbruchschutz, Eigentümer, Fußboden, Umfang, Fensterzahl, Maße, Farbwunsch, Fensterbank, Notizen, offene Wünsche */
       const fw = foerdWeg(p);
       if (fw === 'bafa') dazu('Förderung', 'BAFA-Zuschuss gewünscht: Energieeffizienz-Experte einbinden, Antrag vor Beginn, Vertrag nur mit Förderklausel. Uw-Zielwerte bei den Positionen.', 'foerder', 'Förderung BAFA', null, 'foerd', 'Ohne Antrag vor Beginn gibt es keinen Zuschuss.');
@@ -611,6 +640,24 @@
       wins.forEach((w, i) => { if (motor(w) && !(w.ki && w.ki.fach && w.ki.fach.strom === true)) dazu(pos(w, i), 'Elektrischer Antrieb gewünscht: Strom am Fenster ' + (w.ki && w.ki.fach && w.ki.fach.strom === false ? 'laut Foto nicht zu sehen' : 'klären') + ', gegebenenfalls Elektriker einplanen.', 'pruefen', 'Strom für den Antrieb', i, 'strom-' + wk(w, i), (w.antrieb === 'smart' ? 'Smart Home und Motor' : 'Ein Motor') + ' braucht Strom am Fenster.'); });
       /* Unterputzkasten im Bestand: der Kasten liegt in der Wand, der Sturz muss auf (nicht bei „nach Standard“ oder offen) */
       wins.forEach((w, i) => { if (!w.neu && sartVon(w) !== 'klappladen' && kastenAktiv(w) && !istOffen(w, 'sart') && w.roll === 'unterputz' && !istOffen(w, 'einbau') && !istStd(w, 'einbau')) dazu(pos(w, i), 'Unterputzkasten im Bestand: Sturz öffnen, Platz, Statik und Anschluss an Putz und Dämmung vor Ort prüfen.', 'pruefen', 'Unterputzkasten', i, 'unterputz-' + wk(w, i), 'Der Kasten liegt in der Wand und wird überputzt; beim Austausch ist das ein Eingriff in den Sturz.'); });
+      /* Was das Richtmaß verändert, steht auch hier (nicht nur am Maß): Anschlag laut Foto, Kastenhöhe beim Aufsatzkasten, Fuge bei großen
+         oder dunklen Elementen (Gremium F, 28.10.2026) */
+      wins.forEach((w, i) => {
+        if (w.neu) return;
+        const f = (w.ki && w.ki.fach) || {}, an = f.anschlagI === 'innen' ? 'innen' : f.anschlagA === 'aussen' ? 'außen' : '';
+        if (an) dazu(pos(w, i), 'Anschlag ' + an + ' laut Foto: Das Richtmaß ist ohne Anschlag gerechnet; Maß und Anschlussfuge beim Feinaufmaß festlegen.', 'pruefen', 'Anschlag', i, 'anschlag-' + wk(w, i), 'Mit Anschlag wird das Element größer als die lichte Öffnung bestellt.');
+        if (kastenAktiv(w) && !istOffen(w, 'sart') && sartVon(w) !== 'klappladen' && w.roll === 'aufsatz' && !istOffen(w, 'einbau') && !istStd(w, 'einbau')) dazu(pos(w, i), 'Aufsatzkasten: Kastenhöhe nach System und Behang festlegen; die Höhe des Fensters ist das Richtmaß minus Kasten.', 'pruefen', 'Kastenhöhe', i, 'kasten-' + wk(w, i), 'Der Aufsatzkasten sitzt auf dem Fenster und gehört zur Höhe des Elements.');
+        if (f.rollladen === 'einbau' && !(kastenAktiv(w) && w.roll === 'unterputz')) dazu(pos(w, i), 'Alter Rollladenkasten innen laut Foto: ausbauen und den Sturz schließen, dämmen und luftdicht anschließen oder als Revision weiter nutzen; im Angebot einplanen.', 'kunde', 'Alter Kasten', i, 'altkasten-' + wk(w, i), 'Alte Einbaukästen sind die größte Wärmebrücke am Fenster und oft undicht.');
+        const fuge = fugeHinweis(w); if (fuge) dazu(pos(w, i), fuge + ': Anschlussfuge nach Größe und Farbe festlegen (Längenausdehnung), der pauschale Abzug reicht oft nicht.', 'pruefen', 'Fuge', i, 'fuge-' + wk(w, i), 'Dunkle und große Profile dehnen sich in der Sonne stärker aus.');
+        /* Innenlaibung verputzen, aber die Laibung ist laut Foto gefliest */
+        if (w.putz && !istOffen(w, 'montage') && !istStd(w, 'montage') && laibungGefliest(w)) dazu(pos(w, i), 'Laibung laut Foto gefliest, gewählt ist „Innenlaibung verputzen“: Fliesen ergänzen oder beiputzen mit dem Kunden klären.', 'kunde', 'Fliesenlaibung', i, 'fliesen-' + wk(w, i), 'Beim Ausbau brechen die Fliesen an der Laibung oft ab.');
+      });
+      /* Einbruchschutz RC2 und RC3: Griff und Glas gehören dazu (DIN EN 1627, Glas nach DIN EN 356) */
+      wins.forEach((w, i) => {
+        if (istOffen(w, 'rc') || !(w.rc === 'rc2' || w.rc === 'rc3') || w.art === 'fest') return;
+        const glas = w.rc === 'rc3' ? 'P5A' : 'P4A', griffOk = w.griff === 'abschliessbar' || w.griff === 'motor' || istStd(w, 'griff');
+        dazu(pos(w, i), lab('rc', w.rc) + ' gewählt: Verglasung ' + glas + ' (DIN EN 356) einplanen' + (griffOk ? '' : ', dazu ein abschließbarer Griff (gewählt: ' + (lab(w.art === 'hst' ? 'hstGriff' : 'griff', w.griff) || 'Standard') + ')') + '.', 'kunde', 'Einbruchschutz ' + lab('rc', w.rc), i, 'rcglas-' + wk(w, i), 'Ohne geprüftes Glas und abschließbaren Griff erreicht das Fenster die Klasse nicht.');
+      });
       /* Gedämmte Fassade laut Foto und neue Fensterbank außen: Endkappen mit Gleitabschluss, sonst reißt der Putz */
       wins.forEach((w, i) => { const f = (w.ki && w.ki.fach) || {}; if (f.fassade === 'wdvs' && offenGilt(w, 'fba') && w.fba && w.fba !== 'behalten' && !istOffen(w, 'fba') && w.fbaKappe !== 'gleit') dazu(pos(w, i), 'Fassade laut Foto gedämmt (WDVS): Fensterbank außen mit Gleitabschluss einplanen' + (w.fbaKappe && detailGilt(w, 'fbaKappe') ? ', gewählt sind Endkappen aus ' + lab('fbaKappe', w.fbaKappe) : '') + '.', 'pruefen', 'Gleitabschluss', i, 'gleit-' + wk(w, i), 'Feste Endkappen reißen den Putz der Dämmung auf, dann dringt Wasser ein.'); });
       /* Alarmkontakt: das Kabel muss vor dem Einbau liegen */
@@ -658,6 +705,8 @@
     const notizGruppe = (k) => (/^(typ|din)-\d+$/.test(k) ? 'fenster' : NOTIZ_GRUPPE[k] || NOTIZ_GRUPPE[String(k).toLowerCase()] || (DMAP[k] ? DMAP[k].wg : '') || 'allgemein');
     const ARTKURZ = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Faltschiebewand' };
     const istOT = (t) => String(t || '').indexOf(OFFEN_TEXT) >= 0 || /\boffen\b/.test(String(t || '')) && /^(Material offen|Farbe offen|Antrieb offen)/.test(String(t || ''));
+    /* Glas, das aus anderen Wünschen folgt: VSG im festen unteren Feld (Absturzsicherung), geprüftes Glas für RC2 und RC3 */
+    const glasPflicht = (w) => [absturzFrage(w) && w.absturz === 'fest' ? 'VSG im unteren Feld, absturzsichernd (DIN 18008-4)' : '', !istOffen(w, 'rc') && w.art !== 'fest' && (w.rc === 'rc2' || w.rc === 'rc3') ? (w.rc === 'rc3' ? 'P5A' : 'P4A') + ' nach DIN EN 356 für ' + lab('rc', w.rc) : ''].filter(Boolean);
     function wuensche(w, p) {
       w = nachTiefe(w, p);
       const art = w.art || 'fenster', tuer = istTuer(w), z = uwZiel(w, p), S = w.sashes || sashesFor(w.teilung), n = S.filter((x) => !x.st).length || 1, nAuf = fluegelZahl(w);
@@ -669,7 +718,7 @@
           .concat(teilungText(w) ? [zeile('Aufteilung', teilungText(w))] : [], w.form && w.form !== 'rechteck' ? [zeile('Form', lab('form', w.form))] : [], [zeile('Material', istOffen(w, 'material') ? OFFEN_TEXT : lab('material', w.material) || 'Kunststoff')],
             (w.bars || []).length ? [zeile('Sprossen', ov(w, 'spross', lab('spross', w.spross) + (w.spross === 'auf' ? ' (' + lab('aufseite', w.aufSeite) + ')' : '')) + ', ' + w.breite + ' mm, ' + w.bars.length + ' Stück')] : []) },
         { id: 'farbe', titel: 'Farbe', zeilen: [zeile('außen', farbZeile(w, 'aussen'), { hex: fa[2] }), zeile('innen', w.gleich ? 'wie außen' : farbZeile(w, 'innen'), { hex: fi[2] })] },
-        { id: 'glas', titel: 'Glas', zeilen: [zeile('Verglasung', ov(w, 'glas', lab('glas', w.glas) || '3-fach'))].concat(glasExtras ? [zeile('Extras', glasExtras)] : [], z ? [zeile('Förderwert', uwText(z))] : []) },
+        { id: 'glas', titel: 'Glas', zeilen: [zeile('Verglasung', ov(w, 'glas', lab('glas', w.glas) || '3-fach'))].concat(glasExtras ? [zeile('Extras', glasExtras)] : [], glasPflicht(w).map((x) => zeile('Nötig', x)), z ? [zeile('Förderwert', uwText(z))] : []) },
         { id: 'beschlag', titel: 'Beschlag und Sicherheit', zeilen: [zeile('Griff', griffText(w))].concat(art === 'balkon' ? [zeile('Griff außen', ov(w, 'griffA', lab('griffA', (w.bt || {}).griffA) || 'kein Griff'))] : [], [zeile('Einbruchschutz', rcText(w))], absturzFrage(w) ? [zeile('Absturzsicherung', absturzText(w))] : []) },
         { id: 'sonne', titel: 'Sonnenschutz', zeilen: [zeile('außen', sonne(w)), zeile('innen', innen(w))] },
         { id: 'insekt', titel: 'Insektenschutz', zeilen: [zeile('Insektenschutz', ov(w, 'insekt', lab('insekt', w.insekt) || 'keiner'))] },
@@ -742,8 +791,13 @@
       if (anschlag) warn.push('Anschlag ' + (f.anschlagI === 'innen' && f.anschlagA === 'aussen' ? 'innen und außen' : f.anschlagI === 'innen' ? 'innen' : 'außen') + ' laut Foto');
       if (!w.neu && dev > 10) warn.push('Öffnung bis ' + dev + ' mm außer Winkel');
       if (massPruef(w)) warn.push('Maße und Foto passen nicht zusammen');
+      /* Aufsatzkasten: Die Höhe ist die des Elements samt Kasten; Fuge bei großen oder dunklen Elementen nicht pauschal */
+      const aufsatz = !w.neu && kastenAktiv(w) && !istOffen(w, 'sart') && sartVon(w) !== 'klappladen' && w.roll === 'aufsatz' && !istOffen(w, 'einbau') && !istStd(w, 'einbau');
+      if (aufsatz) warn.push('Höhe samt Aufsatzkasten, Kastenhöhe offen');
+      if (fugeHinweis(w)) warn.push('Fuge nach Größe und Farbe');
       const bw = d.moW - 2 * a.seite, bh = d.moH - a.oben - u;
-      return { b: bw, h: bh, text: th(bw) + ' × ' + th(bh) + ' mm', formel: (w.neu ? 'Rohbauöffnung' : 'Öffnung') + ' minus ' + a.seite + ' mm je Seite, ' + a.oben + ' mm oben' + (u ? ', ' + u + ' mm unten' : ''), warn: warn,
+      /* sicher: ohne Vorbehalt; anschlag: Zahl nicht belastbar (Feinaufmaß nötig); aufsatz: Breite belastbar, Höhe samt Kasten */
+      return { b: bw, h: bh, sicher: !warn.length, anschlag: anschlag, aufsatz: aufsatz, text: th(bw) + ' × ' + th(bh) + ' mm', formel: (w.neu ? 'Rohbauöffnung' : 'Öffnung') + ' minus ' + a.seite + ' mm je Seite, ' + a.oben + ' mm oben' + (u ? ', ' + u + ' mm unten' : ''), warn: warn,
         warnText: warn.length ? 'Vor Ort prüfen: ' + warn.join(', ') + (anschlag ? '; der Vorschlag ist ohne Anschlag gerechnet.' : '.') : '' };
     }
     /* ---------- Zeichnung fürs Aufmaß ----------
@@ -1008,7 +1062,7 @@
       OFFEN_TEXT: OFFEN_TEXT, OFFEN_NAME: OFFEN_NAME, offenName: offenName, istOffen: istOffen, offenGilt: offenGilt, offenListe: offenListe, griffText: griffText, montageText: montageText, fassadeText: fassadeText, teilungText: teilungText, teilFrei: teilFrei, anteileGueltig: anteileGueltig, rcText: rcText,
       nachTiefe: nachTiefe, tiefeVon: tiefeVon, tiefeKopf: tiefeKopf, FRAGE: FRAGE, FRAGE_STUFE: FRAGE_STUFE, STD_TEXT: STD_TEXT, istStd: istStd, TIEFE_NAME: TIEFE_NAME, tiefeText: tiefeText, fluegelZahl: fluegelZahl, oeffnungKurz: oeffnungKurz, absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz,
       /* Strang S5: Aufmaß beim Betrieb und im PDF */
-      sartVon: sartVon, kastenAktiv: kastenAktiv, KLAER_GRUPPEN: KLAER_GRUPPEN, klaerGruppen: klaerGruppen, notizenVon: notizenVon, notizGruppe: notizGruppe, massLuecken: massLuecken, wuensche: wuensche, abzugVon: abzugVon, bestellmass: bestellmass, ZF: ZF, plan: plan, zeichnungSVG: zeichnungSVG, textBreite: textBreite };
+      sartVon: sartVon, kastenAktiv: kastenAktiv, KLAER_GRUPPEN: KLAER_GRUPPEN, klaerGruppen: klaerGruppen, notizenVon: notizenVon, notizGruppe: notizGruppe, massLuecken: massLuecken, wuensche: wuensche, abzugVon: abzugVon, bestellmass: bestellmass, glasPflicht: glasPflicht, rettung: rettung, fugeHinweis: fugeHinweis, laibungGefliest: laibungGefliest, ZF: ZF, plan: plan, zeichnungSVG: zeichnungSVG, textBreite: textBreite };
   })();
 
   /* ---------- Notizen je Stelle (Strang S1) ----------

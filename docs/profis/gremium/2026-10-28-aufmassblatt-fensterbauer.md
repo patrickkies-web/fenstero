@@ -61,5 +61,6 @@ Median der Noten: 6.
 
 ## Stand
 
-Nichts umgesetzt. Die Befunde betreffen web/assets/blatt.js (PDF) und web/assets/modell.js (Abzüge, Regeln). Beide werden nur auf
-ausdrücklichen Wunsch des Inhabers geändert. Die Beispieldaten (gleiche Abweichungen) liegen im Beispiel selbst.
+Nachmittags umgesetzt, zusammen mit zwei weiteren Fensterbauern mit Faible für Struktur: docs/profis/gremium/2026-10-28-aufmassblatt-struktur.md
+(Richtmaß statt Bestellmaß, Bilder im PDF, § 37 Abs. 5 MBO mit Nachrechnung, VSG, RC2 mit P4A und Griff, Kasten, Fliesen, natürlich
+streuende Beispielmaße, Projektstandard, Übersicht mit „Offen“). Offen: Export als CSV oder Excel.

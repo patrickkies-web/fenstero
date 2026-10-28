@@ -485,7 +485,7 @@ if (teil(4)) {
     const [d2] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), pdfKnopf.click()]);
     ok(/\.pdf$/.test(d2.suggestedFilename()), 'Portal-PDF: ' + d2.suggestedFilename());
     let txtB = ''; try { txtB = (await import('node:child_process')).execFileSync('pdftotext', ['-layout', await d2.path(), '-']).toString('utf8'); } catch (e) { txtB = ''; }
-    ok(/BESTELLMA(?:SS|ẞ)-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB) && /Übersicht/.test(txtB) && !/eeziframes-Konto\./.test(txtB), 'Portal-PDF in den Farben des Betriebs: Bestellmaß, keine Werbeseite');
+    ok(/RICHTMA(?:SS|ẞ)/.test(txtB) && !/BESTELLMA(?:SS|ẞ)/.test(txtB) && /Fensterbau Brandt/.test(txtB) && /Übersicht/.test(txtB) && !/eeziframes-Konto\./.test(txtB), 'Portal-PDF in den Farben des Betriebs: Richtmaß fürs Angebot (nie „Bestellmaß“), keine Werbeseite');
   } else ok(false, 'Portal-PDF-Knopf gefunden');
   sauber(page, 'Portal-PDF ohne Fehler');
   // Einladungsseite (Strang S4), Pilotbetrieb: der Betrieb vorn, eeziframes klein als Übermittler, nichts überlappt, Anrede und
@@ -1508,11 +1508,11 @@ if (teil(9)) {
   const fs9b = await import('node:fs'), url9b = await import('node:url'), tourBild = await import('./tour-bild.mjs');
   const tourInfo = JSON.parse(fs9b.readFileSync(url9b.fileURLToPath(new URL('../web/bilder/tour-aufmassblatt.json', import.meta.url)), 'utf8'));
   const tourDaten = await page.evaluate(tourBild.DATEN_AUS_SEITE);
-  ok(!!tb9 && tb9.src === '/bilder/tour-aufmassblatt-20.webp' && /Bestellmaß-Vorschlag 1\.749 × 1\.389 mm/.test(tb9.alt) && tb9.w === tourInfo.breite && tb9.h === tourInfo.hoehe && !tb9.skizze && tourInfo.abzuege.every((a) => fs9b.existsSync(url9b.fileURLToPath(new URL('../web/bilder/tour-aufmassblatt-' + a + '.webp', import.meta.url)))), 'Tour, Bestellmaß und PDF: echter Ausschnitt von Seite 1 des Aufmaßblatts zum gewählten Abzug (' + (tb9 ? tb9.src + ', ' + tb9.w + ' × ' + tb9.h : 'kein Bild') + '), keine Skizze mehr');
+  ok(!!tb9 && tb9.src === '/bilder/tour-aufmassblatt-20.webp' && /Richtmaß fürs Angebot 1\.749 × 1\.389 mm/.test(tb9.alt) && tb9.w === tourInfo.breite && tb9.h === tourInfo.hoehe && !tb9.skizze && tourInfo.abzuege.every((a) => fs9b.existsSync(url9b.fileURLToPath(new URL('../web/bilder/tour-aufmassblatt-' + a + '.webp', import.meta.url)))), 'Tour, Bestellmaß und PDF: echter Ausschnitt von Seite 1 des Aufmaßblatts zum gewählten Abzug (' + (tb9 ? tb9.src + ', ' + tb9.w + ' × ' + tb9.h : 'kein Bild') + '), keine Skizze mehr');
   ok(tourBild.fingerabdruck(tourDaten) === tourInfo.stand, 'Tour-Ausschnitt passt zum aktuellen Aufmaßblatt (sonst neu erzeugen: PW_PFAD=/opt/node-tools node scripts/tour-bild.mjs)');
   const [dlB] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('[data-act="tour-pdf"]')]);
   let txtB = ''; try { txtB = (await import('node:child_process')).execFileSync('pdftotext', ['-layout', await dlB.path(), '-']).toString('utf8'); } catch (e) { txtB = ''; }
-  ok(/Beispiel/.test(dlB.suggestedFilename()) && /AM-BEISPIEL/.test(txtB) && /BESTELLMA(?:SS|ẞ)-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB), 'Beispiel-PDF für Betriebe: mit Bestellmaß, gekennzeichnet als Beispiel');
+  ok(/Beispiel/.test(dlB.suggestedFilename()) && /AM-BEISPIEL/.test(txtB) && /RICHTMA(?:SS|ẞ)/.test(txtB) && /Fensterbau Brandt/.test(txtB), 'Beispiel-PDF für Betriebe: mit Richtmaß, gekennzeichnet als Beispiel');
   await page.click('.tour-schritte [data-v="5"]'); await page.click('[data-act="tour-nb"]'); await page.waitForTimeout(200);
   await page.click('.tour-schritte [data-v="6"]'); await page.click('[data-act="tour-code"]'); await page.waitForTimeout(200);
   ok(await page.locator('.tour-ergebnis').count() === 1, 'Code übernehmen zeigt das neue Projekt');
@@ -3656,7 +3656,7 @@ if (teil(16)) {
   const pdf5p = path16.join(os16.tmpdir(), 'eeziframes-pruefung-s5.pdf'); fs16.writeFileSync(pdf5p, Buffer.from(pdf5.b64, 'base64'));
   const pt5 = (n) => { try { return cp16.execFileSync('pdftotext', ['-layout'].concat(n ? ['-f', String(n), '-l', String(n)] : []).concat([pdf5p, '-'])).toString('utf8'); } catch (e) { return ''; } };
   const raw5 = fs16.readFileSync(pdf5p).toString('latin1'), s5t1 = pt5(1), s5all = pt5(0);
-  ok(pdf5.logo && pdf5.mit > pdf5.ohne && /OutfitSemiBold/.test(raw5) && !/Maven/.test(raw5) && /Familie Weber\./.test(s5t1) && /Übersicht\./.test(s5t1) && /MIT DEM KUNDEN ZU KLÄREN/.test(s5t1) && /1 von \d+ geklärt/.test(s5all) && /geklärt, /.test(s5all) && /1\.759 × 1\.364/.test(s5all) && /NOTIZ DES KUNDEN ZU/.test(s5all) && /WÜNSCHE DES KUNDEN/.test(s5all) && /BESTELLMA(?:SS|ẞ)-VORSCHLAG/.test(s5all) && !/3-D-Ansicht/.test(s5all), 'PDF des Betriebs: Logo im Kopf, Outfit, Seite 1 mit Übersicht und Klärungsliste samt Stand, Notiz des Kunden an der Stelle, Bestellmaß mit Abzug unten');
+  ok(pdf5.logo && pdf5.mit > pdf5.ohne && /OutfitSemiBold/.test(raw5) && !/Maven/.test(raw5) && /Familie Weber\./.test(s5t1) && /Übersicht\./.test(s5all) && /KLÄRLISTE/.test(s5all) && /PROJEKTSTANDARD/.test(s5t1) && /1 von \d+ geklärt/.test(s5all) && /geklärt, /.test(s5all) && /1\.759 × 1\.364/.test(s5all) && /NOTIZ DES KUNDEN ZU/.test(s5all) && /WÜNSCHE DES KUNDEN/.test(s5all) && /RICHTMA(?:SS|ẞ)/.test(s5all) && !/BESTELLMA(?:SS|ẞ)/.test(s5all) && !/3-D-Ansicht/.test(s5all), 'PDF des Betriebs: Logo im Kopf, Outfit, Seite 1 mit Projektstandard, Übersicht und Klärliste samt Stand, Notiz des Kunden an der Stelle, Richtmaß mit Abzug unten');
   /* Die Ansicht Fensterbauer bettet seit dem 23.10.2026 die Paket-Landingpage ein (ihr 3-D-Modell gehört zur Planung des Kunden im
      Konfigurator); die frühere Werbung „Holen Sie es in Ihr Konto“ ist weg, was ankommt, nennt „So funktioniert es“ */
   const land5 = await s5.evaluate(() => { const vorher = S.ansicht; S.ansicht = 'betrieb'; const h = SCREENS.landing().html + '\n' + SCREENS.wie().html; S.ansicht = vorher; return h; });

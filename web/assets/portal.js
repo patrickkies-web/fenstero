@@ -1539,7 +1539,7 @@ const TOUR_BILD = { breite: 920, hoehe: 872 };
 const tourBildSrc = (abzug) => '/bilder/tour-aufmassblatt-' + abzug + '.webp';
 function tourBlattKarte(abzug) {
   const w0 = demoWins('weber')[0], d0 = AW.derive(w0), bm = AW.th(d0.moW - 2 * abzug) + ' × ' + AW.th(d0.moH - abzug) + ' mm';
-  return '<div class="card tour-pdfkarte"><figure class="tpk-blatt"><img src="' + tourBildSrc(abzug) + '" width="' + TOUR_BILD.breite + '" height="' + TOUR_BILD.hoehe + '" decoding="async" alt="Ausschnitt aus Seite 1 des Aufmaßblatts: Kopf mit dem Namen von ' + esc(TOUR_BETRIEB.name) + ', Kunde Familie Weber mit Eckdaten, Übersicht aller Positionen, Position 1 ' + esc(w0.name) + ' mit Bestellmaß-Vorschlag ' + bm + '"></figure>' +
+  return '<div class="card tour-pdfkarte"><figure class="tpk-blatt"><img src="' + tourBildSrc(abzug) + '" width="' + TOUR_BILD.breite + '" height="' + TOUR_BILD.hoehe + '" decoding="async" alt="Ausschnitt aus Seite 1 des Aufmaßblatts: Kopf mit dem Namen von ' + esc(TOUR_BETRIEB.name) + ', Kunde Familie Weber mit Eckdaten, Übersicht aller Positionen, Position 1 ' + esc(w0.name) + ' mit Richtmaß fürs Angebot ' + bm + '"></figure>' +
     '<div class="tpk-tx"><b>Das Aufmaßblatt als PDF</b><p class="km-s">So sieht Seite 1 aus: mit Ihrem Namen und Logo, allen Positionen mit Bestellmaß nach Ihrem Abzug und der Klärungsliste. Danach je Position eine Seite mit Zeichnung, Wünschen und Fotoauswertung. Zum Ausdrucken, Weiterleiten, Abheften.</p><button type="button" class="btn small ghost" data-act="tour-pdf">' + icon('dl', 16) + 'Ganzes Beispiel-PDF ansehen</button></div></div>';
 }
 /* Die anderen Abzüge schon laden, damit der Wechsel ohne Lücke geht */
