@@ -2876,7 +2876,7 @@ function winCard(x, i, live, hide) { const d = derive(x), tag = live ? 'button' 
 const FOTO_START = '<figure class="hero-foto"><img src="/bilder/foto/app-start.webp" width="1120" height="1400" alt="Drei Waschbären im Wohnzimmer: einer fotografiert mit dem Handy die Maueröffnung samt Zollstock, einer tippt auf dem Sofa seine Wünsche an, einer lehnt sich zufrieden zurück" fetchpriority="high" decoding="async"><div class="chips"><span class="chip haken">Fotografieren</span><span class="chip haken">Messen</span><span class="chip haken">Wünschen</span></div></figure>';
 SCREENS.home = () => {
   if (S.betrieb) return linkHome();
-  if (S.windows.length || angelegt() >= GRENZE.fenster) return homeAufmass(); // an der Grenze ohne Fenster: dort steht „Neues Aufmaß beginnen“
+  if (S.windows.length || angelegt() >= GRENZE.fenster) return homeAufmassDna(); // an der Grenze ohne Fenster: dort steht „Neues Aufmaß beginnen“
   const cardsH = '', betrieb = '';
   const html = (window.EinfBanner ? window.EinfBanner('kunde', { act: 'new' }) : '') + '<section class="hero start"><p class="eyebrow kicker">Fensterplanung, ganz <span class="mk" translate="no">eezi</span></p><h1>Fotografieren.<br>Messen.<br><span class="ak">Wünschen.</span></h1><p>Zwei Fotos, vier Maße mit dem Zollstock, und aus deinen Zahlen wächst dein Fenster als 3-D-Modell. Dein Fensterbauer bekommt alles fürs Angebot.</p>' +
     '<div class="cta stapel"><button type="button" class="btn primary" data-act="new">Fenster ausmessen<span class="pf" aria-hidden="true"></span></button><button type="button" class="btn ghost" data-act="tour-start">Führung starten</button><p class="cta-zeile">Zwei Minuten, ohne eigene Maße&nbsp;· <button type="button" class="ulink" data-act="gloss" data-k="referenz">Wie genau ist das?</button></p>' + (kontoBereit() ? '<p class="cta-zeile">' + (KS ? 'Angemeldet als ' + esc(KS.mail) + ' · <button type="button" class="ulink" data-act="go" data-v="meinkonto">Dein Konto</button>' : 'Schon ein Aufmaß gesichert? <button type="button" class="ulink" data-act="anmelden">Anmelden</button>') + '</p>' : '') + '</div>' +
@@ -2918,6 +2918,37 @@ function homeAufmass() {
     '<p class="nachsatz">Ein Fenster in zwei Minuten ausprobieren, ohne eigene Maße: <button type="button" class="ulink" data-act="tour-start">Führung starten</button></p></section>' +
     '<div class="foot-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a><a class="link" href="' + PORTAL_URL + '">Zur Startseite ›</a></div>' + rechtLinks();
   return { html: html, bar: S.windows.length ? { label: FREI() ? 'Zum Aufmaßblatt' : 'Aufmaßblatt fertigstellen', act: 'go', v: FREI() ? 'teilen' : 'anfrage' } : null };
+}
+/* ---------- Deine Fenster im Look der Design-DNA (28.10.2026, Wunsch des Inhabers: „die anderen Bereiche machst du auch“) ----------
+   Kopf wie die Folien des Konfigurators (ohne Zurück), Bühne auf dem Boden im Fensterlicht mit den Fenstern als Strichzeichnungen (nur die
+   Aufteilung und der Name, keine Maße: keine Gesamtübersicht), darunter Titel, Stand mit Balken und „+ Fenster“, die Fensterkarten als
+   Anthrazit-Kacheln, „Weiteres Fenster“, Konto, das Aufmaßblatt und „So funktioniert's“; unten die Pille zum Aufmaßblatt. Bausteine und
+   Aktionen wie bisher (winCard, neuKnopf, kontoKarte, dateiCard), nur in der Form der neuen Folien. Am Laptop wie die Start-Folie. */
+function homeAufmassDna() {
+  const n = S.windows.length, voll = S.windows.filter((x) => fensterStand(x).k === 'voll').length;
+  const neu = S.neuFrage && kontoBereit() && KS ? '<div class="card neu-frage"><p class="eyebrow">Neues Aufmaß</p><b>Ein neues Aufmaß beginnen?</b><p class="sub">Dein bisheriges Aufmaß bleibt in deinem Konto, du findest es unter „Dein Konto“.</p><div class="pill-row"><button type="button" class="pill" data-act="aufmass-neu-ja">Neues Aufmaß beginnen</button><button type="button" class="pill" data-act="aufmass-neu-nein">Abbrechen</button></div></div>'
+    : S.neuFrage ? '<div class="card neu-frage"><p class="eyebrow">Neues Aufmaß</p><b>Dieses Aufmaß auf diesem Gerät löschen?</b><p class="sub">Fenster, Angaben und die Freischaltung dieses Aufmaßes sind danach weg. Lade dein Aufmaßblatt vorher herunter, falls du es noch brauchst.</p><div class="pill-row"><button type="button" class="pill danger" data-act="aufmass-neu-ja">Löschen und neu beginnen</button><button type="button" class="pill" data-act="aufmass-neu-nein">Abbrechen</button></div></div>' : '';
+  /* Bühne: bis zu acht Fenster als Strichzeichnung mit Nummer und Name */
+  const sym = S.windows.slice(0, 8).map((x, i) => '<span class="li-sym"><span class="li-kachel"><b>' + (i + 1) + '</b>' + zuStrich(svgIcon(miniWin(x), 64)) + '</span><small>' + esc(x.name || 'Fenster ' + (i + 1)) + '</small></span>').join('') + (n > 8 ? '<span class="li-sym li-mehr"><span class="li-kachel">+' + (n - 8) + '</span><small>weitere</small></span>' : '');
+  const buehne = '<div class="li-buehne' + (n > 4 ? ' li-viele' : '') + '"><span class="wz-chip li-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (n ? voll / n : 0).toFixed(4) + '"></i>Dein Aufmaß · ' + n + ' Fenster</span><div class="li-reihe" aria-hidden="true">' + sym + '</div></div>';
+  /* Titel mit Stand und Balken, „+ Fenster“ rechts (Klassen wie bisher: .hd, .ueb-zeile, .ueb-prog, .hd-neu) */
+  let stand = esc(aufmassStand());
+  if (n) {
+    const st = S.windows.map(fensterStand), masse = st.filter((x) => x.k === 'masse').length, wunsch = st.filter((x) => x.k === 'wunsch').length;
+    const satz = voll === n ? (n === 1 ? 'Dein Fenster ist vollständig.' : 'Alle ' + n + ' Fenster sind vollständig.') : voll + ' von ' + n + ' vollständig' + (masse ? ' · ' + masse + ' ohne Maße' : '') + (wunsch ? ' · ' + wunsch + ' mit offenen Wünschen' : '');
+    stand = '<span class="ueb-zeile">' + esc(satz) + '</span><span class="ueb-prog" role="progressbar" aria-label="Vollständige Fenster" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + voll + '"><i style="width: ' + Math.round(voll / n * 100) + '%"></i></span>';
+  }
+  const plus = n && neuMoeglich() && linkOffen() ? '<button type="button" class="dna-pille dna-pille--leise dna-pille--klein hd-neu" data-act="new">' + PLUS + 'Fenster</button>' : '';
+  const kopf = '<div class="hd li-kopf"><div class="li-titel"><h1 tabindex="-1">Deine <em>Fenster.</em></h1>' + plus + '</div><p class="sub li-stand">' + stand + '</p></div>';
+  const liste = '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true).replace(/<svg[\s\S]*?<\/svg>/, zuStrich)).join('') + neuKnopf() + '</div></section>';
+  const erklaert = '<section class="card erklaert li-erklaert"><p class="eyebrow">So funktioniert\'s</p><div class="steps">' +
+    '<div class="step"><span class="n">1</span><div><b>Fotografieren.</b><p>Innen und außen, das Handy gerade halten. Die KI liest daraus die Einbausituation.</p></div></div>' +
+    '<div class="step"><span class="n">2</span><div><b>Messen.</b><p>Vier Maße mit dem Zollstock, Schritt für Schritt erklärt, dann die Ränder.</p></div></div>' +
+    '<div class="step"><span class="n">3</span><div><b>Wünschen.</b><p>Flügel, Sprossen, Farben innen und außen, jeder Fachbegriff mit Bild erklärt.</p></div></div></div>' +
+    '<p class="nachsatz">Ein Fenster in zwei Minuten ausprobieren, ohne eigene Maße: <button type="button" class="ulink" data-act="tour-start">Führung starten</button></p></section>';
+  const links = '<div class="foot-links li-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a><a class="link" href="' + PORTAL_URL + '">Zur Startseite ›</a></div>';
+  const fuss = n ? '<div class="lg-fuss li-fuss"><button type="button" class="dna-pille lg-weiter btn primary" data-act="go" data-v="' + (FREI() ? 'teilen' : 'anfrage') + '">' + (FREI() ? 'Zum Aufmaßblatt' : 'Aufmaßblatt fertigstellen') + abPfeil + '</button></div>' : '';
+  return { html: lgKopf(false) + dnaTisch(buehne, kopf + liste + neu + kontoKarte() + (n ? dateiCard() : '') + erklaert + links + rechtLinks() + fuss), dna: true, cls: 'dna li dt', voll: true };
 }
 /* Eigenes Aufmaß: wo es gespeichert ist. Gast: nur in diesem Browser, mit „Aufmaß sichern“; mit Konto: gesichert, „Dein Konto“ */
 function kontoKarte() {
@@ -3719,6 +3750,98 @@ SCREENS.anfrage3 = () => {
   html += '<div class="sec">' + secHead('Am besten erreichbar') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div>';
   return { html: html, back: ['Zurück', 'anfrage2'], cls: 'tight', bar: { label: 'Zum Aufmaßblatt', act: 'go', v: 'teilen', zurueck: true } };
 };
+/* ---------- Fürs Angebot 1–3 im Look der Design-DNA (28.10.2026, Wunsch des Inhabers: „die anderen Bereiche machst du auch“) ----------
+   Nach dem Entwurf der Vorschau (Abschluss-Folien, das Artefakt des Inhabers): Bühne auf dem Boden im Fensterlicht mit dem, worum es geht
+   (Haus: Fenster im ganzen Haus als Kapselreihe; Zeit: Skala mit vier Stationen, Förderweg als Zahl, Budget als Kapselreihe; Kontakt:
+   das Aufmaßblatt, auf dem das Getippte sofort steht), darunter Frage, die Auswahl wie in den Wunsch-Fragen (qpanel) und die Pille.
+   „Offen“ zeigt sich über die Helligkeit, ohne Schraffur (Regel des Inhabers seit der Lage). Aktionen und Felder wie bisher
+   (setp, bumpp, data-in="p"). Am Laptop wie die Start-Folie (dnaTisch). */
+const abPfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
+function abBuehne(cls, schritt, inhalt) {
+  const t = String(schritt), m = /(\d+) von (\d+)/.exec(t), anteil = m ? (+m[1] / +m[2]) : 1;
+  return '<div class="ab-buehne ' + cls + '"><span class="wz-chip ab-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + anteil.toFixed(4) + '"></i>' + esc(t).replace(/ von (\d)/, ' von&nbsp;$1') + '</span>' + inhalt + '</div>';
+}
+/* Kopf eines Abschnitts in der Karte: Beschriftung und Erklärung (44 px) */
+const abKopf = (t, g, id) => '<div class="ab-kopf"><span class="dna-label"' + (id ? ' id="' + id + '"' : '') + '>' + esc(t) + '</span>' + (g && GLOSS[g] ? '<button type="button" class="lg-i ab-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc('Was heißt das? ' + t) + '">' + LG_I + '</button>' : '') + '</div>';
+const abFuss = (zur, act, v, label) => rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="' + esc(zur) + '">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter btn primary" data-act="' + act + '"' + (v ? ' data-v="' + v + '"' : '') + '>' + label + abPfeil + '</button></div>';
+/* Haus: getauschte Fenster violett in der Reihe aller Fenster; ohne Gesamtzahl ein heller Rest; ab einem Drittel die Marke Lüftung */
+function abHausBuehne(pr, replaced, schritt) {
+  const total = num(pr.total), n = Math.max(total, replaced), ueber = total && replaced > total / 3, max = 40;
+  let kapseln = '';
+  if (total) { for (let i = 0; i < Math.min(n, max); i++) kapseln += '<i' + (i < replaced ? ' class="ist-getauscht"' : '') + '></i>'; }
+  else { for (let i = 0; i < Math.min(replaced, max); i++) kapseln += '<i class="ist-getauscht"></i>'; kapseln += '<i class="ist-offen"></i>'; }
+  const drittel = total && n <= max ? '<span class="ab-drittel" style="left: ' + (100 / 3).toFixed(2) + '%"><span>⅓ Lüftung</span></span>' : '';
+  const geb = lab('gebaeude', pr.gebaeude), bj = pr.baujahr ? 'Baujahr ' + pr.baujahr : '';
+  return abBuehne('ab-haus', schritt, (geb || bj ? '<div class="ab-hauschips" aria-hidden="true">' + (geb ? '<span>' + esc(geb) + '</span>' : '') + (bj ? '<span>' + esc(bj) + '</span>' : '') + '</div>' : '') +
+    '<div class="ab-zaehler" aria-hidden="true"><span class="dna-label">Fenster im ganzen Haus</span><p class="ab-zahl"><b>' + replaced + '</b><span>' + (total ? 'von ' + total + ' getauscht' : 'getauscht') + '</span></p>' +
+    '<div class="ab-kapseln' + (ueber ? ' ist-ueber' : '') + '">' + kapseln + drittel + '</div>' +
+    '<p class="ab-satz">' + (total ? anr('Sie tauschen ', 'Du tauschst ') + '<b>' + replaced + ' von ' + total + '</b>' + (ueber ? ', mehr als ein Drittel.' : '.') : anr('Wie viele Fenster hat das Haus? Tragen Sie es unten ein.', 'Wie viele Fenster hat das Haus? Trag es unten ein.')) + '</p></div>');
+}
+function anfrageDna() {
+  const pr = S.proj, replaced = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'dein Fensterbauer') : 'der Fensterbauer';
+  const frage = lgFrage('Noch kurz zum <em>Haus.</em>', 'angaben', 'Damit ' + bn + ' gut planen kann. Alles freiwillig.');
+  let karte = '<div class="qpanel ab-panel">' +
+    '<div class="ab-teil">' + abKopf('Gebäude', 'gebaeude') + chips('gebaeude', pr.gebaeude, 'gebaeude', 'setp') + '</div>';
+  if (pr.gebaeude === 'denkmal') karte += noteBox(anr('Bei Denkmalschutz brauchen Sie', 'Bei Denkmalschutz brauchst du') + ' meist eine Genehmigung. Material und Sprossen können vorgeschrieben sein.', 'echt', 'warn ab-note');
+  karte += '<div class="ab-teil">' + abKopf('Baujahr des Hauses', 'baujahr') + chips('baujahr', pr.baujahr, 'baujahr', 'setp') + '</div>' +
+    '<div class="ab-teil">' + abKopf('Fenster im ganzen Haus', 'lueftung') + '<div class="ab-weiss ab-stepper"><button type="button" class="ab-rund" aria-label="Weniger" data-act="bumpp" data-v="-1">−</button><label class="ab-eingabe"><input type="text" inputmode="numeric" id="p-total" data-in="p" data-f="total" value="' + esc(pr.total) + '" placeholder="z. B. 12" maxlength="3" aria-label="Fenster im ganzen Haus"><span>Stück</span></label><button type="button" class="ab-rund" aria-label="Mehr" data-act="bumpp" data-v="1">+</button></div>' +
+    '<p class="ab-klein">' + anr('Sie tauschen ', 'Du tauschst ') + replaced + ' davon.</p></div>';
+  if (num(pr.total) && replaced > num(pr.total) / 3) karte += noteBox(anr('Sie tauschen ', 'Du tauschst ') + replaced + ' von ' + (num(pr.total) || 0) + ' Fenstern, mehr als ein Drittel. Dann ist ein Lüftungskonzept nach DIN 1946-6 erforderlich; darum kümmert sich ' + (lk ? esc(bn) : 'dein Fensterbauer') + '.', 'lueftung', 'warn ab-note');
+  karte += '</div>';
+  return { html: lgKopf(['back', 'Zurück: Aufmaß']) + dnaTisch(abHausBuehne(pr, replaced, anfrageHead(1, lk)), frage + karte + abFuss('Zurück: Aufmaß', 'go', 'anfrage2', 'Weiter')), back: ['Aufmaß', 'home'], dna: true, cls: 'dna ab dt', voll: true };
+}
+/* Zeit und Budget: Skala mit vier Stationen, Förderweg als Zahl, Budget als Kapselreihe (die gewählte violett, die darunter hell) */
+const AB_FOERD = { bafa: ['15', 'Zuschuss vom BAFA'], steuer: ['20', 'Steuerbonus über drei Jahre'] };
+function abZeitBuehne(pr, schritt) {
+  const fw = AW.foerdWeg(pr), fd = AB_FOERD[fw], bi = ['b1', 'b2', 'b3', 'b4'].indexOf(pr.budget);
+  return abBuehne('ab-zeit', schritt, (fd ? '<div class="ab-foerd" aria-hidden="true"><p><small>bis zu</small><b>' + fd[0] + '</b><small>%</small></p><span>' + fd[1] + '</span></div>' : '') +
+    '<div class="ab-skala" aria-hidden="true"><span class="dna-label">Wann soll es losgehen?</span><div class="ab-band"><i class="ab-band-linie"></i>' +
+    OPT.zeit.map((o) => '<span class="ab-station' + (o.k === pr.zeit ? ' ist-dran' : '') + '"><i></i><b>' + esc(o.label).replace(/ (\d) bis (\d)/, ' $1&nbsp;bis&nbsp;$2') + '</b></span>').join('') + '</div></div>' +
+    '<div class="ab-budget" aria-hidden="true"><span class="dna-label">Budget</span><span class="ab-budget-reihe">' + [0, 1, 2, 3].map((i) => '<i class="' + (i === bi ? 'ist-dran' : i < bi ? 'ist-voll' : '') + '"></i>').join('') + '</span><b>' + esc(lab('budget', pr.budget) || 'Weiß ich noch nicht') + '</b></div>');
+}
+function anfrage2Dna() {
+  const pr = S.proj, lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'dein Fensterbauer') : '';
+  const web = instWebsite(); // Instanz, Website: der Betrieb kennt den Kunden noch nicht, danach kommt der Kontakt
+  const frage = lgFrage('Zeit und <em>Budget.</em>', 'zeitraum', lk && !web ? 'Freiwillig. Deine Kontaktdaten hat ' + bn + ' schon.' : 'Freiwillig, hilft beim Angebot.');
+  const fw = AW.foerdWeg(pr);
+  let karte = '<div class="qpanel ab-panel">' +
+    '<div class="ab-teil">' + abKopf('Wann soll es losgehen?', 'zeitraum') + chips('zeit', pr.zeit, 'zeit', 'setp') + '</div>' +
+    '<div class="ab-teil">' + abKopf('Budget', 'budget') + chips('budget', pr.budget, 'budget', 'setp') + '</div>' +
+    /* Förderweg früh klären: Er ändert das Angebot (Zielwerte, Energieeffizienz-Experte, Bescheinigung) */
+    '<div class="ab-teil">' + abKopf('Förderung', 'foerderung') + chips('foerdweg', fw, 'foerdweg', 'setp') + '</div>';
+  if (FOERD_HINWEIS[fw]) karte += noteBox(FOERD_HINWEIS[fw], null, 'ab-note');
+  if (lk) karte += '<div class="ab-teil">' + abKopf('Nachricht an ' + bn) + '<p class="ab-klein">' + (web ? anr('Freiwillig, zum Beispiel was Ihnen wichtig ist.', 'Freiwillig, zum Beispiel was dir wichtig ist.') : 'Freiwillig, zum Beispiel wann du erreichbar bist.') + '</p><div class="rows">' + textRow('Nachricht', 'notiz', 'z. B. Rollladen im Bad klemmt', 'text', 'p') + '</div></div>';
+  karte += '</div>';
+  const weiter = lk && !web ? ['go', 'blatt', 'Prüfen und senden'] : ['go', 'anfrage3', 'Weiter'];
+  return { html: lgKopf(['back', 'Zurück: Haus']) + dnaTisch(abZeitBuehne(pr, anfrageHead(2, lk)), frage + karte + abFuss('Zurück: Haus', weiter[0], weiter[1], weiter[2])), back: ['Haus', 'anfrage'], dna: true, cls: 'dna ab dt', voll: true };
+}
+/* Kontakt: das Aufmaßblatt als Objekt im Fensterlicht; was getippt wird, steht sofort oben auf dem Blatt (abLive), Maße als Punkte */
+function abPapier() {
+  const pr = S.proj, n = S.windows.length, el = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), pkt = (v) => (v ? thousand(v).replace(/\d/g, '•') : '•.•••');
+  const kontakt = [pr.ort, pr.tel, pr.mail].map((t) => String(t || '').trim()).filter(Boolean);
+  return '<div class="ab-papier" aria-hidden="true"><div class="ab-papier-band">' + LOGO(10) + '<span class="ab-wm" translate="no"><b>eezi</b>frames</span><span class="ab-papier-art">Aufmaßblatt</span></div><div class="ab-papier-in">' +
+    '<p class="ab-papier-h" data-p="name">' + esc(String(pr.name || '').trim() || 'Dein Aufmaß') + '</p>' +
+    '<p class="ab-papier-kontakt" data-p="kontakt">' + (kontakt.length ? esc(kontakt.join(' · ')) : '<i class="ab-leer" style="--b: 38%"></i><i class="ab-leer" style="--b: 30%"></i>') + '</p>' +
+    '<p class="ab-papier-s">' + n + (n === 1 ? ' Position' : ' Positionen') + ' · ' + el + (el === 1 ? ' Element' : ' Elemente') + (pr.gebaeude ? ' · ' + esc(lab('gebaeude', pr.gebaeude)) : '') + '</p>' +
+    '<table class="ab-papier-tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr>' + S.windows.slice(0, 4).map((x, i) => { const d = derive(x); return '<tr><td><b>' + (i + 1) + '</b></td><td>' + esc(x.name || 'Fenster') + '</td><td>' + pkt(d.moW) + ' × ' + pkt(d.moH) + '</td><td>' + pkt(d.elW) + ' × ' + pkt(d.elH) + '</td></tr>'; }).join('') + '</table>' +
+    '<div class="ab-papier-zeichnung"><span class="ab-papier-oeffnung"><span class="ab-papier-element"></span></span></div><div class="ab-papier-zeilen"><i></i><i class="k"></i><i></i></div></div></div>';
+}
+function abLive() {
+  const p = document.querySelector('.scr.dna.ab .ab-papier'); if (!p) return;
+  const pr = S.proj, h = p.querySelector('[data-p="name"]'), k = p.querySelector('[data-p="kontakt"]'), kontakt = [pr.ort, pr.tel, pr.mail].map((t) => String(t || '').trim()).filter(Boolean);
+  if (h) h.textContent = String(pr.name || '').trim() || 'Dein Aufmaß';
+  if (k) { if (kontakt.length) k.textContent = kontakt.join(' · '); else k.innerHTML = '<i class="ab-leer" style="--b: 38%"></i><i class="ab-leer" style="--b: 30%"></i>'; }
+}
+function anfrage3Dna() {
+  if (instWebsite()) return instAnfrage3();
+  const pr = S.proj;
+  const frage = lgFrage('Wie erreicht dich <em>dein Fensterbauer?</em>', 'kontakt', 'Steht auf dem Aufmaßblatt, damit er sich mit dem Angebot melden kann. Alles freiwillig; das Blatt bekommt nur, wem du es gibst.');
+  const karte = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Kontakt') + '<div class="rows ab-felder">' + textRow('Name', 'name', 'Vor- und Nachname', 'text', 'p') + textRow('PLZ und Ort', 'ort', 'z. B. 50667 Köln', 'text', 'p') + textRow('Telefon', 'tel', 'Für Rückfragen', 'tel', 'p') + textRow('E-Mail', 'mail', 'name@beispiel.de', 'email', 'p') + '</div></div>' +
+    '<div class="ab-teil">' + abKopf('Am besten erreichbar') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div></div>';
+  return { html: lgKopf(['back', 'Zurück: Zeit und Budget']) + dnaTisch(abBuehne('ab-blatt', anfrageHead(3, false), abPapier()), frage + karte + abFuss('Zurück: Zeit und Budget', 'go', 'teilen', 'Zum Aufmaßblatt')), back: ['Zurück', 'anfrage2'], dna: true, cls: 'dna ab dt', voll: true };
+}
+SCREENS.anfrageAlt = SCREENS.anfrage; SCREENS.anfrage2Alt = SCREENS.anfrage2; SCREENS.anfrage3Alt = SCREENS.anfrage3;
+SCREENS.anfrage = anfrageDna; SCREENS.anfrage2 = anfrage2Dna; SCREENS.anfrage3 = anfrage3Dna;
 function blattMarkdown(windows, pr) {
   const fw = AW.foerdWeg(pr), kl = klaerListe(windows, pr);
   const lines = ['# Aufmaßblatt · ' + (pr.name || '[Name]'), (pr.ort || '') + (pr.tel ? ' · ' + pr.tel : '') + (pr.mail ? ' · ' + pr.mail : ''), '', 'Gebäude: ' + (lab('gebaeude', pr.gebaeude) || '–') + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '') + ' · Zeitraum: ' + (lab('zeit', pr.zeit) || '–') + ' · Budget: ' + (lab('budget', pr.budget) || '–') + (fw ? ' · Förderung: ' + lab('foerdweg', fw) : ''), ''];
@@ -4858,9 +4981,9 @@ const LG_PFEIL_L = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" s
 const LG_I = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg>';
 /* Kopf: zurück zur Liste der Fenster, die Marke (im Kundenlink einer Instanz deren Zeichen), Übersicht und Begriffe */
 function lgKopf(zurueck) {
-  const z = zurueck || ['liste', 'Zurück: Fenster'];
+  const z = zurueck === false ? null : zurueck || ['liste', 'Zurück: Fenster']; // false: ohne Zurück (Liste der Fenster)
   const marke = S.betrieb ? (INST ? instKopf() : '') : '<span class="lg-marke" role="img" aria-label="eeziframes">' + LOGO(26) + WM() + '</span>';
-  return '<div class="lg-kopf"><span class="lg-kopf-l"><button type="button" class="lg-kopf-zurueck" data-act="' + z[0] + '" aria-label="' + z[1] + '">' + LG_PFEIL_L + '</button>' + marke + '</span>' +
+  return '<div class="lg-kopf"><span class="lg-kopf-l">' + (z ? '<button type="button" class="lg-kopf-zurueck" data-act="' + z[0] + '" aria-label="' + z[1] + '">' + LG_PFEIL_L + '</button>' : '') + marke + '</span>' +
     '<span class="lg-kopf-r"><button type="button" data-act="wohin" aria-label="Übersicht: Schritte, Fenster und Startseite"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button><button type="button" class="lg-kopf-icon" data-act="gindex" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5-1.5h5z"/></svg></button></span></div>';
 }
 /* Kapitel als Stationen auf einem Band: das laufende benannt, die übrigen als Punkte */
@@ -7021,7 +7144,7 @@ function onInput(el, ev) {
   }
   /* Übrige Felder des Fensters und der Angaben: beim Tippen übernehmen (nichts geht verloren, wenn die App zwischendurch neu zeichnet),
      neu gezeichnet wird erst nach dem Verlassen und ohne den Tipp auf den nächsten Knopf zu schlucken (nachAenderung) */
-  if (kind === 'w' || kind === 'p') { feldUebernehmen(kind, f, el); if (ev.type === 'change') { if (kind === 'p') persist(); nachAenderung(); } return; }
+  if (kind === 'w' || kind === 'p') { feldUebernehmen(kind, f, el); if (kind === 'p') abLive(); if (ev.type === 'change') { if (kind === 'p') persist(); nachAenderung(); } return; }
   if (ev.type !== 'change') return;
   if (kind === 'ohnefoto-zu') { try { if (el.checked) localStorage.setItem(OHNE_FOTO_ZU, '1'); else localStorage.removeItem(OHNE_FOTO_ZU); } catch (e) { /* ohne Speicher */ } return; }
   if (kind === 'photo') { S.ohneFotoFrage = false; S.fotoGross = null; return onPhoto(f, el.files && el.files[0]); }

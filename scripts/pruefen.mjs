@@ -323,18 +323,18 @@ if (teil(3)) {
   await page.evaluate(() => go('teilen')); await page.waitForTimeout(200);
   // Kasse, Schritt 1 (ohne Konto): die E-Mail ist Pflicht; den AGB stimmt man an der Kasse zu, für genau diesen Kauf
   await page.click('[data-act="k-start"]'); await page.waitForSelector('#k-mail');
-  await page.click('.bb .btn.primary'); await page.waitForTimeout(200);
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForTimeout(200);
   ok(await page.locator('.kf.bad').count() === 1 && await page.locator('.kcheck').count() === 0 && await page.evaluate(() => S.screen === 'konto'), 'Ohne E-Mail geht es nicht zur Zahlung; die AGB kommen erst an der Kasse');
-  await page.fill('#k-mail', 'kunde@beispiel.de'); await page.click('.bb .btn.primary'); await page.waitForTimeout(300);
+  await page.fill('#k-mail', 'kunde@beispiel.de'); await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForTimeout(300);
   t3 = await page.evaluate(() => document.body.textContent);
   ok(/Schritt 2 von 2/.test(t3) && /Aufmaßblatt als PDF/.test(t3) && /7,99 €/.test(t3) && /darin 19 % MwSt\./.test(t3) && /1,28 €/.test(t3) && /Testkauf abschließen/.test(t3) && /Pilotphase: Testkauf/.test(t3), 'Kasse: 7,99 € mit ausgewiesener MwSt. (1,28 €), im Pilot als Testkauf gekennzeichnet');
   const kasse2 = await page.evaluate(() => ({ haken: Array.from(document.querySelectorAll('.kasse-recht .kcheck')).map((l) => l.textContent.trim()), an: Array.from(document.querySelectorAll('.kasse-recht .kcheck input')).some((i) => i.checked), wr: !!document.querySelector('.kasse-recht a[href="/agb/#widerrufsbelehrung"]') && !!document.querySelector('.kasse-recht a[href="/agb/#widerrufsformular"]') && !!document.querySelector('.kasse-recht a[href="/agb/"]') }));
   ok(kasse2.haken.length === 2 && kasse2.haken[0] === 'Ich akzeptiere die AGB (Stand: ' + RECHT.standText(RECHT.AGB_STAND) + ').' && kasse2.haken[1] === RECHT.ZUSTIMMUNG && !kasse2.an && kasse2.wr, 'Kasse: zwei leere Haken, AGB mit Stand und die Zustimmung zur sofortigen Bereitstellung im Wortlaut des Servers; Widerrufsbelehrung und Muster-Widerrufsformular verlinkt');
   await foto(page, 'app-kasse');
-  await page.click('.bb .btn.primary'); await page.waitForTimeout(200);
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForTimeout(200);
   ok(await page.locator('.kerr').count() === 3 && await page.evaluate(() => !(S.kauf && S.kauf.paid) && S.screen === 'kasse'), 'Ohne Zahlungsart, AGB und Zustimmung zur sofortigen Bereitstellung kein Kauf');
   await page.click('[data-act="k-pay"][data-v="PayPal"]'); await page.click('[data-in="kc"][data-f="bedingungen"]'); await page.click('[data-in="kc"][data-f="widerruf"]');
-  await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gekauft"]'); await page.waitForTimeout(400);
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForSelector('[data-screen="gekauft"]'); await page.waitForTimeout(400);
   ok(/Freigeschaltet\./.test(await page.evaluate(() => document.body.textContent)) && await page.evaluate(() => S.kauf.paid === true && S.kauf.test === true && !S.kauf.token) && await page.evaluate(() => { const e = document.querySelector('.okmark-l[data-lottie="fertig"]'); return !!(e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0); }), 'Testkauf: freigeschaltet, der Haken zeichnet sich (Lottie), als Test gekennzeichnet, ohne Nachweis');
   await foto(page, 'app-gekauft');
   await page.reload({ waitUntil: 'networkidle' }); await page.waitForTimeout(300);
@@ -419,11 +419,11 @@ if (teil(4)) {
   // zwei fertige Fenster in den Link legen (wie nach dem Messen)
   await page.evaluate((code) => { localStorage.setItem('aufmass.k.' + code, JSON.stringify({ windows: demoProject(), proj: {}, name: '' })); }, link.code);
   await page.reload({ waitUntil: 'networkidle' });
-  await page.click('.bb .btn.primary'); // Weiter zum Absenden
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); // Weiter zum Absenden
   await page.waitForSelector('[data-screen="anfrage"]');
-  await page.click('.bb .btn.primary');
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter');
   await page.waitForSelector('[data-screen="anfrage2"]');
-  await page.click('.bb .btn.primary'); // Prüfen und senden
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); // Prüfen und senden
   await page.waitForSelector('[data-screen="blatt"]');
   text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('mit allen Maßen und Wünschen') && !text.includes('Fotos und Wünschen'), 'Prüfen-Seite verspricht keine Fotos');
@@ -435,7 +435,7 @@ if (teil(4)) {
     return { wege: wege.join(','), code: /AM1\./.test(sichtbar), t1: t1, t2: t2, nurAn: /gehen nur an /.test(document.body.textContent) };
   });
   ok(ks4.wege === 'blatt,blatt,blatt,blatt,blatt,blatt' && !ks4.code && /bekommst du von/.test(ks4.t1) && /bekommst du von/.test(ks4.t2) && ks4.nurAn, 'Kundenschutz im Link: kein Weg zu Aufmaßblatt, Code, Kasse oder Konto, die PDF gibt es nur vom Betrieb; Prüfen-Seite: geht nur an den Betrieb (' + ks4.wege + ')');
-  await page.click('.bb .btn.primary'); // An … senden
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); // An … senden
   await page.waitForSelector('[data-screen="gesendet"]');
   text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('Jetzt abschicken.') && !text.includes('Gesendet.'), 'Pilot: „Jetzt abschicken“ statt „Gesendet“');
@@ -650,7 +650,7 @@ if (teil(6)) {
   await foto(p2, 'app-senden-gesperrt');
   await p2.evaluate(() => { S.windows.push(Object.assign({}, demoProject()[1], { name: 'Komplett' })); persist(); render(true); }); await p2.waitForTimeout(300);
   ok(await p2.locator('.bb .btn.primary[disabled]').count() === 0 && /trotzdem senden/.test(await p2.evaluate(() => document.body.innerText)), 'Mit einem vollständigen Fenster geht Senden, Lücke wird genannt');
-  await p2.click('.bb .btn.primary'); await p2.waitForSelector('[data-screen="gesendet"]'); await p2.waitForTimeout(400);
+  await p2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await p2.waitForSelector('[data-screen="gesendet"]'); await p2.waitForTimeout(400);
   const code1 = await codeAusNachricht(p2);
   ok(await p2.evaluate(() => { const e = document.querySelector('.okmark-l[data-lottie="senden"]'); return !!(e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0); }), 'Abschicken: der Flieger fliegt (Lottie)');
   await p2.evaluate(() => { S.windows[0].name = 'Nachträglich geändert'; S.proj.notiz = 'anders'; render(true); }); await p2.waitForTimeout(200);
@@ -830,7 +830,7 @@ if (teil(6)) {
   const pm = await p5.evaluate(() => ({ screen: S.screen, d: derive(S.win), bild: (S.win.plan.bild || '').length, rows: document.querySelectorAll('input[data-in="plan"]').length }));
   await p5.click('[data-act="plan-bump"][data-f="h"][data-v="50"]'); await p5.waitForTimeout(300);
   const pm2 = await p5.evaluate(() => { const d = derive(S.win); return { moH: d.moH, elH: d.elH, mo: S.win.mo.hl === S.win.mo.hr && S.win.mo.hl === d.moH }; });
-  await p5.click('.bb .btn.primary'); await p5.waitForTimeout(900);
+  await p5.click('.bb .btn.primary, .scr.dna .lg-weiter'); await p5.waitForTimeout(900);
   const erg = await p5.evaluate(() => ({ screen: S.screen, tags: Array.from(document.querySelectorAll('.result .tag, .er-tag')).map((t) => t.textContent), bild: !!document.querySelector('.plan-bild'), back: (() => { const s = document.querySelector('.hdr-btn[data-act="back"] span'), k = document.querySelector('.scr.dna .lg-kopf-zurueck'); return s ? s.textContent : k ? k.getAttribute('aria-label').replace(/^Zurück: /, '') : ''; })() })); // Ergebnis im Look der Design-DNA: Zurück im eigenen Kopf
   const code = await p5.evaluate(() => { const o = unpackProject(packProject([S.win], S.proj, null)); return { bild: o.w[0].plan.bild, ecken: o.w[0].plan.ecken.length, neu: o.w[0].neu }; });
   ok(pm.screen === 'planmasse' && pm.d.moW === 1230 && pm.d.elW === 1200 && pm.bild > 5000 && pm.rows === 4 && pm2.moH === 1530 && pm2.elH === 1500 && pm2.mo && erg.screen === 'ergebnis' && erg.tags.length === 2 && erg.tags.every((t) => /Wunschmaß|rechnerisch/.test(t)) && erg.bild && erg.back === 'Maße' && code.bild === '' && code.ecken === 4 && code.neu, 'Wunschmaße: Vorgabe je Art, Element 15 mm je Seite kleiner, Ergebnis als Wunschmaß mit Lage auf dem Foto; das Foto bleibt auf dem Gerät');
@@ -1089,8 +1089,8 @@ if (teil(7)) {
   await foto(page, 'app-nachbesserung');
   await page.evaluate(() => { S.windows[1].mo.wb = 900; S.windows[1].name = 'Bad (nachgemessen)'; persist(); S.screen = 'blatt'; render(true); });
   await page.waitForTimeout(300);
-  ok(/Erneut an Fensterbau Brandt senden/.test(await page.evaluate(() => document.querySelector('.bb .btn.primary').textContent)), 'Prüfen-Seite sagt „Erneut senden“');
-  await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gesendet"]');
+  ok(/Erneut an Fensterbau Brandt senden/.test(await page.evaluate(() => document.querySelector('.bb .btn.primary, .scr.dna .lg-weiter').textContent)), 'Prüfen-Seite sagt „Erneut senden“');
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForSelector('[data-screen="gesendet"]');
   const code2 = await codeAusNachricht(page);
   ok(await page.evaluate((c) => unpackProject(c).r === 2 && !S.nb && S.sent.runde === 2, code2), 'Erneuter Code trägt Runde 2, App ist wieder im Zustand „gesendet“');
   // Betrieb: Code übernehmen → ersetzt, nichts gebucht
@@ -1109,7 +1109,7 @@ if (teil(7)) {
   ok(/~3$/.test(url3), 'Zweite Nachbesserung: Runde 3');
   await page.goto(url3, { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
   await page.evaluate(() => { const w = demoProject()[0]; S.windows = [Object.assign({}, w, { name: 'Garage', w: 2400, h: 2100, el: { w: 2400, h: 2100 }, mo: { hm: 2130, hl: 2130, hr: 2130, wm: 2430, wt: 2430, wb: 2430 } })]; persist(); S.screen = 'blatt'; render(true); });
-  await page.waitForTimeout(200); await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gesendet"]');
+  await page.waitForTimeout(200); await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForSelector('[data-screen="gesendet"]');
   const code3 = await codeAusNachricht(page);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   await tun('sheet', 'linkimport'); await page.waitForSelector('#code-in'); await page.fill('#code-in', code3); await tun('linkimport'); await page.waitForTimeout(500);
@@ -1127,7 +1127,7 @@ if (teil(7)) {
   st = await page.evaluate(() => ({ nb: S.nb, n: S.windows.length, txt: document.body.textContent }));
   ok(st.nb && st.nb.teil && st.n === 0 && /nicht gespeichert/.test(st.txt), 'Ohne gespeicherte Angaben erklärt die App, nur das betroffene Fenster neu zu messen');
   await page.evaluate(() => { S.windows = [Object.assign({}, demoProject()[1], { name: 'Backstube' })]; persist(); S.screen = 'blatt'; render(true); });
-  await page.waitForTimeout(200); await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gesendet"]');
+  await page.waitForTimeout(200); await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForSelector('[data-screen="gesendet"]');
   const code4 = await codeAusNachricht(page);
   ok(await page.evaluate((c) => { const o = unpackProject(c); return o.r === 2 && o.m === 1; }, code4), 'Code meldet Teil-Nachbesserung');
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
@@ -1210,9 +1210,9 @@ if (teil(8)) {
   ok(st1.ok && st1.status === 'geoeffnet' && st1.betrieb === firma && st1.kunde === 'Familie Server', 'Server weiß, dass der Kunde den Link geöffnet hat');
   await kp.evaluate((code) => { localStorage.setItem('aufmass.k.' + code, JSON.stringify({ windows: demoProject(), proj: {}, name: '' })); }, l1.code);
   await kp.reload({ waitUntil: 'networkidle' }); await kp.waitForTimeout(500);
-  await kp.click('.bb .btn.primary'); await kp.waitForSelector('[data-screen="anfrage"]'); await kp.click('.bb .btn.primary'); await kp.waitForSelector('[data-screen="anfrage2"]'); await kp.click('.bb .btn.primary'); await kp.waitForSelector('[data-screen="blatt"]');
+  await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="anfrage"]'); await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="anfrage2"]'); await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="blatt"]');
   ok(/mit allen Maßen und Wünschen, dazu die Auswertung der Fotos/.test(await kp.evaluate(() => document.body.innerText)), 'Prüfen-Seite verspricht Maße, Wünsche und Fotoauswertung');
-  await kp.click('.bb .btn.primary'); await kp.waitForSelector('[data-screen="gesendet"]'); await kp.waitForTimeout(500);
+  await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="gesendet"]'); await kp.waitForTimeout(500);
   const ges = await kp.evaluate(() => ({ txt: document.body.innerText, sent: S.sent, code: !!document.getElementById('code-box'), feier: (function () { const e = document.querySelector('.okmark-l[data-lottie="fertig"]'); return e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0 ? 1 : 0; })() }));
   ok(/Gesendet\./.test(ges.txt) && !/Jetzt abschicken/.test(ges.txt) && !/Nur im Prototyp/.test(ges.txt) && ges.sent && ges.sent.uebertragen === true && !ges.code && ges.feier === 1, 'Aufmaß direkt übertragen: „Gesendet“, kein Code-Umweg, kein Prototyp-Hinweis, gefeiert');
   await foto(kp, 'srv-app-gesendet');
@@ -1333,14 +1333,14 @@ if (teil(8)) {
   ok(await kp2.evaluate(() => SERVER.zahlung && SERVER.attrappe && PREIS() === 7.99 && !FREI()) && await kp2.locator('.dv-blur').count() === 1, 'App kennt die Kasse des Servers, Blatt ist noch gesperrt');
   await kp2.click('[data-act="k-start"]'); await kp2.waitForSelector('#s-mail'); // Freischalten nur mit Konto: E-Mail und Code
   ok(await kp2.evaluate(() => S.screen === 'sichern' && S.sichern.zweck === 'kauf' && /brauchst du ein Konto/.test(document.body.innerText)), 'Freischalten im Servermodus: erst das Aufmaß sichern (E-Mail und Code, kein Passwort)');
-  await kp2.fill('#s-mail', 'kaeufer@beispiel.de'); await kp2.click('[data-in="sc"][data-f="agb"]'); await kp2.click('.bb .btn.primary'); await kp2.waitForSelector('#s-code');
-  await kp2.fill('#s-code', '123456'); await kp2.click('.bb .btn.primary'); await kp2.waitForSelector('[data-screen="kasse"]', { timeout: 10000 }); await kp2.waitForTimeout(300);
+  await kp2.fill('#s-mail', 'kaeufer@beispiel.de'); await kp2.click('[data-in="sc"][data-f="agb"]'); await kp2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp2.waitForSelector('#s-code');
+  await kp2.fill('#s-code', '123456'); await kp2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp2.waitForSelector('[data-screen="kasse"]', { timeout: 10000 }); await kp2.waitForTimeout(300);
   const kasse = await kp2.evaluate(() => document.body.innerText);
   ok(/Weiter zu Stripe · 7,99 €/.test(kasse) && /Zahlungsdienstleisters Stripe/.test(kasse) && /Kredit- oder Debitkarte \(auf passenden Geräten auch Apple Pay oder Google Pay\)/.test(kasse) && /Testbetrieb/.test(kasse) && /Rechnung an kaeufer@beispiel\.de/.test(kasse) && !/Testkauf/.test(kasse) && await kp2.locator('[data-act="k-pay"]').count() === 0, 'Kasse im Servermodus: Zahlung bei Stripe mit den Zahlungsarten des Servers, Rechnung an die E-Mail des Kontos, keine Scheinauswahl, kein Testkauf');
-  await kp2.click('.bb .btn.primary'); await kp2.waitForTimeout(200);
+  await kp2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp2.waitForTimeout(200);
   ok(await kp2.evaluate(() => S.screen === 'kasse' && !(S.kauf && S.kauf.paid)) && await kp2.locator('.kerr').count() === 2, 'Ohne Zustimmung zu AGB und sofortiger Bereitstellung keine Kasse');
   await kp2.click('[data-in="kc"][data-f="bedingungen"]'); await kp2.click('[data-in="kc"][data-f="widerruf"]');
-  await kp2.click('.bb .btn.primary');
+  await kp2.click('.bb .btn.primary, .scr.dna .lg-weiter');
   await kp2.waitForFunction(() => typeof S !== 'undefined' && S.screen === 'gekauft' && S.kauf && S.kauf.paid, null, { timeout: 12000 }); await kp2.waitForTimeout(500);
   const kauf = await kp2.evaluate(() => ({ token: S.kauf.token, session: S.kauf.session, kennung: S.kauf.kennung, test: !!S.kauf.test, url: location.search, txt: document.body.innerText, feier: (function () { const e = document.querySelector('.okmark-l[data-lottie="fertig"]'); return e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0 ? 1 : 0; })() }));
   ok(/Freigeschaltet\./.test(kauf.txt) && /^test_/.test(kauf.session || '') && (kauf.token || '').length === 32 && !kauf.test && kauf.url === '' && kauf.feier === 1, 'Zurück von der Kasse: freigeschaltet mit Nachweis vom Server, Adresse bereinigt');
@@ -1348,7 +1348,7 @@ if (teil(8)) {
   const nwFalsch = await api('/api/zahlung/nachweis?kennung=' + encodeURIComponent(kauf.kennung) + '&session=' + encodeURIComponent(kauf.session) + '&token=' + encodeURIComponent('x'.repeat(32)));
   const unbez = await api('/api/zahlung/pruefen?session=' + encodeURIComponent('cs_offen_' + stempel) + '&kennung=' + encodeURIComponent(kauf.kennung));
   ok(nw.ok === true && nwFalsch.ok === false && unbez.bezahlt === false, 'Nachweis ist auf dem Server prüfbar; gefälschter Nachweis und unbezahlte Sitzung schalten nichts frei');
-  await kp2.click('.bb .btn.primary'); await kp2.waitForTimeout(400);
+  await kp2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp2.waitForTimeout(400);
   ok(await kp2.locator('#code-box').count() === 1 && /Dein Aufmaß, dein Blatt/.test(await kp2.evaluate(() => document.body.innerText)), 'Nach dem Kauf: Code und Datei da');
   const [dl8] = await Promise.all([kp2.waitForEvent('download', { timeout: 10000 }), kp2.click('[data-act="k-dl"]')]);
   ok(/\.pdf$/.test(dl8.suggestedFilename()), 'Gekaufte PDF lädt: ' + dl8.suggestedFilename());
@@ -1365,7 +1365,7 @@ if (teil(8)) {
   const w1 = await kp3.evaluate(() => ({ paid: !!(S.kauf && S.kauf.paid), wartet: (S.kauf && S.kauf.wartet) || '', screen: S.screen, txt: document.body.innerText, toast: S.toast || '', url: location.search }));
   ok(!w1.paid && /^wartet_/.test(w1.wartet) && w1.screen === 'teilen' && /Deine Zahlung ist unterwegs/.test(w1.txt) && /Bitte nicht noch einmal bezahlen/.test(w1.txt) && /unterwegs/.test(w1.toast) && w1.url === '', 'Zahlung noch unterwegs: nicht freigeschaltet, Hinweis „nicht noch einmal bezahlen“ statt „abgebrochen“');
   await foto(kp3, 'srv-app-zahlung-unterwegs');
-  await kp3.click('.bb .btn.primary'); await kp3.waitForTimeout(400);
+  await kp3.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp3.waitForTimeout(400);
   ok(await kp3.evaluate(() => S.screen === 'teilen' && /unterwegs/.test(S.toast || '') && !!S.kauf.wartet), 'Freischalten, während die Zahlung unterwegs ist: keine zweite Kasse, nur der Hinweis');
   await kp3.evaluate(() => { S.kauf.wartet = 'test_spaeter'; persist(); });
   await kp3.reload({ waitUntil: 'networkidle' }); await kp3.waitForTimeout(600);
@@ -1529,7 +1529,7 @@ if (teil(9)) {
     const st = await ap.evaluate(() => ({ id: TOUR[S.tour.i], fakt: !!document.querySelector('.tour-fakt .tf-q'), gesperrt: document.querySelectorAll('.gesperrt[aria-disabled="true"], .farbfeld.gesperrt').length }));
     schritte.push(st);
     if (st.id === 'fotos') await ap.waitForTimeout(1900);
-    if (i < 8) { await ap.click('.bb .btn.primary'); await ap.waitForTimeout(350); }
+    if (i < 8) { await ap.click('.bb .btn.primary, .scr.dna .lg-weiter'); await ap.waitForTimeout(350); }
   }
   ok(schritte.map((x) => x.id).join(',') === 'start,fotos,messen,oeffnung,material,farbe,glas,sonne,blatt' && schritte.every((x) => x.fakt), 'Führung: neun Schritte, in jedem ein Fakt mit Quelle');
   ok(['start', 'oeffnung', 'material', 'farbe', 'glas', 'sonne'].every((id) => schritte.find((x) => x.id === id).gesperrt > 0), 'Führung: einige Optionen tragen ein Schloss (Element, Öffnung, Material, Farbe, Glas, Sonnenschutz)');
@@ -2598,7 +2598,7 @@ if (teil(14)) {
   try {
     await page.goto(BASE + '/app/', { waitUntil: 'networkidle' });
     await fensterAnlegen(page, [['Wohnzimmer', 1230, 1410], ['Küche', 1010, 1210], ['Bad', 610, 810]]); await page.waitForTimeout(400);
-    const h1 = await page.evaluate(() => { const l = document.querySelector('.liste-in'), c = document.querySelectorAll('.liste-in .wincard'); return { h1: document.querySelector('.hd h1').textContent, n: c.length, oben: l ? Math.round(l.getBoundingClientRect().top) : 9999, karten: Array.from(c).map((x) => x.textContent).join(' | '), hero: !!document.querySelector('.hero'), bar: document.querySelector('.bb .btn.primary').textContent, angelegt: angelegt(), wids: S.windows.every((w) => w.wid && w.t0 && w.aend === 0), stand: (document.querySelector('.hd .ueb-zeile') || {}).textContent || '', balken: (document.querySelector('.hd .ueb-prog') || { getAttribute: () => '' }).getAttribute('aria-valuenow'), nr: document.querySelectorAll('.liste-in .wincard .ic .pos').length, st: document.querySelectorAll('.liste-in .wincard .st.voll').length, neu: !!document.querySelector('.hd .hd-neu') }; });
+    const h1 = await page.evaluate(() => { const l = document.querySelector('.liste-in'), c = document.querySelectorAll('.liste-in .wincard'); return { h1: document.querySelector('.hd h1').textContent, n: c.length, oben: l ? Math.round(l.getBoundingClientRect().top) : 9999, karten: Array.from(c).map((x) => x.textContent).join(' | '), hero: !!document.querySelector('.hero'), bar: document.querySelector('.bb .btn.primary, .scr.dna .lg-weiter').textContent, angelegt: angelegt(), wids: S.windows.every((w) => w.wid && w.t0 && w.aend === 0), stand: (document.querySelector('.hd .ueb-zeile') || {}).textContent || '', balken: (document.querySelector('.hd .ueb-prog') || { getAttribute: () => '' }).getAttribute('aria-valuenow'), nr: document.querySelectorAll('.liste-in .wincard .ic .pos').length, st: document.querySelectorAll('.liste-in .wincard .st.voll').length, neu: !!document.querySelector('.hd .hd-neu') }; });
     ok(h1.h1 === 'Deine Fenster.' && /Alle 3 Fenster sind vollständig/.test(h1.stand) && h1.balken === '3' && h1.nr === 3 && h1.st === 3 && h1.neu && h1.n === 3 && h1.oben < 500 && !h1.hero && h1.bar === 'Aufmaßblatt fertigstellen' && h1.angelegt === 3 && h1.wids, 'Angefangenes Aufmaß: „Deine Fenster.“ mit Stand und Balken, die Liste steht oben (ab ' + h1.oben + ' px) statt unter dem Startbild, kein „Fenster ausmessen“ mehr');
     ok(/vollständig/i.test(h1.karten) && !/\d\.\d{3}\s×\s\d/.test(h1.karten) && !/\d mm/.test(h1.karten), 'Liste vor dem Freischalten: nur der Stand („Vollständig“) statt Zahlen');
     await foto(page, 'app-aufmass-fortsetzen');
@@ -2707,7 +2707,7 @@ if (teil(14)) {
     await foto(s1, 'app-link-weitermachen');
     const c2 = await browser.newContext(telefon), s2 = await neueSeite(c2, B5);
     await s2.goto(url, { waitUntil: 'networkidle' }); await s2.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 }); await s2.waitForTimeout(300);
-    const zwei = await s2.evaluate(() => ({ namen: S.windows.map((w) => w.name).join(','), a: angelegt(), merk: (document.querySelector('.merk-karte') || {}).textContent || '', h1: (document.querySelector('.hd h1') || {}).textContent, karten: document.querySelector('.liste-in').textContent, bar: document.querySelector('.bb .btn.primary').textContent }));
+    const zwei = await s2.evaluate(() => ({ namen: S.windows.map((w) => w.name).join(','), a: angelegt(), merk: (document.querySelector('.merk-karte') || {}).textContent || '', h1: (document.querySelector('.hd h1') || {}).textContent, karten: document.querySelector('.liste-in').textContent, bar: document.querySelector('.bb .btn.primary, .scr.dna .lg-weiter').textContent }));
     ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.a === 2 && zwei.h1 === 'Ihre Fenster.' && /auch für ein anderes Gerät/.test(zwei.merk) && /Der Link gilt bis/.test(zwei.merk) && zwei.bar === 'Weiter zum Absenden', 'Anderes Gerät, leerer Speicher: dieselbe Liste aus dem Zwischenstand, Hinweis „jederzeit weitermachen“ mit Gültigkeit');
     ok(/vollständig/i.test(zwei.karten) && !/\d mm/.test(zwei.karten), 'Kundenlink: in der Liste keine Maße (die bekommt der Betrieb)');
     await s2.click('.liste-in .wincard[data-i="0"]'); await s2.waitForSelector('[data-screen="fertig"]');
@@ -2917,7 +2917,7 @@ if (teil(15)) {
   const aus6 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus6);
   const fensterAnlegen = (seite, liste) => seite.evaluate((liste) => { liste.forEach((f) => { S.win = Object.assign(baseWin(), { name: f[0], mo: { hm: f[2] + 70, hl: f[2] + 70, hr: f[2] + 70, wm: f[1] + 140, wt: f[1] + 140, wb: f[1] + 140 }, el: { w: f[1], h: f[2] }, w: f[1], h: f[2], fotos: 2 }); S.editIdx = -1; saveWin(); }); go('home'); }, liste);
   const ruhig = (seite) => seite.waitForFunction(() => S.sync && S.sync.geladen && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
-  const anmelden = async (seite, mail, agb) => { await seite.fill('#s-mail', mail); if (agb) await seite.click('[data-in="sc"][data-f="agb"]'); await seite.click('.bb .btn.primary'); await seite.waitForSelector('#s-code'); await seite.fill('#s-code', '123456'); await seite.click('.bb .btn.primary'); };
+  const anmelden = async (seite, mail, agb) => { await seite.fill('#s-mail', mail); if (agb) await seite.click('[data-in="sc"][data-f="agb"]'); await seite.click('.bb .btn.primary, .scr.dna .lg-weiter'); await seite.waitForSelector('#s-code'); await seite.fill('#s-code', '123456'); await seite.click('.bb .btn.primary, .scr.dna .lg-weiter'); };
   const mail6 = 'haus6-' + stempel + '@beispiel.de';
   try {
     let bereit = false; for (let i = 0; i < 60 && !bereit; i++) { await new Promise((r) => setTimeout(r, 200)); try { bereit = (await fetch(B6 + '/api/status').then((r) => r.json())).konten === true; } catch (e) { /* noch nicht */ } }
@@ -2931,10 +2931,10 @@ if (teil(15)) {
     ok(/Nur auf diesem Gerät/.test(gast.text) && /Aufmaß sichern/.test(gast.text) && gast.nachListe && gast.vorDatei && gast.offen && !gast.ks, 'Gast mit Fenstern: Karte „Nur auf diesem Gerät · Aufmaß sichern“ direkt unter der Liste; noch nichts auf dem Server');
     await foto(s1, 'app-gast-sichern');
     await s1.click('.konto-karte [data-act="sichern"]'); await s1.waitForSelector('#s-mail');
-    await s1.click('.bb .btn.primary'); await s1.waitForTimeout(200);
+    await s1.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s1.waitForTimeout(200);
     ok(await s1.locator('.kf.bad').count() === 1 && await s1.locator('.kcheck.bad').count() === 1 && await s1.evaluate(() => S.screen === 'sichern' && S.sichern.schritt === 1), 'Sichern: ohne E-Mail und Zustimmung kein Code');
     await foto(s1, 'app-sichern-mail');
-    await s1.fill('#s-mail', mail6); await s1.click('[data-in="sc"][data-f="agb"]'); await s1.click('.bb .btn.primary'); await s1.waitForSelector('#s-code'); await s1.waitForTimeout(250);
+    await s1.fill('#s-mail', mail6); await s1.click('[data-in="sc"][data-f="agb"]'); await s1.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s1.waitForSelector('#s-code'); await s1.waitForTimeout(250);
     await foto(s1, 'app-sichern-code');
     const codeSchirm = await s1.evaluate(() => ({ max: document.getElementById('s-code').getAttribute('maxlength'), text: document.body.innerText, link: (document.querySelector('.link-statt-code') || {}).textContent || '' }));
     ok(codeSchirm.max === '10' && !/sechsstellig/.test(codeSchirm.text) && /Wir haben dir einen Code an/.test(codeSchirm.text) && /Link statt eines Codes, öffne ihn in diesem Browser: Dein Aufmaß liegt bisher nur hier/.test(codeSchirm.link), 'Code-Schritt: Feld für 6 bis 10 Stellen (Länge stellt man bei Supabase ein), kein „sechsstellig“; Hinweis, einen Link statt Code in diesem Browser zu öffnen');
@@ -2943,9 +2943,9 @@ if (teil(15)) {
     const laengen = [];
     for (const pfad of ['/api/kunde/anmelden', '/api/konto/bestaetigen']) for (const c of ['12345', '87654321', '9876543210', '12345678901']) laengen.push(await codeLaenge(pfad, c));
     ok(laengen.every((f, i) => ([1, 2].includes(i % 4) ? /stimmt nicht/.test(f) : /Bitte den Code aus der E-Mail eingeben/.test(f))), 'Anmeldecode mit 8 oder 10 Stellen wird geprüft (Supabase: Email OTP Length), 5 oder 11 Stellen gelten nicht als Code (App und Betriebsbereich)');
-    await s1.fill('#s-code', '999999'); await s1.click('.bb .btn.primary'); await s1.waitForTimeout(500);
+    await s1.fill('#s-code', '999999'); await s1.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s1.waitForTimeout(500);
     const falschC = await s1.evaluate(() => ({ screen: S.screen, err: (S.sichern && S.sichern.err.code) || '', ks: !!KS }));
-    await s1.fill('#s-code', '123456'); await s1.click('.bb .btn.primary');
+    await s1.fill('#s-code', '123456'); await s1.click('.bb .btn.primary, .scr.dna .lg-weiter');
     await s1.waitForFunction(() => S.screen === 'home' && KS, null, { timeout: 8000 }); await ruhig(s1); await s1.waitForTimeout(300);
     const gesichert = await s1.evaluate(async () => ({ karte: document.querySelector('.konto-karte').textContent, liste: (await kontoJson('/api/kunde/aufmasse')).aufmasse, kennung: S.kauf.kennung }));
     ok(falschC.screen === 'sichern' && /stimmt nicht/.test(falschC.err) && !falschC.ks && /Gesichert/.test(gesichert.karte) && gesichert.liste.length === 1 && gesichert.liste[0].kennung === gesichert.kennung && gesichert.liste[0].fenster === 2, 'Nach dem Code: Aufmaß im Konto (2 Fenster), Karte „Gesichert“; ein falscher Code meldet sich');
@@ -2963,9 +2963,9 @@ if (teil(15)) {
     await s1.reload({ waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.windows[0] && S.windows[0].name === 'Wohnzimmer links', null, { timeout: 8000 });
     ok(true, 'Änderung auf dem zweiten Gerät ist nach dem Neuladen auch auf dem ersten da');
     // Kauf auf Gerät 2 (mit Konto direkt zur Kasse), Gerät 1 bekommt den Kauf; danach endet die freie Woche
-    await s2.evaluate(() => go('teilen')); await s2.waitForTimeout(200); await s2.click('.bb .btn.primary'); await s2.waitForSelector('[data-screen="kasse"]', { timeout: 8000 });
+    await s2.evaluate(() => go('teilen')); await s2.waitForTimeout(200); await s2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s2.waitForSelector('[data-screen="kasse"]', { timeout: 8000 });
     const kasse = await s2.evaluate(() => document.body.innerText);
-    await s2.click('[data-in="kc"][data-f="bedingungen"]'); await s2.click('[data-in="kc"][data-f="widerruf"]'); await s2.click('.bb .btn.primary');
+    await s2.click('[data-in="kc"][data-f="bedingungen"]'); await s2.click('[data-in="kc"][data-f="widerruf"]'); await s2.click('.bb .btn.primary, .scr.dna .lg-weiter');
     await s2.waitForFunction(() => S.kauf && S.kauf.paid && S.screen === 'gekauft', null, { timeout: 10000 });
     await s1.reload({ waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.kauf && S.kauf.paid, null, { timeout: 8000 });
     const nach = await s1.evaluate(() => { S.win = kopie(S.windows[1]); S.editIdx = 1; go('fertig'); return { frei: FREI(), note: (document.querySelector('.note.warn') || {}).textContent || '' }; });
@@ -3460,7 +3460,7 @@ if (teil(16)) {
       ['start', 'fotos', 'messen', 'rest', 'ergebnis'].forEach((sc) => { go(sc); if (sc === 'rest') { S.rest.i = 0; render(); } pruef(sc); if (sc !== 'messen' && sc !== 'rest' && !document.querySelector('.bb .bb-zurueck, .scr.dna .lg-fuss .lg-zurueck')) ohnePfeil.push(sc); });
       ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { artSetzen(S.win, art); S.win.sart = 'rollladen'; S.win.iart = 'rollo'; qList(S.win).forEach((q) => { if (q.id === 'notiz') return; S.q = q.id; go('frage'); pruef(art + ':' + q.id); }); });
       S.win.neu = true; go('planmasse'); pruef('planmasse'); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push('planmasse'); S.win.neu = false; artSetzen(S.win, 'fenster');
-      ['anfrage', 'anfrage2', 'anfrage3'].forEach((sc) => { go(sc); if (!document.querySelector('.hd .nz-knopf')) fehlt.push(sc); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
+      ['anfrage', 'anfrage2', 'anfrage3'].forEach((sc) => { go(sc); if (!document.querySelector('.hd .nz-knopf, .scr.dna .lg-notiz-knopf')) fehlt.push(sc); if (!document.querySelector('.bb .bb-zurueck, .scr.dna .lg-fuss .lg-zurueck')) ohnePfeil.push(sc); }); // Fürs Angebot im Look der Design-DNA
       return { fehlt: fehlt, ohneWo: ohneWo, ohnePfeil: ohnePfeil, n: n };
     }, MOK);
     ok(nzAlle.n > 100 && !nzAlle.fehlt.length && !nzAlle.ohneWo.length && !nzAlle.ohnePfeil.length, 'Konfigurator: „Notiz“ und „Übersicht“ auf jedem Schritt und jeder Frage (' + nzAlle.n + ' Bildschirme) und den Anfrage-Seiten, unten überall der Pfeil zurück' + (nzAlle.fehlt.length + nzAlle.ohneWo.length + nzAlle.ohnePfeil.length ? ': ' + nzAlle.fehlt.concat(nzAlle.ohneWo, nzAlle.ohnePfeil).slice(0, 8).join(', ') : ''));
@@ -4007,7 +4007,7 @@ if (teil(18)) {
     await s18c.evaluate(() => { go('blatt'); }); await s18c.waitForTimeout(200);
     const vorSenden = await s18c.evaluate(() => ({ hinweis: (document.querySelector('.ki-laeuft') || {}).textContent || '', voll: derive(S.windows[0]).complete }));
     await s18c.evaluate(() => { act('send', document.body); }); await s18c.waitForTimeout(150); // nicht auf das Senden warten: der Zustand währenddessen zählt
-    const wartet = await s18c.evaluate(() => ({ wartet: S.kiWartet, sent: !!S.sent, knopf: (document.querySelector('.bb .btn.primary') || {}).textContent || '', aus: !!(document.querySelector('.bb .btn.primary') || {}).disabled, toast: S.toast || '' }));
+    const wartet = await s18c.evaluate(() => ({ wartet: S.kiWartet, sent: !!S.sent, knopf: (document.querySelector('.bb .btn.primary, .scr.dna .lg-weiter') || {}).textContent || '', aus: !!(document.querySelector('.bb .btn.primary, .scr.dna .lg-weiter') || {}).disabled, toast: S.toast || '' }));
     await s18c.waitForFunction(() => S.sent && S.sent.uebertragen, null, { timeout: 20000 });
     const beimBetrieb = (await api18('/api/konto', null, tok18)).konto.acc.links.find((l) => l.code === code18);
     const kiBetrieb = beimBetrieb && beimBetrieb.aufmass && beimBetrieb.aufmass.windows[0] && beimBetrieb.aufmass.windows[0].ki;
@@ -4530,7 +4530,7 @@ if (teil(22)) {
   await p.tap('#t-wunschA'); await p.keyboard.type('wie Garagentor'); await p.tap('.qnav .btn.primary'); await p.waitForTimeout(600);
   const t2 = await p.evaluate(() => ({ q: S.q, wunschA: S.win.wunschA }));
   await p.evaluate(() => { const w = demoProject()[0]; Object.assign(w, { neu: true, art: 'fest' }); S.win = w; S.editIdx = -1; go('planmasse'); }); await p.waitForTimeout(400);
-  await p.tap('#p-w'); await p.fill('#p-w', ''); await p.keyboard.type('2000'); await p.tap('.bb .btn.primary'); await p.waitForTimeout(600);
+  await p.tap('#p-w'); await p.fill('#p-w', ''); await p.keyboard.type('2000'); await p.tap('.bb .btn.primary, .scr.dna .lg-weiter'); await p.waitForTimeout(600);
   const t3 = await p.evaluate(() => ({ screen: S.screen, wm: S.win.mo.wm }));
   await p.evaluate(() => go('planmasse')); await p.waitForTimeout(300);
   await p.tap('#p-w'); await p.fill('#p-w', ''); await p.keyboard.type('2100'); await p.tap('#p-h'); await p.waitForTimeout(300);
@@ -4790,11 +4790,11 @@ if (teil(22)) {
   await pE.evaluate(() => { const k = demoProject()[0]; k.name = 'Küche'; S.windows = [k]; persist(); const w = demoProject()[1]; w.name = 'Bad'; delete w.wid; S.win = w; S.editIdx = -1; S.q = 'lage'; go('frage'); entwurfJetzt(); S.win = baseWin(); go('blatt'); });
   await pE.waitForTimeout(400);
   const eS0 = await pE.evaluate(() => ({ karte: (document.querySelector('.ek-warn') || {}).textContent || '', knoepfe: document.querySelectorAll('.ek-warn [data-act="entwurf-weiter"], .ek-warn [data-act="entwurf-weg"]').length }));
-  await pE.click('.bb .btn.primary'); await pE.waitForTimeout(400);
+  await pE.click('.bb .btn.primary, .scr.dna .lg-weiter'); await pE.waitForTimeout(400);
   const eS1 = await pE.evaluate(() => { const sh = document.querySelector('.sheet[aria-modal="true"]'); return { titel: sh ? sh.querySelector('h2').textContent : '', ak: sh ? sh.querySelectorAll('h2 .ak').length : 0, fokus: !!sh && sh.contains(document.activeElement), sent: !!S.sent }; });
   await pE.evaluate(() => history.back()); await pE.waitForTimeout(450);
   const eS2 = await pE.evaluate(() => ({ blatt: !!document.querySelector('.sheet[aria-modal="true"]'), screen: S.screen, sent: !!S.sent }));
-  await pE.click('.bb .btn.primary'); await pE.waitForTimeout(400); await pE.click('.sheet [data-act="send-ohne"]'); await pE.waitForSelector('[data-screen="gesendet"]'); await pE.waitForTimeout(300);
+  await pE.click('.bb .btn.primary, .scr.dna .lg-weiter'); await pE.waitForTimeout(400); await pE.click('.sheet [data-act="send-ohne"]'); await pE.waitForSelector('[data-screen="gesendet"]'); await pE.waitForTimeout(300);
   const eS3 = await pE.evaluate(() => ({ sent: !!S.sent, entwurf: Object.keys(localStorage).filter((k) => /\.entwurf$/.test(k)).length }));
   ok(/„Bad“ ist angefangen und nicht gespeichert/.test(eS0.karte) && /nicht mit an Fensterbau Elster/.test(eS0.karte) && eS0.knoepfe === 2 && eS1.titel === 'Bad fehlt noch' && eS1.ak === 1 && eS1.fokus && !eS1.sent && !eS2.blatt && eS2.screen === 'blatt' && !eS2.sent && eS3.sent && !eS3.entwurf,
     'Angefangenes Fenster beim Senden: „Prüfen“ nennt es mit Fortsetzen und Verwerfen, „Senden“ fragt erst nach (die Zurück-Taste schließt die Frage), „Ohne … senden“ räumt den Entwurf weg');
