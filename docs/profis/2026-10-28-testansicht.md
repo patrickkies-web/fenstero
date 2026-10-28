@@ -45,6 +45,19 @@
 | Bestätigung, Testansicht | Infobereich „Testansicht · Ende“: zuerst „So käme die Anfrage bei Ihnen an“, dann „Pakete ansehen“, „Noch einmal ausprobieren“; „Fertig“ führt zur Seite für Fensterbauer | Verkauf | G 5:1 behalten, F 4:2 behalten (Inhaber: Betriebsansicht zuerst) | geändert: Reihenfolge |
 | Testansicht | Anrede „du“ wie in den Folien | Seriosität | Veto F (Petra Lindqvist: du und Sie gemischt) | umgesetzt für die Testansicht |
 
+## Nachtrag: Kontakt als letzte Folie, Versandmeldung, Auswahl für Fensterbauer
+
+Inhaber (12:47): „Eigentlich ist das hier die letzte Folie, und da sollte stehen: an Fensterbauer schicken. Und dann sollte da diese
+Benachrichtigung stehen, dass es versandt wurde, und dann diese ganzen Sachen wie Danke, gesendet etc. Mit Auswahlmöglichkeiten, wie man
+jetzt weitermacht, visuell ansprechend, dass die Fensterbauer animiert werden, zu der Paketeansicht zu kommen.“
+
+| Wo | Was | Warum | Stand |
+| --- | --- | --- | --- |
+| Kontakt (Website einer Instanz) | Pille „An <Betrieb> senden“ sendet direkt; Hinweise aus „Prüfen“ (fehlende Maße, angefangenes Fenster, was danach kommt) stehen auf der Folie | Wunsch des Inhabers; DNA: keine Zwischenschritte, die nur bestätigen | neu |
+| Nach dem Senden | „Wird gesendet …“ auf der Pille, dann Versandmeldung „An <Betrieb> gesendet“ als Glas-Chip oben, drei Sekunden | Rückmeldung | neu |
+| Bestätigung, Testansicht | „Ihr Konfigurator. Ihre Anfragen.“: große Karte „Pakete ansehen“ (#pakete, ab … im Monat aus pakete.js, keine Mindestlaufzeit), „So kommt die Anfrage bei Ihnen an“, „Noch einmal ausprobieren“; treten einmal nacheinander auf | Verkauf, Wunsch des Inhabers | neu |
+| Bestätigung, Testansicht | „Fertig“ führt zu den Paketen | Verkauf | geändert |
+
 ## Gremium (eine Runde, drei Agenten, blind X/Y)
 
 - **Gestalter:**

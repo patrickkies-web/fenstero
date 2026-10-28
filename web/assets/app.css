@@ -3120,6 +3120,42 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .dna.gs .gs-fuss .dna-pille { flex: 1 }
 .dna.gs .gs-bleibt { font-size: 13px }
 .dna.gs .wl-station:first-child .wl-nr { color: var(--weiss); background: none; box-shadow: inset 0 0 0 1.5px var(--silbergrau) } /* nichts ist schon erledigt */
+/* Versandmeldung nach dem Senden: Glas-Chip oben in der Mitte, kommt in 320 ms, steht, geht nach drei Sekunden (einmal je Senden) */
+.dna .gs-meldung { position: fixed; z-index: 30; top: calc(14px + env(safe-area-inset-top, 0px)); left: 0; right: 0; width: max-content; margin-inline: auto; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); padding: 10px 18px 10px 10px; border-radius: 999px; background: rgba(32, 32, 34, .92); color: var(--weiss); font: 500 15px/1.2 var(--font-sans); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 18px 40px -16px rgba(0, 0, 0, .9); opacity: 0; pointer-events: none; animation: gsMeldung 3s var(--dna-auftritt) both; animation-delay: var(--seit, 0ms) }
+.dna.ab2 .ab-inhalt > .gs-meldung { margin: 0 auto } /* sonst setzt .ab-inhalt > * den Rand auf 0 und die Meldung steht links */
+.dna .gs-meldung-haken { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--weiss); color: var(--schwarz) }
+.dna .gs-meldung-haken svg { width: 13px; height: 13px }
+@keyframes gsMeldung { 0% { opacity: 0; transform: translateY(-14px) scale(.96) } 11% { opacity: 1; transform: none } 82% { opacity: 1; transform: none } 100% { opacity: 0; transform: translateY(-6px) } }
+@keyframes gsMeldungRuhig { 0%, 100% { opacity: 0 } 3%, 85% { opacity: 1 } }
+/* Testansicht, Ende: drei Karten für den Fensterbauer, die erste groß mit Licht unter dem Knopf */
+.dna.gs .probe-wahl { display: grid; gap: 10px; margin: 8px 0 4px }
+.dna.gs .probe-wahl .dna-label { display: inline-flex; align-items: center; gap: 8px; font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau) }
+.dna.gs .probe-wahl .dna-label::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 4px rgba(137, 126, 252, .18) }
+.dna.gs .probe-wahl h2 { margin: 0 0 4px; font: 500 26px/1.1 var(--font-sans); letter-spacing: -.025em; color: var(--weiss) }
+.dna.gs .probe-wahl h2 .ak { color: var(--silbergrau) }
+.dna.gs .pw-karte { position: relative; display: flex; align-items: center; gap: 14px; width: 100%; min-height: 72px; margin: 0; padding: 14px 14px 14px 18px; border: 0; border-radius: 22px; text-align: left; text-decoration: none; color: var(--weiss); font: inherit; cursor: pointer; overflow: hidden;
+  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045); transition: transform 160ms var(--dna-druck) }
+.dna.gs .pw-karte:active { transform: scale(.98); transition-duration: 0s }
+.dna.gs .pw-karte:focus-visible { outline: 2px solid var(--weiss); outline-offset: 3px }
+.dna.gs .pw-haupt { min-height: 128px; padding: 20px 18px 20px 20px; background: radial-gradient(70% 90% at 92% 100%, rgba(137, 126, 252, .34), rgba(60, 58, 102, .22) 45%, transparent 75%), radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e) }
+.dna.gs .pw-text { flex: 1; display: grid; gap: 4px; min-width: 0 }
+.dna.gs .pw-text small { font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau) }
+.dna.gs .pw-text b { font: 500 17px/1.25 var(--font-sans); color: var(--weiss) }
+.dna.gs .pw-haupt .pw-text b { font-size: 24px; letter-spacing: -.02em }
+.dna.gs .pw-text > span { font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna.gs .pw-knopf { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna.gs .pw-knopf svg { width: 16px; height: 16px }
+.dna.gs .pw-haupt .pw-knopf { width: 56px; height: 56px; background: var(--weiss); color: var(--schwarz); box-shadow: 0 10px 30px -8px rgba(137, 126, 252, .7) }
+.dna.gs .pw-haupt .pw-knopf svg { width: 20px; height: 20px }
+.dna.gs .pw-fuss { margin: 2px 2px 8px; font: 400 13px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna.gs .probe-wahl.auftritt .pw-karte { animation: pwAuf 460ms var(--dna-auftritt) both; animation-delay: calc(450ms + var(--i, 0) * 90ms) }
+@keyframes pwAuf { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+@media (prefers-reduced-motion: reduce) {
+  .dna .gs-meldung { animation-name: gsMeldungRuhig }
+  .dna.gs .probe-wahl.auftritt .pw-karte { animation: none }
+  .dna.gs .pw-karte { transition: none }
+}
+.dna .ab-danach { margin: 14px 4px 0; font: 400 13px/1.45 var(--font-sans); color: var(--silbergrau) }
 /* Kontakt einer Instanz (instAnfrage3): Pflicht und Fehler am Feld */
 .dna .ab-felder .trow .pfl { font-style: normal; color: var(--textgrau) }
 .dna .ab-felder .trow.bad > span, .dna .ab-felder .trow.bad > span .pfl { color: #b5532f }

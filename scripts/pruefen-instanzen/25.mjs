@@ -86,12 +86,14 @@ export default async (h) => {
     if (o.merken) await merken(s, 'Kontakt');
     await s.fill('#t-name', k.name); if (k.tel) await s.fill('#t-tel', k.tel); if (k.mail) await s.fill('#t-mail', k.mail);
     if (k.erreich) await s.click('[data-act="setp"][data-f="erreich"][data-v="' + k.erreich + '"]');
-    await s.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s.waitForSelector('.scr[data-screen="blatt"]');
-    if (o.merken) await merken(s, 'Prüfen');
+    /* Website einer Instanz: Kontakt ist die letzte Folie, ihre Pille sendet („An <Betrieb> senden“, kein „Prüfen und senden“ dazwischen) */
+    const pille = await s.evaluate(() => (document.querySelector('.scr.dna .lg-weiter') || {}).textContent || '');
     await s.click('.bb .btn.primary, .scr.dna .lg-weiter');
     await s.waitForFunction(() => S.sent && S.sent.nr, null, { timeout: 30000 });
     await s.waitForTimeout(300);
-    return ohne;
+    const nachher = await s.evaluate(() => ({ screen: S.screen, meldung: (document.querySelector('.gs-meldung') || {}).textContent || '' }));
+    if (ohne) Object.assign(ohne, { pille: pille, nachher: nachher });
+    return ohne || { pille: pille, nachher: nachher };
   };
   const pdfHolen = async (s) => {
     const [dl] = await Promise.all([s.waitForEvent('download', { timeout: 20000 }), s.click('[data-act="inst-pdf"]')]);
@@ -169,7 +171,8 @@ export default async (h) => {
   /* Kontakt Pflicht, Senden */
   const kontaktA = { name: 'Familie Ahorn', tel: '0171 2345678', mail: 'ahorn@beispiel.de', erreich: 'nm' };
   const ohne = await kontaktSenden(sA, kontaktA, { ohne: true, merken: true });
-  ok(ohne && ohne.screen === 'anfrage3' && ohne.bad >= 2 && /Namen/.test(ohne.text) && /Telefonnummer oder E-Mail/.test(ohne.text), '25.2 Kontakt ist Pflicht: ohne Name und Telefon oder E-Mail bleibt „Prüfen und senden“ auf dem Kontakt-Schritt, Fehler am Feld');
+  ok(ohne && ohne.screen === 'anfrage3' && ohne.bad >= 2 && /Namen/.test(ohne.text) && /Telefonnummer oder E-Mail/.test(ohne.text), '25.2 Kontakt ist Pflicht: ohne Name und Telefon oder E-Mail bleibt die Pille auf dem Kontakt-Schritt, Fehler am Feld');
+  ok(/^An Glaserei Star senden/.test(ohne.pille) && ohne.nachher.screen === 'gesendet' && /An Glaserei Star gesendet/.test(ohne.nachher.meldung), '25.2 Kontakt ist die letzte Folie: „An Glaserei Star senden“ sendet direkt, danach die Versandmeldung (' + ohne.pille + ')');
   await merken(sA, 'Bestätigung'); await h.foto(sA, '25-bestaetigung-plus');
   const best = await sA.evaluate(() => ({ nr: S.sent.nr, text: document.querySelector('.scr').innerText, pdfKnopf: !!document.querySelector('[data-act="inst-pdf"]'), weitere: !!document.querySelector('[data-act="inst-weitere"]'), vergessen: !!document.querySelector('[data-act="inst-vergessen"]') }));
   const zA = await T.zeile(codeA);
@@ -314,19 +317,22 @@ export default async (h) => {
   }, MO);
   await sT.waitForTimeout(400);
   const t3 = await sT.evaluate(() => (document.querySelector('.scr.dna .probe-zeile') || {}).innerText || '');
-  await sT.evaluate(() => act('send', document.body));
+  const t3p = await sT.evaluate(() => (document.querySelector('.scr.dna .lg-weiter') || {}).textContent || '');
+  await sT.click('.scr.dna .lg-weiter');
   const gesendet = await bis(sT, () => S.screen === 'gesendet' && !!S.sent, 10000);
   const t4 = await sT.evaluate(() => ({ nr: S.sent && S.sent.nr, art: S.sent && S.sent.art, text: document.querySelector('.scr').innerText }));
-  const t4b = await sT.evaluate(() => ({ dna: !!document.querySelector('.scr.dna.gs'), pdf: !!document.querySelector('.gs-pdf [data-act="inst-pdf"]'), pillen: document.querySelectorAll('.scr .dna-pille:not(.dna-pille--leise)').length, fertig: (document.querySelector('.gs-fuss a') || {}).getAttribute ? document.querySelector('.gs-fuss a').getAttribute('href') : '' }));
-  await sT.click('.probe-info [data-act="probe-betrieb"]'); await sT.waitForTimeout(500);
+  const t4b = await sT.evaluate(() => ({ dna: !!document.querySelector('.scr.dna.gs'), pdf: !!document.querySelector('.gs-pdf [data-act="inst-pdf"]'), pillen: document.querySelectorAll('.scr .dna-pille:not(.dna-pille--leise)').length, fertig: (document.querySelector('.gs-fuss a') || {}).getAttribute ? document.querySelector('.gs-fuss a').getAttribute('href') : '',
+    meldung: (document.querySelector('.gs-meldung') || {}).textContent || '', haupt: (document.querySelector('.probe-wahl .pw-haupt') || {}).getAttribute ? document.querySelector('.probe-wahl .pw-haupt').getAttribute('href') : '', hauptText: (document.querySelector('.probe-wahl .pw-haupt') || {}).innerText || '', ab: 'Ab ' + Pakete.euro(Math.min.apply(null, Pakete.LISTE.map((k) => Pakete.preis(k).monat))) + ' im Monat' }));
+  ok(/An Fensterbau Brandt gesendet · Simulation/.test(t4b.meldung) && t4b.haupt === '/fuer-fensterbauer/#pakete' && t4b.hauptText.indexOf(t4b.ab) >= 0, '25.11 Ende der Testansicht: Versandmeldung, dann die große Karte „Pakete ansehen“ zum Anker #pakete mit dem Preis aus pakete.js (' + t4b.ab + ')');
+  await sT.click('.probe-wahl [data-act="probe-betrieb"]'); await sT.waitForTimeout(500);
   const t5 = await sT.evaluate(() => ({ mail: (document.querySelector('.probe-mail') || {}).innerText || '', text: document.querySelector('.scr').innerText, pakete: (document.querySelector('.probe-aktionen a.dna-pille') || {}).getAttribute ? document.querySelector('.probe-aktionen a.dna-pille').getAttribute('href') : '', pillen: document.querySelectorAll('.scr .dna-pille:not(.dna-pille--leise)').length }));
   const [dlT] = await Promise.all([sT.waitForEvent('download', { timeout: 20000 }), sT.click('[data-act="probe-blatt"]')]);
   const fT = path.join(ordner, 'probe-' + Math.random().toString(36).slice(2) + '.pdf'); await dlT.saveAs(fT); const pdfT = pdfText(fs.readFileSync(fT));
   ok(t1.id === 'muster01' && t1.probe && t1.web && !t1.tour && t1.screen === 'start' && /Testansicht für Fensterbauer/.test(t1.hinweis) && /EEZI Essential Plus\)/.test(t1.hinweis) && /Gesendet wird nichts/.test(t1.hinweis) && /\/fuer-fensterbauer\/$/.test(t1.zurueck) && /Fensterbau Brandt/.test(t1.text) && !/Führung starten|7,99/.test(t1.text),
     '25.11 Testansicht: gleich die erste Folie „Was planst du?“ wie auf der Website eines Betriebs mit Paket Plus (Fensterbau Brandt), Infobereich in der Folie mit Weg zurück, keine Führung, keine Preise');
   ok(/^t[a-z0-9]{9}$/.test(String(t2.code || '')) && t2.screen === 'start' && !t2.blatt && /Testansicht/.test(t2.kopf) && /ausgedachte Angaben/.test(t3), '25.11 Testansicht: kein Bogen über der Folie, „Testansicht“ im Kopf der Folien, Code der Planung nur auf dem Gerät (' + t2.code + '), Hinweis bei den Kontaktdaten');
-  ok(gesendet && t4.art === 'probe' && /^TEST-/.test(t4.nr) && /So sieht Ihr Kunde den Abschluss/.test(t4.text) && /Gesendet wurde nichts/.test(t4.text) && /Danke, gesendet/.test(t4.text), '25.11 Testansicht: Senden als Simulation, am Ende die Bestätigung, wie sie der Kunde sieht (' + t4.nr + ')');
-  ok(t4b.dna && t4b.pdf && t4b.pillen === 1 && t4b.fertig === '/fuer-fensterbauer/', '25.11 Bestätigung im Look der Design-DNA: eine volle Pille (Durchschrift als PDF), „Fertig“ führt in der Testansicht zurück zur Seite für Fensterbauer');
+  ok(gesendet && t4.art === 'probe' && /^TEST-/.test(t4.nr) && /wie ihn Ihr Kunde sieht/.test(t4.text) && /Gesendet wurde nichts/.test(t4.text) && /^An Fensterbau Brandt senden/.test(t3p) && /Danke, gesendet/.test(t4.text), '25.11 Testansicht: Kontakt ist die letzte Folie („An Fensterbau Brandt senden“), Senden als Simulation, am Ende die Bestätigung, wie sie der Kunde sieht (' + t4.nr + ')');
+  ok(t4b.dna && t4b.pdf && t4b.pillen === 1 && t4b.fertig === '/fuer-fensterbauer/#pakete', '25.11 Bestätigung im Look der Design-DNA: eine volle Pille (Durchschrift als PDF), „Fertig“ führt in der Testansicht zu den Paketen');
   ok(/Neue Anfrage: Familie Probe/.test(t5.mail) && /Aufmassblatt-TEST-/.test(t5.mail) && /nichts gesendet/.test(t5.text) && t5.pakete === '/fuer-fensterbauer/#pakete' && t5.pillen === 1 && !/beliebig/i.test(t1.text + t4.text + t5.text),
     '25.11 Testansicht: danach die E-Mail an den Betrieb mit Anhang, eine volle Pille „Pakete ansehen“, nirgends „beliebig viele“');
   ok(/Fensterbau Brandt/.test(pdfT) && /Familie Probe/.test(pdfT) && /TEST-/.test(pdfT) && /^Aufmassblatt-TEST-/.test(dlT.suggestedFilename()), '25.11 Testansicht: auf Wunsch das Aufmaßblatt, wie es beim Betrieb ankommt (Kopf „Fensterbau Brandt“)');

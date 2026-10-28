@@ -582,9 +582,12 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     Infobereich in der ersten Folie“, keine Karte über der Startseite des Betriebs): `/app/?ausprobieren[=<paket>]` beginnt mit der
     Folie „Was planst du?“ (Fensterbau Brandt, Merkmale des Pakets). Der Infobereich steht in der Folie als Anthrazit-Fläche mit
     Lichtkante und violettem Punkt am Etikett (Telefon zwischen Bühne und Kacheln, Laptop oben in der rechten Spalte), im Kopf jeder
-    Folie „Testansicht“ unter dem Namen, bei den Kontaktdaten eine Zeile. Am Ende die Bestätigung des Kunden mit dem Infobereich
-    „Testansicht · Ende“ unter der Überschrift; auf Wunsch eine DNA-Folie mit dem Blatt auf der Bühne und der E-Mail an den Betrieb als
-    einziger weißer Karte. Ablauf und Technik in docs/INSTANZEN.md.
+    Folie „Testansicht“ unter dem Namen, bei den Kontaktdaten eine Zeile. Die Kontaktfolie ist die letzte Folie („An Fensterbau Brandt
+    senden“), danach „Wird gesendet …“ und die Versandmeldung als Glas-Chip oben (drei Sekunden). Am Ende die Bestätigung des Kunden und
+    unter der Überschrift die Auswahl für den Fensterbauer („Ihr Konfigurator. Ihre Anfragen.“): eine große Anthrazit-Karte „Pakete
+    ansehen“ mit violettem Licht unter dem weißen runden Knopf und dem Preis aus pakete.js, darunter zwei kleinere Karten mit Ring-Knopf;
+    sie treten nach dem Senden einmal nacheinander auf (460 ms, 90 ms Versatz). Auf Wunsch eine DNA-Folie mit dem Blatt auf der Bühne und
+    der E-Mail an den Betrieb als einziger weißer Karte. Ablauf und Technik in docs/INSTANZEN.md.
   - Bestätigung nach dem Senden einer Instanz („Danke, gesendet.“, `instGesendet`, Wunsch des Inhabers, 28.10.2026): Rahmen der
     Abschluss-Folien. Bühne mit dem Aufmaßblatt im Fensterlicht (Kopfband mit dem Namen des Betriebs, Maße verdeckt wie in der
     Durchschrift), Chip „Gesendet“, Etikett mit der Nummer. Rechts Nummer mit violettem Punkt, „Danke, gesendet.“ mit zweiter Stimme,
