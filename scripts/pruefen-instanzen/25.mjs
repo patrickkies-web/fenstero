@@ -306,9 +306,9 @@ export default async (h) => {
   const ctxT = await telefon(), sT = await h.neueSeite(ctxT, X.base('localhost')), schreibend = [], gelesen = [];
   sT.on('request', (r) => { const u = r.url(); if (!/\/api\//.test(u)) return; (r.method() === 'GET' ? gelesen : schreibend).push(r.method() + ' ' + u.replace(/^https?:\/\/[^/]+/, '')); });
   await sT.goto(X.base('localhost') + '/app/?ausprobieren', { waitUntil: 'networkidle' }); await sT.waitForTimeout(400);
-  const t1 = await sT.evaluate(() => ({ id: INST && INST.id, probe: PROBE, web: instWebsite(), tour: !!S.tour, hinweis: (document.querySelector('.probe-start') || {}).innerText || '', zurueck: (document.querySelector('.probe-start a') || {}).href || '', text: document.body.innerText }));
-  await sT.getByText('Erstes Fenster ausmessen').first().click(); await sT.waitForTimeout(600);
-  const t2 = await sT.evaluate(() => ({ code: S.betrieb && S.betrieb.code, screen: S.screen, kopf: (document.querySelector('.probe-unter') || {}).textContent || '' }));
+  const t1 = await sT.evaluate(() => ({ id: INST && INST.id, probe: PROBE, web: instWebsite(), tour: !!S.tour, screen: S.screen, hinweis: (document.querySelector('.probe-blatt') || {}).innerText || '', zurueck: (document.querySelector('.probe-blatt a') || {}).href || '', text: document.body.innerText }));
+  await sT.click('.probe-blatt [data-act="probe-hinweis-zu"]'); await sT.waitForTimeout(400);
+  const t2 = await sT.evaluate(() => ({ code: S.betrieb && S.betrieb.code, screen: S.screen, blatt: !!document.querySelector('.probe-blatt'), kopf: (document.querySelector('.probe-unter') || {}).textContent || '' }));
   await sT.evaluate((mo) => {
     S.windows = [Object.assign(baseWin(), { name: 'Wohnzimmer', wid: 'fprobe1', t0: Date.now(), aend: 0, ts: Date.now(), mo: mo, el: { w: 1340, h: 1450 }, w: 1340, h: 1450 })];
     Object.assign(S.proj, { name: 'Familie Probe', tel: '0171 2345678', ort: '50823 Köln' }); S.editIdx = -1; S.win = baseWin(); persist(); go('anfrage3');
@@ -322,9 +322,9 @@ export default async (h) => {
   const t5 = await sT.evaluate(() => ({ mail: (document.querySelector('.probe-mail') || {}).innerText || '', text: document.querySelector('.scr').innerText, pakete: (document.querySelector('.probe-aktionen a.dna-pille') || {}).getAttribute ? document.querySelector('.probe-aktionen a.dna-pille').getAttribute('href') : '', pillen: document.querySelectorAll('.scr .dna-pille:not(.dna-pille--leise)').length }));
   const [dlT] = await Promise.all([sT.waitForEvent('download', { timeout: 20000 }), sT.click('[data-act="probe-blatt"]')]);
   const fT = path.join(ordner, 'probe-' + Math.random().toString(36).slice(2) + '.pdf'); await dlT.saveAs(fT); const pdfT = pdfText(fs.readFileSync(fT));
-  ok(t1.id === 'muster01' && t1.probe && t1.web && !t1.tour && /Testansicht für Fensterbauer/.test(t1.hinweis) && /Paket EEZI Essential Plus/.test(t1.hinweis) && /Gesendet wird nichts/.test(t1.hinweis) && /\/fuer-fensterbauer\/$/.test(t1.zurueck) && /Fensterbau Brandt/.test(t1.text) && !/Führung starten|7,99/.test(t1.text),
-    '25.11 Testansicht: Konfigurator wie auf der Website eines Betriebs mit Paket Plus (Fensterbau Brandt), Hinweis am Anfang mit Weg zurück, keine Führung, keine Preise');
-  ok(/^t[a-z0-9]{9}$/.test(String(t2.code || '')) && t2.screen === 'start' && /Testansicht/.test(t2.kopf) && /ausgedachte Angaben/.test(t3), '25.11 Testansicht: „Testansicht“ im Kopf der Folien, Code der Planung nur auf dem Gerät (' + t2.code + '), Hinweis bei den Kontaktdaten');
+  ok(t1.id === 'muster01' && t1.probe && t1.web && !t1.tour && t1.screen === 'start' && /Testansicht für Fensterbauer/.test(t1.hinweis) && /Paket EEZI Essential Plus/.test(t1.hinweis) && /Gesendet wird nichts/.test(t1.hinweis) && /\/fuer-fensterbauer\/$/.test(t1.zurueck) && /Fensterbau Brandt/.test(t1.text) && !/Führung starten|7,99/.test(t1.text),
+    '25.11 Testansicht: gleich die erste Folie „Was planst du?“ wie auf der Website eines Betriebs mit Paket Plus (Fensterbau Brandt), Hinweis als Bogen darüber mit Weg zurück, keine Führung, keine Preise');
+  ok(/^t[a-z0-9]{9}$/.test(String(t2.code || '')) && t2.screen === 'start' && !t2.blatt && /Testansicht/.test(t2.kopf) && /ausgedachte Angaben/.test(t3), '25.11 Testansicht: „Ausprobieren“ schließt den Hinweis, „Testansicht“ im Kopf der Folien, Code der Planung nur auf dem Gerät (' + t2.code + '), Hinweis bei den Kontaktdaten');
   ok(gesendet && t4.art === 'probe' && /^TEST-/.test(t4.nr) && /So sieht Ihr Kunde den Abschluss/.test(t4.text) && /Gesendet wurde nichts/.test(t4.text) && /Danke, gesendet/.test(t4.text), '25.11 Testansicht: Senden als Simulation, am Ende die Bestätigung, wie sie der Kunde sieht (' + t4.nr + ')');
   ok(/Neue Anfrage: Familie Probe/.test(t5.mail) && /Aufmassblatt-TEST-/.test(t5.mail) && /nichts gesendet/.test(t5.text) && t5.pakete === '/fuer-fensterbauer/#pakete' && t5.pillen === 1 && !/beliebig/i.test(t1.text + t4.text + t5.text),
     '25.11 Testansicht: danach die E-Mail an den Betrieb mit Anhang, eine volle Pille „Pakete ansehen“, nirgends „beliebig viele“');
@@ -334,7 +334,7 @@ export default async (h) => {
   h.sauber(sT, '25.11 Testansicht ohne Fehler'); await ctxT.close();
   const ctxPE = await desktop(), sPE = await h.neueSeite(ctxPE, X.base('localhost'));
   await sPE.goto(X.base('localhost') + '/app/?ausprobieren=essential', { waitUntil: 'networkidle' }); await sPE.waitForTimeout(300);
-  const tPE = await sPE.evaluate(() => ({ paket: PROBE_PAKET, farbe: !!INST.m.farbe, kz: INST.m.kennzeichnung, hinweis: (document.querySelector('.probe-start') || {}).innerText || '' }));
+  const tPE = await sPE.evaluate(() => ({ paket: PROBE_PAKET, farbe: !!INST.m.farbe, kz: INST.m.kennzeichnung, hinweis: (document.querySelector('.probe-blatt') || {}).innerText || '' }));
   ok(tPE.paket === 'essential' && !tPE.farbe && tPE.kz === 'deutlich' && /Paket EEZI Essential:/.test(tPE.hinweis), '25.11 Testansicht im Paket Essential: Merkmale aus pakete.js (ohne Firmenfarbe, Kennzeichnung deutlich)');
   h.sauber(sPE, '25.11 Testansicht Essential ohne Fehler'); await ctxPE.close();
   const fbSeite = await X.api('localhost', '/fuer-fensterbauer/');

@@ -3121,3 +3121,7 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .probe-aktionen { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px }
 .probe-zurueck { justify-self: start; min-height: 44px; padding: 0; border: 0; background: none; color: var(--silbergrau); font: 400 14px/1.3 var(--font-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
 @media (prefers-reduced-motion: reduce) { .probe-anhang, .probe-hinweis-los { transition: none } }
+/* Hinweis beim Einstieg in die Testansicht: Bogen über der ersten Folie, Etikett mit violettem Punkt */
+.sheet.probe-blatt .probe-blatt-label { display: inline-flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: .03em }
+.sheet.probe-blatt .probe-blatt-label::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #897efc; box-shadow: 0 0 0 4px rgba(137, 126, 252, .18) }
+.sheet.probe-blatt .vl-ab { display: inline-flex; align-items: center; justify-content: center; min-height: 44px }

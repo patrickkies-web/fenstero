@@ -580,7 +580,8 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
   - Testansicht für Fensterbauer (Wunsch des Inhabers, 28.10.2026: „Selbst ausprobieren“ soll nicht in die Führung und nicht in das
     eigene Aufmaß mit „an beliebig viele“ führen; jeder Weg zum Ausprobieren zeigt, dass man im Bereich zum Testen ist; am Ende die
     Ansicht des Kunden eines Betriebs mit Paket): `/app/?ausprobieren[=<paket>]` zeigt den Konfigurator wie auf der Website eines
-    Betriebs (Fensterbau Brandt, Merkmale des Pakets). Hinweise als Anthrazit-Karten mit violettem Punkt (am Anfang, bei den
+    Betriebs (Fensterbau Brandt, Merkmale des Pakets), beginnend gleich mit der ersten Folie „Was planst du?“ und dem Hinweis als Bogen
+    im Look der Bögen darüber („Ausprobieren“). Hinweise als Anthrazit-Karten mit violettem Punkt (Startseite des Betriebs, bei den
     Kontaktdaten, über der Bestätigung), im Kopf jeder Folie „Testansicht“ mit violettem Punkt unter dem Namen. Das Ende ist die
     Bestätigung des Kunden, darüber „Pakete ansehen“ als Umriss-Pille; auf Wunsch eine DNA-Folie mit dem Blatt auf der Bühne (Kopfband mit
     dem Namen des Betriebs) und der E-Mail an den Betrieb als einziger weißer Karte. Ablauf und Technik in docs/INSTANZEN.md.

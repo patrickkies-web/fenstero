@@ -2551,13 +2551,14 @@ function instanzWeitere() {
   return instanzStart().then((ok) => { if (ok) newWin(); else go('home'); });
 }
 /* „Auf diesem Gerät vergessen“: auch Nummer und Datum weg */
-function instanzVergessen() {
+function instanzVergessen(leise) { // leise: ohne Wechsel zur Startseite und ohne Meldung (Testansicht beginnt neu)
   instanzKuerzen();
   const alt = S.betrieb && S.betrieb.code;
   if (alt) { try { localStorage.removeItem('aufmass.k.' + alt); localStorage.removeItem('aufmass.k.' + alt + '.entwurf'); } catch (e) { /* ok */ } }
   instSchreiben('aktiv', ''); instSchreiben('gesendet', '');
   if (location.hash) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } }
   S.betrieb = instanzBetrieb(''); loadLink(); S.instGeraet = false;
+  if (leise) return;
   go('home'); toast('Auf diesem Gerät vergessen.');
 }
 const PROJ0 = { gebaeude: '', baujahr: '', total: '', zeit: '', budget: '', foerd: false, foerdweg: '', name: '', ort: '', tel: '', mail: '', erreich: '' }; // ohne Vorwahl („Alles freiwillig“): nur was der Kunde selbst wählt, steht auf dem Blatt und geht an den Betrieb
@@ -5665,6 +5666,7 @@ function sheetsHTML() {
   if (S.glossIndex) return glossIndexBlatt();
   if (S.wohin) return wohinBlatt();
   if (S.ohneFotoFrage && S.screen === 'fotos') return ohneFotoBlatt();
+  if (PROBE && S.probeHinweis) return probeHinweisBlatt();
   return '';
 }
 
@@ -5927,6 +5929,7 @@ function zurueckTaste() {
   if (S.wohin) { S.wohin = false; render(); return true; }
   if (S.wzKap) { S.wzKap = false; render(); const b = document.querySelector('.wz-band'); if (b) b.focus({ preventScroll: true }); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
+  if (PROBE && S.probeHinweis) { probeHinweisZu(); return true; }
   if (S.qMass && S.screen === 'frage') { S.qMass = null; render(); return true; } // Zifferntasten in den Wünschen
   if (S.screen === 'messen' && S.mess && S.mess.pad) { messZu(); return true; } // Zifferntasten beim Messen: erst das Blatt zu
   if (S.screen === 'rest' && S.rest && S.rest.pad) { restZu(); return true; }
@@ -5956,6 +5959,7 @@ function escTaste() {
   if (S.wohin) { S.wohin = false; render(); return true; }
   if (S.wzKap) { S.wzKap = false; render(); const b = document.querySelector('.wz-band'); if (b) b.focus({ preventScroll: true }); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
+  if (PROBE && S.probeHinweis) { probeHinweisZu(); return true; }
   if (S.qMass && S.screen === 'frage') { S.qMass = null; render(); return true; }
   if (S.screen === 'messen' && S.mess && S.mess.pad) { messZu(); return true; } // Zifferntasten beim Messen
   if (S.screen === 'rest' && S.rest && S.rest.pad) { restZu(); return true; }
@@ -7072,6 +7076,7 @@ function act(name, el) {
     case 'inst-weitere': return instanzWeitere();
     /* Testansicht für Fensterbauer (probeGesendet) */
     case 'probe-betrieb': S.probeSicht = 'betrieb'; return render(true);
+    case 'probe-hinweis-zu': return probeHinweisZu();
     case 'probe-kunde': S.probeSicht = 'kunde'; return render(true);
     case 'probe-blatt': return probeBlatt();
     case 'probe-neu': instanzVergessen(); return toast('Noch einmal von vorn: Ihre Testdaten sind gelöscht.');
@@ -7642,6 +7647,7 @@ function boot() {
   verlaufBinden(); // Zurück-Taste des Browsers bleibt in der App
   render(true);
   if (location.hash === '#fuehrung' && !S.betrieb) tourStart();
+  else if (PROBE) probeEinstieg(); // Testansicht für Fensterbauer: gleich die erste Folie, mit dem Hinweis darüber
   /* Einstieg von der Website („Jetzt ausmessen“, /app/#ausmessen): gleich der erste Schritt statt der Startseite der App; ein angefangenes
      Fenster wird fortgesetzt, ein Kundenlink hat Vorrang */
   else if (ausmessen && !S.betrieb) { if (KS) { EINSTIEG_NEU = true; setTimeout(einstiegNach, 8000); } else einstiegNeu(); }
@@ -7729,6 +7735,22 @@ function instWeiterKarte(du) {
     if (S.instGeraet) h += '<div class="inst-link"><input type="text" readonly value="' + esc(instWeiterLink()) + '" aria-label="Link zu dieser Planung"><div class="pill-row"><button type="button" class="pill" data-act="inst-link-kopieren">Link kopieren</button>' + (navigator.share ? '<button type="button" class="pill" data-act="inst-link-teilen">Teilen</button>' : '') + '</div><p class="sub">' + T('Wer diesen Link hat, sieht Ihre Planung. Geben Sie ihn nur an Personen weiter, denen Sie vertrauen.', 'Wer diesen Link hat, sieht deine Planung. Gib ihn nur an Personen weiter, denen du vertraust.') + '</p></div>';
   }
   return h + '</div>';
+}
+/* Testansicht für Fensterbauer, Einstieg (Wunsch des Inhabers, 28.10.2026: „Der Start soll quasi diese Maske sein, nur halt mit dem
+   Hinweis“): gleich die erste Folie „Was planst du?“, beim ersten Öffnen im Tab mit dem Hinweis als Bogen darüber. Ein angefangenes
+   Fenster wird fortgesetzt; ein abgeschlossener Test beginnt neu */
+function probeEinstieg() {
+  if (S.sent) instanzVergessen(true);
+  let gesehen = false; try { gesehen = sessionStorage.getItem('aufmass.probe.hinweis') === '1'; } catch (e) { gesehen = false; }
+  S.probeHinweis = !gesehen;
+  if (entwurfLesen()) entwurfFortsetzen(); else act('new', document.body);
+}
+function probeHinweisZu() { S.probeHinweis = false; try { sessionStorage.setItem('aufmass.probe.hinweis', '1'); } catch (e) { /* ok */ } render(); }
+function probeHinweisBlatt() {
+  return '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="probe-hinweis-zu"></button><div class="sheet probe-blatt" role="dialog" aria-modal="true" aria-labelledby="pb-t" aria-describedby="pb-s"><div class="grip"></div>' +
+    '<p class="eyebrow kicker probe-blatt-label">Testansicht für Fensterbauer</p><h2 id="pb-t" tabindex="-1">So erleben Ihre Kunden <span class="ak">Ihren Konfigurator.</span></h2>' +
+    '<p class="vl-sub" id="pb-s">Am Beispiel von Fensterbau Brandt, einem erfundenen Betrieb, im Paket ' + esc(probePaketName()) + ': genau der Ablauf, den Ihre Kunden auf Ihrer Website sehen. Probieren Sie alles aus, vom ersten Maß bis zum Absenden. Gesendet wird nichts; am Ende sehen Sie, wie Ihr Kunde den Abschluss erlebt.</p>' +
+    '<div class="vl-knoepfe"><button type="button" class="btn primary" data-act="probe-hinweis-zu">Ausprobieren</button><a class="link vl-ab" href="' + PROBE_FB + '">Zurück zur Seite für Fensterbauer</a></div></div>';
 }
 /* Testansicht für Fensterbauer: Hinweis am Anfang (erste Seite), knapp über der Liste und nach dem Senden */
 function probeStart(art) {
