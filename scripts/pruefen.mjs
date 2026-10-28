@@ -297,7 +297,7 @@ if (teil(3)) {
   await page.click('.lg-weiter');
   for (const wert of ['1480', '1410', '1370', '1230']) await massTippen(page, wert);
   for (let i = 0; i < 4; i++) await randWieMitte(page);
-  await page.waitForSelector('.ez-folie.ist-passt #mess-weiter');
+  await page.waitForSelector('.ez-folie.ist-passt #mess-weiter'); await page.waitForTimeout(500); // nach „Passt.“ ist die Pille 0,45 s taub (Doppeltipp)
   await page.click('#mess-weiter');
   await page.waitForSelector('[data-screen="ergebnis"]');
   const erg = await page.evaluate(() => { const d = derive(S.win); return [d.moW, d.moH, d.elW, d.elH].join('×'); });
