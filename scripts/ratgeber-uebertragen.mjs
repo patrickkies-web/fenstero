@@ -61,7 +61,7 @@ if (process.argv.includes('--vorschau')) {
     '@font-face { font-family: "Inter"; font-style: normal; font-display: swap; font-weight: 100 900; src: url(inter-latin-ext-wght-normal.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F; }\n');
   /* Schriften und Bilder in den Gestaltungsdateien relativ zur Datei (assets/) */
   for (const f of ['ratgeber-dna.css', 'ratgeber-dna.js', 'recht.css', 'druck.js']) fs.writeFileSync(path.join(ZIEL, 'assets', f), fs.readFileSync(path.join(WEB, 'assets', f), 'utf8').replace(/url\(\/(fonts|bilder)\//g, 'url(../$1/'));
-  const bilder = new Set();
+  const bilder = new Set(['bilder/ratgeber/buehne.webp']); /* Bühne der Zeichnung, steht nur in der Gestaltung (CSS) */
   for (const [pfad, datei] of SEITEN) {
     const quelle = pfad === '/404.html' ? path.join(WEB, '404.html') : path.join(WEB, pfad, 'index.html');
     let html = umschreiben(fs.readFileSync(quelle, 'utf8'));

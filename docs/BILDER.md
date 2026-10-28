@@ -92,6 +92,10 @@ ohne Bildschirm wählen oder den Bildschirm leer lassen).
   je Datei eine Teilmenge von Outfit ein (ein SVG als `<img>` lädt keine Schrift der Seite, sonst erschiene Arial) und schreibt
   Kleinbilder ohne Schrift, gestrichelte Linien und Pfeilspitzen mit 2,2-mal so kräftigen Strichen nach `web/bilder/klein/` (für die
   Zeilen der Übersicht, 96 px breit). Ein zweiter Lauf ändert nichts. Braucht fontTools und brotli (`pip install fonttools brotli`).
+- Bühne der Zeichnung im Einstieg (`web/bilder/ratgeber/buehne.webp`, 1000 × 667, 66 KB, seit 28.10.2026): Foto des Inhabers, dunkler
+  Betonboden im harten Fensterlicht mit Sprossenschatten, ohne Gegenstände und Farbstich; erzeugt nach dem Prompt im Protokoll
+  docs/profis/2026-10-28-ratgeber-dna.md, verkleinert aus 1536 × 1024. Steht nur in der Gestaltung (`.rg-bild` in
+  docs/profis/ratgeber-vorschau/ratgeber.css), mit Vignette, Lichtkante und abgedunkeltem Rand unten für die Unterschrift.
 
 ## Plätze für die Fensterbauer-Seiten (Konfigurator-Pakete, Wunsch des Inhabers vom 23.10.2026)
 

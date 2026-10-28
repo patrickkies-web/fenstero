@@ -120,7 +120,14 @@ offene Punkte).
 
 ## Prüfsuite
 
-`node scripts/pruefen.mjs` vollständig: Ergebnis im Abschnitt „Stand der Prüfsuite“ unten.
+`node scripts/pruefen.mjs` vollständig (vorher 1497 von 1497): 1493 bestanden, 5 rot. Alle fünf kamen von den neuen Bausteinen der
+Rechtstexte und sind behoben, ohne eine Prüfung abzuschalten:
+- „Vertrag widerrufen“ trug auf /widerruf/ ein zusätzliches `aria-current`; der Knopf bleibt jetzt unverändert.
+- Datenschutz: zwei wörtliche Vergleiche (`<h2>8. …`, `<h2>12. …`) kannten die neuen Sprungziele nicht; sie lassen das Attribut zu.
+- Paketbedingungen (29.1, 29.4): Das Verzeichnis „Auf dieser Seite“ floss in den Vertragstext der PDFs; `scripts/bedingungen-pdf.mjs`
+  lässt Navigation jetzt weg, Text und Prüfsumme der PDFs bleiben gleich.
+
+Danach Abschnitte 5 und 17 (49 Prüfungen) und 29 (41) erneut: alle bestanden.
 
 ## Offene Punkte
 
@@ -136,7 +143,12 @@ offene Punkte).
    nur auf sein Wort.
 6. **Zwei externe Quellen** (TÜV Süd, dejure.org) sperren Prüfprogramme; im Browser von Hand öffnen.
 7. **Realitäts-Check** (unten) mit zwei, drei echten Menschen.
-8. Online geht nichts ohne sein Ja; alles liegt auf dem Arbeitszweig `claude/bestand-altes-design`.
+8. Schärferes Bild der Fehlerseite (heute 226 × 320 px) aus dem 3-D-Modell der App rendern.
+9. Beschriftung der Messskizze („Höhe links / Mitte / rechts“ statt doppeltem „Mitte“, Maueröffnung benennen und vom Rahmen absetzen,
+   „fertiger Fußboden“): Wunsch aus der Express-Runde (Kunden, Fensterbauer); das ist Inhalt der Zeichnung, nur auf sein Wort.
+10. Cloudflare spielt auf der Live-Seite ein eigenes Statistik-Skript ein (static.cloudflareinsights.com), das die Sicherheitsregel der
+   Seite blockiert (eine Meldung in der Konsole, es fließen keine Daten). Abschalten in Cloudflare: Analytics & Logs → Web Analytics →
+   automatische Einrichtung für eeziframes.com aus.
 
 ## Realitäts-Check (Fragekarte)
 
@@ -159,6 +171,26 @@ Kalibrierung: Weicht eine Person des Gremiums dreimal gleichgerichtet von den ec
 - AGB am Telefon: `docs/profis/bilder/2026-10-28-ratgeber-dna-agb-telefon.jpg`
 - Vorschau zum Durchklicken (privat): https://claude.ai/artifact/SBbZTRC2rT29e1hDRLZXFo
 
+## Nachtrag: Bühne aus dem Foto des Inhabers
+
+Der Inhaber hat nach dem Prompt unten ein Foto erstellt (Betonboden im Fensterlicht, 1536 × 1024). Eingebaut als Bühne der Zeichnung
+im Einstieg aller 29 Seiten (`web/bilder/ratgeber/buehne.webp`, 1000 × 667, 66 KB, gespiegelt). Express-Runde mit drei getrennten
+Gruppen, blind: Gestalter 4:2 und Fensterbauer 5:1 für das Foto, Kunden 2:4 dagegen, kein Veto; umgesetzt sind die gemeinsamen
+Korrekturen (Licht hinter das Blatt und gedämpft, Schatten in Lichtrichtung, Blatt ganz auf der Bühne, Anthrazit als Rückfall) und
+die Pille der Uw-Wert- und der RAL-Seite am Schreibtisch im ersten Bildschirm. Einzelheiten:
+docs/profis/gremium/2026-10-28-ratgeber-dna-buehne-express.md. Prompt des Fotos:
+
+> Top-down photograph of an empty, dark smooth concrete floor in a quiet room, lit by hard late-afternoon sunlight falling through a
+> window from the upper left, casting a crisp diagonal shadow of a window frame with mullions across the floor. Cool neutral tones only
+> (charcoal, graphite, soft grey), no colour cast, no objects, no people, no text, no logos. Fine natural concrete texture, subtle dust,
+> shallow vignette toward the edges, the brightest sunlit patch slightly right of centre with calm empty space for a white sheet of
+> paper to be placed later. Shot on a 35 mm lens, f/8, high detail, realistic, minimal, editorial product-photography style.
+
+Messung danach: Laden 322 ms (4× gedrosselt), Layoutsprung 0, Bildbytes 66 KB; erste Pille am Telefon 583–775 px oben (unteres
+Drittel), am Schreibtisch höchstens 741 px oben (unten 793 px, ganz im ersten Bildschirm).
+
 ## Antwort des Inhabers
 
-(offen)
+28.10.2026, nach dem Zwischenstand: „Danach alles online stellen.“ Online gestellt mit `main` = b23aa6b (Arbeitszweig
+`claude/bestand-altes-design`, schneller Vorlauf); Cloudflare baut aus `main`. Er bietet an, Bilder nach Prompts zu erstellen; für den
+Stand braucht es keine, als freiwillige Aufwertung ist ein Prompt für eine Bühne im Fensterlicht (Beton, 2000 × 1250) genannt.

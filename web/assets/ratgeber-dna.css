@@ -150,11 +150,11 @@ body.rg-seite { margin: 0; background: var(--schwarz); color: var(--weiss); font
   .rg-hero__text > .rg-cta { margin-top: auto; padding-top: 32px; }
 }
 @media (min-width: 960px) {
-  .rg-hero { grid-template-columns: minmax(0, 1.06fr) minmax(0, .94fr); align-items: center; column-gap: 72px; padding-top: 24px; padding-bottom: calc(96px + var(--rund-xl)); }
+  .rg-hero { grid-template-columns: minmax(0, 1.06fr) minmax(0, .94fr); align-items: center; column-gap: 72px; padding-top: 0; padding-bottom: calc(96px + var(--rund-xl)); }
 }
-.rg-pfad { display: flex; flex-wrap: wrap; align-items: center; column-gap: 6px; margin: 0 0 4px; font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau); }
+.rg-pfad { display: flex; flex-wrap: wrap; align-items: center; column-gap: 6px; margin: 0; font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau); }
 .rg-pfad a { display: inline-flex; align-items: center; min-height: 44px; color: var(--silbergrau); text-decoration: underline; text-decoration-color: var(--haar); text-underline-offset: 3px; }
-.rg .eyebrow.kicker { margin-bottom: 12px; }
+.rg .eyebrow.kicker { margin-bottom: 6px; }
 .rg h1 { margin: 0; font: 600 clamp(36px, 9vw, 56px)/.98 var(--font-sans); letter-spacing: -.035em; color: var(--tinte); text-wrap: balance; overflow-wrap: break-word; hyphens: auto; -webkit-hyphens: auto; hyphenate-limit-chars: 12 5 5; }
 .rg h1 .ak { color: var(--tinte-2); }
 .rg-kurz { margin-top: 12px; max-width: 33em; }
@@ -162,14 +162,15 @@ body.rg-seite { margin: 0; background: var(--schwarz); color: var(--weiss); font
 .rg-kurz p:not(.eyebrow) { margin: 0; font: 400 16px/1.5 var(--font-sans); color: var(--tinte-2); }
 @media (min-width: 760px) { .rg-kurz p:not(.eyebrow) { font-size: 17px; line-height: 1.55; } }
 .rg-kurz p:not(.eyebrow) + p { margin-top: 8px; }
-.rg-bild { position: relative; isolation: isolate; display: grid; justify-items: center; gap: 22px; margin: 32px 0 0; min-width: 0; padding: 0 8px 18px; border-radius: var(--rund-xl); background: var(--rg-flaeche); box-shadow: var(--rg-lichtkante); }
+.rg-bild { position: relative; isolation: isolate; display: grid; justify-items: center; gap: 22px; margin: 32px 0 0; min-width: 0; padding: 18px 8px 18px; border-radius: var(--rund-xl);
+  background: linear-gradient(to top, rgba(7,9,10,.9), rgba(7,9,10,0) 38%), linear-gradient(to left, rgba(7,9,10,.55), rgba(7,9,10,0) 26%), radial-gradient(130% 100% at 50% 32%, rgba(7,9,10,0) 48%, rgba(7,9,10,.6) 100%), linear-gradient(rgba(7,9,10,.2), rgba(7,9,10,.2)), url(/bilder/ratgeber/buehne.webp) 88% 24% / cover no-repeat, var(--rg-flaeche);
+  box-shadow: var(--rg-lichtkante); }
 .rg-bild::before { content: ""; position: absolute; inset: -16%; z-index: -1; pointer-events: none; background: radial-gradient(55% 45% at 58% 45%, #141517, transparent 72%); }
 .rg-bild::after { content: ""; position: absolute; z-index: 0; left: -2%; right: -2%; top: 46%; height: 54%; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, var(--violett), color-mix(in srgb, var(--violett) 42%, transparent) 34%, color-mix(in srgb, var(--indigo) 55%, transparent) 56%, transparent 74%); }
-.rg-bild img { position: relative; z-index: 1; display: block; width: 100%; max-width: 520px; height: auto; margin-top: -32px; border-radius: 14px; background: var(--weiss); box-shadow: 0 1px 0 #e9e8ec, 0 2px 0 #cfced3, 0 46px 60px -28px rgba(0,0,0,.9), 0 14px 22px -10px rgba(0,0,0,.65); }
+.rg-bild img { position: relative; z-index: 1; display: block; width: 100%; max-width: 520px; height: auto; border-radius: 14px; background: var(--weiss); box-shadow: 0 1px 0 #e9e8ec, 0 2px 0 #cfced3, -22px 38px 54px -22px rgba(0,0,0,.85), -6px 12px 18px -8px rgba(0,0,0,.6); }
 .rg-bild figcaption { position: relative; z-index: 1; justify-self: start; max-width: 30em; padding: 0 8px; font: 400 14px/1.45 var(--font-sans); color: color-mix(in srgb, var(--silbergrau) 40%, var(--weiss)); text-wrap: pretty; }
 @media (min-width: 760px) {
-  .rg-bild { padding: 0 8% 7%; }
-  .rg-bild img { margin-top: -10%; }
+  .rg-bild { padding: 8% 11% 8%; }
   .rg-bild figcaption { padding: 0; }
 }
 @media (min-width: 960px) { .rg-bild { margin-top: 64px; } }
