@@ -5,6 +5,7 @@
 // · 25.3 keine Preise, Kasse, WhatsApp, AGB, Widerruf, Cookies, Führung · 25.4 neu laden und zweites Gerät · 25.5 Server weg, Planung
 // verfallen · 25.6 Fotos mit kleiner Fassung, KI mit Code · 25.7 Signature-Einladung · 25.8 Vorschau und Testanfrage · 25.9 keine Fehler,
 // keine fremden Anfragen, kein waagrechter Scroll · 25.10 Hauptdomain-App unverändert (dazu die Abschnitte 4, 14, 16, 19, 21, 22)
+// · 25.11 Testansicht für Fensterbauer (/app/?ausprobieren)
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -297,4 +298,39 @@ export default async (h) => {
   const hd = await sH.evaluate(() => ({ inst: !!(window.KONFIG && window.KONFIG.instanz), betrieb: S.betrieb, text: document.body.innerText, recht: Array.from(document.querySelectorAll('.foot-links.recht a')).map((a) => a.getAttribute('href')).join(' ') }));
   ok(!hd.inst && hd.betrieb === null && /Fotografieren\./.test(hd.text) && /Führung starten/.test(hd.text) && /\/agb\//.test(hd.recht) && /\/widerruf\//.test(hd.recht), '25.10 Hauptdomain: eigene App wie bisher (eeziframes-Start, Führung, AGB und Widerruf in den Rechtslinks)');
   h.sauber(sH, '25.10 Hauptdomain ohne Fehler'); await ctxH.close();
+
+  /* ---------- 25.11 Testansicht für Fensterbauer (/app/?ausprobieren auf der Hauptdomain) ----------
+     Ablauf wie auf der Website eines Betriebs („Muster Fensterbau“), Hinweis am Anfang, keine Führung, nichts an den Server; Senden als
+     Simulation: erst die Bestätigung des Kunden, dann die E-Mail an den Betrieb mit dem Aufmaßblatt (Variante betrieb) */
+  const ctxT = await telefon(), sT = await h.neueSeite(ctxT, X.base('localhost')), schreibend = [], gelesen = [];
+  sT.on('request', (r) => { const u = r.url(); if (!/\/api\//.test(u)) return; (r.method() === 'GET' ? gelesen : schreibend).push(r.method() + ' ' + u.replace(/^https?:\/\/[^/]+/, '')); });
+  await sT.goto(X.base('localhost') + '/app/?ausprobieren', { waitUntil: 'networkidle' }); await sT.waitForTimeout(400);
+  const t1 = await sT.evaluate(() => ({ id: INST && INST.id, probe: PROBE, web: instWebsite(), tour: !!S.tour, hinweis: (document.querySelector('.probe-start') || {}).innerText || '', zurueck: (document.querySelector('.probe-start a') || {}).href || '', text: document.body.innerText }));
+  await sT.getByText('Erstes Fenster ausmessen').first().click(); await sT.waitForTimeout(600);
+  const t2 = await sT.evaluate(() => ({ code: S.betrieb && S.betrieb.code, screen: S.screen }));
+  await sT.evaluate((mo) => {
+    S.windows = [Object.assign(baseWin(), { name: 'Wohnzimmer', wid: 'fprobe1', t0: Date.now(), aend: 0, ts: Date.now(), mo: mo, el: { w: 1340, h: 1450 }, w: 1340, h: 1450 })];
+    Object.assign(S.proj, { name: 'Familie Probe', tel: '0171 2345678', ort: '50823 Köln' }); S.editIdx = -1; S.win = baseWin(); persist(); go('anfrage3');
+  }, MO);
+  await sT.waitForTimeout(400);
+  const t3 = await sT.evaluate(() => (document.querySelector('.probe-hinweis') || {}).innerText || '');
+  await sT.evaluate(() => act('send', document.body));
+  const gesendet = await bis(sT, () => S.screen === 'gesendet' && !!S.sent, 10000);
+  const t4 = await sT.evaluate(() => ({ nr: S.sent && S.sent.nr, art: S.sent && S.sent.art, text: document.querySelector('.scr').innerText }));
+  await sT.click('.probe-hinweis [data-act="probe-betrieb"]'); await sT.waitForTimeout(500);
+  const t5 = await sT.evaluate(() => ({ mail: (document.querySelector('.probe-mail') || {}).innerText || '', text: document.querySelector('.scr').innerText, pakete: (document.querySelector('.probe-aktionen a.dna-pille') || {}).getAttribute ? document.querySelector('.probe-aktionen a.dna-pille').getAttribute('href') : '', pillen: document.querySelectorAll('.scr .dna-pille:not(.dna-pille--leise)').length }));
+  const [dlT] = await Promise.all([sT.waitForEvent('download', { timeout: 20000 }), sT.click('[data-act="probe-blatt"]')]);
+  const fT = path.join(ordner, 'probe-' + Math.random().toString(36).slice(2) + '.pdf'); await dlT.saveAs(fT); const pdfT = pdfText(fs.readFileSync(fT));
+  ok(t1.id === 'muster01' && t1.probe && t1.web && !t1.tour && /Testansicht für Fensterbauer/.test(t1.hinweis) && /Gesendet wird nichts/.test(t1.hinweis) && /\/fuer-fensterbauer\/$/.test(t1.zurueck) && /Muster Fensterbau/.test(t1.text) && !/Führung starten|7,99/.test(t1.text),
+    '25.11 Testansicht: Konfigurator wie auf der Website eines Betriebs („Muster Fensterbau“), Hinweis am Anfang mit Weg zurück, keine Führung, keine Preise');
+  ok(/^t[a-z0-9]{9}$/.test(String(t2.code || '')) && /ausgedachte Angaben/.test(t3), '25.11 Testansicht: Code der Planung nur auf dem Gerät (' + t2.code + '), Hinweis bei den Kontaktdaten');
+  ok(gesendet && t4.art === 'probe' && /^TEST-/.test(t4.nr) && /So sieht Ihr Kunde die Bestätigung/.test(t4.text) && /Danke, gesendet/.test(t4.text), '25.11 Testansicht: Senden als Simulation, erst die Bestätigung des Kunden (' + t4.nr + ')');
+  ok(/Neue Anfrage: Familie Probe/.test(t5.mail) && /Aufmassblatt-TEST-/.test(t5.mail) && /nichts gesendet/.test(t5.text) && t5.pakete === '/fuer-fensterbauer/#pakete' && t5.pillen === 1 && !/beliebig/i.test(t1.text + t4.text + t5.text),
+    '25.11 Testansicht: danach die E-Mail an den Betrieb mit Anhang, eine volle Pille „Pakete ansehen“, nirgends „beliebig viele“');
+  ok(/Muster Fensterbau/.test(pdfT) && /Familie Probe/.test(pdfT) && /TEST-/.test(pdfT) && /^Aufmassblatt-TEST-/.test(dlT.suggestedFilename()), '25.11 Testansicht: das Aufmaßblatt, wie es beim Betrieb ankommt (Kopf „Muster Fensterbau“)');
+  ok(!schreibend.length && !gelesen.some((u) => /\/api\/(status|instanz|link|aufmass)/.test(u)), '25.11 Testansicht: kein Aufruf an den Server außer Lesen der KI-Bereitschaft' + (schreibend.length ? ' (' + schreibend.join(', ') + ')' : ''));
+  ok(!(await waagrecht(sT)), '25.11 Testansicht: kein waagrechter Scroll');
+  h.sauber(sT, '25.11 Testansicht ohne Fehler'); await ctxT.close();
+  const fbSeite = await X.api('localhost', '/fuer-fensterbauer/');
+  ok((String(fbSeite.text).match(/href="\/app\/\?ausprobieren"/g) || []).length === 2, '25.11 Seite für Fensterbauer: „Selbst ausprobieren“ führt zweimal in die Testansicht');
 };

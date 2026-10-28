@@ -3067,3 +3067,55 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
   html.dna-voll .fb-blatt { height: 100%; max-height: none; border-radius: 0; box-shadow: inset 1px 0 0 rgba(255, 255, 255, .08), -20px 0 60px -30px rgba(0, 0, 0, .9) }
   html.dna-voll .fb-kopf { border-radius: 0 }
 }
+
+/* ---------- Testansicht für Fensterbauer (/app/?ausprobieren, 28.10.2026) ----------
+   Hier spricht eeziframes zum Fensterbauer, nicht der Betrieb zu seinem Kunden: Hinweis am Anfang als Anthrazit-Karte mit Lichtkante
+   (G14) und Etikett mit violettem Punkt, im Kopf ein kleines Zeichen „Test“ in Indigo, nach dem Senden erst die echte Bestätigung des
+   Kunden mit kurzem Hinweis, dann auf der Folie mit dem Blatt die E-Mail an den Betrieb als weiße Karte (probeGesendet). */
+.probe-chip { flex: none; display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 999px; background: #3c3a66; color: #fff; font: 500 12px/1 "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; letter-spacing: .03em }
+.probe-start, .probe-hinweis { --pr-font: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; margin: 0 0 16px; padding: 16px 18px 6px; border-radius: 20px; background: radial-gradient(120% 90% at 18% 0%, #363638, #202022 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045); color: #fff; font-family: var(--pr-font) }
+.probe-start .dna-label, .probe-hinweis b { display: inline-flex; align-items: center; gap: 8px; font: 400 12px/1.3 var(--pr-font); letter-spacing: .03em; color: #a8a4a9 }
+.probe-start .dna-label::before, .probe-hinweis b::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #897efc; box-shadow: 0 0 0 4px rgba(137, 126, 252, .18) }
+.probe-start-titel { margin: 8px 0 0; font: 500 20px/1.15 var(--pr-font); letter-spacing: -.02em; color: #fff }
+.probe-start p:not(.probe-start-titel) { margin: 6px 0 0; max-width: 46ch; font: 400 15px/1.45 var(--pr-font); color: #a8a4a9 }
+.probe-start-link { display: inline-flex; align-items: center; min-height: 44px; color: #fff; font: 500 14px/1.2 var(--pr-font); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px }
+.probe-start.knapp { padding-top: 12px }
+.probe-start.knapp p { margin-top: 4px }
+.probe-hinweis { display: grid; gap: 6px; padding-bottom: 14px }
+.probe-hinweis span { font: 400 15px/1.45 var(--pr-font); color: #fff }
+.probe-hinweis-los { justify-self: start; display: inline-flex; align-items: center; min-height: 44px; margin-top: 2px; padding: 0 18px; border: 0; border-radius: 999px; background: transparent; box-shadow: inset 0 0 0 1.5px #a8a4a9; color: #fff; font: 500 15px/1 var(--pr-font); cursor: pointer; transition: transform 160ms cubic-bezier(.2, .7, .2, 1) }
+.probe-hinweis-los:active { transform: scale(.97); transition-duration: 0s }
+.probe-hinweis-los:focus-visible { outline: 2px solid #fff; outline-offset: 3px }
+/* Ende: die E-Mail an den Betrieb (Weiß nur für diese eine Karte), Anhang als Zeile zum Antippen, danach der Weg zurück */
+.dna.probe-ende .lg-frage { display: grid; gap: 8px }
+.dna.probe-ende .lg-frage .dna-label { display: inline-flex; align-items: center; gap: 8px; font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; margin-bottom: -2px }
+.dna.probe-ende .lg-frage .dna-label::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 4px rgba(137, 126, 252, .18) }
+.dna.probe-ende .lg-frage p { max-width: 42ch }
+.dna .ab-papier-betrieb { font: 600 8px/1 var(--font-sans); letter-spacing: -.01em }
+.dna.dt .ab-papier-betrieb { font-size: 13px }
+/* Am Telefon hat der Name des Betriebs im Kopf Vorrang vor dem Zeichen „Test“; dort sagen es die Hinweise am Anfang, bei den Kontaktdaten
+   und am Ende */
+@media (max-width: 479px) { .probe-chip { display: none } }
+.probe-mail { display: grid; gap: 12px; padding: 16px 18px 18px; border-radius: 20px; background: var(--weiss); color: var(--schwarz); box-shadow: 0 24px 60px -30px rgba(0, 0, 0, .9) }
+.probe-mail-kopf { display: flex; justify-content: space-between; gap: 12px; margin: 0; font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--textgrau) }
+.probe-mail h2 { margin: 0; font: 500 17px/1.3 var(--font-sans); letter-spacing: -.01em; color: var(--schwarz) }
+.probe-mail-daten { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none }
+.probe-mail-daten li { display: grid; grid-template-columns: 92px 1fr; gap: 10px; font: 400 14px/1.35 var(--font-sans) }
+.probe-mail-daten span { color: var(--textgrau) }
+.probe-mail-daten b { font-weight: 500; color: var(--schwarz); overflow-wrap: anywhere }
+.probe-anhang { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 10px 14px 10px 10px; border: 0; border-radius: 16px; background: #f1f0f3; color: var(--schwarz); text-align: left; font: inherit; cursor: pointer; transition: transform 160ms var(--dna-druck), background-color 160ms ease }
+.probe-anhang:active { transform: scale(.98); transition-duration: 0s }
+.probe-anhang:disabled { cursor: progress; opacity: .7 }
+.probe-anhang:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px }
+.probe-anhang-ic { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--indigo); color: var(--weiss) }
+.probe-anhang-ic svg { width: 22px; height: 22px }
+.probe-anhang b { display: block; font: 500 15px/1.25 var(--font-sans); overflow-wrap: anywhere }
+.probe-anhang small { display: block; margin-top: 2px; font: 400 13px/1.35 var(--font-sans); color: var(--textgrau) }
+.probe-mail-fuss { margin: 0; font: 400 13px/1.4 var(--font-sans); color: var(--textgrau) }
+.probe-weiter { display: grid; gap: 8px; margin: 4px 0 0; padding: 0; list-style: none }
+.probe-weiter li { position: relative; padding-left: 18px; font: 400 15px/1.45 var(--font-sans); color: var(--silbergrau) }
+.probe-weiter li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--linie) }
+.probe-weiter b { font-weight: 500; color: var(--weiss) }
+.probe-aktionen { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px }
+.probe-zurueck { justify-self: start; min-height: 44px; padding: 0; border: 0; background: none; color: var(--silbergrau); font: 400 14px/1.3 var(--font-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
+@media (prefers-reduced-motion: reduce) { .probe-anhang, .probe-hinweis-los { transition: none } }

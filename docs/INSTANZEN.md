@@ -322,6 +322,9 @@ Signature: Die Mails an den Betrieb kommen vom neutralen Postfach `MAIL_ABSENDER
 
 Demo-Instanzen der Verkaufsseite: Custom Domains `demo-essential.eeziframes.com`, `demo-plus.eeziframes.com`, `demo-signature.eeziframes.com` am Worker, in der Zentrale je eine Instanz ohne Bestellung mit Schalter „Demo“ (Anfragen gehen an `MAIL_KONTAKT` und verschwinden nach `FRISTEN.testTage` Tag). Die Verkaufsseite verlinkt sie erst mit der Variable `PAKETE_DEMOS=1`, vorher führt „Konfigurator ausprobieren“ in die App.
 
+
+Testansicht für Fensterbauer (28.10.2026, Wunsch des Inhabers): „Selbst ausprobieren“ auf der Seite für Fensterbauer und „Konfigurator ausprobieren“ in deren Ratgebern führen auf `/app/?ausprobieren`. Die App läuft dann im Instanz-Modus als „Muster Fensterbau“ (Merkmale wie Plus, Firmenfarbe Violett; `PROBE` in web/assets/app.js setzt `KONFIG.instanz` vor `INST`), so wie die Kunden eines Betriebs den Konfigurator auf dessen Website erleben, ohne Führung und ohne Kauf. Alles bleibt im Browser: kein `/api/status`, kein Code vom Server (`instanzStart` vergibt ihn auf dem Gerät), kein Zwischenstand, keine Fotos hinauf, KI ohne Code wie auf der Hauptdomain. Am Anfang steht ein Hinweis („Testansicht für Fensterbauer“, `probeStart`), bei den Kontaktdaten ein zweiter. Senden ist eine Simulation (`probeSenden`, Nummer `TEST-…`): erst die echte Bestätigung des Kunden, dann auf der Folie mit dem Blatt die E-Mail, wie sie beim Betrieb ankäme, mit dem Aufmaßblatt in der Variante `betrieb` als PDF (`probeBlatt`), „Pakete ansehen“ und „Noch einmal ausprobieren“. Auf einer echten Instanz (KONFIG.instanz vom Server) gibt es die Testansicht nicht.
+
 ### Zustände und was sie bedeuten
 
 | Status | Startseite | Endkunde | Dashboard (Signature) | Wie man hinkommt |

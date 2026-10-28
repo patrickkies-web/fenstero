@@ -2397,7 +2397,7 @@ const AI = (function () {
   async function analyze(file, side, signal, onPart, neu) {
     const img = file && file.blob ? file : await shrink(file), res = { w: img.w, h: img.h, befund: null, errs: {} };
     try {
-      res.befund = readBefund(await sample.json('', { images: img.blob, signal: signal, aufgabe: neu ? 'wand' : 'einbau', seite: side, code: INST && S.betrieb ? S.betrieb.code : '' }), side); // Instanz: Code der Planung (functions/api/ki.js)
+      res.befund = readBefund(await sample.json('', { images: img.blob, signal: signal, aufgabe: neu ? 'wand' : 'einbau', seite: side, code: INST && S.betrieb && !PROBE ? S.betrieb.code : '' }), side); // Instanz: Code der Planung (functions/api/ki.js)
       if (!res.befund) res.errs.befund = 'error';
     } catch (e) {
       if (e && e.code === 'cancelled') throw e;
@@ -2439,6 +2439,19 @@ const STORE = 'aufmass.v1';
    'instanz.<id8>.aktiv'; ein Code aus #k-… (Signature-Einladung, „auf anderem Gerät weitermachen“) hat Vorrang. Kontakt ist Pflicht,
    nach dem Senden kommen Bestätigung und „Meine Anfrage als PDF“; sobald die Bestätigung verlassen wird, bleiben auf dem Gerät nur
    Nummer, Datum und Betrieb (K1.16). Merkmale nur über INST.m (Pakete.oeffentlich), nie über den Namen des Pakets. */
+/* Testansicht für Fensterbauer (/app/?ausprobieren, „Selbst ausprobieren“ auf der Seite für Fensterbauer): der Konfigurator so, wie ihn
+   die Kunden eines Betriebs auf dessen Website erleben, als Instanz „Muster Fensterbau“, ganz im Browser. Kein Aufruf an den Server der
+   Instanzen (kein Code vom Server, kein Zwischenstand, keine Fotos hinauf), Senden ist eine Simulation (probeSenden) und zeigt danach,
+   wie die Anfrage beim Betrieb ankommt. Auf einer echten Instanz (KONFIG.instanz vom Server) gibt es sie nicht. */
+const PROBE = (() => { try { return new URLSearchParams(location.search).has('ausprobieren'); } catch (e) { return false; } })() && !(window.KONFIG && window.KONFIG.instanz);
+if (PROBE) {
+  (window.KONFIG = window.KONFIG || {}).instanz = { id: 'muster01', v: 1, host: location.host, name: 'Muster Fensterbau', du: false, status: 'aktiv', vorschau: false, demo: true, probe: true,
+    m: { gestaltung: 'eigen', logo: false, farbe: true, fotos: 6, startansicht: true, kennzeichnung: 'dezent', pdfKennzeichnung: 'dezent', rechtNennung: 'name', kopieKunde: true, dashboard: false },
+    auftritt: { logo: '', grund: 'dunkel', col: '#897efc', gruss: { sie: '', du: '' }, ap: '', foto: '', tel: '', mail: '', web: '', ort: '', tiefe: '', std: '' },
+    start: { kicker: '', ueberschrift: '', text: '', bilder: [] }, farbe: '#897efc', akzent: '#897efc', kontakt: { tel: '', mail: '' }, logo: '', grenzen: { fenster: 50 } };
+  /* Firmenfarbe wie auf der Seite einer Instanz (der Server setzt dort --accent im Kopf, functions/instanz/seiten.js) */
+  try { document.documentElement.style.setProperty('--accent', '#897efc'); document.documentElement.style.setProperty('--accent-soft', 'rgba(137, 126, 252, .14)'); } catch (e) { /* ok */ }
+}
 const INST = window.KONFIG && window.KONFIG.instanz && typeof window.KONFIG.instanz === 'object' && /^[a-z0-9]{8}$/.test(String(window.KONFIG.instanz.id || '')) ? window.KONFIG.instanz : null;
 const INST_M = INST ? INST.m || {} : {};
 const INST_KEY = INST ? 'instanz.' + INST.id : '';
@@ -2469,6 +2482,7 @@ let INST_START = null;
 function instanzStart() {
   if (!INST || !S.betrieb) return Promise.resolve(false);
   if (S.betrieb.code) return Promise.resolve(true);
+  if (PROBE) { instanzCodeSetzen('t' + Math.random().toString(36).slice(2).replace(/[^a-z0-9]/g, '').padEnd(9, '0').slice(0, 9), null); return Promise.resolve(true); } // Testansicht: Code nur auf diesem Gerät
   if (INST_START) return INST_START;
   INST_START = (async () => {
     try {
@@ -3907,10 +3921,10 @@ function anfrage2Dna() {
   return { html: lgKopf(['back', 'Zurück: Haus']) + dnaTisch(abZeitBuehne(pr, anfrageHead(2, lk)), frage + karte + abFuss('Zurück: Haus', weiter[0], weiter[1], weiter[2])), back: ['Haus', 'anfrage'], dna: true, cls: 'dna ab dt', voll: true };
 }
 /* Kontakt: das Aufmaßblatt als Objekt im Fensterlicht; was getippt wird, steht sofort oben auf dem Blatt (abLive), Maße als Punkte */
-function abPapier(offen, schloss) {
+function abPapier(offen, schloss, betrieb) { // betrieb: Name im Kopfband statt eeziframes (Testansicht: das Blatt, wie es beim Betrieb ankommt)
   const pr = S.proj, n = S.windows.length, el = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), pkt = (v) => (!v ? '•.•••' : offen ? thousand(v) : thousand(v).replace(/\d/g, '•'));
   const kontakt = [pr.ort, pr.tel, pr.mail].map((t) => String(t || '').trim()).filter(Boolean);
-  return '<div class="ab-papier" aria-hidden="true"><div class="ab-papier-band">' + LOGO(10) + '<span class="ab-wm" translate="no"><b>eezi</b>frames</span><span class="ab-papier-art">Aufmaßblatt</span></div><div class="ab-papier-in">' +
+  return '<div class="ab-papier" aria-hidden="true"><div class="ab-papier-band">' + (betrieb ? '<span class="ab-papier-betrieb">' + esc(betrieb) + '</span>' : LOGO(10) + '<span class="ab-wm" translate="no"><b>eezi</b>frames</span>') + '<span class="ab-papier-art">Aufmaßblatt</span></div><div class="ab-papier-in">' +
     '<p class="ab-papier-h" data-p="name">' + esc(String(pr.name || '').trim() || 'Dein Aufmaß') + '</p>' +
     '<p class="ab-papier-kontakt" data-p="kontakt">' + (kontakt.length ? esc(kontakt.join(' · ')) : '<i class="ab-leer" style="--b: 38%"></i><i class="ab-leer" style="--b: 30%"></i>') + '</p>' +
     '<p class="ab-papier-s">' + n + (n === 1 ? ' Position' : ' Positionen') + ' · ' + el + (el === 1 ? ' Element' : ' Elemente') + (pr.gebaeude ? ' · ' + esc(lab('gebaeude', pr.gebaeude)) : '') + '</p>' +
@@ -7052,6 +7066,11 @@ function act(name, el) {
       if (INST && S.betrieb && !S.betrieb.code) return instanzStart().then((ok) => { if (ok) newWin(); }); // Instanz: der Code kommt mit dem ersten Fenster
       return newWin();
     case 'inst-weitere': return instanzWeitere();
+    /* Testansicht für Fensterbauer (probeGesendet) */
+    case 'probe-betrieb': S.probeSicht = 'betrieb'; return render(true);
+    case 'probe-kunde': S.probeSicht = 'kunde'; return render(true);
+    case 'probe-blatt': return probeBlatt();
+    case 'probe-neu': instanzVergessen(); return toast('Noch einmal von vorn: Ihre Testdaten sind gelöscht.');
     case 'inst-vergessen': return instanzVergessen();
     case 'inst-pdf': return anfragePdf();
     case 'inst-geraet': { S.instGeraet = !S.instGeraet; return render(); }
@@ -7195,6 +7214,7 @@ function act(name, el) {
     case 'send': { if (vorschau()) return toast('Vorschau: Hier wird nichts gesendet.'); if (S.betrieb && S.sent) return go('gesendet'); if (!linkOffen()) return; if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); if (S.betrieb && entwurfLesen()) { S.sendeFrage = true; return render(); }
       if (INST && S.instZu) return go('home');
       if (instWebsite() && kontaktPruefen().fehlt) { S.kontaktFehler = kontaktPruefen(); S.kontaktFehler.alle = true; toast('Bitte noch Name und Telefon oder E-Mail angeben.'); return go('anfrage3'); }
+      if (PROBE) return kiVorher('senden').then((weiter) => { if (weiter && !S.sent) probeSenden(); }); // Testansicht: Senden als Simulation
       if (INST) return (SERVER.daten ? Promise.resolve(true) : statusHolen()).then((da) => { if (!da) return toast('Gerade nicht erreichbar. Deine Planung bleibt gespeichert, bitte gleich noch einmal senden.'); if (S.instWeg) { S.instWeg = false; linkPruefen(); } return kiVorher('senden').then((weiter) => { if (weiter && !S.sent) return sendenServer(); }); });
       return kiVorher('senden').then((weiter) => { if (!weiter || (S.betrieb && S.sent)) return; if (SERVER.daten && S.betrieb) return sendenServer(); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); go('gesendet'); }); }
     case 'copyblatt': return copyText(curCode(), 'code-box', 'Code kopiert');
@@ -7663,7 +7683,7 @@ function sendeText() {
 /* Kopf auf der Startseite: Zeichen (Logo oder Initiale) und Name des Betriebs */
 function instKopf() {
   const d = lkDaten(), E = window.Einladung;
-  return '<span class="hdr-inst">' + (E ? E.zeichen(d.name, d.p, 'klein') : '') + '<span class="hdr-name">' + esc(d.name) + '</span></span>';
+  return '<span class="hdr-inst">' + (E ? E.zeichen(d.name, d.p, 'klein') : '') + '<span class="hdr-name">' + esc(d.name) + '</span>' + (PROBE ? '<span class="probe-chip" title="Testansicht für Fensterbauer: Nichts wird gesendet">Test</span>' : '') + '</span>';
 }
 /* Kontakt auf der Website einer Instanz: Name (mindestens 2 Zeichen) und Telefon (mindestens 6 Ziffern) oder E-Mail, dieselbe Regel
    wie der Server (Instanzregeln.telOk/mailOk, functions/api/konten.js); ein angefangenes, falsches Feld zählt als Fehler */
@@ -7688,6 +7708,7 @@ function instAnfrage3() {
   const pr = S.proj, d = lkDaten(), bn = d.name, C = window.KONFIG || {};
   const f = S.kontaktFehler ? Object.assign(kontaktPruefen(), { alle: true }) : {};
   let html = hd(anfrageHead(3, true), anr('Wie erreicht Sie ', 'Wie erreicht dich ') + esc(bn) + '?', 'Name und Telefon oder E-Mail brauchen wir, damit ' + esc(bn) + ' sich mit dem Angebot melden kann. ' + anr('Ihre', 'Deine') + ' Angaben gehen nur an ' + esc(bn) + '; mehr dazu im <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>.', '', '', schrittTools('kontakt'));
+  if (PROBE) html += '<div class="probe-hinweis" role="note"><b>Testansicht</b><span>Hier dürfen Sie auch ausgedachte Angaben eintragen. Nichts wird gesendet, alles bleibt auf diesem Gerät.</span></div>';
   html += '<div class="sec"><div class="rows kontakt-felder">' + kontaktFeld('Name', 'name', 'Vor- und Nachname', 'text', 'name', f.name, true) + kontaktFeld('Telefon', 'tel', 'Für Rückfragen', 'tel', 'tel', f.tel || !!f.weg, false) + kontaktFeld('E-Mail', 'mail', 'name@beispiel.de', 'email', 'email', f.mail || f.weg, false) + kontaktFeld('PLZ und Ort', 'ort', 'z. B. 50667 Köln', 'text', 'postal-code address-level2', '', false) + '</div>' +
     '<p class="sub kontakt-hinweis">* Pflicht. Dazu Telefon oder E-Mail, eins genügt.</p></div>';
   html += '<div class="sec">' + secHead('Wann am besten erreichbar?', null, 'Freiwillig.') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div>';
@@ -7703,6 +7724,14 @@ function instWeiterKarte(du) {
     if (S.instGeraet) h += '<div class="inst-link"><input type="text" readonly value="' + esc(instWeiterLink()) + '" aria-label="Link zu dieser Planung"><div class="pill-row"><button type="button" class="pill" data-act="inst-link-kopieren">Link kopieren</button>' + (navigator.share ? '<button type="button" class="pill" data-act="inst-link-teilen">Teilen</button>' : '') + '</div><p class="sub">' + T('Wer diesen Link hat, sieht Ihre Planung. Geben Sie ihn nur an Personen weiter, denen Sie vertrauen.', 'Wer diesen Link hat, sieht deine Planung. Gib ihn nur an Personen weiter, denen du vertraust.') + '</p></div>';
   }
   return h + '</div>';
+}
+/* Testansicht für Fensterbauer: Hinweis am Anfang (erste Seite), danach knapp über der Liste */
+function probeStart(knapp) {
+  if (!PROBE) return '';
+  return '<section class="probe-start' + (knapp ? ' knapp' : '') + '" role="note" aria-label="Testansicht für Fensterbauer"><span class="dna-label">Testansicht für Fensterbauer</span>' +
+    (knapp ? '<p>Hier wird nichts gesendet. Am Ende sehen Sie, wie die Anfrage bei Ihnen ankommt.</p>'
+      : '<p class="probe-start-titel">So erleben Ihre Kunden Ihren Konfigurator.</p><p>„Muster Fensterbau“ steht für Ihren Betrieb: Auf Ihrer Website trägt der Konfigurator Ihren Namen und Ihre Farbe. Probieren Sie alles aus, vom ersten Maß bis zum Absenden. Gesendet wird nichts; am Ende sehen Sie, wie die Anfrage bei Ihnen ankommt.</p>') +
+    '<a class="link probe-start-link" href="' + PROBE_FB + '">Zurück zur Seite für Fensterbauer</a></section>';
 }
 /* Startseite einer Instanz in allen Zuständen (erste Seite, Liste, gesendet, Planung nicht mehr da, Nachbesserung einer Einladung) */
 function instHome() {
@@ -7728,13 +7757,13 @@ function instHome() {
   }
   if (S.nb) return linkHomeInhaltAlt(I);
   if (n || angelegt() >= GRENZE.fenster) {
-    const html = weg + (web ? '' : '<div class="lk-kopf">' + E.kopf({ name: name, p: p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '', instanz: I }) + '</div>') + uebersichtKopf(T) +
+    const html = weg + probeStart(true) + (web ? '' : '<div class="lk-kopf">' + E.kopf({ name: name, p: p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '', instanz: I }) + '</div>') + uebersichtKopf(T) +
       '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
       (vorschau() ? '' : web ? instWeiterKarte(du) : linkMerk(name, du)) + kontakt() + rechtLinks();
     return { html: html, bar: n ? { label: 'Weiter zum Absenden', act: 'go', v: 'anfrage' } : null };
   }
   const frueher = web && liste.length ? '<section class="card inst-frueher"><p class="eyebrow">' + T('Ihre Anfragen auf diesem Gerät', 'Deine Anfragen auf diesem Gerät') + '</p><ul class="inst-nr">' + liste.slice(0, 5).map((x) => { let t = ''; try { t = new Date(x.when).toLocaleDateString('de-DE'); } catch (e) { t = ''; } return '<li><b>' + esc((x.test ? 'Testanfrage ' : 'Anfrage ') + x.nr) + '</b><span>' + esc(t ? 'gesendet am ' + t : 'gesendet') + '</span></li>'; }).join('') + '</ul><div class="pill-row"><button type="button" class="pill" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>' : '';
-  const html = weg + E.html({ name: name, kunde: d.kunde, du: du, p: p, bis: web ? '' : d.bis, server: !!SERVER.daten, instanz: I }) + frueher + rechtLinks(true);
+  const html = weg + probeStart() + E.html({ name: name, kunde: d.kunde, du: du, p: p, bis: web ? '' : d.bis, server: !!SERVER.daten, instanz: I }) + frueher + rechtLinks(true);
   return { html: html, bar: null };
 }
 /* Die Instanz ist inzwischen pausiert, beendet oder wieder in Vorbereitung (Antwort der API, Status-Matrix §2.7), während die App offen
@@ -7754,6 +7783,53 @@ function instZuSeite() {
   const html = '<section class="hero lk"><div class="ein-start-in"><p class="eyebrow" style="color: var(--warn)">' + t[0] + '</p><h1>' + t[1] + '</h1><p class="ein-lead">' + t[2] + (n ? ' ' + T('Ihre Planung bleibt auf diesem Gerät gespeichert.', 'Deine Planung bleibt auf diesem Gerät gespeichert.') : '') + '</p></div></section>' +
     (E ? E.kontakt({ name: name, p: d.p, du: du, instanz: instOpt() }) : '') + rechtLinks();
   return { html: html, bar: null };
+}
+/* ---------- Testansicht für Fensterbauer: Senden als Simulation ----------
+   Wie nach dem echten Senden (sendenServer), nur ohne Server: Nummer einer Testanfrage (wie der Server sie vergibt, TEST-…), nichts
+   verlässt das Gerät. Danach zwei Ansichten auf derselben Folie (sonst räumt render die Planung weg, instanzKuerzen): erst die
+   Bestätigung, wie sie der Kunde sieht, dann, wie die Anfrage beim Betrieb ankommt (E-Mail mit dem Aufmaßblatt als PDF). */
+function probeSenden() {
+  S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: 1, uebertragen: true, nr: 'TEST-' + String(S.betrieb.code || '').slice(1, 7).toUpperCase(), art: 'probe' };
+  S.nb = null; S._feier = 'gesendet'; S.toast = ''; clearTimeout(toastTimer); S.probeSicht = 'kunde';
+  persist(); go('gesendet');
+}
+function probeGesendet() {
+  if (!S.sent || S.sent.kurz) return instHome();
+  if (S.probeSicht !== 'betrieb') {
+    const v = instGesendet();
+    return Object.assign({}, v, { html: '<div class="probe-hinweis" role="note"><b>Testansicht</b><span>So sieht Ihr Kunde die Bestätigung. Danach sehen Sie, wie die Anfrage bei Ihnen ankommt.</span><button type="button" class="probe-hinweis-los" data-act="probe-betrieb">So kommt sie bei Ihnen an</button></div>' + v.html, bar: { label: 'So kommt die Anfrage bei Ihnen an', act: 'probe-betrieb' } });
+  }
+  const pr = S.proj, n = S.windows.length, kunde = String(pr.name || 'Ihr Kunde').slice(0, 60), offen = AW.klaerung(S.windows, pr, {}).length;
+  const fotos = S.windows.reduce((a, w) => a + bilderVon(w).length, 0), nr = S.sent.nr || '';
+  const zeile = (k, v) => v ? '<li><span>' + esc(k) + '</span><b>' + esc(v) + '</b></li>' : '';
+  const nw = (k, e, m) => k + '\u00a0' + (k === 1 ? e : m);
+  const mail = '<section class="probe-mail" aria-label="E-Mail an Ihren Betrieb, simuliert"><p class="probe-mail-kopf"><span>An Ihre Adresse für Anfragen</span><span>gerade eben</span></p>' +
+    '<h2>Neue Anfrage: ' + esc(kunde) + ' · ' + esc(nw(n, 'Position', 'Positionen')) + ' · ' + esc(nr) + '</h2>' +
+    '<ul class="probe-mail-daten">' + zeile('Name', pr.name ? kunde : '') + zeile('Telefon', pr.tel) + zeile('E-Mail', pr.mail) + zeile('Ort', pr.ort) + zeile('Fotos', fotos ? String(fotos) : '') + zeile('Zu klären', offen ? nw(offen, 'Punkt', 'Punkte') : '') + '</ul>' +
+    '<button type="button" class="probe-anhang" data-act="probe-blatt"' + (S.pdfLaeuft ? ' disabled' : '') + '><span class="probe-anhang-ic" aria-hidden="true">' + FILE_IC + '</span><span><b>Aufmassblatt-' + esc(nr) + '.pdf</b><small>' + (S.pdfLaeuft ? 'Wird erstellt …' : 'Anhang ansehen: Maße, Zeichnung, Fotos, Wünsche, Klärungsliste') + '</small></span></button>' +
+    (pr.mail ? '<p class="probe-mail-fuss">Antworten Sie einfach auf diese E-Mail, sie geht direkt an ' + esc(kunde) + '.</p>' : '') + '</section>';
+  const html = '<div class="lg-frage probe-titel"><span class="dna-label">Testansicht · Simulation</span><div class="lg-frage-kopf"><h1 tabindex="-1">Gesendet. <span class="ak">So kommt es bei Ihnen an.</span></h1></div>' +
+    '<p>Ihr Kunde hat jetzt seine Bestätigung. Sie bekämen in diesem Moment diese E-Mail, das Aufmaßblatt hängt als PDF an. In der Testansicht wurde nichts gesendet.</p></div>' + mail +
+    '<ul class="probe-weiter"><li><b>Angebot.</b> Sie rufen an oder schreiben das Angebot, mit allen Maßen und Wünschen.</li><li><b>Feinaufmaß.</b> Vor der Fertigung messen Sie einmal vor Ort nach.</li></ul>' +
+    '<div class="probe-aktionen"><a class="dna-pille" href="' + esc(PROBE_FB) + '#pakete">Pakete ansehen' + abPfeil + '</a><button type="button" class="dna-pille dna-pille--leise" data-act="probe-neu">Noch einmal ausprobieren</button></div>' +
+    '<button type="button" class="link probe-zurueck" data-act="probe-kunde">Bestätigung des Kunden noch einmal ansehen</button>';
+  return { html: lgKopf(false) + dnaTisch(abBuehne('ab-blatt', 'Bei Ihnen eingegangen', abPapier(true, false, lkDaten().name)), '<div class="ab-inhalt">' + html + '</div>'), dna: true, cls: 'dna ab ab2 dt probe-ende', voll: true, bar: null };
+}
+const PROBE_FB = '/fuer-fensterbauer/';
+/* Das Aufmaßblatt, wie es beim Betrieb ankommt (Variante betrieb, wie functions/api/blatt-server.js), mit den Fotos dieses Geräts */
+async function probeBlatt() {
+  if (!PROBE || !S.sent || S.sent.kurz) return;
+  if (S.pdfLaeuft) return;
+  S.pdfLaeuft = true; render();
+  try {
+    await blattSchrift();
+    const d = lkDaten(), pr = S.proj, fotos = await fotosFuerBlatt(S.windows);
+    const kunde = { name: pr.name || '', kontakt: pr.tel || pr.mail || '', adresse: pr.ort || '', mehr: AW.kundeKontakt({ kontakt: pr.tel || pr.mail || '', aufmass: { proj: pr } }) };
+    const pdf = window.Blatt ? window.Blatt.pdf({ variante: 'betrieb', kennzeichnung: INST_M.pdfKennzeichnung, fenster: S.windows, projekt: pr, kunde: kunde, klaerung: AW.klaerung(S.windows, pr, {}), klaerStand: {}, portalKurz: location.host, nr: S.sent.nr || '', fotos: fotos || {}, betrieb: { name: d.name, nr: S.sent.nr || '', eingegangen: '' }, h: BLATT_H }) : null;
+    if (!pdf) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); return; }
+    await dateiSpeichern(pdf, 'Aufmassblatt-' + (String(S.sent.nr || '').replace(/[^A-Za-z0-9-]/g, '') || 'Test') + '.pdf');
+  } catch (e) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); }
+  finally { S.pdfLaeuft = false; render(); }
 }
 /* Bestätigung nach dem Senden: Nummer, „<Name> meldet sich“, Kontaktkarte, „Meine Anfrage als PDF“ (Merkmal kopieKunde), weitere Anfrage,
    vergessen. Verlässt der Kunde sie, bleiben nur Nummer und Datum (render → instanzKuerzen) */
@@ -7800,6 +7876,7 @@ async function anfragePdf() {
 const gesendetOrig = SCREENS.gesendet;
 SCREENS.gesendet = () => abRahmen(gesendetPilot(), abBlattBuehne('Senden', false)); // Design-DNA: Rahmen der neuen Folien (abRahmen)
 function gesendetPilot() {
+  if (PROBE && S.betrieb) return probeGesendet();
   if (INST && S.betrieb) return instGesendet();
   if (!PILOT) return gesendetOrig();
   const bn = S.betrieb && S.betrieb.name ? S.betrieb.name : '', dat = bn || 'deinem Fensterbauer', nom = bn || 'dein Fensterbauer';
@@ -7821,6 +7898,7 @@ function gesendetPilot() {
    daten:   Aufmaße gehen direkt an den Betrieb, ohne Code-Umweg; der Link wird beim Öffnen geprüft
    zahlung: das Aufmaßblatt wird über Stripe bezahlt */
 async function statusHolen() {
+  if (PROBE) return false; // Testansicht: ohne Server, wie eine Instanz ohne Verbindung, aber ohne Hinweis darauf
   try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); const j = r.ok ? await r.json() : null; if (j && j.ok) { SERVER.daten = !!j.daten; SERVER.konten = !!j.konten; SERVER.zahlung = !!j.zahlung; SERVER.attrappe = !!j.attrappe; SERVER.testmodus = !!j.testmodus; SERVER.preise = j.preise || null; SERVER.betriebskonto = !!j.betriebskonto; if (j.preise && window.Abrechnung && window.Abrechnung.setPreise) window.Abrechnung.setPreise(j.preise); /* auch die Box für Fensterbauer im Aufmaßblatt (blatt.js) */ if (window.Abrechnung && window.Abrechnung.setEinfuehrung) window.Abrechnung.setEinfuehrung(j.einfuehrung || null); SERVER.zahlarten = Array.isArray(j.zahlarten) ? j.zahlarten : null; SERVER.recht = j.recht || null; } } catch (e) { /* ohne Server weiter */ }
   return SERVER.daten;
 }
@@ -7829,7 +7907,7 @@ async function serverStart() {
   /* Instanz: nie der Pilot-Weg (Code per WhatsApp an eeziframes); ohne Antwort des Servers bleibt die Planung auf dem Gerät, gesendet
      wird, sobald er wieder antwortet */
   PILOT = INST ? false : !SERVER.daten;
-  if (INST && !SERVER.daten) { S.instWeg = true; render(); }
+  if (INST && !SERVER.daten && !PROBE) { S.instWeg = true; render(); }
   setTimeout(() => { fotosHochladen(); fotosLokalAufraeumen(); }, 4000); // liegengebliebene Fotos nachschicken, Überholtes auf dem Gerät wegräumen
   if (SERVER.daten) document.querySelectorAll('.fx-pilot').forEach((e) => e.remove());
   const q = new URLSearchParams(location.search), bezahlt = q.get('bezahlt'), t = LINK_TOKEN; LINK_TOKEN = null;
