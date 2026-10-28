@@ -1074,6 +1074,27 @@ function facadeBg(k, hex) {
   if (k === 'wdvs') return 'linear-gradient(160deg, #b8b3ab, #a39d94)';
   return 'linear-gradient(160deg, #aaa193, #968c7e)';
 }
+/* Klinker im CSS-Modell (ohne WebGL, 28.10.2026, Inhaber: „das gängige Klinker-Problem“): echtes Mauerwerk statt Raster. Der Verlauf aus
+   facadeBg ließ alle Stoßfugen senkrecht durchlaufen, Steine fast quadratisch, Fugen hell: das sah aus wie Fliesen. Hier ein Muster in
+   Millimetern: Normalformat 240 × 71 mm, Fuge 10 mm, Läuferverband (jede zweite Reihe um einen halben Stein versetzt), je Stein ein etwas
+   anderer Ton, oben eine feine Lichtkante, unten ein Schatten; Fuge grau, zum Stein getönt. Sechs Steine × sechs Reihen je Kachel, skaliert
+   mit dem Maßstab des Modells (--mm, Bildpunkte je mm aus w3dLayout). Die WebGL-Bühne liest weiter facadeBg (_bg) und zeichnet ihren
+   eigenen Läuferverband (buehne.js), unverändert */
+const KLINKER_CSS = new Map();
+function klinkerCss(hex) {
+  const b = hex || FASSADE_STD.klinker; if (KLINKER_CSS.has(b)) return KLINKER_CSS.get(b);
+  const fuge = mischHex('#9c968e', b, 0.22), L = 250, C = 81.25, N = 6, R = 6, var_ = [0, -0.07, 0.06, -0.03, 0.03, -0.1, 0.09, -0.05];
+  let r = '';
+  for (let y = 0; y < R; y++) for (let x = -1; x < N; x++) {
+    const i = ((y * 7 + (x + 1) * 3) % var_.length + var_.length) % var_.length, v = var_[i], ton = v < 0 ? mischHex(b, '#000000', -v) : mischHex(b, '#ffffff', v);
+    const sx = x * L + (y % 2 ? L / 2 : 0) + 5, sy = y * C + 5;
+    r += '<rect x="' + sx + '" y="' + sy + '" width="240" height="71.25" fill="' + ton + '"/><rect x="' + sx + '" y="' + sy + '" width="240" height="2.5" fill="' + mischHex(ton, '#ffffff', 0.18) + '"/><rect x="' + sx + '" y="' + (sy + 67.25) + '" width="240" height="4" fill="' + mischHex(ton, '#000000', 0.16) + '"/>';
+  }
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + N * L + '" height="' + R * C + '" viewBox="0 0 ' + N * L + ' ' + R * C + '"><rect width="100%" height="100%" fill="' + fuge + '"/>' + r + '</svg>';
+  const v = "url('data:image/svg+xml," + encodeURIComponent(svg) + "') 0 0 / calc(var(--mm, .3) * " + N * L + 'px) calc(var(--mm, .3) * ' + R * C + 'px) repeat, ' + b;
+  KLINKER_CSS.set(b, v); return v;
+}
+const facadeCss = (k, hex) => (k === 'klinker' ? klinkerCss(hex) : facadeBg(k, hex));
 /* Fensterbänke: Oberseite (oben), Stirnseite (stirn), Vollton (voll) je Material; innen und außen */
 const GRANIT = 'radial-gradient(circle at 30% 40%, rgba(40, 38, 35, .38) 0 1px, transparent 1.6px) 0 0 / 6px 6px, radial-gradient(circle at 70% 25%, rgba(255, 255, 255, .6) 0 .8px, transparent 1.4px) 0 0 / 5px 5px, radial-gradient(circle at 45% 80%, rgba(90, 84, 76, .32) 0 1.2px, transparent 2px) 0 0 / 9px 9px, ';
 const BANK = {
@@ -1148,6 +1169,12 @@ function meshBg(w, s) {
   const st = Math.max(1.2, (g === 'pollen' ? 1 : g === 'tier' ? 2 : 1.4) * (s || 0.16)), lw = st * (g === 'tier' ? 0.4 : 0.3), n = (v) => Math.round(v * 100) / 100 + 'px';
   return 'repeating-linear-gradient(0deg, rgba(20, 20, 20, ' + a + ') 0 ' + n(lw) + ', transparent ' + n(lw) + ' ' + n(st) + '), repeating-linear-gradient(90deg, rgba(20, 20, 20, ' + a + ') 0 ' + n(lw) + ', transparent ' + n(lw) + ' ' + n(st) + ')';
 }
+/* Dasselbe Gewebe im CSS-Modell (ohne WebGL) als gleichmäßiger Schleier in der mittleren Deckkraft der Maschen: feine Verläufe unter zwei
+   Bildpunkten flimmern dort (Moiré auf dem Glas, Foto des Inhabers 28.10.2026); die WebGL-Bühne liest weiter meshBg (_bg) */
+function meshCss(w) {
+  const g = dg(w, 'insGewebe') ? w.insGewebe : 'standard', a = g === 'klar' ? 0.1 : g === 'pollen' ? 0.3 : g === 'tier' ? 0.34 : 0.22, f = g === 'tier' ? 0.4 : 0.3;
+  return 'rgba(20, 20, 20, ' + (a * (1 - (1 - f) * (1 - f))).toFixed(3) + ')';
+}
 const INS_FARBE = { weiss: '#f1f0ea', braun: '#4b3628', anthrazit: '#383e42' };
 const insRahmen = (w) => (dg(w, 'insFarbe') ? (w.insFarbe === 'rahmen' ? rahmenFarbe(w, 'aussen').solid : INS_FARBE[w.insFarbe] || (ralFarbe(w.insFarbe) || {}).hex) : '') || '#55585c';
 /* Fensterbänke in der gewählten Farbe (innen: Werzalit weiß, Marmor, Granit, Holzdekor; außen: Aluminium eloxiert oder beschichtet) */
@@ -1216,7 +1243,7 @@ function w3dHTML(w, o) {
   /* o.frei: das Element schwebt allein (Start), ohne Wand, Laibung, Boden, Fensterbänke, Fuge und Abdeckleisten */
   const frei = !!o.frei;
   if (!frei) {
-  h += faceEl('wall-in', 'w3d-wall-in'); h += faceEl('wall-out', 'w3d-wall-out', ' style="background: ' + facadeBg(w.fassade, fassadeTon(w)) + '"');
+  h += faceEl('wall-in', 'w3d-wall-in'); h += faceEl('wall-out', 'w3d-wall-out', ' style="background: ' + facadeCss(w.fassade, fassadeTon(w)) + '"');
   if (G) { for (let k = 0; k < FORM_O + FORM_U + 2; k++) h += faceEl('rs-' + k, 'w3d-rev w3d-rs'); }
   else h += faceEl('rev-t', 'w3d-rev w3d-rev-t') + faceEl('rev-b', 'w3d-rev w3d-rev-b') + faceEl('rev-l', 'w3d-rev w3d-rev-l') + faceEl('rev-r', 'w3d-rev w3d-rev-r');
   /* Türen stehen auf dem Boden: Raumboden innen, Terrasse außen */
@@ -1413,7 +1440,7 @@ function w3dSig(w, o) { o = o || {}; const V = w3dCalc(w, o); return [o.id || 'w
 /* Farben und Materialien auf die Flächen schreiben (mit Übergang, wenn sich etwas ändert) */
 function w3dPaint(stage, w) {
   /* Nur schreiben, was sich geändert hat (der Vergleich mit dem gelesenen Stil schlägt bei Verläufen immer fehl) */
-  const q = (r) => stage.querySelector('[data-r="' + r + '"]'), bg = (r, v) => { const el = q(r); if (el && el._bg !== v) { el._bg = v; el.style.background = v; } }, bgc = (r, v) => { const el = q(r); if (el && el._bg !== v) { el._bg = v; el.style.backgroundColor = v; } };
+  const q = (r) => stage.querySelector('[data-r="' + r + '"]'), bg = (r, v, css) => { const el = q(r); if (el && el._bg !== v) { el._bg = v; el.style.background = css || v; } }, bgc = (r, v) => { const el = q(r); if (el && el._bg !== v) { el._bg = v; el.style.backgroundColor = v; } };
   const fin = rahmenFarbe(w, 'innen'), fout = rahmenFarbe(w, 'aussen'), hcol = griffFarbe(w).bg;
   stage.classList.toggle('glas-sonne', w.glasfn.indexOf('sonne') >= 0); stage.classList.toggle('glas-sicht', w.glasfn.indexOf('sicht') >= 0 && !(dg(w, 'sichtZone') && w.sichtZone === 'unten'));
   stage.classList.toggle('glas-klar', w.glasfn.indexOf('extraklar') >= 0); stage.classList.toggle('glas-vogel', w.glasfn.indexOf('vogel') >= 0);
@@ -1425,7 +1452,7 @@ function w3dPaint(stage, w) {
   stage.classList.toggle('mit-schloss', AW.rcAb(w, 'rc2n') || w.griff === 'abschliessbar' || (dg(w, 'kinder') && w.kinder === 'schloss')); stage.classList.toggle('mit-knopf', w.griff === 'druckknopf');
   stage.classList.toggle('ohne-griff', w.griff === 'ohne' || (w.griff === 'motor' && w.art === 'hst'));
   const bi = bankFarbig(bank(w.fbi, 'innen'), dg(w, 'fbiFarbe') ? w.fbiFarbe : ''), ba = bankFarbig(bank(w.fba, 'aussen'), dg(w, 'fbaFarbe') ? w.fbaFarbe : ''), kp = dg(w, 'fbaKappe') && KAPPE[w.fbaKappe] ? KAPPE[w.fbaKappe] : ba.stirn;
-  bg('wall-out', facadeBg(w.fassade, fassadeTon(w))); bg('sill-t', bi.oben); bg('sill-f', bi.stirn); bg('sill-l', bi.stirn); bg('sill-r', bi.stirn); bg('sa-t1', ba.oben); bg('sa-t2', ba.oben); bg('sa-f', ba.stirn); bg('sa-l', kp); bg('sa-r', kp);
+  bg('wall-out', facadeBg(w.fassade, fassadeTon(w)), facadeCss(w.fassade, fassadeTon(w))); bg('sill-t', bi.oben); bg('sill-f', bi.stirn); bg('sill-l', bi.stirn); bg('sill-r', bi.stirn); bg('sa-t1', ba.oben); bg('sa-t2', ba.oben); bg('sa-f', ba.stirn); bg('sa-l', kp); bg('sa-r', kp);
   ['t', 'l', 'r'].forEach((k) => { bg('li-' + k, fin.bg); bg('la-' + k, fout.bg); });
   bg('oeff', 'linear-gradient(180deg, #eef0f2, #c3c8cd 60%, #a3a9af)');
   bg('luef', 'repeating-linear-gradient(90deg, rgba(0, 0, 0, .2) 0 1px, transparent 1px 5px), linear-gradient(180deg, ' + mischHex(fin.solid, '#ffffff', 0.12) + ', ' + mischHex(fin.solid, '#000000', 0.1) + ')');
@@ -1443,7 +1470,7 @@ function w3dPaint(stage, w) {
     /* Aufsatzkasten: die Blende außen verputzt bzw. verblendet wie die Fassade (Muster läuft weiter), als Alu-Blende in Kastenfarbe mit
        Revisionsfuge unten (Detailangabe blende) */
     const aluBl = w.roll === 'aufsatz' && dg(w, 'blende') && w.blende === 'alu';
-    if (w.roll === 'aufsatz') { bg('roll-f', aluBl ? 'linear-gradient(180deg, ' + L + ' 0 3%, ' + F + ' 10% 84%, ' + D + ' 88% 91%, ' + mischHex(D, '#000000', 0.35) + ' 91% 93.5%, ' + F + ' 93.5%)' : facadeBg(w.fassade, fassadeTon(w))); bg('roll-sl', 'transparent'); bg('roll-t', 'transparent'); bg('roll-l', 'transparent'); bg('roll-r', 'transparent'); }
+    if (w.roll === 'aufsatz') { bg('roll-f', aluBl ? 'linear-gradient(180deg, ' + L + ' 0 3%, ' + F + ' 10% 84%, ' + D + ' 88% 91%, ' + mischHex(D, '#000000', 0.35) + ' 91% 93.5%, ' + F + ' 93.5%)' : facadeBg(w.fassade, fassadeTon(w)), aluBl ? '' : facadeCss(w.fassade, fassadeTon(w))); bg('roll-sl', 'transparent'); bg('roll-t', 'transparent'); bg('roll-l', 'transparent'); bg('roll-r', 'transparent'); }
     /* Vorbau: Rundkasten des Rollladens mit der Fuge des Revisionsdeckels, eckige Blende bei Raffstore und Screen */
     else { bg('roll-f', w.sart === 'rollladen' ? 'linear-gradient(180deg, ' + L + ' 0 2%, ' + F + ' 14% 56%, ' + D + ' 60% 61.5%, ' + mischHex(F, '#ffffff', 0.18) + ' 61.5% 63%, ' + F + ' 66% 82%, ' + D + ')' : 'linear-gradient(180deg, ' + L + ' 0 3%, ' + F + ' 12% 86%, ' + D + ')'); bg('roll-sl', 'linear-gradient(180deg, ' + F + ', ' + D + ')'); bg('roll-b', D); bg('roll-t', L); bg('roll-l', F); bg('roll-r', F); }
     bg('fs-l', schieneBg(r, true, seil)); bg('fs-r', schieneBg(r, false, seil)); bg('fs-l2', seil ? '#9aa0a6' : r[1]); bg('fs-r2', seil ? '#9aa0a6' : r[1]);
@@ -1463,7 +1490,7 @@ function w3dPaint(stage, w) {
   });
   w.bars.forEach((b) => { const be = q('bar-' + b.id); if (be) { be._bi = barBg(w, fin, 'innen'); be._bo = barBg(w, fout, 'aussen'); be._art = holzig(fin) && w.spross !== 'szr' ? 'holz' : ''; be._arto = holzig(fout) && w.spross !== 'szr' ? 'holz' : ''; be.style.setProperty('--bi', be._bi); be.style.setProperty('--bo', be._bo); } });
   const ms = q('mesh'), mk = q('mesh-k'), ir = insRahmen(w);
-  if (ms) { ms._kante = ir; ms.style.boxShadow = 'inset 0 0 0 1.5px ' + ir; bg('mesh', meshBg(w, stage._v && stage._v.s)); }
+  if (ms) { ms._kante = ir; ms.style.boxShadow = 'inset 0 0 0 1.5px ' + ir; bg('mesh', meshBg(w, stage._v && stage._v.s), meshCss(w)); }
   if (mk) bg('mesh-k', 'linear-gradient(180deg, ' + mischHex(ir, '#ffffff', 0.22) + ', ' + ir + ' 45%, ' + mischHex(ir, '#000000', 0.25) + ')');
   w3dOberflaeche(stage, w, fin, fout);
 }
@@ -1569,7 +1596,7 @@ function w3dLayout(stage, w, o, gr) {
   stage.classList.toggle('is-niedrig', (gr ? gr[1] : stage.clientHeight || 360) < 200); // niedrige Bühne: Knöpfe am Modell in einer Reihe (app.css)
   const moW = V.moW * s, moH = V.moH * s, T = V.T * s, d = V.laib * s, fd = V.fd * s, sd = W3D.FD * s, wallW = V.wallW * s, wallH = V.wallH * s, tuer = V.tuer;
   /* Größe der Öffnung für das Tageslicht dahinter (app.css, .raum-licht: durch die Öffnung sieht man hell nach draußen) */
-  stage.style.setProperty('--lw', px(moW)); stage.style.setProperty('--lh', px(moH));
+  stage.style.setProperty('--lw', px(moW)); stage.style.setProperty('--lh', px(moH)); stage.style.setProperty('--mm', s.toFixed(5)); // Maßstab für das Mauerwerk (klinkerCss)
   const gO = G ? formGeo(form, -moW / 2, -moH / 2, moW, moH) : null;
   /* ohne Übergang: erster Aufbau, weniger Bewegung und Zoomen mit zwei Fingern oder dem Rad (is-zooming), sonst liefe das Modell nach */
   W3D_SOFORT = stage.classList.contains('no-anim') || stage.classList.contains('is-zooming') || ruhig();
@@ -4893,7 +4920,7 @@ const HS = { el: null, q: '', screen: '', wacht: null };
 function hausHTML() {
   const w = S.win, ki = (w.ki && w.ki.fach) || {}, art = w.fassade || 'putz', toene = fassadeTonListe(art), cur = w.fassadeFarbe, foto = ki.fassade && ki.fassade !== 'sonstige' ? AW.lab('fassade', ki.fassade) : '';
   const chips = '<div class="qchips grid2" role="group" aria-label="Art der Fassade">' + OPT.fassade.map((o) => '<button type="button" class="chip" data-hs="art" data-v="' + o.k + '" aria-pressed="' + (o.k === art) + '">' + esc(o.label) + '</button>').join('') + '</div>';
-  const tupfen = '<div class="qswatches fw-raster" role="group" aria-label="Farbe der Fassade">' + toene.map((t) => '<button type="button" class="qsw" data-hs="farbe" data-v="' + t[0] + '" aria-pressed="' + (t[0] === cur) + '" aria-label="' + esc(t[1]) + '"><span class="c" style="background: ' + facadeBg(art, t[2]) + '"></span><span class="n">' + esc(t[1]) + '</span></button>').join('') + '</div>';
+  const tupfen = '<div class="qswatches fw-raster" role="group" aria-label="Farbe der Fassade">' + toene.map((t) => '<button type="button" class="qsw" data-hs="farbe" data-v="' + t[0] + '" aria-pressed="' + (t[0] === cur) + '" aria-label="' + esc(t[1]) + '"><span class="c" style="--mm: .09; background: ' + facadeCss(art, t[2]) + '"></span><span class="n">' + esc(t[1]) + '</span></button>').join('') + '</div>';
   const quelle = w.e_fassade ? 'Deine Angabe' + (foto ? ' · laut Außenfoto ' + foto : '') : foto ? 'Laut Außenfoto: ' + foto + '. Stimmt es nicht, tipp die richtige Art an.' : 'Noch keine Angabe: Das Modell zeigt Putz.';
   return '<button type="button" class="fb-weg" data-hs="zu" tabindex="-1" aria-label="Schließen"></button>' +
     '<div class="fb-blatt hs-blatt" tabindex="-1"><div class="fb-kopf"><div class="grip" aria-hidden="true"></div>' +

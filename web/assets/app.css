@@ -416,7 +416,9 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-stage.is-demo .w3d-sash, .w3d-stage.is-demo .w3d-handle { transition: none !important }
 .w3d-band { border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) } .w3d-leiste { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12) }
 .w3d-solar, .w3d-klappladen { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3) } .w3d-sicht-u { opacity: .9 }
-.w3d-mesh { background: repeating-linear-gradient(0deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px); box-shadow: inset 0 0 0 1.5px #55585c }
+/* Gewebe des Insektenschutzes im CSS-Modell als gleichmäßiger Schleier (mittlere Deckkraft des Gitters): das Gitter aus 4-px-Linien flimmerte
+   schräg und verkleinert (Moiré, Foto des Inhabers 28.10.2026); die WebGL-Bühne zeichnet ihr Gewebe selbst (buehne.js) */
+.w3d-mesh { background: rgba(20, 20, 20, .075); box-shadow: inset 0 0 0 1.5px #55585c }
 .w3d-dim { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), color .4s; pointer-events: none }
 .w3d-dim.mo { --dc: color-mix(in srgb, var(--mo) 62%, #fff) } .w3d-dim.el { --dc: color-mix(in srgb, var(--el) 62%, #fff) }
 .w3d-dim.mo.is-active, .w3d-stage.dims-all .w3d-dim.mo { --dc: var(--mo) } .w3d-dim.el.is-active, .w3d-stage.dims-all .w3d-dim.el { --dc: var(--el) }
@@ -2902,7 +2904,7 @@ html.dna-voll body { background: #07090a }
    Übersicht, Begriffe, Erklärung, Notiz, Verlassen, Senden-Rückfrage und Großansicht des Fotos: Aufbau und Aktionen unverändert, nur die
    Form. Die alten Größen der App werden auf die Palette umgelegt (Fläche Anthrazit, Text Weiß/Silbergrau, Akzent Violett, Warnung
    Koralle), Etiketten klein mit violettem Punkt, die farbigen Wörter werden zur zweiten Stimme in Silbergrau, eine weiße Pille. */
-html.dna-voll :is(.sheet:not(.ofoto-dna), .fz) { --schwarz: #07090a; --anthrazit: #202022; --weiss: #ffffff; --silbergrau: #a8a4a9; --textgrau: #6b676c; --violett: #897efc; --koralle: #f88962; --indigo: #3c3a66;
+html.dna-voll :is(.sheet:not(.ofoto-dna), .fz, .fb) { --schwarz: #07090a; --anthrazit: #202022; --weiss: #ffffff; --silbergrau: #a8a4a9; --textgrau: #6b676c; --violett: #897efc; --koralle: #f88962; --indigo: #3c3a66;
   --font-sans: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; --surface: #161618; --surface2: var(--anthrazit); --ground: var(--schwarz); --ink: var(--weiss); --ink2: var(--silbergrau); --muted: var(--silbergrau);
   --line2: rgba(168, 164, 169, .34); --accent: var(--violett); --accent-soft: var(--indigo); --ok: var(--violett); --bad: var(--koralle); --bad-soft: color-mix(in srgb, var(--koralle) 16%, transparent);
   --primary: var(--weiss); --on-primary: var(--schwarz); --primary-hover: #ececef; --ring: inset 0 0 0 1px rgba(255, 255, 255, .06); font-family: var(--font-sans); color: var(--weiss) }
@@ -3025,4 +3027,43 @@ html.dna-voll .fz-wert { font: 500 15px/1 var(--font-sans); color: var(--silberg
   .dna .er-buehne { top: calc(60px + var(--by)); height: calc(max(560px, 100svh - 60px) - 2 * var(--by)); margin: var(--by) var(--bx); border-radius: var(--rund-l) }
   /* Messen und Ränder */
   .dna .ez-folie[data-folie="messen"] > #mess-buehne { margin: var(--by) var(--bx); min-height: calc(560px - 2 * var(--by)); border-radius: var(--rund-l) }
+}
+
+/* ---------- Farbblatt und Fassade am Zahnrad im Look der Design-DNA (28.10.2026, Foto des Inhabers: „Woraus ist die Wand?“ noch alt) ----------
+   Aufbau und Aktionen wie bisher (data-fb, data-hs). Telefon: Blatt von unten wie die Bögen. Laptop: rechts als Spalte angedockt (380 px),
+   das Modell links bleibt frei sichtbar und lässt sich beim Wählen drehen. */
+html.dna-voll .fb-blatt { background: radial-gradient(120% 40% at 18% 0%, #2a2a2c, #161618 60%); border-radius: 28px 28px 0 0; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), 0 -20px 60px -20px rgba(0, 0, 0, .8); color: var(--weiss) }
+html.dna-voll .fb-kopf { background: #1b1b1d; border-bottom: 1px solid rgba(168, 164, 169, .18); border-radius: 28px 28px 0 0 }
+html.dna-voll .fb .grip { background: rgba(168, 164, 169, .45) }
+html.dna-voll .fb .eyebrow { display: flex; align-items: center; gap: 8px; font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; text-transform: none; color: var(--silbergrau) }
+html.dna-voll .fb .eyebrow.kicker::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 4px color-mix(in srgb, var(--violett) 22%, transparent) }
+html.dna-voll .fb h2 { font: 500 24px/1.1 var(--font-sans); letter-spacing: -.02em; color: var(--weiss) }
+html.dna-voll .fb h2 .ak { color: var(--silbergrau) }
+html.dna-voll .fb .fw-cur b, html.dna-voll .fb .fb-wahl-t b { font: 500 16px/1.2 var(--font-sans); color: var(--weiss) }
+html.dna-voll .fb .fw-cur small, html.dna-voll .fb .fb-wahl-t small { font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau) }
+html.dna-voll .fb .btn { min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; font: 500 15px/1 var(--font-sans) }
+html.dna-voll .fb .btn.primary { background: var(--weiss); color: var(--schwarz) }
+html.dna-voll .fb .chip { min-height: 44px; border: 0; border-radius: 999px; background: transparent; color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau); font: 500 15px/1 var(--font-sans) }
+html.dna-voll .fb .chip[aria-pressed="true"] { background: var(--weiss); color: var(--schwarz); box-shadow: none }
+html.dna-voll .fb .chip:active { transform: scale(.97) }
+html.dna-voll .fb .qcur, html.dna-voll .fb .qlabel, html.dna-voll .fb .fw-hinweis { font: 400 13px/1.4 var(--font-sans); letter-spacing: .01em; text-transform: none; color: var(--silbergrau) }
+html.dna-voll .fb .qlabel { margin: 4px 2px 0 }
+html.dna-voll .fb .fw-raster .qsw .c { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16) }
+html.dna-voll .fb .fw-raster .qsw[aria-pressed="true"] .c { box-shadow: 0 0 0 3px #161618, 0 0 0 5px var(--violett) }
+html.dna-voll .fb .qsw .n { font: 400 12px/1.3 var(--font-sans); color: var(--silbergrau) }
+html.dna-voll .fb .qsw[aria-pressed="true"] .n { color: var(--weiss); font-weight: 500 }
+html.dna-voll .fb .fb-such { border-radius: 999px; background: var(--weiss); box-shadow: none; color: var(--textgrau) }
+html.dna-voll .fb .fb-such input { color: var(--schwarz); font: 400 16px/1 var(--font-sans) }
+html.dna-voll .fb .fb-such input::placeholder { color: var(--textgrau) }
+html.dna-voll .fb .fb-such:focus-within { box-shadow: inset 0 0 0 2px var(--violett) }
+html.dna-voll .fb .fb-hilfe summary { font: 500 14px/1.4 var(--font-sans); color: var(--weiss) }
+html.dna-voll .fb .fb-hilfe li { font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+html.dna-voll .fb .qoffen { border: 0; border-radius: 16px; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045); color: var(--weiss) }
+html.dna-voll .fb .qoffen b { font: 500 15px/1.25 var(--font-sans); color: var(--weiss) } html.dna-voll .fb .qoffen small { font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau) }
+html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px var(--violett) }
+@media (min-width: 1024px) {
+  html.dna-voll .fb { top: 60px; left: auto; right: 0; width: 380px; max-width: none; margin: 0 }
+  html.dna-voll .fb-weg { flex: 0 0 0; min-height: 0 }
+  html.dna-voll .fb-blatt { height: 100%; max-height: none; border-radius: 0; box-shadow: inset 1px 0 0 rgba(255, 255, 255, .08), -20px 0 60px -30px rgba(0, 0, 0, .9) }
+  html.dna-voll .fb-kopf { border-radius: 0 }
 }
