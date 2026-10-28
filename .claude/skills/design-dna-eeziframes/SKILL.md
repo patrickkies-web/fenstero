@@ -212,6 +212,13 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   auf Wunsch mitgestalten, erklärt „Fenster planen“ auf der Seite und bietet „Fenster konfigurieren“ gleich im Kästchen (Inhaber, später
   am selben Tag). Vorschlag für seine DNA (Abschnitt 9):
   „Ein Ablauf ist erst fertig, wenn jeder erreichbare Bildschirm darin im neuen Look steht.“
+- Bestandsaufnahmen gründlich (Inhaber, 28.10.2026: „diese ganzen Ratgeber Seiten die hast du ja noch gar nicht überprüft … vernünftig
+  vorgehen“; „Wo kommen denn diese ganzen komischen Firmen her“): Jede Seite in voller Länge fotografieren (vorher durchscrollen), am
+  Telefon und am Schreibtisch, und selbst ansehen, nicht nur messen; der erste Bildschirm allein reicht nie. Bilder für den Inhaber nie
+  mit den Testbetrieben der Prüfsuite (Amsel, Fink, Specht, Meise); wo ein Betrieb gezeigt werden muss, den es online noch nicht gibt,
+  Fensterbau Brandt aus der Paket-Vorschau, lokal nachgestellt, und das in der Lieferung sagen. Bilder in einer Liste laden sofort
+  (kein `loading="lazy"`). Werkzeug: `docs/profis/werkzeuge/altes-design.mjs`. Vorschlag für seine DNA (Abschnitt 7):
+  „Geprüft heißt: jede Seite ganz gesehen, mit Beispielen, die der Inhaber kennt.“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
