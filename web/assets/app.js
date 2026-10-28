@@ -3130,12 +3130,15 @@ function ohneFotoBlatt() {
   const neu = !!S.win.neu, punkte = neu
     ? ['Du zeichnest das neue Element auf dem Foto ein.', 'Die KI liest Wand, Leitungen und Fassade.', 'Dein Fensterbauer sieht vor dem Termin, wo es hin soll.']
     : ['Die KI liest Rollladenkasten, Laibung, Fensterbänke und Fassade.', 'Sie merkt, wenn Breite und Höhe vertauscht sind.', 'Dein Fensterbauer sieht die Stelle vor dem Termin.'];
-  return '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="ohne-foto-zu"></button><div class="sheet ofoto" role="dialog" aria-modal="true" aria-labelledby="ofoto-t"><div class="grip"></div>' +
-    '<p class="eyebrow kicker" style="margin-top: 6px">Ohne Foto</p><h2 id="ofoto-t" style="margin: 8px 0 18px">' + akH('Mit Foto wird dein Aufmaß besser.') + '</h2>' +
-    '<ul class="ofoto-liste">' + punkte.map((t) => '<li>' + CHECK + '<span>' + esc(t) + '</span></li>').join('') + '</ul>' +
+  const zu = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+  const haken = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>';
+  /* wie im Artefakt des Inhabers (Bogen „ohne-foto“): dunkles Blatt, Titel mit Schließen, Haken, ein Satz, das Häkchen, zwei leise Pillen */
+  return '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="ohne-foto-zu"></button><div class="sheet ofoto ofoto-dna" role="dialog" aria-modal="true" aria-labelledby="ofoto-t">' +
+    '<div class="ofoto-kopf"><h2 id="ofoto-t" tabindex="-1">Mit Foto wird dein Aufmaß besser.</h2><button type="button" class="ofoto-zu" aria-label="Schließen" data-act="ohne-foto-zu">' + zu + '</button></div>' +
+    '<ul class="ofoto-liste">' + punkte.map((t) => '<li>' + haken + '<span>' + esc(t) + '</span></li>').join('') + '</ul>' +
     '<p class="ofoto-ohne">' + (neu ? 'Es geht auch ohne: Du gibst die Wunschmaße an, die Lage klärt dein Fensterbauer vor Ort.' : 'Es geht auch ohne: Dann nimmt dein Fensterbauer die Einbausituation vor Ort auf.') + '</p>' +
-    '<label class="kcheck"><input type="checkbox" data-in="ohnefoto-zu"' + (ohneFotoZu() ? ' checked' : '') + '><span>Diesen Hinweis nicht mehr anzeigen</span></label>' +
-    '<div class="ofoto-knoepfe"><label class="btn primary ofoto-foto"><input type="file" accept="image/*" capture="environment" data-in="photo" data-f="in">Foto machen</label><button type="button" class="btn ghost" data-act="ohne-foto-weiter">Ohne Foto weiter</button></div></div>';
+    '<label class="ofoto-haekchen"><input type="checkbox" data-in="ohnefoto-zu"' + (ohneFotoZu() ? ' checked' : '') + '><span class="ofoto-kasten" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span><span>Diesen Hinweis nicht mehr anzeigen</span></label>' +
+    '<div class="ofoto-knoepfe"><label class="ofoto-knopf ofoto-foto"><input type="file" accept="image/*" capture="environment" data-in="photo" data-f="in">Foto machen</label><button type="button" class="ofoto-knopf" data-act="ohne-foto-weiter">Ohne Foto weiter</button></div></div>';
 }
 /* ---------- Neue Öffnung, Schritt 3: das Element auf dem Foto einzeichnen ----------
    Vier Ecken auf dem Foto, wie beim Scannen eines Dokuments: Außen abgedunkelt, innen ein Raster, die Ecken als große Griffe.
@@ -3509,8 +3512,8 @@ function mdAuf(scr) {
   });
 }
 SCREENS.messen = messenDna;
-/* Ränder (Schritt 4) bleiben, bis der Inhaber die Folie durchgesehen hat, wie sie online sind */
-SCREENS.rest = SCREENS.restAlt;
+/* Ränder (Schritt 4) in derselben Ansicht wie Messen (Wunsch des Inhabers, 28.10.2026) */
+SCREENS.rest = messenDna;
 /* ---------- Ergebnis ---------- */
 SCREENS.ergebnis = () => {
   const w = S.win, d = derive(w), ki = S.win.ki, neu = !!w.neu, en = artName(w);
@@ -7223,7 +7226,7 @@ function boot() {
     /* Tab bleibt im offenen Blatt (das Farbblatt hat seine eigene Falle) */
     if (e.key === 'Tab' && !FB.el) { const sh = $app().querySelector('.sheet[aria-modal="true"]'), z = sh ? fokusZiele(sh) : []; if (z.length) { const i = z.indexOf(document.activeElement); if (e.shiftKey ? i <= 0 : (i < 0 || i === z.length - 1)) { e.preventDefault(); (e.shiftKey ? z[z.length - 1] : z[0]).focus(); } } return; }
     if (S.notiz || S.gloss || S.glossIndex || S.wohin || S.verlassen || S.fotoGross) return;
-    if (S.screen !== 'rest' && !(S.screen === 'frage' && S.qMass)) return; // Messen: messen-dna.js
+    if (!(S.screen === 'frage' && S.qMass)) return; // Messen und Ränder: messen-dna.js
     const t = e.target, typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA');
     if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
     if (/^\d$/.test(e.key)) { e.preventDefault(); keyIn(e.key); } else if (e.key === 'Backspace') { e.preventDefault(); keyIn('del'); } else if (e.key === 'Enter') { e.preventDefault(); keyIn('ok'); }

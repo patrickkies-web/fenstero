@@ -525,8 +525,12 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     Zifferntasten. Unterzeile und Notiz stehen unter der Bühne, darunter „Maß 1 von 4“ mit dem Hinweis und den Rückfragen der App
     (Zentimeter, Warnungen). Die Pille „Weiter zu Maß 2“ erscheint erst mit einem Wert; „Weiter“ prüft, speichert und zeigt das nächste
     Maß auf derselben Folie mit leerem Feld (die Tastatur geht zu und kommt mit dem nächsten Antippen wieder). Ist die Tastatur offen,
-    steht die Pille direkt über ihr (`visualViewport`). Die Ränder (Schritt 4) bleiben bis zur Durchsicht durch den Inhaber wie bisher
-    (`SCREENS.restAlt`).
+    steht die Pille direkt über ihr (`visualViewport`). Die Ränder (Schritt 4: Höhe links und rechts, Breite oben und unten) stehen seit
+    28.10.2026 auf Wunsch des Inhabers in derselben Ansicht (dasselbe Modul, „Hier auch … gemessen?“ in der Zeile unter der Bühne),
+    danach „Passt.“ mit allen sechs Maßen an der Öffnung und der Karte mit dem Maß, das zählt.
+  - Bogen „Mit Foto wird dein Aufmaß besser.“ (`ohneFotoBlatt`, app.css „.ofoto-dna“) wie im Artefakt des Inhabers: dunkles Blatt, Titel
+    mit rundem Schließen, drei Haken, „Es geht auch ohne …“, das Häkchen „Diesen Hinweis nicht mehr anzeigen“ (gewählt Violett), zwei
+    leise Pillen „Foto machen“ und „Ohne Foto weiter“.
   - Regel des Inhabers (27.10.2026): Beim Messen eine feste Ansicht je Element, in den Wünschen das ausgearbeitete 3-D-Modell; die
     Wünsche werden nie durch Standbilder ersetzt.
 - **Weiter ist immer weiß.** Fehlt etwas, steht eine Zeile mit Koralle-Punkt darüber („Gib dem Raum einen Namen …“, „Trag die Brüstung

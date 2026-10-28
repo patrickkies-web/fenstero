@@ -333,3 +333,11 @@ bleiben, wie sie online sind, bis er die Folie durchgesehen hat. Was ohne echtes
 Pille über der Systemtastatur (iOS und Android rechnen den sichtbaren Bereich verschieden; gebaut mit `visualViewport`).
 
 Bilder: docs/profis/bilder/2026-10-27-app-messen-neu-tel.jpg, docs/profis/bilder/2026-10-27-app-messen-neu-laptop.jpg.
+
+## Schritt 4 „Ränder“ und der Bogen ohne Foto (28.10.2026)
+
+Der Inhaber: „Höhe links, Höhe rechts etc., die anderen ganzen Maße können auch in der Ansicht erstellt werden. Außerdem diese Meldung
+‚Mit Foto wird dein Aufmaß besser‘ bitte auch aus dem Artefakt holen.“ Die Ränder laufen jetzt durch dieselbe Folie wie Messen
+(Überschrift in der Bühne, Feld unter dem Element mit Systemtastatur, „Hier auch … gemessen?“ unter der Bühne), danach „Passt.“ mit
+allen sechs Maßen. Der Bogen ohne Foto ist der des Artefakts (dunkles Blatt, Haken, Häkchen, zwei leise Pillen); seine Funktionen
+(Foto machen, ohne Foto weiter, Hinweis abschalten) sind dieselben.

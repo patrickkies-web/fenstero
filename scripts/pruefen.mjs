@@ -60,10 +60,10 @@ async function massTippen(pg, wert) {
   await pg.fill('#mess-eingabe', ''); await pg.click('#mess-feld'); await pg.keyboard.type(wert);
   await pg.click('#mess-weiter'); await pg.waitForTimeout(550);
 }
+/* Rand wie die Mitte: „Hier auch … gemessen?“; sind alle vier gleich, fragt die Folie einmal nach („Stimmt so“) */
 async function randWieMitte(pg) {
-  await pg.waitForSelector('.mess-dock [data-act="rest-auf"]'); await pg.click('.mess-dock [data-act="rest-auf"]');
-  await pg.waitForSelector('[data-act="rest-same"]'); await pg.click('[data-act="rest-same"]');
-  await pg.waitForSelector('.mess-dock [data-act="rest-weiter"]'); await pg.click('.mess-dock [data-act="rest-weiter"]'); await pg.waitForTimeout(150);
+  await pg.waitForSelector('#mess-gleich'); await pg.waitForTimeout(600); await pg.click('#mess-gleich'); await pg.waitForTimeout(550);
+  if (await pg.locator('#mess-stimmt').count()) { await pg.click('#mess-stimmt'); await pg.waitForTimeout(550); }
 }
 
 const require = createRequire(process.env.PW_PFAD ? process.env.PW_PFAD.replace(/\/?$/, '/') + 'x.js' : import.meta.url);
@@ -297,8 +297,8 @@ if (teil(3)) {
   await page.click('.lg-weiter');
   for (const wert of ['1480', '1410', '1370', '1230']) await massTippen(page, wert);
   for (let i = 0; i < 4; i++) await randWieMitte(page);
-  await page.waitForSelector('.bb .btn.primary');
-  await page.click('.bb .btn.primary');
+  await page.waitForSelector('.ez-folie.ist-passt #mess-weiter');
+  await page.click('#mess-weiter');
   await page.waitForSelector('[data-screen="ergebnis"]');
   const erg = await page.evaluate(() => { const d = derive(S.win); return [d.moW, d.moH, d.elW, d.elH].join('×'); });
   ok(erg === '1370×1480×1230×1410', 'Ergebnis stimmt: ' + erg);
@@ -664,8 +664,8 @@ if (teil(6)) {
   await p2.evaluate(() => { S.win.mo = { hm: 1480, wm: 1370, hl: '', hr: '', wt: '', wb: '' }; go('rest'); });
   for (let i = 0; i < 4; i++) await randWieMitte(p2);
   await p2.waitForTimeout(400);
-  const passt = await p2.evaluate(() => ({ t: document.querySelector('.scr').textContent, zahl: (document.querySelector('.ps-zahl b') || {}).textContent || '', reihen: document.querySelectorAll('.ps-reihe').length, schilder: Array.from(document.querySelectorAll('#w3d .w3d-dim-lab')).filter((e) => e.getBoundingClientRect().width > 0).length, zoom: !!document.querySelector('#w3d .w3d-zoom, #w3d [data-w3d="zoom-in"]'), cream: document.querySelectorAll('.scr .btn.primary').length }));
-  ok(/Passt\./.test(passt.t) && passt.zahl === '1.370 × 1.480' && passt.reihen === 6 && passt.schilder === 0 && passt.cream === 1 && await p2.locator('.w3d-dim.is-drawing').count() >= 2, '„Passt.“: Maßlinien zeichnen sich nacheinander, das Maß der Öffnung groß (' + passt.zahl + '), je Richtung drei Messungen, keine Schilder im Modell, eine Hauptaktion');
+  const passt = await p2.evaluate(() => ({ t: document.querySelector('.scr').textContent, zahl: (document.getElementById('passt-zahl') || {}).textContent || '', reihen: document.querySelectorAll('.ez-passt__reihe').length, linien: document.querySelectorAll('#mess-passt g').length, zaehlt: document.querySelectorAll('#mess-passt g.ist-zaehlt').length, schilder: Array.from(document.querySelectorAll('.ez-passt__schild')).filter((e) => e.getBoundingClientRect().width > 0).map((e) => e.textContent).join('|'), pillen: document.querySelectorAll('.scr .lg-fuss .dna-pille').length, w3d: !!document.querySelector('.w3d-stage'), rest: S.rest.i }));
+  ok(/Passt\./.test(passt.t) && passt.zahl === '1.370 × 1.480' && passt.reihen === 6 && passt.linien === 6 && passt.zaehlt === 6 && passt.schilder === '1.370mm|1.480mm' && passt.pillen === 1 && !passt.w3d && passt.rest === 4, '„Passt.“: die Öffnung von vorn mit allen sechs Maßen (die kleinsten kräftig, ihr Wert am Modell), das Maß der Öffnung groß (' + passt.zahl + '), je Richtung drei Messungen, eine Hauptaktion, kein 3-D');
   await foto(p2, 'app-masse-da');
   // Bewegtbilder (Lottie) in Tokenfarben, Haptik, Scroll-Bindung
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
@@ -3251,7 +3251,7 @@ if (teil(16)) {
   const of0 = await a16.evaluate(() => Array.from(document.querySelectorAll('.lg-fuss button:not(.lg-zurueck)')).map((b) => b.getAttribute('data-act') + ':' + b.textContent).join('|'));
   await a16.click('.lg-fuss [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
   const of1 = await a16.evaluate(() => ({ text: (document.querySelector('.sheet.ofoto') || {}).textContent || '', screen: S.screen }));
-  await a16.check('.sheet.ofoto input[data-in="ohnefoto-zu"]');
+  await a16.click('.sheet.ofoto .ofoto-haekchen'); // Häkchen wie im Artefakt: die ganze Zeile schaltet
   await a16.click('.sheet.ofoto [data-act="ohne-foto-weiter"]'); await a16.waitForTimeout(250);
   const of2 = await a16.evaluate(() => ({ screen: S.screen, ohne: S.win.ohneFoto, zu: localStorage.getItem('aufmass.ohnefoto.zu'), blatt: !!document.querySelector('.sheet.ofoto') }));
   await a16.evaluate(() => { S.win.neu = true; go('fotos'); }); await a16.waitForTimeout(200);
@@ -4554,27 +4554,27 @@ if (teil(22)) {
     await p.evaluate(([art, W, H, neu, scr]) => { const w = demoProject()[0]; Object.assign(w, { art: art, neu: neu }); planMasse(w, 'w', W); planMasse(w, 'h', H); S.win = w; S.editIdx = -1; go(scr); if (scr === 'planmasse') { planMasse(S.win, 'w', W); planMasse(S.win, 'h', H); render(); } }, [art, W, H, neu, scr]);
     await p.waitForTimeout(1500); const m = await buehne(); if (m.fehler.length) schilder.push(art + ' ' + W + ' ' + scr + ': ' + m.fehler.join(', '));
   }
-  for (const gleich of [false, true]) { // Übersicht nach den Rändern: gleiche Maße einmal, ungleiche an den äußeren Linien
-    await p.evaluate((g) => { const w = demoProject()[0]; if (g) { const m = w.mo; m.hl = m.hr = m.hm; m.wt = m.wb = m.wm; } S.win = w; S.editIdx = -1; go('rest'); S.rest.i = 4; render(); }, gleich);
-    await p.waitForTimeout(1800); const m = await buehne(); if (m.fehler.length) schilder.push('Ränder ' + (gleich ? 'gleich' : 'ungleich') + ': ' + m.fehler.join(', '));
-  }
   /* Messen (Fassung des Inhabers): Lupen, Chip, „Groß ansehen“, Überschrift und Feld in der Bühne, nichts überdeckt sich; das Feld über dem Fuß */
   const buehneMd = () => p.evaluate(() => {
     const st = document.getElementById('mess-buehne'); if (!st) return { fehler: ['keine Bühne'] };
     const b = st.getBoundingClientRect(), sicht = (e) => { const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity === 0) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
     const t = [];
-    st.querySelectorAll('.ez-mass__ende, #mess-feld, .ez-gross-auf, .ez-glaschip, .md-titel').forEach((e) => { if (sicht(e)) t.push([(e.id || e.className.split(' ')[0]) + ' ' + e.textContent.trim().slice(0, 14), e.getBoundingClientRect()]); });
+    st.querySelectorAll('.ez-passt__schild, .ez-mass__ende, #mess-feld, .ez-gross-auf, .ez-glaschip, .md-titel').forEach((e) => { if (sicht(e)) t.push([(e.id || e.className.split(' ')[0]) + ' ' + e.textContent.trim().slice(0, 14), e.getBoundingClientRect()]); });
     const fehler = [];
     t.forEach(([n, a], i) => { if (a.left < b.left + 2 || a.right > b.right - 2 || a.top < b.top || a.bottom > b.bottom) fehler.push(n + ' am Rand'); t.slice(i + 1).forEach(([m, c]) => { if (Math.min(a.right, c.right) - Math.max(a.left, c.left) > 1 && Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top) > 1) fehler.push(n + ' über ' + m); }); });
-    const fe = document.getElementById('mess-feld').getBoundingClientRect(), fu = document.querySelector('.lg-fuss').getBoundingClientRect(); if (innerWidth < 1024 && fe.bottom > fu.top + 1) fehler.push('Feld unter dem Fuß'); // am Laptop steht der Fuß rechts in der Spalte
+    const fe = document.getElementById('mess-feld').getBoundingClientRect(), fu = document.querySelector('.lg-fuss').getBoundingClientRect(); if (fe.height && innerWidth < 1024 && fe.bottom > fu.top + 1) fehler.push('Feld unter dem Fuß'); // am Laptop steht der Fuß rechts in der Spalte
     return { fehler: fehler };
   });
   for (const [W, H] of [[390, 844], [320, 640], [1440, 900]]) {
     await p.setViewportSize({ width: W, height: H });
-    for (const art of ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw']) for (let n = 0; n < 4; n++) {
-      await p.evaluate(([art, n]) => { const w = demoProject()[0]; artSetzen(w, art); S.win = w; S.editIdx = -1; S.mess.step = n; S.mess.cur = ''; go('messen'); render(true); }, [art, n]);
+    for (const art of ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw']) for (let n = 0; n < 8; n++) {
+      await p.evaluate(([art, n]) => { const w = demoProject()[0]; artSetzen(w, art); S.win = w; S.editIdx = -1; if (n < 4) { S.mess.step = n; S.mess.cur = ''; go('messen'); } else { S.rest.i = n - 4; S.rest.cur = ''; go('rest'); } render(true); }, [art, n]);
       await p.waitForTimeout(260); const m = await buehneMd();
-      if (m.fehler.length) schilder.push(W + ' ' + art + ' Maß ' + (n + 1) + ': ' + m.fehler.join(', '));
+      if (m.fehler.length) schilder.push(W + ' ' + art + ' ' + (n < 4 ? 'Maß ' + (n + 1) : 'Rand ' + (n - 3)) + ': ' + m.fehler.join(', '));
+    }
+    for (const gleich of [false, true]) { // „Passt.“ nach den Rändern: gleiche Maße einmal, ungleiche an den äußeren Linien
+      await p.evaluate((g) => { const w = demoProject()[0]; if (g) { const m = w.mo; m.hl = m.hr = m.hm; m.wt = m.wb = m.wm; } S.win = w; S.editIdx = -1; S.rest.i = 4; go('rest'); render(true); }, gleich);
+      await p.waitForTimeout(900); const m = await buehneMd(); if (m.fehler.length) schilder.push(W + ' Passt ' + (gleich ? 'gleich' : 'ungleich') + ': ' + m.fehler.join(', '));
     }
   }
   await p.setViewportSize({ width: 390, height: 844 });

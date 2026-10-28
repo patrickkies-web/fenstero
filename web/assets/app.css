@@ -790,6 +790,35 @@ a.pill { text-decoration: none }
 .ofoto-knoepfe .btn { flex: 0 0 auto; width: 100% }
 .ofoto-foto { cursor: pointer }
 .ofoto-foto input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none }
+/* Bogen „Mit Foto wird dein Aufmaß besser.“ wie im Artefakt des Inhabers (28.10.2026; Vorschau start.css, .ez-bogen): dunkles Blatt im
+   Licht von oben links, Titel mit rundem Schließen, Haken in Weiß, ein Satz in Silbergrau, das Häkchen (gewählt Violett), zwei leise
+   Pillen nebeneinander. Das Blatt steht außerhalb der DNA-Bildschirme, darum die Farben als Werte der Palette. */
+.sheet.ofoto-dna { display: grid; gap: 10px; padding: 14px 16px calc(20px + env(safe-area-inset-bottom, 0px)); border-radius: 28px 28px 0 0; color: #fff; font-family: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  background: radial-gradient(120% 90% at 18% 0%, #363638, #202022 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045), 0 -24px 48px -16px rgba(0, 0, 0, .7) }
+.ofoto-dna .ofoto-kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.sheet.ofoto-dna h2 { margin: 0; font: 500 17px/1.2 "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; letter-spacing: -.01em; color: #fff }
+.ofoto-dna .ofoto-zu { flex: none; width: 44px; height: 44px; border: 0; padding: 0; border-radius: 50%; display: grid; place-items: center; color: #fff; cursor: pointer;
+  background: radial-gradient(at 30% 20%, rgba(255, 255, 255, .16), rgba(255, 255, 255, .04) 70%), #07090a; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), inset 0 0 0 1px #a8a4a9; transition: transform 160ms cubic-bezier(.2, .7, .2, 1) }
+.ofoto-dna .ofoto-zu svg { width: 16px; height: 16px }
+.ofoto-dna .ofoto-zu:active { transform: scale(.94); transition-duration: 0s }
+.ofoto-dna .ofoto-liste { display: grid; gap: 8px; margin: 0 }
+.ofoto-dna .ofoto-liste li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; align-items: start; font: 400 15px/1.45 "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; color: #fff }
+.ofoto-dna .ofoto-liste li svg { width: 14px; height: 14px; margin-top: 4px; color: #fff }
+.ofoto-dna .ofoto-ohne { margin: 0; font: 400 15px/1.5 "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; color: #a8a4a9 }
+.ofoto-haekchen { position: relative; display: flex; align-items: center; gap: 12px; min-height: 44px; margin: -2px 0 -4px; cursor: pointer; font: 400 15px/1.3 "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; color: #fff; -webkit-tap-highlight-color: transparent }
+.ofoto-haekchen input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none }
+.ofoto-kasten { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 7px; box-shadow: inset 0 0 0 1.5px #a8a4a9; color: #fff; transition: background-color 150ms cubic-bezier(.2, .7, .2, 1), box-shadow 150ms cubic-bezier(.2, .7, .2, 1), transform 160ms cubic-bezier(.2, .7, .2, 1) }
+.ofoto-kasten svg { width: 14px; height: 14px; opacity: 0; transform: scale(.6); transition: opacity 150ms cubic-bezier(.2, .7, .2, 1), transform 150ms cubic-bezier(.2, .7, .2, 1) }
+.ofoto-haekchen input:checked + .ofoto-kasten { background: #897efc; box-shadow: inset 0 0 0 1.5px #897efc }
+.ofoto-haekchen input:checked + .ofoto-kasten svg { opacity: 1; transform: none }
+.ofoto-haekchen:active .ofoto-kasten { transform: scale(.94); transition-duration: 0s }
+.ofoto-haekchen input:focus-visible + .ofoto-kasten { outline: 2px solid #fff; outline-offset: 3px }
+.ofoto-dna .ofoto-knoepfe { flex-direction: row; flex-wrap: wrap; gap: 8px; margin-top: 4px }
+.ofoto-dna .ofoto-knopf { position: relative; display: inline-flex; align-items: center; justify-content: center; width: auto; height: 44px; margin: 0; padding: 0 20px; border: 0; border-radius: 999px; background: transparent; color: #fff; cursor: pointer;
+  font: 500 15px/1 "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; box-shadow: inset 0 0 0 1.5px #a8a4a9; transition: transform 160ms cubic-bezier(.2, .7, .2, 1) }
+.ofoto-dna .ofoto-knopf:active { transform: scale(.97); transition-duration: 0s }
+.ofoto-dna .ofoto-knopf:focus-visible, .ofoto-dna .ofoto-foto:focus-within { outline: 2px solid #fff; outline-offset: 3px }
+@media (prefers-reduced-motion: reduce) { .ofoto-dna .ofoto-zu, .ofoto-dna .ofoto-knopf, .ofoto-kasten, .ofoto-kasten svg { transition: none !important } }
 .order { display: flex; justify-content: space-between; gap: 12px; align-items: baseline } .order span b { display: block; font-size: 17px } .order span small { font-size: 13px; color: var(--muted) } .order > b { font-size: 17px; font-variant-numeric: tabular-nums }
 .order.sum { padding-top: 10px; border-top: 1px solid var(--line); font-size: 15px; color: var(--muted) }
 .pay { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0 2px } .pay .chip { width: 100%; padding: 0 10px } .pay.bad .chip { border-color: var(--bad) }
