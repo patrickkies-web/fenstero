@@ -429,3 +429,10 @@ docs/profis/bilder/2026-10-28-app-restliche-folien-tel-a.jpg, -tel-b.jpg, -lapto
 Alle mit Laptop-Raster wie die Start-Folie; am Laptop rechnen die Chips mit der rechten Spalte (380 px), sonst wurden Beschriftungen
 abgeschnitten. Grün kommt nicht mehr vor (Haken violett). Bewusst nicht angefasst: die Einladungsseite eines Betriebs im Kundenlink
 und die Bildschirme in Instanzen auf der Website eines Fensterbauers (eigene Marke des Betriebs); das Aufmaßblatt selbst (blatt.js).
+
+Gremium eine Runde (docs/profis/gremium/2026-10-28-konfigurator-restliche-folien.md): Gestalter Median 3, Kunden 2,5, Fensterbauer
+2,5; Vetos zur Kasse, zu den Zahlen der Wunschmaße und zur Förderzeile. Umgesetzt: Zahlungsarten als Kacheln mit gewählter in Violett,
+helle Häkchen, „… fortsetzen“ als Pille bei angefangenem Fenster, Zahlen statt Haken in den Chips, Satz zu den Kosten, Förderung mit
+Bedingung, Wunschmaße mit Tausenderpunkt, Legende, Statiker-Satz und Hinweis unter 80 cm Brüstung, Schlösser der Führung erklärt.
+Die „falschen Zahlen“ der Wunschmaße kamen aus Beispieldaten der Bildaufnahme, nicht aus der App. Offen für den Inhaber: Wortlaut der
+Pille an der Kasse im Echtbetrieb („Weiter zu Stripe · 7,99 €“, bestellt wird bei Stripe), Startlage der Ecken beim Einzeichnen.
