@@ -77,17 +77,17 @@ export default async (h) => {
     o = o || {};
     await s.evaluate(() => go('anfrage')); await s.waitForSelector('.scr[data-screen="anfrage"]');
     if (o.merken) await merken(s, 'Haus');
-    await s.click('.bb .btn.primary'); await s.waitForSelector('.scr[data-screen="anfrage2"]');
+    await s.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s.waitForSelector('.scr[data-screen="anfrage2"]');
     if (o.merken) await merken(s, 'Zeit und Budget');
-    await s.click('.bb .btn.primary'); await s.waitForSelector('.scr[data-screen="anfrage3"]');
+    await s.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s.waitForSelector('.scr[data-screen="anfrage3"]');
     let ohne = null;
-    if (o.ohne) { await s.click('.bb .btn.primary'); await s.waitForTimeout(300); ohne = await s.evaluate(() => ({ screen: S.screen, bad: document.querySelectorAll('.trow.bad').length, text: Array.from(document.querySelectorAll('.trow-f')).map((e) => e.textContent).join(' | ') })); await h.foto(s, '25-kontakt-pflicht'); }
+    if (o.ohne) { await s.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s.waitForTimeout(300); ohne = await s.evaluate(() => ({ screen: S.screen, bad: document.querySelectorAll('.trow.bad').length, text: Array.from(document.querySelectorAll('.trow-f')).map((e) => e.textContent).join(' | ') })); await h.foto(s, '25-kontakt-pflicht'); }
     if (o.merken) await merken(s, 'Kontakt');
     await s.fill('#t-name', k.name); if (k.tel) await s.fill('#t-tel', k.tel); if (k.mail) await s.fill('#t-mail', k.mail);
     if (k.erreich) await s.click('[data-act="setp"][data-f="erreich"][data-v="' + k.erreich + '"]');
-    await s.click('.bb .btn.primary'); await s.waitForSelector('.scr[data-screen="blatt"]');
+    await s.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s.waitForSelector('.scr[data-screen="blatt"]');
     if (o.merken) await merken(s, 'Prüfen');
-    await s.click('.bb .btn.primary');
+    await s.click('.bb .btn.primary, .scr.dna .lg-weiter');
     await s.waitForFunction(() => S.sent && S.sent.nr, null, { timeout: 30000 });
     await s.waitForTimeout(300);
     return ohne;
@@ -266,12 +266,12 @@ export default async (h) => {
   ok(!!zE && (zE.status === 'geoeffnet' || !!((zE.daten || {}).log || {}).geoeffnet), '25.7 „Geöffnet“ an den Betrieb gemeldet');
   await sE.click('[data-act="new"]'); await sE.waitForSelector('.scr[data-screen="start"]');
   await fensterSpeichern(sE, 'Erker'); await sE.waitForSelector('.scr[data-screen="fertig"]');
-  await sE.evaluate(() => go('anfrage')); await sE.click('.bb .btn.primary'); await sE.waitForSelector('.scr[data-screen="anfrage2"]');
-  const e2 = await sE.evaluate(() => ({ kopf: (document.querySelector('.hd .eyebrow') || {}).textContent || '', bar: (document.querySelector('.bb .btn.primary') || {}).textContent || '' }));
-  await sE.click('.bb .btn.primary'); await sE.waitForSelector('.scr[data-screen="blatt"]'); await sE.click('.bb .btn.primary');
+  await sE.evaluate(() => go('anfrage')); await sE.click('.bb .btn.primary, .scr.dna .lg-weiter'); await sE.waitForSelector('.scr[data-screen="anfrage2"]');
+  const e2 = await sE.evaluate(() => ({ kopf: (document.querySelector('.hd .eyebrow, .scr.dna .ab-chip') || {}).textContent || '', bar: (document.querySelector('.bb .btn.primary, .scr.dna .lg-weiter') || {}).textContent || '' }));
+  await sE.click('.bb .btn.primary, .scr.dna .lg-weiter'); await sE.waitForSelector('.scr[data-screen="blatt"]'); await sE.click('.bb .btn.primary, .scr.dna .lg-weiter');
   await sE.waitForFunction(() => S.sent && S.sent.uebertragen, null, { timeout: 20000 });
   const zE2 = await T.zeile(ein.code), e3 = await sE.evaluate(() => document.body.innerText);
-  ok(/2 von 2/.test(e2.kopf) && /Prüfen und senden/.test(e2.bar) && zE2.status === 'eingegangen' && !eezi.test(e3), '25.7 Einladung: zwei Schritte ohne Kontaktpflicht (der Betrieb kennt den Kunden), Eingang beim Betrieb, Bestätigung ohne eeziframes');
+  ok(/2 von\s2/.test(e2.kopf) && /Prüfen und senden/.test(e2.bar) && zE2.status === 'eingegangen' && !eezi.test(e3), '25.7 Einladung: zwei Schritte ohne Kontaktpflicht (der Betrieb kennt den Kunden), Eingang beim Betrieb, Bestätigung ohne eeziframes');
   h.sauber(sE, '25.7 Einladung ohne Fehler'); await ctxE.close();
 
   /* ---------- 25.8 Vorschau in der Einrichtung, Testanfrage ---------- */
