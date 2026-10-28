@@ -2877,6 +2877,7 @@ const FOTO_START = '<figure class="hero-foto"><img src="/bilder/foto/app-start.w
 SCREENS.home = () => {
   if (S.betrieb) return linkHome();
   if (S.windows.length || angelegt() >= GRENZE.fenster) return homeAufmassDna(); // an der Grenze ohne Fenster: dort steht „Neues Aufmaß beginnen“
+  if (!INST) return homeLeerDna();
   const cardsH = '', betrieb = '';
   const html = (window.EinfBanner ? window.EinfBanner('kunde', { act: 'new' }) : '') + '<section class="hero start"><p class="eyebrow kicker">Fensterplanung, ganz <span class="mk" translate="no">eezi</span></p><h1>Fotografieren.<br>Messen.<br><span class="ak">Wünschen.</span></h1><p>Zwei Fotos, vier Maße mit dem Zollstock, und aus deinen Zahlen wächst dein Fenster als 3-D-Modell. Dein Fensterbauer bekommt alles fürs Angebot.</p>' +
     '<div class="cta stapel"><button type="button" class="btn primary" data-act="new">Fenster ausmessen<span class="pf" aria-hidden="true"></span></button><button type="button" class="btn ghost" data-act="tour-start">Führung starten</button><p class="cta-zeile">Zwei Minuten, ohne eigene Maße&nbsp;· <button type="button" class="ulink" data-act="gloss" data-k="referenz">Wie genau ist das?</button></p>' + (kontoBereit() ? '<p class="cta-zeile">' + (KS ? 'Angemeldet als ' + esc(KS.mail) + ' · <button type="button" class="ulink" data-act="go" data-v="meinkonto">Dein Konto</button>' : 'Schon ein Aufmaß gesichert? <button type="button" class="ulink" data-act="anmelden">Anmelden</button>') + '</p>' : '') + '</div>' +
@@ -2890,6 +2891,29 @@ SCREENS.home = () => {
     '<div class="foot-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a><a class="link" href="' + PORTAL_URL + '">Zur Startseite ›</a></div>' + rechtLinks();
   return { html: html, bar: S.windows.length ? { label: FREI() ? 'Zum Aufmaßblatt' : 'Aufmaßblatt fertigstellen', act: 'go', v: FREI() ? 'teilen' : 'anfrage' } : null };
 };
+/* ---------- Leere Startansicht der App im Look der Design-DNA (28.10.2026, „die anderen Bereiche machst du auch“) ----------
+   Kopf wie die Liste (Logo zur Startseite, ohne Zurück), Bühne mit dem Foto der Waschbären und Glas-Chips (Fotografieren, Messen,
+   Wünschen), darunter Etikett, Titel, Lead, „Führung starten“ als leise Pille, Konto-Zeile; dann das 3-D-Modell mit den Maßen an der
+   Sache (folgt dem Scrollen, --sp), „So funktioniert's“ als drei Stationen auf Anthrazit, Links und unten die Pille „Erstes Fenster
+   ausmessen“. Texte und Aktionen wie bisher (new, tour-start, gloss referenz/feinaufmass, anmelden, meinkonto). Am Laptop wie die Start-Folie. */
+function homeLeerDna() {
+  const chips = ['Fotografieren', 'Messen', 'Wünschen'].map((t) => '<span class="wl-chip"><i aria-hidden="true"></i>' + t + '</span>').join('');
+  const buehne = '<div class="wl-buehne"><img src="/bilder/foto/app-start.webp" width="1120" height="1400" alt="Drei Waschbären im Wohnzimmer: einer fotografiert mit dem Handy die Maueröffnung samt Zollstock, einer tippt auf dem Sofa seine Wünsche an, einer lehnt sich zufrieden zurück" fetchpriority="high" decoding="async"><div class="wl-chips">' + chips + '</div></div>';
+  const konto = kontoBereit() ? '<p class="wl-zeile">' + (KS ? 'Angemeldet als ' + esc(KS.mail) + ' · <button type="button" class="ulink" data-act="go" data-v="meinkonto">Dein Konto</button>' : 'Schon ein Aufmaß gesichert? <button type="button" class="ulink" data-act="anmelden">Anmelden</button>') + '</p>' : '';
+  const kopf = '<div class="wl-kopf">' + (window.EinfBanner ? window.EinfBanner('kunde', { act: 'new' }) : '') + '<span class="dna-label wl-etikett"><i aria-hidden="true"></i><span>Fensterplanung, ganz <span translate="no">eezi</span></span></span><h1 tabindex="-1">Fotografieren. Messen. <em>Wünschen.</em></h1>' +
+    '<p class="wl-lead">Zwei Fotos, vier Maße mit dem Zollstock, und aus deinen Zahlen wächst dein Fenster als 3-D-Modell. Dein Fensterbauer bekommt alles fürs Angebot.</p>' +
+    '<div class="wl-aktionen"><button type="button" class="dna-pille dna-pille--leise wl-tour" data-act="tour-start">Führung starten</button><p class="wl-zeile">Zwei Minuten, ohne eigene Maße · <button type="button" class="ulink" data-act="gloss" data-k="referenz">Wie genau ist das?</button></p>' + konto + '</div></div>';
+  const modell = '<div class="wl-modell"><span class="dna-label">Aus deinen Zahlen wächst dein Fenster</span><div class="hero-scene">' + model(HERO_WIN, { id: 'w3d-hero', view: 'three', sway: true, cls: 'hero dims-all', stageH: 280, dims: ['hm', 'wm', 'eh', 'ew'], labels: { hm: '1.480 mm', wm: '1.370 mm', eh: '1.410 mm', ew: '1.230 mm' } }) + '</div></div>';
+  const station = (n, t, x) => '<li class="wl-station"><span class="wl-nr">' + n + '</span><div><b>' + t + '</b><p>' + x + '</p></div></li>';
+  const erklaert = '<section class="wl-erklaert"><span class="dna-label">So funktioniert\'s</span><h2>Zollstock statt <em>Rätselraten.</em></h2><ol class="wl-stationen">' +
+    station(1, 'Fotografieren.', 'Innen und außen, das Handy gerade halten. Die KI liest daraus die Einbausituation: Rollladenkasten, Laibung, Fensterbänke, Fassade.') +
+    station(2, 'Messen.', 'Vier Maße mit dem Zollstock, Schritt für Schritt erklärt. Mit jeder Zahl formt sich Öffnung und Fenster als Modell, dann ergänzt du die Ränder.') +
+    station(3, 'Wünschen.', 'Flügel antippen, Sprossen ziehen, Farben innen und außen wählen. Jeder Fachbegriff mit Bild erklärt.') + '</ol>' +
+    '<p class="wl-nachsatz">Vor der Fertigung misst dein Fensterbauer einmal vor Ort nach, das <button type="button" class="ulink" data-act="gloss" data-k="feinaufmass">Feinaufmaß</button>.</p></section>';
+  const links = '<div class="foot-links wl-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a><a class="link" href="' + PORTAL_URL + '">Zur Startseite ›</a></div>';
+  const fuss = rechtLinks() + '<div class="lg-fuss"><button type="button" class="dna-pille lg-weiter btn primary" data-act="new">Erstes Fenster ausmessen' + abPfeil + '</button></div>';
+  return { html: lgKopf(false) + dnaTisch(buehne, kopf + modell + erklaert + links + fuss), dna: true, cls: 'dna wl dt', voll: true };
+}
 const PLUS = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2v14M2 9h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>';
 /* Stand des Aufmaßes in einem Satz */
 function aufmassStand() {
@@ -3308,6 +3332,41 @@ SCREENS.planmasse = () => {
     noteBox('Neue Öffnung in der Wand: Bei tragenden Wänden entscheidet die Statik über Sturz und Größe. Der Fachbetrieb bricht die Öffnung, setzt den Sturz und baut ein.', 'neuoeffnung');
   return { html: html, back: planFoto() ? ['Einzeichnen', 'zeichnen'] : ['Fotos', 'fotos'], bar: { label: 'Maße ansehen', act: 'go', v: 'ergebnis', zurueck: true } };
 };
+/* ---------- Wunschmaße und Einzeichnen (neue Öffnung) im Look der Design-DNA (28.10.2026, „die anderen Bereiche machst du auch“) ----------
+   Wunschmaße wie die Ergebnis-Folie: das Modell der App in der Bühne, Chip und Überschrift darin, darunter Unterzeile und Notiz, die Maße
+   auf einer weißen Karte (Felder und − / + wie bisher: data-in="plan", plan-bump), Hinweise mit Punkt, unten zurück und „Maße ansehen“.
+   Einzeichnen: das Foto mit den vier Ecken ist die Bühne (zeichnenLayout wie bisher), darunter Frage, Werkzeuge als leise Pillen, Fuß. */
+function planmasseDna() {
+  const w = S.win; planVorgabe(w);
+  const d = derive(w), tuer = istTuer(w), flaeche = d.moW * d.moH / 1e6, steps = stepsFor(w), nr = Math.max(1, steps.indexOf('planmasse') + 1);
+  const row = (label, f, v, step, g, sub) => '<div class="row"><label><span class="lbl">' + esc(label) + (sub ? '<small class="sb">' + esc(sub) + '</small>' : '') + '</span><span class="val"><input type="text" inputmode="numeric" id="p-' + f + '" data-in="plan" data-f="' + f + '" value="' + (v === '' || v == null ? '' : esc(v)) + '"><span class="unit">mm</span></span></label>' + (g ? '<button type="button" class="ibtn" aria-label="Erklärung" data-act="gloss" data-k="' + g + '">' + ICON_I + '</button>' : '') + '<button type="button" class="rnd" aria-label="Weniger" data-act="plan-bump" data-f="' + f + '" data-v="' + (-step) + '">−</button><button type="button" class="rnd" aria-label="Mehr" data-act="plan-bump" data-f="' + f + '" data-v="' + step + '">+</button></div>';
+  const warn = flaeche > (tuer ? 14 : w.art === 'fest' ? 9 : 5) ? noteBox('Sehr groß: ' + flaeche.toFixed(1).replace('.', ',') + ' m². Das geht, braucht aber einen kräftigen Sturz und meist eine Teilung. Dein Fensterbauer berät dazu.', null, 'warn ab-note') : '';
+  const g = GLOSS.rohbau ? '<button type="button" class="lg-i" data-act="gloss" data-k="rohbau" aria-label="' + esc(GLOSS.rohbau.t) + '">' + LG_I + '</button>' : '';
+  const buehne = '<div class="er-buehne">' + model(w, { id: 'w3d', view: 'result', sway: true, stageH: 'auto', fitW: 0.6, fitH: 0.56, dims: ['hm', 'wm', 'eh', 'ew'], labels: messLabels(), bg: photoBg(), cls: 'dims-all', hint: 'Zum Drehen ziehen' }) +
+    '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / steps.length).toFixed(4) + '"></i>Schritt ' + nr + ' von ' + steps.length + ' · Maße</span>' +
+    '<div class="md-titel er-titel"><h1 tabindex="-1">Wie groß soll es <em>werden?</em></h1>' + g + '</div></div>';
+  const unter = '<div class="md-unter"><p class="ez-unterzeile">Wunschmaße der Rohbauöffnung. Dein Fensterbauer prüft Sturz und Statik und legt das endgültige Maß fest.</p>' + lgNotiz('ez-notizknopf') + '</div>';
+  const karte = '<div class="pm-karte"><span class="dna-label">Wunschmaß Rohbauöffnung</span><div class="rows">' + row('Breite', 'w', d.moW, 50, 'rohbau') + row('Höhe', 'h', d.moH, 50, 'rohbau') + (tuer ? '' : row('Brüstungshöhe', 'bru', w.bru, 50, 'bruestung', 'Boden bis Unterkante Öffnung')) + row('Wandstärke', 'wand', w.wand, 10, 'wandstaerke', 'falls bekannt') + '</div>' +
+    '<p class="pm-satz"><i aria-hidden="true"></i>Das Element wird ' + FUGE + ' mm je Seite kleiner als die Öffnung: ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm.</p></div>';
+  const hinweis = noteBox('Neue Öffnung in der Wand: Bei tragenden Wänden entscheidet die Statik über Sturz und Größe. Der Fachbetrieb bricht die Öffnung, setzt den Sturz und baut ein.', 'neuoeffnung', 'ab-note');
+  const zur = planFoto() ? 'Zurück: Einzeichnen' : 'Zurück: Fotos';
+  const fuss = rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="' + zur + '">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter btn primary" data-act="go" data-v="ergebnis">Maße ansehen' + abPfeil + '</button></div>';
+  return { html: lgKopf(['back', zur]) + '<div class="er-tisch">' + buehne + '<div class="er-rechts">' + unter + karte + warn + hinweis + fuss + '</div></div>', back: planFoto() ? ['Einzeichnen', 'zeichnen'] : ['Fotos', 'fotos'], dna: true, cls: 'dna er pm', voll: true };
+}
+SCREENS.planmasseAlt = SCREENS.planmasse;
+SCREENS.planmasse = planmasseDna;
+function zeichnenDna() {
+  const w = S.win, p = planFoto(), steps = stepsFor(w), nr = Math.max(1, steps.indexOf('zeichnen') + 1), ding = istTuer(w) ? 'die Tür' : w.art === 'fest' ? 'die Verglasung' : 'das Fenster';
+  if (!p) return SCREENS.zeichnenAlt();
+  const chip = '<span class="wz-chip zn-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / steps.length).toFixed(4) + '"></i>Schritt ' + nr + ' von ' + steps.length + ' · Einzeichnen</span>';
+  const buehne = '<div class="zn-buehne" style="--zn-ar: ' + (p.w || 3) + ' / ' + (p.h || 4) + '"><div class="zeich" data-r="zeich"><img class="zeich-img" src="' + p.url + '" alt="" draggable="false"><div class="zeich-ov" data-r="zov"></div><div class="zlupe" data-r="zlupe" hidden></div><span class="w3d-hint zhint" data-r="zhint">Ecken ziehen · ' + (planSicher(w).seite === 'in' ? 'von innen' : 'von außen') + '</span></div>' + chip + '</div>';
+  const frage = lgFrage('Zieh es an seinen <em>Platz.</em>', 'neuoeffnung', 'Die vier Ecken dorthin ziehen, wo ' + ding + ' hin soll, so wie beim Scannen eines Dokuments.');
+  const werkzeuge = '<div class="zn-werkzeuge qrow zrow"><button type="button" class="dna-pille dna-pille--leise chip" data-act="plan-rect">Rechteck ausrichten</button><button type="button" class="dna-pille dna-pille--leise chip" data-act="plan-reset">Zurücksetzen</button>' + (S.photos.in && S.photos.out ? '<button type="button" class="dna-pille dna-pille--leise chip" data-act="plan-seite">' + (planSicher(w).seite === 'in' ? 'Auf dem Außenfoto' : 'Auf dem Innenfoto') + '</button>' : '') + '</div>';
+  const fuss = rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="go" data-v="fotos" aria-label="Zurück zu den Fotos">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter btn primary" data-act="go" data-v="planmasse">Weiter zu den Maßen' + abPfeil + '</button></div>';
+  return { html: lgKopf(['back', 'Zurück: Fotos']) + dnaTisch(buehne, frage + werkzeuge + fuss), back: ['Fotos', 'fotos'], dna: true, cls: 'dna zn dt', voll: true };
+}
+SCREENS.zeichnenAlt = SCREENS.zeichnen;
+SCREENS.zeichnen = zeichnenDna;
 /* ---------- Messen: vier geführte Maße, das Modell wächst mit ---------- */
 const dimKey = (st) => (st.who === 'el' ? 'e' + st.k : st.k);
 /* Das Innenfoto bleibt als weicher Hintergrund hinter dem Modell */
@@ -4481,7 +4540,8 @@ function textBreite(t) {
 }
 /* Platz für die Beschriftung in einem Chip mit i im Raster aus zwei Spalten: halbe Breite des Docks (16 px Rand, 8 px Abstand) minus
    Rand 2 × 2, links 10, rechts 40 fürs i und gegebenenfalls Symbol oder Tupfen samt Abstand */
-const chipPlatz = (sym) => (Math.min(document.documentElement.clientWidth || 390, 640) - 32 - 8) / 2 - 4 - 10 - 40 - (sym ? 24 : 0);
+/* am Laptop stehen die Fragen der Folien in der rechten Spalte (380 px, innen 324 px): gerechnet wird wie bei 356 px Bildschirmbreite */
+const chipPlatz = (sym) => ((!INST && (document.documentElement.clientWidth || 390) >= 1024 ? 356 : Math.min(document.documentElement.clientWidth || 390, 640)) - 32 - 8) / 2 - 4 - 10 - 40 - (sym ? 24 : 0);
 function auswahl(opts, attrs, istGewaehlt) {
   const lang = Math.max.apply(null, opts.map((o) => o.label.length)), dots = opts.some((o) => o.bg);
   const knopf = (o, cls, inner) => '<button type="button" class="' + cls + '" ' + attrs + ' data-v="' + o.k + '" aria-pressed="' + istGewaehlt(o) + '">' + inner + '</button>';
@@ -5124,6 +5184,7 @@ function lgGrund() {
 /* Nach dem Zeichnen: Bühne auf die Breite bringen, Zustand ohne Gleiten setzen */
 function lgAuf() {
   const scr = document.querySelector('.scr.dna'); if (!scr) return;
+  if (scr.classList.contains('zn') || scr.classList.contains('ab') || scr.classList.contains('li')) return; // Einzeichnen, Abschluss, Liste: nichts von der Lage nachzuziehen
   if (scr.classList.contains('st')) return stZeigen();
   if (scr.classList.contains('md')) return mdAuf(scr);
   if (scr.classList.contains('er')) return; // Ergebnis: das Modell bindet die App selbst
@@ -7374,8 +7435,11 @@ function tourBlatt() {
 SCREENS.tour = () => {
   const t = S.tour; if (!t) return SCREENS.home();
   const id = TOUR[t.i], n = TOUR.length, w = S.win, art = w.art || 'fenster', letzte = t.i === n - 1;
-  const kopf = (titel, sub) => hd('Führung · ' + (t.i + 1) + ' von ' + n + ' · ' + TOUR_NAME[id], titel, sub, 'compact');
-  const modell = (o) => model(w, Object.assign({ id: 'w3d', view: 'inside', sway: true, stageH: 270, fitW: 0.66, fitH: 0.72 }, o));
+  /* Im Look der Design-DNA (28.10.2026): Überschrift und Modell werden eingesammelt und als Folie zusammengesetzt (Bühne links bzw. oben,
+     Frage und Auswahl rechts bzw. darunter); in Instanzen bleibt die bisherige Form */
+  const dna = !INST; let T = null, B = '';
+  const kopf = (titel, sub) => { if (!dna) return hd('Führung · ' + (t.i + 1) + ' von ' + n + ' · ' + TOUR_NAME[id], titel, sub, 'compact'); T = [titel, sub]; return ''; };
+  const modell = (o) => { const m = model(w, Object.assign({ id: 'w3d', view: 'inside', sway: true, stageH: dna ? 'auto' : 270, fitW: 0.66, fitH: 0.72 }, o)); if (!dna) return m; B = m; return ''; };
   let html = '';
   if (id === 'start') {
     const o = OPT.art.find((x) => x.k === art) || OPT.art[0];
@@ -7387,7 +7451,7 @@ SCREENS.tour = () => {
     const kachel = (k, label) => { const p = S.photos[k], a = S.ai[k]; return '<div class="tile">' + (p ? '<img src="' + p.url + '" alt="' + label + ', Beispielfoto">' : '<span class="empty"><span class="spin dark"></span>' + label + '</span>') + (a && a.status === 'running' ? '<span class="ai-scan" data-lottie="fotos" data-loop="1" aria-hidden="true"></span><span class="ai"><span class="spin"></span>KI liest</span>' : a && a.status === 'done' ? '<span class="ai">' + KI_OK + 'KI fertig</span>' : '') + (p ? '<span class="tag">' + CHECK + esc(label) + '</span>' : '') + '</div>'; };
     const ki = w.ki && w.ki.chips && w.ki.chips.length && S.ai.in && S.ai.in.status === 'done';
     html = kopf('Zwei Fotos, die KI liest mit.', 'Einmal innen, einmal außen. Die KI liest die Einbausituation: Rollladenkasten, Anschlag, Laibung, Fensterbänke, Fassade. Hier mit Beispielfotos, die Kamera bleibt aus.') +
-      '<div class="tiles">' + kachel('in', 'Von innen') + kachel('out', 'Von außen') + '</div>' +
+      (dna ? ((B = '<div class="tiles tr-fotos">' + kachel('in', 'Von innen') + kachel('out', 'Von außen') + '</div>'), '') : '<div class="tiles">' + kachel('in', 'Von innen') + kachel('out', 'Von außen') + '</div>') +
       (ki ? '<div class="teaser"><p class="eyebrow">Aus den Fotos gelesen · ' + kiAnzahl(w.ki) + ' fürs Aufmaßblatt</p><div class="chips">' + w.ki.chips.map((c) => '<span class="chip">' + esc(c) + '</span>').join('') + '</div></div>'
         : '<div class="teaser"><p class="eyebrow">Aus den Fotos</p><p class="sub" style="display: flex; align-items: center; gap: 10px"><span class="spin dark"></span>Die KI liest die Einbausituation.</p></div>');
   } else if (id === 'messen') {
@@ -7440,12 +7504,19 @@ SCREENS.tour = () => {
   } else {
     const preis = KUNDE_FREI() ? 'Messen, Fotos und das Aufmaßblatt sind kostenlos.' : 'Messen, Fotos und 3-D-Modell sind kostenlos. Das fertige Aufmaßblatt kostet einmalig ' + euro(PREIS()) + (MWST() ? ' inkl. MwSt.' : '') + ', egal an wie viele Fensterbauer es geht.';
     const av = (x) => '<span class="av" aria-hidden="true">' + x + '</span>';
-    html = kopf('Fertig. Das war eezi.', 'So sieht dein Aufmaßblatt aus, das an Fensterbauer geht. Vorn dein Weg und die Eckdaten, danach je Fenster eine Seite mit Zeichnung.') + tourBlatt() +
+    html = kopf('Fertig. Das war eezi.', 'So sieht dein Aufmaßblatt aus, das an Fensterbauer geht. Vorn dein Weg und die Eckdaten, danach je Fenster eine Seite mit Zeichnung.') + (dna ? ((B = tourBlatt()), '') : tourBlatt()) +
       '<div class="card tour-senden"><p class="eyebrow">Und dann</p><h2 class="sec-title">An beliebig viele Fensterbauer.</h2><p class="sub">Ein Aufmaß, so viele Angebote, wie du möchtest. Du schickst das Blatt per WhatsApp oder E-Mail. Jeder Betrieb kann es lesen; mit eeziframes übernimmt er alles per Code.</p>' +
       '<ul class="ts-ziele">' + [['A', 'Fensterbauer im Ort'], ['B', 'Empfehlung von Nachbarn'], ['C', 'Betrieb mit eeziframes']].map((x) => '<li>' + av(x[0]) + '<span><b>' + esc(x[1]) + '</b><small>Aufmaßblatt geschickt</small></span>' + CHECK + '</li>').join('') + '<li class="mehr">' + av('+') + '<span><b>So viele, wie du möchtest</b><small>ein Aufmaß, beliebig viele Angebote</small></span></li></ul>' +
       '<p class="sub">' + esc(preis) + '</p><div class="pill-row"><button type="button" class="pill" data-act="tour-pdf">Beispiel als PDF ansehen</button></div></div>';
   }
   html += tourFakt(id);
+  if (dna) {
+    const nr = t.i + 1, chip = '<span class="wz-chip tr-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / n).toFixed(4) + '"></i>Führung · ' + nr + ' von ' + n + ' · ' + esc(TOUR_NAME[id]) + '</span>';
+    const art3 = B.indexOf('w3d-stage') >= 0, buehne = '<div class="tr-buehne' + (art3 ? ' tr-modell' : id === 'blatt' ? ' tr-blatt' : ' tr-bilder') + '">' + B + chip + '</div>';
+    const frage = T ? '<div class="lg-frage tr-frage"><div class="lg-frage-kopf"><h1 tabindex="-1">' + esc(T[0]).replace(/ ([^ ]+)$/, ' <em>$1</em>') + '</h1></div><p>' + esc(T[1]) + '</p></div>' : '';
+    const fuss = rechtLinks() + '<div class="lg-fuss">' + (t.i ? '<button type="button" class="lg-zurueck" data-act="tour-zurueck" aria-label="Zurück: ' + esc(TOUR_NAME[TOUR[t.i - 1]]) + '">' + LG_PFEIL_L + '</button>' : '') + '<button type="button" class="dna-pille lg-weiter btn primary" data-act="' + (letzte ? 'tour-eigen' : 'tour-weiter') + '">' + (letzte ? 'Eigenes Fenster ausmessen' : 'Weiter') + abPfeil + '</button></div>';
+    return { html: lgKopf(['back', 'Führung beenden']) + dnaTisch(buehne, frage + '<div class="tr-inhalt">' + html + '</div>' + fuss), back: ['Beenden', 'tour-ende'], dna: true, cls: 'dna tour tr dt', voll: true };
+  }
   return { html: html, back: ['Beenden', 'tour-ende'], cls: 'tour', bar: { label: letzte ? 'Eigenes Fenster ausmessen' : 'Weiter', act: letzte ? 'tour-eigen' : 'tour-weiter', sec: t.i ? 'Zurück' : null, secAct: 'tour-zurueck' } };
 };
 /* Die echte PDF fürs Beispiel: Wasserzeichen „Beispiel“, ohne Aufmaß-Code */

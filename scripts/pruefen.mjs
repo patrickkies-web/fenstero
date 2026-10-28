@@ -826,7 +826,7 @@ if (teil(6)) {
   await p5.click('[data-act="plan-rect"]'); await p5.waitForTimeout(200);
   const z2 = await p5.evaluate(() => { const P = S.win.plan.ecken; return Math.abs(P[0][1] - P[1][1]) < 1e-9 && Math.abs(P[1][0] - P[2][0]) < 1e-9; });
   ok(startNeu.neu && startNeu.note && /Fotos/.test(startNeu.bar) && /Stelle/.test(fotosNeu.h1) && fotosNeu.bar === 'ohne-foto:Weiter zum Einzeichnen' && /^go:Weiter zum Einzeichnen/.test(fotosNeu.weiter) && fotosNeu.steps === 'start,fotos,zeichnen,planmasse,ergebnis,frage' && z0.screen === 'zeichnen' && z0.ecken === 4 && z0.raster === 4 && z0.dim && z0.e !== z1.e && lupe && z1.lupe && z2, 'Neue Öffnung: eigener Weg mit Einzeichnen, vier Ecken mit Raster, Lupe beim Ziehen, „Rechteck ausrichten“');
-  await p5.click('.qnav .btn.primary'); await p5.waitForTimeout(900);
+  await p5.click('.qnav .btn.primary, .scr.dna.zn .lg-weiter'); await p5.waitForTimeout(900);
   const pm = await p5.evaluate(() => ({ screen: S.screen, d: derive(S.win), bild: (S.win.plan.bild || '').length, rows: document.querySelectorAll('input[data-in="plan"]').length }));
   await p5.click('[data-act="plan-bump"][data-f="h"][data-v="50"]'); await p5.waitForTimeout(300);
   const pm2 = await p5.evaluate(() => { const d = derive(S.win); return { moH: d.moH, elH: d.elH, mo: S.win.mo.hl === S.win.mo.hr && S.win.mo.hl === d.moH }; });
@@ -1537,7 +1537,7 @@ if (teil(9)) {
   const [dlA] = await Promise.all([ap.waitForEvent('download', { timeout: 10000 }), ap.click('[data-act="tour-pdf"]')]);
   let txtA = ''; try { txtA = (await import('node:child_process')).execFileSync('pdftotext', ['-layout', await dlA.path(), '-']).toString('utf8'); } catch (e) { txtA = ''; }
   ok(/AM-BEISPIEL/.test(txtA) && /BEISPIEL/.test(txtA) && !/AM1\./.test(txtA) && /DEIN WEG ZU NEUEN FENSTERN/.test(txtA), 'Beispiel-PDF der Führung: Wasserzeichen, ohne Aufmaß-Code, Seite 1 mit dem Weg');
-  await ap.click('.hdr-btn[data-act="back"]'); await ap.waitForTimeout(300);
+  await ap.click('.hdr-btn[data-act="back"], .scr.dna .lg-kopf-zurueck'); await ap.waitForTimeout(300);
   ok(await ap.evaluate(() => !S.tour && S.screen === 'home' && S.windows.length === 1) && await ap.evaluate(() => localStorage.getItem('aufmass.v1')) === vorher, 'Führung beenden: eigenes Projekt unverändert');
   await ap.goto(BASE + '/app/#fuehrung', { waitUntil: 'networkidle' }); await ap.waitForTimeout(300);
   ok(await ap.evaluate(() => S.screen === 'tour' && TOUR[S.tour.i] === 'start'), '#fuehrung (von der Startseite) öffnet die Führung');
@@ -2924,7 +2924,7 @@ if (teil(15)) {
     ok(bereit, 'Testserver mit Konten läuft: ' + B6);
     const c1 = await browser.newContext(telefon), s1 = await neueSeite(c1, B6);
     await s1.goto(B6 + '/app/', { waitUntil: 'networkidle' }); await s1.waitForTimeout(300);
-    const start = await s1.evaluate(() => ({ anmelden: !!document.querySelector('.hero [data-act="anmelden"]'), text: document.querySelector('.hero').textContent }));
+    const start = await s1.evaluate(() => ({ anmelden: !!document.querySelector('.hero [data-act="anmelden"], .wl-kopf [data-act="anmelden"]'), text: document.querySelector('.hero, .wl-kopf').textContent }));
     ok(start.anmelden && /Schon ein Aufmaß gesichert\?/.test(start.text), 'Startbild als Gast: „Schon ein Aufmaß gesichert? Anmelden“');
     await fensterAnlegen(s1, [['Wohnzimmer', 1230, 1410], ['Küche', 1010, 1210]]); await s1.waitForTimeout(300);
     const gast = await s1.evaluate(() => { const k = document.querySelector('.konto-karte'), l = document.querySelector('.liste-in'); return { text: k ? k.textContent : '', nachListe: !!(k && l && k.getBoundingClientRect().top > l.getBoundingClientRect().bottom), vorDatei: !!(k && document.querySelector('.datei-card') && k.getBoundingClientRect().top < document.querySelector('.datei-card').getBoundingClientRect().top), offen: S.sync.offen, ks: !!KS }; });
@@ -2953,7 +2953,7 @@ if (teil(15)) {
     // zweites Gerät: Anmelden, die Liste ist da; Änderung kommt zurück aufs erste Gerät
     const c2 = await browser.newContext(telefon), s2 = await neueSeite(c2, B6);
     await s2.goto(B6 + '/app/', { waitUntil: 'networkidle' }); await s2.waitForTimeout(250);
-    await s2.click('.hero [data-act="anmelden"]'); await s2.waitForSelector('#s-mail');
+    await s2.click('.hero [data-act="anmelden"], .wl-kopf [data-act="anmelden"]'); await s2.waitForSelector('#s-mail');
     ok(await s2.locator('[data-in="sc"]').count() === 0 && /Weiter mit deinem Aufmaß/.test(await s2.evaluate(() => document.body.innerText)), 'Anmelden auf einem anderen Gerät: nur E-Mail und Code, ohne erneute Zustimmung');
     await anmelden(s2, mail6, false);
     await s2.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 }); await s2.waitForTimeout(300);
@@ -3459,7 +3459,7 @@ if (teil(16)) {
       const pruef = (wo) => { n++; const raum = wo === 'messen' || wo === 'rest'; if (raum) { S.gloss = wo === 'messen' ? MESS[S.mess.step].g : 'raender'; render(); } if (!document.querySelector(raum ? '.sheet [data-act="notiz-auf"]' : '.hd .nz-knopf, .scr.dna .lg-notiz-knopf')) fehlt.push(wo); if (raum) { S.gloss = null; render(); } if (!document.querySelector('.hdr-wo, .scr.dna .lg-kopf [data-act="wohin"]')) ohneWo.push(wo); }; // Design-DNA (Lage): Notiz und Übersicht im eigenen Kopf
       ['start', 'fotos', 'messen', 'rest', 'ergebnis'].forEach((sc) => { go(sc); if (sc === 'rest') { S.rest.i = 0; render(); } pruef(sc); if (sc !== 'messen' && sc !== 'rest' && !document.querySelector('.bb .bb-zurueck, .scr.dna .lg-fuss .lg-zurueck')) ohnePfeil.push(sc); });
       ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { artSetzen(S.win, art); S.win.sart = 'rollladen'; S.win.iart = 'rollo'; qList(S.win).forEach((q) => { if (q.id === 'notiz') return; S.q = q.id; go('frage'); pruef(art + ':' + q.id); }); });
-      S.win.neu = true; go('planmasse'); pruef('planmasse'); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push('planmasse'); S.win.neu = false; artSetzen(S.win, 'fenster');
+      S.win.neu = true; go('planmasse'); pruef('planmasse'); if (!document.querySelector('.bb .bb-zurueck, .scr.dna .lg-fuss .lg-zurueck')) ohnePfeil.push('planmasse'); S.win.neu = false; artSetzen(S.win, 'fenster');
       ['anfrage', 'anfrage2', 'anfrage3'].forEach((sc) => { go(sc); if (!document.querySelector('.hd .nz-knopf, .scr.dna .lg-notiz-knopf')) fehlt.push(sc); if (!document.querySelector('.bb .bb-zurueck, .scr.dna .lg-fuss .lg-zurueck')) ohnePfeil.push(sc); }); // Fürs Angebot im Look der Design-DNA
       return { fehlt: fehlt, ohneWo: ohneWo, ohnePfeil: ohnePfeil, n: n };
     }, MOK);
@@ -4802,7 +4802,7 @@ if (teil(22)) {
   await ctxE.close();
   // Führung, letzter Schritt: die Box „Für den Fensterbauer“ steht im Vorschaublatt (vorher traf sie die Regel des Farbblatts .fb)
   const ctxT = await browser.newContext(telefon), pT = await neueSeite(ctxT);
-  await pT.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await pT.click('.hero [data-act="tour-start"]'); await pT.waitForTimeout(400);
+  await pT.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await pT.click('.hero [data-act="tour-start"], .wl-kopf [data-act="tour-start"]'); await pT.waitForTimeout(400);
   await pT.evaluate(() => tourGehe(TOUR.length - 1)); await pT.waitForTimeout(1200);
   const tbB = await pT.evaluate(() => { const b = document.querySelector('.tb-box.tb-fb'), bl = b && b.closest('.tb-blatt'); if (!b || !bl) return null; const r = b.getBoundingClientRect(), rb = bl.getBoundingClientRect(); return { drin: r.left >= rb.left && r.right <= rb.right && r.top >= rb.top && r.bottom <= rb.bottom, pos: getComputedStyle(b).position, alt: document.querySelectorAll('.tb-box.fb').length }; });
   ok(tbB && tbB.drin && tbB.pos === 'static' && !tbB.alt, 'Führung, letzter Schritt: „Für den Fensterbauer“ steht im Vorschaublatt, nicht über dem Titel');
