@@ -291,3 +291,53 @@ Prüfsuite: Abschnitte 1 bis 22 grün; „Lamellen wenden“ (WebGL) einmal wied
 Bild: docs/profis/bilder/2026-10-27-app-fotos-dna-tel.jpg.
 
 Offen: Messen, Ränder, Ergebnis, Bögen und Abschluss folgen in derselben Weise.
+
+## Schritt 1 neu, Folie für Folie mit dem Inhaber (27.10.2026, spät)
+
+Nach der ersten Übernahme in die App war der Inhaber „überhaupt nicht zufrieden“ (Bühne am Laptop winzig, graue Streifen links und
+rechts, Knöpfe zu groß, alte und neue Folien durcheinander). Seitdem gehen wir jede Folie einzeln durch: Er beschreibt, ich zeige ein
+Bild ohne Programmierung, erst nach seinem Ja wird gebaut (Regel in .claude/skills/design-dna-eeziframes/SKILL.md, Abschnitt 4).
+
+Seine Wünsche zu Schritt 1, in der Reihenfolge: Kopfzeile, Chip und Hintergrund bleiben; das Element mittig und schwebend, deutlich
+größer, zweimal noch größer; „Was planst du?“ in derselben Schrift unter dem Chip; Kacheln kleiner, ohne Lila, minimalistisch; kein
+schwarzer Rand („Warum sind die Ränder schwarz?“); der Hintergrund nicht in einem Container, sondern hinter den Kacheln weiter bis in
+die weiße Karte. Dazu seine Bilder der sechs Elemente (Fenster, Balkontür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür,
+Faltschiebewand); freigestellt und als WebP unter web/bilder/konfigurator/element/ (die früheren Renderings sind entfernt).
+
+Sein Ja: „Wenn du dann soweit bist stelle das online im aktuellen konfigurator mit allen links auf der folie die passen im echten
+konfigurator“. Gebaut genau wie das Bild; was die App dort an Bedienung hat, bleibt: zurück im Kopf, Übersicht, Begriffe, i an der Frage
+(„Welches Element passt zu mir?“), Notiz, i am Namen je Element, Kacheln (auch mit Pfeiltasten und Wischen auf der Bühne), die Stelle
+mit „Mehr erfahren“ bei „Neue Öffnung“, rechtliche Verweise, zurück und „Weiter zu den Fotos“. Alle einmal angetippt, Telefon und Laptop.
+
+Abweichungen vom Bild, mit Grund: Unter dem Element steht bei der Balkon- oder Terrassentür „Balkontür“ (sonst passen Name, Zusatz und
+i nicht in eine Zeile); auf Telefonen unter 375 px fällt der Zusatz weg und die Frage ist 26 px groß.
+
+Am Laptop füllt nur diese Folie den ganzen Bildschirm (`voll` an der Ansicht, Klasse `dna-voll` an html); die übrigen Folien sind
+unverändert und kommen einzeln dran.
+
+Bilder: docs/profis/bilder/2026-10-27-app-start-neu-tel.jpg, docs/profis/bilder/2026-10-27-app-start-neu-laptop.jpg.
+
+## Schritt 2 und 3, Folie für Folie (27.10.2026, nachts)
+
+Der Inhaber zu Schritt 2: „die zweite Folie kann genauso wie in diesem Artefakt bleiben“. Die Folie in der App entsprach dem Artefakt
+bis auf die Überschrift; jetzt steht wie dort das i neben der zweizeiligen Überschrift und die Notiz rund mit dem Zeichen über dem Wort.
+
+Zu Schritt 3 („Messen“) beschrieb er die Folie so: Überschrift oben in der Bühne wie auf Folie 1; das Element mindestens so groß wie auf
+Folie 1; Einzeichnungen und Linien bleiben; der Chip für den Wert unter dem Element; Notiz und die kleine graue Schrift unter der
+Bühne; keine Tastatur von Anfang an, erst Antippen des Chips holt die Systemtastatur; mit einem Wert erscheint „Weiter zu Maß 2“, die
+Folie bleibt und zeigt das nächste Maß mit neuem Feld. Dazu sein Wort: „Wenn du das verändert hast, dann stellst du das auch online“.
+
+Gebaut auf dem Modul web/assets/messen-dna.js (bisher nur auf dem Arbeitszweig) mit diesen Änderungen; Prüfungen, Rückfragen
+(Zentimeter, Warnungen), Großansicht, Lupen und Wege der App bleiben. Die Ränder (Schritt 4) sind nicht Teil seiner Beschreibung und
+bleiben, wie sie online sind, bis er die Folie durchgesehen hat. Was ohne echtes Telefon nicht geprüft werden konnte: die Lage der
+Pille über der Systemtastatur (iOS und Android rechnen den sichtbaren Bereich verschieden; gebaut mit `visualViewport`).
+
+Bilder: docs/profis/bilder/2026-10-27-app-messen-neu-tel.jpg, docs/profis/bilder/2026-10-27-app-messen-neu-laptop.jpg.
+
+## Schritt 4 „Ränder“ und der Bogen ohne Foto (28.10.2026)
+
+Der Inhaber: „Höhe links, Höhe rechts etc., die anderen ganzen Maße können auch in der Ansicht erstellt werden. Außerdem diese Meldung
+‚Mit Foto wird dein Aufmaß besser‘ bitte auch aus dem Artefakt holen.“ Die Ränder laufen jetzt durch dieselbe Folie wie Messen
+(Überschrift in der Bühne, Feld unter dem Element mit Systemtastatur, „Hier auch … gemessen?“ unter der Bühne), danach „Passt.“ mit
+allen sechs Maßen. Der Bogen ohne Foto ist der des Artefakts (dunkles Blatt, Haken, Häkchen, zwei leise Pillen); seine Funktionen
+(Foto machen, ohne Foto weiter, Hinweis abschalten) sind dieselben.

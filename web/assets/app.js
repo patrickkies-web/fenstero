@@ -2706,6 +2706,7 @@ function render(fresh) {
   if (INST && S.sent && !S.sent.kurz && S.screen !== 'gesendet') instanzKuerzen(); // Bestätigung verlassen: nur Nummer und Datum bleiben
   const root = $app(), scroller = root.querySelector('.scroll'), keep = !fresh && scroller ? scroller.scrollTop : 0, fokus = fresh ? null : fokusMerken(root);
   const view = SCREENS[S.screen] ? SCREENS[S.screen]() : SCREENS.home();
+  document.documentElement.classList.toggle('dna-voll', !!view.voll); // Folie füllt am Laptop den Bildschirm (Start), Grund schwarz
   /* Angefangenes Fenster: „Fortsetzen“ auf der Startseite, über der Liste */
   /* Auf der Einladungsseite (Kundenlink, noch keine Liste) steht der Betrieb vorn: die Karte kommt direkt unter den Absender */
   if (S.screen === 'home' && view.html) { const ek = entwurfKarte(); if (ek) { const li = view.html.indexOf('<section class="sec liste"'), ki = view.html.indexOf('<p class="eyebrow kicker">'), ein = view.html.indexOf('ein-start-in'); view.html = li >= 0 ? view.html.slice(0, li) + ek + view.html.slice(li) : ein >= 0 && ki > ein ? view.html.slice(0, ki) + ek + view.html.slice(ki) : ek + view.html; } }
@@ -3003,20 +3004,23 @@ function linkHomeInhaltAlt(I) {
   const html = E.html({ name: name, kunde: d.kunde, du: du, p: d.p, bis: d.bis, server: !!SERVER.daten }) + rechtLinks();
   return { html: html, bar: null };
 }
-/* ---------- Start im Look der Design-DNA (27.10.2026) ----------
-   Folie „Was planst du?“ (vom Inhaber angenommen, 26.10.2026; Vorschau docs/profis/konfigurator-start-vorschau/): Betonboden im
-   Fensterlicht als Bühne, das gewählte Element als feste Ansicht (Regel des Inhabers: beim Messen kein 3-D) mit Etikett und Anker, die
-   Frage, die sechs Elemente als Anthrazit-Kacheln mit Strichzeichnung, die Stelle auf weißer Karte, unten zurück und eine Pille.
-   Aktionen wie bisher (art, situation, gloss, notiz, go fotos); Wischen auf der Bühne und Pfeiltasten wechseln das Element. Beim Wechsel
-   blenden Element, Anker und Etikett im selben Frame (220 ms, aus der Wischrichtung), nur das Licht gleitet nach; Tastatur ohne Übergang. */
-const ST_NAME = { fenster: ['Fenster', 'Fenster'], balkon: ['Balkontür', 'Balkontür'], fest: ['Festverglasung', 'Festverglasung'], hst: ['Hebe-Schiebe-Tür', 'Hebe-Schiebe'], psk: ['PSK-Tür', 'PSK-Tür'], fsw: ['Faltschiebewand', 'Faltschiebewand'] };
-let stZuletzt = '', stNeuZuletzt = false, stRichtung = 0, stSofort = false, stLichtAlt = null;
+/* ---------- Start im Look der Design-DNA (27.10.2026, mit dem Inhaber Folie für Folie neu gefasst) ----------
+   Folie „Was planst du?“ genau wie die vom Inhaber angenommene Vorschau: Der Boden im Fensterlicht ist der Hintergrund der Folie, ohne
+   Rahmen und ohne Abdunklung von Rand zu Rand; er läuft hinter den Kacheln weiter und verliert sich an der weißen Karte. Oben Chip, Frage
+   mit Erklärung und Notiz; in der Mitte schwebt das gewählte Element groß (Bilder des Inhabers, nach Seitenverhältnis in ein festes Feld
+   eingepasst), darunter sein Name. Sechs kleine Glas-Kacheln ohne Violett (gewählt: weißer Ring), die Stelle auf weißer Karte, unten
+   zurück und eine Pille. Am Laptop füllt die Folie den Bildschirm: Bühne links, rechts eine Spalte mit Kacheln, Stelle und Pille.
+   Aktionen wie bisher (art, situation, gloss, notiz-auf, wohin, gindex, back, go fotos); Wischen auf der Bühne und Pfeiltasten wechseln
+   das Element. Beim Wechsel blendet das neue Element aus der Wischrichtung ein (220 ms), der Name im selben Frame; Tastatur und
+   „weniger Bewegung“ ohne Übergang. */
+let stZuletzt = '', stNeuZuletzt = false, stRichtung = 0, stSofort = false;
 const stIdx = (k) => Math.max(0, OPT.art.findIndex((x) => x.k === k));
 const stNachbar = (k, d) => OPT.art[(stIdx(k) + d + OPT.art.length) % OPT.art.length].k;
-const ST_BILD = { fenster: [379, 536], balkon: [208, 525], fest: [552, 557], hst: [526, 564], psk: [404, 549], fsw: [595, 492] };
+/* Bilder des Inhabers (web/bilder/konfigurator/element/), Breite und Höhe in px */
+const ST_BILD = { fenster: [879, 1057], balkon: [536, 1200], fest: [1179, 996], hst: [1188, 993], psk: [908, 1079], fsw: [1200, 754] };
+/* Name unter dem Element; die Balkon- oder Terrassentür kurz, damit Name, Zusatz und Erklärung auf einer Zeile bleiben */
+const ST_NAME = { balkon: 'Balkontür' };
 const ST_KURZ = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Fest&shy;verglasung', hst: 'Hebe-Schiebe', psk: 'PSK-Tür', fsw: 'Falt&shy;schiebewand' };
-/* Name am Etikett mit Trennstellen, damit er auf schmalen Telefonen umbricht statt abgeschnitten zu werden */
-const ST_ET = { fenster: 'Fenster', balkon: 'Balkon&shy;tür', fest: 'Fest&shy;verglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Falt&shy;schiebe&shy;wand' };
 const ST_STELLE = {
   ersatz: '<b>Dort ist schon eins.</b> Das neue kommt in dieselbe Öffnung. Soll sie größer werden, etwa für eine Tür, wähle „Neue Öffnung“.',
   neu: '<span class="st-punkt" aria-hidden="true"></span><b>Dort war noch keins, oder die Öffnung wird größer.</b> Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.'
@@ -3030,49 +3034,28 @@ function startDna() {
   /* Wechsel auf demselben Bildschirm: aus der Wischrichtung, sonst aus der Richtung in der Reihe */
   const gleich = lastScreen === 'start', still = stSofort || ruhig(), wechsel = gleich && !still && stZuletzt && stZuletzt !== art, kommt = gleich && !still && neu && !stNeuZuletzt;
   const d = stRichtung || (stIdx(art) > stIdx(stZuletzt) ? 1 : -1);
-  if (!gleich) stLichtAlt = null;
   stZuletzt = art; stNeuZuletzt = neu; stRichtung = 0; stSofort = false;
   const wl = wechsel ? ' wechselt' : '';
   const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
-  const buehne = '<figure class="st-buehne-dna" role="group" aria-roledescription="Bühne" aria-label="' + esc('Gewähltes Element: ' + ST_NAME[art][0] + '. Wischen wechselt das Element.') + '">' +
-    '<img class="st-boden" src="/bilder/konfigurator/buehne.webp" width="1000" height="750" alt="" decoding="async" draggable="false">' +
-    '<span class="st-licht" aria-hidden="true"></span><span class="st-kante" aria-hidden="true"></span>' +
-    '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / steps.length).toFixed(4) + '"></i>Schritt ' + nr + ' von ' + steps.length + ' · Start</span>' +
-    '<div class="st-objekt' + wl + '" style="--d: ' + d + '" aria-hidden="true"><span class="st-schatten"></span><img src="/bilder/konfigurator/' + art + '.webp" width="' + b[0] + '" height="' + b[1] + '" alt="" decoding="async" draggable="false">' +
-    (neu ? '<svg class="st-rahmen' + (kommt ? ' kommt' : '') + '" aria-hidden="true"><rect x=".75" y=".75" rx="6"/></svg>' : '') + '</div>' +
-    '<svg class="st-linie' + wl + '" aria-hidden="true"><line/></svg><span class="st-anker' + wl + '" aria-hidden="true"></span>' +
-    '<div class="st-etikett"><span class="dna-etikett"><span class="st-et' + wl + '"><b>' + ST_ET[art] + '</b><small>' + esc(o.sub || '') + '</small></span>' +
-    (g ? '<button type="button" class="lg-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc('Was ist das: ' + o.label + '?') + '">' + LG_I + '</button>' : '') + '</span></div></figure>';
-  const frage = lgFrage('Was planst <em>du?</em>', 'elementart', 'Unsicher? Nimm, was heute eingebaut ist. Weitere Fenster kommen danach einzeln dran.');
-  const bento = '<div class="st-bento" role="radiogroup" aria-label="Element">' + OPT.art.map((x) => { const an = x.k === art; return '<button type="button" class="st-kachel" role="radio" data-act="art" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '" aria-label="' + esc(x.label) + '"><span class="st-kachel-licht" aria-hidden="true"></span><svg class="st-zeichen" viewBox="0 0 64 64" aria-hidden="true"><use href="#z-' + x.k + '"/></svg><span class="st-kachel-name" aria-hidden="true">' + ST_KURZ[x.k] + '</span></button>'; }).join('') + '</div>';
+  const buehne = '<div class="st-buehne-dna">' +
+    '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / steps.length).toFixed(4) + '"></i>Schritt ' + nr + ' von ' + steps.length + ' · Start</span>' +
+    lgFrage('Was planst <em>du?</em>', 'elementart', 'Unsicher? Nimm, was heute eingebaut ist.') +
+    '<div class="st-objekt' + wl + '" style="--d: ' + d + '; --asp: ' + (b[0] / b[1]).toFixed(3) + '" aria-hidden="true"><span class="st-schatten"></span><img src="/bilder/konfigurator/element/' + art + '.webp" width="' + b[0] + '" height="' + b[1] + '" alt="" decoding="async" draggable="false">' +
+    (neu ? '<span class="st-rahmen' + (kommt ? ' kommt' : '') + '"></span>' : '') + '</div>' +
+    '<p class="st-name' + wl + '"><b>' + esc(ST_NAME[art] || o.label) + '</b><small>' + esc(o.sub || '') + '</small>' +
+    (g ? '<button type="button" class="lg-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc('Was ist das: ' + o.label + '?') + '">' + LG_I + '</button>' : '') + '</p></div>';
+  const bento = '<div class="st-bento" role="radiogroup" aria-label="Element">' + OPT.art.map((x) => { const an = x.k === art; return '<button type="button" class="st-kachel" role="radio" data-act="art" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '" aria-label="' + esc(x.label) + '"><svg class="st-zeichen" viewBox="0 0 64 64" aria-hidden="true"><use href="#z-' + x.k + '"/></svg><span class="st-kachel-name" aria-hidden="true">' + ST_KURZ[x.k] + '</span></button>'; }).join('') + '</div>';
   const stelle = '<div class="lg-karte lg-hell st-stelle-karte"><div class="lg-feld"><span class="dna-label" id="st-stelle-l">Die Stelle</span><div class="st-stelle" role="radiogroup" aria-labelledby="st-stelle-l">' +
     OPT.situation.map((x) => { const an = (x.k === 'neu') === neu; return '<button type="button" role="radio" data-act="situation" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '">' + esc(x.label) + '</button>'; }).join('') + '</div>' +
     '<p class="st-stelle-text" aria-live="polite">' + ST_STELLE[neu ? 'neu' : 'ersatz'] + (neu ? ' <button type="button" class="ulink" data-act="gloss" data-k="neuoeffnung">Mehr erfahren</button>' : '') + '</p></div></div>';
-  const fuss = rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Aufmaß">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="fotos">Weiter zu den Fotos' + pfeil + '</button></div>';
-  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(['back', 'Zurück: Aufmaß']) + buehne + frage + bento + stelle + fuss, back: ['Aufmaß', 'home'], dna: true, cls: 'dna st' };
+  const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Aufmaß">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="fotos">Weiter zu den Fotos' + pfeil + '</button></div>';
+  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(['back', 'Zurück: Aufmaß']) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + bento + stelle + rechtLinks() + fuss + '</div></div>', back: ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
 }
-/* Nach dem Zeichnen: Anker an die rechte obere Ecke des Elements, Linie zum Etikett, Licht und Schatten mittig, Rahmen der neuen Öffnung
-   um die Standfläche; aus den bekannten Maßen des Bilds, ohne auf das Laden zu warten */
+/* Nach dem Zeichnen: Wechsel erst einblenden, wenn das neue Bild bereit ist; Wischen an die Bühne binden */
 function stZeigen() {
   const f = document.querySelector('.st-buehne-dna'); if (!f) return;
-  const art = ST_BILD[S.win.art] ? S.win.art : 'fenster', b = ST_BILD[art], ob = f.querySelector('.st-objekt'), s = f.getBoundingClientRect(), o = ob.getBoundingClientRect();
-  if (!s.width || !o.width) return;
-  const sc = Math.min(o.width / b[0], o.height / b[1]), bw = b[0] * sc, bh = b[1] * sc, bl = o.left + (o.width - bw) / 2, bt = o.bottom - bh;
-  const px = bl + bw * 0.9 - s.left, py = bt + bh * 0.14 - s.top, et = f.querySelector('.dna-etikett').getBoundingClientRect();
-  const anker = f.querySelector('.st-anker'); anker.style.left = px.toFixed(1) + 'px'; anker.style.top = py.toFixed(1) + 'px';
-  const svg = f.querySelector('.st-linie'), ln = svg.querySelector('line');
-  svg.setAttribute('viewBox', '0 0 ' + Math.round(s.width) + ' ' + Math.round(s.height));
-  [['x1', px], ['y1', py], ['x2', et.left - s.left + 2], ['y2', et.top - s.top + et.height / 2]].forEach(([k, v]) => ln.setAttribute(k, v.toFixed(1)));
-  /* Licht: vom alten Element zum neuen gleiten, beim ersten Zeichnen sofort dort */
-  const l = f.querySelector('.st-licht'), lx = bl + bw / 2 - s.left - 120;
-  l.style.transition = 'none'; f.style.setProperty('--licht-x', (stLichtAlt != null && !ruhig() ? stLichtAlt : lx).toFixed(1) + 'px'); void l.offsetWidth;
-  l.style.transition = ''; f.style.setProperty('--licht-x', lx.toFixed(1) + 'px'); stLichtAlt = lx;
-  ob.style.setProperty('--schatten-x', (bl + bw / 2 - (o.left + o.width / 2)).toFixed(1) + 'px');
-  const r = f.querySelector('.st-rahmen');
-  if (r) { const rw = Math.round(bw + 12), rh = Math.round(bh + 12), rr = r.querySelector('rect'); r.style.left = (bl - o.left - 6).toFixed(1) + 'px'; r.style.top = (bt - o.top - 6).toFixed(1) + 'px'; r.setAttribute('width', rw); r.setAttribute('height', rh); r.setAttribute('viewBox', '0 0 ' + rw + ' ' + rh); rr.setAttribute('width', rw - 1.5); rr.setAttribute('height', rh - 1.5); }
-  /* Wechsel: erst wenn das neue Bild bereit ist, blenden Element, Anker, Linie, Etikett und Rahmen ein */
-  const img = ob.querySelector('img'), auf = () => requestAnimationFrame(() => f.querySelectorAll('.wechselt, .kommt').forEach((el) => el.classList.remove('wechselt', 'kommt')));
-  if (f.querySelector('.wechselt, .kommt')) { if (img.decode) img.decode().then(auf, auf); else auf(); }
+  const img = f.querySelector('.st-objekt img'), auf = () => requestAnimationFrame(() => f.querySelectorAll('.wechselt, .kommt').forEach((el) => el.classList.remove('wechselt', 'kommt')));
+  if (f.querySelector('.wechselt, .kommt')) { if (img && img.decode) img.decode().then(auf, auf); else auf(); }
   stWischen(f);
 }
 /* Wischen auf der Bühne wechselt das Element (ab 56 px oder einem schnellen Wisch); Pfeiltasten in den Radiogruppen wählen den Nachbarn */
@@ -3095,7 +3078,6 @@ document.addEventListener('keydown', (e) => {
   const k = z.getAttribute('data-v'), grp = z.getAttribute('data-act'); stSofort = true; z.click();
   const neu = document.querySelector('[data-act="' + grp + '"][data-v="' + k + '"]'); if (neu) neu.focus({ preventScroll: true });
 });
-window.addEventListener('resize', () => { if (S.screen === 'start') stZeigen(); });
 SCREENS.start = startDna;
 /* ---------- Fotos ---------- */
 /* ---------- Fotos im Look der Design-DNA (27.10.2026) ----------
@@ -3127,7 +3109,7 @@ function fotosDna() {
   const tipp = '<p class="ft-tipp"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 10h16M10 7v6"/><circle cx="10" cy="10" r="2.6"/></svg><span>' +
     (tilt != null ? (Math.abs(tilt) <= 2.5 ? 'Dein Foto ist mit ' + String(Math.abs(tilt)).replace('.', ',') + '° fast waagerecht. Passt.' : 'Dein Foto ist etwa ' + String(Math.abs(tilt)).replace('.', ',') + '° schräg. Es geht, gerader wäre besser.')
       : 'Handy <b>gerade</b> halten, ' + (neu ? 'die ganze Stelle' : ding + ' ganz') + ' im Bild, etwas Wand drumherum.') + '</span></p>';
-  const frage = lgFrage(neu ? 'Fotografiere <em>die Stelle.</em>' : 'Fotografiere <em>' + ding + '.</em>', 'einbausituation', neu ? 'Einmal von innen, einmal von außen: die ganze Wand, an die das neue Element soll.' : 'Einmal von innen, einmal von außen. Du musst nichts eintippen.');
+  const frage = lgFrage(neu ? 'Fotografiere <em>die Stelle.</em>' : 'Fotografiere <em>' + ding + '.</em>', 'einbausituation', neu ? 'Einmal von innen, einmal von außen: die ganze Wand, an die das neue Element soll.' : 'Einmal von innen, einmal von außen. Du musst nichts eintippen.', true);
   const karte = '<div class="lg-karte lg-hell ft-karte"><div class="ft-kopf"><span class="dna-label" id="ft-l">Deine Fotos</span><span class="ft-stand">' + n + ' von 2</span></div>' +
     '<div class="ft-plaetze" role="group" aria-labelledby="ft-l">' + ftPlatz('in') + ftPlatz('out') + '</div>' +
     '<p class="ft-text">' + (neu ? 'Danach zeichnest du das Element auf dem Foto ein. Die KI liest Wand, Leitungen und Fassade.' : 'Die KI liest daraus die Einbausituation für deinen Fensterbauer: Rollladenkasten, Laibung, Fensterbänke, Fassade.') + (n ? ' Tipp ein Foto an, um es groß anzusehen.' : '') + '</p>' +
@@ -3148,12 +3130,15 @@ function ohneFotoBlatt() {
   const neu = !!S.win.neu, punkte = neu
     ? ['Du zeichnest das neue Element auf dem Foto ein.', 'Die KI liest Wand, Leitungen und Fassade.', 'Dein Fensterbauer sieht vor dem Termin, wo es hin soll.']
     : ['Die KI liest Rollladenkasten, Laibung, Fensterbänke und Fassade.', 'Sie merkt, wenn Breite und Höhe vertauscht sind.', 'Dein Fensterbauer sieht die Stelle vor dem Termin.'];
-  return '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="ohne-foto-zu"></button><div class="sheet ofoto" role="dialog" aria-modal="true" aria-labelledby="ofoto-t"><div class="grip"></div>' +
-    '<p class="eyebrow kicker" style="margin-top: 6px">Ohne Foto</p><h2 id="ofoto-t" style="margin: 8px 0 18px">' + akH('Mit Foto wird dein Aufmaß besser.') + '</h2>' +
-    '<ul class="ofoto-liste">' + punkte.map((t) => '<li>' + CHECK + '<span>' + esc(t) + '</span></li>').join('') + '</ul>' +
+  const zu = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+  const haken = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>';
+  /* wie im Artefakt des Inhabers (Bogen „ohne-foto“): dunkles Blatt, Titel mit Schließen, Haken, ein Satz, das Häkchen, zwei leise Pillen */
+  return '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="ohne-foto-zu"></button><div class="sheet ofoto ofoto-dna" role="dialog" aria-modal="true" aria-labelledby="ofoto-t">' +
+    '<div class="ofoto-kopf"><h2 id="ofoto-t" tabindex="-1">Mit Foto wird dein Aufmaß besser.</h2><button type="button" class="ofoto-zu" aria-label="Schließen" data-act="ohne-foto-zu">' + zu + '</button></div>' +
+    '<ul class="ofoto-liste">' + punkte.map((t) => '<li>' + haken + '<span>' + esc(t) + '</span></li>').join('') + '</ul>' +
     '<p class="ofoto-ohne">' + (neu ? 'Es geht auch ohne: Du gibst die Wunschmaße an, die Lage klärt dein Fensterbauer vor Ort.' : 'Es geht auch ohne: Dann nimmt dein Fensterbauer die Einbausituation vor Ort auf.') + '</p>' +
-    '<label class="kcheck"><input type="checkbox" data-in="ohnefoto-zu"' + (ohneFotoZu() ? ' checked' : '') + '><span>Diesen Hinweis nicht mehr anzeigen</span></label>' +
-    '<div class="ofoto-knoepfe"><label class="btn primary ofoto-foto"><input type="file" accept="image/*" capture="environment" data-in="photo" data-f="in">Foto machen</label><button type="button" class="btn ghost" data-act="ohne-foto-weiter">Ohne Foto weiter</button></div></div>';
+    '<label class="ofoto-haekchen"><input type="checkbox" data-in="ohnefoto-zu"' + (ohneFotoZu() ? ' checked' : '') + '><span class="ofoto-kasten" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span><span>Diesen Hinweis nicht mehr anzeigen</span></label>' +
+    '<div class="ofoto-knoepfe"><label class="ofoto-knopf ofoto-foto"><input type="file" accept="image/*" capture="environment" data-in="photo" data-f="in">Foto machen</label><button type="button" class="ofoto-knopf" data-act="ohne-foto-weiter">Ohne Foto weiter</button></div></div>';
 }
 /* ---------- Neue Öffnung, Schritt 3: das Element auf dem Foto einzeichnen ----------
    Vier Ecken auf dem Foto, wie beim Scannen eines Dokuments: Außen abgedunkelt, innen ein Raster, die Ecken als große Griffe.
@@ -3400,7 +3385,7 @@ function liveWin(step, cur) {
   if (v >= 250 && v <= 6000) { if (step.who === 'mo') w.mo[step.k] = v; else { w.el[step.k] = v; w[step.k] = v; } }
   return w;
 }
-SCREENS.messen = () => {
+SCREENS.messenAlt = () => {
   const m = S.mess, step = MESS[m.step], fertig = !m.pad && !!messWert(step);
   const html = messKopf(messTitel(step)) + model(liveWin(step, m.cur), messOpts(step, m.cur)) +
     (m.pad ? messPad(m, step.dir, 'mess', '', step.who) : messDock(fertig ? (m.step < 3 ? 'Weiter zu Maß ' + (m.step + 2) : 'Weiter zu den Rändern') : 'Maß eingeben', fertig ? 'mess-weiter' : 'mess-auf', m.step ? 'Voriges Maß' : 'Zurück zu den Fotos', step.g));
@@ -3455,7 +3440,7 @@ function passtMasse(w, d) {
     '<div class="ps-drei"><h2>Dreimal gemessen, das kleinste zählt</h2><div class="ps-spalten">' + spalte('Breite', [['oben', mo.wt], ['Mitte', mo.wm], ['unten', mo.wb]]) + spalte('Höhe', [['links', mo.hl], ['Mitte', mo.hm], ['rechts', mo.hr]]) + '</div>' +
     '<p class="ps-fuss">' + (dev ? 'Höchstens ' + dev + '&nbsp;mm Unterschied, überhöht gezeichnet.' : 'Alle drei Maße sind gleich.') + '</p></div></section>';
 }
-SCREENS.rest = () => {
+SCREENS.restAlt = () => {
   const r = S.rest, rest = r.i < 4 ? REST[r.i] : null;
   if (!rest) {
     const d = derive(S.win), dev = Math.max(d.devW, d.devH);
@@ -3497,6 +3482,38 @@ function restWeiter() {
 }
 function restAuf() { const r = S.rest; PAD_NEU = !r.pad; r.pad = true; r.msg = null; r.cmLive = false; r.cur = ''; render(); }
 function restZu() { const r = S.rest; clearTimeout(cmTimer); r.pad = false; r.msg = null; r.cmLive = false; r.cur = String(restWert(REST[r.i]) || ''); render(); }
+/* ---------- Messen und Ränder im Look der Design-DNA (27.10.2026) ----------
+   Folie „Messen“ der Vorschau (große Bühne mit fester Ansicht je Element, Lupen, Zahl auf der Linie, Großansicht, Zifferntasten offen;
+   „Weiter“ prüft, speichert und geht zum nächsten Maß; danach die vier Ränder und „Passt.“). Gezeichnet und bedient von messen-dna.js
+   (MessenDna); die App liefert Kopf, Notiz, Rechtliches und die Wege und hält Schritt und Werte (S.mess.step, S.rest.i, S.win). */
+function mdWerte() {
+  const w = S.win, mo = w.mo || {}, el = w.el || {};
+  return { hm: num(mo.hm), h: num(el.h), wm: num(mo.wm), w: num(el.w), hl: num(mo.hl), hr: num(mo.hr), wt: num(mo.wt), wb: num(mo.wb) };
+}
+function mdLage() { const rest = S.screen === 'rest', i = rest ? S.rest.i : S.mess.step; return { satz: rest ? 1 : 0, i: Math.min(i, 3), passt: rest && i >= 4 }; }
+function messenDna() {
+  const l = mdLage(), st = l.satz ? REST[l.i] : MESS[l.i];
+  const html = window.MessenDna.html({ kopf: lgKopf(['back', l.satz || l.i ? 'Zurück' : 'Zurück zu den Fotos']), notiz: lgNotiz('ez-notizknopf'), recht: rechtLinks(), satz: l.satz, g: l.satz ? 'raender' : st.g });
+  return { html: html, back: ['Zurück', 'md-zurueck'], dna: true, cls: 'dna md', voll: true };
+}
+function mdAuf(scr) {
+  const l = mdLage(), w = S.win;
+  window.MessenDna.binden(scr.querySelector('#md-folie'), {
+    wid: w.id || w, satz: l.satz, i: l.i, passt: l.passt, cur: l.satz ? S.rest.cur : S.mess.cur, werte: mdWerte,
+    tuer: istTuer(w), art: ST_BILD[w.art] ? w.art : 'fenster', artName: artName(w), scroll: document.querySelector('#app .scroll'),
+    speichern: (k, v) => { if (k === 'h' || k === 'w') { S.win.el[k] = v; S.win[k] = v; } else S.win.mo[k] = v; entwurfMerken(); },
+    schritt: (satz, i) => { if (satz) { S.rest.i = i; S.rest.cur = ''; } else { S.mess.step = i; S.mess.cur = ''; } },
+    sync: (m) => { if (m.satz) S.rest.cur = m.cur; else S.mess.cur = m.cur; },
+    passtSetzen: (an) => { S.rest.i = an ? 4 : 3; },
+    zuRaendern: () => { S.rest.i = 0; S.rest.cur = ''; go('rest'); },
+    zumMessen: () => { S.mess.step = 3; S.mess.cur = ''; go('messen', 'back'); },
+    zurFotos: () => go('fotos', 'back'),
+    zumErgebnis: () => go('ergebnis')
+  });
+}
+SCREENS.messen = messenDna;
+/* Ränder (Schritt 4) in derselben Ansicht wie Messen (Wunsch des Inhabers, 28.10.2026) */
+SCREENS.rest = messenDna;
 /* ---------- Ergebnis ---------- */
 SCREENS.ergebnis = () => {
   const w = S.win, d = derive(w), ki = S.win.ki, neu = !!w.neu, en = artName(w);
@@ -4740,10 +4757,15 @@ function lgBand(c) {
   return '<div class="lg-stationen" role="group" aria-label="' + esc('Kapitel ' + (ki + 1) + ' von ' + abs.length + ': ' + ab.name + (abs.length > ki + 1 ? '. Danach ' + abs.slice(ki + 1).map((g) => g.name.replace(' & ', ' und ')).join(', ') : '')) + '"><b>' + esc(ab.name) + '</b><span class="lg-band" aria-hidden="true">' + abs.map((g, i) => '<i' + (i === ki ? ' class="ist"' : g.fertig ? ' class="fertig"' : '') + '></i>').join('') + '</span><small>' + (ki + 1) + ' von ' + abs.length + '</small></div>';
 }
 /* Frage mit Erklärung (i) und Notiz */
-function lgFrage(h1, g, sub) {
+function lgNotiz(cls) {
   const ort = notizOrt(), nzDa = !!(ort && notizText(ort)), stelle = ort ? AW.notizStelle(ort[1]) : '';
-  const notiz = ort ? '<button type="button" class="dna-pille dna-pille--leise dna-pille--klein lg-notiz-knopf' + (nzDa ? ' da' : '') + '" data-act="notiz-auf" data-v="' + ort[0] + ':' + esc(ort[1]) + '" aria-label="' + esc((nzDa ? 'Deine Notiz zu „' : 'Notiz zu „') + stelle + (nzDa ? '“ ansehen oder ändern' : '“ anfügen')) + '"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>' + (nzDa ? 'Deine Notiz' : 'Notiz') + '</button>' : '';
-  return '<div class="lg-frage"><div class="lg-frage-kopf"><h1 tabindex="-1">' + h1 + (GLOSS[g] ? '<button type="button" class="lg-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc(GLOSS[g].t) + '">' + LG_I + '</button>' : '') + '</h1>' + notiz + '</div><p>' + esc(sub) + '</p></div>';
+  return ort ? '<button type="button" class="dna-pille dna-pille--leise dna-pille--klein lg-notiz-knopf' + (cls ? ' ' + cls : '') + (nzDa ? ' da' : '') + '" data-act="notiz-auf" data-v="' + ort[0] + ':' + esc(ort[1]) + '" aria-label="' + esc((nzDa ? 'Deine Notiz zu „' : 'Notiz zu „') + stelle + (nzDa ? '“ ansehen oder ändern' : '“ anfügen')) + '"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>' + (nzDa ? 'Deine Notiz' : 'Notiz') + '</button>' : '';
+}
+/* iDaneben: das i steht neben der Überschrift statt in ihrer letzten Zeile (Fotos, wie im Artefakt des Inhabers) */
+function lgFrage(h1, g, sub, iDaneben) {
+  const notiz = lgNotiz(), i = GLOSS[g] ? '<button type="button" class="lg-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc(GLOSS[g].t) + '">' + LG_I + '</button>' : '';
+  if (iDaneben) return '<div class="lg-frage lg-frage--i-daneben"><div class="lg-frage-kopf"><div class="lg-frage-titel"><h1 tabindex="-1">' + h1 + '</h1>' + i + '</div>' + notiz + '</div><p>' + esc(sub) + '</p></div>';
+  return '<div class="lg-frage"><div class="lg-frage-kopf"><h1 tabindex="-1">' + h1 + i + '</h1>' + notiz + '</div><p>' + esc(sub) + '</p></div>';
 }
 /* Unten: die rechtlichen Verweise am Ende des Inhalts, dann zurück als Umriss und „Weiter“ (immer weiß); fehlt etwas, sagt die Zeile darüber was */
 function lgFuss(c) {
@@ -4836,6 +4858,7 @@ function lgGrund() {
 function lgAuf() {
   const scr = document.querySelector('.scr.dna'); if (!scr) return;
   if (scr.classList.contains('st')) return stZeigen();
+  if (scr.classList.contains('md')) return mdAuf(scr);
   lgMass(); scr.classList.add('lg-still'); lgZeigen(); void scr.offsetWidth; requestAnimationFrame(() => scr.classList.remove('lg-still'));
 }
 function lgMass() { const b = document.querySelector('.scr.dna .lg-buehne:not(.lp-buehne)'); if (b && b.clientWidth) b.style.setProperty('--lg-s', Math.min(1, b.clientWidth / LG_B).toFixed(4)); }
@@ -5506,6 +5529,7 @@ function zurueckTaste() {
   const ki = document.querySelector('.fx-dialog .fx-nein'); if (ki) { ki.click(); return true; }
   if (FB.el) { fbZu(true); return true; } // Farbblatt „Alle Farben“ (S2)
   if (HS.el) { hausZu(true); return true; } // Blatt „Haus“ (Fassade)
+  const gross = document.querySelector('dialog.ez-gross[open]'); if (gross) { gross.close(); return true; } // Großansicht beim Messen
   if (S.fotoGross) { S.fotoGross = null; render(); return true; }
   if (S.notiz) { notizZu(); return true; }
   if (S.verlassen) { S.verlassen = null; render(); return true; }
@@ -6650,7 +6674,7 @@ function act(name, el) {
     case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; return go(v);
     /* Übersicht aller Fenster aus den Wünschen (Knopf oben links): bei ungespeicherten Änderungen erst das Blatt „Noch nicht gespeichert“ */
     case 'liste': { S.qMass = null; return verlassen({ art: 'home' }); }
-    case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; S.mess.pad = false; S.mess.msg = null; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
+    case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'md-zurueck') return window.MessenDna.zurueck(); if (b === 'mess-back') { S.mess.step = 3; S.mess.pad = false; S.mess.msg = null; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
     case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: zeit(), aend: 0, ts: zeit() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); S.designVorher = null; persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
     case 'new': if (INST && S.betrieb && S.sent) return instanzWeitere(); if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg());
       if (INST && S.instZu) return go('home');
@@ -7203,7 +7227,7 @@ function boot() {
     /* Tab bleibt im offenen Blatt (das Farbblatt hat seine eigene Falle) */
     if (e.key === 'Tab' && !FB.el) { const sh = $app().querySelector('.sheet[aria-modal="true"]'), z = sh ? fokusZiele(sh) : []; if (z.length) { const i = z.indexOf(document.activeElement); if (e.shiftKey ? i <= 0 : (i < 0 || i === z.length - 1)) { e.preventDefault(); (e.shiftKey ? z[z.length - 1] : z[0]).focus(); } } return; }
     if (S.notiz || S.gloss || S.glossIndex || S.wohin || S.verlassen || S.fotoGross) return;
-    if (S.screen !== 'messen' && S.screen !== 'rest' && !(S.screen === 'frage' && S.qMass)) return;
+    if (!(S.screen === 'frage' && S.qMass)) return; // Messen und Ränder: messen-dna.js
     const t = e.target, typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA');
     if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
     if (/^\d$/.test(e.key)) { e.preventDefault(); keyIn(e.key); } else if (e.key === 'Backspace') { e.preventDefault(); keyIn('del'); } else if (e.key === 'Enter') { e.preventDefault(); keyIn('ok'); }
