@@ -1388,7 +1388,7 @@ if (teil(8)) {
   // Abrechnungslauf (Cron) mit Attrappen im selben Prozess: offene Projektbuchungen werden zur Sammelrechnung, nichts doppelt
   {
     const umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), stM = await import('../functions/api/stripe.js'), ko = await import('../functions/api/konten.js');
-    const k = umg.konfig({ DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1' }); globalThis.Abrechnung.setPreise(k.preise);
+    const k = umg.konfig({ DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', BETRIEBE_ABRECHNUNG: '1' }); globalThis.Abrechnung.setPreise(k.preise); // frühere Abrechnung je Projekt (seit 28.10.2026 nur mit Schalter)
     const sp = spM.speicher(k), zd = stM.zahlungsdienst(k);
     const row = await sp.betriebAnlegen({ auth_user: 'u-cron', mail: 'cron@beispiel.de', name: 'Cron GmbH', plz: '50667', tel_norm: '', name_norm: 'cron', daten: { konto: 'service', pay: { type: 'SEPA-Lastschrift', label: 'DE •••• 0000' }, links: [], book: [{ id: 'b1', kind: 'aufmass', ref: 'l1', when: 'heute', month: '2026-10', text: 'Aufmaß · Test', sub: '', betrag: 9, badge: 'nächste Rechnung', status: 'offen' }, { id: 'b0', kind: 'aufmass', ref: 'l0', when: 'gestern', month: '2026-10', text: 'Aufmaß · Frei', sub: '', betrag: 0, badge: 'kostenlos', status: 'offen' }], freeUsed: 3, rechnungen: [], notif: [] } });
     await sp.betriebFelder(row.id, { stripe_customer: 'cus_test_cron' });
@@ -1768,8 +1768,20 @@ if (teil(10)) {
   /* Einführungspreis (EINFUEHRUNG in functions/api/umgebung.js): bis 17.11.2026 Startpreise und Hinweise, ab 18.11. 0:00 Uhr von selbst die regulären */
   const umg = await import(new URL('../functions/api/umgebung.js', import.meta.url).href);
   const VOR = '2026-11-17T23:59:59+01:00', NACH = '2026-11-18T00:00:00+01:00';
-  const kv = umg.konfig({ JETZT: VOR }), kn = umg.konfig({ JETZT: NACH }), ke = umg.konfig({ JETZT: VOR, PREIS_ABO: '49' });
-  ok(kv.preise.aufmass === 7.99 && kv.preise.abo.grund === 49 && kv.preise.plus === 79 && kv.einfuehrung && kv.einfuehrung.danach.aufmass === 12.99 && kn.preise.aufmass === 12.99 && kn.preise.abo.grund === 69 && kn.preise.plus === 119 && kn.preise.projekt === 9 && kn.einfuehrung === null && ke.einfuehrung === null && ke.hinweise.some((h) => /^PREIS_ABO:/.test(h)), 'Einführungspreis: bis 17.11. 7,99 €, 49 € und 79 €, ab 18.11. 0:00 Uhr 12,99 €, 69 € und 119 € (Projektpreis bleibt); gesetzte PREIS_… schalten den Wechsel ab und stehen als Hinweis in /api/status');
+  const kv = umg.konfig({ JETZT: VOR }), kn = umg.konfig({ JETZT: NACH }), ke = umg.konfig({ JETZT: VOR, PREIS_ABO: '49' }), kab = umg.konfig({ JETZT: NACH, BETRIEBE_ABRECHNUNG: '1' });
+  ok(kv.preise.aufmass === 7.99 && kv.preise.abo.grund === 49 && kv.preise.plus === 79 && kv.einfuehrung && kv.einfuehrung.danach.aufmass === 12.99 && kn.preise.aufmass === 12.99 && kn.preise.abo.grund === 69 && kn.preise.plus === 119 && kn.preise.projekt === 0 && kn.preise.frei === 0 && kab.preise.projekt === 9 && kab.preise.frei === 3 && kn.einfuehrung === null && ke.einfuehrung === null && ke.hinweise.some((h) => /^PREIS_ABO:/.test(h)), 'Einführungspreis: bis 17.11. 7,99 €, 49 € und 79 €, ab 18.11. 0:00 Uhr 12,99 €, 69 € und 119 €; Betriebskonto ohne Projektpreis (kostenlos), 9 € nur mit BETRIEBE_ABRECHNUNG=1; gesetzte PREIS_… schalten den Wechsel ab und stehen als Hinweis in /api/status');
+  /* Seit 28.10.2026: Betriebskonto kostenlos (ohne BETRIEBE_ABRECHNUNG). Modell bucht kostenlos, nie gesperrt, keine Tarife; Nutzungsbedingungen ohne alte Preise */
+  {
+    const XK = globalThis.Abrechnung, vorher = JSON.parse(JSON.stringify(XK.preise()));
+    XK.setPreise(kn.preise);
+    const ak = { links: [], konto: 'service' }, jetztK = Date.now();
+    for (let i = 0; i < 5; i++) { const l = { id: 'lk' + i, kunde: 'Kunde ' + i, nr: 'K' + i }; ak.links.unshift(l); XK.receiveAufmass(ak, l, { windows: [{}], fotos: 0 }, 'Link', jetztK); }
+    const wk = XK.planWechsel(ak, 'plus', jetztK), nbK = await roh('/nutzungsbedingungen/', B3);
+    ok(XK.kostenlos() && XK.lockedLinks(ak).length === 0 && ak.book.every((b) => b.betrag === 0 && b.badge === 'kostenlos') && wk.art === 'kostenlos' && XK.konto(ak) === 'service' &&
+      /Ihr Konto ist kostenlos/.test(nbK.text) && !/9&nbsp;€|9 € je Projekt|Abo 10/.test(nbK.text.replace(/§ 6 Frühere Tarife[\s\S]*?<\/p>/, '')),
+      'Betriebskonto kostenlos (ohne BETRIEBE_ABRECHNUNG): fünf Aufmaße kostenlos und sichtbar, kein Tarifwechsel; Nutzungsbedingungen ohne 9 € und Abo (außer § 6 Frühere Tarife)');
+    XK.setPreise(vorher);
+  }
   const einfFehler = [];
   for (const s10 of seo.SEITEN) {
     const datei = path10.join(WURZEL, 'web', s10.pfad, 'index.html'); if (!fs10.existsSync(datei)) continue;
@@ -1886,7 +1898,7 @@ if (teil(11)) {
     const { api } = await import('../functions/api/router.js'), ko = await import('../functions/api/konten.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), stM = await import('../functions/api/stripe.js');
     const X = globalThis.Abrechnung, W = 'whsec_pruefung', B = 'https://eeziframes.com';
     const fs11 = await import('node:fs'), path11 = await import('node:path'), url11 = await import('node:url'), W11 = path11.resolve(path11.dirname(url11.fileURLToPath(import.meta.url)), '..');
-    const env = { STRIPE_SECRET_KEY: 'sk_test_pruefung11', STRIPE_WEBHOOK_SECRET: W, DATEN_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruefung' };
+    const env = { STRIPE_SECRET_KEY: 'sk_test_pruefung11', STRIPE_WEBHOOK_SECRET: W, DATEN_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruefung', BETRIEBE_ABRECHNUNG: '1' }; // frühere Abrechnung je Projekt
     const k = umg.konfig(env), sp = spM.speicher(k), zd = stM.zahlungsdienst(k);
     const rufe = async (pfad, body, token, e) => { const h = { accept: 'application/json', origin: B }; if (body) h['content-type'] = 'application/json'; if (token) h.authorization = 'Bearer ' + token; const r = await api(new Request(B + pfad, { method: body ? 'POST' : 'GET', headers: h, body: body ? JSON.stringify(body) : undefined }), e || env, null); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
     const senden = async (w) => { const r = await api(new Request(B + '/api/zahlung/webhook', { method: 'POST', headers: { 'stripe-signature': w.kopf, 'content-type': 'application/json' }, body: w.roh }), env, null); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };

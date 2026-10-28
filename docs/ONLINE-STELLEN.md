@@ -270,7 +270,7 @@ Jeder Fensterbauer bestellt seine Landingpage mit Konfigurator unter `/bestellen
 | `PAKETE_OFFEN` | Variable | `1` = Pakete werden verkauft (Kasse im Live-Modus; ohne: die Bestellung endet mit einer unverbindlichen Anfrage) |
 | `ZENTRALE_PASSWORT`, `ZENTRALE_2FA`, `MAIL_KONTAKT` | Secrets, Variable | Anmeldung in der Zentrale (ab 12 Zeichen, zweiter Faktor optional) und deine Adresse für neue Bestellungen, Nachrichten und Fragen |
 | `PAKETE_DEMOS` | Variable | `1` = Verkaufsseite verlinkt die Demo-Instanzen |
-| `PDF_IM_WORKER`, `KI_TAG_MAX`, `INSTANZ_CACHE_MS`, `HAUPT_HOSTS` | Variablen | Feinsteuerung, Beschreibung in `functions/api/umgebung.js` |
+| `PDF_IM_WORKER`, `KI_TAG_MAX`, `KI_TAG_MAX_INSTANZEN`, `INSTANZ_CACHE_MS`, `HAUPT_HOSTS` (nie setzen: `BETRIEBE_ABRECHNUNG`, `PREIS_PROJEKT`; das Betriebskonto ist kostenlos) | Variablen | Feinsteuerung, Beschreibung in `functions/api/umgebung.js` |
 
 ### Je Kunde
 

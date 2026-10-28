@@ -27,7 +27,12 @@
      ZAHLARTEN                Zahlungsarten an der Kasse des Aufmaßblatts, durch Komma getrennt: card (Karte, dazu Apple Pay und Google Pay
                               auf passenden Geräten), paypal, klarna; Standard card. Die App nennt sie vor dem Kauf (§ 312j Abs. 1 BGB);
                               in Stripe müssen sie unter Einstellungen → Zahlungsmethoden eingeschaltet sein
+     BETRIEBE_ABRECHNUNG      nicht setzen. Seit 28.10.2026 ist das Betriebskonto (Projekte, Kundenlinks, Code vom Kunden) kostenlos; bezahlt
+                              wird nur noch das Paket (Einrichtung, Monatspreis, weitere KI-Auswertungen) und das Aufmaßblatt der Hauseigentümer
+                              (Nutzungsbedingungen § 4). 1 schaltet die frühere Abrechnung je Projekt mit Abo 10 und Plus wieder ein (nur die
+                              Prüfsuite tut das, scripts/dev-server.mjs); die Nutzungsbedingungen beschreiben sie nicht mehr
      PREIS_AUFMASS_CENT 799 · PREIS_PROJEKT 9 · FREI_PROJEKTE 3 · PREIS_ABO 49 · ABO_INKL 10 · PREIS_ABO_EXTRA 5 · PREIS_PLUS 79
+                              (PREIS_PROJEKT, FREI_PROJEKTE, PREIS_ABO, ABO_INKL, PREIS_ABO_EXTRA, PREIS_PLUS nur mit BETRIEBE_ABRECHNUNG=1)
                               (Einführungspreise bis 17.11.2026; ab 18.11.2026 ohne Angabe 1299, 69 und 119, siehe EINFUEHRUNG unten.
                               Wer PREIS_AUFMASS_CENT, PREIS_ABO oder PREIS_PLUS setzt, schaltet den Wechsel ab; /api/status weist darauf hin)
      JETZT                    nur für die Prüfung: Zeitpunkt (ISO), an dem der Server sich wähnt, etwa für den Einführungspreis
@@ -52,7 +57,9 @@
                               Beschwerde); ohne Secret nimmt der Server keine Meldungen an, eine gesendete Anfrage gilt dann als zugestellt
      PDF_IM_WORKER            0 = das Aufmaßblatt nie im Worker bauen (Gratis-Tarif von Cloudflare: zu wenig Rechenzeit); die Mail an den
                               Betrieb kommt dann mit dem Aufmaß als Text und einem Link. Vorgabe: bauen, bei einem Abbruch holt der Server es nach
-     KI_TAG_MAX               Höchstzahl KI-Auswertungen am Tag über alle Domains (Vorgabe 3000, Mail an MAIL_KONTAKT bei 80 %)
+     KI_TAG_MAX               Höchstzahl KI-Auswertungen am Tag in der App für Hauseigentümer (Vorgabe 3000, Mail an MAIL_KONTAKT bei 80 %)
+     KI_TAG_MAX_INSTANZEN     dasselbe für alle Konfiguratoren der Pakete zusammen, getrennt von der App: Missbrauch der kostenlosen App
+                              legt die KI der zahlenden Betriebe nicht still (Vorgabe 3000)
      INSTANZ_CACHE_MS         wie lange ein Worker die Daten einer Instanz im Speicher hält (Vorgabe 60000; Prüfung 0)
      HAUPT_HOSTS              weitere Domains, die wie eeziframes.com behandelt werden (durch Komma getrennt), nie eine Instanz
      CF_API_TOKEN             Secret, Schlüssel für die Domains der Instanzen (eigene Vorlage ohne Zugriff auf eeziframes.com, siehe
@@ -106,6 +113,8 @@ export function konfig(env) {
   if (mailKontakt && !adresse(mailKontakt)) hinweise.push('MAIL_KONTAKT: ist keine E-Mail-Adresse.');
   /* Umsatzsteuer: nur 0 oder 19 gelten als festgelegt (1 als ältere Schreibweise für 19) */
   const mwstRoh = String(env.MWST == null ? '' : env.MWST).trim(), mwstGesetzt = ['0', '19', '1'].includes(mwstRoh);
+  /* Betriebskonto kostenlos (projekt 0); die frühere Abrechnung je Projekt nur mit BETRIEBE_ABRECHNUNG=1 (Prüfsuite) */
+  const abrechnung = String(env.BETRIEBE_ABRECHNUNG || '').trim() === '1';
   if (mwstRoh && !mwstGesetzt) hinweise.push('MWST: erlaubt sind 0 (Kleinunternehmerregelung, keine Umsatzsteuer) oder 19 (19 % Umsatzsteuer).');
   /* Zahlungsarten der Kasse des Aufmaßblatts: nur solche, die sofort bestätigen (das Blatt wird sofort geliefert) */
   const zRoh = String(env.ZAHLARTEN || 'card').split(',').map((z) => z.trim().toLowerCase()).filter(Boolean), zOk = zRoh.filter((z) => ZAHLARTEN_OK.includes(z));
@@ -128,7 +137,7 @@ export function konfig(env) {
   const instanzen = {
     absender: adresse(absInst) ? absInst : '', neutral: adresse(absNeutral) ? absNeutral : '',
     webhook: /^whsec_/.test(whsec) ? whsec : datenAttrappe ? 'whsec_ZWV6aWZyYW1lcy1hdHRyYXBwZS1yZXNlbmQtd2ViaG9vaw==' : '', webhookAttrappe: !/^whsec_/.test(whsec) && datenAttrappe,
-    pdf: String(env.PDF_IM_WORKER || '').trim() !== '0', kiTagMax: Math.max(1, num(env.KI_TAG_MAX, 3000))
+    pdf: String(env.PDF_IM_WORKER || '').trim() !== '0', kiTagMax: Math.max(1, num(env.KI_TAG_MAX, 3000)), kiTagMaxInstanzen: Math.max(1, num(env.KI_TAG_MAX_INSTANZEN, 3000))
   };
   const post = (mailKey && adresse(mailAb)) || mailAttrappe ? { key: mailKey, absender: mailAb || 'kontakt@eeziframes.invalid', kontakt: adresse(mailKontakt) ? mailKontakt : (ANBIETER.mail || mailAb || 'kontakt@eeziframes.invalid'), attrappe: mailAttrappe } : null;
   return {
@@ -137,7 +146,7 @@ export function konfig(env) {
     zentrale: zentrale, indexierung: String(env.INDEXIERUNG || '') === '1', post: post,
     ki: !!env.ANTHROPIC_API_KEY, mwstGesetzt: mwstGesetzt, zahlarten: zahlarten, sitzung: sitzung, instanzen: instanzen, paketeOffen: String(env.PAKETE_OFFEN || '').trim() === '1', jetzt: jetztAus(env),
     geheimnis: env.FREISCHALT_GEHEIMNIS || env.STRIPE_SECRET_KEY || 'eeziframes-pilot', hinweise: hinweise,
-    preise: { aufmass: num(env.PREIS_AUFMASS_CENT, Math.round(stufe.aufmass * 100)) / 100, projekt: num(env.PREIS_PROJEKT, 9), frei: num(env.FREI_PROJEKTE, 3), abo: { grund: num(env.PREIS_ABO, stufe.abo), inkl: num(env.ABO_INKL, 10), extra: num(env.PREIS_ABO_EXTRA, 5) }, plus: num(env.PREIS_PLUS, stufe.plus), mwst: mwstRoh !== '0' },
+    preise: { aufmass: num(env.PREIS_AUFMASS_CENT, Math.round(stufe.aufmass * 100)) / 100, projekt: abrechnung ? num(env.PREIS_PROJEKT, 9) : 0, frei: abrechnung ? num(env.FREI_PROJEKTE, 3) : 0, abo: { grund: num(env.PREIS_ABO, stufe.abo), inkl: num(env.ABO_INKL, 10), extra: num(env.PREIS_ABO_EXTRA, 5) }, plus: num(env.PREIS_PLUS, stufe.plus), mwst: mwstRoh !== '0' },
     /* solange er läuft und keine eigenen Preise gesetzt sind: Stichtag und Preise danach für die Hinweise in App und Betriebsbereich */
     einfuehrung: einf && !eigenePreise.length ? { bis: EINFUEHRUNG.bis, ende: EINFUEHRUNG.ende, danach: EINFUEHRUNG.danach } : null
   };

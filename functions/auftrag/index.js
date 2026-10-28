@@ -780,12 +780,12 @@ async function kiAbrechnen(k, sp, env, d, jetzt) {
     if (!a.instanz || !a.instanz.id8 || ['live', 'pausiert', 'beendet'].indexOf(a.stand) < 0 || ((a.ki || {}).abgerechnet || {})[monat]) continue;
     const richt = await kiKontingent(ctx, a), preis = kiPreis(a);
     const genutzt = await budgetStand(ctx, 'inst:' + a.instanz.id8 + ':kiok', { periode: vor }), mehr = Math.max(0, Math.min(genutzt, richt * 2) - richt), cent = Math.round(mehr * preis * 100);
-    let posten = '', offen = false;
-    if (cent > 0) { try { posten = (await kiPosten(ctx, a, { monat: monat, text: text, mehr: mehr, cent: cent })).id || ''; } catch (e) { offen = true; } }
+    let posten = '', offen = false, schluss = false;
+    if (cent > 0) { try { const r = await kiPosten(ctx, a, { monat: monat, text: text, mehr: mehr, cent: cent }); posten = r.id || ''; schluss = !!r.schluss; } catch (e) { offen = true; } }
     await d.auftragAendern(a.id, (z) => {
       const ki = Object.assign({}, z.ki); if ((ki.abgerechnet || {})[monat]) return false;
       ki.abgerechnet = Object.assign({}, ki.abgerechnet, { [monat]: { genutzt: genutzt, kontingent: richt, mehr: mehr, cent: cent, posten: posten, offen: offen, zeit: ZEIT() } }); z.ki = ki;
-      if (mehr) verlauf(z, { von: 'system', text: 'KI-Auswertungen ' + text + ': ' + mehr + ' über dem Kontingent, ' + euro(cent / 100) + ' netto ' + (offen ? 'noch von Hand abzurechnen' : 'auf der nächsten Monatsrechnung') });
+      if (mehr) verlauf(z, { von: 'system', text: 'KI-Auswertungen ' + text + ': ' + mehr + ' über dem Kontingent, ' + euro(cent / 100) + ' netto ' + (offen ? 'noch von Hand abzurechnen' : schluss ? 'als Schlussrechnung (Vertrag beendet)' : 'auf der nächsten Monatsrechnung') });
     }).catch(() => null);
     n++;
   }

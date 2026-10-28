@@ -27,6 +27,7 @@ import { blattBauen, logoLaden, base64 } from './blatt-server.js';
 import { instanzAusZeile, pruefStoerung } from '../instanz/mandant.js';
 import { pseudoKonto, stempelBerlin, datumBerlin, zeitenBerlin } from '../instanz/adapter.js';
 import { tagBerlin } from './statistik.js';
+import { daten as auftragDaten } from '../auftrag/daten.js';
 export { textPdf } from './blatt-server.js';
 
 const X = () => globalThis.Abrechnung;
@@ -256,6 +257,18 @@ export async function eingangErneut(ctx, code) {
   return { ok: true, versand: (await ctx.sp.anfrageHolen(code)).versand, ergebnis: r };
 }
 
+/* Betrieb informieren, wenn eine Anfrage endgültig nicht zugestellt wurde: Mail an die Adresse des Kundenkontos des laufenden Auftrags */
+async function betriebBounce(ctx, pd, inst, z) {
+  const d = auftragDaten(ctx.k); if (!d || !d.auftragZuInstanz) return false;
+  const a = await d.auftragZuInstanz(inst.id); if (!a) return false;
+  const kunde = await d.kundeHolen(a.kunde); if (!kunde || !kunde.mail) return false;
+  const F = R().FRISTEN, konto = String((ctx.env && ctx.env.KANONISCH) || 'https://eeziframes.com').replace(/\/+$/, '') + '/konto/#auftrag/' + a.id;
+  const html = mailRahmen('Eine Anfrage kam nicht an', absatz('Die Anfrage ' + esc(z.nr || z.code) + ' aus Ihrem Konfigurator ' + esc(inst.name) + ' hat Ihr Postfach nicht erreicht: Der Mailserver Ihrer Eingangsadresse hat sie abgewiesen.') +
+    absatz('Bitte prüfen Sie Ihre Eingangsadresse im Kundenbereich und melden Sie sich bei uns. Die Anfrage liegt bei uns bereit, höchstens ' + F.unzustellbarTage + ' Tage nach dem Eingang.') +
+    absatz('<a href="' + esc(konto) + '">Zum Kundenbereich</a>'), pd.kontakt);
+  return (await pd.senden({ an: kunde.mail, betreff: 'Anfrage nicht zugestellt: ' + (z.nr || z.code), html: html, antwortAn: pd.kontakt })).ok;
+}
+
 /* Zentrale: Testanfrage an die Eingangsadressen (nicht gezählt, nach einem Tag weg) */
 export async function probeEingang(ctx, instanzId) {
   const sp = ctx.sp, k = ctx.k, inst = await instanzKontext(sp, instanzId); if (!inst) throw new ApiFehler('Diese Instanz gibt es nicht.', 404);
@@ -314,6 +327,8 @@ export async function anfragenAufraeumen(k, sp) {
   } catch (e) { out.ok = false; }
   /* Fehlversuche bei der Anmeldung zum Dashboard (Prüfwert der E-Mail-Adresse, dashboard.js): nach 2 Tagen weg (AV-Vertrag § 11) */
   try { if (sp.zaehlerAltLoeschen) out.anmeldeFehler = await sp.zaehlerAltLoeschen(tagBerlin(new Date(jetzt - 2 * TAG)), 'budget:otpfehl:'); } catch (e) { out.ok = false; }
+  /* Anfragen je Anschluss (Prüfwert, konten.js aufmassInstanz): ebenfalls nach 2 Tagen weg */
+  try { if (sp.zaehlerAltLoeschen) out.anschluesse = await sp.zaehlerAltLoeschen(tagBerlin(new Date(jetzt - 2 * TAG)), 'budget:anf:'); } catch (e) { out.ok = false; }
   return out;
 }
 
@@ -358,7 +373,9 @@ async function postEreignis(ctx, sp, ev) {
       else { v.status = 'bounce'; v.bounce = iso(jetzt); x.versand = v; }
     });
     await hinweis(sp, 'instanz_versand', z.betrieb, 'Anfrage ' + (z.nr || z.code) + (inst ? ' bei ' + inst.name : '') + ' kam nicht an (Bounce)' + (nochmal ? ', neuer Versuch ohne Fotos' : ''), { code: z.code, status: 'bounce' });
-    if (pd) ctx.waitUntil(pd.senden({ an: pd.kontakt, betreff: 'Anfrage nicht zugestellt: ' + (inst ? inst.name : '') + ' · ' + (z.nr || z.code), html: mailRahmen('Anfrage nicht zugestellt', absatz('Die Mail zur Anfrage ' + esc(z.nr || z.code) + (inst ? ' an ' + esc(inst.name) + ' (' + esc(inst.haupthost) + ')' : '') + ' kam beim Empfänger nicht an. ' + (nochmal ? 'Der Server versucht es einmal ohne Fotos.' : 'Bitte die Eingangsadresse in der Zentrale prüfen.') + ' Den Betrieb darüber informieren (Paketbedingungen § 11 Abs. 2); die Anfrage liegt bereit.'), pd.kontakt) }).catch(() => false));
+    if (pd) ctx.waitUntil(pd.senden({ an: pd.kontakt, betreff: 'Anfrage nicht zugestellt: ' + (inst ? inst.name : '') + ' · ' + (z.nr || z.code), html: mailRahmen('Anfrage nicht zugestellt', absatz('Die Mail zur Anfrage ' + esc(z.nr || z.code) + (inst ? ' an ' + esc(inst.name) + ' (' + esc(inst.haupthost) + ')' : '') + ' kam beim Empfänger nicht an. ' + (nochmal ? 'Der Server versucht es einmal ohne Fotos.' : 'Bitte die Eingangsadresse in der Zentrale prüfen.') + (nochmal ? '' : ' Der Betrieb bekommt dazu eine Mail an die Adresse seines Kundenkontos (Paketbedingungen § 11 Abs. 2); die Anfrage liegt bereit.')), pd.kontakt) }).catch(() => false));
+    /* endgültig nicht zugestellt: auch der Betrieb erfährt es, an die Adresse seines Kundenkontos (Paketbedingungen § 11 Abs. 2) */
+    if (pd && !nochmal && inst && z.art !== 'test' && z.art !== 'demo') ctx.waitUntil(betriebBounce(ctx, pd, inst, z).catch(() => false));
     return { ok: true, status: nochmal ? 'offen' : 'bounce', nochmal: nochmal };
   }
   if (typ === 'email.complained') {

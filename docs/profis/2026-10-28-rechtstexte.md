@@ -71,19 +71,44 @@ Neue Fassungen: Paketbedingungen und AV-Vertrag vom 28.10.2026 (PDFs neu), Nutzu
 - **Rolle bei der KI im Portal** (Albrecht: der Betrieb sollte verantwortlich sein): bewusst so, denn die App für Hauseigentümer ist ein eigener Dienst von eeziframes, und die Einwilligung gilt eeziframes. Im Konfigurator (Paket) ist der Betrieb verantwortlich. Beide Wege sind getrennt beschrieben.
 - **Vertragsübertragung an jeden Fortführer** (Roth: nicht an Hersteller oder Portale): Sonderkündigungsrecht und anteilige Erstattung reichen.
 
-## Offen, Technik (nach Wirkung)
+## Nachtrag am selben Tag: Preise des Inhabers und die technischen Lücken
 
-1. **KI ohne Anmeldung missbrauchbar** (Schulze). `/api/ki` prüft nur die Origin, das Tagesbudget von 3.000 gilt für alle zusammen. Ein Skript kann gratis auswerten und das Budget aller Paketkunden für den Tag leeren. Abhilfe: signiertes Kurzzeit-Token je Entwurf, getrennte Budgets für App und Instanzen, dauerhafte Grenzen je Anschluss.
-2. **Vorschau-Link als Gratis-Konfigurator** (Schulze): 30 Tage gültig, teilbar, Testanfragen kommen mit PDF an. Jetzt kann der Inhaber eine Frist setzen und nach 14 Tagen live schalten. Besser wären höchstens fünf Testanfragen je Vorschau.
-3. **KI-Nachberechnung bei Vertragsende** (Schulze): Weitere Auswertungen im letzten Monat kommen „mit der nächsten Monatsrechnung“, die es nach dem Ende nicht mehr gibt. Abhilfe: Schlussrechnung beim Ende.
-4. **Falsche Anfragen gegen einen Mitbewerber** (Schulze): Sie verbrauchen dessen Kontingent. Abhilfe: Prüfung gegen Automaten vor dem Senden; verdächtige Anfragen nicht zählen.
-5. **Doppelte Konten für Gratisprojekte** (Schulze): erkennen über Kartenkennung bzw. IBAN bei der ersten Zahlung.
-6. **Nachweis der KI-Einwilligung** (Albrecht): Sie liegt nur im Browser; Zeitpunkt und Fassung sollten beim Aufmaß gespeichert werden.
-7. **Bounce an den Betrieb automatisch melden** statt über den Inhaber.
+**Preise (Wort des Inhabers):** „Es gelten nur noch die Paketpreise und die Einrichtungsgebühren plus Aufpreise 8 ct. 9 € lange nicht mehr, für Privathaushalte immer noch 7,99 € im Angebot fürs Aufmaß.“ Daraus:
+
+- **Betriebskonto kostenlos.** Projekte, Kundenlinks, eingegangene Aufmaße und Codes vom Kunden kosten nichts, eine Zahlungsart wird nicht verlangt.
+  - Code: `preise.projekt` 0, `kostenlos()` in `modell.js`. Es gibt keine Sperre und keine Tarife; früher gesperrte Aufmaße schalten sich frei.
+  - Das Portal hat keine Abrechnung mehr. Preise und FAQ sagen „Ihr Konto kostet nichts“ und verweisen auf die Pakete.
+  - Das Aufmaßblatt zeigt „Konto kostenlos“.
+  - Die Abo-Kasse und die Zahlungsart lehnt der Server ab (409). Sammelrechnungen gibt es nicht mehr; ein altes Abo 10 oder Plus kündigt der Abrechnungslauf einmal zum Ende seines Abrechnungsmonats.
+  - Die alte Abrechnung je Projekt läuft nur noch mit `BETRIEBE_ABRECHNUNG=1`, also nur in der Prüfsuite.
+- **Nutzungsbedingungen §§ 4–8 neu** (Stand 28.10.2026):
+  - § 4 Kosten: Das Konto ist kostenlos; kostenpflichtig sind nur das Paket und das Aufmaßblatt der Hauseigentümer.
+  - § 5 Projekte und Nachbesserungen.
+  - § 6 Frühere Tarife: nichts mehr berechnet, alte Abos enden.
+  - § 7 Sperre.
+  - § 8 Laufzeit ohne Abo.
+  - Dazu § 12 und § 14 angepasst. Datenschutz: Abschnitt „Frühere Abrechnung der Betriebe“.
+- Unverändert: Pakete (Einrichtung, Monatspreis, 0,08 € je weiterer KI-Auswertung) und das Aufmaßblatt (7,99 € bis 17.11.2026, danach 12,99 €).
+
+**Technische Lücken, jetzt geschlossen:**
+
+1. **KI-Missbrauch über die App:** Die Tagesbudgets für App (`KI_TAG_MAX`) und Konfiguratoren (`KI_TAG_MAX_INSTANZEN`) sind getrennt; die App hat zusätzlich die Cloudflare-Bremse `RL_KI` je Anschluss. Wer die kostenlose App leerfährt, trifft die zahlenden Betriebe nicht mehr.
+2. **Vorschau als Gratis-Konfigurator:**
+   - Höchstens 10 Testanfragen am Tag je Konfigurator (`GRENZEN.testJeTag`), steht in Paketbedingungen § 5 Abs. 3.
+   - Testanfragen zählen nicht ins Kontingent.
+   - Dazu „Frist zur Freigabe setzen“ in der Zentrale.
+3. **KI-Nachberechnung beim Vertragsende:** Ist der Vertrag beendet, kommen weitere Auswertungen des letzten Monats als eigene Schlussrechnung, eingezogen vom hinterlegten Zahlungsmittel. Ohne laufenden Auftrag läuft die KI nicht mehr über das Kontingent hinaus.
+4. **Falsche Anfragen gegen einen Mitbewerber:** Anfragen je Anschluss werden dauerhaft gezählt (10 am Tag), als gekürzter Prüfwert mit Geheimnis, nach 2 Tagen gelöscht. Instanz-Datenschutz und AV-Vertrag nennen das.
+5. **Doppelte Konten für Gratisprojekte:** erledigt, weil das Konto kostenlos ist.
+6. **Nachweis der KI-Einwilligung:** Zeitpunkt und Fassung (`KI_HINWEIS_STAND`) stehen am Entwurf und gehen mit der Anfrage an den Betrieb. Instanz-Datenschutz und AV-Vertrag nennen das.
+7. **Unzustellbare Anfrage:** Der Betrieb bekommt beim endgültigen Bounce selbst eine Mail an die Adresse seines Kundenkontos.
+
+Nicht gelöst: eine echte Prüfung gegen Automaten (Captcha). Sie bräuchte einen fremden Dienst, und die CSP lässt keine fremden Server zu. Die Grenzen oben begrenzen den Schaden.
 
 ## Was du tun musst
 
 1. **Stripe:** Workbench → Webhooks → dein Ziel → Ereignis `charge.dispute.created` ergänzen (Test und Live). Ohne das merkt der Server keine Rücklastschrift.
-2. **Bestehende Konten für Betriebe:** Falls es schon echte gibt, ihnen die neuen Nutzungsbedingungen mailen. § 14 Abs. 1 verlangt sechs Wochen Vorlauf mit Hinweis auf das Widerspruchsrecht; Resend als Unterauftragsverarbeiter vier Wochen (Anlage Nr. 6). Inhaltlich wird nichts schlechter für sie.
+2. **Bestehende Konten für Betriebe:** Falls es schon echte gibt, ihnen die neuen Nutzungsbedingungen mailen. § 14 Abs. 1 verlangt sechs Wochen Vorlauf mit Hinweis auf das Widerspruchsrecht; Resend als Unterauftragsverarbeiter vier Wochen (Anlage Nr. 6). Für sie wird alles günstiger (Konto kostenlos). Hat noch jemand ein Abo 10 oder Plus bei Stripe, kündigt es der Abrechnungslauf zum Ende des Abrechnungsmonats; schau in Stripe nach, ob es solche Abos gibt.
+5. **Nie setzen:** `BETRIEBE_ABRECHNUNG` und `PREIS_PROJEKT` bei Cloudflare. Sie schalten die alte Abrechnung je Projekt wieder ein.
 3. **Impressum:** Hast du eine USt-IdNr. oder schon eine Wirtschafts-Identifikationsnummer, gehört sie ins Impressum (§ 5 Abs. 1 Nr. 6 DDG). Sag sie mir, dann trage ich sie ein.
 4. **Umsatzsteuer:** Die Pakete sind netto plus 19 % ausgewiesen. Bist du Kleinunternehmer (MWST=0), muss ich die Paketseiten und Bedingungen anpassen.

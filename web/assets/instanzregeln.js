@@ -62,7 +62,7 @@
     empfaengerTage: 14, rueckrufWerktage: 10, einladungErinnernTage: 3, versandVersuche: 8, versandMaxTage: 3, versandErsterMinuten: 10
   };
   const GRENZEN = {
-    anfragenIpTag: 10, fotosJeFenster: 2, fotosZusatz: 4, kiJeCode: 60, fotoTagInstanz: 1500, otpFehlerMailTag: 10,
+    anfragenIpTag: 10, testJeTag: 10, fotosJeFenster: 2, fotosZusatz: 4, kiJeCode: 60, fotoTagInstanz: 1500, otpFehlerMailTag: 10,
     dateienBestellung: 12, dateiBytes: 1000000, summeBestellung: 10000000, nachrichtenStunde: 20, eingangMails: 3,
     pdfBudget: 5000000, anhangMax: 7000000, startsTagInstanzHart: 5000,
     domains: 3, farben: 3, titel: 80, begruessung: 400, notiz: 1500, nachricht: 2000, fenster: 50

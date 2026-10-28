@@ -31,6 +31,8 @@ const WEB = path.join(ROOT, 'web');
 const PORT = Number(process.env.PORT || 8788);
 const ATTRAPPE = process.env.KI_ATTRAPPE === '1';
 const env = Object.assign({}, process.env, {
+  /* Die Prüfsuite prüft die abgeschaltete Abrechnung je Projekt weiter (umgebung.js); BETRIEBE_ABRECHNUNG=0 zeigt das kostenlose Konto wie online */
+  BETRIEBE_ABRECHNUNG: process.env.BETRIEBE_ABRECHNUNG || '1',
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || (ATTRAPPE ? 'attrappe' : ''),
   KI_MODELL: process.env.KI_MODELL || ''
 });

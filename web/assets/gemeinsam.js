@@ -9,7 +9,7 @@
   'use strict';
   /* Mit JavaScript übernimmt die App; die Textfassung für Suchmaschinen und KI-Assistenten (.vorab) bleibt verborgen */
   document.documentElement.classList.add('js');
-  var C = window.KONFIG =Object.assign({ marke: 'eeziframes', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/', preise: { aufmass: 7.99, projekt: 9, frei: 3, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true } }, window.KONFIG || {});
+  var C = window.KONFIG =Object.assign({ marke: 'eeziframes', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/', preise: { aufmass: 7.99, projekt: 0, frei: 0, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true } }, window.KONFIG || {});
   var mem = {};
   function get(k) { try { return window.localStorage.getItem(k); } catch (e) { return mem[k] || null; } }
   function put(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { mem[k] = v; } }
@@ -340,7 +340,9 @@
   window.EinfBanner = function (art, ziel) {
     var X = window.Abrechnung, e = X && X.einfuehrung && X.einfuehrung();
     if (!e || !e.danach) return '';
-    var p = X.preise(), eur = function (v) { return (Math.round(v) === v ? String(v) : v.toFixed(2).replace('.', ',')) + '\u00a0€'; };
+    var p = X.preise();
+    if (art === 'betrieb' && !(Number(p.projekt) > 0)) return ''; // Betriebskonto kostenlos: keine Tarife, kein Einführungspreis für Betriebe
+    var eur = function (v) { return (Math.round(v) === v ? String(v) : v.toFixed(2).replace('.', ',')) + '\u00a0€'; };
     var n = X.einfRest(), rest = n <= 1 ? 'Nur noch heute' : 'Noch ' + n + ' Tage';
     var text = art === 'betrieb'
       ? '<b>Einführungspreise bis ' + X.einfBis() + ':</b> Abo 10 für ' + eur(p.abo.grund) + ', Plus für ' + eur(p.plus) + ' im Monat <span class="spaeter">· danach ' + eur(e.danach.abo) + ' und ' + eur(e.danach.plus) + '</span>'

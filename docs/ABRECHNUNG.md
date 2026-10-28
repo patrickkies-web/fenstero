@@ -1,5 +1,12 @@
 # Abrechnung: Preise, Regeln, Zählung, Schranken
 
+> **Seit 28.10.2026 (Wort des Inhabers): Es gelten nur noch die Paketpreise (Einrichtung, Monatspreis, 0,08 € je weiterer KI-Auswertung) und
+> das Aufmaßblatt der Hauseigentümer (7,99 € bis 17.11.2026, danach 12,99 €).** Das Betriebskonto (Projekte, Kundenlinks, Code vom Kunden)
+> ist kostenlos: `preise.projekt` 0, `kostenlos()` in `modell.js`, keine Sperre, keine Tarife, keine Zahlungsart, keine Sammelrechnungen,
+> alte Abos 10/Plus kündigt der Abrechnungslauf einmal zum Ende ihres Abrechnungsmonats (Nutzungsbedingungen § 6). Die folgenden
+> Abschnitte beschreiben die frühere Abrechnung je Projekt; sie läuft nur noch mit `BETRIEBE_ABRECHNUNG=1` (die Prüfsuite tut das über
+> `scripts/dev-server.mjs`, damit der Code getestet bleibt). Online nicht setzen.
+
 Stand: Preise und Paywalls sind eingebaut, die Regeln laufen im Browser (Pilot, nichts wird berechnet) und auf dem Server (Stufe 2, sobald Supabase und Stripe angeschlossen sind, siehe `docs/ONLINE-STELLEN.md`). Beide nutzen denselben Code: `web/assets/modell.js`.
 
 ## 1. Das Modell in einem Satz

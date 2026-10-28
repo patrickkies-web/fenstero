@@ -1016,6 +1016,7 @@
       let yy = y0 + 12.8 + t1.length * 4.6 + 0.6;
       font('normal', 8, INK2); const t2 = wrap('Projekt in eeziframes anlegen, Aufmaß-Link per WhatsApp oder E-Mail schicken. Zurück kommt ein Aufmaß wie dieses: 8 Maße je Fenster, Fotos mit Auswertung, alle Wünsche, Bestellmaß nach Ihrem Abzug, das Blatt mit Ihrem Logo.', tw2); txt(t2, tx, yy, { lineHeightFactor: 1.22 }); yy += t2.length * 3.45 + 1.6;
       if (FREI || JE) { font('bold', 8, INK); txt([FREI ? FREI + ' Projekte kostenlos' : '', JE ? (FREI ? 'danach ' : '') + euroN(JE) + ' netto je Projekt mit eingegangenem Aufmaß' : '', 'keine Grundgebühr'].filter(Boolean).join(' · '), tx, yy); yy += 4.2; }
+      else { font('bold', 8, INK); txt('Konto kostenlos · keine Grundgebühr · keine Zahlungsart', tx, yy); yy += 4.2; } // Betriebskonto kostenlos (seit 28.10.2026)
       font('normal', 7, GREY); txt(wrap('Zum Vergleich: Eine Meisterstunde kostet im Schnitt 65,14 € netto (Preisatlas Handwerk 2024).', tw2)[0], tx, yy);
       qr(qx, qy, qs); font('normal', 7, INK2); txt('Scannen: Projekt anlegen', qx + qs / 2, qy + qs + 3.4, { align: 'center' }); font('bold', 7, INK); txt(HOST, qx + qs / 2, qy + qs + 6.8, { align: 'center' });
       y += EIGENE_H + 6;

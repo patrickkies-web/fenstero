@@ -124,11 +124,22 @@ export async function erstatten(ctx, a) {
   return { ok: true, cent: r.amount || 0 };
 }
 
-/* KI-Auswertungen über dem Kontingent des Vormonats: ein Posten (netto zzgl. Steuersatz) auf der nächsten Rechnung des Abos */
+/* KI-Auswertungen über dem Kontingent des Vormonats: ein Posten (netto zzgl. Steuersatz) auf der nächsten Rechnung des Abos. Ist der
+   Vertrag beendet, kommt keine nächste Rechnung mehr: dann eine eigene Schlussrechnung mit dem Posten, eingezogen vom hinterlegten
+   Zahlungsmittel (Paketbedingungen § 4 Abs. 4) */
 export async function kiPosten(ctx, a, o) {
   pruefe(ctx.k);
-  if (attrappe(ctx.k)) return { id: 'test_ii_' + zufall(10) };
+  if (attrappe(ctx.k)) return { id: 'test_ii_' + zufall(10), schluss: a.stand === 'beendet' };
   const s = stripe(ctx.k), steuer = await steuersatz(ctx, s), z = a.zahlung || {}, ab = a.abo || {};
+  if (z.kunde && (a.stand === 'beendet' || ab.status === 'beendet')) {
+    const meta = { art: 'auftrag', auftrag: a.id, nr: a.nr, ki_monat: o.monat };
+    const inv = await s.post('/invoices', { customer: z.kunde, collection_method: 'charge_automatically', auto_advance: true, pending_invoice_items_behavior: 'exclude',
+      default_payment_method: z.zahlungsmittel || undefined, description: 'Schlussrechnung KI-Auswertungen ' + o.text, metadata: meta }, { idem: 'auftrag-ki-schluss-' + a.id + '-' + o.monat });
+    await s.post('/invoiceitems', { customer: z.kunde, invoice: inv.id, amount: o.cent, currency: 'eur', description: 'KI-Auswertungen ' + o.text + ': ' + o.mehr + ' über dem Kontingent',
+      tax_rates: steuer ? [steuer] : undefined, metadata: meta }, { idem: 'auftrag-ki-schlussposten-' + a.id + '-' + o.monat });
+    await s.post('/invoices/' + inv.id + '/finalize', { auto_advance: true }, { idem: 'auftrag-ki-schlussfertig-' + a.id + '-' + o.monat });
+    return { id: inv.id, schluss: true };
+  }
   if (!z.kunde || !ab.id) throw new ApiFehler('Kein Abo bei Stripe für diesen Auftrag.', 409);
   const r = await s.post('/invoiceitems', { customer: z.kunde, subscription: ab.id, amount: o.cent, currency: 'eur', description: 'KI-Auswertungen ' + o.text + ': ' + o.mehr + ' über dem Kontingent',
     tax_rates: steuer ? [steuer] : undefined, metadata: { art: 'auftrag', auftrag: a.id, nr: a.nr, ki_monat: o.monat } }, { idem: 'auftrag-ki-' + a.id + '-' + o.monat });
