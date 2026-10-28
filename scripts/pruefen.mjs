@@ -4605,7 +4605,7 @@ if (teil(22)) {
   ok(!eyeUeber.length, 'Bei 320 px Breite läuft die Eyebrow nicht unter die Knöpfe i und Notiz' + (eyeUeber.length ? ' (' + eyeUeber.join(', ') + ')' : ''));
   // Genau ein grünes Wort je Titel (Schritte und alle Fragen)
   const titel = [];
-  for (const scr of ['start', 'fotos', 'messen', 'rest', 'ergebnis', 'anfrage', 'anfrage2', 'anfrage3']) { await p.evaluate((scr) => { const w = demoProject()[0]; S.win = w; S.editIdx = -1; S.windows = [w]; go(scr); }, scr); await p.waitForTimeout(150); titel.push([scr, await p.evaluate(() => (document.querySelector('.scr.dna h1 em') ? 1 : document.querySelectorAll('.hd h1 .ak').length))]); }
+  for (const scr of ['start', 'fotos', 'messen', 'rest', 'ergebnis', 'anfrage', 'anfrage2', 'anfrage3']) { await p.evaluate((scr) => { const w = demoProject()[0]; S.win = w; S.editIdx = -1; S.windows = [w]; if (scr === 'rest') { S.rest.i = 0; S.rest.cur = ''; } go(scr); }, scr); await p.waitForTimeout(150); titel.push([scr, await p.evaluate(() => (document.querySelector('.scr.dna h1 em') ? 1 : document.querySelectorAll('.hd h1 .ak').length))]); }
   for (const q of await p.evaluate(() => qList(demoProject()[0]).map((x) => x.id))) { await frage20(q); titel.push([q, await p.evaluate(() => (document.querySelector('.scr.dna h1 em') ? 1 : document.querySelectorAll('.hd h1 .ak').length))]); } // Design-DNA (Lage): zweite Stimme in Grau statt grünem Wort
   const ohneAk = titel.filter((x) => x[1] !== 1).map((x) => x[0]);
   ok(titel.length > 30 && !ohneAk.length, 'Jeder Schritt- und Fragentitel hat genau ein grünes Wort (' + titel.length + ' Titel' + (ohneAk.length ? ', ohne: ' + ohneAk.join(', ') : '') + ')');

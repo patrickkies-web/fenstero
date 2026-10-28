@@ -534,12 +534,15 @@
       gesetzt[r] = true; var sc = schild[r]; sc.querySelector('b').textContent = tausend(min);
       /* Das Schild steht auf seiner Linie, aber nie auf einer Linie der anderen Richtung (Zeichen 6): 27, 73, 15 oder 85 Prozent */
       var w = sc.offsetWidth, h = sc.offsetHeight, quer = ecken.filter(function (e, m) { return (m < 3 ? 0 : 1) !== r; }), lage = null;
+      var tE = messBuehne.querySelector('.md-titel'), sR = messBuehne.getBoundingClientRect(), tR = tE && tE.offsetParent ? tE.getBoundingClientRect() : null, tB = tR ? { x: tR.left - sR.left, y: tR.top - sR.top, w: tR.width, h: tR.height } : null;
       [0.27, 0.73, 0.15, 0.85, 0.5].some(function (t) {
         var x = r ? A[0] - w / 2 : A[0] + (B[0] - A[0]) * t - w / 2, y = r ? A[1] + (B[1] - A[1]) * t - h / 2 : A[1] - h / 2;
         x = Math.max(8, Math.min(W - 8 - w, x)); y = Math.max(8, Math.min(S - 8 - h, y)); lage = lage || [x, y];
-        var frei = !quer.some(function (e) { return r ? (e[0][1] > y - 4 && e[0][1] < y + h + 4) : (e[0][0] > x - 4 && e[0][0] < x + w + 4); });
+        var frei = !quer.some(function (e) { return r ? (e[0][1] > y - 4 && e[0][1] < y + h + 4) : (e[0][0] > x - 4 && e[0][0] < x + w + 4); }) && !(tB && schneidet({ x: x - 4, y: y - 4, w: w + 8, h: h + 8 }, tB));
         if (frei) lage = [x, y]; return frei;
       });
+      /* liegt es trotzdem unter der Überschrift (schmale Telefone), steht das Schild der Breite unter seiner Linie */
+      if (tB && schneidet({ x: lage[0], y: lage[1], w: w, h: h }, tB)) lage[1] = Math.min(S - 8 - h, r ? tB.y + tB.h + 6 : A[1] + 6);
       sc.style.left = Math.round(lage[0]) + 'px'; sc.style.top = Math.round(lage[1]) + 'px';
     });
     $('mess-bildtext').textContent = 'Modell von vorn mit allen sechs Maßen der Öffnung. Es zählt das kleinste: Breite ' + tausend(pw.moW) + ' Millimeter, Höhe ' + tausend(pw.moH) + ' Millimeter.';

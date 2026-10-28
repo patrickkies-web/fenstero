@@ -396,7 +396,7 @@ html:has(.ez-gross[open]) { overflow: hidden; overscroll-behavior: none; }
 .dna.md { --bh: clamp(420px, calc(100svh - 300px), 560px) }
 .dna.md .ez-buehne--mess { height: var(--bh) }
 /* Überschrift auf der Wand: Schwarz, zweite Stimme Textgrau, i als Ring */
-.md-titel { position: absolute; z-index: 5; left: 16px; right: 16px; top: 48px; display: flex; align-items: center; gap: 10px; pointer-events: none }
+.md-titel { position: absolute; z-index: 5; left: 16px; max-width: calc(100% - 32px); top: 48px; display: flex; align-items: center; gap: 10px; pointer-events: none }
 .md-titel h1 { margin: 0; min-width: 0; font: 500 1.75rem/1.1 var(--font-sans); letter-spacing: -.025em; color: var(--schwarz); text-wrap: balance }
 .md-titel h1 em { font-style: normal; color: var(--textgrau) }
 .md-titel .ez-i { flex: none; pointer-events: auto; color: var(--schwarz); background: rgba(255, 255, 255, .45); box-shadow: inset 0 0 0 1.5px var(--schwarz) }
@@ -453,7 +453,7 @@ html:has(.ez-gross[open]) { overflow: hidden; overscroll-behavior: none; }
   .ez-folie[data-folie="messen"] > .foot-links { grid-column: 2; grid-row: 6; margin: 12px 32px 24px 24px }
   .ez-buehne--mess .ez-glaschip { left: 16px; top: 16px }
   .ez-buehne--mess .ez-gross-auf { top: 8px; right: 16px }
-  .md-titel { left: 24px; right: 24px; top: 58px }
+  .md-titel { left: 24px; max-width: calc(100% - 48px); top: 58px }
   .md-titel h1 { font-size: 2.5rem }
   .md-wert { bottom: 24px }
 }
