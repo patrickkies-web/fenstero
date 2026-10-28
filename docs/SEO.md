@@ -126,7 +126,7 @@ Essential-Instanzen wären Doppelinhalt zur eeziframes-App und bleiben draußen;
 
 ## Freigabe
 
-1. Impressum und Datenschutz vollständig: Name und Anschrift stehen drin, E-Mail-Adresse und Telefonnummer fehlen noch (orange Platzhalter); dazu AGB, Nutzungsbedingungen und Cookies, alles rechtlich prüfen lassen. Eine öffentliche, auffindbare Website braucht ein vollständiges Impressum (§ 5 DDG).
+1. Impressum und Datenschutz vollständig: Name und Anschrift stehen drin, E-Mail-Adresse und Telefonnummer fehlen noch (orange Platzhalter); dazu AGB, Paketbedingungen und Cookies, alles rechtlich prüfen lassen. Eine öffentliche, auffindbare Website braucht ein vollständiges Impressum (§ 5 DDG).
 2. Cloudflare → Workers & Pages → `fenstero` → Einstellungen → Variablen und Geheimnisse: `INDEXIERUNG` = `1` (Typ Text). Die Hauptdomain ist `eeziframes.com`; `www.eeziframes.com` zählt von selbst als `eeziframes.com`, die `…workers.dev`-Adresse bleibt immer gesperrt. Nur wenn weitere Domains am Worker hängen (etwa `eeziframes.de`): `KANONISCH` = `https://eeziframes.com`, damit alle Canonicals auf eine Adresse zeigen (besser noch: die weitere Domain per Weiterleitungsregel umleiten).
 3. Prüfen: `https://eeziframes.com/robots.txt` (Allow, Content-Signal, Sitemap-Zeile), `/sitemap.xml` (38 Adressen), `/llms.txt`, `/f39851a897e004d2371f5b99367aa8c2.txt` (IndexNow-Schlüssel); eine Seite im Browser, Entwicklerwerkzeuge → Netzwerk: kein `X-Robots-Tag`, `Link: <…>; rel="canonical"`.
 

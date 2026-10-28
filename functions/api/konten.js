@@ -254,7 +254,7 @@ export const KONTO = {
     if (ctx.instanz) return DASH.gesperrt(ctx);
     await mitBetrieb(ctx); const plan = ['service', 'abo', 'plus'].includes((ctx.body || {}).plan) ? ctx.body.plan : 'service', a0 = ctx.row.daten || {}, alt = X().konto(a0), sub = ctx.row.stripe_subscription;
     const hoch = X().RANG[plan] > X().RANG[alt];
-    /* Betriebskonto kostenlos (umgebung.js, ohne BETRIEBE_ABRECHNUNG): keine Tarife mehr, kein neues Abo */
+    /* Betriebskonto kostenlos (umgebung.js, ohne BETRIEBSKONTO): keine Tarife mehr, kein neues Abo */
     if (hoch && plan !== 'service' && X().kostenlos()) throw new ApiFehler('Ihr Konto ist kostenlos; Tarife gibt es nicht mehr.', 409);
     if (hoch && plan !== 'service') {
       mwstPruefen(ctx);

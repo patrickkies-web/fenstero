@@ -1388,7 +1388,7 @@ if (teil(8)) {
   // Abrechnungslauf (Cron) mit Attrappen im selben Prozess: offene Projektbuchungen werden zur Sammelrechnung, nichts doppelt
   {
     const umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), stM = await import('../functions/api/stripe.js'), ko = await import('../functions/api/konten.js');
-    const k = umg.konfig({ DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', BETRIEBE_ABRECHNUNG: '1' }); globalThis.Abrechnung.setPreise(k.preise); // frühere Abrechnung je Projekt (seit 28.10.2026 nur mit Schalter)
+    const k = umg.konfig({ DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', BETRIEBSKONTO: '1' }); globalThis.Abrechnung.setPreise(k.preise); // frühere Abrechnung je Projekt (seit 28.10.2026 nur mit Schalter)
     const sp = spM.speicher(k), zd = stM.zahlungsdienst(k);
     const row = await sp.betriebAnlegen({ auth_user: 'u-cron', mail: 'cron@beispiel.de', name: 'Cron GmbH', plz: '50667', tel_norm: '', name_norm: 'cron', daten: { konto: 'service', pay: { type: 'SEPA-Lastschrift', label: 'DE •••• 0000' }, links: [], book: [{ id: 'b1', kind: 'aufmass', ref: 'l1', when: 'heute', month: '2026-10', text: 'Aufmaß · Test', sub: '', betrag: 9, badge: 'nächste Rechnung', status: 'offen' }, { id: 'b0', kind: 'aufmass', ref: 'l0', when: 'gestern', month: '2026-10', text: 'Aufmaß · Frei', sub: '', betrag: 0, badge: 'kostenlos', status: 'offen' }], freeUsed: 3, rechnungen: [], notif: [] } });
     await sp.betriebFelder(row.id, { stripe_customer: 'cus_test_cron' });
@@ -1768,9 +1768,10 @@ if (teil(10)) {
   /* Einführungspreis (EINFUEHRUNG in functions/api/umgebung.js): bis 17.11.2026 Startpreise und Hinweise, ab 18.11. 0:00 Uhr von selbst die regulären */
   const umg = await import(new URL('../functions/api/umgebung.js', import.meta.url).href);
   const VOR = '2026-11-17T23:59:59+01:00', NACH = '2026-11-18T00:00:00+01:00';
-  const kv = umg.konfig({ JETZT: VOR }), kn = umg.konfig({ JETZT: NACH }), ke = umg.konfig({ JETZT: VOR, PREIS_ABO: '49' }), kab = umg.konfig({ JETZT: NACH, BETRIEBE_ABRECHNUNG: '1' });
-  ok(kv.preise.aufmass === 7.99 && kv.preise.abo.grund === 49 && kv.preise.plus === 79 && kv.einfuehrung && kv.einfuehrung.danach.aufmass === 12.99 && kn.preise.aufmass === 12.99 && kn.preise.abo.grund === 69 && kn.preise.plus === 119 && kn.preise.projekt === 0 && kn.preise.frei === 0 && kab.preise.projekt === 9 && kab.preise.frei === 3 && kn.einfuehrung === null && ke.einfuehrung === null && ke.hinweise.some((h) => /^PREIS_ABO:/.test(h)), 'Einführungspreis: bis 17.11. 7,99 €, 49 € und 79 €, ab 18.11. 0:00 Uhr 12,99 €, 69 € und 119 €; Betriebskonto ohne Projektpreis (kostenlos), 9 € nur mit BETRIEBE_ABRECHNUNG=1; gesetzte PREIS_… schalten den Wechsel ab und stehen als Hinweis in /api/status');
-  /* Seit 28.10.2026: Betriebskonto kostenlos (ohne BETRIEBE_ABRECHNUNG). Modell bucht kostenlos, nie gesperrt, keine Tarife; Nutzungsbedingungen ohne alte Preise */
+  const kv = umg.konfig({ JETZT: VOR }), kn = umg.konfig({ JETZT: NACH }), ke = umg.konfig({ JETZT: VOR, PREIS_ABO: '49' }), kab = umg.konfig({ JETZT: NACH, BETRIEBSKONTO: '1' });
+  ok(kv.preise.aufmass === 7.99 && kv.preise.abo.grund === 49 && kv.preise.plus === 79 && kv.einfuehrung && kv.einfuehrung.danach.aufmass === 12.99 && kn.preise.aufmass === 12.99 && kn.preise.abo.grund === 69 && kn.preise.plus === 119 && kn.preise.projekt === 0 && kn.preise.frei === 0 && kab.preise.projekt === 9 && kab.preise.frei === 3 && kn.einfuehrung === null && ke.einfuehrung === null && ke.hinweise.some((h) => /^PREIS_ABO:/.test(h)), 'Einführungspreis: bis 17.11. 7,99 €, 49 € und 79 €, ab 18.11. 0:00 Uhr 12,99 €, 69 € und 119 €; Betriebskonto ohne Projektpreis (kostenlos), 9 € nur mit BETRIEBSKONTO=1; gesetzte PREIS_… schalten den Wechsel ab und stehen als Hinweis in /api/status');
+  /* Seit 28.10.2026 gibt es das Betriebskonto nicht mehr (ohne BETRIEBSKONTO). Das Modell bucht ohne Preise kostenlos, nie gesperrt, keine Tarife;
+     /nutzungsbedingungen/ ist nur noch die Hinweisseite zum Ende des Kontos */
   {
     await import('../web/assets/modell.js');
     const XK = globalThis.Abrechnung, vorher = JSON.parse(JSON.stringify(XK.preise()));
@@ -1779,8 +1780,8 @@ if (teil(10)) {
     for (let i = 0; i < 5; i++) { const l = { id: 'lk' + i, kunde: 'Kunde ' + i, nr: 'K' + i }; ak.links.unshift(l); XK.receiveAufmass(ak, l, { windows: [{}], fotos: 0 }, 'Link', jetztK); }
     const wk = XK.planWechsel(ak, 'plus', jetztK), nbK = await roh('/nutzungsbedingungen/');
     ok(XK.kostenlos() && XK.lockedLinks(ak).length === 0 && ak.book.every((b) => b.betrag === 0 && b.badge === 'kostenlos') && wk.art === 'kostenlos' && XK.konto(ak) === 'service' &&
-      /Ihr Konto ist kostenlos/.test(nbK.text) && !/9&nbsp;€|9 € je Projekt|Abo 10/.test(nbK.text.replace(/§ 6 Frühere Tarife[\s\S]*?<\/p>/, '')),
-      'Betriebskonto kostenlos (ohne BETRIEBE_ABRECHNUNG): fünf Aufmaße kostenlos und sichtbar, kein Tarifwechsel; Nutzungsbedingungen ohne 9 € und Abo (außer § 6 Frühere Tarife)');
+      /<title>Konto für Fensterbauer eingestellt/.test(nbK.text) && /<meta name="robots" content="noindex">/.test(nbK.text) && /löschen wir bis spätestens 31\. Dezember 2026/.test(nbK.text) && /Es fallen keine Kosten mehr an/.test(nbK.text) && /href="\/konfigurator-bedingungen\/"/.test(nbK.text) && !/9&nbsp;€|9 € je Projekt|im Monat/.test(nbK.text) && !seo.SEITEN.some((x) => x.pfad === '/nutzungsbedingungen/'),
+      'Ohne Betriebskonto: Modell ohne Preise kostenlos, kein Tarifwechsel; /nutzungsbedingungen/ als Hinweisseite (eingestellt, keine Kosten, Löschung bis 31.12.2026, Verweis auf die Paketbedingungen, noindex, nicht in der Sitemap)');
     XK.setPreise(vorher);
   }
   const einfFehler = [];
@@ -1788,20 +1789,20 @@ if (teil(10)) {
     const datei = path10.join(WURZEL, 'web', s10.pfad, 'index.html'); if (!fs10.existsSync(datei)) continue;
     const roh10 = fs10.readFileSync(datei, 'utf8');
     const aus = async (jetzt) => { const r = await seo.behandeln(new Request('https://eeziframes.com' + s10.pfad, { headers: { 'if-none-match': '"alt"' } }), { INDEXIERUNG: '1', JETZT: jetzt }, async (req) => (req.headers.get('if-none-match') ? new Response(null, { status: 304, headers: { etag: '"alt"' } }) : new Response(roh10, { headers: { 'content-type': 'text/html; charset=utf-8', etag: '"alt"' } }))); return { status: r.status, etag: r.headers.get('etag'), text: r.status === 200 ? await r.text() : '' }; };
-    const vor = await aus(VOR), nach = await aus(NACH), recht = ['/agb/', '/nutzungsbedingungen/'].includes(s10.pfad);
+    const vor = await aus(VOR), nach = await aus(NACH), recht = s10.pfad === '/agb/';
     /* Seiten für Fensterbauer: kein Band mehr (sie verkaufen die Pakete), aber wie der Ratgeber ohne ETag, weil der Worker ihre
        Bausteine je Umgebung einsetzt (functions/pakete-seite.js) */
     const mitBanner = /^\/ratgeber\//.test(s10.pfad), ohneBand = /^\/fuer-fensterbauer\//.test(s10.pfad);
     if (ohneBand ? (vor.status !== 200 || vor.etag || /einf-bar/.test(vor.text)) : mitBanner ? (vor.status !== 200 || vor.etag || !/<a class="einf-bar" href="[^"]+"><span><span class="txt"><b>Einführungspreise? bis 17\. November:<\/b>[\s\S]*?<span class="rest">Nur noch heute<\/span>/.test(vor.text)) : vor.status !== 304) einfFehler.push(s10.pfad + (ohneBand ? ' (vorher Banner oder ETag)' : mitBanner ? ' (vorher kein Banner mit Countdown oder alte Fassung aus dem Browser-Cache möglich)' : ' (vorher kein 304)'));
     if (/einf-bar/.test(nach.text)) einfFehler.push(s10.pfad + ' (Banner nach dem Stichtag)');
     if (nach.status !== 200 || (nach.etag && !recht)) einfFehler.push(s10.pfad + ' (danach alte Fassung aus dem Browser-Cache möglich)');
-    /* AGB nennen beide Zeiträume des Aufmaßblatts; die Nutzungsbedingungen haben seit 28.10.2026 keine Preise mehr (Betriebskonto kostenlos) */
-    if (recht) { if (s10.pfad === '/agb/' ? !/7,99 € bei Kauf bis einschließlich 17\. November 2026/.test(nach.text) || !/12,99 €/.test(nach.text) : /(49|69|79|119)(&nbsp;|\u00a0| )€ im Monat|9(&nbsp;|\u00a0| )€ je Projekt/.test(nach.text)) einfFehler.push(s10.pfad + (s10.pfad === '/agb/' ? ' (nennt nicht beide Zeiträume)' : ' (nennt noch Preise des Betriebskontos)')); continue; }
+    /* AGB nennen beide Zeiträume des Aufmaßblatts */
+    if (recht) { if (!/7,99 € bei Kauf bis einschließlich 17\. November 2026/.test(nach.text) || !/12,99 €/.test(nach.text)) einfFehler.push(s10.pfad + ' (nennt nicht beide Zeiträume)'); continue; }
     if (/7,99|class="einf"|49(&nbsp;|\u00a0| )€ im Monat|79(&nbsp;|\u00a0| )€|"price":"(7\.99|49\.00|79\.00)"/.test(nach.text)) einfFehler.push(s10.pfad + ' (alter Preis nach dem Stichtag)');
     if (/7,99/.test(roh10) && !/12,99/.test(nach.text)) einfFehler.push(s10.pfad + ' (neuer Preis fehlt)');
   }
   const startRoh = fs10.readFileSync(path10.join(WURZEL, 'web/index.html'), 'utf8'), fbRoh = fs10.readFileSync(path10.join(WURZEL, 'web/fuer-fensterbauer/index.html'), 'utf8');
-  ok(!einfFehler.length && /class="einf"> \(Einführungspreis bis 17\. November 2026, danach 12,99&nbsp;€\)/.test(startRoh) && !/Einführungspreis|class="einf"/.test(fbRoh), 'Einführungspreis auf den Seiten: vorher mit Hinweis, ab dem Stichtag reguläre Preise ohne Hinweis und ohne ETag (kein veralteter Stand aus dem Browser-Cache); AGB nennen beide Zeiträume, die Nutzungsbedingungen keine Preise mehr (Konto kostenlos); die Seite für Fensterbauer hat keinen Einführungspreis mehr' + (einfFehler.length ? ' (' + einfFehler.join(', ') + ')' : ''));
+  ok(!einfFehler.length && /class="einf"> \(Einführungspreis bis 17\. November 2026, danach 12,99&nbsp;€\)/.test(startRoh) && !/Einführungspreis|class="einf"/.test(fbRoh), 'Einführungspreis auf den Seiten: vorher mit Hinweis, ab dem Stichtag reguläre Preise ohne Hinweis und ohne ETag (kein veralteter Stand aus dem Browser-Cache); AGB nennen beide Zeiträume; die Seite für Fensterbauer hat keinen Einführungspreis mehr' + (einfFehler.length ? ' (' + einfFehler.join(', ') + ')' : ''));
   const llVor = seo.llms('https://eeziframes.com', { JETZT: VOR }), llNach = seo.llms('https://eeziframes.com', { JETZT: NACH });
   ok(/Einführungspreis bis 17\.11\.2026/.test(llVor) && !/Einführungspreis/.test(llNach) && llNach.includes('12,99 €') && llNach.includes(PK.preis('essential').monat + ' € im Monat') && !/Abo 10|119 € im Monat/.test(llVor + llNach), 'llms.txt: Einführungspreis des Aufmaßblatts mit Stichtag, danach nur der reguläre Preis; für Fensterbauer die Paketpreise, keine Tarife des Betriebsbereichs');
 
@@ -1900,7 +1901,7 @@ if (teil(11)) {
     const { api } = await import('../functions/api/router.js'), ko = await import('../functions/api/konten.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), stM = await import('../functions/api/stripe.js');
     const X = globalThis.Abrechnung, W = 'whsec_pruefung', B = 'https://eeziframes.com';
     const fs11 = await import('node:fs'), path11 = await import('node:path'), url11 = await import('node:url'), W11 = path11.resolve(path11.dirname(url11.fileURLToPath(import.meta.url)), '..');
-    const env = { STRIPE_SECRET_KEY: 'sk_test_pruefung11', STRIPE_WEBHOOK_SECRET: W, DATEN_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruefung', BETRIEBE_ABRECHNUNG: '1' }; // frühere Abrechnung je Projekt
+    const env = { STRIPE_SECRET_KEY: 'sk_test_pruefung11', STRIPE_WEBHOOK_SECRET: W, DATEN_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruefung', BETRIEBSKONTO: '1' }; // frühere Abrechnung je Projekt
     const k = umg.konfig(env), sp = spM.speicher(k), zd = stM.zahlungsdienst(k);
     const rufe = async (pfad, body, token, e) => { const h = { accept: 'application/json', origin: B }; if (body) h['content-type'] = 'application/json'; if (token) h.authorization = 'Bearer ' + token; const r = await api(new Request(B + pfad, { method: body ? 'POST' : 'GET', headers: h, body: body ? JSON.stringify(body) : undefined }), e || env, null); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
     const senden = async (w) => { const r = await api(new Request(B + '/api/zahlung/webhook', { method: 'POST', headers: { 'stripe-signature': w.kopf, 'content-type': 'application/json' }, body: w.roh }), env, null); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
@@ -2188,7 +2189,7 @@ if (teil(13)) {
   console.log('13. Zentrale des Inhabers');
   const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), ze = await import('../functions/api/zentrale.js'), stat = await import('../functions/api/statistik.js');
   const B = 'https://eeziframes.com', PW = 'pruef-passwort-zentrale-13', GEHEIM = 'JBSWY3DPEHPK3PXPJBSWY3DP', stempel = Date.now().toString(36), seoSperre = (await import('../functions/seo.js')).SPERRE;
-  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef13', BETRIEBE_ABRECHNUNG: '1' }, env2 = Object.assign({}, env, { ZENTRALE_2FA: GEHEIM });
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef13', BETRIEBSKONTO: '1' }, env2 = Object.assign({}, env, { ZENTRALE_2FA: GEHEIM });
   let ipNr = 1; const neueIp = () => '198.51.100.' + (ipNr++);
   const rufe = async (pfad, o) => {
     o = o || {}; const h = Object.assign({ accept: 'application/json', origin: B, 'cf-connecting-ip': o.ip || '192.0.2.10' }, o.kopf || {});
@@ -2426,7 +2427,7 @@ if (teil(14)) {
   console.log('14. Fortsetzen, Paywall, Grenzen, Zwischenstand beim Kundenlink');
   const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), ze = await import('../functions/api/zentrale.js');
   const X = globalThis.Abrechnung, B = 'https://eeziframes.com', PW = 'pruef-passwort-zentrale-14', TAG = 864e5, stempel = Date.now().toString(36);
-  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef14', BETRIEBE_ABRECHNUNG: '1' };
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef14', BETRIEBSKONTO: '1' };
   const sp = spM.speicher(umg.konfig(env));
   let ipNr = 1; const neueIp = () => '198.51.100.' + (60 + (ipNr++ % 150));
   const rufe = async (pfad, o) => {
@@ -2846,7 +2847,7 @@ if (teil(15)) {
   console.log('15. Konten für Hauseigentümer (Gast, Aufmaß sichern, Anmelden, Kauf nur mit Konto)');
   const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), ze = await import('../functions/api/zentrale.js');
   const B = 'https://eeziframes.com', TAG = 864e5, stempel = Date.now().toString(36), t = Date.now();
-  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef15', BETRIEBE_ABRECHNUNG: '1' };
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef15', BETRIEBSKONTO: '1' };
   const sp = spM.speicher(umg.konfig(env));
   let ipNr = 1;
   const rufe = async (pfad, o) => {
@@ -3797,7 +3798,7 @@ if (teil(17)) {
   ok(/id="widerrufsbelehrung"/.test(agb17) && /Sie können Ihr Widerrufsrecht auch online unter/.test(agb17) && /Eingangsbestätigung mit Informationen zum Inhalt der Widerrufserklärung sowie dem Datum und der Uhrzeit ihres Eingangs/.test(agb17) && /id="widerrufsformular"/.test(agb17) && /Erlöschen des Widerrufsrechts/.test(agb17) && /Bestätigung des Vertrags auf einem dauerhaften Datenträger/.test(agb17) && /7,99 €/.test(agb17) && /§ 19 UStG/.test(agb17), 'AGB: Widerrufsbelehrung mit Online-Funktion und Eingangsbestätigung, Erlöschen bei digitalen Inhalten, Muster-Widerrufsformular, Preis mit beiden Umsatzsteuer-Fällen');
   const konf17 = {}; new Function('window', fs17.readFileSync(path17.join(W17, 'web/config.js'), 'utf8'))(konf17);
   const pr17 = konf17.KONFIG.preise, nb17 = t17['/nutzungsbedingungen/'];
-  ok(/§ 14 BGB/.test(nb17) && /id="avv"/.test(nb17) && /Unterauftragsverarbeiter/.test(nb17) && /Technische und organisatorische Maßnahmen/.test(nb17) && pr17.projekt === 0 && pr17.frei === 0 && /Ihr Konto ist kostenlos/.test(nb17) && /§ 6 Frühere Tarife/.test(nb17) && !/€ je Projekt|€ im Monat bei Abschluss/.test(nb17), 'Nutzungsbedingungen für Fensterbauer: nur Unternehmer, Konto kostenlos wie in config.js (projekt 0), frühere Tarife in § 6, Vertrag über die Auftragsverarbeitung mit Maßnahmen und Unterauftragsverarbeitern');
+  ok(pr17.projekt === 0 && pr17.frei === 0 && konf17.KONFIG.betriebskonto === false && /<title>Konto für Fensterbauer eingestellt · eeziframes<\/title>/.test(nb17) && /<meta name="robots" content="noindex">/.test(nb17) && /§ 2 Ende des Kontos/.test(nb17) && /Ihr Vertrag über das Konto endet damit/.test(nb17) && /ein laufendes Abo 10 oder Plus beenden wir zum Ende seines laufenden Abrechnungsmonats/.test(nb17) && /löschen wir bis spätestens 31\. Dezember 2026/.test(nb17) && /Art\. 20 DSGVO/.test(nb17) && /<a href="\/konfigurator-bedingungen\/">Paketbedingungen<\/a>/.test(nb17) && !/€ je Projekt|€ im Monat/.test(nb17), 'Nutzungsbedingungen für Fensterbauer: nur noch Hinweis zum Ende des Kontos (keine Kosten, alte Abos enden, Löschung bis 31.12.2026, Kopie auf Wunsch, Verweis auf die Paketbedingungen), noindex; config.js ohne Betriebskonto und ohne Projektpreis');
   ok(/Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen/.test(t17['/datenschutz/']) && /id="widerruf"/.test(t17['/datenschutz/']) && /Resend \(Plus Five Five, Inc\./.test(t17['/datenschutz/']) && /Öffnungs- und Klickmessung ist ausgeschaltet/.test(t17['/datenschutz/']) && !/Brevo/.test(t17['/datenschutz/']) && /href="\/cookies\/"/.test(t17['/datenschutz/']), 'Datenschutz: Aufsichtsbehörde NRW, Abschnitt zur Widerrufsfunktion, E-Mail-Dienstleister, Verweis auf die Cookies-Seite');
   /* Cookies: jeder Speicher-Eintrag aus dem Code steht auf der Seite */
   const code17 = ['app.js', 'portal.js', 'gemeinsam.js'].map((f) => fs17.readFileSync(path17.join(W17, 'web/assets', f), 'utf8')).join('\n');
@@ -3813,8 +3814,8 @@ if (teil(17)) {
   const app17 = await s17a.evaluate(() => { const a = document.querySelector('.foot-links.recht a.widerruf[href="/widerruf/"]'), r = a ? a.getBoundingClientRect() : null; return !!r && r.height >= 44 && !!document.querySelector('.foot-links.recht a[href="/agb/"]') && !!document.querySelector('.foot-links.recht a[href="/cookies/"]'); });
   await s17a.goto(BASE + '/', { waitUntil: 'networkidle' }); await s17a.waitForTimeout(300);
   /* Startseite (Ansicht Hauseigentümer): eigene Fußzeile im Schatten-DOM von #startseite, „Vertrag widerrufen“ als Pille */
-  const portal17 = await s17a.evaluate(() => { const sr = (document.getElementById('startseite') || {}).shadowRoot, f = sr ? sr.querySelector('footer.ez-fuss') : document.querySelector('.foot'), a = f ? f.querySelector('a.widerruf-knopf[href="/widerruf/"], a.foot-widerruf[href="/widerruf/"]') : null, r = a ? a.getBoundingClientRect() : null; return !!r && r.height >= 44 && !!f.querySelector('a[href="/nutzungsbedingungen/"]') && !!f.querySelector('a[href="/agb/"]'); });
-  ok(app17 && portal17, 'App und Startseite: „Vertrag widerrufen“ als Knopf ab 44 px, dazu AGB, Cookies und Nutzungsbedingungen');
+  const portal17 = await s17a.evaluate(() => { const sr = (document.getElementById('startseite') || {}).shadowRoot, f = sr ? sr.querySelector('footer.ez-fuss') : document.querySelector('.foot'), a = f ? f.querySelector('a.widerruf-knopf[href="/widerruf/"], a.foot-widerruf[href="/widerruf/"]') : null, r = a ? a.getBoundingClientRect() : null; return !!r && r.height >= 44 && !!f.querySelector('a[href="/konfigurator-bedingungen/"]') && !f.querySelector('a[href="/nutzungsbedingungen/"]') && !!f.querySelector('a[href="/agb/"]'); });
+  ok(app17 && portal17, 'App und Startseite: „Vertrag widerrufen“ als Knopf ab 44 px, dazu AGB, Cookies und Paketbedingungen (keine Nutzungsbedingungen mehr)');
   sauber(s17a, 'App und Startseite mit den neuen Rechtslinks ohne Fehler'); await c17a.close();
   /* c) Ohne Mailversand und ohne Datenbank (Pilot) nimmt der Server keinen Widerruf an, statt ihn zu verlieren */
   const pilot17 = await fetch(BASE + '/api/widerruf', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'Test', vertrag: 'Aufmaßblatt', mail: 'test@beispiel.de' }) }), pj17 = await pilot17.json();
@@ -3847,11 +3848,11 @@ if (teil(17)) {
 
   /* e) Rechtstexte nach der unabhängigen Prüfung */
   const bel17 = agb17.slice(agb17.indexOf('id="widerrufsbelehrung"'), agb17.indexOf('Ende der Widerrufsbelehrung'));
-  ok(/Telefon: <a href="tel:\+4915256950998">0152 56950998<\/a>, E-Mail: <a href="mailto:ask@eeziframes\.com">ask@eeziframes\.com<\/a>/.test(bel17) && agb17.indexOf('id="erloeschen"') > agb17.indexOf('Ende der Widerrufsbelehrung') && !/Erlöschen/.test(bel17) && agb17.includes('<meta name="stand" content="' + RECHT.AGB_STAND + '">') && nb17.includes('<meta name="stand" content="' + RECHT.NB_STAND + '">') && agb17.includes('Stand: ' + RECHT.standText(RECHT.AGB_STAND)) && nb17.includes('Stand: ' + RECHT.standText(RECHT.NB_STAND)), 'AGB: Widerrufsbelehrung mit Telefonnummer, der Hinweis zum Erlöschen steht nach dem Ende der Belehrung; Stand von AGB und Nutzungsbedingungen wie in functions/api/recht.js');
+  ok(/Telefon: <a href="tel:\+4915256950998">0152 56950998<\/a>, E-Mail: <a href="mailto:ask@eeziframes\.com">ask@eeziframes\.com<\/a>/.test(bel17) && agb17.indexOf('id="erloeschen"') > agb17.indexOf('Ende der Widerrufsbelehrung') && !/Erlöschen/.test(bel17) && agb17.includes('<meta name="stand" content="' + RECHT.AGB_STAND + '">') && nb17.includes('<meta name="stand" content="' + RECHT.NB_STAND + '">') && agb17.includes('Stand: ' + RECHT.standText(RECHT.AGB_STAND)) && nb17.includes('Stand: ' + RECHT.standText(RECHT.NB_STAND)), 'AGB: Widerrufsbelehrung mit Telefonnummer, der Hinweis zum Erlöschen steht nach dem Ende der Belehrung; Stand von AGB und Hinweisseite der Nutzungsbedingungen wie in functions/api/recht.js');
   ok(/frühestens drei Jahre nach dem Kauf/.test(agb17) && /Mit dem Kauf des Aufmaßblatts endet die Zeit für freies Ändern/.test(agb17) && /Auf der Kassenseite der App/.test(agb17) && /Eingabefehler berichtigen Sie/.test(agb17) && /Online abrufen können Sie den Vertragstext nach dem Kauf nicht/.test(agb17) && /Absatz 1 bleibt unberührt/.test(agb17) && /Für die kostenlosen Funktionen bemühen wir uns/.test(agb17), 'AGB: Kündigung eines Kontos mit Kauf erst nach drei Jahren, der Kauf beendet die freie Woche, Bestellschritte mit der Kassenseite, Eingabefehler, Vertragstext, Haftung, Mängelrechte bei Störungen');
-  const avv17 = nb17.slice(nb17.indexOf('id="avv"'));
-  ok(!/Gerichtsstand/.test(nb17) && /laufendes Abo 10 oder Plus beenden wir zum Ende seines laufenden Abrechnungsmonats/.test(nb17) && !/Sammelrechnung|Vorabankündigung/.test(nb17) && /Entgelte für das Konto und Änderungen der Hauptleistungen gelten nur mit Ihrer Zustimmung/.test(nb17) && /sachlichen Grund/.test(nb17) && /10\. Verantwortung des Betriebs/.test(avv17) && /Inspektionen/.test(avv17) && /als eigener Verantwortlicher|selbst verantworten/.test(avv17) && !/Anthropic/.test(avv17) && /sieben Tagen/.test(avv17), 'Nutzungsbedingungen: kein Gerichtsstand, alte Abos enden zum Abrechnungsmonat, keine Sammelrechnung mehr, Entgelte nur mit Zustimmung, Zustimmung durch Schweigen nur aus sachlichem Grund; AVV mit Rollen, Sicherung, Kontrollen und Pflichten des Betriebs, ohne die KI-Auswertung');
-  ok(/<h2 id="kundenschutz">§ 11 Kundenschutz<\/h2>/.test(nb17) && /Ihr Kunde sieht beim Messen nur Ihren Betrieb/.test(nb17) && /Kein anderer Betrieb kann es über eeziframes öffnen oder in sein Konto übernehmen/.test(nb17) && /weder das Aufmaßblatt noch einen Code, mit dem ein anderer Betrieb das Aufmaß übernehmen könnte/.test(nb17) && /verkaufen keine Anfragen oder Kontaktdaten/.test(nb17) && /ohne Einhaltung einer Frist kündigen/.test(nb17) && /<h2>§ 13 Haftung<\/h2>/.test(nb17) && /<h2>§ 15 Schlussbestimmungen<\/h2>/.test(nb17) && !/Kundenschutz-?Garantie/.test(nb17), 'Nutzungsbedingungen § 11 Kundenschutz: nur der eigene Betrieb im Link, kein Zugriff anderer Betriebe, kein Blatt und kein Code vom Anbieter, keine Ansprache und kein Verkauf, fristlose Kündigung bei Verstoß; folgende Paragrafen neu nummeriert');
+  /* Seit 28.10.2026 kein Betriebskonto mehr: AGB, Datenschutz, Cookies und Impressum kennen weder Aufmaß-Link noch Code vom Kunden */
+  const ds17 = t17['/datenschutz/'], ohneBk17 = ['/agb/', '/datenschutz/', '/cookies/', '/impressum/'].filter((p) => /Link eines (Fensterbauers|Betriebs)|Aufmaß-Code|Code vom Kunden|Betriebsbereich|Bereich für Fensterbauer|href="\/nutzungsbedingungen\/"/.test(t17[p]));
+  ok(!ohneBk17.length && /Frühere Konten für Betriebe\.<\/strong> Bis zum 27\. Oktober 2026/.test(ds17) && /löschen wir bis spätestens 31\. Dezember 2026/.test(ds17) && /<h2>8\. Konten und Zahlungen<\/h2>/.test(ds17) && /<strong>Speicherort\.<\/strong>/.test(ds17) && /Ihr Aufmaß übertragen Sie selbst: Sie schicken das Aufmaßblatt \(PDF\)/.test(ds17) && /Paketbedingungen für Fensterbauer/.test(t17['/impressum/']) && /Planen Sie im Konfigurator auf der Website eines Fensterbauers, ist dieser Ihr Anbieter/.test(agb17) && /§ 2 Abs\. 3/.test(agb17) && !/Aufmaß-Link/.test(agb17), 'Ohne Betriebskonto: AGB, Datenschutz, Cookies und Impressum ohne Link eines Betriebs, ohne Aufmaß-Code und ohne Nutzungsbedingungen; Datenschutz mit Speicherort, Versand als PDF und dem Abschnitt zu den früheren Konten (Löschung bis 31.12.2026)' + (ohneBk17.length ? ': noch in ' + ohneBk17.join(', ') : ''));
   ok(/__cf_bm/.test(t17['/cookies/']) && /cf_clearance/.test(t17['/cookies/']) && /method="post" action="\/api\/widerruf"/.test(t17['/widerruf/']) && /Anthropic Ireland, Limited/.test(t17['/datenschutz/']) && /KI-Einwilligung widerrufen/.test(t17['/datenschutz/']) && !/sobald eeziframes mit Datenbank und Zahlungsdienst läuft/.test(t17['/datenschutz/']) && /Anmeldeprotokolle/.test(t17['/datenschutz/']), 'Cookies mit den Sicherheits-Cookies von Cloudflare; Widerrufsformular auch ohne JavaScript; Datenschutz mit Anthropic Ireland, Widerruf der KI-Einwilligung, Anmeldeprotokollen, ohne Vorbehalt zur Pilotphase');
   const gem17 = fs17.readFileSync(path17.join(W17, 'web/assets/gemeinsam.js'), 'utf8'), portalQ17 = fs17.readFileSync(path17.join(W17, 'web/assets/portal.js'), 'utf8');
   ok(/Anthropic Ireland, Ltd\./.test(gem17) && /in der Regel nach 30 Tagen/.test(gem17) && /jederzeit widerrufen/.test(gem17) && /Ich registriere mich als Unternehmer \(§ 14 BGB\)/.test(portalQ17) && /Nur für Unternehmer \(§ 14 BGB\)/.test(portalQ17) && /Angebot nur für Unternehmer im Sinne von § 14 BGB/.test((await holen17(BASE, '/fuer-fensterbauer/')).text), 'KI-Dialog nennt Anthropic Ireland, die Löschung nach 30 Tagen und den Widerruf; Betriebe registrieren sich als Unternehmer, Preise für Betriebe mit Hinweis „nur für Unternehmer“');
@@ -3959,10 +3960,36 @@ if (teil(17)) {
   const altB17 = XB17.datum(jetztB17 - 5 * 864e5), LB17 = (id, status, created, extra) => Object.assign({ id: id, code: 'c' + id, nr: 'P-' + id, kunde: 'Kunde ' + id, status: status, progress: 0, created: created, expires: XB17.dateIn(30, jetztB17), log: {} }, extra || {});
   const erB17 = await sp17.betriebAnlegen({ auth_user: 'u-er17', mail: 'er17@beispiel.de', name: 'Erinnerung GmbH', plz: '50667', tel_norm: '02219917', name_norm: 'erinnerung17', daten: { ap: 'Eva Erin', mail: 'er17@beispiel.de', prefs: { mail: true, remind: true }, links: [LB17('a', 'gesendet', altB17), LB17('b', 'geoeffnet', altB17), LB17('c', 'gesendet', XB17.datum(jetztB17)), LB17('d', 'arbeit', altB17, { progress: 2 }), LB17('e', 'erstellt', altB17), LB17('f', 'eingegangen', altB17)] } });
   await sp17.betriebAnlegen({ auth_user: 'u-aus17', mail: 'aus17@beispiel.de', name: 'Ohne Erinnerung GmbH', plz: '50667', tel_norm: '02219918', name_norm: 'ohneerinnerung17', daten: { mail: 'aus17@beispiel.de', prefs: { remind: false }, links: [LB17('g', 'gesendet', altB17)] } });
-  const er1B17 = await benM17.erinnerungenSenden(k17, sp17, {}), er2B17 = await benM17.erinnerungenSenden(k17, sp17, {});
+  /* Ohne Betriebskonto (Standard seit 28.10.2026) gehen keine Erinnerungen zu Aufmaß-Links raus; der alte Lauf mit BETRIEBSKONTO=1 */
+  const er0B17 = await benM17.erinnerungenSenden(k17, sp17, {}), kBk17 = Object.assign({}, k17, { betriebskonto: true });
+  ok(er0B17.gesendet === 0 && er0B17.ohneBetriebskonto === true && !postM17.attrappePost.some((m) => /^(er17|aus17)@/.test(m.an)), 'Ohne Betriebskonto: keine Erinnerungs-Mails zu Aufmaß-Links an frühere Betriebe');
+  const er1B17 = await benM17.erinnerungenSenden(kBk17, sp17, {}), er2B17 = await benM17.erinnerungenSenden(kBk17, sp17, {});
   const erMailsB17 = postM17.attrappePost.filter((m) => /^(er17|aus17)@/.test(m.an)), erNachB17 = await sp17.betriebHolen(erB17.id || (erB17[0] || {}).id);
   ok(er1B17.gesendet >= 1 && er2B17.gesendet === 0 && erMailsB17.length === 1 && erMailsB17[0].an === 'er17@beispiel.de' && /2 Kunden haben noch nicht gemessen/.test(erMailsB17[0].betreff) && erMailsB17[0].html.includes('/#projekt-a') && erMailsB17[0].html.includes('/#projekt-b') && !erMailsB17[0].html.includes('/#projekt-c') && !!erNachB17 && erNachB17.daten.links.filter((l) => l.erinnert).map((l) => l.id).join(',') === 'a,b', 'Erinnerung an offene Links: einmal je Projekt nach 3 Tagen, nur verschickt oder geöffnet und ohne Maß, abschaltbar');
   aus17();
+
+  /* f) Ohne Betriebskonto, wie online seit 28.10.2026 (BETRIEBSKONTO nicht gesetzt): eigener Testserver mit BETRIEBSKONTO=0 */
+  const port0 = await freierPort(), B0 = 'http://localhost:' + port0;
+  const kind0 = cp17.spawn(process.execPath, [path17.join(W17, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port0), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', BETRIEBSKONTO: '0' }), stdio: ['ignore', 'ignore', 'pipe'] });
+  kind0.stderr.on('data', (dd) => process.stderr.write('  [Server ohne Konto] ' + dd));
+  const aus0 = () => { try { kind0.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus0);
+  let st0 = null; for (let i = 0; i < 60 && !(st0 && st0.ok); i++) { await new Promise((r) => setTimeout(r, 200)); try { st0 = await fetch(B0 + '/api/status').then((r) => r.json()); } catch (e) { /* noch nicht */ } }
+  const r0a = await fetch(B0 + '/api/konto', { headers: { accept: 'application/json' } }), j0a = await r0a.json().catch(() => ({}));
+  const r0b = await fetch(B0 + '/api/link/abc123'), r0c = await fetch(B0 + '/api/aufmass', { method: 'POST', headers: { 'content-type': 'application/json', origin: B0 }, body: '{}' });
+  ok(!!st0 && st0.ok && st0.betriebskonto === false && st0.preise.projekt === 0 && r0a.status === 410 && r0b.status === 410 && r0c.status === 410 && /Paket/.test(j0a.fehler || '') && /fuer-fensterbauer/.test(j0a.fehler || ''), 'Ohne Betriebskonto: /api/status meldet es aus, Konto, Kundenlinks und Aufmaß-Eingang antworten 410 mit Verweis auf die Pakete');
+  const c0 = await browser.newContext(telefon), s0 = await neueSeite(c0, B0);
+  await s0.addInitScript(() => { try { if (!sessionStorage.getItem('alt0')) { sessionStorage.setItem('alt0', '1'); localStorage.setItem('aufmass.portal.v1', JSON.stringify({ v: 5, screen: 'projects', role: 'betrieb', cur: 'srv' })); localStorage.setItem('aufmass.sitzung', JSON.stringify({ access_token: 'alt', mail: 'alt@beispiel.de' })); } } catch (e) { /* ohne Speicher */ } });
+  await s0.goto(B0 + '/', { waitUntil: 'networkidle' }); await s0.waitForTimeout(500);
+  const p0 = await s0.evaluate(() => ({ portal: localStorage.getItem('aufmass.portal.v1'), sitzung: localStorage.getItem('aufmass.sitzung'), screen: S.screen, role: S.role }));
+  await s0.goto(B0 + '/#fensterbauer', { waitUntil: 'networkidle' }); await s0.waitForTimeout(500);
+  const f0 = await s0.evaluate(() => document.body.innerText);
+  ok(p0.portal === null && p0.sitzung === null && p0.screen === 'landing' && !p0.role && !/Code vom Kunden|Tour für Fensterbauer|Preise für Betriebe|Projekt anlegen/.test(f0), 'Ohne Betriebskonto: Startseite räumt alte Anmeldung und Portal-Speicher weg, kein Betriebsbereich, keine Tour, kein Code vom Kunden');
+  await s0.goto(B0 + '/app/', { waitUntil: 'networkidle' }); await s0.waitForTimeout(500);
+  const b640 = await s0.evaluate(async () => { S.windows = demoProject(); await blattSchrift(); const pdf = blattPDF('fensterbauer', {}); if (!pdf) return ''; const u = new Uint8Array(await pdf.arrayBuffer()); let s = ''; for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); });
+  const fs0 = await import('node:fs'), os0 = await import('node:os'), pdf0Pfad = path17.join(os0.tmpdir(), 'ohne-konto-' + process.pid + '.pdf'); fs0.writeFileSync(pdf0Pfad, Buffer.from(b640, 'base64'));
+  const txt0 = (() => { try { return cp17.execFileSync('pdftotext', ['-layout', pdf0Pfad, '-']).toString('utf8'); } catch (e) { return ''; } })(), roh0 = fs0.readFileSync(pdf0Pfad).toString('latin1'); fs0.rmSync(pdf0Pfad, { force: true });
+  ok(!!b640 && /Ihr eigener Fenster-Konfigurator|Ihr eigener Konfigurator/.test(txt0) && /Scannen: Pakete ansehen/.test(txt0) && roh0.includes('/fuer-fensterbauer/?von=pdf') && !/Code vom Kunden|AM1\.|Projekte kostenlos|Scannen: Anmeldung|Scannen: Projekt anlegen/.test(txt0), 'Ohne Betriebskonto: Aufmaßblatt ohne Aufmaß-Code, letzte Seite und QR führen zu den Paketen');
+  sauber(s0, 'Ohne Betriebskonto: Startseite und App ohne Fehler'); await c0.close(); aus0();
 }
 
 if (teil(18)) {
@@ -4047,7 +4074,7 @@ if (teil(19)) {
   const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js');
   const fo = await import('../functions/api/fotos.js'), ze = await import('../functions/api/zentrale.js'), auth = await import('../functions/api/auth.js');
   const B = 'https://eeziframes.com', TAG = 864e5, stempel = Date.now().toString(36);
-  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef19', BETRIEBE_ABRECHNUNG: '1' }, k19 = umg.konfig(env), sp = spM.speicher(k19), ab = fo.ablage(k19);
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef19', BETRIEBSKONTO: '1' }, k19 = umg.konfig(env), sp = spM.speicher(k19), ab = fo.ablage(k19);
   let ipNr = 1; const hinten = [];
   const rufe = async (pfad, o) => {
     o = o || {}; const h = { accept: 'application/json', origin: B, 'cf-connecting-ip': '203.0.113.' + (10 + (ipNr++ % 200)) };

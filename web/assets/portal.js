@@ -9,6 +9,10 @@ const INST = (window.KONFIG && window.KONFIG.instanz && window.KONFIG.instanz.m 
 const P = () => X.preise();
 /* Betriebskonto kostenlos (seit 28.10.2026): ohne Projektpreis keine Tarife, keine Abrechnung, keine Zahlungsart (modell.js kostenlos) */
 const KOSTENLOS = () => X.kostenlos();
+/* Das frühere Konto für Betriebe gibt es seit 28.10.2026 nicht mehr (nur Pakete und Hauseigentümer): auf der Hauptdomain nur die Startseite
+   mit ihren zwei Ansichten. Der Server sagt es in /api/status (BETRIEBSKONTO=1 nur in der Prüfsuite); antwortet er nicht, gilt config.js.
+   null = noch nicht gefragt: Anzeigen zeigen dann nichts vom Konto, abgemeldet und aufgeräumt wird erst bei einem sicheren false */
+const BETRIEBSKONTO = () => (Server.status && Server.status.ok ? !!Server.status.betriebskonto : Server.gefragt ? !!(window.KONFIG || {}).betriebskonto : null);
 const eur2 = (n) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n);
 /* ---------- Grundlagen ---------- */
 /* Adressen aus der aktuellen Seite: läuft so auf pages.dev und auf der eigenen Domain */
@@ -103,12 +107,15 @@ try { const raw = localStorage.getItem(STORE); if (raw) { const o = JSON.parse(r
 if (INST) { S = seed(); S.screen = 'anmelden'; }
 /* Instanz-Modus: im Browser bleiben nur die Codes der Projekte (die App derselben Domain erkennt daran „Als Kunde öffnen“, app.js
    linkImBetrieb), keine Kundendaten; alles andere kommt nach dem Laden der Seite vom Server */
-function save() { if (INST) { try { const a = S.acc[Server.id]; localStorage.setItem(STORE, JSON.stringify({ v: 5, acc: a ? { srv: { links: (a.links || []).map((l) => ({ code: l.code })) } } : {} })); } catch (e) { /* ok */ } return; } try { const o = Object.assign({}, S, { sheet: null }); ['justCreated', '_pop', '_focusErr', 'animNext', '_feier', 'tour'].forEach((k) => delete o[k]); localStorage.setItem(STORE, JSON.stringify(o)); } catch (e) { /* ok */ } }
+function save() { if (INST) { try { const a = S.acc[Server.id]; localStorage.setItem(STORE, JSON.stringify({ v: 5, acc: a ? { srv: { links: (a.links || []).map((l) => ({ code: l.code })) } } : {} })); } catch (e) { /* ok */ } return; }
+  /* Ohne Betriebskonto (seit 28.10.2026) bleibt nichts vom Portal im Browser; Reste früherer Anmeldungen räumen wir weg, sobald der Server das bestätigt */
+  if (BETRIEBSKONTO() === false) { if (Server.gefragt) { try { [STORE, 'aufmass.sitzung', 'aufmass.sitzung.anfrage'].forEach((k) => localStorage.removeItem(k)); } catch (e) { /* ok */ } } return; }
+  try { const o = Object.assign({}, S, { sheet: null }); ['justCreated', '_pop', '_focusErr', 'animNext', '_feier', 'tour'].forEach((k) => delete o[k]); localStorage.setItem(STORE, JSON.stringify(o)); } catch (e) { /* ok */ } }
 /* ---------- Server (Stufe 2) ----------
    Meldet /api/status „daten“, liegt das Konto des Betriebs auf dem Server (Supabase) und Zahlungen laufen über Stripe.
    Ohne Server bleiben Konten lokal im Browser (Pilotphase); das Server-Konto heißt hier 'srv'. Jede Änderung geht an die API, der Server rechnet und zählt. */
 const Server = {
-  id: 'srv', status: null, sitzung: null, laeuft: false, stripe: null,
+  id: 'srv', status: null, gefragt: false, sitzung: null, laeuft: false, stripe: null,
   get an() { return !!(this.status && this.status.daten); },
   online() { return this.an && S.role === 'betrieb' && S.cur === this.id && !!this.sitzung; },
   lesen() { if (INST) return; try { this.sitzung = JSON.parse(localStorage.getItem('aufmass.sitzung') || 'null'); } catch (e) { this.sitzung = null; } },
@@ -169,10 +176,12 @@ const Server = {
   },
   async start() {
     try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); this.status = r.ok ? await r.json() : null; } catch (e) { this.status = null; }
+    this.gefragt = true;
     if (this.status && this.status.preise) X.setPreise(this.status.preise);
     if (this.status && this.status.ok) X.setEinfuehrung(this.status.einfuehrung || null); // ab dem Stichtag kommt null: kein Hinweis mehr
     if (INST) return this.startInst();
     if (!this.an) { if (S.cur === this.id) { S.cur = null; if (S.role) S.role = null; } return false; }
+    if (BETRIEBSKONTO() === false) { S.role = null; S.cur = null; save(); return 'ohne'; } // kein Konto mehr: keine Anmeldung, kein Laden, keine Link-Anmeldung
     this.lesen();
     if (this.sitzung) { try { await this.laden(); if (!S.role || S.cur === this.id) { S.role = 'betrieb'; S.cur = this.id; } } catch (e) { if (e.gesperrt) toast(e.message); /* sonst Sitzung abgelaufen: Startseite */ } }
     else if (S.cur === this.id) { S.role = null; S.cur = null; }
@@ -437,6 +446,7 @@ function render() {
     if (out && S.screen !== 'anmelden' && !(S.screen === 'beendet' && S.beendet)) S.screen = 'anmelden';
     if (!out && ['anmelden', 'beendet', 'landing', 'reg', 'wie', 'preise', 'tour', 'abrechnung'].includes(S.screen)) S.screen = home();
   } else {
+    if (BETRIEBSKONTO() === false) { if (S.role) { S.role = null; S.cur = null; } S.sheet = null; S.screen = 'landing'; }
     if (out && !['landing', 'reg', 'wie', 'preise', 'tour'].includes(S.screen)) S.screen = 'landing';
     if (out && FB_SCREENS.includes(S.screen) && S.ansicht !== 'betrieb') ansichtMerken('betrieb');
     if (!out && ['landing', 'reg'].includes(S.screen)) S.screen = home();
@@ -490,8 +500,8 @@ function footer(schlank) {
   /* Instanz: Impressum und Datenschutz der Instanz; angemeldet dazu Vertrag, Rechnungen und Support im Kundenkonto (E15) */
   if (INST) { const i = A().instanz || {}; return '<footer class="foot schlank b-fuss"><div class="wrap"><div class="row foot-links"><a href="/impressum/">Impressum</a><a href="/datenschutz/">Datenschutz</a>' + (schlank && i.kundenkonto ? '<a href="' + esc(i.kundenkonto) + '" target="_blank" rel="noopener">Vertrag, Rechnungen und Support</a>' : '') + '</div></div></footer>'; }
   /* Angemeldet (S6): eine schlanke Fußzeile mit Rechtslinks, „Vertrag widerrufen“, „So funktioniert es“, Preisen und Ratgeber */
-  if (schlank) return '<footer class="foot schlank"><div class="wrap"><div class="row foot-links"><a class="foot-widerruf" href="/widerruf/">Vertrag widerrufen</a><button type="button" data-act="go" data-v="wie">So funktioniert es</button><button type="button" data-act="go" data-v="preise">Preise</button><a href="/ratgeber/">Ratgeber</a><a href="/nutzungsbedingungen/">Nutzungsbedingungen</a><a href="/agb/">AGB</a><a href="/datenschutz/">Datenschutz</a><a href="/cookies/">Cookies</a><a href="/impressum/">Impressum</a></div><p><span class="lm-foot">' + LOGO(18) + WM() + '</span> ' + (Server.an ? 'Ihre Projekte und Aufmaße liegen auf unserem Server; Zahlungen laufen über Stripe.' : 'Pilotphase: Konto und Projekte liegen in diesem Browser.') + '</p></div></footer>';
-  return '<footer class="foot"><div class="wrap"><div class="row between"><span class="lm-foot">' + LOGO(22) + WM() + '</span><div class="row foot-links"><button type="button" data-act="go" data-v="wie">So funktioniert es für Betriebe</button><button type="button" data-act="tour">Tour für Fensterbauer</button><button type="button" data-act="go" data-v="preise">Preise für Betriebe</button><a href="/fuer-fensterbauer/">Konfigurator für Fensterbauer</a><a href="/ratgeber/">Ratgeber</a><a href="/nutzungsbedingungen/">Nutzungsbedingungen</a><a href="/agb/">AGB</a><a href="/datenschutz/">Datenschutz</a><a href="/cookies/">Cookies</a><a href="/impressum/">Impressum</a><a class="foot-widerruf" href="/widerruf/">Vertrag widerrufen</a></div></div>' + (Server.an ? '<p>Ihre Projekte und Aufmaße liegen auf unserem Server; Zahlungen laufen über Stripe.</p>' : '<p>Pilotphase: Es wird nichts berechnet. Echt funktionieren schon Aufmaß-Links, der Code-Eingang, Nachbesserungen und der PDF-Export; Konto und Projekte bleiben in Ihrem Browser.</p>') + '</div></footer>';
+  if (schlank) return '<footer class="foot schlank"><div class="wrap"><div class="row foot-links"><a class="foot-widerruf" href="/widerruf/">Vertrag widerrufen</a><button type="button" data-act="go" data-v="wie">So funktioniert es</button><button type="button" data-act="go" data-v="preise">Preise</button><a href="/ratgeber/">Ratgeber</a>' + (BETRIEBSKONTO() ? '<a href="/nutzungsbedingungen/">Nutzungsbedingungen</a>' : '<a href="/konfigurator-bedingungen/">Paketbedingungen</a>') + '<a href="/agb/">AGB</a><a href="/datenschutz/">Datenschutz</a><a href="/cookies/">Cookies</a><a href="/impressum/">Impressum</a></div><p><span class="lm-foot">' + LOGO(18) + WM() + '</span> ' + (Server.an ? 'Ihre Projekte und Aufmaße liegen auf unserem Server; Zahlungen laufen über Stripe.' : 'Pilotphase: Konto und Projekte liegen in diesem Browser.') + '</p></div></footer>';
+  return '<footer class="foot"><div class="wrap"><div class="row between"><span class="lm-foot">' + LOGO(22) + WM() + '</span><div class="row foot-links">' + (BETRIEBSKONTO() ? '<button type="button" data-act="go" data-v="wie">So funktioniert es für Betriebe</button><button type="button" data-act="tour">Tour für Fensterbauer</button><button type="button" data-act="go" data-v="preise">Preise für Betriebe</button>' : '') + '<a href="/fuer-fensterbauer/">Konfigurator für Fensterbauer</a><a href="/ratgeber/">Ratgeber</a>' + (BETRIEBSKONTO() ? '<a href="/nutzungsbedingungen/">Nutzungsbedingungen</a>' : '<a href="/konfigurator-bedingungen/">Paketbedingungen</a>') + '<a href="/agb/">AGB</a><a href="/datenschutz/">Datenschutz</a><a href="/cookies/">Cookies</a><a href="/impressum/">Impressum</a><a class="foot-widerruf" href="/widerruf/">Vertrag widerrufen</a></div></div>' + (!BETRIEBSKONTO() ? '' : Server.an ? '<p>Ihre Projekte und Aufmaße liegen auf unserem Server; Zahlungen laufen über Stripe.</p>' : '<p>Pilotphase: Es wird nichts berechnet. Echt funktionieren schon Aufmaß-Links, der Code-Eingang, Nachbesserungen und der PDF-Export; Konto und Projekte bleiben in Ihrem Browser.</p>') + '</div></footer>';
 }
 /* ---------- Fotos des Kunden (functions/api/fotos.js) ----------
    Kommen nur vom Server, mit der Anmeldung des Betriebs: als Blob geladen (ein <img> kann die Anmeldung nicht mitschicken) und hier
@@ -861,7 +871,7 @@ SCREENS.landing = () => {
   /* Ansicht Fensterbauer: Hinweis zum Code vom Aufmaßblatt (?von=pdf), dann die eingebettete Paket-Landingpage (ihr h1 ist das einzige
      dieser Ansicht), am Ende der Weg zu den Hauseigentümern. Die frühere Werbung für Aufmaß-Links (Tour, Rechner, „Holen Sie es in Ihr
      Konto“) ist hier weg (Bauplan E28); Preise, Anmelden und „Kostenlos starten“ bleiben in der Kopfzeile für Bestandsbetriebe. */
-  if (ansicht() === 'betrieb') return { title: 'eeziframes', kopflos: true, fusslos: true, html: (vonPdf() ? '<div class="wrap"><div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaß in der Hand?</b> So holen Sie es in Ihr Konto: kostenlos registrieren, dann „Code vom Kunden einfügen“ und den Code von der letzten Seite eintippen oder einfügen. Die ersten 3 Aufmaße sind frei.</span><span class="row"><button type="button" class="btn small ghost" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn small ghost" data-act="vonpdf-zu">Später</button></span></div></div>' : '') +
+  if (ansicht() === 'betrieb') return { title: 'eeziframes', kopflos: true, fusslos: true, html: (vonPdf() && !BETRIEBSKONTO() ? '<div class="wrap"><div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaßblatt in der Hand?</b> Alle Maße, Fotos und Wünsche stehen im PDF. Damit Ihre Kunden so auch auf Ihrer Website planen, gibt es Ihren eigenen Fenster-Konfigurator als Paket.</span><span class="row"><button type="button" class="btn small ghost" data-act="vonpdf-zu">Schließen</button></span></div></div>' : vonPdf() ? '<div class="wrap"><div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaß in der Hand?</b> So holen Sie es in Ihr Konto: kostenlos registrieren, dann „Code vom Kunden einfügen“ und den Code von der letzten Seite eintippen oder einfügen. Die ersten 3 Aufmaße sind frei.</span><span class="row"><button type="button" class="btn small ghost" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn small ghost" data-act="vonpdf-zu">Später</button></span></div></div>' : '') +
   einbettung() }; // die Seite für Fensterbauer volle Breite, außerhalb von .wrap; den Weg zu den Hauseigentümern hat sie selbst (Umschalter, Zeile unter dem Hero, Fuß)
   /* Ansicht Hauseigentümer (seit 26.10.2026): die Startseite nach der Design-DNA (startseite.js, startseite-dna.css, Vorlage in
      index.html) mit eigenem Kopf und eigener Fußzeile; portal.js zeichnet hier weder Kopfzeile noch Einführungsband noch Fußzeile */
@@ -1777,6 +1787,11 @@ function act(name, el) {
     if (/^tour/.test(name) || ['reg', 'reg-next', 'reg-prev', 'konto', 'linkimport', 'ansicht', 'srv-zahlungsart', 'pay-save', 'login-submit', 'srv-link-ja', 'vonpdf-zu'].includes(name)) return;
     if ((name === 'go' || name === 'nav') && ['abrechnung', 'preise', 'wie', 'landing', 'tour', 'reg', 'anmelden', 'beendet'].includes(v)) return nav(home());
     if (name === 'sheet' && ['login', 'linkimport', 'pay', 'legal', 'linkfrage'].includes(v)) return;
+  } else if (BETRIEBSKONTO() === false) {
+    /* Hauptdomain ohne Konto für Betriebe: keine Tour, keine Registrierung, keine Anmeldung, nur die Startseite */
+    if (/^tour/.test(name) || ['reg', 'reg-next', 'reg-prev', 'konto', 'linkimport', 'srv-zahlungsart', 'pay-save', 'login-submit', 'srv-link-ja'].includes(name)) return;
+    if ((name === 'go' || name === 'nav') && v !== 'landing') return nav('landing');
+    if (name === 'sheet' && ['login', 'linkimport', 'pay', 'linkfrage'].includes(v)) return;
   }
   switch (name) {
     case 'none': return;
@@ -1994,5 +2009,5 @@ const ankerLink = () => {
 if (vonPdf()) ansichtMerken('betrieb');
 if (!ankerLink()) render();
 window.addEventListener('hashchange', ankerLink);
-Server.start().then((an) => { if (an) { render(); setInterval(() => Server.aktualisieren(), 30000); } else { window.PilotHinweis(); if (Server.status) render(); } projektAnkerOeffnen(); });
+Server.start().then((an) => { if (an === 'ohne') return render(); if (an) { render(); setInterval(() => Server.aktualisieren(), 30000); } else { window.PilotHinweis(); if (Server.status) render(); } projektAnkerOeffnen(); });
 

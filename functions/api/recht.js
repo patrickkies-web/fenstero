@@ -9,7 +9,7 @@
      Konten laufen und in den Rechtstexten keine Platzhalter mehr stehen (E-Mail-Adresse, Telefonnummer). /api/status zeigt das. */
 import { VORLAGE } from '../instanz/recht.js';
 
-export const AGB_STAND = '2026-10-18';
+export const AGB_STAND = '2026-10-28';
 /* Paketbedingungen der Konfigurator-Pakete mit Anlage AV-Vertrag (/konfigurator-bedingungen/, Strang F), Fassung beim Bestellen: Das
    Bestellformular zeigt sie, der Server nimmt nur Bestellungen mit genau diesem Stand an und speichert ihn an der Bestellung
    (bestellungen.zustimmung, Metadaten der Stripe-Kasse). Die Fassung als PDF liegt unter /konfigurator-bedingungen/paketbedingungen-<STAND>.pdf

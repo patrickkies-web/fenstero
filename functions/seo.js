@@ -18,10 +18,10 @@ export const STAND = '2026-10-21';
 /* Alle Seiten für die Sitemap, wichtigste zuerst. stand = letzte inhaltliche Änderung (lastmod in der Sitemap, IndexNow); bei
    Ratgeberseiten gleich dem dateModified im JSON-LD und dem „Stand“ auf der Seite (prüft die Suite) */
 export const SEITEN = [
-  { pfad: '/', prio: '1.0', stand: '2026-10-23' },
-  { pfad: '/app/', prio: '0.9', stand: '2026-10-18' },
+  { pfad: '/', prio: '1.0', stand: '2026-10-28' },
+  { pfad: '/app/', prio: '0.9', stand: '2026-10-28' },
   { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-27' },
+  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-28' },
   { pfad: '/ratgeber/balkontuer-ausmessen/', prio: '0.8', stand: '2026-10-21' },
   { pfad: '/ratgeber/fenster-mit-rollladen-ausmessen/', prio: '0.8', stand: '2026-10-21' },
   { pfad: '/ratgeber/bestellmass-fenster/', prio: '0.8', stand: '2026-10-21' },
@@ -50,11 +50,10 @@ export const SEITEN = [
   { pfad: '/fuer-fensterbauer/geplatzter-aufmasstermin/', prio: '0.7', stand: '2026-10-23' },
   { pfad: '/fuer-fensterbauer/fensterbau-software/', prio: '0.7', stand: '2026-10-23' },
   { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-21' },
-  { pfad: '/impressum/', prio: '0.2', stand: '2026-10-16' },
-  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-27' },
-  { pfad: '/agb/', prio: '0.2', stand: '2026-10-18' },
-  { pfad: '/nutzungsbedingungen/', prio: '0.2', stand: '2026-10-18' },
-  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-27' },
+  { pfad: '/impressum/', prio: '0.2', stand: '2026-10-28' },
+  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-28' },
+  { pfad: '/agb/', prio: '0.2', stand: '2026-10-28' },
+  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-28' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
 ].concat(PAKETE_SEITEN);
 
@@ -139,9 +138,9 @@ export async function seite(antwort, env, url) {
 }
 
 /* Einführungspreis (EINFUEHRUNG in functions/api/umgebung.js): Ab dem Stichtag nennen die Seiten die regulären Preise und die
-   Hinweise <span class="einf">…</span> fallen weg, ohne dass jemand die Dateien ändert. AGB und Nutzungsbedingungen nennen beide
+   Hinweise <span class="einf">…</span> fallen weg, ohne dass jemand die Dateien ändert. Die AGB nennen beide
    Zeiträume selbst (Vertragstext mit Stand) und bleiben, wie sie sind. Die Prüfsuite gibt jede Seite einmal nach dem Stichtag aus. */
-const RECHT_MIT_ZEITRAUM = ['/agb/', '/nutzungsbedingungen/'];
+const RECHT_MIT_ZEITRAUM = ['/agb/'];
 const BANNER_SEITEN = /^\/(ratgeber|fuer-fensterbauer)\//;
 const zahl = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace('.', ','));
 const NACH_EINFUEHRUNG = [
@@ -265,7 +264,7 @@ export function llms(origin, env) {
     '- [Wie misst man ein Fenster mit Rollladenkasten?](' + u('/ratgeber/fenster-mit-rollladen-ausmessen/') + '): beim Aufsatzkasten bis zur Oberkante des Kastens, beim Einbaukasten bis zu seiner Unterkante, beim Vorbaurollladen die Öffnung wie immer.',
     '- [DIN links oder DIN rechts?](' + u('/ratgeber/din-links-rechts/') + '): von der Seite gesehen, zu der das Fenster aufgeht, also meist von innen; Bänder links heißt DIN links (DIN 107).',
     '- [Wie hoch muss eine Fensterbrüstung sein?](' + u('/ratgeber/bruestungshoehe-fenster/') + '): mindestens 80 cm, bei mehr als 12 m Absturzhöhe 90 cm, wenn draußen mehr als 1 m tiefer liegt (Musterbauordnung, von den meisten Ländern übernommen; Bayern weicht ab).',
-    '- [Gibt es eine App, mit der man Fenster selbst ausmisst?](' + u('/app/') + '): ja, eeziframes im Browser, ohne Installation; Messen kostenlos, Aufmaßblatt als PDF ' + eur(p.aufmass) + ', über den Link eines Fensterbauers kostenlos.',
+    '- [Gibt es eine App, mit der man Fenster selbst ausmisst?](' + u('/app/') + '): ja, eeziframes im Browser, ohne Installation; Messen kostenlos, Aufmaßblatt als PDF ' + eur(p.aufmass) + ', im Konfigurator auf der Website eines Fensterbauers kostenlos.',
     '- [Warum beschlagen Fenster, und was bedeutet es?](' + u('/ratgeber/fenster-beschlagen/') + '): innen ist die Raumluft zu feucht oder die Scheibe zu kalt (ein Vier-Personen-Haushalt gibt rund 8 bis 12 Liter Wasser am Tag ab, Ziel 40 bis 60 % Luftfeuchte); außen beschlägt gut dämmendes Glas, das ist kein Mangel; zwischen den Scheiben ist der Randverbund undicht, dann hilft nur neues Glas oder ein neues Fenster.',
     '- [Was tun, wenn es am Fenster zieht?](' + u('/ratgeber/fenster-undicht/') + '): mit dem Papiertest die Stelle finden; alte Dichtungen durch neue Gummiprofile ersetzen, Beschläge vom Fachbetrieb einstellen lassen; die Fuge zur Wand muss mit Dichtbändern angeschlossen sein, Bauschaum allein reicht nicht. Bei Fenstern von vor 1995 ist meist ein neues Fenster sinnvoll.',
     '- [Wie erkenne ich, wie alt meine Fenster sind?](' + u('/ratgeber/fenster-alter-erkennen/') + '): am Aufdruck auf dem Abstandhalter zwischen den Scheiben, dort steht oft das Herstellungsdatum der Verglasung. Einfachglas, Kasten- und Verbundfenster stammen meist von bis 1978, unbeschichtetes Isolierglas von 1978 bis 1995, Wärmeschutzglas ab etwa 1995. Das BBSR setzt für Rahmen 50 Jahre und mehr an, für Isolierglas 30, für Dichtungsprofile 20.',

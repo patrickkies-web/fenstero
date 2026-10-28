@@ -1195,7 +1195,7 @@
 
     /* ---------- Buchungen ----------
        0. Seit 28.10.2026 ist das Betriebskonto kostenlos (projekt 0, kostenlos()): jede Buchung „kostenlos“, nie gesperrt, keine Tarife.
-          Die Regeln 2 bis 4 gelten nur, wenn der Server einen Projektpreis meldet (BETRIEBE_ABRECHNUNG=1, nur die Prüfsuite).
+          Die Regeln 2 bis 4 gelten nur, wenn der Server einen Projektpreis meldet (BETRIEBSKONTO=1, nur die Prüfsuite).
        1. Gebucht wird beim ersten Eingang je Projekt, zum Tarif, der in diesem Moment gilt; Nachbesserungen im selben Projekt kosten nichts. Eine Buchung wird nie geändert oder gelöscht.
        2. Start: die ersten 3 Projekte je Betrieb frei (zählt über die Buchungen), danach 9 € je Projekt, nur mit Zahlungsart.
        3. Abo 10: 49 € im Monat, 10 Projekte im Kalendermonat inklusive, jedes weitere 5 €. Plus: 79 € im Monat, unbegrenzt.

@@ -76,13 +76,13 @@ Die Menünamen bei Cloudflare ändern sich ab und zu; die Werte in der Tabelle b
 
 ## Schritt 4: Rechtstexte
 
-Impressum (`web/impressum/`), Datenschutzerklärung (`web/datenschutz/`), AGB für Hauseigentümer mit Widerrufsbelehrung und Muster-Widerrufsformular (`web/agb/`), Nutzungsbedingungen für Fensterbauer mit dem Vertrag über die Auftragsverarbeitung (`web/nutzungsbedingungen/`), Cookies (`web/cookies/`) und die Widerrufsfunktion (`web/widerruf/`) sind mit den Angaben des Anbieters ausgefüllt (Patrick Kies, Postweg 35, 33442 Herzebrock-Clarholz, E-Mail ask@eeziframes.com, Telefon 0152 56950998; das Postfach liegt bei Zoho Mail, das steht in der Datenschutzerklärung). Alle Fußzeilen verlinken die Texte und zeigen „Vertrag widerrufen“ als Knopf (§ 356a BGB, seit 19. Juni 2026 Pflicht, sobald Verbraucher online kaufen).
+Impressum (`web/impressum/`), Datenschutzerklärung (`web/datenschutz/`), AGB für Hauseigentümer mit Widerrufsbelehrung und Muster-Widerrufsformular (`web/agb/`), Paketbedingungen für Fensterbauer mit dem Vertrag über die Auftragsverarbeitung (`web/konfigurator-bedingungen/`), Cookies (`web/cookies/`) und die Widerrufsfunktion (`web/widerruf/`) sind mit den Angaben des Anbieters ausgefüllt (Patrick Kies, Postweg 35, 33442 Herzebrock-Clarholz, E-Mail ask@eeziframes.com, Telefon 0152 56950998; das Postfach liegt bei Zoho Mail, das steht in der Datenschutzerklärung). Alle Fußzeilen verlinken die Texte und zeigen „Vertrag widerrufen“ als Knopf (§ 356a BGB, seit 19. Juni 2026 Pflicht, sobald Verbraucher online kaufen).
 
 Die Texte sind Entwürfe. Lass sie vor dem öffentlichen Start rechtlich prüfen. Die Suite (Abschnitt 17) prüft, dass Anbieter, Preise, Widerrufsbelehrung, Speicher-Einträge und Knöpfe zur Website passen.
 
 Die Telefonnummer ist Pflicht: Sie gehört in die Widerrufsbelehrung und in die Vertragsbestätigung, nicht nur ins Impressum (Art. 246a § 1 EGBGB). E-Mail-Adresse und Nummer stehen auch in `functions/api/anbieter.js` (`mail`, `telefon`), damit sie in Vertragsbestätigung und Eingangsbestätigung stehen; die Suite prüft, dass beides zum Impressum passt. Steht in einem Text wieder ein orangefarbener Platzhalter (`<mark class="ph">`), bleibt die Kasse im Live-Modus zu (`/api/status`, `"verkauf"`).
 
-Ändert sich der Text der AGB oder der Nutzungsbedingungen, bekommt er einen neuen Stand: in `functions/api/recht.js` (`AGB_STAND`, `NB_STAND`) und auf der Seite (`<meta name="stand">` und „Stand:“, erzeugt aus einer Quelle). Die Kasse zeigt den Stand, der Server nimmt nur Käufe mit genau diesem Stand an und speichert ihn mit dem Kauf; die Suite prüft, dass beides übereinstimmt.
+Ändert sich der Text der AGB, bekommt er einen neuen Stand: in `functions/api/recht.js` (`AGB_STAND`; `NB_STAND` gehört seit 28.10.2026 nur noch zur Hinweisseite `/nutzungsbedingungen/` über das eingestellte Konto für Fensterbauer, `PAKET_STAND` zu den Paketbedingungen) und auf der Seite (`<meta name="stand">` und „Stand:“, erzeugt aus einer Quelle). Die Kasse zeigt den Stand, der Server nimmt nur Käufe mit genau diesem Stand an und speichert ihn mit dem Kauf; die Suite prüft, dass beides übereinstimmt.
 
 ## Schritt 5: KI-Fotoauswertung einschalten (optional)
 
@@ -217,7 +217,7 @@ Unter `https://eeziframes.com/zentrale/` kommen alle Bestellungen der Landingpag
 2. Im **Live-Modus** einen Geheimschlüssel (`sk_live_…`) und ein neues Ereignisziel anlegen (gleiche Adresse, gleiche Ereignisse; Test- und Live-Modus sind getrennt), bei Cloudflare `STRIPE_SECRET_KEY` und `STRIPE_WEBHOOK_SECRET` austauschen. Preise und Steuersätze legt der Server im Live-Modus selbst neu an.
 3. Stripe-Kennungen aus dem Testmodus gelten live nicht: In Supabase (Tabelle `betriebe`) die Spalten `stripe_customer` und `stripe_subscription` der Testkonten leeren oder die Testkonten löschen.
 4. Rechtliches vor der ersten echten Zahlung: E-Mail-Adresse und Telefonnummer in die Rechtstexte (Schritt 4), Mailversand eingerichtet (`MAIL_API_KEY`, sonst gehen weder Vertragsbestätigung noch Eingangsbestätigung eines Widerrufs raus), Gewerbe angemeldet und Kleinunternehmer-Frage geklärt (`MWST`), die Texte rechtlich prüfen lassen. Die Kasse im Live-Modus prüft das Technische davon selbst (`"verkauf"` in `/api/status`).
-   Bevor sich der erste Betrieb registriert: Supabase auf den Tarif **Pro** stellen (tägliche Sicherungen, sieben Tage aufbewahrt). So sagt es der Vertrag über die Auftragsverarbeitung (Anlage der Nutzungsbedingungen, Nr. 5 und 8); im kostenlosen Tarif sichert Supabase nichts.
+   Vor dem ersten Paket: Supabase auf den Tarif **Pro** stellen (tägliche Sicherungen, sieben Tage aufbewahrt). So sagt es der Vertrag über die Auftragsverarbeitung (Anlage der Paketbedingungen); im kostenlosen Tarif sichert Supabase nichts.
 5. Suchmaschinen freigeben: Schritt 7 (Variable `INDEXIERUNG`).
 
 Erstattungen, Kündigungen und Rechnungen siehst und erledigst du im Stripe-Dashboard (**Zahlungen** → Zahlung → **⋯** → **Zahlung erstatten**; **Kunden**; **Rechnungen**). Eine Erstattung des Aufmaßblatts sperrt das Blatt nicht nachträglich; es liegt auf dem Gerät des Käufers.
@@ -270,7 +270,7 @@ Jeder Fensterbauer bestellt seine Landingpage mit Konfigurator unter `/bestellen
 | `PAKETE_OFFEN` | Variable | `1` = Pakete werden verkauft (Kasse im Live-Modus; ohne: die Bestellung endet mit einer unverbindlichen Anfrage) |
 | `ZENTRALE_PASSWORT`, `ZENTRALE_2FA`, `MAIL_KONTAKT` | Secrets, Variable | Anmeldung in der Zentrale (ab 12 Zeichen, zweiter Faktor optional) und deine Adresse für neue Bestellungen, Nachrichten und Fragen |
 | `PAKETE_DEMOS` | Variable | `1` = Verkaufsseite verlinkt die Demo-Instanzen |
-| `PDF_IM_WORKER`, `KI_TAG_MAX`, `KI_TAG_MAX_INSTANZEN`, `INSTANZ_CACHE_MS`, `HAUPT_HOSTS` (nie setzen: `BETRIEBE_ABRECHNUNG`, `PREIS_PROJEKT`; das Betriebskonto ist kostenlos) | Variablen | Feinsteuerung, Beschreibung in `functions/api/umgebung.js` |
+| `PDF_IM_WORKER`, `KI_TAG_MAX`, `KI_TAG_MAX_INSTANZEN`, `INSTANZ_CACHE_MS`, `HAUPT_HOSTS` (nie setzen: `BETRIEBSKONTO`, `PREIS_PROJEKT`; das Betriebskonto gibt es seit 28.10.2026 nicht mehr) | Variablen | Feinsteuerung, Beschreibung in `functions/api/umgebung.js` |
 
 ### Je Kunde
 

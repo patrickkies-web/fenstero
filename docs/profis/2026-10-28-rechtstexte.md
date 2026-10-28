@@ -73,6 +73,8 @@ Neue Fassungen: Paketbedingungen und AV-Vertrag vom 28.10.2026 (PDFs neu), Nutzu
 
 ## Nachtrag am selben Tag: Preise des Inhabers und die technischen Lücken
 
+(Der Teil zum Betriebskonto ist durch den zweiten Nachtrag überholt: Das Konto gibt es nicht mehr.)
+
 **Preise (Wort des Inhabers):** „Es gelten nur noch die Paketpreise und die Einrichtungsgebühren plus Aufpreise 8 ct. 9 € lange nicht mehr, für Privathaushalte immer noch 7,99 € im Angebot fürs Aufmaß.“ Daraus:
 
 - **Betriebskonto kostenlos.** Projekte, Kundenlinks, eingegangene Aufmaße und Codes vom Kunden kosten nichts, eine Zahlungsart wird nicht verlangt.
@@ -80,7 +82,7 @@ Neue Fassungen: Paketbedingungen und AV-Vertrag vom 28.10.2026 (PDFs neu), Nutzu
   - Das Portal hat keine Abrechnung mehr. Preise und FAQ sagen „Ihr Konto kostet nichts“ und verweisen auf die Pakete.
   - Das Aufmaßblatt zeigt „Konto kostenlos“.
   - Die Abo-Kasse und die Zahlungsart lehnt der Server ab (409). Sammelrechnungen gibt es nicht mehr; ein altes Abo 10 oder Plus kündigt der Abrechnungslauf einmal zum Ende seines Abrechnungsmonats.
-  - Die alte Abrechnung je Projekt läuft nur noch mit `BETRIEBE_ABRECHNUNG=1`, also nur in der Prüfsuite.
+  - Die alte Abrechnung je Projekt läuft nur noch mit `BETRIEBSKONTO=1`, also nur in der Prüfsuite.
 - **Nutzungsbedingungen §§ 4–8 neu** (Stand 28.10.2026):
   - § 4 Kosten: Das Konto ist kostenlos; kostenpflichtig sind nur das Paket und das Aufmaßblatt der Hauseigentümer.
   - § 5 Projekte und Nachbesserungen.
@@ -105,10 +107,38 @@ Neue Fassungen: Paketbedingungen und AV-Vertrag vom 28.10.2026 (PDFs neu), Nutzu
 
 Nicht gelöst: eine echte Prüfung gegen Automaten (Captcha). Sie bräuchte einen fremden Dienst, und die CSP lässt keine fremden Server zu. Die Grenzen oben begrenzen den Schaden.
 
+## Zweiter Nachtrag: Betriebskonto eingestellt
+
+**Wort des Inhabers:** „Diese Funktion gibt es nicht mehr auf meiner Webseite. Entweder du hast ein Paket, worüber alles läuft, oder nicht. Die einzige andere Variante sind einfache Kunden, die so vorbeikommen.“ Der erste Nachtrag (Konto kostenlos) ist damit überholt. Es gibt nur noch zwei Wege: Fensterbauer mit Paket und Hauseigentümer, die das Aufmaßblatt kaufen.
+
+- **Technik:** Ohne `BETRIEBSKONTO` (so läuft es online) antworten Konto, Kundenlinks und Aufmaß-Eingang mit 410 und verweisen auf die Pakete.
+  - `/api/status` meldet `betriebskonto: false`.
+  - Die Startseite hat keinen Betriebsbereich mehr: keine Anmeldung, keine Tour, kein Code-Import. Alte Anmeldungen im Browser räumt sie weg.
+  - Das Aufmaßblatt hat keinen Aufmaß-Code mehr. Die letzte Seite und der QR-Code führen zu den Paketen.
+  - Erinnerungs-Mails zu offenen Links gehen nicht mehr raus.
+  - Der alte Code bleibt für die Prüfsuite (`BETRIEBSKONTO=1`). Abschnitt 17 f prüft den Betrieb ohne Konto.
+- **Nutzungsbedingungen:** `/nutzungsbedingungen/` ist nur noch eine Hinweisseite (noindex, nicht in der Sitemap). Sie sagt:
+  - Das Konto endet; es fallen keine Kosten mehr an, alte Abos enden.
+  - Die Daten werden bis 31.12.2026 gelöscht; eine Kopie gibt es auf Wunsch.
+  - Für den eigenen Konfigurator gelten die Paketbedingungen.
+- **AGB:** ohne Kundenlink und ohne Code (§ 1, § 2, § 4), Stand 28.10.2026. Plant ein Kunde im Konfigurator eines Fensterbauers, ist dieser sein Anbieter.
+- **Paketbedingungen § 1 Abs. 3:** Der Satz zum Betriebskonto ist gestrichen; die PDFs sind neu erzeugt.
+- **Datenschutz:** Link eines Betriebs, Aufmaß-Code und die Konten für Betriebe sind gestrichen.
+  - Abschnitt 6: Versand als PDF.
+  - Abschnitt 8 „Konten und Zahlungen“: Speicherort, Konto für Hauseigentümer, Kauf, Verwaltung.
+  - Neu: „Frühere Konten für Betriebe“ mit Löschung bis 31.12.2026.
+- **Cookies:** Die Einträge des Kontos stehen nur noch als Altlast im Text.
+- **Seiten:** In allen Fußzeilen steht „Paketbedingungen“ statt „Nutzungsbedingungen“. Im Kopf der Rechtstexte steht „Für Fensterbauer“.
+  - Startseite, App-Seite und `llms.txt` sprechen vom Konfigurator auf der Website des Fensterbauers statt vom Link.
+  - Die öffentlichen Entwurfsvermerke im Quelltext sind entfernt.
+
 ## Was du tun musst
 
 1. **Stripe:** Workbench → Webhooks → dein Ziel → Ereignis `charge.dispute.created` ergänzen (Test und Live). Ohne das merkt der Server keine Rücklastschrift.
-2. **Bestehende Konten für Betriebe:** Falls es schon echte gibt, ihnen die neuen Nutzungsbedingungen mailen. § 14 Abs. 1 verlangt sechs Wochen Vorlauf mit Hinweis auf das Widerspruchsrecht; Resend als Unterauftragsverarbeiter vier Wochen (Anlage Nr. 6). Für sie wird alles günstiger (Konto kostenlos). Hat noch jemand ein Abo 10 oder Plus bei Stripe, kündigt es der Abrechnungslauf zum Ende des Abrechnungsmonats; schau in Stripe nach, ob es solche Abos gibt.
-5. **Nie setzen:** `BETRIEBE_ABRECHNUNG` und `PREIS_PROJEKT` bei Cloudflare. Sie schalten die alte Abrechnung je Projekt wieder ein.
+2. **Frühere Konten für Betriebe:** Schau in der Zentrale nach, ob es echte gibt.
+   - Falls ja: Schreib ihnen kurz, dass das Konto endet, mit dem Link auf `/nutzungsbedingungen/`.
+   - Lösch ihre Daten bis 31.12.2026. Das steht so in der Hinweisseite und in der Datenschutzerklärung.
+   - Schau in Stripe nach alten Abos 10 oder Plus. Der Abrechnungslauf kündigt sie zum Ende ihres Abrechnungsmonats.
 3. **Impressum:** Hast du eine USt-IdNr. oder schon eine Wirtschafts-Identifikationsnummer, gehört sie ins Impressum (§ 5 Abs. 1 Nr. 6 DDG). Sag sie mir, dann trage ich sie ein.
 4. **Umsatzsteuer:** Die Pakete sind netto plus 19 % ausgewiesen. Bist du Kleinunternehmer (MWST=0), muss ich die Paketseiten und Bedingungen anpassen.
+5. **Nie setzen:** `BETRIEBSKONTO` und `PREIS_PROJEKT` bei Cloudflare. Sie schalten das alte Konto mit der Abrechnung je Projekt wieder ein.

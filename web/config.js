@@ -5,6 +5,7 @@ window.KONFIG = {
   marke: 'eeziframes',
   pilot: true,                 // ohne Server: Code-Versand per WhatsApp/E-Mail, Kauf als Testkauf; mit Server (/api/status) schaltet die App selbst um
   ki: '/api/ki',               // KI-Auswertung der Fotos; '' schaltet sie ganz ab
+  betriebskonto: false,        // das frühere Konto für Fensterbauer gibt es seit 28.10.2026 nicht mehr (nur Pakete); mit Server gilt /api/status
   impressum: '/impressum/',
   datenschutz: '/datenschutz/',
   /* Preise. Mit Server (Stufe 2) kommen sie aus /api/status und überschreiben diese Werte.

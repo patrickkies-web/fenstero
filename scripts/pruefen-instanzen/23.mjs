@@ -224,7 +224,7 @@ export default async (h) => {
   const rechnungen = [];
   const zd = { rechnung: async (o) => { rechnungen.push(o.id); return { neu: { nr: 'R-1', id: 'in_1', betrag: 9, buchungen: o.posten.map((p) => p.buchung) } }; } };
   const spF = { betriebeMitKunde: async () => [{ id: 'inst-b', stripe_customer: 'cus_i', daten: { instanz: { id: 'x' }, konto: 'instanz', pay: { type: 'Karte' }, book: [{ id: 'bi', kind: 'aufmass', status: 'offen', betrag: 9, text: 'x' }] } }, { id: 'alt-b', stripe_customer: 'cus_a', daten: { konto: 'service', pay: { type: 'Karte' }, book: [{ id: 'ba', kind: 'aufmass', status: 'offen', betrag: 9, text: 'y' }], rechnungen: [] } }], betriebAendern: async () => true };
-  /* die frühere Abrechnung je Projekt (seit 28.10.2026 nur mit BETRIEBE_ABRECHNUNG=1): Instanz-Betriebe bleiben davon frei */
+  /* die frühere Abrechnung je Projekt (seit 28.10.2026 nur mit BETRIEBSKONTO=1): Instanz-Betriebe bleiben davon frei */
   const preiseVorher = JSON.parse(JSON.stringify(globalThis.Abrechnung.preise())); globalThis.Abrechnung.setPreise({ projekt: 9, frei: 3 });
   const lauf = await KONTEN.abrechnungslauf({}, spF, zd);
   globalThis.Abrechnung.setPreise(preiseVorher);
