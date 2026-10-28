@@ -5,7 +5,7 @@
 // · 25.3 keine Preise, Kasse, WhatsApp, AGB, Widerruf, Cookies, Führung · 25.4 neu laden und zweites Gerät · 25.5 Server weg, Planung
 // verfallen · 25.6 Fotos mit kleiner Fassung, KI mit Code · 25.7 Signature-Einladung · 25.8 Vorschau und Testanfrage · 25.9 keine Fehler,
 // keine fremden Anfragen, kein waagrechter Scroll · 25.10 Hauptdomain-App unverändert (dazu die Abschnitte 4, 14, 16, 19, 21, 22)
-// · 25.11 Testansicht für Fensterbauer (/app/?ausprobieren[=<paket>], Paket-Beispiele)
+// · 25.11 Testansicht für Fensterbauer (/app/?ausprobieren[=<paket>], Einstieg über die Beispielseite Signature mit Hinweis-Kästchen)
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -322,8 +322,9 @@ export default async (h) => {
   const gesendet = await bis(sT, () => S.screen === 'gesendet' && !!S.sent, 10000);
   const t4 = await sT.evaluate(() => ({ nr: S.sent && S.sent.nr, art: S.sent && S.sent.art, text: document.querySelector('.scr').innerText }));
   const t4b = await sT.evaluate(() => ({ dna: !!document.querySelector('.scr.dna.gs'), pdf: !!document.querySelector('.gs-pdf [data-act="inst-pdf"]'), pillen: document.querySelectorAll('.scr .dna-pille:not(.dna-pille--leise)').length, fertig: (document.querySelector('.gs-fuss a') || {}).getAttribute ? document.querySelector('.gs-fuss a').getAttribute('href') : '',
-    meldung: (document.querySelector('.gs-meldung') || {}).textContent || '', haupt: (document.querySelector('.probe-wahl .pw-haupt') || {}).getAttribute ? document.querySelector('.probe-wahl .pw-haupt').getAttribute('href') : '', hauptText: (document.querySelector('.probe-wahl .pw-haupt') || {}).innerText || '', ab: 'Ab ' + Pakete.euro(Math.min.apply(null, Pakete.LISTE.map((k) => Pakete.preis(k).monat))) + ' im Monat' }));
+    meldung: (document.querySelector('.gs-meldung') || {}).textContent || '', wahl: (document.querySelector('.probe-wahl') || {}).className || '', haupt: (document.querySelector('.probe-wahl .pw-haupt') || {}).getAttribute ? document.querySelector('.probe-wahl .pw-haupt').getAttribute('href') : '', hauptText: (document.querySelector('.probe-wahl .pw-haupt') || {}).innerText || '', ab: 'Ab ' + Pakete.euro(Math.min.apply(null, Pakete.LISTE.map((k) => Pakete.preis(k).monat))) + ' im Monat' }));
   ok(/An Fensterbau Brandt gesendet · Simulation/.test(t4b.meldung) && t4b.haupt === '/fuer-fensterbauer/#pakete' && t4b.hauptText.indexOf(t4b.ab) >= 0, '25.11 Ende der Testansicht: Versandmeldung, dann die große Karte „Pakete ansehen“ zum Anker #pakete mit dem Preis aus pakete.js (' + t4b.ab + ')');
+  ok(/\bpw-halb\b/.test(t4b.wahl), '25.11 Ende der Testansicht im Paket Plus: Auswahl in den Farben des Beispielbetriebs, zur Hälfte (' + t4b.wahl + ')');
   await sT.click('.probe-wahl [data-act="probe-betrieb"]'); await sT.waitForTimeout(500);
   const t5 = await sT.evaluate(() => ({ mail: (document.querySelector('.probe-mail') || {}).innerText || '', text: document.querySelector('.scr').innerText, pakete: (document.querySelector('.probe-aktionen a.dna-pille') || {}).getAttribute ? document.querySelector('.probe-aktionen a.dna-pille').getAttribute('href') : '', pillen: document.querySelectorAll('.scr .dna-pille:not(.dna-pille--leise)').length }));
   const [dlT] = await Promise.all([sT.waitForEvent('download', { timeout: 20000 }), sT.click('[data-act="probe-blatt"]')]);
@@ -344,10 +345,48 @@ export default async (h) => {
   const tPE = await sPE.evaluate(() => ({ paket: PROBE_PAKET, farbe: !!INST.m.farbe, kz: INST.m.kennzeichnung, hinweis: (document.querySelector('.st-rechts .probe-info') || {}).innerText || '' }));
   ok(tPE.paket === 'essential' && !tPE.farbe && tPE.kz === 'deutlich' && /EEZI Essential\)/.test(tPE.hinweis), '25.11 Testansicht im Paket Essential: Merkmale aus pakete.js (ohne Firmenfarbe, Kennzeichnung deutlich)');
   h.sauber(sPE, '25.11 Testansicht Essential ohne Fehler'); await ctxPE.close();
+  /* Einstieg über die Beispielseite (Inhaber, 28.10.2026): „Selbst ausprobieren“ öffnet Fensterbau Brandt im Paket Signature, abgedunkelt
+     mit einem Kästchen davor; „Fenster planen“ führt in die Testansicht, deren erste Folie zurück zur Beispielseite führt; Fensterliste und
+     die Seite nach dem Senden im Look der DNA, das Ende in den Farben des Betriebs */
+  const ctxL = await telefon(), sL = await h.neueSeite(ctxL, X.base('localhost'));
+  await sL.goto(X.base('localhost') + '/vorschau/paket-beispiel/signature.html?ausprobieren', { waitUntil: 'networkidle' }); await sL.waitForTimeout(500);
+  const l1 = await sL.evaluate(() => { const dl = document.querySelector('dialog.ez-probe'); return { offen: !!(dl && dl.open), text: dl ? dl.innerText : '', gleich: (document.querySelector('.ez-probe__leise') || {}).getAttribute ? document.querySelector('.ez-probe__leise').getAttribute('href') : '', modus: document.querySelector('main.ez').getAttribute('data-modus'), pakete: Array.from(document.querySelectorAll('.ez-ml__pakete a')).map((a) => a.getAttribute('href')).join(' ') }; });
+  ok(l1.offen && /So sieht Ihre Seite aus\.\s*Im Paket Signature\./.test(l1.text) && /erfundener Betrieb/.test(l1.text) && /Ihre Bilder, Ihr Logo, Ihre Farben/.test(l1.text) && /Gesendet wird nichts/.test(l1.text) && l1.gleich === '/app/?ausprobieren=signature' && l1.modus === 'website' && l1.pakete === 'essential.html?ausprobieren plus.html?ausprobieren signature.html?ausprobieren',
+    '25.11 Beispielseite Signature als Testansicht: Kästchen „So sieht Ihre Seite aus“ über der abgedunkelten Seite, Weg über die Website, Paketwechsel bleibt in der Testansicht');
+  await sL.click('.ez-probe [data-zu]'); await sL.waitForTimeout(400);
+  await sL.reload({ waitUntil: 'networkidle' }); await sL.waitForTimeout(300);
+  ok(!(await sL.evaluate(() => !!document.querySelector('dialog.ez-probe'))), '25.11 Beispielseite: das Kästchen kommt je Tab nur einmal');
+  await Promise.all([sL.waitForURL(/\/app\/\?ausprobieren=signature/), sL.click('main a.dna-pille:not(.dna-pille--klein)[href="/app/?ausprobieren=signature"]')]);
+  await bis(sL, () => typeof S !== 'undefined' && S.screen === 'start', 8000);
+  const l2 = await sL.evaluate(() => ({ landing: PROBE_LANDING, zurueck: Array.from(document.querySelectorAll('[data-act="probe-landing"]')).length, info: (document.querySelector('.st-rechts .probe-info a') || {}).getAttribute ? document.querySelector('.st-rechts .probe-info a').getAttribute('href') : '', hinweis: (document.querySelector('.st-rechts .probe-info') || {}).innerText || '' }));
+  ok(l2.landing === '/vorschau/paket-beispiel/signature.html?ausprobieren' && l2.zurueck >= 1 && l2.info === l2.landing && /EEZI Signature\)/.test(l2.hinweis), '25.11 „Fenster planen“ führt in die erste Folie (Paket Signature); Zurück führt auf die Beispielseite');
+  await sL.evaluate((mo) => {
+    S.windows = [Object.assign(baseWin(), { name: 'Wohnzimmer', wid: 'fprobe2', t0: Date.now(), aend: 0, ts: Date.now(), mo: mo, el: { w: 1340, h: 1450 }, w: 1340, h: 1450 })];
+    S.editIdx = -1; S.win = baseWin(); persist(); go('home');
+  }, MO);
+  await sL.waitForTimeout(400);
+  const l3 = await sL.evaluate(() => ({ cls: (document.querySelector('.scr') || {}).className || '', pille: Array.from(document.querySelectorAll('.scr .dna-pille:not(.dna-pille--leise)')).map((e) => e.textContent.trim()), bb: !!document.querySelector('.bb .btn') }));
+  ok(/\bdna\b/.test(l3.cls) && /\bli\b/.test(l3.cls) && l3.pille.length === 1 && /Weiter zum Absenden/.test(l3.pille[0]) && !l3.bb, '25.11 Fensterliste im Look der DNA (eine volle Pille „Weiter zum Absenden“, keine alte Leiste)');
+  await sL.evaluate(() => { Object.assign(S.proj, { name: 'Familie Probe', tel: '0171 2345678', ort: '50823 Köln' }); persist(); go('anfrage3'); });
+  await sL.waitForTimeout(300); await sL.click('.scr.dna .lg-weiter');
+  await bis(sL, () => S.screen === 'gesendet' && !!S.sent, 10000);
+  const l4 = await sL.evaluate(() => (document.querySelector('.probe-wahl') || {}).className || '');
+  await sL.evaluate(() => go('home')); await sL.waitForTimeout(400);
+  const l5 = await sL.evaluate(() => ({ cls: (document.querySelector('.scr') || {}).className || '', blatt: (document.querySelector('.ab-papier-h') || {}).textContent || '', wahl: !!document.querySelector('.probe-wahl'), text: document.querySelector('.scr').innerText }));
+  ok(/\bpw-voll\b/.test(l4) && /\bgs\b/.test(l5.cls) && /^Anfrage TEST-/.test(l5.blatt) && l5.wahl && /Danke, gesendet/.test(l5.text), '25.11 Signature: Ende in den Farben von Fensterbau Brandt; danach die Startseite „Danke, gesendet.“ im Look der DNA mit der Nummer auf dem Blatt');
+  await sL.evaluate(() => { instanzVergessen(true); go('home'); });
+  await sL.waitForURL(/paket-beispiel\/signature\.html\?ausprobieren/, { timeout: 8000 }).catch(() => {});
+  ok(/paket-beispiel\/signature\.html\?ausprobieren/.test(sL.url()), '25.11 Testansicht ohne Fenster: zurück auf die Beispielseite statt auf die alte Startseite');
+  ok(!(await waagrecht(sL)), '25.11 Beispielseite: kein waagrechter Scroll');
+  h.sauber(sL, '25.11 Einstieg über die Beispielseite ohne Fehler'); await ctxL.close();
   const fbSeite = await X.api('localhost', '/fuer-fensterbauer/');
-  ok((String(fbSeite.text).match(/href="\/app\/\?ausprobieren"/g) || []).length === 2, '25.11 Seite für Fensterbauer: „Selbst ausprobieren“ führt zweimal in die Testansicht');
+  ok((String(fbSeite.text).match(/href="\/vorschau\/paket-beispiel\/signature\.html\?ausprobieren"/g) || []).length === 2, '25.11 Seite für Fensterbauer: „Selbst ausprobieren“ öffnet zweimal die Beispielseite Signature als Testansicht');
+  for (const rg of ['/fuer-fensterbauer/fensterbau-software/', '/fuer-fensterbauer/erstaufmass-feinaufmass/']) {
+    const t = String((await X.api('localhost', rg)).text);
+    ok(t.indexOf('href="/vorschau/paket-beispiel/signature.html?ausprobieren"') >= 0 && t.indexOf('href="/app/?ausprobieren"') < 0, '25.11 ' + rg + ': „Konfigurator ausprobieren“ öffnet die Beispielseite Signature als Testansicht');
+  }
   for (const pk of ['essential', 'plus', 'signature']) {
     const bsp = String((await X.api('localhost', '/vorschau/paket-beispiel/' + pk + '.html')).text);
-    ok(bsp.indexOf('href="/app/?ausprobieren=' + pk + '"') >= 0 && !/href="#"[^>]*data-vorlage="ziel\.konfigurator"/.test(bsp), '25.11 Paket-Beispiel ' + pk + ': „Fenster planen“ öffnet die Testansicht in diesem Paket');
+    ok(bsp.indexOf('href="/app/?ausprobieren=' + pk + '"') >= 0 && !/href="#"[^>]*data-vorlage="ziel\.konfigurator"/.test(bsp) && bsp.indexOf('<script src="ausprobieren.js"></script>') >= 0 && bsp.indexOf('href="ausprobieren.css"') >= 0, '25.11 Paket-Beispiel ' + pk + ': „Fenster planen“ öffnet die Testansicht in diesem Paket, Hinweis-Kästchen eingebunden');
   }
 };

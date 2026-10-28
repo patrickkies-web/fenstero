@@ -1,0 +1,27 @@
+/* Hinweis-Kästchen der Testansicht auf der Beispielseite (ausprobieren-hinweis.js). Hier spricht eeziframes zum Fensterbauer, darum in
+   der Palette von eeziframes, nicht in der des Beispielbetriebs: die Seite dahinter abgedunkelt, davor eine Anthrazit-Karte mit
+   Lichtkante (G14), Etikett mit violettem Punkt, eine weiße Pille, ein Umriss. Auftritt 220 ms (Grund) und 320 ms (Karte, ease-out). */
+.ez-probe { --pr-font: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; width: min(520px, calc(100% - 32px)); max-width: none; max-height: calc(100% - 32px);
+  margin: auto; padding: 0; border: 0; background: transparent; color: #fff; overflow: visible }
+.ez-probe::backdrop { background: rgba(7, 9, 10, .58) }
+.ez-probe[open] { animation: ezProbeKarte 320ms cubic-bezier(.16, 1, .3, 1) both }
+.ez-probe[open]::backdrop { animation: ezProbeGrund 220ms ease-out both }
+@keyframes ezProbeKarte { from { opacity: 0; transform: translateY(10px) scale(.98) } to { opacity: 1; transform: none } }
+@keyframes ezProbeGrund { from { opacity: 0 } to { opacity: 1 } }
+.ez-probe__karte { display: grid; gap: 12px; padding: 24px 22px 20px; border-radius: 28px; font-family: var(--pr-font);
+  background: radial-gradient(120% 90% at 18% 0%, #363638, #202022 55%, #1c1c1e);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045), 0 40px 80px -30px rgba(0, 0, 0, .8) }
+.ez-probe__etikett { display: inline-flex; align-items: center; gap: 8px; font: 400 12px/1.3 var(--pr-font); letter-spacing: .03em; color: #a8a4a9 }
+.ez-probe__etikett::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #897efc; box-shadow: 0 0 0 4px rgba(137, 126, 252, .18) }
+.ez-probe h2 { margin: 0; font: 500 28px/1.08 var(--pr-font); letter-spacing: -.025em; color: #fff; outline: none }
+.ez-probe h2 span { color: #a8a4a9 }
+.ez-probe p { margin: 0; max-width: 44ch; font: 400 15px/1.5 var(--pr-font); color: #a8a4a9 }
+.ez-probe__knoepfe { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px }
+.ez-probe__pille, .ez-probe__leise { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 24px; border: 0; border-radius: 999px;
+  font: 500 15px/1 var(--pr-font); text-decoration: none; cursor: pointer; transition: transform 160ms cubic-bezier(.2, .7, .2, 1) }
+.ez-probe__pille { background: #fff; color: #07090a }
+.ez-probe__leise { background: transparent; color: #fff; box-shadow: inset 0 0 0 1.5px #a8a4a9 }
+.ez-probe__pille:active, .ez-probe__leise:active { transform: scale(.97); transition-duration: 0s }
+.ez-probe__pille:focus-visible, .ez-probe__leise:focus-visible { outline: 2px solid #fff; outline-offset: 3px }
+@media (max-width: 420px) { .ez-probe__knoepfe > * { flex: 1 1 100% } .ez-probe h2 { font-size: 26px } }
+@media (prefers-reduced-motion: reduce) { .ez-probe[open], .ez-probe[open]::backdrop { animation: none } .ez-probe__pille, .ez-probe__leise { transition: none } }

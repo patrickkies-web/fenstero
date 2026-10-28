@@ -58,6 +58,31 @@ jetzt weitermacht, visuell ansprechend, dass die Fensterbauer animiert werden, z
 | Bestätigung, Testansicht | „Ihr Konfigurator. Ihre Anfragen.“: große Karte „Pakete ansehen“ (#pakete, ab … im Monat aus pakete.js, keine Mindestlaufzeit), „So kommt die Anfrage bei Ihnen an“, „Noch einmal ausprobieren“; treten einmal nacheinander auf | Verkauf, Wunsch des Inhabers | neu |
 | Bestätigung, Testansicht | „Fertig“ führt zu den Paketen | Verkauf | geändert |
 
+## Nachtrag 2: Ausprobieren über die Beispielseite von Fensterbau Brandt (nachmittags)
+
+Inhaber: „… dass wenn auf der Seite für Fensterbauer jemand auf den Knopf ausprobieren drückt, dass er dann sozusagen die Seite sieht wie
+in dem Beispiel von Fensterbau Brand. Aber in der teuersten Fassung. … die Seite dann sozusagen im Hintergrund so ein bisschen ausgegraut
+… und im Vordergrund so ein Kästchen …“ und „… diesen gesamten Workflow ausprobieren kann … und danach wieder abgeholt wird, um zu meiner
+Seite zu gelangen … Einflüsse … von meiner vorherigen Geschäftsausrichtung und dessen Design … möcht ich halt nicht in diesen Schritten sehen.“
+
+| Wo | Was | Warum | Stand |
+| --- | --- | --- | --- |
+| Seite für Fensterbauer, Ratgeber | „Selbst ausprobieren“ und „Konfigurator ausprobieren“ öffnen `/vorschau/paket-beispiel/signature.html?ausprobieren` | Wunsch des Inhabers | neu |
+| Beispielseite Signature | Abgedunkelt, davor das Kästchen „So sieht Ihre Seite aus. Im Paket Signature.“ (angepasst mit Bildern, Logo, Farben, Ansprechpartnern, Texten; „Seite ansehen“, „Gleich Fenster planen“), einmal je Tab; Weg „Über die Website“; Paketwechsel bleibt in der Testansicht | Verständnis, Verkauf | neu |
+| Erste Folie | „Zurück“ (Kopf, Fuß und Infobereich) führt auf die Beispielseite; eine Testansicht ohne Fenster kehrt dorthin zurück statt auf die alte Startseite | Ein Ablauf, ein Look | neu |
+| Fensterliste (alle Instanzen) | Im Look der DNA wie die Liste des eigenen Aufmaßes: Bühne mit den Fenstern, „Deine Fenster.“ mit Stand, Karten, „Fragen?“, Pille „Weiter zum Absenden“ | Wunsch des Inhabers | neu |
+| Startseite nach dem Senden (alle Instanzen) | Im Look der DNA: Blatt mit der Anfragenummer (Maße und Kontakt sind vom Gerät gelöscht), „Danke, gesendet.“, „Von diesem Gerät löschen“ mit „… bleibt bestehen.“, „Weitere Anfrage starten“ | Wunsch des Inhabers | neu |
+| Ende der Testansicht | Auswahl in den Farben von Fensterbau Brandt (Signature ganz, Plus zur Hälfte, Essential eeziframes) | Wunsch des Inhabers | neu |
+| Kontakt, Fußleiste | Passt „An <Betrieb> senden“ nicht neben „Zurück“ (Laptop-Spalte, Telefon unter 390 px), weicht der runde Knopf (Rückweg im Kopf); bei sehr langen Namen „Anfrage senden“ | Bedienung (vorher lag der Knopf am Laptop über dem letzten Feld) | neu |
+| Paket-Beispiele | Preise in der Muster-Leiste aus pakete.js (39, 69, 99 €) | Ehrlichkeit | korrigiert |
+
+Farbanteile (Telefon, werkzeuge/farben.py): Beispielseite mit Kästchen 99,9 % neutral; Fensterliste 98,9 % neutral (Violett 0,7);
+Kontakt 99,8 %; Ende mit Auswahl 66,1 % neutral, 33,7 % Brandt-Palette (zählt im Werkzeug als „Foto“, gewollt); Auswahl im Bild 57 %
+Brandt-Palette. Bilder: docs/profis/bilder/2026-10-28-ausprobieren-telefon.jpg und -laptop.jpg.
+
+Noch im früheren Look und nicht im Testablauf: die Startseite einer Instanz vor dem ersten Fenster und die Einladungsseite („kümmern
+wir uns erst danach“).
+
 ## Gremium (eine Runde, drei Agenten, blind X/Y)
 
 - **Gestalter:**
@@ -103,5 +128,5 @@ Die Urteile stehen unter docs/profis/gremium/2026-10-28-testansicht.md.
 
 ## Offen (Wort des Inhabers)
 
-- Startseiten (Einladung, Instanz) und die Fensterliste der Instanz im neuen Design.
+- Startseiten (Einladung, Instanz vor dem ersten Fenster) im neuen Design. Die Fensterliste der Instanz ist seit Nachtrag 2 umgestellt.
 - Anrede auf echten Instanzen: Die Folien sagen „du“, Instanzen mit „Sie“ sprechen auf Kontakt und Bestätigung „Sie“.

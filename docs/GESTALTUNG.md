@@ -588,6 +588,15 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     ansehen“ mit violettem Licht unter dem weißen runden Knopf und dem Preis aus pakete.js, darunter zwei kleinere Karten mit Ring-Knopf;
     sie treten nach dem Senden einmal nacheinander auf (460 ms, 90 ms Versatz). Auf Wunsch eine DNA-Folie mit dem Blatt auf der Bühne und
     der E-Mail an den Betrieb als einziger weißer Karte. Ablauf und Technik in docs/INSTANZEN.md.
+    Seit dem Nachmittag (Inhaber: den ganzen Ablauf von der Landingpage bis zum Absenden, danach wieder abgeholt, „Einflüsse … von meiner
+    vorherigen Geschäftsausrichtung und dessen Design … möcht ich halt nicht in diesen Schritten sehen“): „Selbst ausprobieren“ öffnet die
+    Beispielseite Signature von Fensterbau Brandt; die Seite liegt abgedunkelt (Schwarz zu 58 %) hinter einem Kästchen in der Palette von
+    eeziframes (Anthrazit-Karte mit Lichtkante, Etikett mit violettem Punkt, weiße Pille „Seite ansehen“, Umriss „Gleich Fenster planen“,
+    320 ms ease-out, Grund 220 ms). Die Auswahl am Ende steht in den Farben des Beispielbetriebs: Signature auf Schieferblau mit Karten in
+    Schiefer und der großen Karte in Petrol mit Aquatürkis als Licht, Plus mit Karten in Schiefer und Aquatürkis als Licht, Essential im
+    Look von eeziframes. Fensterliste und die Startseite nach dem Senden folgen den Abschluss-Folien (Liste: Bühne mit den Fenstern als
+    Strichzeichnungen, „Deine Fenster.“ mit Stand und Balken, Karten, „Fragen?“, die Pille „Weiter zum Absenden“; nach dem Senden das Blatt
+    mit der Nummer und ruhigen Zeilen, weil Maße und Kontakt vom Gerät gelöscht sind).
   - Bestätigung nach dem Senden einer Instanz („Danke, gesendet.“, `instGesendet`, Wunsch des Inhabers, 28.10.2026): Rahmen der
     Abschluss-Folien. Bühne mit dem Aufmaßblatt im Fensterlicht (Kopfband mit dem Namen des Betriebs, Maße verdeckt wie in der
     Durchschrift), Chip „Gesendet“, Etikett mit der Nummer. Rechts Nummer mit violettem Punkt, „Danke, gesendet.“ mit zweiter Stimme,

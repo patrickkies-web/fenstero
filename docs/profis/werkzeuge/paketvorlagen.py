@@ -99,6 +99,10 @@ def fuer_web(html, p):
     html = html.replace('href="#" tabindex="-1" data-vorlage="ziel.konfigurator"', 'href="/app/?ausprobieren=%s" tabindex="-1" data-vorlage="ziel.konfigurator"' % p)
     html = html.replace('href="#" data-vorlage="ziel.konfigurator"', 'href="/app/?ausprobieren=%s" data-vorlage="ziel.konfigurator"' % p)
     assert 'href="#" data-vorlage="ziel.konfigurator"' not in html and 'href="#" tabindex="-1" data-vorlage="ziel.konfigurator"' not in html, p
+    # Hinweis-Kästchen der Testansicht (<paket>.html?ausprobieren, „Selbst ausprobieren“ auf der Seite für Fensterbauer)
+    html = html.replace('<link rel="stylesheet" href="muster.css">', '<link rel="stylesheet" href="muster.css">\n<link rel="stylesheet" href="ausprobieren.css">', 1)
+    html = html.replace('<script src="muster.js"></script>', '<script src="muster.js"></script>\n<script src="ausprobieren.js"></script>', 1)
+    assert 'href="ausprobieren.css"' in html and 'src="ausprobieren.js"' in html, p
     assert '<script>' not in html and 'noindex' in html, p
     return html
 
@@ -156,6 +160,8 @@ def main():
     if b.get('farben'):
         shutil.copy(ROOT / 'docs' / 'profis' / 'werkzeuge' / b['farben']['datei'], ziel / 'farben.css')
     if web:
+        shutil.copy(ROOT / 'docs' / 'profis' / 'werkzeuge' / 'ausprobieren-hinweis.css', ziel / 'ausprobieren.css')
+        shutil.copy(ROOT / 'docs' / 'profis' / 'werkzeuge' / 'ausprobieren-hinweis.js', ziel / 'ausprobieren.js')
         (ziel / 'index.html').write_text('<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow">'
             '<meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0; url=plus.html">'
             '<title>Beispiel: Fensterbau Brandt in drei Paketen · eeziframes</title><style>html,body{background:#07090a;color:#fff;font-family:system-ui,sans-serif}</style></head>'

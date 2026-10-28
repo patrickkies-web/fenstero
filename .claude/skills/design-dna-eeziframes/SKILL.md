@@ -203,6 +203,13 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
 - Ein Ablauf, ein Look (Korrektur des Inhabers, 28.10.2026, Kontakt auf einer Instanz neben der neuen Bestätigung: „Das passt ja nicht
   überein. Nimm das neue Design“): Was der Kunde in einem Zug durchläuft, steht ganz im neuen Look, auch auf Instanzen. Wird eine
   Folie neu, werden ihre Nachbarn im selben Ablauf mitgezogen oder ausdrücklich als offen genannt.
+- Ausprobieren ist der ganze Weg des Kunden (Inhaber, 28.10.2026: „von der Landingpage über den Konfigurator bis zu dem Absenden … und
+  danach wieder abgeholt werden, um zu meiner Seite zu gelangen“; „Einflüsse … von meiner vorherigen Geschäftsausrichtung und dessen
+  Design … möcht ich halt nicht in diesen Schritten sehen“): Ein Test für Fensterbauer beginnt auf der Beispielseite Signature von
+  Fensterbau Brandt (Kästchen davor in der Palette von eeziframes), geht durch den Konfigurator bis zum Senden und endet mit der Auswahl
+  in den Farben des Betriebs, die zurück zu den Paketen führt. Jede Seite, die dabei erreichbar ist (Liste, Seite nach dem Senden,
+  Rückwege), steht im neuen Look; ein Rückweg führt nie auf eine Seite im früheren Design. Vorschlag für seine DNA (Abschnitt 9):
+  „Ein Ablauf ist erst fertig, wenn jeder erreichbare Bildschirm darin im neuen Look steht.“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

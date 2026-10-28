@@ -2456,6 +2456,9 @@ if (PROBE) {
   /* Firmenfarbe wie auf der Seite einer Instanz (der Server setzt dort --accent im Kopf, functions/instanz/seiten.js) */
   if (farbe) { try { document.documentElement.style.setProperty('--accent', farbe); document.documentElement.style.setProperty('--accent-soft', 'rgba(42, 180, 189, .14)'); } catch (e) { /* ok */ } }
 }
+/* Rückweg: Kam der Fensterbauer über die Beispielseite (Paket in der Adresse), führt „Zurück“ dorthin, sonst zur Seite für Fensterbauer */
+const PROBE_LANDING = (() => { if (!PROBE) return ''; let p = ''; try { p = String(new URLSearchParams(location.search).get('ausprobieren') || '').toLowerCase(); } catch (e) { p = ''; } return window.Pakete && window.Pakete.gueltig(p) ? '/vorschau/paket-beispiel/' + p + '.html?ausprobieren' : ''; })();
+let PROBE_DA = false; // nach dem Einstieg: eine leere Startseite führt zurück zur Beispielseite
 const probePaketName = () => { const P = window.Pakete; return (P && P.PAKETE && P.PAKETE[PROBE_PAKET] && P.PAKETE[PROBE_PAKET].name) || PROBE_PAKET; };
 const INST = window.KONFIG && window.KONFIG.instanz && typeof window.KONFIG.instanz === 'object' && /^[a-z0-9]{8}$/.test(String(window.KONFIG.instanz.id || '')) ? window.KONFIG.instanz : null;
 const INST_M = INST ? INST.m || {} : {};
@@ -2818,7 +2821,7 @@ function render(fresh) {
   bindAfterRender();
   if (['teilen', 'blatt', 'gesendet', 'datei', 'gekauft'].includes(S.screen)) blattSchrift();
   /* Blöcke erscheinen nacheinander bzw. beim Scrollen; die wiederverwendete 3-D-Bühne bleibt, wie sie ist */
-  if (view.dna) lgAuf();
+  if (view.dna) { lgAuf(); fussPasst(); }
   if (neu && !view.fit && !view.dna && window.Reveal) { const scr = root.querySelector('.scr'); if (scr) window.Reveal.auf(Array.from(scr.children).filter((c) => !(c.classList.contains('w3d-stage') && c.getAttribute('data-reused') === '1')), sc); }
   if (window.Lottie) window.Lottie.auf(document.body);
   /* Startbild neigt sich leicht mit dem Scrollen der Liste */
@@ -3154,8 +3157,9 @@ function startDna() {
   const stelle = '<div class="lg-karte lg-hell st-stelle-karte"><div class="lg-feld"><span class="dna-label" id="st-stelle-l">Die Stelle</span><div class="st-stelle" role="radiogroup" aria-labelledby="st-stelle-l">' +
     OPT.situation.map((x) => { const an = (x.k === 'neu') === neu; return '<button type="button" role="radio" data-act="situation" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '">' + esc(x.label) + '</button>'; }).join('') + '</div>' +
     '<p class="st-stelle-text" aria-live="polite">' + ST_STELLE[neu ? 'neu' : 'ersatz'] + (neu ? ' <button type="button" class="ulink" data-act="gloss" data-k="neuoeffnung">Mehr erfahren</button>' : '') + '</p></div></div>';
-  const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Aufmaß">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="fotos">Weiter zu den Fotos' + pfeil + '</button></div>';
-  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(['back', 'Zurück: Aufmaß']) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + probeInfo() + bento + stelle + rechtLinks() + fuss + '</div></div>', back: ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
+  const zurLanding = PROBE && PROBE_LANDING && !S.windows.length, zur = zurLanding ? ['probe-landing', 'Zurück zur Website von Fensterbau Brandt'] : ['back', 'Zurück: Aufmaß']; // Testansicht: die Beispielseite ist die Website des Betriebs
+  const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="' + zur[0] + '" aria-label="' + zur[1] + '">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="fotos">Weiter zu den Fotos' + pfeil + '</button></div>';
+  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(zur) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + probeInfo() + bento + stelle + rechtLinks() + fuss + '</div></div>', back: ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
 }
 /* Nach dem Zeichnen: Wechsel erst einblenden, wenn das neue Bild bereit ist; Wischen an die Bühne binden */
 function stZeigen() {
@@ -3927,14 +3931,14 @@ function anfrage2Dna() {
   return { html: lgKopf(['back', 'Zurück: Haus']) + dnaTisch(abZeitBuehne(pr, anfrageHead(2, lk)), frage + karte + abFuss('Zurück: Haus', weiter[0], weiter[1], weiter[2])), back: ['Haus', 'anfrage'], dna: true, cls: 'dna ab dt', voll: true };
 }
 /* Kontakt: das Aufmaßblatt als Objekt im Fensterlicht; was getippt wird, steht sofort oben auf dem Blatt (abLive), Maße als Punkte */
-function abPapier(offen, schloss, betrieb, balken) { // betrieb: Name im Kopfband statt eeziframes; balken: Maße als ruhige Balken (Bestätigung, Durchschrift ohne Maße)
+function abPapier(offen, schloss, betrieb, balken, nr) { // betrieb: Name im Kopfband statt eeziframes; balken: Maße als ruhige Balken (Bestätigung, Durchschrift ohne Maße); nr: gesendet und vom Gerät gelöscht, dann Nummer und ruhige Zeilen
   const pr = S.proj, n = S.windows.length, el = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), pkt = (v) => (balken ? '<i class="ab-leer" style="--b: 72%"></i>' : !v ? '•.•••' : offen ? thousand(v) : thousand(v).replace(/\d/g, '•'));
   const kontakt = [pr.ort, pr.tel, pr.mail].map((t) => String(t || '').trim()).filter(Boolean);
   return '<div class="ab-papier" aria-hidden="true"><div class="ab-papier-band">' + (betrieb ? '<span class="ab-papier-betrieb">' + esc(betrieb) + '</span>' : LOGO(10) + '<span class="ab-wm" translate="no"><b>eezi</b>frames</span>') + '<span class="ab-papier-art">Aufmaßblatt</span></div><div class="ab-papier-in">' +
-    '<p class="ab-papier-h" data-p="name">' + esc(String(pr.name || '').trim() || 'Dein Aufmaß') + '</p>' +
+    '<p class="ab-papier-h" data-p="name">' + esc(nr ? 'Anfrage ' + nr : String(pr.name || '').trim() || 'Dein Aufmaß') + '</p>' +
     '<p class="ab-papier-kontakt" data-p="kontakt">' + (kontakt.length ? esc(kontakt.join(' · ')) : '<i class="ab-leer" style="--b: 38%"></i><i class="ab-leer" style="--b: 30%"></i>') + '</p>' +
-    '<p class="ab-papier-s">' + n + (n === 1 ? ' Position' : ' Positionen') + ' · ' + el + (el === 1 ? ' Element' : ' Elemente') + (pr.gebaeude ? ' · ' + esc(lab('gebaeude', pr.gebaeude)) : '') + '</p>' +
-    '<table class="ab-papier-tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr>' + S.windows.slice(0, 4).map((x, i) => { const d = derive(x); return '<tr><td><b>' + (i + 1) + '</b></td><td>' + esc(x.name || 'Fenster') + '</td><td>' + pkt(d.moW) + ' × ' + pkt(d.moH) + '</td><td>' + pkt(d.elW) + ' × ' + pkt(d.elH) + '</td></tr>'; }).join('') + '</table>' +
+    '<p class="ab-papier-s">' + (nr && !n ? '<i class="ab-leer" style="--b: 46%"></i>' : n + (n === 1 ? ' Position' : ' Positionen') + ' · ' + el + (el === 1 ? ' Element' : ' Elemente') + (pr.gebaeude ? ' · ' + esc(lab('gebaeude', pr.gebaeude)) : '')) + '</p>' +
+    '<table class="ab-papier-tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr>' + S.windows.slice(0, 4).map((x, i) => { const d = derive(x); return '<tr><td><b>' + (i + 1) + '</b></td><td>' + esc(x.name || 'Fenster') + '</td><td>' + pkt(d.moW) + ' × ' + pkt(d.moH) + '</td><td>' + pkt(d.elW) + ' × ' + pkt(d.elH) + '</td></tr>'; }).join('') + (nr && !n ? [1, 2].map((k) => '<tr><td><b>' + k + '</b></td><td><i class="ab-leer" style="--b: 70%"></i></td><td><i class="ab-leer" style="--b: 72%"></i></td><td><i class="ab-leer" style="--b: 72%"></i></td></tr>').join('') : '') + '</table>' +
     '<div class="ab-papier-zeichnung"><span class="ab-papier-oeffnung"><span class="ab-papier-element"></span></span></div><div class="ab-papier-zeilen"><i></i><i class="k"></i><i></i></div></div>' +
     (schloss ? '<span class="ab-schloss">' + LOCK + '</span>' : '') + '</div>';
 }
@@ -5245,6 +5249,17 @@ function lgAuf() {
   if (scr.classList.contains('fg')) return; // Gespeichert: nichts nachzuziehen
   lgMass(); scr.classList.add('lg-still'); lgZeigen(); void scr.offsetWidth; requestAnimationFrame(() => scr.classList.remove('lg-still'));
 }
+/* Pille mit dem Namen des Betriebs („An Fensterbau Brandt senden“): Passt sie nicht neben „Zurück“ (Laptop-Spalte, Telefon unter 390 px),
+   weicht der runde Zurück-Knopf, der Rückweg bleibt oben im Kopf; passt sie dann noch nicht (langer Name), steht „Anfrage senden“ da */
+function fussPasst() {
+  const f = document.querySelector('.scr.dna .lg-fuss'), p = f && f.querySelector('.lg-weiter .lw-lang') ? f.querySelector('.lg-weiter') : null; if (!p) return;
+  f.classList.remove('fuss-eng', 'fuss-kurz');
+  const z = f.querySelector('.lg-zurueck'), cs = getComputedStyle(f), frei = f.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const eng = () => z && p.offsetTop > z.offsetTop + 4;
+  if (eng()) f.classList.add('fuss-eng');
+  if (p.scrollWidth > Math.min(frei, p.clientWidth) + 1) { f.classList.add('fuss-kurz'); f.classList.remove('fuss-eng'); if (eng()) f.classList.add('fuss-eng'); }
+}
+window.addEventListener('resize', fussPasst, { passive: true });
 /* Maßstab des Hauses: am Telefon höchstens 1, am Laptop (Bühne links über die ganze Höhe) so groß, wie die Bühne es zulässt */
 function lgMass() {
   const b = document.querySelector('.scr.dna .lg-buehne:not(.lp-buehne)'); if (!b || !b.clientWidth) return;
@@ -7076,6 +7091,7 @@ function act(name, el) {
     case 'probe-betrieb': S.probeSicht = 'betrieb'; return render(true);
     case 'probe-kunde': S.probeSicht = 'kunde'; return render(true);
     case 'probe-blatt': return probeBlatt();
+    case 'probe-landing': if (PROBE_LANDING) location.assign(PROBE_LANDING); return;
     case 'probe-neu': instanzVergessen(); return toast('Noch einmal von vorn: Ihre Testdaten sind gelöscht.');
     case 'inst-vergessen': return instanzVergessen();
     case 'inst-pdf': return anfragePdf();
@@ -7729,7 +7745,7 @@ function instAnfrage3() {
   const voll = S.windows.filter((x) => derive(x).complete).length, fehlt = S.windows.length - voll;
   const hinweis = (fehlt ? '<p class="ab-note">' + (voll ? fehlt + (fehlt === 1 ? ' Fenster hat' : ' Fenster haben') + ' noch keine vollständigen Maße. ' + anr('Sie können', 'Du kannst') + ' trotzdem senden, ' + esc(bn) + ' sieht dann, was fehlt.' : anr('Noch kein Fenster ist vollständig gemessen. Tragen Sie die fehlenden Maße nach, dann können Sie senden.', 'Noch kein Fenster ist vollständig gemessen. Trag die fehlenden Maße nach, dann kannst du senden.')) + ' <button type="button" class="ulink" data-act="go" data-v="home">Fenster ansehen</button></p>' : '') + entwurfWarnung() +
     '<p class="ab-danach">' + anr('Nach dem Senden bekommen Sie', 'Nach dem Senden bekommst du') + ' sofort eine Bestätigung' + (INST_M.kopieKunde ? anr(' und eine Durchschrift Ihrer Anfrage als PDF', ' und eine Durchschrift deiner Anfrage als PDF') : '') + '. ' + anr('Ändern können Sie', 'Ändern kannst du') + ' danach nur noch direkt mit ' + esc(bn) + '.</p>';
-  const wartet = S.kiWartet === 'senden', label = wartet ? esc(S.warteText || 'Einen Moment …') : 'An ' + esc(bn) + ' senden';
+  const wartet = S.kiWartet === 'senden', label = wartet ? esc(S.warteText || 'Einen Moment …') : '<span class="lw-lang">An ' + esc(bn) + ' senden</span><span class="lw-kurz">Anfrage senden</span>';
   const fuss = rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Zeit und Budget">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter btn primary" data-act="kontakt-senden"' + (wartet ? ' disabled aria-busy="true"' : '') + '>' + label + (wartet ? '' : abPfeil) + '</button></div>';
   return { html: lgKopf(['back', 'Zurück: Zeit und Budget']) + dnaTisch(abBuehne('ab-blatt', anfrageHead(3, true), abPapier(false, false, bn)), frage + probe + karte + hinweis + fuss), back: ['Zurück', 'anfrage2'], dna: true, cls: 'dna ab dt', voll: true };
 }
@@ -7744,17 +7760,51 @@ function instWeiterKarte(du) {
   }
   return h + '</div>';
 }
+/* Liste der Fenster auf der Website einer Instanz im Look der Design-DNA (28.10.2026, Inhaber: keine Einflüsse der früheren Gestaltung
+   im Ablauf): wie die Liste des eigenen Aufmaßes (homeAufmassDna): Bühne mit den Fenstern als Strichzeichnung, Titel mit Stand und
+   Balken, „+ Fenster“, die Karten, „Jederzeit weitermachen“ (auf anderem Gerät), Fragen an den Betrieb, unten „Weiter zum Absenden“ */
+function instListeDna(weg) {
+  const d = lkDaten(), du = d.du, T = (sie, x) => (du ? x : sie), n = S.windows.length, voll = S.windows.filter((x) => fensterStand(x).k === 'voll').length;
+  const sym = S.windows.slice(0, 8).map((x, i) => '<span class="li-sym"><span class="li-kachel"><b>' + (i + 1) + '</b>' + zuStrich(svgIcon(miniWin(x), 64)) + '</span><small>' + esc(x.name || 'Fenster ' + (i + 1)) + '</small></span>').join('');
+  const buehne = '<div class="li-buehne' + (n > 4 ? ' li-viele' : '') + '"><span class="wz-chip li-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (n ? voll / n : 0).toFixed(4) + '"></i>' + T('Ihre', 'Deine') + ' Anfrage · ' + n + ' Fenster</span><div class="li-reihe" aria-hidden="true">' + sym + '</div></div>';
+  let stand = '';
+  if (n) {
+    const st = S.windows.map(fensterStand), masse = st.filter((x) => x.k === 'masse').length, wunsch = st.filter((x) => x.k === 'wunsch').length;
+    const satz = voll === n ? (n === 1 ? T('Ihr Fenster ist vollständig.', 'Dein Fenster ist vollständig.') : 'Alle ' + n + ' Fenster sind vollständig.') : voll + ' von ' + n + ' vollständig' + (masse ? ' · ' + masse + ' ohne Maße' : '') + (wunsch ? ' · ' + wunsch + ' mit offenen Wünschen' : '');
+    stand = '<span class="ueb-zeile">' + esc(satz) + '</span><span class="ueb-prog" role="progressbar" aria-label="Vollständige Fenster" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + voll + '"><i style="width: ' + Math.round(voll / n * 100) + '%"></i></span>';
+  }
+  const plus = n && neuMoeglich() && linkOffen() ? '<button type="button" class="dna-pille dna-pille--leise dna-pille--klein hd-neu" data-act="new">' + PLUS + 'Fenster</button>' : '';
+  const kopf = '<div class="hd li-kopf"><div class="li-titel"><h1 tabindex="-1">' + T('Ihre', 'Deine') + ' <em>Fenster.</em></h1>' + plus + '</div><p class="sub li-stand">' + stand + '</p></div>';
+  const liste = '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true).replace(/<svg[\s\S]*?<\/svg>/, zuStrich)).join('') + neuKnopf() + '</div></section>';
+  const weiter = vorschau() ? '' : instWebsite() ? instWeiterKarte(du) : linkMerk(d.name, du);
+  const fuss = n ? '<div class="lg-fuss li-fuss"><button type="button" class="dna-pille lg-weiter btn primary" data-act="go" data-v="anfrage">Weiter zum Absenden' + abPfeil + '</button></div>' : '';
+  return { html: lgKopf(false) + dnaTisch(buehne, (weg || '') + kopf + liste + weiter + instKontaktDna(d) + rechtLinks() + fuss), dna: true, cls: 'dna li dt gs-k-teil', voll: true };
+}
+/* Nach dem Senden, sobald die Bestätigung verlassen ist (nur Nummer und Datum auf dem Gerät), im Look der Design-DNA: Blatt im
+   Fensterlicht mit Chip „Gesendet“, Nummer, „Danke, gesendet.“ bzw. „Schon gesendet.“, seit wann der Betrieb sie hat, was auf dem Gerät
+   bleibt (vergessen), Fragen, die Pille „Weitere Anfrage starten“; in der Testansicht dazu die Auswahl für den Fensterbauer */
+function instGesendetKurz(weg) {
+  const d = lkDaten(), name = d.name, du = d.du, T = (sie, x) => (du ? x : sie), test = S.sent.art === 'test', nr = S.sent.nr || '';
+  const buehne = abBuehne('ab-blatt gs-buehne', 'Gesendet', abPapier(false, false, name, true, nr));
+  const titel = '<div class="lg-frage gs-titel"><span class="dna-label">' + (test ? 'Testanfrage ' : 'Anfrage ') + '<span class="inst-nr-wert">' + esc(nr) + '</span></span><div class="lg-frage-kopf"><h1 tabindex="-1">' + (S.sent.anderswo ? 'Schon <span class="ak">gesendet.</span>' : 'Danke, <span class="ak">gesendet.</span>') + '</h1></div>' +
+    '<p>' + esc(name) + T(' hat Ihre Anfrage seit ', ' hat deine Anfrage seit ') + esc(sentWhen()) + T(' und meldet sich bei Ihnen.', ' und meldet sich bei dir.') + '</p></div>';
+  const geraet = '<section class="gs-geraet"><span class="dna-label">Auf diesem Gerät</span><p>' + T('Hier sind nur Nummer und Datum Ihrer Anfrage gespeichert; Maße, Fotos und Kontaktdaten sind von diesem Gerät gelöscht.', 'Hier sind nur Nummer und Datum deiner Anfrage gespeichert; Maße, Fotos und Kontaktdaten sind von diesem Gerät gelöscht.') + '</p>' +
+    '<div class="gs-geraet-knoepfe"><button type="button" class="probe-info-link" data-act="inst-vergessen">Von diesem Gerät löschen</button></div><p class="gs-bleibt">' + T('Ihre Anfrage bei ', 'Deine Anfrage bei ') + esc(name) + ' bleibt bestehen.</p></section>';
+  const fuss = '<div class="gs-fuss"><button type="button" class="dna-pille" data-act="inst-weitere">Weitere Anfrage starten' + abPfeil + '</button></div>';
+  return { html: lgKopf(false) + dnaTisch(buehne, '<div class="ab-inhalt">' + (weg || '') + titel + probeWahl(false) + geraet + instKontaktDna(d) + fuss + '</div>' + rechtLinks()), dna: true, cls: 'dna ab ab2 dt gs', voll: true, bar: null };
+}
 /* Testansicht für Fensterbauer, Einstieg (Wunsch des Inhabers, 28.10.2026: „Der Start soll quasi diese Maske sein, nur halt mit dem
    Hinweis“; kein Bogen und keine Karte über der Startseite des Betriebs, sondern ein Infobereich in der ersten Folie): gleich die erste
    Folie „Was planst du?“. Ein angefangenes Fenster wird fortgesetzt; ein abgeschlossener Test beginnt neu */
 function probeEinstieg() {
   if (S.sent) instanzVergessen(true);
   if (entwurfLesen()) entwurfFortsetzen(); else act('new', document.body);
+  PROBE_DA = true;
 }
 /* Infobereich der Testansicht in der ersten Folie */
 function probeInfo() {
   if (!PROBE) return '';
-  return '<section class="probe-info kurz" aria-label="Testansicht für Fensterbauer"><div class="probe-info-zeile"><span class="dna-label">Testansicht für Fensterbauer</span><a class="probe-info-link" href="' + PROBE_FB + '" aria-label="Zurück zur Seite für Fensterbauer">Zurück</a></div><p><b>So erleben Ihre Kunden Ihren Konfigurator</b> (Fensterbau Brandt, ' + esc(probePaketName()) + '). Gesendet wird nichts.</p></section>';
+  return '<section class="probe-info kurz" aria-label="Testansicht für Fensterbauer"><div class="probe-info-zeile"><span class="dna-label">Testansicht für Fensterbauer</span><a class="probe-info-link" href="' + (PROBE_LANDING || PROBE_FB) + '" aria-label="' + (PROBE_LANDING ? 'Zurück zur Website von Fensterbau Brandt' : 'Zurück zur Seite für Fensterbauer') + '">Zurück</a></div><p><b>So erleben Ihre Kunden Ihren Konfigurator</b> (Fensterbau Brandt, ' + esc(probePaketName()) + '). Gesendet wird nichts.</p></section>';
 }
 /* Testansicht, Ende (Inhaber, 28.10.2026: „Auswahlmöglichkeiten, wie man jetzt weitermacht, visuell ansprechend, dass die Fensterbauer
    animiert werden, zu den Paketen zu kommen“): unter „Danke, gesendet.“ drei Karten für den Fensterbauer, die erste groß mit Licht und
@@ -7767,7 +7817,8 @@ function probeWahl(frisch) {
   const pfeil = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>';
   const neu = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 8a5.2 5.2 0 1 0 1.6-3.8"/><path d="M2.6 2.4v2.8h2.8"/></svg>';
   const karte = (i, tag, attr, cls, klein, titel, text, knopf) => '<' + tag + ' class="pw-karte' + cls + '" ' + attr + ' style="--i: ' + i + '"><span class="pw-text">' + (klein ? '<small>' + klein + '</small>' : '') + '<b>' + titel + '</b><span>' + text + '</span></span><span class="pw-knopf" aria-hidden="true">' + knopf + '</span></' + tag + '>';
-  return '<section class="probe-wahl' + (frisch ? ' auftritt' : '') + '" aria-label="So geht es für Sie weiter"><span class="dna-label">Testansicht · So geht es für Sie weiter</span><h2>Ihr Konfigurator. <span class="ak">Ihre Anfragen.</span></h2>' +
+  const farbe = PROBE_PAKET === 'signature' ? ' pw-voll' : PROBE_PAKET === 'plus' ? ' pw-halb' : ''; // Farben des Beispielbetriebs je Paket
+  return '<section class="probe-wahl' + farbe + (frisch ? ' auftritt' : '') + '" aria-label="So geht es für Sie weiter"><span class="dna-label">Testansicht · So geht es für Sie weiter</span><h2>Ihr Konfigurator. <span class="ak">Ihre Anfragen.</span></h2>' +
     karte(0, 'a', 'href="' + PROBE_FB + '#pakete"', ' pw-haupt', 'Für Ihre Website', 'Pakete ansehen', 'Genau dieser Ablauf mit Ihrem Namen, Ihrer Farbe und Ihren Anfragen. ' + esc(ab) + 'Keine Mindestlaufzeit.', pfeil) +
     karte(1, 'button', 'type="button" data-act="probe-betrieb"', '', '', 'So kommt die Anfrage bei Ihnen an', 'E-Mail mit dem Aufmaßblatt als PDF', pfeil) +
     karte(2, 'button', 'type="button" data-act="probe-neu"', '', '', 'Noch einmal ausprobieren', 'Von vorn, mit einem neuen Fenster', neu) +
@@ -7781,27 +7832,16 @@ function instHome() {
   const pf = '<span class="pf" aria-hidden="true"></span>', ok = '<div class="okmark-l" data-lottie="fertig"><span class="lottie-still"><svg class="okmark" viewBox="0 0 64 64" width="84" height="84" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--ok-soft)"></circle><path class="tick" d="M19 33l9 9 18-20" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>';
   const liste = instGesendetListe();
   if (S.instZu && !S.sent) return instZuSeite();
-  if (S.sent) {
-    const test = S.sent.art === 'test';
-    const html = '<section class="hero lk"><div class="ein-start-in">' + ok + '<p class="eyebrow kicker">' + (test ? 'Testanfrage ' : 'Anfrage ') + esc(S.sent.nr || '') + '</p><h1>' + (S.sent.anderswo ? 'Schon <span class="ak">gesendet</span>.' : 'Danke, <span class="ak">gesendet</span>.') + '</h1>' +
-      '<p class="ein-lead">' + esc(name) + T(' hat Ihre Anfrage seit ', ' hat deine Anfrage seit ') + esc(sentWhen()) + T(' und meldet sich bei Ihnen.', ' und meldet sich bei dir.') + '</p>' +
-      '<div class="ein-cta"><button type="button" class="btn primary" data-act="inst-weitere">Weitere Anfrage starten' + pf + '</button></div></div></section>' + weg +
-      '<section class="card inst-geraet-karte"><p class="eyebrow">Auf diesem Gerät</p><p>' + T('Hier sind nur Nummer und Datum Ihrer Anfrage gespeichert; Maße, Fotos und Kontaktdaten sind von diesem Gerät gelöscht.', 'Hier sind nur Nummer und Datum deiner Anfrage gespeichert; Maße, Fotos und Kontaktdaten sind von diesem Gerät gelöscht.') + '</p><div class="pill-row"><button type="button" class="pill" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>' +
-      kontakt() + rechtLinks();
-    return { html: html, bar: null };
-  }
+  if (S.sent) return instGesendetKurz(weg); // nach dem Senden: nur Nummer und Datum, im Look der Design-DNA
   if (S.linkZu && S.linkZu !== 'eingegangen') {
     const html = '<section class="hero lk"><div class="ein-start-in">' + (web ? '' : E.kopf({ name: name, p: p, instanz: I })) + '<p class="eyebrow" style="color: var(--warn)">' + (S.linkZu === 'abgelaufen' ? 'Abgelaufen' : 'Nicht mehr aktiv') + '</p><h1>Hier geht es gerade nicht weiter.</h1><p class="ein-lead">' + esc(S.linkZuText || T('Bitte melden Sie sich bei ', 'Bitte melde dich bei ') + name + '.') + '</p>' +
       '<div class="ein-cta"><button type="button" class="btn primary" data-act="inst-weitere">Neue Planung beginnen' + pf + '</button></div></div></section>' + kontakt() + rechtLinks();
     return { html: html, bar: null };
   }
   if (S.nb) return linkHomeInhaltAlt(I);
-  if (n || angelegt() >= GRENZE.fenster) {
-    const html = weg + (web ? '' : '<div class="lk-kopf">' + E.kopf({ name: name, p: p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '', instanz: I }) + '</div>') + uebersichtKopf(T) +
-      '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
-      (vorschau() ? '' : web ? instWeiterKarte(du) : linkMerk(name, du)) + kontakt() + rechtLinks();
-    return { html: html, bar: n ? { label: 'Weiter zum Absenden', act: 'go', v: 'anfrage' } : null };
-  }
+  if (n || angelegt() >= GRENZE.fenster) return instListeDna(weg); // Liste der Fenster im Look der Design-DNA
+  /* Testansicht: Die Startseite des Betriebs ist die Beispielseite, von der der Fensterbauer kam (keine alte Startseite im Ablauf) */
+  if (PROBE && PROBE_DA && PROBE_LANDING) { setTimeout(() => location.assign(PROBE_LANDING), 0); return { html: lgKopf(false), dna: true, cls: 'dna', voll: true }; }
   const frueher = web && liste.length ? '<section class="card inst-frueher"><p class="eyebrow">' + T('Ihre Anfragen auf diesem Gerät', 'Deine Anfragen auf diesem Gerät') + '</p><ul class="inst-nr">' + liste.slice(0, 5).map((x) => { let t = ''; try { t = new Date(x.when).toLocaleDateString('de-DE'); } catch (e) { t = ''; } return '<li><b>' + esc((x.test ? 'Testanfrage ' : 'Anfrage ') + x.nr) + '</b><span>' + esc(t ? 'gesendet am ' + t : 'gesendet') + '</span></li>'; }).join('') + '</ul><div class="pill-row"><button type="button" class="pill" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>' : '';
   const html = weg + E.html({ name: name, kunde: d.kunde, du: du, p: p, bis: web ? '' : d.bis, server: !!SERVER.daten, instanz: I }) + frueher + rechtLinks(true);
   return { html: html, bar: null };
@@ -7873,6 +7913,17 @@ async function probeBlatt() {
   } catch (e) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); }
   finally { S.pdfLaeuft = false; render(); }
 }
+/* Fragen an den Betrieb im Look der Design-DNA (Bestätigung, Liste, nach dem Senden): Ansprechpartner, Telefon und E-Mail als runde Knöpfe */
+function instKontaktDna(d) {
+  const name = d.name, du = d.du, T = (sie, x) => (du ? x : sie), p = d.p || {};
+  const tel = String(p.tel || '').trim(), mail = String(p.mail || '').trim(), telH = tel.replace(/[^\d+]/g, '');
+  const rund = (href, ic, text) => '<a class="gs-k" href="' + esc(href) + '"><span class="gs-k-rund" aria-hidden="true">' + ic + '</span><span>' + esc(text) + '</span></a>';
+  const IC_TEL = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.3 3.5 8 7.2 6.4 8.6a9.6 9.6 0 0 0 5 5l1.4-1.6 3.7 1.7-.6 2.6a1.4 1.4 0 0 1-1.5 1.1A13.6 13.6 0 0 1 2.4 5.1a1.4 1.4 0 0 1 1.1-1.5z"/></svg>';
+  const IC_MAIL = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="m3 5.5 7 5 7-5"/></svg>';
+  const kontakt = '<section class="gs-kontakt"><span class="dna-label">Fragen?</span><div class="gs-ap"><span class="gs-ap-bild" aria-hidden="true">' + esc(String(p.ap || name || '?').trim().charAt(0).toUpperCase()) + '</span><span><b>' + esc(p.ap || name) + '</b>' + (p.ap ? '<small>' + esc(name) + '</small>' : '') + '</span></div>' +
+    (tel || mail ? '<div class="gs-k-reihe">' + (tel ? rund('tel:' + telH, IC_TEL, tel) : '') + (mail ? rund('mailto:' + mail, IC_MAIL, mail) : '') + '</div>' : '<p>' + esc(name) + T(' meldet sich nach Ihrer Anfrage bei Ihnen.', ' meldet sich nach deiner Anfrage bei dir.') + '</p>') + '</section>';
+  return kontakt;
+}
 /* Bestätigung nach dem Senden im Look der Design-DNA (28.10.2026, Wunsch des Inhabers: „Danke, gesendet“ überarbeiten). Bühne: das Blatt
    im Fensterlicht mit dem Namen des Betriebs im Kopfband, die Maße verdeckt wie in der Durchschrift, Etikett mit der Nummer, Chip
    „Gesendet“. Rechts Nummer, „Danke, gesendet.“ und wer sich meldet; die Durchschrift als PDF (Merkmal kopieKunde, die eine volle Pille:
@@ -7891,12 +7942,7 @@ function instGesendet() {
     '<button type="button" class="dna-pille gs-pdf-knopf" data-act="inst-pdf"' + (S.pdfLaeuft ? ' disabled' : '') + '>' + (S.pdfLaeuft ? 'PDF entsteht …' : 'Meine Anfrage als PDF' + abPfeil) + '</button></section>' : '';
   const station = (n, t, x) => '<li class="wl-station"><span class="wl-nr">' + n + '</span><div><b>' + t + '</b><p>' + x + '</p></div></li>';
   const weiter = '<section class="gs-weiter"><span class="dna-label">So geht\'s weiter</span><ol class="wl-stationen">' + station(1, 'Angebot', 'von ' + esc(name)) + station(2, 'Feinaufmaß', 'ein Termin vor Ort') + station(3, 'Fertigung und Einbau', 'Termin nach Absprache') + '</ol></section>';
-  const tel = String(p.tel || '').trim(), mail = String(p.mail || '').trim(), telH = tel.replace(/[^\d+]/g, '');
-  const rund = (href, ic, text) => '<a class="gs-k" href="' + esc(href) + '"><span class="gs-k-rund" aria-hidden="true">' + ic + '</span><span>' + esc(text) + '</span></a>';
-  const IC_TEL = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.3 3.5 8 7.2 6.4 8.6a9.6 9.6 0 0 0 5 5l1.4-1.6 3.7 1.7-.6 2.6a1.4 1.4 0 0 1-1.5 1.1A13.6 13.6 0 0 1 2.4 5.1a1.4 1.4 0 0 1 1.1-1.5z"/></svg>';
-  const IC_MAIL = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="m3 5.5 7 5 7-5"/></svg>';
-  const kontakt = '<section class="gs-kontakt"><span class="dna-label">Fragen?</span><div class="gs-ap"><span class="gs-ap-bild" aria-hidden="true">' + esc(String(p.ap || name || '?').trim().charAt(0).toUpperCase()) + '</span><span><b>' + esc(p.ap || name) + '</b>' + (p.ap ? '<small>' + esc(name) + '</small>' : '') + '</span></div>' +
-    (tel || mail ? '<div class="gs-k-reihe">' + (tel ? rund('tel:' + telH, IC_TEL, tel) : '') + (mail ? rund('mailto:' + mail, IC_MAIL, mail) : '') + '</div>' : '<p>' + esc(name) + T(' meldet sich nach Ihrer Anfrage bei Ihnen.', ' meldet sich nach deiner Anfrage bei dir.') + '</p>') + '</section>';
+  const kontakt = instKontaktDna(d);
   const geraet = '<section class="gs-geraet"><span class="dna-label">Auf diesem Gerät</span><p>' + T('Sobald Sie diese Seite verlassen oder schließen, löschen wir Maße, Fotos und Kontaktdaten von diesem Gerät. Es bleiben nur Nummer und Datum Ihrer Anfrage.', 'Sobald du diese Seite verlässt oder schließt, löschen wir Maße, Fotos und Kontaktdaten von diesem Gerät. Es bleiben nur Nummer und Datum deiner Anfrage.') + '</p>' +
     '<div class="gs-geraet-knoepfe"><button type="button" class="dna-pille dna-pille--leise" data-act="inst-weitere">Weitere Anfrage starten</button><button type="button" class="probe-info-link" data-act="inst-vergessen">Jetzt von diesem Gerät löschen</button></div><p class="gs-bleibt">' + T('Ihre Anfrage bei ', 'Deine Anfrage bei ') + esc(name) + ' bleibt bestehen.</p></section>';
   const fertig = PROBE ? '<a class="dna-pille dna-pille--leise" href="' + PROBE_FB + '#pakete">Fertig</a>' : '<button type="button" class="dna-pille dna-pille--leise" data-act="go" data-v="home">Fertig</button>';

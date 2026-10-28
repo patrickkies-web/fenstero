@@ -1690,6 +1690,8 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna .lg-fuss { position: sticky; bottom: 0; z-index: 4; margin: auto -16px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; padding: 14px 16px calc(18px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(180deg, transparent, var(--schwarz) 16px) }
 .dna .lg-fuss .dna-pille { flex: 0 1 260px }
 @media (max-width: 359px) { .dna .lg-fuss .dna-pille { flex-basis: 200px } } /* 320 px: Zurück und Pille in einer Zeile */
+.dna .lg-weiter .lw-kurz, .dna .lg-fuss.fuss-kurz .lw-lang, .dna .lg-fuss.fuss-eng .lg-zurueck { display: none } /* fussPasst() in app.js */
+.dna .lg-fuss.fuss-kurz .lw-kurz { display: inline }
 .dna .lg-zurueck { width: 52px; height: 52px; flex: none; border-radius: 50%; border: 0; background: transparent; color: var(--tinte); box-shadow: inset 0 0 0 1.5px var(--silbergrau); display: grid; place-items: center; cursor: pointer }
 .dna .lg-zurueck svg { width: 16px; height: 16px }
 .dna .lg-grund { order: -1; flex: 0 0 100%; margin: 0 0 2px; text-align: center }
@@ -3099,21 +3101,21 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .dna.gs .gs-titel { display: grid; gap: 8px }
 .dna.gs .gs-titel p { margin: 0; max-width: 40ch }
 .dna.gs .inst-nr-wert { font-variant-numeric: tabular-nums; color: var(--weiss) }
-.dna.gs :is(.gs-pdf, .gs-kontakt) { display: grid; gap: 12px; padding: 16px; border-radius: var(--rund-l); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+.dna:is(.gs, .gs-k-teil) :is(.gs-pdf, .gs-kontakt) { display: grid; gap: 12px; padding: 16px; border-radius: var(--rund-l); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
 .dna.gs .gs-pdf-kopf { display: flex; align-items: center; gap: 12px }
-.dna.gs .gs-pdf-kopf b, .dna.gs .gs-ap b { display: block; margin-top: 2px; font: 500 17px/1.25 var(--font-sans); color: var(--weiss) }
-.dna.gs :is(.gs-pdf, .gs-kontakt, .gs-geraet) p { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna:is(.gs, .gs-k-teil) .gs-pdf-kopf b, .dna:is(.gs, .gs-k-teil) .gs-ap b { display: block; margin-top: 2px; font: 500 17px/1.25 var(--font-sans); color: var(--weiss) }
+.dna:is(.gs, .gs-k-teil) :is(.gs-pdf, .gs-kontakt, .gs-geraet) p { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
 .dna.gs .gs-pdf-knopf { width: 100%; padding: 0 6px 0 24px; justify-content: space-between }
 .dna.gs .gs-pdf-knopf:disabled { opacity: .7; cursor: progress }
 .dna.gs .gs-weiter { display: grid; gap: 10px; margin-top: 12px }
-.dna.gs .gs-ap { display: flex; align-items: center; gap: 12px }
-.dna.gs .gs-ap small { display: block; font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau) }
-.dna.gs .gs-ap-bild { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--indigo); color: var(--weiss); font: 500 17px/1 var(--font-sans) }
-.dna.gs .gs-k-reihe { display: flex; flex-wrap: wrap; gap: 8px 18px }
-.dna.gs .gs-k { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--weiss); font: 500 15px/1.2 var(--font-sans); text-decoration: none; overflow-wrap: anywhere }
-.dna.gs .gs-k-rund { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: transform 160ms var(--dna-druck) }
-.dna.gs .gs-k:active .gs-k-rund { transform: scale(.95); transition-duration: 0s }
-.dna.gs .gs-k-rund svg { width: 18px; height: 18px }
+.dna:is(.gs, .gs-k-teil) .gs-ap { display: flex; align-items: center; gap: 12px }
+.dna:is(.gs, .gs-k-teil) .gs-ap small { display: block; font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau) }
+.dna:is(.gs, .gs-k-teil) .gs-ap-bild { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--indigo); color: var(--weiss); font: 500 17px/1 var(--font-sans) }
+.dna:is(.gs, .gs-k-teil) .gs-k-reihe { display: flex; flex-wrap: wrap; gap: 8px 18px }
+.dna:is(.gs, .gs-k-teil) .gs-k { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--weiss); font: 500 15px/1.2 var(--font-sans); text-decoration: none; overflow-wrap: anywhere }
+.dna:is(.gs, .gs-k-teil) .gs-k-rund { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: transform 160ms var(--dna-druck) }
+.dna:is(.gs, .gs-k-teil) .gs-k:active .gs-k-rund { transform: scale(.95); transition-duration: 0s }
+.dna:is(.gs, .gs-k-teil) .gs-k-rund svg { width: 18px; height: 18px }
 .dna.gs .gs-geraet { display: grid; gap: 8px; margin-top: 12px; padding: 0 2px }
 .dna.gs .gs-geraet-knoepfe { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px }
 .dna.gs .gs-fuss { display: flex; margin-top: 20px }
@@ -3150,6 +3152,20 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .dna.gs .pw-fuss { margin: 2px 2px 8px; font: 400 13px/1.45 var(--font-sans); color: var(--silbergrau) }
 .dna.gs .probe-wahl.auftritt .pw-karte { animation: pwAuf 460ms var(--dna-auftritt) both; animation-delay: calc(450ms + var(--i, 0) * 90ms) }
 @keyframes pwAuf { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+/* In den Farben des Beispielbetriebs (Inhaber, 28.10.2026: „auch in den entsprechenden Farben des Betriebes“; Palette Fensterbau Brandt
+   wie in web/vorschau/paket-beispiel/farben.css): Signature ganz (Fläche Schieferblau, Karten Schiefer, die große in Petrol mit
+   Aquatürkis als Licht), Plus zur Hälfte (Karten Schiefer, Licht Aquatürkis), Essential bleibt eeziframes */
+.dna.gs .probe-wahl.pw-voll { --b-schiefer: #233d48; --b-schiefer-hoch: #2c4955; --b-petrol: #0a6774; --b-petrol-tief: #075560; --b-aqua: #2ab4bd; --b-eis: #eef7f9;
+  padding: 18px 16px 6px; border-radius: 28px; background: radial-gradient(120% 70% at 18% 0%, #2f5260, var(--b-schiefer) 60%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10) }
+.dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .dna-label { color: #a9c3cc }
+.dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .dna-label::before { background: #2ab4bd; box-shadow: 0 0 0 4px rgba(42, 180, 189, .22) }
+.dna.gs .probe-wahl:is(.pw-voll, .pw-halb) h2 .ak, .dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .pw-text > span, .dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .pw-text small, .dna.gs .probe-wahl.pw-voll .pw-fuss { color: #a9c3cc }
+.dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .pw-karte { background: radial-gradient(120% 90% at 18% 0%, #3a5a68, #2c4955 55%, #1d343e) }
+.dna.gs .probe-wahl.pw-voll .pw-haupt { background: radial-gradient(70% 90% at 92% 100%, rgba(42, 180, 189, .45), transparent 70%), radial-gradient(120% 90% at 18% 0%, #13808e, #0a6774 55%, #075560) }
+.dna.gs .probe-wahl.pw-voll .pw-haupt .pw-text > span, .dna.gs .probe-wahl.pw-voll .pw-haupt .pw-text small { color: #cfe9ec }
+.dna.gs .probe-wahl.pw-halb .pw-haupt { background: radial-gradient(70% 90% at 92% 100%, rgba(42, 180, 189, .38), transparent 72%), radial-gradient(120% 90% at 18% 0%, #3a5a68, #2c4955 55%, #1d343e) }
+.dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .pw-haupt .pw-knopf { color: #233d48; box-shadow: 0 10px 30px -8px rgba(42, 180, 189, .7) }
+.dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .pw-knopf { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .55) }
 @media (prefers-reduced-motion: reduce) {
   .dna .gs-meldung { animation-name: gsMeldungRuhig }
   .dna.gs .probe-wahl.auftritt .pw-karte { animation: none }
