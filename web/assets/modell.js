@@ -155,12 +155,13 @@
     /* ---------- Fragen der App: Kapitel und Stufe (eine Quelle für App, Klärungsliste, Betrieb und Blatt) ----------
        FRAGE.kap: Kapitel je Frage (Schlüssel wie in qList von app.js, ohne Nummer: typ-0 → typ). FRAGE.stufe: 2 heißt „die üblichen
        Wünsche“, was viele mögen, für ein erstes Angebot aber nicht braucht; sonst 1, das Wichtigste (Pflichtthemen sind immer 1).
-       Detailangaben tragen ihre Stufe im Register DETAIL (s). */
+       Detailangaben tragen ihre Stufe im Register DETAIL (s). Ist ein Sonnenschutz, ein Sichtschutz innen, Klappläden oder ein
+       Insektenschutz gewählt, kommt die Frage nach seiner Farbe bei jeder Tiefe (Stufe 1; Wunsch des Inhabers, 28.10.2026). */
     const FRAGE = {
       kap: { lage: 'vorweg', absturz: 'vorweg', design: 'vorweg', tiefe: 'vorweg', form: 'aufbau', teilung: 'aufbau', typ: 'aufbau', din: 'aufbau', stulp: 'aufbau', felder: 'aufbau', hsts: 'aufbau', hstr: 'aufbau', pskS: 'aufbau', pskR: 'aufbau', fswn: 'aufbau', fsws: 'aufbau', fswg: 'aufbau', ol: 'aufbau', ul: 'aufbau', richtung: 'aufbau', schwelle: 'aufbau', boden: 'aufbau',
         material: 'material', fa: 'material', fi: 'material', glas: 'glas', glasfn: 'glas', orn: 'glas', sprossen: 'glas', spross: 'glas', aufseite: 'glas', breite: 'glas', griff: 'bedienung', griffA: 'bedienung', gf: 'bedienung', rc: 'bedienung',
         sart: 'sonne', einbau: 'sonne', sfarbe: 'sonne', antrieb: 'sonne', insekt: 'sonne', iart: 'sonne', ifarbe: 'sonne', fbi: 'bank', fba: 'bank', montage: 'bank', notiz: 'bank' },
-      stufe: { ul: 2, richtung: 2, boden: 2, glasfn: 2, orn: 2, sprossen: 2, spross: 2, aufseite: 2, breite: 2, griff: 2, griffA: 2, gf: 2, einbau: 2, sfarbe: 2, iart: 2, ifarbe: 2, fbi: 2, fba: 2, montage: 2 }
+      stufe: { ul: 2, richtung: 2, boden: 2, glasfn: 2, orn: 2, sprossen: 2, spross: 2, aufseite: 2, breite: 2, griff: 2, griffA: 2, gf: 2, einbau: 2, iart: 2, fbi: 2, fba: 2, montage: 2 }
     };
     /* Detailtiefe des Projekts (p.tiefe: kurz 1, normal 2, genau 3): Was bei dieser Tiefe nicht gefragt wurde, macht der Fensterbauer
        nach seinem Standard. nachTiefe(w, p) gibt dafür eine Kopie des Fensters zurück:
@@ -249,7 +250,7 @@
       /* Aufsatzkasten: die Blende außen vor dem Kasten ist verputzt bzw. verblendet wie die Fassade oder eine Alu-Blende in Kastenfarbe */
       { k: 'blende', s: 2, kap: 'sonne', n: 'Blende des Aufsatzkastens', gilt: (w) => sonneDa(w) && w.roll === 'aufsatz', design: true },
       { k: 'klBauart', s: 2, kap: 'sonne', n: 'Klappläden', gilt: (w) => w.sart === 'klappladen' && !istOffen(w, 'sart'), design: true },
-      { k: 'klFarbe', s: 2, kap: 'sonne', n: 'Farbe Klappläden', gilt: (w) => w.sart === 'klappladen' && !istOffen(w, 'sart'), design: true },
+      { k: 'klFarbe', s: 1, kap: 'sonne', n: 'Farbe Klappläden', gilt: (w) => w.sart === 'klappladen' && !istOffen(w, 'sart'), design: true },
       { k: 'lamelle', s: 3, kap: 'sonne', n: 'Lamellen', gilt: (w) => sonneDa(w) && w.sart === 'raffstore', design: true },
       { k: 'fuehrung', s: 3, kap: 'sonne', n: 'Führung', gilt: (w) => sonneDa(w) && w.sart === 'raffstore', design: true },
       { k: 'panzer', s: 3, kap: 'sonne', n: 'Rollladenpanzer', gilt: (w) => sonneDa(w) && w.sart === 'rollladen', design: true },
@@ -257,7 +258,7 @@
       { k: 'transp', s: 3, kap: 'sonne', n: 'Screen-Gewebe', gilt: (w) => sonneDa(w) && w.sart === 'screen', design: true },
       { k: 'bedien', s: 3, kap: 'sonne', n: 'Bedienseite', gilt: sonneDa },
       { k: 'sensor', s: 3, kap: 'sonne', n: 'Steuerung', mehr: true, gilt: (w) => sonneDa(w) && ['motor', 'smart', 'solar'].indexOf(w.antrieb) >= 0 && !istOffen(w, 'antrieb'), design: true },
-      { k: 'insFarbe', s: 3, kap: 'sonne', wg: 'insekt', n: 'Farbe Insektenschutz', gilt: insektDa, design: true },
+      { k: 'insFarbe', s: 1, kap: 'sonne', wg: 'insekt', n: 'Farbe Insektenschutz', gilt: insektDa, design: true },
       { k: 'insGewebe', s: 3, kap: 'sonne', wg: 'insekt', n: 'Insektenschutzgewebe', gilt: insektDa, design: true },
       { k: 'fbiFarbe', s: 3, kap: 'bank', n: 'Fensterbank innen, Farbe', gilt: (w) => offenGilt(w, 'fbi') && w.fbi !== 'behalten' && !istOffen(w, 'fbi'), design: true },
       { k: 'fbaFarbe', s: 3, kap: 'bank', n: 'Fensterbank außen, Farbe', gilt: (w) => bankAussen(w) && w.fba === 'alu', design: true },
