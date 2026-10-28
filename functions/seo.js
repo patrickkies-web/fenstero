@@ -120,13 +120,13 @@ export function absolut(html, b) {
 }
 
 /* Kopfzeilen einer Seite: Sicherheit wie in _headers; in der Pilotphase X-Robots-Tag: noindex, mit Freigabe ohne; dazu der Canonical-Hinweis */
-export async function seite(antwort, env, url) {
+export async function seite(antwort, env, url, kanonisch) {
   const h = new Headers(antwort.headers);
   for (const [k, v] of Object.entries(SICHERHEIT)) if (!h.has(k)) h.set(k, v);
   if (frei(env, url)) h.delete('X-Robots-Tag'); else h.set('X-Robots-Tag', SPERRE);
   const html = antwort.status === 200 && /text\/html/.test(h.get('content-type') || '');
   if (!html) return new Response(antwort.body, { status: antwort.status, statusText: antwort.statusText, headers: h });
-  const b = basis(env, url), kan = b + kanonischerPfad(url.pathname), nach = !einfuehrungLaeuft(env) && !RECHT_MIT_ZEITRAUM.includes(url.pathname);
+  const b = basis(env, url), kan = b + (kanonisch || kanonischerPfad(url.pathname)), nach = !einfuehrungLaeuft(env) && !RECHT_MIT_ZEITRAUM.includes(url.pathname);
   const mitTag = einfuehrungLaeuft(env) && BANNER_SEITEN.test(url.pathname); // Banner mit Countdown: der Text ändert sich jeden Tag
   h.set('Link', '<' + kan + '>; rel="canonical"');
   h.delete('content-length');
@@ -317,6 +317,7 @@ export function umleitung(request) {
   if (index) url.pathname = kanonischerPfad(url.pathname);
   return new Response(null, { status: 301, headers: { location: url.href, 'cache-control': 'public, max-age=86400' } });
 }
+export const ANSICHT_FB = /^\/fensterbauer\/?$/;
 const ohneBedingung = (r) => { const h = new Headers(r.headers); h.delete('if-none-match'); h.delete('if-modified-since'); return new Request(r.url, { method: r.method, headers: h }); };
 export async function behandeln(request, env, holen) {
   const url = new URL(request.url);
@@ -325,6 +326,9 @@ export async function behandeln(request, env, holen) {
   if (url.pathname === '/robots.txt') return text(robots(basis(env, url), frei(env, url)), 'text/plain; charset=utf-8');
   if (url.pathname === '/sitemap.xml') return frei(env, url) ? text(sitemap(basis(env, url)), 'application/xml; charset=utf-8') : text('Nicht freigegeben.\n', 'text/plain; charset=utf-8', 404);
   if (url.pathname === '/llms.txt') return text(llms(basis(env, url), env), 'text/plain; charset=utf-8', 200, frei(env, url) ? null : { 'x-robots-tag': SPERRE });
+  /* /fensterbauer: die Startseite in der Ansicht für Fensterbauer (portal.js liest den Pfad), Adresse ohne Anker statt /#fensterbauer;
+     derselbe Inhalt wie /fuer-fensterbauer/, daher dorthin kanonisch und nicht in der Sitemap */
+  if (ANSICHT_FB.test(url.pathname)) return await seite(await holen(new Request(new URL('/', url).href, request)), env, url, '/fuer-fensterbauer/');
   if (istSeite(url.pathname)) return await seite(await holen(einfuehrungLaeuft(env) && !BANNER_SEITEN.test(url.pathname) ? request : ohneBedingung(request)), env, url);
   return null;
 }

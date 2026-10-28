@@ -2429,7 +2429,7 @@ const APP_URL = location.href.split('#')[0].split('?')[0];
 const PORTAL_URL = new URL('../', APP_URL).href;
 const PORTAL_OPEN = PORTAL_URL;
 const PORTAL_KURZ = PORTAL_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
-const RATGEBER_URL = new URL('ratgeber/fenster-ausmessen/', PORTAL_URL).href, FB_URL = PORTAL_URL + '#fensterbauer';
+const RATGEBER_URL = new URL('ratgeber/fenster-ausmessen/', PORTAL_URL).href, FB_URL = PORTAL_URL + 'fensterbauer';
 const STORE = 'aufmass.v1';
 /* ---------- Konfigurator-Instanz: eigene Domain eines Fensterbauers (docs/INSTANZEN.md, Bauplan Strang B) ----------
    window.KONFIG.instanz kommt vom Server (/config.js der Instanz); ohne INST ändert sich nichts. Mit INST ist die App immer im Modus
