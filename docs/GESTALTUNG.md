@@ -578,13 +578,19 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     das Gewebe des Insektenschutzes als gleichmäßigen Schleier (`meshCss`); die WebGL-Bühne liest weiter `facadeBg` und `meshBg` (_bg).
     Farbblatt und Fassade am Zahnrad im Look der Bögen, am Laptop rechts als Spalte angedockt.
   - Testansicht für Fensterbauer (Wunsch des Inhabers, 28.10.2026: „Selbst ausprobieren“ soll nicht in die Führung und nicht in das
-    eigene Aufmaß mit „an beliebig viele“ führen; jeder Weg zum Ausprobieren zeigt, dass man im Bereich zum Testen ist; am Ende die
-    Ansicht des Kunden eines Betriebs mit Paket): `/app/?ausprobieren[=<paket>]` zeigt den Konfigurator wie auf der Website eines
-    Betriebs (Fensterbau Brandt, Merkmale des Pakets), beginnend gleich mit der ersten Folie „Was planst du?“ und dem Hinweis als Bogen
-    im Look der Bögen darüber („Ausprobieren“). Hinweise als Anthrazit-Karten mit violettem Punkt (Startseite des Betriebs, bei den
-    Kontaktdaten, über der Bestätigung), im Kopf jeder Folie „Testansicht“ mit violettem Punkt unter dem Namen. Das Ende ist die
-    Bestätigung des Kunden, darüber „Pakete ansehen“ als Umriss-Pille; auf Wunsch eine DNA-Folie mit dem Blatt auf der Bühne (Kopfband mit
-    dem Namen des Betriebs) und der E-Mail an den Betrieb als einziger weißer Karte. Ablauf und Technik in docs/INSTANZEN.md.
+    eigene Aufmaß mit „an beliebig viele“ führen; jeder Weg zum Ausprobieren zeigt, dass man im Bereich zum Testen ist; „einfach einen
+    Infobereich in der ersten Folie“, keine Karte über der Startseite des Betriebs): `/app/?ausprobieren[=<paket>]` beginnt mit der
+    Folie „Was planst du?“ (Fensterbau Brandt, Merkmale des Pakets). Der Infobereich steht in der Folie als Anthrazit-Fläche mit
+    Lichtkante und violettem Punkt am Etikett (Telefon zwischen Bühne und Kacheln, Laptop oben in der rechten Spalte), im Kopf jeder
+    Folie „Testansicht“ unter dem Namen, bei den Kontaktdaten eine Zeile. Am Ende die Bestätigung des Kunden mit dem Infobereich
+    „Testansicht · Ende“ unter der Überschrift; auf Wunsch eine DNA-Folie mit dem Blatt auf der Bühne und der E-Mail an den Betrieb als
+    einziger weißer Karte. Ablauf und Technik in docs/INSTANZEN.md.
+  - Bestätigung nach dem Senden einer Instanz („Danke, gesendet.“, `instGesendet`, Wunsch des Inhabers, 28.10.2026): Rahmen der
+    Abschluss-Folien. Bühne mit dem Aufmaßblatt im Fensterlicht (Kopfband mit dem Namen des Betriebs, Maße verdeckt wie in der
+    Durchschrift), Chip „Gesendet“, Etikett mit der Nummer. Rechts Nummer mit violettem Punkt, „Danke, gesendet.“ mit zweiter Stimme,
+    wer sich meldet; die Durchschrift als PDF auf einer Anthrazit-Fläche mit der einen vollen Pille (nur jetzt zu haben), die drei
+    Stationen, „Fragen?“ mit Ansprechpartner und runden Knöpfen für Telefon und E-Mail, „Auf diesem Gerät“ mit „Weitere Anfrage starten“
+    (Umriss) und „Auf diesem Gerät vergessen“, unten „Fertig“ als Umriss-Pille. Inhalt und Aktionen wie bisher.
   - Restliche Folien (Wunsch des Inhabers, 28.10.2026: „Die anderen Bereiche machst du auch. Musst selber gucken, welche Folien da noch
     fehlen.“): „Deine Fenster“ (Bühne mit den Fenstern als Strichzeichnungen, Stand mit Balken, Karten auf Anthrazit), „Fürs Angebot“
     1–3 (Haus mit Kapselreihe der getauschten Fenster, Zeitleiste und Budget, Aufmaßblatt, das sich beim Tippen füllt), Aufmaßblatt,

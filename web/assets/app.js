@@ -3154,7 +3154,7 @@ function startDna() {
     OPT.situation.map((x) => { const an = (x.k === 'neu') === neu; return '<button type="button" role="radio" data-act="situation" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '">' + esc(x.label) + '</button>'; }).join('') + '</div>' +
     '<p class="st-stelle-text" aria-live="polite">' + ST_STELLE[neu ? 'neu' : 'ersatz'] + (neu ? ' <button type="button" class="ulink" data-act="gloss" data-k="neuoeffnung">Mehr erfahren</button>' : '') + '</p></div></div>';
   const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Aufmaß">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="fotos">Weiter zu den Fotos' + pfeil + '</button></div>';
-  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(['back', 'Zurück: Aufmaß']) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + bento + stelle + rechtLinks() + fuss + '</div></div>', back: ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
+  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(['back', 'Zurück: Aufmaß']) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + probeInfo('start') + bento + stelle + rechtLinks() + fuss + '</div></div>', back: ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
 }
 /* Nach dem Zeichnen: Wechsel erst einblenden, wenn das neue Bild bereit ist; Wischen an die Bühne binden */
 function stZeigen() {
@@ -5666,7 +5666,6 @@ function sheetsHTML() {
   if (S.glossIndex) return glossIndexBlatt();
   if (S.wohin) return wohinBlatt();
   if (S.ohneFotoFrage && S.screen === 'fotos') return ohneFotoBlatt();
-  if (PROBE && S.probeHinweis) return probeHinweisBlatt();
   return '';
 }
 
@@ -5929,7 +5928,6 @@ function zurueckTaste() {
   if (S.wohin) { S.wohin = false; render(); return true; }
   if (S.wzKap) { S.wzKap = false; render(); const b = document.querySelector('.wz-band'); if (b) b.focus({ preventScroll: true }); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
-  if (PROBE && S.probeHinweis) { probeHinweisZu(); return true; }
   if (S.qMass && S.screen === 'frage') { S.qMass = null; render(); return true; } // Zifferntasten in den Wünschen
   if (S.screen === 'messen' && S.mess && S.mess.pad) { messZu(); return true; } // Zifferntasten beim Messen: erst das Blatt zu
   if (S.screen === 'rest' && S.rest && S.rest.pad) { restZu(); return true; }
@@ -5959,7 +5957,6 @@ function escTaste() {
   if (S.wohin) { S.wohin = false; render(); return true; }
   if (S.wzKap) { S.wzKap = false; render(); const b = document.querySelector('.wz-band'); if (b) b.focus({ preventScroll: true }); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
-  if (PROBE && S.probeHinweis) { probeHinweisZu(); return true; }
   if (S.qMass && S.screen === 'frage') { S.qMass = null; render(); return true; }
   if (S.screen === 'messen' && S.mess && S.mess.pad) { messZu(); return true; } // Zifferntasten beim Messen
   if (S.screen === 'rest' && S.rest && S.rest.pad) { restZu(); return true; }
@@ -7076,7 +7073,6 @@ function act(name, el) {
     case 'inst-weitere': return instanzWeitere();
     /* Testansicht für Fensterbauer (probeGesendet) */
     case 'probe-betrieb': S.probeSicht = 'betrieb'; return render(true);
-    case 'probe-hinweis-zu': return probeHinweisZu();
     case 'probe-kunde': S.probeSicht = 'kunde'; return render(true);
     case 'probe-blatt': return probeBlatt();
     case 'probe-neu': instanzVergessen(); return toast('Noch einmal von vorn: Ihre Testdaten sind gelöscht.');
@@ -7647,7 +7643,7 @@ function boot() {
   verlaufBinden(); // Zurück-Taste des Browsers bleibt in der App
   render(true);
   if (location.hash === '#fuehrung' && !S.betrieb) tourStart();
-  else if (PROBE) probeEinstieg(); // Testansicht für Fensterbauer: gleich die erste Folie, mit dem Hinweis darüber
+  else if (PROBE) probeEinstieg(); // Testansicht für Fensterbauer: gleich die erste Folie mit dem Infobereich
   /* Einstieg von der Website („Jetzt ausmessen“, /app/#ausmessen): gleich der erste Schritt statt der Startseite der App; ein angefangenes
      Fenster wird fortgesetzt, ein Kundenlink hat Vorrang */
   else if (ausmessen && !S.betrieb) { if (KS) { EINSTIEG_NEU = true; setTimeout(einstiegNach, 8000); } else einstiegNeu(); }
@@ -7719,7 +7715,7 @@ function instAnfrage3() {
   const pr = S.proj, d = lkDaten(), bn = d.name, C = window.KONFIG || {};
   const f = S.kontaktFehler ? Object.assign(kontaktPruefen(), { alle: true }) : {};
   let html = hd(anfrageHead(3, true), anr('Wie erreicht Sie ', 'Wie erreicht dich ') + esc(bn) + '?', 'Name und Telefon oder E-Mail brauchen wir, damit ' + esc(bn) + ' sich mit dem Angebot melden kann. ' + anr('Ihre', 'Deine') + ' Angaben gehen nur an ' + esc(bn) + '; mehr dazu im <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>.', '', '', schrittTools('kontakt'));
-  if (PROBE) html += '<div class="probe-hinweis" role="note"><b>Testansicht</b><span>Hier dürfen Sie auch ausgedachte Angaben eintragen. Nichts wird gesendet, alles bleibt auf diesem Gerät.</span></div>';
+  if (PROBE) html += '<p class="probe-zeile" role="note"><span><b>Testansicht:</b> Hier dürfen Sie auch ausgedachte Angaben eintragen. Nichts wird gesendet, alles bleibt auf diesem Gerät.</span></p>';
   html += '<div class="sec"><div class="rows kontakt-felder">' + kontaktFeld('Name', 'name', 'Vor- und Nachname', 'text', 'name', f.name, true) + kontaktFeld('Telefon', 'tel', 'Für Rückfragen', 'tel', 'tel', f.tel || !!f.weg, false) + kontaktFeld('E-Mail', 'mail', 'name@beispiel.de', 'email', 'email', f.mail || f.weg, false) + kontaktFeld('PLZ und Ort', 'ort', 'z. B. 50667 Köln', 'text', 'postal-code address-level2', '', false) + '</div>' +
     '<p class="sub kontakt-hinweis">* Pflicht. Dazu Telefon oder E-Mail, eins genügt.</p></div>';
   html += '<div class="sec">' + secHead('Wann am besten erreichbar?', null, 'Freiwillig.') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div>';
@@ -7737,29 +7733,19 @@ function instWeiterKarte(du) {
   return h + '</div>';
 }
 /* Testansicht für Fensterbauer, Einstieg (Wunsch des Inhabers, 28.10.2026: „Der Start soll quasi diese Maske sein, nur halt mit dem
-   Hinweis“): gleich die erste Folie „Was planst du?“, beim ersten Öffnen im Tab mit dem Hinweis als Bogen darüber. Ein angefangenes
-   Fenster wird fortgesetzt; ein abgeschlossener Test beginnt neu */
+   Hinweis“; kein Bogen und keine Karte über der Startseite des Betriebs, sondern ein Infobereich in der ersten Folie): gleich die erste
+   Folie „Was planst du?“. Ein angefangenes Fenster wird fortgesetzt; ein abgeschlossener Test beginnt neu */
 function probeEinstieg() {
   if (S.sent) instanzVergessen(true);
-  let gesehen = false; try { gesehen = sessionStorage.getItem('aufmass.probe.hinweis') === '1'; } catch (e) { gesehen = false; }
-  S.probeHinweis = !gesehen;
   if (entwurfLesen()) entwurfFortsetzen(); else act('new', document.body);
 }
-function probeHinweisZu() { S.probeHinweis = false; try { sessionStorage.setItem('aufmass.probe.hinweis', '1'); } catch (e) { /* ok */ } render(); }
-function probeHinweisBlatt() {
-  return '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="probe-hinweis-zu"></button><div class="sheet probe-blatt" role="dialog" aria-modal="true" aria-labelledby="pb-t" aria-describedby="pb-s"><div class="grip"></div>' +
-    '<p class="eyebrow kicker probe-blatt-label">Testansicht für Fensterbauer</p><h2 id="pb-t" tabindex="-1">So erleben Ihre Kunden <span class="ak">Ihren Konfigurator.</span></h2>' +
-    '<p class="vl-sub" id="pb-s">Am Beispiel von Fensterbau Brandt, einem erfundenen Betrieb, im Paket ' + esc(probePaketName()) + ': genau der Ablauf, den Ihre Kunden auf Ihrer Website sehen. Probieren Sie alles aus, vom ersten Maß bis zum Absenden. Gesendet wird nichts; am Ende sehen Sie, wie Ihr Kunde den Abschluss erlebt.</p>' +
-    '<div class="vl-knoepfe"><button type="button" class="btn primary" data-act="probe-hinweis-zu">Ausprobieren</button><a class="link vl-ab" href="' + PROBE_FB + '">Zurück zur Seite für Fensterbauer</a></div></div>';
-}
-/* Testansicht für Fensterbauer: Hinweis am Anfang (erste Seite), knapp über der Liste und nach dem Senden */
-function probeStart(art) {
+/* Infobereich der Testansicht in der Folie selbst: auf der ersten Folie („start“) und auf der Bestätigung („ende“) */
+function probeInfo(art) {
   if (!PROBE) return '';
-  const zurueck = '<a class="link probe-start-link" href="' + PROBE_FB + '">Zurück zur Seite für Fensterbauer</a>';
-  if (art === 'liste') return '<section class="probe-start knapp" role="note" aria-label="Testansicht für Fensterbauer"><span class="dna-label">Testansicht für Fensterbauer</span><p>Hier wird nichts gesendet. Am Ende sehen Sie den Abschluss, wie ihn Ihr Kunde sieht.</p>' + zurueck + '</section>';
-  if (art === 'gesendet') return '<section class="probe-start knapp" role="note" aria-label="Testansicht für Fensterbauer"><span class="dna-label">Testansicht für Fensterbauer</span><p>So sieht Ihr Kunde die Seite, wenn er nach dem Senden wiederkommt. Gesendet wurde nichts.</p><div class="probe-knoepfe"><a class="probe-hinweis-los" href="' + PROBE_FB + '#pakete">Pakete ansehen</a><button type="button" class="link probe-start-link" data-act="probe-neu">Noch einmal ausprobieren</button></div></section>';
-  return '<section class="probe-start" role="note" aria-label="Testansicht für Fensterbauer"><span class="dna-label">Testansicht für Fensterbauer</span>' +
-    '<p class="probe-start-titel">So erleben Ihre Kunden Ihren Konfigurator.</p><p>Am Beispiel von Fensterbau Brandt, einem erfundenen Betrieb, im Paket ' + esc(probePaketName()) + ': genau der Ablauf, den Ihre Kunden auf Ihrer Website sehen, mit Ihrem Namen statt Brandt. Probieren Sie alles aus, vom ersten Maß bis zum Absenden. Gesendet wird nichts.</p>' + zurueck + '</section>';
+  const zurueck = '<a class="probe-info-link" href="' + PROBE_FB + '">Zurück zur Seite für Fensterbauer</a>';
+  if (art === 'ende') return '<section class="probe-info" aria-label="Testansicht für Fensterbauer"><span class="dna-label">Testansicht · Ende</span><p><b>So sieht Ihr Kunde den Abschluss auf Ihrer Website.</b> Gesendet wurde nichts.</p>' +
+    '<div class="probe-info-knoepfe"><a class="dna-pille dna-pille--leise" href="' + PROBE_FB + '#pakete">Pakete ansehen</a><button type="button" class="probe-info-link" data-act="probe-betrieb">So käme die Anfrage bei Ihnen an</button><button type="button" class="probe-info-link" data-act="probe-neu">Noch einmal ausprobieren</button></div></section>';
+  return '<section class="probe-info" aria-label="Testansicht für Fensterbauer"><span class="dna-label">Testansicht für Fensterbauer</span><p><b>So erleben Ihre Kunden Ihren Konfigurator.</b> Am Beispiel von Fensterbau Brandt, einem erfundenen Betrieb, im Paket ' + esc(probePaketName()) + '. Probieren Sie alles aus bis zum Absenden; gesendet wird nichts.</p>' + zurueck + '</section>';
 }
 /* Startseite einer Instanz in allen Zuständen (erste Seite, Liste, gesendet, Planung nicht mehr da, Nachbesserung einer Einladung) */
 function instHome() {
@@ -7771,7 +7757,7 @@ function instHome() {
   if (S.instZu && !S.sent) return instZuSeite();
   if (S.sent) {
     const test = S.sent.art === 'test';
-    const html = probeStart('gesendet') + '<section class="hero lk"><div class="ein-start-in">' + ok + '<p class="eyebrow kicker">' + (test ? 'Testanfrage ' : 'Anfrage ') + esc(S.sent.nr || '') + '</p><h1>' + (S.sent.anderswo ? 'Schon <span class="ak">gesendet</span>.' : 'Danke, <span class="ak">gesendet</span>.') + '</h1>' +
+    const html = '<section class="hero lk"><div class="ein-start-in">' + ok + '<p class="eyebrow kicker">' + (test ? 'Testanfrage ' : 'Anfrage ') + esc(S.sent.nr || '') + '</p><h1>' + (S.sent.anderswo ? 'Schon <span class="ak">gesendet</span>.' : 'Danke, <span class="ak">gesendet</span>.') + '</h1>' +
       '<p class="ein-lead">' + esc(name) + T(' hat Ihre Anfrage seit ', ' hat deine Anfrage seit ') + esc(sentWhen()) + T(' und meldet sich bei Ihnen.', ' und meldet sich bei dir.') + '</p>' +
       '<div class="ein-cta"><button type="button" class="btn primary" data-act="inst-weitere">Weitere Anfrage starten' + pf + '</button></div></div></section>' + weg +
       '<section class="card inst-geraet-karte"><p class="eyebrow">Auf diesem Gerät</p><p>' + T('Hier sind nur Nummer und Datum Ihrer Anfrage gespeichert; Maße, Fotos und Kontaktdaten sind von diesem Gerät gelöscht.', 'Hier sind nur Nummer und Datum deiner Anfrage gespeichert; Maße, Fotos und Kontaktdaten sind von diesem Gerät gelöscht.') + '</p><div class="pill-row"><button type="button" class="pill" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>' +
@@ -7785,13 +7771,13 @@ function instHome() {
   }
   if (S.nb) return linkHomeInhaltAlt(I);
   if (n || angelegt() >= GRENZE.fenster) {
-    const html = weg + probeStart('liste') + (web ? '' : '<div class="lk-kopf">' + E.kopf({ name: name, p: p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '', instanz: I }) + '</div>') + uebersichtKopf(T) +
+    const html = weg + (web ? '' : '<div class="lk-kopf">' + E.kopf({ name: name, p: p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '', instanz: I }) + '</div>') + uebersichtKopf(T) +
       '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
       (vorschau() ? '' : web ? instWeiterKarte(du) : linkMerk(name, du)) + kontakt() + rechtLinks();
     return { html: html, bar: n ? { label: 'Weiter zum Absenden', act: 'go', v: 'anfrage' } : null };
   }
   const frueher = web && liste.length ? '<section class="card inst-frueher"><p class="eyebrow">' + T('Ihre Anfragen auf diesem Gerät', 'Deine Anfragen auf diesem Gerät') + '</p><ul class="inst-nr">' + liste.slice(0, 5).map((x) => { let t = ''; try { t = new Date(x.when).toLocaleDateString('de-DE'); } catch (e) { t = ''; } return '<li><b>' + esc((x.test ? 'Testanfrage ' : 'Anfrage ') + x.nr) + '</b><span>' + esc(t ? 'gesendet am ' + t : 'gesendet') + '</span></li>'; }).join('') + '</ul><div class="pill-row"><button type="button" class="pill" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>' : '';
-  const html = weg + probeStart() + E.html({ name: name, kunde: d.kunde, du: du, p: p, bis: web ? '' : d.bis, server: !!SERVER.daten, instanz: I }) + frueher + rechtLinks(true);
+  const html = weg + E.html({ name: name, kunde: d.kunde, du: du, p: p, bis: web ? '' : d.bis, server: !!SERVER.daten, instanz: I }) + frueher + rechtLinks(true);
   return { html: html, bar: null };
 }
 /* Die Instanz ist inzwischen pausiert, beendet oder wieder in Vorbereitung (Antwort der API, Status-Matrix §2.7), während die App offen
@@ -7823,11 +7809,7 @@ function probeSenden() {
 }
 function probeGesendet() {
   if (!S.sent || S.sent.kurz) return instHome();
-  if (S.probeSicht !== 'betrieb') {
-    const v = instGesendet();
-    return Object.assign({}, v, { html: '<div class="probe-hinweis" role="note"><b>Testansicht · Ende</b><span>So sieht Ihr Kunde den Abschluss auf Ihrer Website. Gesendet wurde nichts.</span>' +
-      '<div class="probe-knoepfe"><a class="probe-hinweis-los" href="' + PROBE_FB + '#pakete">Pakete ansehen</a><button type="button" class="link probe-start-link" data-act="probe-betrieb">So käme die Anfrage bei Ihnen an</button></div></div>' + v.html });
-  }
+  if (S.probeSicht !== 'betrieb') return instGesendet(); // das Ende: die Bestätigung, wie sie der Kunde sieht (Infobereich darin)
   const pr = S.proj, n = S.windows.length, kunde = String(pr.name || 'Ihr Kunde').slice(0, 60), offen = AW.klaerung(S.windows, pr, {}).length;
   const fotos = S.windows.reduce((a, w) => a + bilderVon(w).length, 0), nr = S.sent.nr || '';
   const zeile = (k, v) => v ? '<li><span>' + esc(k) + '</span><b>' + esc(v) + '</b></li>' : '';
@@ -7860,20 +7842,35 @@ async function probeBlatt() {
   } catch (e) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); }
   finally { S.pdfLaeuft = false; render(); }
 }
-/* Bestätigung nach dem Senden: Nummer, „<Name> meldet sich“, Kontaktkarte, „Meine Anfrage als PDF“ (Merkmal kopieKunde), weitere Anfrage,
-   vergessen. Verlässt der Kunde sie, bleiben nur Nummer und Datum (render → instanzKuerzen) */
+/* Bestätigung nach dem Senden im Look der Design-DNA (28.10.2026, Wunsch des Inhabers: „Danke, gesendet“ überarbeiten). Bühne: das Blatt
+   im Fensterlicht mit dem Namen des Betriebs im Kopfband, die Maße verdeckt wie in der Durchschrift, Etikett mit der Nummer, Chip
+   „Gesendet“. Rechts Nummer, „Danke, gesendet.“ und wer sich meldet; die Durchschrift als PDF (Merkmal kopieKunde, die eine volle Pille:
+   nur jetzt zu haben), die drei Stationen danach, Fragen an den Betrieb, was auf dem Gerät bleibt (weitere Anfrage, vergessen) und
+   Fertig. Inhalt und Aktionen wie bisher. In der Testansicht steht darüber der Infobereich, und Fertig führt zurück zur Seite für
+   Fensterbauer. Verlässt der Kunde sie, bleiben nur Nummer und Datum (render → instanzKuerzen) */
 function instGesendet() {
   if (!S.sent || S.sent.kurz) return instHome();
-  const E = window.Einladung, d = lkDaten(), name = d.name, du = d.du, T = (sie, x) => (du ? x : sie), test = S.sent.art === 'test', web = instWebsite();
-  const ok = '<div class="okmark-l" data-lottie="fertig"><span class="lottie-still"><svg class="okmark" viewBox="0 0 64 64" width="78" height="78" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--ok-soft)"></circle><path class="tick" d="M19 33l9 9 18-20" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>';
-  const html = '<section class="inst-danke"><div class="ein-start-in">' + ok + '<p class="eyebrow kicker">' + (test ? 'Testanfrage ' : 'Anfrage ') + '<span class="inst-nr-wert">' + esc(S.sent.nr || '') + '</span></p><h1>Danke, <span class="ak">gesendet</span>.</h1>' +
-      '<p class="ein-lead">' + esc(name) + T(' hat jetzt Ihre Maße, Fotos und Wünsche und meldet sich bei Ihnen.', ' hat jetzt deine Maße, Fotos und Wünsche und meldet sich bei dir.') + '</p></div></section>' +
-    (test ? noteBox('Vorschau: Das war eine Testanfrage. Sie geht mit „[Test]“ im Betreff an den Betrieb, zählt nicht mit und ist nach einem Tag gelöscht.', null, 'warn') : '') +
-    (INST_M.kopieKunde ? '<section class="card inst-pdf"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">' + T('Für Ihre Unterlagen', 'Für deine Unterlagen') + '</p><b>' + T('Ihre Anfrage als PDF', 'Deine Anfrage als PDF') + '</b><small>' + T('Durchschrift mit Ihren Fenstern, der Ausstattung und Ihren Wünschen, ohne Maße. Das vollständige Aufmaßblatt schickt ' + esc(name) + ' Ihnen gern auf Anfrage. Nur jetzt: Danach löschen wir die Planung von diesem Gerät.', 'Durchschrift mit deinen Fenstern, der Ausstattung und deinen Wünschen, ohne Maße. Das vollständige Aufmaßblatt schickt ' + esc(name) + ' dir gern auf Anfrage. Nur jetzt: Danach löschen wir die Planung von diesem Gerät.') + '</small></div></div><div class="pill-row"><button type="button" class="btn primary" data-act="inst-pdf"' + (S.pdfLaeuft ? ' disabled' : '') + '>' + (S.pdfLaeuft ? 'PDF entsteht …' : 'Meine Anfrage als PDF') + '</button></div></section>' : '') +
-    '<div class="card" style="gap: 12px"><p class="eyebrow">So geht\'s weiter</p><div class="steps mini"><div class="step"><span class="n">1</span><div><b>Angebot</b><p>von ' + esc(name) + '</p></div></div><div class="step"><span class="n">2</span><div><b>Feinaufmaß</b><p>ein Termin vor Ort</p></div></div><div class="step"><span class="n">3</span><div><b>Fertigung und Einbau</b><p>Termin nach Absprache</p></div></div></div></div>' +
-    (E ? E.kontakt({ name: name, p: d.p, du: du, instanz: instOpt({ website: web }) }) : '') +
-    '<section class="card inst-geraet-karte"><p class="eyebrow">Auf diesem Gerät</p><p>' + T('Sobald Sie diese Seite verlassen oder schließen, löschen wir Maße, Fotos und Kontaktdaten von diesem Gerät. Es bleiben nur Nummer und Datum Ihrer Anfrage.', 'Sobald du diese Seite verlässt oder schließt, löschen wir Maße, Fotos und Kontaktdaten von diesem Gerät. Es bleiben nur Nummer und Datum deiner Anfrage.') + '</p><div class="pill-row"><button type="button" class="pill" data-act="inst-weitere">Weitere Anfrage starten</button><button type="button" class="pill" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>';
-  return { html: html, cls: 'tight', bar: { label: 'Fertig', act: 'go', v: 'home', ghost: true } };
+  const d = lkDaten(), name = d.name, du = d.du, T = (sie, x) => (du ? x : sie), test = S.sent.art === 'test', p = d.p || {}, nr = S.sent.nr || '';
+  const buehne = abBuehne('ab-blatt gs-buehne', 'Gesendet', abPapier(false, false, name) + (nr ? abEtikett(test ? 'Testanfrage' : 'Anfrage', nr) : ''));
+  const titel = '<div class="lg-frage gs-titel"><span class="dna-label">' + (test ? 'Testanfrage ' : 'Anfrage ') + '<span class="inst-nr-wert">' + esc(nr) + '</span></span><div class="lg-frage-kopf"><h1 tabindex="-1">Danke, <span class="ak">gesendet.</span></h1></div>' +
+    '<p>' + esc(name) + T(' hat jetzt Ihre Maße, Fotos und Wünsche und meldet sich bei Ihnen.', ' hat jetzt deine Maße, Fotos und Wünsche und meldet sich bei dir.') + '</p></div>';
+  const testNote = test ? '<p class="ab-note">Vorschau: Das war eine Testanfrage. Sie geht mit „[Test]“ im Betreff an den Betrieb, zählt nicht mit und ist nach einem Tag gelöscht.</p>' : '';
+  const pdf = INST_M.kopieKunde ? '<section class="gs-pdf"><div class="gs-pdf-kopf"><span class="probe-anhang-ic" aria-hidden="true">' + FILE_IC + '</span><span><span class="dna-label">' + T('Für Ihre Unterlagen', 'Für deine Unterlagen') + '</span><b>' + T('Ihre Anfrage als PDF', 'Deine Anfrage als PDF') + '</b></span></div>' +
+    '<p>' + T('Durchschrift mit Ihren Fenstern, der Ausstattung und Ihren Wünschen, ohne Maße. Das vollständige Aufmaßblatt schickt ' + esc(name) + ' Ihnen gern auf Anfrage. Nur jetzt: Danach löschen wir die Planung von diesem Gerät.', 'Durchschrift mit deinen Fenstern, der Ausstattung und deinen Wünschen, ohne Maße. Das vollständige Aufmaßblatt schickt ' + esc(name) + ' dir gern auf Anfrage. Nur jetzt: Danach löschen wir die Planung von diesem Gerät.') + '</p>' +
+    '<button type="button" class="dna-pille gs-pdf-knopf" data-act="inst-pdf"' + (S.pdfLaeuft ? ' disabled' : '') + '>' + (S.pdfLaeuft ? 'PDF entsteht …' : 'Meine Anfrage als PDF' + abPfeil) + '</button></section>' : '';
+  const station = (n, t, x) => '<li class="wl-station"><span class="wl-nr">' + n + '</span><div><b>' + t + '</b><p>' + x + '</p></div></li>';
+  const weiter = '<section class="gs-weiter"><span class="dna-label">So geht\'s weiter</span><ol class="wl-stationen">' + station(1, 'Angebot', 'von ' + esc(name)) + station(2, 'Feinaufmaß', 'ein Termin vor Ort') + station(3, 'Fertigung und Einbau', 'Termin nach Absprache') + '</ol></section>';
+  const tel = String(p.tel || '').trim(), mail = String(p.mail || '').trim(), telH = tel.replace(/[^\d+]/g, '');
+  const rund = (href, ic, text) => '<a class="gs-k" href="' + esc(href) + '"><span class="gs-k-rund" aria-hidden="true">' + ic + '</span><span>' + esc(text) + '</span></a>';
+  const IC_TEL = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.3 3.5 8 7.2 6.4 8.6a9.6 9.6 0 0 0 5 5l1.4-1.6 3.7 1.7-.6 2.6a1.4 1.4 0 0 1-1.5 1.1A13.6 13.6 0 0 1 2.4 5.1a1.4 1.4 0 0 1 1.1-1.5z"/></svg>';
+  const IC_MAIL = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="m3 5.5 7 5 7-5"/></svg>';
+  const kontakt = '<section class="gs-kontakt"><span class="dna-label">Fragen?</span><div class="gs-ap"><span class="gs-ap-bild" aria-hidden="true">' + esc(String(p.ap || name || '?').trim().charAt(0).toUpperCase()) + '</span><span><b>' + esc(p.ap || name) + '</b>' + (p.ap ? '<small>' + esc(name) + '</small>' : '') + '</span></div>' +
+    (tel || mail ? '<div class="gs-k-reihe">' + (tel ? rund('tel:' + telH, IC_TEL, tel) : '') + (mail ? rund('mailto:' + mail, IC_MAIL, mail) : '') + '</div>' : '<p>' + esc(name) + T(' meldet sich nach Ihrer Anfrage bei Ihnen.', ' meldet sich nach deiner Anfrage bei dir.') + '</p>') + '</section>';
+  const geraet = '<section class="gs-geraet"><span class="dna-label">Auf diesem Gerät</span><p>' + T('Sobald Sie diese Seite verlassen oder schließen, löschen wir Maße, Fotos und Kontaktdaten von diesem Gerät. Es bleiben nur Nummer und Datum Ihrer Anfrage.', 'Sobald du diese Seite verlässt oder schließt, löschen wir Maße, Fotos und Kontaktdaten von diesem Gerät. Es bleiben nur Nummer und Datum deiner Anfrage.') + '</p>' +
+    '<div class="gs-geraet-knoepfe"><button type="button" class="dna-pille dna-pille--leise" data-act="inst-weitere">Weitere Anfrage starten</button><button type="button" class="probe-info-link" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>';
+  const fertig = PROBE ? '<a class="dna-pille dna-pille--leise lg-weiter" href="' + PROBE_FB + '">Fertig</a>' : '<button type="button" class="dna-pille dna-pille--leise lg-weiter" data-act="go" data-v="home">Fertig</button>';
+  const inhalt = titel + testNote + probeInfo('ende') + pdf + weiter + kontakt + geraet;
+  return { html: lgKopf(false) + dnaTisch(buehne, '<div class="ab-inhalt">' + inhalt + '</div>' + rechtLinks() + '<div class="lg-fuss gs-fuss">' + fertig + '</div>'), dna: true, cls: 'dna ab ab2 dt gs', voll: true, bar: null };
 }
 /* Logo der Instanz fürs PDF: Bild von /marke/<v>/logo.png als Data-URL mit Maßen */
 async function logoFuerBlatt(url) {

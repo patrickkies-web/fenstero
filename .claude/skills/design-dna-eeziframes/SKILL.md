@@ -195,6 +195,11 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   nicht herein, über dem drehbaren Modell kein Milchglas (`backdrop-filter`), ohne WebGL schwingt das Modell nicht von selbst. Prüfen
   mit vierfach gedrosselter CPU, auch ohne WebGL: Folienwechsel unter 0,3 s. Vorschlag für seine DNA (Abschnitt 9): „Bewegung nur
   für Zustand und Rückmeldung; Folienwechsel stehen sofort; kein Glas über bewegten 3-D-Bühnen“.
+- Hinweise gehören in die Folie, nicht darüber (Korrektur des Inhabers, 28.10.2026, Testansicht für Fensterbauer): Eine Karte über der
+  alten Startseite eines Betriebs fand er „hässlich“, gewünscht ist „einfach ein Infobereich in der ersten Folie des Konfigurators“.
+  Regel: Ein Hinweis, der für eine ganze Ansicht gilt, steht als Fläche in der Folie selbst (Anthrazit mit Lichtkante, Etikett mit
+  violettem Punkt, ein Satz, ein Weg), nicht als Bogen oder Karte vor dem Inhalt und nicht auf noch nicht überarbeiteten Seiten.
+  Vorschlag für seine DNA: in Abschnitt 9 „Hinweise als Fläche in der Folie, nie als Schicht davor“.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

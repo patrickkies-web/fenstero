@@ -3069,28 +3069,52 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 }
 
 /* ---------- Testansicht für Fensterbauer (/app/?ausprobieren, 28.10.2026) ----------
-   Hier spricht eeziframes zum Fensterbauer, nicht der Betrieb zu seinem Kunden: Hinweis am Anfang als Anthrazit-Karte mit Lichtkante
-   (G14) und Etikett mit violettem Punkt, im Kopf ein kleines Zeichen „Test“ in Indigo, nach dem Senden erst die echte Bestätigung des
-   Kunden mit kurzem Hinweis, dann auf der Folie mit dem Blatt die E-Mail an den Betrieb als weiße Karte (probeGesendet). */
+   Hier spricht eeziframes zum Fensterbauer, nicht der Betrieb zu seinem Kunden: ein Infobereich in der Folie selbst (erste Folie und
+   Bestätigung) als Anthrazit-Fläche mit Lichtkante (G14) und Etikett mit violettem Punkt, „Testansicht“ unter dem Namen im Kopf jeder
+   Folie, bei den Kontaktdaten eine Zeile; auf Wunsch die Folie mit der E-Mail an den Betrieb als einziger weißer Karte (probeGesendet). */
 /* Kopf: „Testansicht“ unter dem Namen des Betriebs, auf jeder Folie und jeder Breite */
 .probe-namen { display: grid; gap: 2px; min-width: 0 }
 .hdr-inst .probe-namen .hdr-name { line-height: 1.1 }
 .probe-unter { display: flex; align-items: center; gap: 6px; min-width: 0; font: 400 12px/1.2 "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; letter-spacing: .02em; color: #a8a4a9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .probe-unter::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: #897efc; box-shadow: 0 0 0 3px rgba(137, 126, 252, .18) }
-.probe-start, .probe-hinweis { --pr-font: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; margin: 0 0 16px; padding: 16px 18px 6px; border-radius: 20px; background: radial-gradient(120% 90% at 18% 0%, #363638, #202022 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045); color: #fff; font-family: var(--pr-font) }
-.probe-start .dna-label, .probe-hinweis b { display: inline-flex; align-items: center; gap: 8px; font: 400 12px/1.3 var(--pr-font); letter-spacing: .03em; color: #a8a4a9 }
-.probe-start .dna-label::before, .probe-hinweis b::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #897efc; box-shadow: 0 0 0 4px rgba(137, 126, 252, .18) }
-.probe-start-titel { margin: 8px 0 0; font: 500 20px/1.15 var(--pr-font); letter-spacing: -.02em; color: #fff }
-.probe-start p:not(.probe-start-titel) { margin: 6px 0 0; max-width: 46ch; font: 400 15px/1.45 var(--pr-font); color: #a8a4a9 }
-.probe-start-link { display: inline-flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; cursor: pointer; color: #fff; font: 500 14px/1.2 var(--pr-font); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px }
-.probe-start.knapp { padding-top: 12px }
-.probe-start.knapp p { margin-top: 4px }
-.probe-hinweis { display: grid; gap: 6px; padding-bottom: 14px }
-.probe-hinweis span { font: 400 15px/1.45 var(--pr-font); color: #fff }
-.probe-knoepfe { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; margin-top: 4px }
-.probe-hinweis-los { justify-self: start; display: inline-flex; text-decoration: none; align-items: center; min-height: 44px; margin-top: 2px; padding: 0 18px; border: 0; border-radius: 999px; background: transparent; box-shadow: inset 0 0 0 1.5px #a8a4a9; color: #fff; font: 500 15px/1 var(--pr-font); cursor: pointer; transition: transform 160ms cubic-bezier(.2, .7, .2, 1) }
-.probe-hinweis-los:active { transform: scale(.97); transition-duration: 0s }
-.probe-hinweis-los:focus-visible { outline: 2px solid #fff; outline-offset: 3px }
+/* Infobereich in der Folie */
+.dna .probe-info { display: grid; gap: 6px; margin: 0 0 12px; padding: 14px 16px 4px; border-radius: 20px; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+.dna .probe-info .dna-label, .dna.gs :is(.gs-titel, .gs-pdf, .gs-weiter, .gs-kontakt, .gs-geraet) .dna-label { display: inline-flex; align-items: center; gap: 8px; font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau) }
+.dna .probe-info .dna-label::before, .dna.gs .gs-titel .dna-label::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 4px rgba(137, 126, 252, .18) }
+.dna .probe-info p { margin: 0; max-width: 46ch; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna .probe-info p b { font-weight: 500; color: var(--weiss) }
+.dna .probe-info-link, .dna.gs .probe-info-link { justify-self: start; display: inline-flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; color: var(--weiss); font: 500 14px/1.25 var(--font-sans); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; cursor: pointer }
+.dna .probe-info-knoepfe { display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px; padding: 6px 0 4px }
+.dna .probe-info-knoepfe .dna-pille, .dna.gs .gs-geraet-knoepfe .dna-pille { height: 44px; padding: 0 18px; font-size: 14px }
+.dna.dt .st-rechts > .probe-info { margin-bottom: 14px }
+.dna.gs .ab-inhalt > .probe-info { margin: 4px 0 0 }
+/* Kontaktdaten (Seite der Instanz, noch im bisherigen Look): eine Zeile statt einer Karte */
+.probe-zeile { display: flex; align-items: baseline; gap: 8px; margin: 0 0 14px; padding: 0 6px; font: 400 15px/1.45 "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif; color: #a8a4a9 }
+.probe-zeile::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #897efc; box-shadow: 0 0 0 3px rgba(137, 126, 252, .18); transform: translateY(-1px) }
+.probe-zeile b { font-weight: 500; color: #fff }
+/* Bestätigung nach dem Senden (instGesendet) im Look der Design-DNA */
+.dna.gs .gs-titel { display: grid; gap: 8px }
+.dna.gs .gs-titel p { margin: 0; max-width: 40ch }
+.dna.gs .inst-nr-wert { font-variant-numeric: tabular-nums; color: var(--weiss) }
+.dna.gs :is(.gs-pdf, .gs-kontakt) { display: grid; gap: 12px; padding: 16px; border-radius: var(--rund-l); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+.dna.gs .gs-pdf-kopf { display: flex; align-items: center; gap: 12px }
+.dna.gs .gs-pdf-kopf b, .dna.gs .gs-ap b { display: block; margin-top: 2px; font: 500 17px/1.25 var(--font-sans); color: var(--weiss) }
+.dna.gs :is(.gs-pdf, .gs-kontakt, .gs-geraet) p { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna.gs .gs-pdf-knopf { width: 100%; padding: 0 6px 0 24px; justify-content: space-between }
+.dna.gs .gs-pdf-knopf:disabled { opacity: .7; cursor: progress }
+.dna.gs .gs-weiter { display: grid; gap: 10px; margin-top: 12px }
+.dna.gs .gs-ap { display: flex; align-items: center; gap: 12px }
+.dna.gs .gs-ap small { display: block; font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau) }
+.dna.gs .gs-ap-bild { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--indigo); color: var(--weiss); font: 500 17px/1 var(--font-sans) }
+.dna.gs .gs-k-reihe { display: flex; flex-wrap: wrap; gap: 8px 18px }
+.dna.gs .gs-k { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--weiss); font: 500 15px/1.2 var(--font-sans); text-decoration: none; overflow-wrap: anywhere }
+.dna.gs .gs-k-rund { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: transform 160ms var(--dna-druck) }
+.dna.gs .gs-k:active .gs-k-rund { transform: scale(.95); transition-duration: 0s }
+.dna.gs .gs-k-rund svg { width: 18px; height: 18px }
+.dna.gs .gs-geraet { display: grid; gap: 8px; margin-top: 12px; padding: 0 2px }
+.dna.gs .gs-geraet-knoepfe { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px }
+.dna.gs .gs-fuss { justify-content: flex-start }
+.dna.gs .gs-fuss .lg-weiter { flex: 0 1 200px }
 /* Ende: die E-Mail an den Betrieb (Weiß nur für diese eine Karte), Anhang als Zeile zum Antippen, danach der Weg zurück */
 .dna.probe-ende .lg-frage { display: grid; gap: 8px }
 .dna.probe-ende .lg-frage .dna-label { display: inline-flex; align-items: center; gap: 8px; font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; margin-bottom: -2px }
@@ -3120,8 +3144,4 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .probe-weiter b { font-weight: 500; color: var(--weiss) }
 .probe-aktionen { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px }
 .probe-zurueck { justify-self: start; min-height: 44px; padding: 0; border: 0; background: none; color: var(--silbergrau); font: 400 14px/1.3 var(--font-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
-@media (prefers-reduced-motion: reduce) { .probe-anhang, .probe-hinweis-los { transition: none } }
-/* Hinweis beim Einstieg in die Testansicht: Bogen über der ersten Folie, Etikett mit violettem Punkt */
-.sheet.probe-blatt .probe-blatt-label { display: inline-flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: .03em }
-.sheet.probe-blatt .probe-blatt-label::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #897efc; box-shadow: 0 0 0 4px rgba(137, 126, 252, .18) }
-.sheet.probe-blatt .vl-ab { display: inline-flex; align-items: center; justify-content: center; min-height: 44px }
+@media (prefers-reduced-motion: reduce) { .probe-anhang, .dna.gs .gs-k-rund { transition: none } }
