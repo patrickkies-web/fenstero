@@ -1120,7 +1120,8 @@
   /* ---------- Abrechnung ---------- */
   const Abrechnung = (() => {
     /* Preise netto für Betriebe, brutto für Hauseigentümer; aus /config.js bzw. vom Server (/api/status) überschreibbar */
-    const PREISE0 = { aufmass: 7.99, projekt: 9, frei: 3, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true, freiTage: 14 };
+    /* projekt 0: Betriebskonto kostenlos (seit 28.10.2026, Nutzungsbedingungen § 4); die Abrechnung je Projekt nur, wenn der Server einen Preis meldet */
+    const PREISE0 = { aufmass: 7.99, projekt: 0, frei: 0, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true, freiTage: 14 };
     let PREISE = JSON.parse(JSON.stringify(PREISE0));
     if (typeof window !== 'undefined' && window.KONFIG && window.KONFIG.preise) PREISE = Object.assign({}, PREISE, window.KONFIG.preise, { abo: Object.assign({}, PREISE.abo, window.KONFIG.preise.abo || {}) });
     function setPreise(p) { if (!p) return PREISE; PREISE = Object.assign({}, PREISE, p, { abo: Object.assign({}, PREISE.abo, p.abo || {}) }); return PREISE; }
@@ -1193,11 +1194,15 @@
     const aufmassOf = (wins, proj) => ({ windows: wins, proj: proj, fotos: wins.reduce((s, w) => s + (w.fotos || 0), 0), elemente: wins.reduce((s, w) => s + (AW.num(w.anzahl) || 1), 0) });
 
     /* ---------- Buchungen ----------
+       0. Seit 28.10.2026 ist das Betriebskonto kostenlos (projekt 0, kostenlos()): jede Buchung „kostenlos“, nie gesperrt, keine Tarife.
+          Die Regeln 2 bis 4 gelten nur, wenn der Server einen Projektpreis meldet (BETRIEBSKONTO=1, nur die Prüfsuite).
        1. Gebucht wird beim ersten Eingang je Projekt, zum Tarif, der in diesem Moment gilt; Nachbesserungen im selben Projekt kosten nichts. Eine Buchung wird nie geändert oder gelöscht.
        2. Start: die ersten 3 Projekte je Betrieb frei (zählt über die Buchungen), danach 9 € je Projekt, nur mit Zahlungsart.
        3. Abo 10: 49 € im Monat, 10 Projekte im Kalendermonat inklusive, jedes weitere 5 €. Plus: 79 € im Monat, unbegrenzt.
        4. Ohne Zahlungsart bleibt ein kostenpflichtiges Aufmaß gesperrt: es kommt an, wird gespeichert, die Maße bleiben verborgen, bis eine Zahlungsart da ist. */
     const freeQuota = (a) => (a.freeQuota != null ? a.freeQuota : PREISE.frei);
+    /* Betriebskonto kostenlos: kein Projektpreis, also keine Tarife, keine Sperre, keine Zahlungsart */
+    const kostenlos = () => !(Number(PREISE.projekt) > 0);
     function ledger(a) {
       if (!a.book) { a.book = []; a.freeUsed = 0; (a.links || []).slice().reverse().filter((l) => l.status === 'eingegangen' && !l.demo).forEach((l) => { l.locked = !bookAufmass(a, l); }); }
       return a.book;
@@ -1206,13 +1211,15 @@
     const lockedLinks = (a) => (a.links || []).filter((l) => l.status === 'eingegangen' && l.locked && !l.demo);
     const aboGenutzt = (a, now) => { const k = monthKey(now); return ledger(a).filter((b) => b.kind === 'aufmass' && b.inkl && b.month === k).length; };
     const aboFrei = (a, now) => Math.max(0, PREISE.abo.inkl - aboGenutzt(a, now));
-    function bookAufmass(a, l, extra, now) {
+    function bookAufmass(a, l, extra, now, alsStart) {
       const book = a.book || (a.book = []), ref = extra ? l.id + '#' + extra : l.id;
       if (book.some((b) => b.kind === 'aufmass' && b.ref === ref)) return true;
       const am = l.aufmass || {}, sub = [((l.log || {}).eingegangen || stamp(now)), l.nr, am.windows ? nW(am.windows.length, 'Position', 'Positionen') : '', extra ? 'anderes Aufmaß in Runde ' + extra : ''].filter(Boolean).join(' · ');
       let betrag = 0, badge, inkl = false;
-      const k = konto(a);
+      /* alsStart: ein gesperrtes Aufmaß kam unter Start an (ohne Zahlungsart gibt es kein Abo) und wird zu diesem Tarif gebucht (Regel 1) */
+      const k0 = konto(a), k = alsStart && k0 !== 'instanz' ? 'service' : k0;
       if (k === 'instanz') badge = 'im Paket';
+      else if (kostenlos()) badge = 'kostenlos';
       else if (k === 'plus') badge = 'inklusive (Plus)';
       else if (k === 'abo') {
         const genutzt = aboGenutzt(a, now);
@@ -1233,8 +1240,8 @@
       const size = nW(aufmass.windows.length, 'Position', 'Positionen') + ' mit ' + nW(aufmass.fotos || 0, 'Foto', 'Fotos');
       return { ok: !l.locked, notif: l.locked ? { t: 'Aufmaß eingegangen: ' + l.kunde, s: size + '. Zum Ansehen eine Zahlungsart hinterlegen; Ihre kostenlosen Aufmaße sind verbraucht.', to: ['link', l.id] } : { t: 'Aufmaß eingegangen: ' + l.kunde, s: size + '. ' + (l.nr || ''), to: ['link', l.id] } };
     }
-    /* Nach Zahlungsart oder Tarifwechsel: wartende Aufmaße freischalten, ältestes zuerst */
-    function unlockWaiting(a, now) { let n = 0; lockedLinks(a).slice().reverse().forEach((l) => { if (bookAufmass(a, l, null, now)) { l.locked = false; n++; } }); return n; }
+    /* Nach Zahlungsart oder Tarifwechsel: wartende Aufmaße freischalten, ältestes zuerst, zum Tarif beim Eingang (Start; Nutzungsbedingungen § 5 Abs. 1) */
+    function unlockWaiting(a, now) { let n = 0; lockedLinks(a).slice().reverse().forEach((l) => { if (bookAufmass(a, l, null, now, true)) { l.locked = false; n++; } }); return n; }
     function bookPlan(a, k, now) {
       const key = monthKey(now), preis = k === 'plus' ? PREISE.plus : PREISE.abo.grund;
       const schon = ledger(a).filter((b) => (b.kind === 'plus' || b.kind === 'abo') && b.month === key);
@@ -1246,6 +1253,7 @@
     /* Tarif wechseln: nach oben sofort (Monat wird gebucht), nach unten zum Monatsende vorgemerkt. Rückgabe: was passiert ist */
     function planWechsel(a, k, now) {
       if (konto(a) === 'instanz' || k === 'instanz') return { art: 'paket', msg: 'Das Paket wechselt nur über die Bestellung.' };
+      if (kostenlos() && k !== 'service') return { art: 'kostenlos', msg: 'Ihr Konto ist kostenlos; Tarife gibt es nicht mehr.' };
       const alt = konto(a); k = RANG[k] !== undefined ? k : 'service';
       if (k === alt) { if (a.downgrade) { a.downgrade = null; return { art: 'bleibt', msg: planName(k) + ' läuft weiter' }; } return { art: 'gleich', msg: planName(k) + ' ist schon Ihr Tarif' }; }
       if (RANG[k] > RANG[alt]) {
@@ -1260,6 +1268,8 @@
     /* Beim Start und einmal pro Minute: was die Zeit erledigt. Rückgabe: Meldungen für den Betrieb */
     function tickKonto(a, now) {
       now = now || Date.now(); const out = []; let dirty = false;
+      /* Konto kostenlos: früher gesperrte Aufmaße werden sichtbar */
+      if (kostenlos() && konto(a) !== 'instanz' && lockedLinks(a).length) { const n = unlockWaiting(a, now); if (n) { dirty = true; out.push({ t: nW(n, 'Aufmaß', 'Aufmaße') + ' freigeschaltet', s: 'Ihr Konto ist jetzt kostenlos, ohne Zahlungsart.' }); } }
       if (a.downgrade) { const d = parseDE(a.downgrade.at); if (d && now > d.getTime()) { const alt = konto(a); a.konto = a.downgrade.to; a.downgrade = null; dirty = true; out.push({ t: 'Tarif gewechselt', s: planName(alt) + ' ist ausgelaufen, wie vorgemerkt. Jetzt: ' + planName(konto(a)) + '.', to: ['abrechnung'] }); } }
       if ((konto(a) === 'plus' || konto(a) === 'abo') && a.pay && !ledger(a).some((b) => (b.kind === 'plus' || b.kind === 'abo') && b.month === monthKey(now))) { bookPlan(a, konto(a), now); dirty = true; }
       (a.links || []).forEach((l) => { if (['erstellt', 'gesendet', 'geoeffnet', 'arbeit'].includes(l.status)) { const d = parseDE(l.expires); if (d && now > d.getTime()) { l.status = 'abgelaufen'; l.log = l.log || {}; l.log.abgelaufen = l.expires; dirty = true; } } });
@@ -1411,7 +1421,7 @@
 
     return { preise: preise, setPreise: setPreise, einfuehrung: einfuehrung, setEinfuehrung: setEinfuehrung, einfBis: einfBis, einfRest: einfRest, einfText: einfText, planName: planName, konto: konto, RANG: RANG, NB_MAX: NB_MAX, NB_TAGE: NB_TAGE, OFFEN_TAGE: OFFEN_TAGE, VERLAENGERN_TAGE: VERLAENGERN_TAGE, monthKey: monthKey, monthLabel: monthLabel, monthEnd: monthEnd, stamp: stamp, datum: datum, dateIn: dateIn, parseDE: parseDE, hashN: hashN, nW: nW, newCode: newCode, newId: newId, nextNr: nextNr, normTel: normTel, normFirma: normFirma,
       unpack: unpack, fromApp: fromApp, fingerprint: fingerprint, fromAppProj: fromAppProj, aufmassOf: aufmassOf,
-      freeQuota: freeQuota, ledger: ledger, freeLeft: freeLeft, lockedLinks: lockedLinks, aboGenutzt: aboGenutzt, aboFrei: aboFrei, bookAufmass: bookAufmass, receiveAufmass: receiveAufmass, unlockWaiting: unlockWaiting, bookPlan: bookPlan, planWechsel: planWechsel, tickKonto: tickKonto,
+      freeQuota: freeQuota, kostenlos: kostenlos, ledger: ledger, freeLeft: freeLeft, lockedLinks: lockedLinks, aboGenutzt: aboGenutzt, aboFrei: aboFrei, bookAufmass: bookAufmass, receiveAufmass: receiveAufmass, unlockWaiting: unlockWaiting, bookPlan: bookPlan, planWechsel: planWechsel, tickKonto: tickKonto,
       passt: passt, ueberschneidung: ueberschneidung, klaerUmziehen: klaerUmziehen, nbMoeglich: nbMoeglich, nbAnfragen: nbAnfragen, nbZurueck: nbZurueck, neuesProjekt: neuesProjekt, listeProjekte: listeProjekte, projektAendern: projektAendern, importCode: importCode, fortschritt: fortschritt, linkZu: linkZu };
   })();
 

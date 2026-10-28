@@ -47,7 +47,9 @@ Formen in JSON-Spalten:
 instanzen.marke   { name, titel, beschreibung, farbe, v, bilder: { logo, icon32, icon180, icon512, og, start: [], ap }, start: { kicker, ueberschrift, text } }
 instanzen.eingang { mails: [{ mail, bestaetigt: ISO|null, eingeladen: ISO }], absendername }
 instanzen.zugang  [{ mail, uid, name, rolle, bestaetigt, zuletzt, aus }]
-instanzen.recht   { firma, rechtsform, vertretung, strasse, plz, ort, land, tel, mail, register, ust, kammer, beruf, bundesland, stand }
+instanzen.recht   { firma, rechtsform, vertretung, strasse, plz, ort, land, tel, mail, register, ust, kammer, beruf, schlichtung, dsb, bundesland, stand }
+                  schlichtung: Angabe nach § 36 VSBG, leer = „nicht bereit und nicht verpflichtet“; dsb: Datenschutzbeauftragter, nur wenn benannt
+                  (beide aus den Angaben des Auftrags, betrieb.schlichtung und betrieb.dsb)
 anfragen.versand  { runde, status: offen|gesendet|zugestellt|bounce|beschwerde|fehler, versuche, naechster: ISO, id, bytes, ohneFotos }
 bestellungen.preise { monat, einrichtung, mwst, name, stand }   (Pakete.preisStand)
 ```

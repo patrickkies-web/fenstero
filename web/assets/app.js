@@ -4005,17 +4005,18 @@ SCREENS.teilen = () => {
   if (!FREI()) {
     const html = hd('Fertig gemessen', 'Dein Aufmaßblatt ist fertig.', n + (n === 1 ? ' Fenster' : ' Fenster') + ', alle acht Handmaße, die Auswertung der Fotos, deine Wünsche. Einmal freischalten, dann gehört es dir.') + entwurfWarnung() + blattVorschau() +
       '<div class="card"><div class="incl">' + ['Technische Zeichnung mit allen Maßen je Fenster', 'Auswertung der Fotos und deine Wünsche', 'Als PDF teilen, so oft du willst, an jeden Fensterbauer', 'Mit Code: Dein Fensterbauer übernimmt alles mit einem Klick', 'Gilt für dieses Projekt, auch wenn du später Fenster ergänzt (bis ' + GRENZE.fenster + ' je Aufmaß)'].map((x) => '<p>' + CHECK + '<span>' + esc(x) + '</span></p>').join('') + '</div>' +
-      '<div class="price-row"><span><b>' + euro(PREIS()) + '</b><small>einmalig' + (MWST() ? ', inkl. MwSt.' : '') + '</small>' + (EINF() ? '<small class="einf">' + esc(EINF()) + '</small>' : '') + '</span><small class="sub">Messen, Fotos und 3-D-Modell bleiben kostenlos</small></div></div>' +
+      '<div class="price-row"><span><b>' + euro(PREIS()) + '</b><small>einmalig' + (MWST() ? ', inkl. MwSt.' : '') + '</small>' + (EINF() ? '<small class="einf">' + esc(EINF()) + '</small>' : '') + '</span><small class="sub">Messen, Fotos und 3-D-Modell bleiben kostenlos</small></div>' + (SERVER.zahlung ? '<p class="sub" style="margin: 8px 0 0">Zahlbar mit ' + esc(zahlartenText()) + ', über Stripe.</p>' : '') + '</div>' +
       (S.kauf && S.kauf.wartet ? '<p class="sub" style="padding: 0 6px"><b>Deine Zahlung ist unterwegs.</b> Sobald Stripe sie bestätigt, schaltet sich dein Blatt hier von selbst frei. Bitte nicht noch einmal bezahlen.</p>' : '<p class="sub" style="padding: 0 6px">Du kannst weitere Fenster messen, das Blatt wächst mit. Jedes Fenster kannst du eine Woche lang beliebig ändern; ab dem Freischalten zählt jede Änderung, viermal je Fenster.</p>');
     return { html: html, back: ['Zurück', 'anfrage3'], cls: 'tight', bar: { label: 'Freischalten · ' + euro(PREIS()), act: 'k-start' } };
   }
-  const msg = 'Hallo, hier ist mein Fenster-Aufmaß aus eeziframes (' + n + ' Fenster): alle Maße, die Auswertung der Fotos und meine Wünsche. Den Code bitte bei eeziframes unter „Code vom Kunden einfügen“ einsetzen. Noch kein Zugang? Kostenlos anmelden' + (BETRIEB_FREI() ? ', die ersten ' + BETRIEB_FREI() + ' Projekte sind frei' : '') + ': ' + PORTAL_URL + '\n\n' + code;
+  const msg = BK() ? 'Hallo, hier ist mein Fenster-Aufmaß aus eeziframes (' + n + ' Fenster): alle Maße, die Auswertung der Fotos und meine Wünsche. Den Code bitte bei eeziframes unter „Code vom Kunden einfügen“ einsetzen. Noch kein Zugang? Kostenlos anmelden' + (BETRIEB_FREI() ? ', die ersten ' + BETRIEB_FREI() + ' Projekte sind frei' : '') + ': ' + PORTAL_URL + '\n\n' + code
+    : 'Hallo, hier ist mein Fenster-Aufmaß aus eeziframes (' + n + ' Fenster): alle Maße, die Auswertung der Fotos und meine Wünsche, im Aufmaßblatt als PDF.';
   const stand = t.betrieb ? 'Unterwegs zu deinem Fensterbauer. Du kannst das Blatt jederzeit weiteren Betrieben geben, es gehört dir.' : (KUNDE_FREI() ? 'Dein Aufmaßblatt ist vollständig und kostenlos.' : 'Freigeschaltet, für dieses Projekt.') + ' Gib es dem Fensterbauer, von dem du ein Angebot möchtest, gern auch mehreren.';
   const tick = (on) => '<span class="way-tick' + (on ? ' on' : '') + '">' + (on ? CHECK : '') + '</span>';
   const html = hd(KUNDE_FREI() ? 'Fertig gemessen' : 'Freigeschaltet', 'Dein Aufmaß, dein Blatt.', stand) +
-    '<div class="card share-way' + (t.betrieb ? ' done' : '') + '"><div class="way-head">' + tick(t.betrieb) + '<div><p class="eyebrow">' + (t.betrieb ? 'Erledigt' : 'Schritt 1') + '</p><h2>An deinen Fensterbauer</h2></div></div><p class="sub" style="color: var(--fg2)">Schick ihm das Aufmaßblatt als PDF: Zeichnungen, alle Maße, die Auswertung der Fotos, deine Wünsche. Dafür braucht er kein eeziframes; auf der letzten Seite steht, wie er es trotzdem mit einem Klick übernimmt.</p><div class="pill-row"><button type="button" class="btn primary" style="flex: 0 0 auto; padding: 0 22px" data-act="teil-pdf">PDF schicken</button></div><p class="sub" style="color: var(--muted); margin-top: 8px">Oder nur den Code, falls er eeziframes schon nutzt:</p><div class="pill-row"><a class="pill" href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-act="teil-mark" data-v="betrieb">WhatsApp ›</a><a class="pill" href="mailto:?subject=' + encodeURIComponent('Mein Fenster-Aufmaß') + '&body=' + encodeURIComponent(msg) + '" data-act="teil-mark" data-v="betrieb">E-Mail</a><button type="button" class="pill" data-act="teil-copy" data-v="betrieb">Code kopieren</button></div></div>' +
+    '<div class="card share-way' + (t.betrieb ? ' done' : '') + '"><div class="way-head">' + tick(t.betrieb) + '<div><p class="eyebrow">' + (t.betrieb ? 'Erledigt' : 'Schritt 1') + '</p><h2>An deinen Fensterbauer</h2></div></div><p class="sub" style="color: var(--fg2)">Schick ihm das Aufmaßblatt als PDF: Zeichnungen, alle Maße, die Auswertung der Fotos, deine Wünsche. Dafür braucht er kein eeziframes' + (BK() ? '; auf der letzten Seite steht, wie er es trotzdem mit einem Klick übernimmt.' : '.') + '</p><div class="pill-row"><button type="button" class="btn primary" style="flex: 0 0 auto; padding: 0 22px" data-act="teil-pdf">PDF schicken</button></div><p class="sub" style="color: var(--muted); margin-top: 8px">Oder nur den Code, falls er eeziframes schon nutzt:</p><div class="pill-row"><a class="pill" href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-act="teil-mark" data-v="betrieb">WhatsApp ›</a><a class="pill" href="mailto:?subject=' + encodeURIComponent('Mein Fenster-Aufmaß') + '&body=' + encodeURIComponent(msg) + '" data-act="teil-mark" data-v="betrieb">E-Mail</a><button type="button" class="pill" data-act="teil-copy" data-v="betrieb">Code kopieren</button></div></div>' +
     '<div class="card share-way"><p class="eyebrow">Für dich</p><h2>Als Datei behalten</h2><p class="sub" style="color: var(--fg2)">Dein komplettes Aufmaßblatt als PDF, für deine Unterlagen.' + (S.kauf && S.kauf.paid && S.kauf.mail ? ' Die Rechnung ist an ' + esc(S.kauf.mail) + ' unterwegs.' : '') + '</p><div class="pill-row"><button type="button" class="pill" data-act="k-dl">Herunterladen</button></div></div>' +
-    '<div class="sec">' + secHead('Dein Aufmaß-Code', null, 'Steht auch auf der letzten Seite der PDF. Falls Kopieren nicht klappt: Text markieren und kopieren.') + '<textarea class="copybox" id="code-box" readonly rows="3" aria-label="Aufmaß-Code">' + esc(code) + '</textarea></div>';
+    (BK() ? '<div class="sec">' + secHead('Dein Aufmaß-Code', null, 'Steht auch auf der letzten Seite der PDF. Falls Kopieren nicht klappt: Text markieren und kopieren.') + '<textarea class="copybox" id="code-box" readonly rows="3" aria-label="Aufmaß-Code">' + esc(code) + '</textarea></div>' : '');
   return { html: html, back: ['Zurück', 'anfrage3'], bar: { label: 'Zurück zum Projekt', act: 'go', v: 'home', ghost: true } }; // Cream nur für „PDF schicken“
 };
 SCREENS.datei = () => SCREENS.teilen();
@@ -4193,7 +4194,7 @@ const BLATT_H = { derive: derive, lab: lab, num: num, th: thousand, col: (k) => 
 /* fotos: Kennung → { data, w, h } (fotosFuerBlatt); ohne stehen die Positionen ohne Fotos da */
 function blattPDF(variante, fotos) {
   if (!window.Blatt) return null;
-  return window.Blatt.pdf({ variante: S.betrieb ? 'fensterbauer' : (variante || 'kunde'), fenster: S.windows, projekt: S.proj, code: packProject(S.windows, S.proj, null), portalUrl: PORTAL_URL, portalKurz: PORTAL_KURZ, appKurz: PORTAL_KURZ + '/app/', qr: window.qrcode, h: BLATT_H, fotos: fotos || {} });
+  return window.Blatt.pdf({ variante: S.betrieb ? 'fensterbauer' : (variante || 'kunde'), fenster: S.windows, projekt: S.proj, code: BK() ? packProject(S.windows, S.proj, null) : '', betriebskonto: BK(), portalUrl: PORTAL_URL, portalKurz: PORTAL_KURZ, appKurz: PORTAL_KURZ + '/app/', qr: window.qrcode, h: BLATT_H, fotos: fotos || {} });
 }
 const blattSchrift = () => (window.Blatt ? window.Blatt.schrift() : Promise.resolve(false));
 /* PDF direkt weitergeben: auf dem Telefon per Teilen-Menü (WhatsApp, Mail), sonst herunterladen */
@@ -4206,7 +4207,7 @@ async function pdfTeilen() {
     try {
       const file = new File([pdf], fileBase() + '.pdf', { type: 'application/pdf' });
       if (navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Mein Fenster-Aufmaß', text: 'Hallo, hier ist mein Fenster-Aufmaß aus eeziframes als PDF: alle Maße, die Auswertung der Fotos und meine Wünsche. Auf der letzten Seite steht, wie du es in eeziframes öffnest.' });
+        await navigator.share({ files: [file], title: 'Mein Fenster-Aufmaß', text: 'Hallo, hier ist mein Fenster-Aufmaß aus eeziframes als PDF: alle Maße, die Auswertung der Fotos und meine Wünsche.' + (BK() ? ' Auf der letzten Seite steht, wie du es in eeziframes öffnest.' : '') });
         teilMark('betrieb'); return;
       }
     } catch (e) { if (e && e.name === 'AbortError') return; }
@@ -7531,7 +7532,7 @@ async function tourPDF() {
   if (!S.tour) return;
   if (!window.Blatt) return toast('Die PDF lädt noch, gleich noch einmal.');
   await blattSchrift();
-  const pdf = window.Blatt.pdf({ variante: 'kunde', beispiel: true, fenster: [S.win], projekt: Object.assign({}, PROJ0, { name: 'Familie Muster', ort: '12345 Musterstadt', gebaeude: 'efh', zeit: '3m', total: 9, foerd: true, foerdweg: 'bafa' }), code: '', portalUrl: PORTAL_URL, portalKurz: PORTAL_KURZ, appKurz: PORTAL_KURZ + '/app/', qr: window.qrcode, h: BLATT_H });
+  const pdf = window.Blatt.pdf({ variante: 'kunde', beispiel: true, fenster: [S.win], projekt: Object.assign({}, PROJ0, { name: 'Familie Muster', ort: '12345 Musterstadt', gebaeude: 'efh', zeit: '3m', total: 9, foerd: true, foerdweg: 'bafa' }), code: '', betriebskonto: BK(), portalUrl: PORTAL_URL, portalKurz: PORTAL_KURZ, appKurz: PORTAL_KURZ + '/app/', qr: window.qrcode, h: BLATT_H });
   if (!pdf) return toast('Die PDF lässt sich hier gerade nicht erzeugen.');
   return dateiSpeichern(pdf, 'eeziframes-Beispiel-Aufmass.pdf');
 }
@@ -7608,7 +7609,9 @@ const einstiegNach = () => { if (EINSTIEG_NEU) einstiegNeu(); };
    „Gesendet“ erst mit dem Code, keine Scheinzahlung, die Datei ist kostenlos.
    Schalter: window.KONFIG.pilot in /config.js */
 let PILOT = !!(window.KONFIG && window.KONFIG.pilot);
-const SERVER = { daten: false, zahlung: false, konten: false, attrappe: false, testmodus: false, preise: null, zahlarten: null, recht: null };
+const SERVER = { daten: false, zahlung: false, konten: false, attrappe: false, testmodus: false, preise: null, zahlarten: null, recht: null, betriebskonto: !!(window.KONFIG || {}).betriebskonto };
+/* Das frühere Konto für Betriebe (Code vom Kunden einfügen, Aufmaß-Links) gibt es seit 28.10.2026 nicht mehr; ohne es kein Aufmaß-Code für den Fensterbauer */
+const BK = () => !!SERVER.betriebskonto;
 const LOGO = (px) => (window.Logo ? window.Logo.svg(px) : '');
 const WM = () => (window.Marke ? window.Marke.wort() : 'eeziframes');
 /* Rechtslinks unter jedem Bildschirm (render hängt sie an, wo sie fehlen; Messbildschirme ohne Platz zeigen sie im Glossar-Blatt):
@@ -7791,7 +7794,7 @@ function gesendetPilot() {
    daten:   Aufmaße gehen direkt an den Betrieb, ohne Code-Umweg; der Link wird beim Öffnen geprüft
    zahlung: das Aufmaßblatt wird über Stripe bezahlt */
 async function statusHolen() {
-  try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); const j = r.ok ? await r.json() : null; if (j && j.ok) { SERVER.daten = !!j.daten; SERVER.konten = !!j.konten; SERVER.zahlung = !!j.zahlung; SERVER.attrappe = !!j.attrappe; SERVER.testmodus = !!j.testmodus; SERVER.preise = j.preise || null; if (window.Abrechnung && window.Abrechnung.setEinfuehrung) window.Abrechnung.setEinfuehrung(j.einfuehrung || null); SERVER.zahlarten = Array.isArray(j.zahlarten) ? j.zahlarten : null; SERVER.recht = j.recht || null; } } catch (e) { /* ohne Server weiter */ }
+  try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); const j = r.ok ? await r.json() : null; if (j && j.ok) { SERVER.daten = !!j.daten; SERVER.konten = !!j.konten; SERVER.zahlung = !!j.zahlung; SERVER.attrappe = !!j.attrappe; SERVER.testmodus = !!j.testmodus; SERVER.preise = j.preise || null; SERVER.betriebskonto = !!j.betriebskonto; if (j.preise && window.Abrechnung && window.Abrechnung.setPreise) window.Abrechnung.setPreise(j.preise); /* auch die Box für Fensterbauer im Aufmaßblatt (blatt.js) */ if (window.Abrechnung && window.Abrechnung.setEinfuehrung) window.Abrechnung.setEinfuehrung(j.einfuehrung || null); SERVER.zahlarten = Array.isArray(j.zahlarten) ? j.zahlarten : null; SERVER.recht = j.recht || null; } } catch (e) { /* ohne Server weiter */ }
   return SERVER.daten;
 }
 async function serverStart() {

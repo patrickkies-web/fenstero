@@ -258,6 +258,8 @@ export function fristenZeilen() {
     ['Begonnene Planung mit Fenster, nicht gesendet', je(() => F.entwurfStillTage + ' Tage nach der letzten Änderung')],
     ['Testanfragen (Vorschau, Demo)', je(() => F.testTage + (F.testTage === 1 ? ' Tag' : ' Tage'))],
     ['Alle Daten der Instanz nach Vertragsende', je(() => F.loeschenNachEndeTage + ' Tage nach dem Ende')],
+    ['Zählung der Anfragen je Anschluss gegen Missbrauch (Prüfwert der IP-Adresse)', je(() => '2 Tage')],
+    ['Fehlversuche bei der Anmeldung zum Dashboard (Prüfwert der E-Mail-Adresse)', je((m) => (m.dashboard ? '2 Tage' : 'entfällt'))],
     ['Sicherungskopien der Datenbank', je(() => '7 Tage (rollierend)')]
   ];
 }

@@ -11,44 +11,41 @@
 <link rel="stylesheet" href="/assets/recht.css">
 </head>
 <body>
-<!-- Entwurf, mit den Angaben des Anbieters ausgefüllt. Vor dem öffentlichen Start rechtlich prüfen lassen. -->
 <header class="kopf"><div>
   <a class="marke" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect class="fi-kachel" width="64" height="64" rx="10" fill="#000"/><g class="fi-licht" fill="#fff"><path class="fi-decke" d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path class="fi-fenster" d="M45 22 57 17.6V41.9L45 39.8Z"/><path class="fi-strahl" d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect class="fi-rand" x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#000" stroke-opacity=".1"/></svg><span class="wm" translate="no"><b>eezi</b>frames</span></a>
-  <nav><a href="/">Für Betriebe</a><a href="/app/">App</a></nav>
+  <nav><a href="/fuer-fensterbauer/">Für Fensterbauer</a><a href="/app/">App</a></nav>
 </div></header>
 <main>
-  <p class="klein">Stand: 27. Oktober 2026</p>
+  <p class="klein">Stand: 28. Oktober 2026</p>
   <h1>Cookies und Speicher im Browser</h1>
   <div class="karte">
     <p><strong>Kurz gesagt:</strong> eeziframes setzt keine Cookies für Werbung, Tracking oder Analyse und bindet keine Dienste ein, die das tun. Deshalb gibt es kein Cookie-Banner. Damit die App funktioniert, speichert sie Ihre Eingaben im lokalen Speicher Ihres Browsers; das ist für den Dienst, den Sie nutzen, unbedingt erforderlich.</p>
   </div>
 
   <h2>Was im Browser gespeichert wird</h2>
-  <p>App und Bereich für Fensterbauer nutzen den lokalen Speicher Ihres Browsers (localStorage), die App für Fotos außerdem eine Datenbank im Browser (IndexedDB). Die Einträge bleiben auf Ihrem Gerät; unser Server liest sie nicht aus. Ihre Fotos schickt die App nur zu uns, wenn Sie über den Link eines Fensterbauers messen oder Ihr Aufmaß in einem Konto sichern (<a href="/datenschutz/">Datenschutzerklärung</a>, Abschnitt 5).</p>
+  <p>Die App und die Seiten für Fensterbauer nutzen den lokalen Speicher Ihres Browsers (localStorage), die App für Fotos außerdem eine Datenbank im Browser (IndexedDB). Die Einträge bleiben auf Ihrem Gerät; unser Server liest sie nicht aus. Ihre Fotos schickt die App nur zu uns, wenn Sie Ihr Aufmaß in einem Konto sichern (<a href="/datenschutz/">Datenschutzerklärung</a>, Abschnitt 5).</p>
   <div class="tabelle"><table>
     <thead><tr><th>Eintrag</th><th>Wofür</th><th>Wie lange</th></tr></thead>
     <tbody>
-      <tr><td><code>aufmass.v1</code></td><td data-k="Wofür">Ihr Aufmaß in der App ohne Link: Fenster, Maße, Wünsche, Angaben zum Haus, Zähler gegen Mehrfachnutzung</td><td data-k="Wie lange">bis Sie das Aufmaß löschen oder sich abmelden</td></tr>
-      <tr><td><code>aufmass.k.…</code></td><td data-k="Wofür">Ihr Aufmaß über den Link eines Fensterbauers, je Link</td><td data-k="Wie lange">bis Sie die Website-Daten löschen</td></tr>
-      <tr><td><code>aufmass.entwurf.v1</code></td><td data-k="Wofür">das Fenster, das Sie gerade erfassen und noch nicht gespeichert haben, damit es Neuladen und die Zurück-Taste übersteht (beim Link eines Fensterbauers unter <code>aufmass.k.….entwurf</code>)</td><td data-k="Wie lange">bis Sie das Fenster speichern oder verwerfen</td></tr>
+      <tr><td><code>aufmass.v1</code></td><td data-k="Wofür">Ihr Aufmaß in der App: Fenster, Maße, Wünsche, Angaben zum Haus, Zähler gegen Mehrfachnutzung</td><td data-k="Wie lange">bis Sie das Aufmaß löschen oder sich abmelden</td></tr>
+      <tr><td><code>aufmass.entwurf.v1</code></td><td data-k="Wofür">das Fenster, das Sie gerade erfassen und noch nicht gespeichert haben, damit es Neuladen und die Zurück-Taste übersteht</td><td data-k="Wie lange">bis Sie das Fenster speichern oder verwerfen</td></tr>
       <tr><td><code>aufmass.bilder.…</code></td><td data-k="Wofür">das Bild der eingezeichneten Lage zu einem gesicherten Aufmaß; es bleibt auf diesem Gerät</td><td data-k="Wie lange">bis Sie das Aufmaß löschen oder sich abmelden</td></tr>
       <tr><td><code>aufmass-fotos (IndexedDB)</code></td><td data-k="Wofür">die Fotos Ihrer Fenster, verkleinert, damit sie Neuladen und Speichern überstehen und ins Aufmaßblatt kommen</td><td data-k="Wie lange">bis Sie das Fenster oder das Aufmaß löschen oder sich abmelden; Fotos, die zu keinem Fenster mehr gehören, nach spätestens 30 Tagen</td></tr>
       <tr><td><code>aufmass.kunde</code></td><td data-k="Wofür">Ihre Anmeldung mit dem Konto für Hauseigentümer</td><td data-k="Wie lange">bis Sie sich abmelden</td></tr>
       <tr><td><code>aufmass.kunde.anfrage</code></td><td data-k="Wofür">die E-Mail-Adresse, an die gerade ein Anmeldecode geht</td><td data-k="Wie lange">bis zur Anmeldung, höchstens eine Stunde</td></tr>
-      <tr><td><code>aufmass.sitzung</code></td><td data-k="Wofür">die Anmeldung im Bereich für Fensterbauer</td><td data-k="Wie lange">bis Sie sich abmelden</td></tr>
-      <tr><td><code>aufmass.sitzung.anfrage</code></td><td data-k="Wofür">die E-Mail-Adresse während der Anmeldung eines Betriebs</td><td data-k="Wie lange">bis zur Anmeldung</td></tr>
-      <tr><td><code>aufmass.portal.v1</code></td><td data-k="Wofür">Ansicht und Einstellungen im Bereich für Fensterbauer, in der Pilotphase das ganze Konto</td><td data-k="Wie lange">bis Sie die Website-Daten löschen</td></tr>
       <tr><td><code>aufmass.ki.einwilligung</code></td><td data-k="Wofür">Ihre Einwilligung zur KI-Auswertung der Fotos</td><td data-k="Wie lange">bis Sie die Website-Daten löschen</td></tr>
       <tr><td><code>aufmass.uhr</code></td><td data-k="Wofür">der Abstand der Uhr Ihres Geräts zur Zeit unseres Servers, damit Änderungen von mehreren Geräten richtig zusammenlaufen</td><td data-k="Wie lange">bis Sie die Website-Daten löschen</td></tr>
       <tr><td><code>aufmass.haptik</code></td><td data-k="Wofür">Ihre Einstellung zum Vibrieren</td><td data-k="Wie lange">bis Sie die Website-Daten löschen</td></tr>
+      <tr><td><code>vk.halt</code></td><td data-k="Wofür">Ihre Einstellung, die Animationen auf den Seiten für Fensterbauer anzuhalten</td><td data-k="Wie lange">bis Sie die Website-Daten löschen</td></tr>
       <tr><td><code>aufmass.pilot.zu</code></td><td data-k="Wofür">dass Sie den Hinweis zur Pilotphase geschlossen haben</td><td data-k="Wie lange">bis Sie die Website-Daten löschen</td></tr>
       <tr><td><code>aufmass.ohnefoto.zu</code></td><td data-k="Wofür">dass Sie den Hinweis beim Erfassen eines Fensters ohne Foto nicht mehr sehen wollen</td><td data-k="Wie lange">bis Sie die Website-Daten löschen</td></tr>
       <tr><td><code>aufmass.vonpdf.zu</code></td><td data-k="Wofür">dass Sie den Hinweis nach dem Scannen eines Aufmaßblatts geschlossen haben (Sitzungsspeicher)</td><td data-k="Wie lange">bis Sie den Tab schließen</td></tr>
     </tbody>
   </table></div>
+  <p>Aus dem früheren Konto für Fensterbauer (bis 27. Oktober 2026) können noch diese Einträge in Ihrem Browser liegen: <code>aufmass.portal.v1</code>, <code>aufmass.sitzung</code> und <code>aufmass.sitzung.anfrage</code> (Ansicht und Anmeldung des Kontos; die Startseite löscht sie beim nächsten Besuch) sowie <code>aufmass.k.…</code> (ein Aufmaß über einen früheren Kundenlink; es bleibt, bis Sie die Website-Daten löschen). Neu angelegt werden sie nicht mehr.</p>
 
   <h2>Cookies</h2>
-  <p>Für Besucher, Hauseigentümer und Fensterbauer setzen wir keine Cookies. Technisch notwendige Sitzungs-Cookies gibt es nur an zwei Stellen: Fensteranbieter, die sich zum Bestellen oder im Kundenbereich der Konfigurator-Pakete anmelden, erhalten <code>__Host-kunde</code> (nur über HTTPS, für Skripte nicht lesbar, nur für eeziframes.com, höchstens 14 Tage; <a href="/datenschutz/#pakete">Datenschutz, Abschnitt 9</a>), und wir selbst als Betreiber erhalten beim Anmelden in unserer Zentrale <code>__Host-inhaber</code> und in der Verwaltung der App <code>__Host-zentrale</code> (beide ebenso geschützt, höchstens acht Stunden).</p>
+  <p>Für Besucher und Hauseigentümer setzen wir keine Cookies. Technisch notwendige Sitzungs-Cookies gibt es nur an zwei Stellen: Fensteranbieter, die sich zum Bestellen oder im Kundenbereich der Konfigurator-Pakete anmelden, erhalten <code>__Host-kunde</code> (nur über HTTPS, für Skripte nicht lesbar, nur für eeziframes.com, höchstens 14 Tage; <a href="/datenschutz/#pakete">Datenschutz, Abschnitt 9</a>), und wir selbst als Betreiber erhalten beim Anmelden in unserer Zentrale <code>__Host-inhaber</code> und in der Verwaltung der App <code>__Host-zentrale</code> (beide ebenso geschützt, höchstens acht Stunden).</p>
   <p>Zum Schutz vor Angriffen kann Cloudflare in Ausnahmefällen eigene, technisch notwendige Cookies setzen: <code>__cf_bm</code> zur Erkennung automatisierter Zugriffe, nur wenn wir den Bot-Schutz von Cloudflare einschalten (läuft nach 30 Minuten ohne Aktivität ab), und <code>cf_clearance</code> als Nachweis einer bestandenen Sicherheitsprüfung, nur wenn Cloudflare eine solche Prüfung einblendet (in der Regel 30 Minuten). Sie dienen nur der Sicherheit, nicht der Analyse.</p>
   <p>Auf der Zahlungsseite unseres Zahlungsdienstleisters Stripe (checkout.stripe.com) setzt Stripe eigene Cookies, etwa zur Betrugsvorbeugung. Dafür ist Stripe verantwortlich; Einzelheiten stehen in der <a href="https://stripe.com/de/privacy">Datenschutzerklärung von Stripe</a>.</p>
 
@@ -59,6 +56,6 @@
   <p>In der App melden Sie sich ab oder löschen ein Aufmaß; alles auf einmal entfernen Sie in den Einstellungen Ihres Browsers über „Website-Daten löschen“ für eeziframes.com. Danach ist ein nicht gesichertes Aufmaß weg, und die App fragt die Einwilligung zur KI-Auswertung erneut.</p>
   <p>Mehr zum Datenschutz: <a href="/datenschutz/">Datenschutzerklärung</a>.</p>
 </main>
-<footer class="fuss"><a href="/">Startseite</a><a href="/app/">App</a><a href="/ratgeber/">Ratgeber</a><a href="/agb/">AGB</a><a href="/nutzungsbedingungen/">Nutzungsbedingungen</a><a href="/datenschutz/">Datenschutz</a><a href="/cookies/">Cookies</a><a href="/impressum/">Impressum</a><a class="widerruf-knopf" href="/widerruf/">Vertrag widerrufen</a></footer>
+<footer class="fuss"><a href="/">Startseite</a><a href="/app/">App</a><a href="/ratgeber/">Ratgeber</a><a href="/agb/">AGB</a><a href="/konfigurator-bedingungen/">Paketbedingungen</a><a href="/datenschutz/">Datenschutz</a><a href="/cookies/">Cookies</a><a href="/impressum/">Impressum</a><a class="widerruf-knopf" href="/widerruf/">Vertrag widerrufen</a></footer>
 </body>
 </html>

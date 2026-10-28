@@ -202,7 +202,7 @@ export default async (h) => {
   const kiStati = [];
   for (let i = 0; i < 5; i++) { const c = (await T.start(kiI.host)).json.code; kiStati.push((await ki(kiI.host, c)).status); }
   const kiAlarm = await T.warteMail((m) => /Kontingent erreicht bei KI-Probe Fenster/.test(m.betreff || ''), 3000);
-  ok(kiStati.join() === '200,200,200,200,429' && kiAlarm.length === 1, '23.9 KI je Instanz und Monat: Alarm-Mail genau einmal beim Kontingent, ohne verknüpften Auftrag 429 erst beim Doppelten (' + kiStati.join(',') + ')');
+  ok(kiStati.join() === '200,200,429,429,429' && kiAlarm.length === 1, '23.9 KI je Instanz und Monat: Alarm-Mail genau einmal beim Kontingent; ohne laufenden Auftrag nichts darüber hinaus, 429 ab dem Kontingent (' + kiStati.join(',') + ')');
   const s2 = await h.server({ KI_TAG_MAX: '3' });
   const tagStati = [];
   for (let i = 0; i < 4; i++) tagStati.push((await s2.api('localhost', '/api/ki?aufgabe=einbau&seite=in', { body: kiBild, origin: true, headers: Object.assign({ 'content-type': 'text/plain' }, T.ip()) })).status);
@@ -224,7 +224,10 @@ export default async (h) => {
   const rechnungen = [];
   const zd = { rechnung: async (o) => { rechnungen.push(o.id); return { neu: { nr: 'R-1', id: 'in_1', betrag: 9, buchungen: o.posten.map((p) => p.buchung) } }; } };
   const spF = { betriebeMitKunde: async () => [{ id: 'inst-b', stripe_customer: 'cus_i', daten: { instanz: { id: 'x' }, konto: 'instanz', pay: { type: 'Karte' }, book: [{ id: 'bi', kind: 'aufmass', status: 'offen', betrag: 9, text: 'x' }] } }, { id: 'alt-b', stripe_customer: 'cus_a', daten: { konto: 'service', pay: { type: 'Karte' }, book: [{ id: 'ba', kind: 'aufmass', status: 'offen', betrag: 9, text: 'y' }], rechnungen: [] } }], betriebAendern: async () => true };
+  /* die frühere Abrechnung je Projekt (seit 28.10.2026 nur mit BETRIEBSKONTO=1): Instanz-Betriebe bleiben davon frei */
+  const preiseVorher = JSON.parse(JSON.stringify(globalThis.Abrechnung.preise())); globalThis.Abrechnung.setPreise({ projekt: 9, frei: 3 });
   const lauf = await KONTEN.abrechnungslauf({}, spF, zd);
+  globalThis.Abrechnung.setPreise(preiseVorher);
   const quellen = []; const such = (d) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const f = path.join(d, e.name); if (e.isDirectory()) { if (!['vendor', 'fonts', 'bilder', 'lottie'].includes(e.name)) such(f); } else if (/\.m?js$/.test(e.name)) quellen.push(f); } };
   such(path.join(W, 'functions')); such(path.join(W, 'web/assets')); quellen.push(path.join(W, 'worker.js'));
   const vergleich = quellen.filter((f) => !f.endsWith(path.join('assets', 'pakete.js')) && /\bpaket\s*[!=]==?\s*['"]/.test(fs.readFileSync(f, 'utf8')));

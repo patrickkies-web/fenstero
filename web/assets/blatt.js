@@ -100,6 +100,9 @@
     /* Adresse der Website: die, unter der eeziframes gerade läuft (nach einem Domainwechsel stimmt sie von selbst); bei der Kopie einer
        Anfrage die Domain der Instanz */
     const HOST = (ANF && bt.host) || e.portalKurz || (typeof location !== 'undefined' && location.host) || (KZ === 'keine' ? '' : 'eeziframes');
+    /* e.betriebskonto: das frühere Konto für Betriebe (Code vom Kunden, Aufmaß-Links) gibt es seit 28.10.2026 nicht mehr; ohne es kein Aufmaß-Code,
+       kein Weg in ein Konto, und die Box am Ende zeigt den eigenen Konfigurator als Paket (/fuer-fensterbauer/) */
+    const BK = !!e.betriebskonto, PAKET_URL = 'https://' + (HOST && HOST.indexOf('.') > 0 ? HOST : 'eeziframes.com') + '/fuer-fensterbauer/';
     /* Schrift: Outfit wie auf der Website (300 große Zahlen, 400 Text, 500 Werte und Listen, 600 Überschriften und Codes), die Wortmarke
        in Inter; ohne eingebettete Schrift Helvetica */
     const BS = G.BlattSchrift;
@@ -288,7 +291,7 @@
       if (!STREIFEN) return;
       const x0 = W - STREIFEN, y0 = bandH, y1 = H - 12, len = y1 - y0;
       fill(BUEHNE); doc.rect(x0, y0, STREIFEN, len, 'F');
-      const text = 'eeziframes  ·  Fenster ausmessen. Selbst. eezi.  ·  ' + HOST + '  ·  Für Fensterbauer: Aufmaß per Code in Ihr Konto holen' + (codeSeite ? ', Seite ' + codeSeite : '') + (FREI ? '  ·  ' + FREI + ' Projekte kostenlos' : '');
+      const text = 'eeziframes  ·  Fenster ausmessen. Selbst. eezi.  ·  ' + HOST + (BK ? '  ·  Für Fensterbauer: Aufmaß per Code in Ihr Konto holen' + (codeSeite ? ', Seite ' + codeSeite : '') + (FREI ? '  ·  ' + FREI + ' Projekte kostenlos' : '') : '  ·  Für Fensterbauer: Ihr eigener Fenster-Konfigurator');
       let size = 6.8; font('bold', size, HELL);
       while (tw(text) > len - 16 && size > 5.2) { size -= 0.2; font('bold', size, HELL); }
       const tl = tw(text), ty = y1 - 9 - (len - 16 - tl) / 2;
@@ -337,7 +340,7 @@
       if (fbBox) { doc.setPage(1); fbBox(); }
     };
     /* QR-Code zur Anmeldung (?von=pdf), weiß hinterlegt und anklickbar */
-    const QR_URL = (e.portalUrl || '') + '?von=pdf';
+    const QR_URL = BK ? (e.portalUrl || '') + '?von=pdf' : PAKET_URL + '?von=pdf';
     function qr(x, y0, size) {
       try {
         if (!e.qr) return false;
@@ -534,7 +537,7 @@
       y = wy + 21;
       /* Links Eckdaten, rechts die Box für den Fensterbauer, mit einer Spitze am letzten Schritt angeschlossen */
       const fbW = 82, ekW = CW - fbW - 5, fbX = XR - fbW, oFb = { lw: 19, fs: 8 }, oEk = { lw: 25, fs: FS };
-      const fbZeilen = (seite) => kontaktZ.concat([['Maße', 'in mm, Breite × Höhe, Ansicht von innen; Maueröffnung: kleinstes von drei Maßen'], ['Digital', '„Code vom Kunden einfügen“ in eeziframes, Code auf Seite ' + seite + (FREI ? '; die ersten ' + FREI + ' Projekte sind frei' : '')], ['Danach', 'Angebot, vor der Fertigung Feinaufmaß vor Ort']]);
+      const fbZeilen = (seite) => kontaktZ.concat([['Maße', 'in mm, Breite × Höhe, Ansicht von innen; Maueröffnung: kleinstes von drei Maßen']], BK ? [['Digital', '„Code vom Kunden einfügen“ in eeziframes, Code auf Seite ' + seite + (FREI ? '; die ersten ' + FREI + ' Projekte sind frei' : '')]] : [], [['Danach', 'Angebot, vor der Fertigung Feinaufmaß vor Ort']]);
       const fbTitel = V === 'kunde' ? 'Für deinen Fensterbauer' : 'Für Sie als Fensterbauer';
       const hFb = 11 + zeilenH(fbZeilen(99), fbW - 8, oFb) + 3, hEk = 11 + zeilenH(eck, ekW - 8, oEk) + 3, hb = Math.max(hFb, hEk);
       karteRand(M, y, ekW, hb); kicker('Eckdaten zum Projekt', M + 4, y + 6, GREY); zeilen(eck, M + 4, y + 9, ekW - 8, oEk);
@@ -981,7 +984,7 @@
     }
     /* Aufmaß-Code mit der Anleitung zum Übernehmen (für Fensterbauer, die eeziframes nutzen möchten) */
     function codeTeil() {
-      if (!e.code && !e.beispiel) return;
+      if (!BK || (!e.code && !e.beispiel)) return;
       platz(70);
       codeSeite = seiteNr(); SEITEN.abschnitt.code = codeSeite;
       sektion('Für Fensterbauer' + (FREI ? ' · kostenlos bis ' + FREI + ' Projekte' : ''), 'Aufmaß digital übernehmen.');
@@ -1007,6 +1010,7 @@
     /* Für Fensterbauer: eeziframes für die eigenen Kunden. Gestaltet wie normaler Inhalt, nicht wie Werbung. */
     const EIGENE_H = 46;
     function eigeneKunden() {
+      if (!BK) return paketHinweis();
       platz(EIGENE_H + 4);
       const y0 = y;
       karteRand(M, y0, CW, EIGENE_H);
@@ -1016,8 +1020,25 @@
       let yy = y0 + 12.8 + t1.length * 4.6 + 0.6;
       font('normal', 8, INK2); const t2 = wrap('Projekt in eeziframes anlegen, Aufmaß-Link per WhatsApp oder E-Mail schicken. Zurück kommt ein Aufmaß wie dieses: 8 Maße je Fenster, Fotos mit Auswertung, alle Wünsche, Bestellmaß nach Ihrem Abzug, das Blatt mit Ihrem Logo.', tw2); txt(t2, tx, yy, { lineHeightFactor: 1.22 }); yy += t2.length * 3.45 + 1.6;
       if (FREI || JE) { font('bold', 8, INK); txt([FREI ? FREI + ' Projekte kostenlos' : '', JE ? (FREI ? 'danach ' : '') + euroN(JE) + ' netto je Projekt mit eingegangenem Aufmaß' : '', 'keine Grundgebühr'].filter(Boolean).join(' · '), tx, yy); yy += 4.2; }
+      else { font('bold', 8, INK); txt('Konto kostenlos · keine Grundgebühr · keine Zahlungsart', tx, yy); yy += 4.2; } // Betriebskonto kostenlos (seit 28.10.2026)
       font('normal', 7, GREY); txt(wrap('Zum Vergleich: Eine Meisterstunde kostet im Schnitt 65,14 € netto (Preisatlas Handwerk 2024).', tw2)[0], tx, yy);
       qr(qx, qy, qs); font('normal', 7, INK2); txt('Scannen: Projekt anlegen', qx + qs / 2, qy + qs + 3.4, { align: 'center' }); font('bold', 7, INK); txt(HOST, qx + qs / 2, qy + qs + 6.8, { align: 'center' });
+      y += EIGENE_H + 6;
+    }
+
+    /* Für Fensterbauer: der eigene Konfigurator als Paket (ohne das frühere Konto für Betriebe), gestaltet wie normaler Inhalt */
+    function paketHinweis() {
+      platz(EIGENE_H + 4);
+      const y0 = y;
+      karteRand(M, y0, CW, EIGENE_H);
+      const qs = 25, qx = XR - qs - 5, qy = y0 + 5, tx = M + 5, tw2 = qx - tx - 6;
+      kicker('Für Fensterbauer · Ihr eigener Konfigurator', tx, y0 + 6.6, GRUEN_T);
+      font('extra', 11.5, INK); const t1 = wrap('So planen Ihre Kunden auch auf Ihrer Website.', tw2); txt(t1, tx, y0 + 12.8, { lineHeightFactor: 1.1 });
+      let yy = y0 + 12.8 + t1.length * 4.6 + 0.6;
+      font('normal', 8, INK2); const t2 = wrap('Ihr Fenster-Konfigurator unter Ihrer Domain und in Ihrem Design: Ihre Kunden messen und planen selbst, jede Anfrage kommt mit einem Aufmaßblatt wie diesem per E-Mail zu Ihnen.', tw2); txt(t2, tx, yy, { lineHeightFactor: 1.22 });
+      yy += t2.length * 3.6 + 1.6;
+      font('bold', 8, INK); txt('Als Paket mit Einrichtung und Monatspreis · monatlich kündbar', tx, yy);
+      qr(qx, qy, qs); font('normal', 7, INK2); txt('Scannen: Pakete ansehen', qx + qs / 2, qy + qs + 3.4, { align: 'center' }); font('bold', 7, INK); txt(HOST, qx + qs / 2, qy + qs + 6.8, { align: 'center' });
       y += EIGENE_H + 6;
     }
 

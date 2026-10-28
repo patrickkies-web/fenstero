@@ -79,10 +79,10 @@ export const schrittVon = (pfad) => WEG.findIndex((s) => s.seiten.includes(pfad)
 /* Fußzeile: Ratgeber in der Reihenfolge des Wegs */
 export const GRUPPEN = [
   ['Ratgeber', [['/ratgeber/', 'Alle Ratgeber']].concat(WEG.flatMap((s) => s.seiten.map((p) => [p, name(p)])))],
-  /* Für Fensterbauer: die Verkaufsseite der Konfigurator-Pakete und das Wissen rund ums Aufmaß (die Tour des Betriebsbereichs wird nicht
-     mehr beworben, Bauplan E28; erreichbar bleibt sie über /#tour) */
+  /* Für Fensterbauer: die Verkaufsseite der Konfigurator-Pakete und das Wissen rund ums Aufmaß; die Paketbedingungen stehen hier,
+     die Nutzungsbedingungen des eingestellten Betriebskontos (28.10.2026) nicht mehr */
   ['Für Fensterbauer', FENSTERBAUER.map((p) => [p, name(p)]).concat([['/konfigurator-bedingungen/', 'Paketbedingungen']])],
-  ['Mehr', [['/', 'Startseite'], ['/app/', 'App'], ['/agb/', 'AGB'], ['/nutzungsbedingungen/', 'Nutzungsbedingungen'], ['/datenschutz/', 'Datenschutz'], ['/cookies/', 'Cookies'], ['/impressum/', 'Impressum']]]
+  ['Mehr', [['/', 'Startseite'], ['/app/', 'App'], ['/agb/', 'AGB'], ['/datenschutz/', 'Datenschutz'], ['/cookies/', 'Cookies'], ['/impressum/', 'Impressum']]]
 ];
 export function fusszeile(eigen) {
   const link = ([href, text]) => '<a href="' + href + '"' + (href === eigen ? ' aria-current="page"' : '') + '>' + text + '</a>';

@@ -7,6 +7,12 @@ const AW = window.AW, X = window.Abrechnung;
    anfragen (functions/api/dashboard.js), keine Abrechnung, keine Preise, keine Tour, keine Registrierung. Ohne INST ändert sich nichts. */
 const INST = (window.KONFIG && window.KONFIG.instanz && window.KONFIG.instanz.m && window.KONFIG.instanz.m.dashboard && document.body && document.body.getAttribute('data-seite') === 'betrieb') ? window.KONFIG.instanz : null;
 const P = () => X.preise();
+/* Betriebskonto kostenlos (seit 28.10.2026): ohne Projektpreis keine Tarife, keine Abrechnung, keine Zahlungsart (modell.js kostenlos) */
+const KOSTENLOS = () => X.kostenlos();
+/* Das frühere Konto für Betriebe gibt es seit 28.10.2026 nicht mehr (nur Pakete und Hauseigentümer): auf der Hauptdomain nur die Startseite
+   mit ihren zwei Ansichten. Der Server sagt es in /api/status (BETRIEBSKONTO=1 nur in der Prüfsuite); antwortet er nicht, gilt config.js.
+   null = noch nicht gefragt: Anzeigen zeigen dann nichts vom Konto, abgemeldet und aufgeräumt wird erst bei einem sicheren false */
+const BETRIEBSKONTO = () => (Server.status && Server.status.ok ? !!Server.status.betriebskonto : Server.gefragt ? !!(window.KONFIG || {}).betriebskonto : null);
 const eur2 = (n) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n);
 /* ---------- Grundlagen ---------- */
 /* Adressen aus der aktuellen Seite: läuft so auf pages.dev und auf der eigenen Domain */
@@ -101,12 +107,15 @@ try { const raw = localStorage.getItem(STORE); if (raw) { const o = JSON.parse(r
 if (INST) { S = seed(); S.screen = 'anmelden'; }
 /* Instanz-Modus: im Browser bleiben nur die Codes der Projekte (die App derselben Domain erkennt daran „Als Kunde öffnen“, app.js
    linkImBetrieb), keine Kundendaten; alles andere kommt nach dem Laden der Seite vom Server */
-function save() { if (INST) { try { const a = S.acc[Server.id]; localStorage.setItem(STORE, JSON.stringify({ v: 5, acc: a ? { srv: { links: (a.links || []).map((l) => ({ code: l.code })) } } : {} })); } catch (e) { /* ok */ } return; } try { const o = Object.assign({}, S, { sheet: null }); ['justCreated', '_pop', '_focusErr', 'animNext', '_feier', 'tour'].forEach((k) => delete o[k]); localStorage.setItem(STORE, JSON.stringify(o)); } catch (e) { /* ok */ } }
+function save() { if (INST) { try { const a = S.acc[Server.id]; localStorage.setItem(STORE, JSON.stringify({ v: 5, acc: a ? { srv: { links: (a.links || []).map((l) => ({ code: l.code })) } } : {} })); } catch (e) { /* ok */ } return; }
+  /* Ohne Betriebskonto (seit 28.10.2026) bleibt nichts vom Portal im Browser; Reste früherer Anmeldungen räumen wir weg, sobald der Server das bestätigt */
+  if (BETRIEBSKONTO() === false) { if (Server.gefragt) { try { [STORE, 'aufmass.sitzung', 'aufmass.sitzung.anfrage'].forEach((k) => localStorage.removeItem(k)); } catch (e) { /* ok */ } } return; }
+  try { const o = Object.assign({}, S, { sheet: null }); ['justCreated', '_pop', '_focusErr', 'animNext', '_feier', 'tour'].forEach((k) => delete o[k]); localStorage.setItem(STORE, JSON.stringify(o)); } catch (e) { /* ok */ } }
 /* ---------- Server (Stufe 2) ----------
    Meldet /api/status „daten“, liegt das Konto des Betriebs auf dem Server (Supabase) und Zahlungen laufen über Stripe.
    Ohne Server bleiben Konten lokal im Browser (Pilotphase); das Server-Konto heißt hier 'srv'. Jede Änderung geht an die API, der Server rechnet und zählt. */
 const Server = {
-  id: 'srv', status: null, sitzung: null, laeuft: false, stripe: null,
+  id: 'srv', status: null, gefragt: false, sitzung: null, laeuft: false, stripe: null,
   get an() { return !!(this.status && this.status.daten); },
   online() { return this.an && S.role === 'betrieb' && S.cur === this.id && !!this.sitzung; },
   lesen() { if (INST) return; try { this.sitzung = JSON.parse(localStorage.getItem('aufmass.sitzung') || 'null'); } catch (e) { this.sitzung = null; } },
@@ -167,10 +176,12 @@ const Server = {
   },
   async start() {
     try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); this.status = r.ok ? await r.json() : null; } catch (e) { this.status = null; }
+    this.gefragt = true;
     if (this.status && this.status.preise) X.setPreise(this.status.preise);
     if (this.status && this.status.ok) X.setEinfuehrung(this.status.einfuehrung || null); // ab dem Stichtag kommt null: kein Hinweis mehr
     if (INST) return this.startInst();
     if (!this.an) { if (S.cur === this.id) { S.cur = null; if (S.role) S.role = null; } return false; }
+    if (BETRIEBSKONTO() === false) { S.role = null; S.cur = null; save(); return 'ohne'; } // kein Konto mehr: keine Anmeldung, kein Laden, keine Link-Anmeldung
     this.lesen();
     if (this.sitzung) { try { await this.laden(); if (!S.role || S.cur === this.id) { S.role = 'betrieb'; S.cur = this.id; } } catch (e) { if (e.gesperrt) toast(e.message); /* sonst Sitzung abgelaufen: Startseite */ } }
     else if (S.cur === this.id) { S.role = null; S.cur = null; }
@@ -417,7 +428,7 @@ document.addEventListener('focusout', () => { if (!pendingRefresh) return; setTi
 function toast(t) { let el = document.getElementById('toast'); if (!el) { el = document.createElement('div'); el.id = 'toast'; el.className = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); } el.textContent = t; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2600); }
 function later(ms, fn) { setTimeout(() => { fn(); save(); refresh(); }, ms); }
 /* ---------- Rahmen ---------- */
-function navItems() { return INST ? [['links', 'Projekte', 'folder'], ['notif', 'Nachrichten', 'bell'], ['bprofil', 'Betrieb', 'user']] : [['links', 'Projekte', 'folder'], ['notif', 'Nachrichten', 'bell'], ['abrechnung', 'Abrechnung', 'card'], ['bprofil', 'Betrieb', 'user']]; }
+function navItems() { return INST ? [['links', 'Projekte', 'folder'], ['notif', 'Nachrichten', 'bell'], ['bprofil', 'Betrieb', 'user']] : [['links', 'Projekte', 'folder'], ['notif', 'Nachrichten', 'bell']].concat(KOSTENLOS() ? [] : [['abrechnung', 'Abrechnung', 'card']], [['bprofil', 'Betrieb', 'user']]); }
 const PARENT = { newlink: 'links', link: 'links', preise: 'abrechnung' };
 function navCount(k) {
   if (k === 'notif') return newNotif();
@@ -435,6 +446,7 @@ function render() {
     if (out && S.screen !== 'anmelden' && !(S.screen === 'beendet' && S.beendet)) S.screen = 'anmelden';
     if (!out && ['anmelden', 'beendet', 'landing', 'reg', 'wie', 'preise', 'tour', 'abrechnung'].includes(S.screen)) S.screen = home();
   } else {
+    if (BETRIEBSKONTO() === false) { if (S.role) { S.role = null; S.cur = null; } S.sheet = null; S.screen = 'landing'; }
     if (out && !['landing', 'reg', 'wie', 'preise', 'tour'].includes(S.screen)) S.screen = 'landing';
     if (out && FB_SCREENS.includes(S.screen) && S.ansicht !== 'betrieb') ansichtMerken('betrieb');
     if (!out && ['landing', 'reg'].includes(S.screen)) S.screen = home();
@@ -488,8 +500,8 @@ function footer(schlank) {
   /* Instanz: Impressum und Datenschutz der Instanz; angemeldet dazu Vertrag, Rechnungen und Support im Kundenkonto (E15) */
   if (INST) { const i = A().instanz || {}; return '<footer class="foot schlank b-fuss"><div class="wrap"><div class="row foot-links"><a href="/impressum/">Impressum</a><a href="/datenschutz/">Datenschutz</a>' + (schlank && i.kundenkonto ? '<a href="' + esc(i.kundenkonto) + '" target="_blank" rel="noopener">Vertrag, Rechnungen und Support</a>' : '') + '</div></div></footer>'; }
   /* Angemeldet (S6): eine schlanke Fußzeile mit Rechtslinks, „Vertrag widerrufen“, „So funktioniert es“, Preisen und Ratgeber */
-  if (schlank) return '<footer class="foot schlank"><div class="wrap"><div class="row foot-links"><a class="foot-widerruf" href="/widerruf/">Vertrag widerrufen</a><button type="button" data-act="go" data-v="wie">So funktioniert es</button><button type="button" data-act="go" data-v="preise">Preise</button><a href="/ratgeber/">Ratgeber</a><a href="/nutzungsbedingungen/">Nutzungsbedingungen</a><a href="/agb/">AGB</a><a href="/datenschutz/">Datenschutz</a><a href="/cookies/">Cookies</a><a href="/impressum/">Impressum</a></div><p><span class="lm-foot">' + LOGO(18) + WM() + '</span> ' + (Server.an ? 'Ihre Projekte und Aufmaße liegen auf unserem Server; Zahlungen laufen über Stripe.' : 'Pilotphase: Konto und Projekte liegen in diesem Browser.') + '</p></div></footer>';
-  return '<footer class="foot"><div class="wrap"><div class="row between"><span class="lm-foot">' + LOGO(22) + WM() + '</span><div class="row foot-links"><button type="button" data-act="go" data-v="wie">So funktioniert es für Betriebe</button><button type="button" data-act="tour">Tour für Fensterbauer</button><button type="button" data-act="go" data-v="preise">Preise für Betriebe</button><a href="/fuer-fensterbauer/">Konfigurator für Fensterbauer</a><a href="/ratgeber/">Ratgeber</a><a href="/nutzungsbedingungen/">Nutzungsbedingungen</a><a href="/agb/">AGB</a><a href="/datenschutz/">Datenschutz</a><a href="/cookies/">Cookies</a><a href="/impressum/">Impressum</a><a class="foot-widerruf" href="/widerruf/">Vertrag widerrufen</a></div></div>' + (Server.an ? '<p>Ihre Projekte und Aufmaße liegen auf unserem Server; Zahlungen laufen über Stripe.</p>' : '<p>Pilotphase: Es wird nichts berechnet. Echt funktionieren schon Aufmaß-Links, der Code-Eingang, Nachbesserungen und der PDF-Export; Konto und Projekte bleiben in Ihrem Browser.</p>') + '</div></footer>';
+  if (schlank) return '<footer class="foot schlank"><div class="wrap"><div class="row foot-links"><a class="foot-widerruf" href="/widerruf/">Vertrag widerrufen</a><button type="button" data-act="go" data-v="wie">So funktioniert es</button><button type="button" data-act="go" data-v="preise">Preise</button><a href="/ratgeber/">Ratgeber</a>' + (BETRIEBSKONTO() ? '<a href="/nutzungsbedingungen/">Nutzungsbedingungen</a>' : '<a href="/konfigurator-bedingungen/">Paketbedingungen</a>') + '<a href="/agb/">AGB</a><a href="/datenschutz/">Datenschutz</a><a href="/cookies/">Cookies</a><a href="/impressum/">Impressum</a></div><p><span class="lm-foot">' + LOGO(18) + WM() + '</span> ' + (Server.an ? 'Ihre Projekte und Aufmaße liegen auf unserem Server; Zahlungen laufen über Stripe.' : 'Pilotphase: Konto und Projekte liegen in diesem Browser.') + '</p></div></footer>';
+  return '<footer class="foot"><div class="wrap"><div class="row between"><span class="lm-foot">' + LOGO(22) + WM() + '</span><div class="row foot-links">' + (BETRIEBSKONTO() ? '<button type="button" data-act="go" data-v="wie">So funktioniert es für Betriebe</button><button type="button" data-act="tour">Tour für Fensterbauer</button><button type="button" data-act="go" data-v="preise">Preise für Betriebe</button>' : '') + '<a href="/fuer-fensterbauer/">Konfigurator für Fensterbauer</a><a href="/ratgeber/">Ratgeber</a>' + (BETRIEBSKONTO() ? '<a href="/nutzungsbedingungen/">Nutzungsbedingungen</a>' : '<a href="/konfigurator-bedingungen/">Paketbedingungen</a>') + '<a href="/agb/">AGB</a><a href="/datenschutz/">Datenschutz</a><a href="/cookies/">Cookies</a><a href="/impressum/">Impressum</a><a class="foot-widerruf" href="/widerruf/">Vertrag widerrufen</a></div></div>' + (!BETRIEBSKONTO() ? '' : Server.an ? '<p>Ihre Projekte und Aufmaße liegen auf unserem Server; Zahlungen laufen über Stripe.</p>' : '<p>Pilotphase: Es wird nichts berechnet. Echt funktionieren schon Aufmaß-Links, der Code-Eingang, Nachbesserungen und der PDF-Export; Konto und Projekte bleiben in Ihrem Browser.</p>') + '</div></footer>';
 }
 /* ---------- Fotos des Kunden (functions/api/fotos.js) ----------
    Kommen nur vom Server, mit der Anmeldung des Betriebs: als Blob geladen (ein <img> kann die Anmeldung nicht mitschicken) und hier
@@ -859,7 +871,7 @@ SCREENS.landing = () => {
   /* Ansicht Fensterbauer: Hinweis zum Code vom Aufmaßblatt (?von=pdf), dann die eingebettete Paket-Landingpage (ihr h1 ist das einzige
      dieser Ansicht), am Ende der Weg zu den Hauseigentümern. Die frühere Werbung für Aufmaß-Links (Tour, Rechner, „Holen Sie es in Ihr
      Konto“) ist hier weg (Bauplan E28); Preise, Anmelden und „Kostenlos starten“ bleiben in der Kopfzeile für Bestandsbetriebe. */
-  if (ansicht() === 'betrieb') return { title: 'eeziframes', kopflos: true, fusslos: true, html: (vonPdf() ? '<div class="wrap"><div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaß in der Hand?</b> So holen Sie es in Ihr Konto: kostenlos registrieren, dann „Code vom Kunden einfügen“ und den Code von der letzten Seite eintippen oder einfügen. Die ersten 3 Aufmaße sind frei.</span><span class="row"><button type="button" class="btn small ghost" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn small ghost" data-act="vonpdf-zu">Später</button></span></div></div>' : '') +
+  if (ansicht() === 'betrieb') return { title: 'eeziframes', kopflos: true, fusslos: true, html: (vonPdf() && !BETRIEBSKONTO() ? '<div class="wrap"><div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaßblatt in der Hand?</b> Alle Maße, Fotos und Wünsche stehen im PDF. Damit Ihre Kunden so auch auf Ihrer Website planen, gibt es Ihren eigenen Fenster-Konfigurator als Paket.</span><span class="row"><button type="button" class="btn small ghost" data-act="vonpdf-zu">Schließen</button></span></div></div>' : vonPdf() ? '<div class="wrap"><div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaß in der Hand?</b> So holen Sie es in Ihr Konto: kostenlos registrieren, dann „Code vom Kunden einfügen“ und den Code von der letzten Seite eintippen oder einfügen. Die ersten 3 Aufmaße sind frei.</span><span class="row"><button type="button" class="btn small ghost" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn small ghost" data-act="vonpdf-zu">Später</button></span></div></div>' : '') +
   einbettung() }; // die Seite für Fensterbauer volle Breite, außerhalb von .wrap; den Weg zu den Hauseigentümern hat sie selbst (Umschalter, Zeile unter dem Hero, Fuß)
   /* Ansicht Hauseigentümer (seit 26.10.2026): die Startseite nach der Design-DNA (startseite.js, startseite-dna.css, Vorlage in
      index.html) mit eigenem Kopf und eigener Fußzeile; portal.js zeichnet hier weder Kopfzeile noch Einführungsband noch Fußzeile */
@@ -884,18 +896,18 @@ function kundenschutz() {
     '<a class="linkbtn schutz-fuss" href="/nutzungsbedingungen/#kundenschutz">§ 11 Kundenschutz in den Nutzungsbedingungen</a></section>';
 }
 /* Einführungspreis für Betriebe in einem Satz (Abo 10 und Plus), sonst leer; Stichtag und Preise aus modell.js (einfuehrung) */
-const einfBetrieb = () => { const e = X.einfuehrung(); return e && e.danach ? ' Zum Start gelten Einführungspreise bis ' + X.einfBis() + ', danach ' + e.danach.abo + ' € (Abo 10) und ' + e.danach.plus + ' € (Plus) im Monat.' : ''; };
+const einfBetrieb = () => { const e = X.einfuehrung(); return !KOSTENLOS() && e && e.danach ? ' Zum Start gelten Einführungspreise bis ' + X.einfBis() + ', danach ' + e.danach.abo + ' € (Abo 10) und ' + e.danach.plus + ' € (Plus) im Monat.' : ''; };
 const FAQ = () => [
   ['Wie genau ist das Aufmaß?', 'Die App führt durch acht Handmaße je Fenster mit dem Zollstock. Von drei Breiten und drei Höhen zählt das kleinste Maß, Abweichungen außer Winkel werden markiert. Für ein erstes Angebot reicht das; vor der Fertigung misst der Fensterbauer einmal nach.'],
   ['Was braucht mein Kunde?', 'Ein Smartphone mit Kamera und einen Zollstock. Kein Konto, keine App aus dem Store, keine Kosten. Der Link öffnet die App direkt im Browser.'],
   ['Was, wenn der Kunde nicht klarkommt?', 'Jeder Schritt hat eine Erklärung mit Bild, jeder Fachbegriff ein Glossar. Im Projekt sehen Sie, ob der Link geöffnet wurde und wie weit Ihr Kunde ist, und können gezielt nachhaken. Und ist ein Maß falsch, fragen Sie eine Nachbesserung an: Ihr Kunde ändert nur das Nötige und schickt erneut, ohne neue Kosten.'],
   ['Wer sieht die Daten?', 'Nur Sie. Aufmaße aus Ihren Links gehen an keinen anderen Betrieb, und Ihr Kunde sieht im Link nur Ihren Betrieb. Eine Kopie mit Maßen bekommt er von Ihnen, nicht von uns.'],
   ['Kann mir ein anderer Betrieb über eeziframes den Kunden abwerben?', 'Nein. Wer über Ihren Link misst, sieht keine anderen Betriebe und keine Werbung. Sein Aufmaß geht nur in Ihr Konto, er bekommt von uns weder das Aufmaßblatt noch einen Code zum Weitergeben, und wir sprechen ihn nicht an. Das sagen wir Ihnen in den Nutzungsbedingungen verbindlich zu (§ 11 Kundenschutz).'],
-  ['Was ist mit Kunden, die selbst mit eeziframes messen?', 'Hauseigentümer können die App auch ohne Ihren Link nutzen; das Messen ist kostenlos, ihr Aufmaßblatt kaufen sie für ' + eur2(P().aufmass) + '. Es enthält einen Code; schickt ein Kunde es Ihnen, holen Sie es mit „Code vom Kunden einfügen“ in Ihr Konto. Das zählt wie ein eigenes Projekt.'],
-  ['Wann zahle ich, und wofür?', 'Nur für Projekte mit eingegangenem Aufmaß, nie für verschickte Links. Die ersten ' + P().frei + ' sind kostenlos und brauchen keine Zahlungsart. Danach ' + P().projekt + ' € netto je Projekt, oder Sie nehmen Abo 10 (' + P().abo.grund + ' € im Monat, ' + P().abo.inkl + ' Projekte inklusive, jedes weitere ' + P().abo.extra + ' €) oder Plus (' + P().plus + ' €, unbegrenzt).' + einfBetrieb() + ' Ohne Zahlungsart bleibt ein neues Aufmaß gesperrt. Abgebucht wird alle zwei Wochen als Sammelrechnung, Abos monatlich. Nachbesserungen im selben Projekt kosten nichts.'],
+  ['Was ist mit Kunden, die selbst mit eeziframes messen?', 'Hauseigentümer können die App auch ohne Ihren Link nutzen; das Messen ist kostenlos, ihr Aufmaßblatt kaufen sie für ' + eur2(P().aufmass) + '. Es enthält einen Code; schickt ein Kunde es Ihnen, holen Sie es mit „Code vom Kunden einfügen“ in Ihr Konto.' + (KOSTENLOS() ? ' Das kostet Sie nichts.' : ' Das zählt wie ein eigenes Projekt.')],
+  KOSTENLOS() ? ['Was kostet mich das?', 'Ihr Konto nichts: Projekte, Aufmaß-Links, eingegangene Aufmaße, Nachbesserungen und Codes vom Kunden sind kostenlos, ohne Zahlungsart. Bezahlt wird nur Ihr eigener Konfigurator, wenn Sie einen wollen (Paket mit Einrichtung und Monatspreis), und das Aufmaßblatt, das ein Hauseigentümer ohne Ihren Link selbst kauft.'] : ['Wann zahle ich, und wofür?', 'Nur für Projekte mit eingegangenem Aufmaß, nie für verschickte Links. Die ersten ' + P().frei + ' sind kostenlos und brauchen keine Zahlungsart. Danach ' + P().projekt + ' € netto je Projekt, oder Sie nehmen Abo 10 (' + P().abo.grund + ' € im Monat, ' + P().abo.inkl + ' Projekte inklusive, jedes weitere ' + P().abo.extra + ' €) oder Plus (' + P().plus + ' €, unbegrenzt).' + einfBetrieb() + ' Ohne Zahlungsart bleibt ein neues Aufmaß gesperrt. Abgebucht wird alle zwei Wochen als Sammelrechnung, Abos monatlich. Nachbesserungen im selben Projekt kosten nichts.'],
   ['Kann ich die Daten weiterverarbeiten?', 'Ja: als PDF-Aufmaßblatt mit Bestellmaß-Vorschlag je Position und als Text zum Kopieren. Geplant sind Schnittstellen zu gängiger Fensterbau-Software.']
 ];
-SCREENS.wie = () => ({ html: '<div class="wrap narrow"><div class="h hbild"><div>' + kicker('So funktioniert es') + '<h2>' + akSatz('Aufmaß ohne Anfahrt, abgerechnet mit Ihnen.') + '</h2><p>Für Fensterbauer, die ihren Kunden ein sauberes Erstaufmaß ermöglichen wollen, ohne selbst hinzufahren.</p><div class="row"><button type="button" class="btn ghost" data-act="tour">' + icon('play', 16) + 'Tour starten, acht Schritte</button></div></div><span class="hbild-l" data-lottie="messen" data-loop="1" aria-hidden="true"></span></div>' +
+SCREENS.wie = () => ({ html: '<div class="wrap narrow"><div class="h hbild"><div>' + kicker('So funktioniert es') + '<h2>' + akSatz(KOSTENLOS() ? 'Aufmaß ohne Anfahrt, Konto kostenlos.' : 'Aufmaß ohne Anfahrt, abgerechnet mit Ihnen.') + '</h2><p>Für Fensterbauer, die ihren Kunden ein sauberes Erstaufmaß ermöglichen wollen, ohne selbst hinzufahren.</p><div class="row"><button type="button" class="btn ghost" data-act="tour">' + icon('play', 16) + 'Tour starten, acht Schritte</button></div></div><span class="hbild-l" data-lottie="messen" data-loop="1" aria-hidden="true"></span></div>' +
   '<div class="card"><p class="eyebrow">Projekt und Aufmaß-Link</p><div class="kv" style="margin-top: 10px"><span>1 · Projekt</span><span>Sie legen ein Projekt an: Kunde, Adresse und grobe Eckdaten wie Gebäude und ungefähre Fensterzahl. Oder Sie laden eine ganze Liste von Kunden auf einmal ein.</span><span>2 · Link</span><span>Sie schicken den Aufmaß-Link per WhatsApp, SMS oder E-Mail. Er gilt für ein Aufmaß: Ihr Kunde öffnet ihn innerhalb von 7, 14 oder 30 Tagen und hat ab dann 60 Tage Zeit.</span><span>3 · Aufmaß</span><span>Ihr Kunde öffnet den Link im Browser, ohne Konto und ohne Installation, und misst geführt: Fotos, Maße, Wünsche am 3-D-Modell.</span><span>4 · Eingang</span><span>Das Aufmaß landet in Ihrem Projekt. Kein anderer Betrieb sieht es.</span><span>5 · Nachbesserung</span><span>Fehlt etwas oder stimmt ein Maß nicht, fragen Sie eine Nachbesserung an. Ihr Kunde ändert nur das Nötige und schickt erneut. Kostenlos, bis zu zweimal je Projekt.</span><span>6 · Abrechnung</span><span>Mit Ihnen: 3 Projekte kostenlos, danach 9 € netto je Projekt mit eingegangenem Aufmaß, im Abo 10 Projekte für 49 € im Monat, mit Plus unbegrenzt. Ihr Kunde zahlt nichts.</span><span>7 · Datei</span><span>Ihr Kunde bekommt keine Kopie mit Maßen zum Weiterschicken; möchte er eine, geben Sie ihm das Aufmaßblatt als PDF mit dem Angebot.</span></div></div>' +
   '<div class="card"><p class="eyebrow">Für Hauseigentümer</p><div class="kv" style="margin-top: 10px"><span>Kostenlos messen</span><span>Messen, Fotos, 3-D-Modell und Wünsche sind kostenlos, mit oder ohne Link eines Betriebs. Wer ohne Link misst, kauft sein Aufmaßblatt als PDF für ' + eur2(P().aufmass) + '; wer über Ihren Link kommt, zahlt nichts, Sie bekommen das Aufmaß.</span><span>Ohne Konto</span><span>Nichts installieren, nichts anmelden. Wer ohne Link und ohne Konto misst, behält alles auf dem eigenen Gerät; Fotos verlassen es dann nur für die freiwillige KI-Auswertung. Über Ihren Link kommen die Fotos mit dem Aufmaß zu Ihnen.</span><span>Zum Fensterbauer</span><span>Das Aufmaßblatt lässt sich direkt teilen. Auf der letzten Seite steht, wie ein Fensterbauer es in sein eeziframes-Konto holt.</span></div></div>' +
   kundenschutz() +
@@ -904,6 +916,10 @@ SCREENS.wie = () => ({ html: '<div class="wrap narrow"><div class="h hbild"><div
     : '<div class="row"><button type="button" class="btn primary" data-act="reg" data-v="betrieb">Kostenlos starten<span class="pf" aria-hidden="true"></span></button><button type="button" class="btn ghost" data-act="tour">' + icon('play', 16) + 'Tour starten</button><button type="button" class="btn ghost" data-act="go" data-v="preise">Preise</button><a class="btn ghost" href="' + APP_OPEN + '">Zur App</a></div></div>') });
 SCREENS.preise = () => {
   const p = P(), cur = S.role === 'betrieb' ? X.konto(A()) : '';
+  if (KOSTENLOS()) return { html: '<div class="wrap"><div class="h">' + kicker('Preise für Fensterbauer') + '<h2>' + akSatz('Ihr Konto kostet nichts.') + '</h2><p>Projekte anlegen, Aufmaß-Links verschicken, Aufmaße empfangen und Codes vom Kunden übernehmen: ohne Grundgebühr, ohne Zahlungsart, ohne Zählung je Projekt. Nur für Unternehmer (§ 14 BGB).</p></div>' +
+    '<div class="grid c2"><div class="card kcost"><span class="ci">' + icon('nouser', 22) + '</span><div><b>Für Ihren Kunden: kostenlos und ohne Konto.</b><p>Er misst über Ihren Link und schickt das Aufmaß an Sie. Eine Kopie mit allen Maßen bekommt er von Ihnen. Ihr Kunde bleibt Ihr Kunde.</p></div></div>' +
+    '<div class="card kcost"><span class="ci">' + icon('euro', 22) + '</span><div><b>Hauseigentümer ohne Link: ' + eur2(p.aufmass) + ' je Aufmaßblatt.</b>' + (X.einfText('aufmass') ? '<p class="einf">' + esc(X.einfText('aufmass')) + '</p>' : '') + '<p>Das zahlt der Hauseigentümer, nicht Sie. Im Blatt steht der Code, mit dem Sie das Aufmaß kostenlos in Ihr Konto holen.</p></div></div></div>' +
+    '<div class="card kcost"><span class="ci">' + icon('gift', 22) + '</span><div><b>Ihr eigener Konfigurator: als Paket.</b><p>Unter Ihrer Domain und in Ihrem Design, mit Einrichtung und Monatspreis, monatlich kündbar. Weitere KI-Auswertungen über dem Kontingent nur, wenn Sie sie freischalten.</p><a class="btn ghost" href="/fuer-fensterbauer/#pakete">Pakete ansehen</a></div></div></div>' };
   const card = (k, eb, pr, sm, items, btn, hi) => '<div class="price' + (cur === k || (!cur && hi) ? ' hi' : '') + '"><p class="eyebrow">' + eb + (cur === k ? ' · Ihr Tarif' : '') + '</p><span class="p">' + pr + '<small>' + sm + '</small></span><ul>' + items.map((t) => '<li>' + t + '</li>').join('') + '</ul>' + btn + '</div>';
   /* eine Cream-Pille je Bildschirm: nur die empfohlene Karte (Abo 10) trägt sie, die anderen Ring */
   const btn = (k, l) => { const haupt = k === 'abo', cls = 'btn ' + (haupt ? 'primary' : 'ghost'), pf = haupt ? '<span class="pf" aria-hidden="true"></span>' : ''; return S.role ? (cur === k ? '' : '<button type="button" class="' + cls + '" data-act="konto" data-v="' + k + '">' + l + pf + '</button>') : '<button type="button" class="' + cls + '" data-act="reg" data-v="betrieb">' + (k === 'service' ? 'Kostenlos starten' : 'Starten') + pf + '</button>'; };
@@ -958,7 +974,7 @@ function regFinish() {
   S.acc[id] = { plan: 'service', konto: 'service', ap: d.ap.trim(), mail: mail, tel: d.tel, abzug: { seite: 15, oben: 15 }, prefs: { mail: true, remind: true }, rechnungen: [], links: [], book: [], freeUsed: 0 };
   if (dup) { S.acc[id].freeQuota = 0; S.acc[id].dupOf = dup; }
   S.logins[mail] = { role: 'betrieb', id: id };
-  S.notif[id] = [{ t: 'Willkommen bei eeziframes', s: dup ? 'Für ' + dup + ' gibt es schon ein Konto, die kostenlosen Projekte wurden dort genutzt. Ab dem ersten Aufmaß brauchen Sie eine Zahlungsart.' : 'Legen Sie Ihr erstes Projekt an oder laden Sie gleich mehrere Kunden ein. Die ersten ' + P().frei + ' Projekte sind kostenlos.', when: stamp(), new: true, to: ['links'] }];
+  S.notif[id] = [{ t: 'Willkommen bei eeziframes', s: KOSTENLOS() ? 'Legen Sie Ihr erstes Projekt an oder laden Sie gleich mehrere Kunden ein. Ihr Konto ist kostenlos.' : dup ? 'Für ' + dup + ' gibt es schon ein Konto, die kostenlosen Projekte wurden dort genutzt. Ab dem ersten Aufmaß brauchen Sie eine Zahlungsart.' : 'Legen Sie Ihr erstes Projekt an oder laden Sie gleich mehrere Kunden ein. Die ersten ' + P().frei + ' Projekte sind kostenlos.', when: stamp(), new: true, to: ['links'] }];
   S.reg = null; S._feier = 'willkommen';
   return login('betrieb', id, 'Willkommen, ' + d.ap.trim().split(' ')[0]);
 }
@@ -1153,6 +1169,7 @@ function kontingentStat(a) {
   return stat('acc', 'gift', 'Noch kostenlos', freeLeft(a), a.pay ? 'danach ' + p.projekt + ' € je Projekt' : 'danach mit Zahlungsart');
 }
 SCREENS.abrechnung = () => {
+  if (KOSTENLOS()) return SCREENS.preise(); // keine Abrechnung mehr; ältere Links auf #abrechnung zeigen die Preise
   const a = A(), book = ledger(a), rec = receivedLinks(), wait = lockedLinks(a), p = P(), k = X.konto(a);
   const nextInv = book.filter((b) => b.status === 'offen').reduce((s, b) => s + b.betrag, 0);
   const row = (t, sub, amount, badge, cls) => '<div class="lrow"><span class="lt"><b>' + esc(t) + '</b><small>' + esc(sub) + '</small></span><span class="la"><b>' + amount + '</b><span class="badge ' + (cls || '') + '">' + esc(badge) + '</span></span></div>';
@@ -1457,7 +1474,7 @@ function tourFakt(id) {
     projekt: { z: '97.482', t: 'offene Stellen im Handwerk ließen sich 2025 rechnerisch nicht mit passend Qualifizierten besetzen, fast jede zweite.', mit: 'Ihr Kunde misst selbst, Ihre Leute fahren erst zum Feinaufmaß.', q: 'KOFA/IW Köln, KOFA Kompakt 7/2026' },
     link: { z: '68 %', t: 'der Handwerksbetriebe verschicken Angebote schon digital, 35 % beraten auch online.', mit: 'Der Aufmaß-Link passt in diesen Ablauf: per WhatsApp verschickt, beim Kunden gemessen, zurück in Ihrem Projekt.', q: 'Bitkom, Studie Digitalisierung des Handwerks, 01/2026' },
     misst: { z: '§ 632 BGB', t: 'Ein Kostenanschlag ist im Zweifel nicht zu vergüten. Ohne Absprache trägt der Betrieb den Aufwand dafür.', mit: 'Der Kunde misst selbst, die Anfahrt fürs erste Angebot entfällt.', q: 'Bürgerliches Gesetzbuch, § 632 Abs. 3' },
-    eingang: { z: '65,14 €', t: 'netto kostet eine Meisterstunde im Handwerk im Schnitt.', mit: 'Im Tarif Start kostet ein Projekt mit eingegangenem Aufmaß ' + p.projekt + ' € netto, die ersten ' + p.frei + ' sind kostenlos.', q: 'OneQrew/Taifun, Preisatlas Handwerk 2024' },
+    eingang: { z: '65,14 €', t: 'netto kostet eine Meisterstunde im Handwerk im Schnitt.', mit: KOSTENLOS() ? 'Ein Aufmaß über Ihren Link kostet Sie nichts, auch nicht die Fahrt.' : 'Im Tarif Start kostet ein Projekt mit eingegangenem Aufmaß ' + p.projekt + ' € netto, die ersten ' + p.frei + ' sind kostenlos.', q: 'OneQrew/Taifun, Preisatlas Handwerk 2024' },
     bestell: { z: '87 %', t: 'der Handwerksbetriebe sagen: Kunden erwarten individuelle Angebote.', mit: 'Je Position alle Maße, Fotos und Wünsche: Sie kalkulieren individuell, ohne Termin vor Ort.', q: 'Bitkom, Studie Digitalisierung des Handwerks, 01/2026' },
     nachbes: { z: '76 %', t: 'der Handwerksbetriebe nennen Zeitersparnis als Vorteil digitaler Anwendungen.', mit: 'Fehlt ein Maß, fragen Sie nach. Ihr Kunde ändert nur das Nötige, das kostet nichts extra.', q: 'Bitkom, Studie Digitalisierung des Handwerks, 01/2026' },
     code: { z: '49 %', t: 'der Deutschen finden, Handwerksbetriebe arbeiten oft noch zu analog.', mit: 'Bringt ein Kunde sein eeziframes-Aufmaß mit, holen Sie es per Code in Ihr Konto, als Projekt wie jedes andere.', q: 'Bitkom, Presseinformation vom 14.03.2025' },
@@ -1582,10 +1599,17 @@ SCREENS.tour = () => {
       (t.code ? '<div class="tour-ergebnis">' + icon('check', 20) + '<span><b>Projekt angelegt: Familie Muster</b><small>2 Positionen · Aufmaß eingegangen · zählt wie ein eigenes Projekt</small></span></div>' : '<button type="button" class="btn soft" data-act="tour-code">Übernehmen</button>') + '</div>' +
       '<div class="card tour-blattinfo"><p class="eyebrow">So steht es im Aufmaßblatt</p><ol class="tbi"><li><b>Seite 1</b><span>Die Box „Für Sie als Fensterbauer“ mit Kontakt und dem Weg zum Code, darunter, was zu klären ist</span></li><li><b>Ab Seite 2</b><span>Je Position eine Seite mit Code wie EG-01, Zeichnung und Maßen</span></li><li><b>Letzte Seite</b><span>Der Aufmaß-Code, der QR-Code zur Anmeldung und eeziframes für Ihre eigenen Kunden</span></li></ol></div>';
   } else {
-    titel = 'Bereit für Ihr erstes Projekt?'; lead = 'Kostenlos registrieren, Projekt anlegen, Link schicken. Die ersten ' + p.frei + ' Projekte sind frei, eine Zahlungsart brauchen Sie erst danach.';
-    merk = ['Bezahlt wird nur ein eingegangenes Aufmaß, nie ein verschickter Link.', 'Ihr Kunde zahlt nichts und braucht kein Konto.', 'Nur für Unternehmer (§ 14 BGB). Monatlich kündbar, alle Preise netto' + (p.mwst ? ' zzgl. MwSt.' : '.')];
-    v = '<div class="tour-preise">' + [['Start', '0 €', 'Grundgebühr', p.frei + ' Projekte kostenlos, danach ' + p.projekt + ' € je Projekt mit eingegangenem Aufmaß'], ['Abo 10', p.abo.grund + ' €', 'im Monat', p.abo.inkl + ' Projekte inklusive, jedes weitere ' + p.abo.extra + ' €'], ['Plus', p.plus + ' €', 'im Monat', 'Projekte unbegrenzt, Team mit Rollen und Statistik']].map((c, k) => '<div class="tpr' + (k === 0 ? ' hi' : '') + '"><p class="eyebrow">' + c[0] + '</p><b>' + c[1] + '<small> ' + c[2] + '</small></b><span>' + esc(c[3]) + '</span></div>').join('') + '</div>' +
-      '<p class="km-s">Zum Vergleich: Eine Meisterstunde kostet im Schnitt 65,14 € netto (Preisatlas Handwerk 2024).</p>';
+    if (KOSTENLOS()) {
+      titel = 'Bereit für Ihr erstes Projekt?'; lead = 'Kostenlos registrieren, Projekt anlegen, Link schicken. Ihr Konto kostet nichts, eine Zahlungsart brauchen Sie nicht.';
+      merk = ['Ihr Kunde zahlt nichts und braucht kein Konto.', 'Nur für Unternehmer (§ 14 BGB).', 'Ihren eigenen Konfigurator unter Ihrer Domain gibt es als Paket.'];
+      v = '<div class="tour-preise"><div class="tpr hi"><p class="eyebrow">Konto</p><b>0 €<small> Grundgebühr</small></b><span>Projekte, Links und Aufmaße kostenlos, ohne Zahlungsart</span></div></div>' +
+        '<p class="km-s">Zum Vergleich: Eine Meisterstunde kostet im Schnitt 65,14 € netto (Preisatlas Handwerk 2024).</p>';
+    } else {
+      titel = 'Bereit für Ihr erstes Projekt?'; lead = 'Kostenlos registrieren, Projekt anlegen, Link schicken. Die ersten ' + p.frei + ' Projekte sind frei, eine Zahlungsart brauchen Sie erst danach.';
+      merk = ['Bezahlt wird nur ein eingegangenes Aufmaß, nie ein verschickter Link.', 'Ihr Kunde zahlt nichts und braucht kein Konto.', 'Nur für Unternehmer (§ 14 BGB). Monatlich kündbar, alle Preise netto' + (p.mwst ? ' zzgl. MwSt.' : '.')];
+      v = '<div class="tour-preise">' + [['Start', '0 €', 'Grundgebühr', p.frei + ' Projekte kostenlos, danach ' + p.projekt + ' € je Projekt mit eingegangenem Aufmaß'], ['Abo 10', p.abo.grund + ' €', 'im Monat', p.abo.inkl + ' Projekte inklusive, jedes weitere ' + p.abo.extra + ' €'], ['Plus', p.plus + ' €', 'im Monat', 'Projekte unbegrenzt, Team mit Rollen und Statistik']].map((c, k) => '<div class="tpr' + (k === 0 ? ' hi' : '') + '"><p class="eyebrow">' + c[0] + '</p><b>' + c[1] + '<small> ' + c[2] + '</small></b><span>' + esc(c[3]) + '</span></div>').join('') + '</div>' +
+        '<p class="km-s">Zum Vergleich: Eine Meisterstunde kostet im Schnitt 65,14 € netto (Preisatlas Handwerk 2024).</p>';
+    }
   }
   const kopf = '<div class="tour-kopf"><div class="tk-t">' + kicker('Tour für Fensterbauer') + '<h2>' + akSatz('So läuft ein Aufmaß mit eeziframes.', 3) + '</h2></div><button type="button" class="btn small ghost" data-act="tour-ende">Tour beenden</button></div>' +
     '<ol class="tour-schritte" aria-label="Schritte der Tour">' + TOUR.map((s, k) => '<li><button type="button" data-act="tour-geh" data-v="' + k + '"' + (k === t.i ? ' aria-current="step"' : '') + ' class="' + (k < t.i ? 'fertig' : '') + '"><span class="n">' + (k < t.i ? icon('check', 14) : k + 1) + '</span><span class="tx">' + TOUR_NAME[s] + '</span></button></li>').join('') + '</ol>';
@@ -1728,9 +1752,9 @@ function ibanOk(v) {
   return m === 1;
 }
 const ibanMask = (v) => { const s = String(v || '').replace(/\s+/g, '').toUpperCase(); return s.slice(0, 4) + ' •••• •••• ' + s.slice(-4); };
-function dupNote(d) { const n = sameCompany(d); return n ? '<div class="note warn">Für <b>' + esc(n) + '</b> gibt es schon ein eeziframes-Konto. Ein weiteres geht, die 3 kostenlosen Aufmaße gibt es aber nur einmal je Betrieb. <button type="button" class="ulink" data-act="sheet" data-v="login">Lieber anmelden</button></div>' : ''; }
+function dupNote(d) { const n = KOSTENLOS() ? '' : sameCompany(d); return n ? '<div class="note warn">Für <b>' + esc(n) + '</b> gibt es schon ein eeziframes-Konto. Ein weiteres geht, die 3 kostenlosen Aufmaße gibt es aber nur einmal je Betrieb. <button type="button" class="ulink" data-act="sheet" data-v="login">Lieber anmelden</button></div>' : ''; }
 function payBanner() {
-  if (INST || S.role !== 'betrieb') return '';
+  if (INST || S.role !== 'betrieb' || KOSTENLOS()) return '';
   const a = A(), w = lockedLinks(a).length;
   if (w) return '<div class="banner warn"><span><b>' + nW(w, 'Aufmaß wartet', 'Aufmaße warten') + ' auf Freischaltung.</b> Mit einer Zahlungsart sehen Sie ' + (w === 1 ? 'es' : 'sie') + ' sofort.</span><button type="button" class="btn small ghost" data-act="sheet" data-v="pay">Zahlungsart hinterlegen</button></div>';
   if (!a.pay && X.konto(a) === 'service' && freeLeft(a) === 0) return '<div class="banner"><span><b>Keine kostenlosen Projekte mehr.</b> Mit einer Zahlungsart ist das nächste Aufmaß sofort sichtbar.</span><button type="button" class="btn small ghost" data-act="sheet" data-v="pay">Zahlungsart hinterlegen</button></div>';
@@ -1763,6 +1787,11 @@ function act(name, el) {
     if (/^tour/.test(name) || ['reg', 'reg-next', 'reg-prev', 'konto', 'linkimport', 'ansicht', 'srv-zahlungsart', 'pay-save', 'login-submit', 'srv-link-ja', 'vonpdf-zu'].includes(name)) return;
     if ((name === 'go' || name === 'nav') && ['abrechnung', 'preise', 'wie', 'landing', 'tour', 'reg', 'anmelden', 'beendet'].includes(v)) return nav(home());
     if (name === 'sheet' && ['login', 'linkimport', 'pay', 'legal', 'linkfrage'].includes(v)) return;
+  } else if (BETRIEBSKONTO() === false) {
+    /* Hauptdomain ohne Konto für Betriebe: keine Tour, keine Registrierung, keine Anmeldung, nur die Startseite */
+    if (/^tour/.test(name) || ['reg', 'reg-next', 'reg-prev', 'konto', 'linkimport', 'srv-zahlungsart', 'pay-save', 'login-submit', 'srv-link-ja'].includes(name)) return;
+    if ((name === 'go' || name === 'nav') && v !== 'landing') return nav('landing');
+    if (name === 'sheet' && ['login', 'linkimport', 'pay', 'linkfrage'].includes(v)) return;
   }
   switch (name) {
     case 'none': return;
@@ -1819,6 +1848,7 @@ function act(name, el) {
     case 'notif-open': { const i = +el.getAttribute('data-i'), n = notifs()[i]; if (!n) return; n.new = false; Server.konto({ gelesenIndex: i }); if (n.to) return go(n.to[0], n.to[1]); return render(); }
     case 'read-all': { notifs().forEach((n) => { n.new = false; }); Server.konto({ gelesen: true }); return render(); }
     case 'konto': {
+      if (KOSTENLOS()) { S.sheet = null; render(); return toast('Ihr Konto ist kostenlos; Tarife gibt es nicht mehr.'); }
       const a = A(), k = ['service', 'abo', 'plus'].includes(v) ? v : 'service';
       if (Server.online()) return Server.plan(k);
       if (X.RANG[k] > X.RANG[X.konto(a)] && !a.pay) { S.sheet = { k: 'pay', then: k, type: 'sepa' }; return render(); }
@@ -1979,5 +2009,5 @@ const ankerLink = () => {
 if (vonPdf()) ansichtMerken('betrieb');
 if (!ankerLink()) render();
 window.addEventListener('hashchange', ankerLink);
-Server.start().then((an) => { if (an) { render(); setInterval(() => Server.aktualisieren(), 30000); } else { window.PilotHinweis(); if (Server.status) render(); } projektAnkerOeffnen(); });
+Server.start().then((an) => { if (an === 'ohne') return render(); if (an) { render(); setInterval(() => Server.aktualisieren(), 30000); } else { window.PilotHinweis(); if (Server.status) render(); } projektAnkerOeffnen(); });
 

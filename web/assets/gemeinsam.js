@@ -9,7 +9,7 @@
   'use strict';
   /* Mit JavaScript übernimmt die App; die Textfassung für Suchmaschinen und KI-Assistenten (.vorab) bleibt verborgen */
   document.documentElement.classList.add('js');
-  var C = window.KONFIG =Object.assign({ marke: 'eeziframes', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/', preise: { aufmass: 7.99, projekt: 9, frei: 3, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true } }, window.KONFIG || {});
+  var C = window.KONFIG =Object.assign({ marke: 'eeziframes', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/', preise: { aufmass: 7.99, projekt: 0, frei: 0, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true } }, window.KONFIG || {});
   var mem = {};
   function get(k) { try { return window.localStorage.getItem(k); } catch (e) { return mem[k] || null; } }
   function put(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { mem[k] = v; } }
@@ -43,8 +43,8 @@
     return new Promise(function (resolve) {
       var bg = el('div', 'fx-bg');
       /* Instanz: neutral im Namen des Betriebs; eeziframes nur, wo das Paket es nennt (rechtNennung 'name'), sonst „technischer Dienstleister“ */
-      var weg = !INST ? 'an unseren Dienstleister Anthropic übertragen und dort ausgewertet (Anthropic Ireland, Ltd.; verarbeitet auch in den USA). eeziframes speichert deine Fotos nicht; Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben spätestens nach 30 Tagen.'
-        : (INST.m && INST.m.rechtNennung === 'name' ? 'über eeziframes, den technischen Dienstleister von ' + esc(INST.name) + ',' : 'über unseren technischen Dienstleister') + ' an den KI-Dienst Anthropic übertragen und dort ausgewertet (Anthropic Ireland, Ltd.; verarbeitet auch in den USA). Für die Auswertung werden sie dort nicht gespeichert: Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben spätestens nach 30 Tagen.';
+      var weg = !INST ? 'an unseren Dienstleister Anthropic übertragen und dort ausgewertet (Anthropic Ireland, Ltd.; verarbeitet auch in den USA). Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben in der Regel nach 30 Tagen. Eine eigene Kopie für die KI legt eeziframes nicht an; gespeichert sind deine Fotos nur dort, wo dein Aufmaß liegt.'
+        : (INST.m && INST.m.rechtNennung === 'name' ? 'über eeziframes, den technischen Dienstleister von ' + esc(INST.name) + ',' : 'über unseren technischen Dienstleister') + ' an den KI-Dienst Anthropic übertragen und dort ausgewertet (Anthropic Ireland, Ltd.; verarbeitet auch in den USA). Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben in der Regel nach 30 Tagen.';
       var box = el('div', 'fx-dialog',
         '<h2 id="fx-t">Fotos von der KI auswerten lassen?</h2>' +
         '<p>Die KI liest auf deinen Fotos die Einbausituation: Rollladenkasten, Laibung, Fensterbänke, Fassade und was ' + (INST ? esc(INST.name) : 'dein Fensterbauer') + ' sonst noch wissen muss. Dafür werden die Fotos verkleinert ' + weg + '</p>' +
@@ -340,7 +340,9 @@
   window.EinfBanner = function (art, ziel) {
     var X = window.Abrechnung, e = X && X.einfuehrung && X.einfuehrung();
     if (!e || !e.danach) return '';
-    var p = X.preise(), eur = function (v) { return (Math.round(v) === v ? String(v) : v.toFixed(2).replace('.', ',')) + '\u00a0€'; };
+    var p = X.preise();
+    if (art === 'betrieb' && !(Number(p.projekt) > 0)) return ''; // Betriebskonto kostenlos: keine Tarife, kein Einführungspreis für Betriebe
+    var eur = function (v) { return (Math.round(v) === v ? String(v) : v.toFixed(2).replace('.', ',')) + '\u00a0€'; };
     var n = X.einfRest(), rest = n <= 1 ? 'Nur noch heute' : 'Noch ' + n + ' Tage';
     var text = art === 'betrieb'
       ? '<b>Einführungspreise bis ' + X.einfBis() + ':</b> Abo 10 für ' + eur(p.abo.grund) + ', Plus für ' + eur(p.plus) + ' im Monat <span class="spaeter">· danach ' + eur(e.danach.abo) + ' und ' + eur(e.danach.plus) + '</span>'

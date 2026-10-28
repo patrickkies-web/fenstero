@@ -468,7 +468,9 @@ function instanzAttrappe() {
     geschuetzteNutzer: async () => { const s = new Set(); for (const p of PA.values()) if (p.auth_user) s.add(p.auth_user); for (const i of I.values()) (i.zugang || []).forEach((z) => { if (z && z.uid) s.add(z.uid); }); return s; },
     /* ---------- dauerhafte Zähler (bremse.js budget), in der Tabelle statistik ---------- */
     zaehlerLesen: async (tag, schluessel) => { const o = {}; (schluessel || []).forEach((s) => { o[s] = attrappe.statistik.get(tag + '|' + s) || 0; }); return o; },
-    zaehlerErhoehen: async (tag, schluessel, n) => { const k2 = tag + '|' + schluessel, neu = (attrappe.statistik.get(k2) || 0) + (n || 1); attrappe.statistik.set(k2, neu); return neu; }
+    zaehlerErhoehen: async (tag, schluessel, n) => { const k2 = tag + '|' + schluessel, neu = (attrappe.statistik.get(k2) || 0) + (n || 1); attrappe.statistik.set(k2, neu); return neu; },
+    /* Zähler eines Präfixes vor dem Tag bis (YYYY-MM-DD) löschen, z. B. budget:otpfehl: (Prüfwert der E-Mail-Adresse) */
+    zaehlerAltLoeschen: async (bis, praefix) => { let n = 0; for (const k2 of Array.from(attrappe.statistik.keys())) { const [tag, s] = [k2.slice(0, k2.indexOf('|')), k2.slice(k2.indexOf('|') + 1)]; if (tag < bis && s.indexOf(praefix) === 0) { attrappe.statistik.delete(k2); n++; } } return n; }
   };
 }
 
@@ -626,7 +628,9 @@ function instanzSupabase(sb, alle, eins, q) {
       if (z && z.fehlt) return undefined;
       const l = await lesen('statistik?tag=eq.' + q(tag) + '&schluessel=eq.' + q(schluessel) + '&select=anzahl');
       return l && l[0] ? Number(l[0].anzahl) || 0 : 0;
-    }
+    },
+    /* Zähler eines Präfixes vor dem Tag bis (YYYY-MM-DD) löschen, z. B. budget:otpfehl: (Prüfwert der E-Mail-Adresse) */
+    zaehlerAltLoeschen: async (bis, praefix) => { const r = await schreiben('statistik?tag=lt.' + q(bis) + '&schluessel=like.' + q(praefix + '*') + '&select=schluessel', { method: 'DELETE' }); return Array.isArray(r) ? r.length : 0; }
   };
 }
 

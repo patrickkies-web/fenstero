@@ -3,7 +3,8 @@
      impressumSeite(inst) → HTML-Dokument   datenschutzSeite(inst) → HTML-Dokument   rechtVollstaendig(recht) → { ok, fehlt: [Feld …] }
      AUFSICHT (Datenschutz-Aufsichtsbehörden der 16 Länder), aufsichtFuer(bundesland), speicherFristen(m), VORLAGE
    inst: ctx.instanz (docs/INSTANZEN.md), gebraucht werden name, recht, m (Merkmale), kontakt.
-   instanzen.recht: { firma, rechtsform, vertretung, strasse, plz, ort, land, tel, mail, register, ust, kammer, beruf, bundesland, stand }
+   instanzen.recht: { firma, rechtsform, vertretung, strasse, plz, ort, land, tel, mail, register, ust, kammer, beruf, schlichtung, dsb, bundesland, stand }
+   (schlichtung leer: Satz „nicht bereit und nicht verpflichtet“ nach § 36 VSBG; dsb nur, wenn benannt)
    Regeln:
    - Verantwortlich für die Anfragen ist der Betrieb; der technische Dienstleister (eeziframes) ist sein Auftragsverarbeiter. Bei
      rechtNennung 'name' (Essential, Plus) steht er mit Namen und Anschrift da, bei 'kategorie' (Signature) nur als „technischer
@@ -22,8 +23,9 @@ import { ANBIETER } from '../api/anbieter.js';
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const R = () => globalThis.Instanzregeln;
 
-/* Freigegeben vom Inhaber am 27.10.2026 („wer hat gesagt, dass die anwaltliche Prüfung noch nicht stattgefunden hat?“) */
-export const VORLAGE = { stand: '2026-10-23', geprueft: true };
+/* Freigegeben vom Inhaber am 27.10.2026 („wer hat gesagt, dass die anwaltliche Prüfung noch nicht stattgefunden hat?“); Fassung vom
+   28.10.2026 nach der Prüfrunde docs/profis/2026-10-28-rechtstexte.md (Anthropic-Fristen, Empfänger, Schlichtung, Datenschutzbeauftragter) */
+export const VORLAGE = { stand: '2026-10-28', geprueft: true };
 const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 const datum = (iso) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || '')); return m ? Number(m[3]) + '. ' + MONATE[Number(m[2]) - 1] + ' ' + m[1] : String(iso || ''); };
 
@@ -54,7 +56,7 @@ const UNTER = [
   ['Cloudflare, Inc., San Francisco, USA', 'Auslieferung der Seiten, Server-Programm, Zwischenspeicher, Domain und DNS', 'weltweit verteilt; EU-US Data Privacy Framework (Art. 45 DSGVO), ergänzend Standardvertragsklauseln'],
   ['Supabase Inc., USA (Server in Frankfurt am Main)', 'Datenbank, Ablage der Fotos und Aufmaßblätter', 'Frankfurt am Main (EU); Standardvertragsklauseln für Zugriffe aus Drittländern (Support)'],
   ['Plus Five Five, Inc. (Resend), 2261 Market Street #5039, San Francisco, CA 94114, USA', 'Versand der E-Mails mit Ihrer Anfrage, Zustellprotokolle (30 Tage)', 'USA; EU-US Data Privacy Framework (Art. 45 DSGVO), ergänzend Standardvertragsklauseln'],
-  ['Anthropic Ireland, Limited, Dublin, Irland', 'KI-Auswertung der Fotos, nur mit Ihrer Einwilligung; keine Nutzung zum Training, Löschung spätestens nach 30 Tagen', 'Irland und USA; Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO)']
+  ['Anthropic Ireland, Limited, Dublin, Irland', 'KI-Auswertung der Fotos, nur mit Ihrer Einwilligung; keine Nutzung zum Training, Löschung nach Angaben von Anthropic in der Regel nach 30 Tagen (bei Prüfung eines Verstoßes gegen seine Nutzungsrichtlinien bis zu zwei Jahre)', 'Irland und USA; Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO)']
 ];
 
 /* Pflichtangaben nach § 5 DDG, soweit für jeden Betrieb nötig (Register, USt-IdNr., Kammer nur, wenn vorhanden) */
@@ -101,6 +103,7 @@ export function impressumSeite(inst) {
     (r.ust ? '<h2>Umsatzsteuer</h2>\n<p>Umsatzsteuer-Identifikationsnummer nach § 27a UStG: ' + esc(r.ust) + '</p>\n' : '') +
     (r.kammer || r.beruf ? '<h2>Berufsangaben</h2>\n' + zeile('Zuständige Kammer', r.kammer) + zeile('Berufsbezeichnung', r.beruf ? r.beruf + ' (verliehen in Deutschland)' : '') +
       (r.kammer && /handwerk/i.test(r.kammer) ? '<p>Berufsrechtliche Regelung: Gesetz zur Ordnung des Handwerks (Handwerksordnung), nachzulesen unter <a href="https://www.gesetze-im-internet.de/hwo/">gesetze-im-internet.de/hwo</a>.</p>\n' : '') : '') +
+    '<h2>Verbraucherstreitbeilegung</h2>\n<p>' + (String(r.schlichtung || '').trim() ? esc(r.schlichtung) : 'Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.') + '</p>\n' +
     (bl ? '<p class="klein">Sitz: ' + esc(bl) + '</p>\n' : '') +
     (r.stand ? '<p class="klein">Stand der Angaben: ' + esc(datum(r.stand)) + '</p>\n' : '');
   return seite(inst, 'Impressum', inhalt);
@@ -143,9 +146,10 @@ export function datenschutzSeite(inst) {
     '<p>' + esc(name) + (anschrift(r).length ? ', ' + anschrift(r).map(esc).join(', ') : '') + (r.vertretung ? ', vertreten durch ' + esc(r.vertretung) : '') + '<br>' +
       (tel ? 'Telefon: ' + telLink(tel) + (mail ? ', ' : '') : '') + (mail ? 'E-Mail: ' + mailLink(mail) : '') + '</p>\n' +
     '<p>Weitere Angaben stehen im <a href="/impressum/">Impressum</a>. An diese Adresse wenden Sie sich auch mit allen Fragen zum Datenschutz.</p>\n' +
+    (String(r.dsb || '').trim() ? '<p>Unseren Datenschutzbeauftragten erreichen Sie unter: ' + esc(r.dsb) + '</p>\n' : '') +
 
     h('Aufruf dieser Seiten', 'aufruf') +
-    '<p>Beim Aufruf verarbeitet unser Hosting-Dienstleister Cloudflare technisch notwendige Daten wie IP-Adresse, Zeitpunkt, aufgerufene Adresse und Browser-Kennung, um die Seiten auszuliefern und vor Angriffen zu schützen. Zugriffsprotokolle mit IP-Adressen werden nicht gespeichert. Gegen Missbrauch zählt der Server kurzzeitig, wie viele Anfragen von einem Anschluss kommen; diese Zählung liegt nur im Arbeitsspeicher und verfällt spätestens nach einem Tag. Wie oft der Konfigurator aufgerufen und genutzt wird, zählt der Server nur als Summe je Tag, ohne Cookies und ohne Angaben zu Personen. Rechtsgrundlage ist unser berechtigtes Interesse an einer sicheren Auslieferung (Art. 6 Abs. 1 lit. f DSGVO).</p>\n' +
+    '<p>Beim Aufruf verarbeitet unser Hosting-Dienstleister Cloudflare technisch notwendige Daten wie IP-Adresse, Zeitpunkt, aufgerufene Adresse und Browser-Kennung, um die Seiten auszuliefern und vor Angriffen zu schützen. Zugriffsprotokolle mit IP-Adressen werden nicht gespeichert. Gegen Missbrauch zählt der Server, wie viele Anfragen von einem Anschluss kommen; im Arbeitsspeicher kurzzeitig und als gekürzter, mit einem Geheimnis gebildeter Prüfwert (nicht die IP-Adresse selbst) höchstens zwei Tage. Wie oft der Konfigurator aufgerufen und genutzt wird, zählt der Server nur als Summe je Tag, ohne Cookies und ohne Angaben zu Personen. Rechtsgrundlage ist unser berechtigtes Interesse an einer sicheren Auslieferung (Art. 6 Abs. 1 lit. f DSGVO).</p>\n' +
 
     h('Speicherung in Ihrem Browser und Cookies', 'browser') +
     '<p>Der Konfigurator speichert Ihre Planung im lokalen Speicher Ihres Browsers (localStorage), Ihre Fotos verkleinert in einer Datenbank Ihres Browsers (IndexedDB), damit nichts verloren geht, wenn Sie die Seite neu laden. Das ist für den Dienst, den Sie nutzen, unbedingt erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG, Art. 6 Abs. 1 lit. b DSGVO). Sie löschen diese Daten, indem Sie in Ihrem Browser die Website-Daten für diese Seite entfernen.</p>\n' +
@@ -158,17 +162,17 @@ export function datenschutzSeite(inst) {
       'Wenn Sie auf „Senden“ tippen, kommen Ihre Kontaktangaben dazu (Name, Telefon oder E-Mail, auf Wunsch die Zeit, zu der Sie am besten erreichbar sind, und die Adresse des Objekts). Wir bekommen die Anfrage als E-Mail mit dem Aufmaßblatt als PDF; antworten wir darauf, geht die Antwort direkt an Sie. ' +
       'Nach dem Senden können Sie Ihre Anfrage als PDF behalten; diese Kopie entsteht in Ihrem Browser.</p>\n' +
     '<p>Rechtsgrundlage ist die Anbahnung eines Vertrags mit Ihnen (Art. 6 Abs. 1 lit. b DSGVO). Ihre Angaben sind freiwillig; ohne Kontaktangaben können wir Ihnen nicht antworten.</p>\n' +
-    (m.einladungslinks ? '<p><strong>Persönliche Einladung.</strong> Laden wir Sie mit einem persönlichen Link ein, legen wir dafür Ihren Namen und Ihre Kontaktangaben an. Wir sehen dann, ob Sie den Link geöffnet haben und wie weit Ihre Planung ist (eingeladen, in Bearbeitung, eingereicht), Ihre Angaben und Fotos aber erst, wenn Sie senden. Rechtsgrundlage ist ebenfalls Art. 6 Abs. 1 lit. b DSGVO.</p>\n' : '') +
+    (m.einladungslinks ? '<p><strong>Persönliche Einladung.</strong> Laden wir Sie mit einem persönlichen Link ein, legen wir dafür Ihren Namen und Ihre Kontaktangaben an. Wir sehen dann, ob Sie den Link geöffnet haben und wie weit Ihre Planung ist (eingeladen, in Bearbeitung, eingereicht), Ihre Angaben und Fotos aber erst, wenn Sie senden. Rechtsgrundlage für die Einladung ist Art. 6 Abs. 1 lit. b DSGVO, für die Anzeige, wie weit Ihre Planung ist, unser berechtigtes Interesse, Sie gezielt zu unterstützen (Art. 6 Abs. 1 lit. f DSGVO); dem können Sie widersprechen.</p>\n' : '') +
 
     h('Fotos und KI-Auswertung (freiwillig)', 'ki') +
-    '<p>Wenn Sie ausdrücklich einwilligen, werden Ihre Fotos durch eine KI ausgewertet, damit wir die Einbausituation besser einschätzen können (etwa Rollladenkasten, Anschlag, Fensterbank). Dafür gehen die Fotos an Anthropic (Anthropic Ireland, Limited, Dublin, Irland). Anthropic nutzt sie nicht zum Training und löscht sie spätestens nach 30 Tagen. ' +
-      'Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Sie können sie jederzeit mit Wirkung für die Zukunft widerrufen, im Konfigurator oder mit einer Nachricht an uns; ohne Einwilligung planen Sie ganz normal weiter.</p>\n' +
+    '<p>Wenn Sie ausdrücklich einwilligen, werden Ihre Fotos durch eine KI ausgewertet, damit wir die Einbausituation besser einschätzen können (etwa Rollladenkasten, Anschlag, Fensterbank). Dafür gehen die Fotos an Anthropic (Anthropic Ireland, Limited, Dublin, Irland). Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben in der Regel nach 30 Tagen; nur wenn eine Anfrage gegen die Nutzungsrichtlinien von Anthropic zu verstoßen scheint, bewahrt Anthropic sie bis zu zwei Jahre auf. Die Übermittlung in die USA stützt sich auf die EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO). ' +
+      'Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO); Zeitpunkt und Fassung des Hinweises speichern wir mit Ihrer Planung, um sie nachweisen zu können. Sie können sie jederzeit mit Wirkung für die Zukunft widerrufen, im Konfigurator oder mit einer Nachricht an uns; ohne Einwilligung planen Sie ganz normal weiter.</p>\n' +
 
     h('Dienstleister und Empfänger', 'empfaenger') +
     '<p>Den Konfigurator betreibt ' + esc(dl) + ' als unser Auftragsverarbeiter (Art. 28 DSGVO): Er stellt die Seiten bereit, speichert Planungen und Anfragen und schickt sie uns, nur nach unseren Weisungen und nach einem Vertrag zur Auftragsverarbeitung. ' +
       'Dabei setzt er diese Unterauftragnehmer ein:</p>\n' +
     tabelle(['Unterauftragnehmer', 'Leistung', 'Ort und Garantien'], UNTER) +
-    '<p>Daten aus diesem Konfigurator gehen an niemanden sonst. Wir verkaufen sie nicht und nutzen sie nicht für Werbung.</p>\n' +
+    '<p>Ihre Anfrage erreicht uns per E-Mail; für unser Postfach und die weitere Bearbeitung setzen wir eigene Dienstleister ein, die in unserem Auftrag handeln. Sonst geben wir Ihre Daten nur weiter, wenn es für Ihren Auftrag nötig ist oder ein Gesetz es verlangt. Wir verkaufen sie nicht und nutzen sie nicht für Werbung.</p>\n' +
 
     h('Speicherdauer', 'speicherdauer') +
     '<p>Wir löschen Ihre Daten, sobald sie für den Zweck nicht mehr gebraucht werden. Auf dem Server des Konfigurators gelten diese Fristen:</p>\n' +

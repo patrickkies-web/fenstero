@@ -47,7 +47,7 @@ Kosten des Kontingents für dich, falls ein Betrieb es ganz ausschöpft (0,044 �
 - Je Anfrage höchstens 2 × Fenster + 6 Auswertungen, nie mehr als 60 (`Instanzregeln.GRENZEN.kiJeCode`).
 - Bremse je Anschluss: 40 Anfragen in 10 Minuten (IPv6 je /64), dazu die Bremse der Datenbank.
 - Je Konfigurator und Monat: Pause bei 100 %, außer der Betrieb hat weitere freigeschaltet, dann Schluss beim Doppelten; Mails an den Betrieb bei 80 und 100 %, an dich bei 100 %. Danach nimmt der Konfigurator weiter Anfragen an, nur ohne KI-Befund.
-- Über alle Konfiguratoren: höchstens `KI_TAG_MAX` Auswertungen am Tag (Standard 3.000), Mail an dich bei 80 %.
+- Über alle Konfiguratoren: höchstens `KI_TAG_MAX_INSTANZEN` Auswertungen am Tag (Standard 3.000), getrennt von der App für Hauseigentümer (`KI_TAG_MAX`, Standard 3.000); Mail an dich bei 80 %.
 
 ## Offen
 

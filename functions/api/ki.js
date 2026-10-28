@@ -41,6 +41,9 @@ const MODELL = 'claude-sonnet-5-5';
    JSON unlesbar und die App bliebe ohne Auswertung. Bezahlt wird nur, was das Modell wirklich schreibt. */
 const MAX_TOKENS = 8000;
 const MAX_BILD = 3000000;            // Zeichen Base64, etwa 2,2 MB Bild (die App schickt meist unter 0,7 MB)
+/* Fassung des Einwilligungshinweises (web/assets/gemeinsam.js, frage()); bei jeder Änderung des Wortlauts erhöhen. Sie steht mit dem
+   Zeitpunkt am Entwurf und geht mit der Anfrage an den Betrieb, damit er die Einwilligung nachweisen kann (Art. 7 Abs. 1 DSGVO) */
+export const KI_HINWEIS_STAND = '2026-10-28';
 const FENSTER_MS = 10 * 60 * 1000;   // Bremse gegen Missbrauch: höchstens 40 Anfragen je 10 Minuten und Anschluss (IPv6 je /64)
 const MAX_ANFRAGEN = 40;             // gezählt nur im Arbeitsspeicher dieser Instanz (umgebung.js), wird nirgends gespeichert
 
@@ -173,10 +176,11 @@ export async function alarmMail(k, betreff, text) {
   const pd = postDienst(k); if (!pd) return false;
   try { return (await pd.senden({ an: pd.kontakt, betreff: betreff, html: mailRahmen(betreff, '<p style="margin:0 0 12px">' + esc(text) + '</p>', pd.kontakt) })).ok; } catch (e) { return false; }
 }
-/* Tagesbudget über alle Domains; false: Grenze erreicht */
-async function tagesBudget(ctx) {
-  const max = ctx.k.instanzen.kiTagMax, b = await budget(ctx, 'ki:tag', max, { alarm: Math.max(1, Math.floor(max * 0.8)) });
-  if (b.alarm) { const p = alarmMail(ctx.k, 'KI-Auswertungen: 80 % des Tagesbudgets', 'Heute sind schon ' + b.stand + ' von höchstens ' + max + ' KI-Auswertungen gelaufen (Variable KI_TAG_MAX). Darüber antwortet die KI bis Mitternacht nicht mehr; die App macht ohne Auswertung weiter.'); if (ctx.waitUntil) ctx.waitUntil(p); else await p; }
+/* Tagesbudget, getrennt für die App (KI_TAG_MAX) und die Konfiguratoren der Pakete (KI_TAG_MAX_INSTANZEN), damit Missbrauch der kostenlosen
+   App die KI der zahlenden Betriebe nicht stilllegt; false: Grenze erreicht */
+async function tagesBudget(ctx, inst) {
+  const max = inst ? ctx.k.instanzen.kiTagMaxInstanzen : ctx.k.instanzen.kiTagMax, b = await budget(ctx, inst ? 'ki:tag:inst' : 'ki:tag', max, { alarm: Math.max(1, Math.floor(max * 0.8)) });
+  if (b.alarm) { const p = alarmMail(ctx.k, 'KI-Auswertungen: 80 % des Tagesbudgets ' + (inst ? 'der Konfiguratoren' : 'der App'), 'Heute sind schon ' + b.stand + ' von höchstens ' + max + ' KI-Auswertungen ' + (inst ? 'in den Konfiguratoren' : 'in der App') + ' gelaufen (Variable ' + (inst ? 'KI_TAG_MAX_INSTANZEN' : 'KI_TAG_MAX') + '). Darüber antwortet die KI bis Mitternacht nicht mehr; die App macht ohne Auswertung weiter.'); if (ctx.waitUntil) ctx.waitUntil(p); else await p; }
   return b.ok;
 }
 const kontext = (request, env, o) => { const k = konfig(env); return Object.assign({ k: k, env: env, sp: k.daten ? speicher(k) : null, request: request, url: new URL(request.url) }, o || {}); };
@@ -186,8 +190,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const url = new URL(request.url);
   /* nur Anfragen von der eigenen Seite */
   if (request.headers.get('Origin') !== url.origin) return antwort({ ok: false, fehler: 'forbidden' }, 403);
-  if (!bremse('ki:' + quelle(request), MAX_ANFRAGEN, FENSTER_MS)) return antwort({ ok: false, fehler: 'rate_limited' }, 429);
-  if (!(await tagesBudget(kontext(request, env, { waitUntil: waitUntil })))) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'tag' }, 429);
+  const ctx = kontext(request, env, { waitUntil: waitUntil });
+  if (!bremse('ki:' + quelle(request), MAX_ANFRAGEN, FENSTER_MS) || !(await rlBremse(ctx, 'KI', 'app:' + quelle(request)))) return antwort({ ok: false, fehler: 'rate_limited' }, 429);
+  if (!(await tagesBudget(ctx, false))) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'tag' }, 429);
   return auswerten(request, env, url);
 }
 
@@ -209,15 +214,21 @@ export async function kiInstanz({ request, env, instanz, waitUntil }) {
   await ctx.sp.entwurfAendern(code, instanz.betrieb, (r) => {
     const mt = r.meta || {}, n = Math.max(((r.daten || {}).windows || []).length, Number(mt.angelegt) || 0), max = Math.min(G.kiJeCode, 2 * n + 6), schon = Number(mt.ki) || 0;
     if (schon >= max) return false;
-    r.meta = Object.assign({}, mt, { ki: schon + 1 }); frei = true; return true;
+    r.meta = Object.assign({}, mt, { ki: schon + 1 }, mt.kiEinwilligung ? {} : { kiEinwilligung: { zeit: new Date(ctx.k.jetzt || Date.now()).toISOString(), fassung: KI_HINWEIS_STAND } }); frei = true; return true;
   });
   if (!frei) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'code' }, 429);
-  /* je Instanz und Monat: Kontingent aus pakete.js, ohne Freischaltung Schluss bei 100 %, mit Freischaltung (oder ohne Auftrag) beim Doppelten */
+  /* Testanfragen in der Vorschau zählen nicht ins Kontingent (Paketbedingungen § 2 Abs. 2); es bleiben die Grenze je Code und das Tagesbudget */
+  if (globalThis.Instanzregeln.anfrageArt(instanz.status, { vorschau: instanz.vorschau }) === 'test') {
+    if (!(await tagesBudget(ctx, true))) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'tag' }, 429);
+    return auswerten(request, env, url);
+  }
+  /* je Instanz und Monat: Kontingent aus pakete.js, ohne Freischaltung Schluss bei 100 %, mit Freischaltung beim Doppelten. Ohne laufenden
+     Auftrag (etwa nach dem Vertragsende, bevor der Konfigurator vom Netz ist) gibt es nichts über das Kontingent hinaus: keiner zahlt es */
   const m = instanz.m || {}, richt = Math.max(1, Number(m.kiMonat) || 600), auf = await kiAuftrag(ctx, instanz);
-  const mehrFrei = !auf || !!(auf.ki || {}).frei, grenze = mehrFrei ? richt * 2 : richt, okKey = 'inst:' + instanz.id8 + ':kiok';
+  const mehrFrei = !!auf && !!(auf.ki || {}).frei, grenze = mehrFrei ? richt * 2 : richt, okKey = 'inst:' + instanz.id8 + ':kiok';
   const versuch = await budget(ctx, 'inst:' + instanz.id8 + ':ki', richt * 3, { monat: true });
   if (!versuch.ok || (await budgetStand(ctx, okKey, { monat: true })) >= grenze) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'monat' }, 429);
-  if (!(await tagesBudget(ctx))) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'tag' }, 429);
+  if (!(await tagesBudget(ctx, true))) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'tag' }, 429);
   const r = await auswerten(request, env, url);
   if (r.status === 200) {
     instanzZaehlen(ctx, instanz, 'ki');
@@ -236,7 +247,7 @@ function kiStufe(ctx, instanz, a, n, richt, frei) {
   const stufe = n === richt ? 100 : n === Math.ceil(richt * 0.8) && n < richt ? 80 : frei && n === richt * 2 ? 200 : 0;
   if (!stufe) return null;
   const aufgaben = [];
-  if (stufe === 100) aufgaben.push(alarmMail(ctx.k, 'KI-Auswertungen: Kontingent erreicht bei ' + instanz.name, instanz.name + ' (' + (instanz.haupthost || '') + ') hat in diesem Monat ' + n + ' KI-Auswertungen, Kontingent ' + richt + '. ' + (!a ? 'Kein Auftrag verknüpft: Die KI läuft bis zum Doppelten weiter.' : frei ? 'Weitere Auswertungen sind freigeschaltet; sie werden am Monatsende abgerechnet, höchstens bis zum Doppelten.' : 'Nicht freigeschaltet: Die KI pausiert dort bis zum Monatsende.')));
+  if (stufe === 100) aufgaben.push(alarmMail(ctx.k, 'KI-Auswertungen: Kontingent erreicht bei ' + instanz.name, instanz.name + ' (' + (instanz.haupthost || '') + ') hat in diesem Monat ' + n + ' KI-Auswertungen, Kontingent ' + richt + '. ' + (!a ? 'Kein laufender Auftrag verknüpft: Die KI pausiert dort bis zum Monatsende.' : frei ? 'Weitere Auswertungen sind freigeschaltet; sie werden am Monatsende abgerechnet, höchstens bis zum Doppelten.' : 'Nicht freigeschaltet: Die KI pausiert dort bis zum Monatsende.')));
   if (a) aufgaben.push((async () => {
     const pd = postDienst(ctx.k), d = auftragDaten(ctx.k); if (!pd || !d) return false;
     const kunde = await d.kundeHolen(a.kunde); if (!kunde || !kunde.mail) return false;

@@ -254,6 +254,8 @@ export const KONTO = {
     if (ctx.instanz) return DASH.gesperrt(ctx);
     await mitBetrieb(ctx); const plan = ['service', 'abo', 'plus'].includes((ctx.body || {}).plan) ? ctx.body.plan : 'service', a0 = ctx.row.daten || {}, alt = X().konto(a0), sub = ctx.row.stripe_subscription;
     const hoch = X().RANG[plan] > X().RANG[alt];
+    /* Betriebskonto kostenlos (umgebung.js, ohne BETRIEBSKONTO): keine Tarife mehr, kein neues Abo */
+    if (hoch && plan !== 'service' && X().kostenlos()) throw new ApiFehler('Ihr Konto ist kostenlos; Tarife gibt es nicht mehr.', 409);
     if (hoch && plan !== 'service') {
       mwstPruefen(ctx);
       if (sub) { await ctx.zd.aboAendern(sub, plan); return aendern(ctx, (a) => ({ ergebnis: X().planWechsel(a, plan) })); }
@@ -288,6 +290,7 @@ export const KONTO = {
   /* --- Zahlungsart --- */
   'POST /api/konto/zahlungsart': async (ctx) => {
     if (ctx.instanz) return DASH.gesperrt(ctx);
+    if (X().kostenlos()) throw new ApiFehler('Ihr Konto ist kostenlos; eine Zahlungsart brauchen Sie nicht.', 409);
     await mitBetrieb(ctx); const customer = await stripeKunde(ctx);
     const kasse = await ctx.zd.zahlungsartKasse({ id: ctx.row.id, customer: customer, zurueck: zurueck(ctx) });
     zaehlen(ctx, 'ereignis:zahlungsart_kasse');
@@ -408,6 +411,11 @@ async function fortschrittInstanz(ctx) {
   return { ok: true, expires: expires };
 }
 const zeileText = (v, n) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, n);
+/* Anschluss als gekürzter Prüfwert mit Geheimnis (kein Klartext im Zähler) */
+async function anschlussWert(ctx) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(ctx.k.geheimnis || '') + '|' + quelle(ctx.request)));
+  return Array.from(new Uint8Array(d)).slice(0, 8).map((x) => x.toString(16).padStart(2, '0')).join('');
+}
 async function aufmassInstanz(ctx) {
   const inst = ctx.instanz, k = ctx.k, o = ctx.body || {};
   if (!o || !Array.isArray(o.w) || !o.b) throw new ApiFehler('Kein Aufmaß im Versand.');
@@ -425,6 +433,11 @@ async function aufmassInstanz(ctx) {
   if (aufl.art === 'virtuell' && (name.length < 2 || !(RI().telOk(tel) || RI().mailOk(mail)))) throw new ApiFehler('Bitte Namen und eine Telefonnummer oder E-Mail-Adresse angeben, damit ' + inst.name + ' sich melden kann.', 400, { kontakt: true });
   if (aufl.art === 'virtuell') {
     /* je Anschluss höchstens GRENZEN.anfragenIpTag Anfragen am Tag; je Instanz Alarm beim Richtwert, Schluss beim Vierfachen (E12) */
+    /* dauerhaft gezählt (gekürzter Prüfwert des Anschlusses, nach 2 Tagen gelöscht, eingang.js), damit niemand einem Betrieb über viele
+       Instanzen des Workers Postfach und KI-Kontingent mit gefälschten Anfragen füllt; in der Vorschau höchstens GRENZEN.testJeTag
+       Testanfragen je Konfigurator (sonst taugt die Vorschau als Konfigurator ohne Abo) */
+    if (art === 'test' && !(await budget(ctx, 'inst:' + inst.id8 + ':test', RI().GRENZEN.testJeTag)).ok) throw new ApiFehler('In der Vorschau gehen höchstens ' + RI().GRENZEN.testJeTag + ' Testanfragen am Tag. Morgen geht es weiter.', 429);
+    if (!(await budget(ctx, 'anf:' + (await anschlussWert(ctx)), RI().GRENZEN.anfragenIpTag)).ok) throw new ApiFehler('Von diesem Anschluss kamen heute schon viele Anfragen. Bitte melden Sie sich direkt bei ' + inst.name + '.', 429);
     if (!erlaubt('anf:' + quelle(ctx.request), RI().GRENZEN.anfragenIpTag, TAG_MS)) throw new ApiFehler('Von diesem Anschluss kamen heute schon viele Anfragen. Bitte melden Sie sich direkt bei ' + inst.name + '.', 429);
     if (art !== 'test') {
       const richt = Math.max(1, Number(inst.m.anfragenTag) || 50), b = await budget(ctx, 'inst:' + inst.id8 + ':anfragen', richt * 4, { alarm: richt });
@@ -459,6 +472,7 @@ async function aufmassInstanz(ctx) {
     if (!r.ok) throw new ApiFehler(r.art === 'schon' || r.art === 'doppelt' ? 'Diese Anfrage ist schon angekommen.' : r.msg, r.art === 'schon' || r.art === 'doppelt' ? 409 : 400);
     zeitenBerlin(r.l, jetztK); r.l.log.eingegangen = stempelBerlin(jetztK);
     if (r.l && r.l.aufmass) fotosVermerken(r.l.aufmass, namen);
+    if (zw && zw.meta && zw.meta.kiEinwilligung) a.links[0].kiEinwilligung = zw.meta.kiEinwilligung; // Nachweis für den Betrieb (ki.js KI_HINWEIS_STAND)
     await ctx.sp.anfrageAnlegen({ code: code, instanz: inst.id, betrieb: inst.betrieb, lid: l.id, art: art, status: 'eingegangen', nr: nr, daten: a.links[0], versand: { runde: 1, status: 'offen', versuche: 0, n: 0, basis: basis }, eingegangen_at: eingangAt, loeschen_ab: loeschenAbFuer(inst.m, art, jetztK) })
       .catch((e) => { throw e && e.status === 409 ? new ApiFehler('Diese Anfrage ist schon angekommen.', 409) : e; });
   } else {
@@ -497,6 +511,18 @@ const fotoIdsMitKlein = (wins) => { const s = fotoIds(wins); Array.from(s).forEa
    nurId: nur dieser Betrieb (Zentrale, „jetzt abrechnen“). */
 export async function abrechnungslauf(k, sp, zd, nurId) {
   if (!sp || !zd) return { ok: false, grund: 'kein Speicher oder Zahlungsdienst' };
+  /* Betriebskonto kostenlos (seit 28.10.2026): keine Sammelrechnungen, auch nicht für alte offene Buchungen; ein laufendes Abo 10 oder
+     Plus wird einmal zum Ende seines Abrechnungsmonats gekündigt (Nutzungsbedingungen § 6), danach meldet Stripe das Ende wie sonst */
+  if (X().kostenlos()) {
+    let abos = 0;
+    if (!nurId && typeof sp.betriebeAlle === 'function') for (const row of (await sp.betriebeAlle().catch(() => [])) || []) {
+      if (!row.stripe_subscription || (row.daten || {}).aboAuslauf) continue;
+      const merken = () => sp.betriebAendern(row.id, (a) => { a.aboAuslauf = new Date(k.jetzt || Date.now()).toISOString(); });
+      try { await zd.aboKuendigen(row.stripe_subscription); await merken(); abos++; }
+      catch (e) { if (/no such subscription|cancel/i.test(String(e && e.message))) await merken().catch(() => null); else console.log('Abo nicht gekündigt', row.id, e && e.message); }
+    }
+    return { ok: true, aus: true, rechnungen: 0, fehler: 0, abosGekuendigt: abos, meldung: 'Das Betriebskonto ist kostenlos; es gibt keine Sammelrechnungen.' };
+  }
   if (live(k) && !k.mwstGesetzt) return { ok: false, grund: 'MWST nicht festgelegt (0 oder 19): keine Sammelrechnungen', rechnungen: 0, fehler: 0, meldung: 'Umsatzsteuer festlegen: Variable MWST bei Cloudflare (0 = Kleinunternehmer, 19 = 19 %).' };
   const rows = nurId ? [await sp.betriebHolen(nurId)].filter((r) => r && r.stripe_customer) : await sp.betriebeMitKunde(); let n = 0, fehler = 0, meldung = '';
   for (const row of rows) {

@@ -129,7 +129,11 @@
     if (a.stand === 'angefragt' && (a.kasse || S.kasse || {}).kasse) return { titel: 'Zur Zahlung einladen', einladen: true };
     if (a.stand === 'bezahlt') return { titel: 'Seite beginnen', nach: 'in_arbeit', text: 'Der Kunde bekommt eine E-Mail „Wir bauen Ihre Seite“. Danach ist kein kostenloser Storno mehr möglich.' };
     if (a.stand === 'in_arbeit') return { titel: v.aenderung ? 'Neue Vorschau bereitstellen' : 'Vorschau bereitstellen', nach: 'vorschau', link: 'Link zur Vorschau', text: 'Der Kunde bekommt den Link per E-Mail und gibt im Kundenbereich frei oder wünscht Änderungen.' };
-    if (a.stand === 'vorschau' && v.freigabe) return { titel: 'Live schalten', nach: 'live', link: 'Adresse der fertigen Seite', vorschlag: a.adresse && a.adresse.indexOf('.') > 0 && !/Vorschlag/.test(a.adresse) ? 'https://' + a.adresse + '/' : '', text: 'Das Monatsabo startet jetzt (' + U.euro((a.preise || {}).monat || 0) + ' netto im Monat), der Kunde bekommt eine E-Mail mit dem Link.' };
+    const live = (titel, vorab) => ({ titel: titel, nach: 'live', link: 'Adresse der fertigen Seite', vorschlag: a.adresse && a.adresse.indexOf('.') > 0 && !/Vorschlag/.test(a.adresse) ? 'https://' + a.adresse + '/' : '', text: vorab + 'Das Monatsabo startet jetzt (' + U.euro((a.preise || {}).monat || 0) + ' netto im Monat), der Kunde bekommt eine E-Mail mit dem Link.' });
+    if (a.stand === 'vorschau' && v.freigabe) return live('Live schalten', '');
+    /* Keine Antwort auf die Vorschau: Frist zur Freigabe (Paketbedingungen § 5 Abs. 5, § 640 Abs. 2 BGB); danach gilt die Einrichtung als abgenommen */
+    if (a.stand === 'vorschau' && v.frist && Date.parse(v.frist) < Date.now()) return live('Live schalten (Frist abgelaufen)', 'Die Frist zur Freigabe ist am ' + U.datum(v.frist) + ' abgelaufen. Hat der Kunde bis dahin keinen Mangel genannt, gilt die Einrichtung als abgenommen (Paketbedingungen § 5 Abs. 5). ');
+    if (a.stand === 'vorschau' && !v.frist) return { titel: 'Frist zur Freigabe setzen', frist: true };
     if (a.stand === 'pausiert') return { titel: 'Wieder live schalten', nach: 'live', link: 'Adresse der Seite', vorschlag: v.live || '', text: 'Die Seite ist wieder erreichbar.' };
     return null;
   }
@@ -142,6 +146,18 @@
     ja.addEventListener('click', async () => {
       if (U.wartet(ja)) return; U.warten(ja, true);
       try { await U.api('POST', '/api/inhaber/auftraege/' + a.id + '/zahlung-einladen', { text: text.eingabe.value }); zu(); U.toast('Einladung gesendet'); zeigen(await auftragLaden(a.id), { stehen: true }); }
+      catch (e) { U.warten(ja, false); U.fehlerSetzen(text, e.message); }
+    });
+  }
+  /* Frist zur Freigabe: Mail an den Kunden mit 14 Tagen Frist und dem Hinweis auf die Abnahme (Paketbedingungen § 5 Abs. 5) */
+  function fristBlatt(a) {
+    const text = U.feld({ k: 'text', label: 'Satz an den Kunden', optional: true, zeilen: 3, max: 600, platzhalter: 'z. B. Wir haben Sie telefonisch nicht erreicht.' });
+    const ja = U.pille('Frist setzen'), nein = U.ring('Abbrechen');
+    const zu = U.blatt({ titel: 'Frist zur Freigabe setzen?', text: 'Der Kunde bekommt eine E-Mail: Er gibt die Vorschau innerhalb von 14 Tagen frei oder nennt Änderungswünsche. Nennt er bis dahin keinen Mangel, gilt die Einrichtung als abgenommen, und Sie dürfen live schalten.', inhalt: h('div', { class: 'a-karte', style: 'margin:0 0 4px' }, text), knoepfe: [ja, nein] });
+    nein.addEventListener('click', zu);
+    ja.addEventListener('click', async () => {
+      if (U.wartet(ja)) return; U.warten(ja, true);
+      try { await U.api('POST', '/api/inhaber/auftraege/' + a.id + '/freigabe-frist', { text: text.eingabe.value }); zu(); U.toast('Frist gesetzt'); zeigen(await auftragLaden(a.id), { stehen: true }); }
       catch (e) { U.warten(ja, false); U.fehlerSetzen(text, e.message); }
     });
   }
@@ -185,6 +201,7 @@
     if (a.wechsel) hin.push('Wechsel zu ' + P.PAKETE[a.wechsel.paket].name + ' angefragt am ' + U.datum(a.wechsel.zeit) + '. Differenz der Einrichtung und neuen Monatspreis mit dem Kunden klären.');
     if (v.aenderung && a.stand === 'in_arbeit') hin.push('Änderungswunsch vom ' + U.datum(v.aenderung.zeit) + ': „' + v.aenderung.text + '“');
     if (v.freigabe && a.stand === 'vorschau') hin.push('Vorschau am ' + U.zeit(v.freigabe.zeit) + ' freigegeben.');
+    else if (v.frist && a.stand === 'vorschau') hin.push('Frist zur Freigabe gesetzt, läuft bis ' + U.datum(v.frist) + '. Danach dürfen Sie live schalten, wenn der Kunde keinen Mangel nennt.');
     const kst = a.kasse || S.kasse;
     if (a.stand === 'angefragt') hin.push(kst && kst.kasse ? 'Unverbindlich angefragt, als die Kasse zu war. Jetzt ist sie offen (' + (MODUS[kst.modus] || '') + '): Laden Sie den Kunden zur Zahlung ein; er bekommt einen Link zur Bestellung und bezahlt dort.'
       : 'Unverbindlich angefragt. Die Kasse ist zu' + (kst && kst.gruende && kst.gruende.length ? ': ' + kst.gruende.join('; ') : '') + '. Sobald sie offen ist, laden Sie den Kunden hier zur Zahlung ein.');
@@ -200,7 +217,7 @@
     /* Betrieb, Adresse */
     inhalt.push(U.karte('Betrieb und Impressum', null, kv([['Unternehmen', b.firma], ['Auf der Seite', b.name], ['Einzugsgebiet', b.region], ['Ansprechperson', [b.ap, b.rolle].filter(Boolean).join(', ')], ['Telefon', b.tel], ['E-Mail', b.mail], ['Erreichbar', b.erreichbar],
       ['Website', b.web ? h('a', { href: b.web, target: '_blank', rel: 'noopener noreferrer', text: b.web }) : ''], ['Anschrift', [b.strasse, [b.plz, b.ort].filter(Boolean).join(' ')].filter(Boolean).join(', ')], ['Bundesland', A.BUNDESLAENDER[b.bundesland]],
-      ['Rechtsform', b.rechtsform], ['Vertreten durch', b.vertretung], ['Register', b.register], ['USt-IdNr.', b.ust], ['Kammer', b.kammer], ['Beruf', b.beruf], ['Anruf', b.rueckruf]])));
+      ['Rechtsform', b.rechtsform], ['Vertreten durch', b.vertretung], ['Register', b.register], ['USt-IdNr.', b.ust], ['Kammer', b.kammer], ['Beruf', b.beruf], ['Schlichtung', b.schlichtung], ['Datenschutzbeauftragter', b.dsb], ['Anruf', b.rueckruf]])));
     inhalt.push(U.karte('Adresse und Anfragen', null, kv([['Adresse', a.adresse], m.domain ? ['Domain', ad.art === 'eigene' ? 'gehört dem Kunden, nach Absprache anbinden (§ 6 Abs. 3)' : 'neu registrieren, bis 25 € netto im Jahr'] : null, m.domain && (ad.domains || []).length > 1 ? ['Weitere Wünsche', ad.domains.slice(1).join(', ')] : null,
       ad.vorschlaege ? ['Vorschläge', 'erwünscht'] : null, ['Anfragen an', (ad.eingang || []).join(', ')], m.dashboard ? ['Team', (ad.team || []).filter(Boolean).join(', ')] : null])));
 
@@ -242,7 +259,7 @@
 
     const titel = (b.name || b.firma || 'Ohne Namen') + (a.naechster ? '. *' + a.naechster + '.*' : '');
     seite({ band: h('p', { class: 'a-band-text', text: a.nr + ' · ' + P.PAKETE[a.paket].name + (A.gestaltet(P.merkmale(a.paket) || {}) ? ' · ' + (a.weg === 'schnell' ? 'Seite vorschlagen' : 'Selbst angeben') : '') + ' · bestellt ' + (z.bezahlt_am ? U.datum(z.bezahlt_am) : 'noch nicht') }), buehne: buehne(a),
-      frage: U.frage(titel, null), inhalt: inhalt, fuss: s ? [U.pille(s.titel, { on: { click: () => (s.einladen ? einladenBlatt(a) : standBlatt(a, s)) } })] : null, stehen: o.stehen });
+      frage: U.frage(titel, null), inhalt: inhalt, fuss: s ? [U.pille(s.titel, { on: { click: () => (s.einladen ? einladenBlatt(a) : s.frist ? fristBlatt(a) : standBlatt(a, s)) } })] : null, stehen: o.stehen });
     const liste = wurzel.querySelector('.a-nachrichten'); if (liste) liste.scrollTop = liste.scrollHeight;
   }
 
