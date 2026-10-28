@@ -83,6 +83,29 @@ Brandt-Palette. Bilder: docs/profis/bilder/2026-10-28-ausprobieren-telefon.jpg u
 Noch im früheren Look und nicht im Testablauf: die Startseite einer Instanz vor dem ersten Fenster und die Einladungsseite („kümmern
 wir uns erst danach“).
 
+Gremium, eine Runde, blind X/Y (Urteile unter docs/profis/gremium/2026-10-28-ausprobieren.md):
+
+- Gestalter: X 6:0, Median 4.
+- Kunden: X 5:1, Median 3,5.
+- Fensterbauer: X 5:1, Median 3. Veto Datenqualität: Das Blatt nach dem Senden zeigte zwei Zeilen statt einer Position.
+
+Umgesetzt:
+
+| Wo | Was | Gremium | Stand |
+| --- | --- | --- | --- |
+| Startseite nach dem Senden | Blatt mit der gesendeten Anzahl an Fenstern | Veto F, Muss K | geändert |
+| Kästchen | kürzer, am Telefon unten (Seite oben sichtbar) | Muss G, F | geändert |
+| Auswahl am Ende | eine Fläche, nur „Pakete ansehen“ gefüllt, Zeilen darunter, Punkt violett, Staffel 360 ms, Kontrast ab 5,2:1 | Muss G | geändert |
+| Auswahl am Ende | Preis des gezeigten Pakets, „ab …“ mit dem kleinsten Paket | Muss G, F | geändert |
+| Fensterliste | „Noch ein Fenster hinzufügen“ | Muss K | geändert |
+| Bestätigung | „Du musst nichts weiter tun.“ | Muss K | neu |
+| Kopf | Name ganz, „Übersicht“ bis 430 px als Zeichen | Muss G | geändert |
+| Beispielseiten | Seitensymbol (kein 404 auf /favicon.ico) | Prüfsuite | neu |
+
+Nicht übernommen, weil es dem Wort des Inhabers widerspricht: Auswahl ohne Betriebsfarben (K) und Paket am Einstieg wählbar (F).
+Offen: Satz zu Serverstandort und KI, Hinweis „der Betrieb prüft die Maße“, Zeigemodus ohne Preisleiste, gelegentlicher Sprung im Hero
+der Beispielseite (bestand schon vorher).
+
 ## Gremium (eine Runde, drei Agenten, blind X/Y)
 
 - **Gestalter:**

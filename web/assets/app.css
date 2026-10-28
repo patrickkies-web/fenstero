@@ -1539,6 +1539,8 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna .lg-kopf .lg-kopf-zurueck, .dna .lg-kopf .lg-kopf-icon { flex: none; width: 44px; padding: 0; justify-content: center }
 /* 320 px: „Übersicht“ nur als Zeichen (Name bleibt für Vorleser), damit jeder Knopf 44 px breit bleibt */
 @media (max-width: 359px) { .dna .lg-kopf [data-act="wohin"] { flex: none; width: 44px; padding: 0; justify-content: center } .dna .lg-kopf [data-act="wohin"] span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap } }
+/* Name des Betriebs mit Zurück daneben (Instanz): bis 430 px „Übersicht“ nur als Zeichen, damit der Name ganz steht (Gremium G, Daniel Roth) */
+@media (max-width: 430px) { .dna .lg-kopf.mit-name [data-act="wohin"] { flex: none; width: 44px; padding: 0; justify-content: center } .dna .lg-kopf.mit-name [data-act="wohin"] span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap } }
 .dna .lg-marke { display: inline-flex; align-items: center; gap: 8px; font: 400 17px/1 var(--font-sans); letter-spacing: -.01em; color: var(--tinte); white-space: nowrap }
 .dna .lg-marke .fi-logo { width: 26px; height: 26px }
 .dna .lg-marke .wm b { font-weight: 700 }
@@ -3150,20 +3152,22 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .dna.gs .pw-haupt .pw-knopf { width: 56px; height: 56px; background: var(--weiss); color: var(--schwarz); box-shadow: 0 10px 30px -8px rgba(137, 126, 252, .7) }
 .dna.gs .pw-haupt .pw-knopf svg { width: 20px; height: 20px }
 .dna.gs .pw-fuss { margin: 2px 2px 8px; font: 400 13px/1.45 var(--font-sans); color: var(--silbergrau) }
-.dna.gs .probe-wahl.auftritt .pw-karte { animation: pwAuf 460ms var(--dna-auftritt) both; animation-delay: calc(450ms + var(--i, 0) * 90ms) }
+.dna.gs .probe-wahl.auftritt .pw-karte { animation: pwAuf 360ms var(--dna-auftritt) both; animation-delay: calc(450ms + var(--i, 0) * 80ms) }
+/* Gremium G (28.10.2026): eine Fläche, nur „Pakete ansehen“ gefüllt; die beiden anderen Wege als Zeilen mit Trennlinie, kein Rahmen im Rahmen */
+.dna.gs .pw-karte:not(.pw-haupt) { min-height: 64px; padding: 12px 2px; border-radius: 0; background: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12) }
+.dna.gs .pw-karte:not(.pw-haupt) + .pw-karte:not(.pw-haupt) { margin-top: -10px }
+.dna.gs .pw-karte:not(.pw-haupt):active { transform: none; opacity: .7 }
 @keyframes pwAuf { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
 /* In den Farben des Beispielbetriebs (Inhaber, 28.10.2026: „auch in den entsprechenden Farben des Betriebes“; Palette Fensterbau Brandt
    wie in web/vorschau/paket-beispiel/farben.css): Signature ganz (Fläche Schieferblau, Karten Schiefer, die große in Petrol mit
    Aquatürkis als Licht), Plus zur Hälfte (Karten Schiefer, Licht Aquatürkis), Essential bleibt eeziframes */
 .dna.gs .probe-wahl.pw-voll { --b-schiefer: #233d48; --b-schiefer-hoch: #2c4955; --b-petrol: #0a6774; --b-petrol-tief: #075560; --b-aqua: #2ab4bd; --b-eis: #eef7f9;
-  padding: 18px 16px 6px; border-radius: 28px; background: radial-gradient(120% 70% at 18% 0%, #2f5260, var(--b-schiefer) 60%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10) }
+  padding: 18px 16px 6px; border-radius: 28px; background: radial-gradient(120% 70% at 18% 0%, #2c4955, var(--b-schiefer) 60%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10) }
 .dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .dna-label { color: #a9c3cc }
-.dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .dna-label::before { background: #2ab4bd; box-shadow: 0 0 0 4px rgba(42, 180, 189, .22) }
 .dna.gs .probe-wahl:is(.pw-voll, .pw-halb) h2 .ak, .dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .pw-text > span, .dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .pw-text small, .dna.gs .probe-wahl.pw-voll .pw-fuss { color: #a9c3cc }
-.dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .pw-karte { background: radial-gradient(120% 90% at 18% 0%, #3a5a68, #2c4955 55%, #1d343e) }
-.dna.gs .probe-wahl.pw-voll .pw-haupt { background: radial-gradient(70% 90% at 92% 100%, rgba(42, 180, 189, .45), transparent 70%), radial-gradient(120% 90% at 18% 0%, #13808e, #0a6774 55%, #075560) }
-.dna.gs .probe-wahl.pw-voll .pw-haupt .pw-text > span, .dna.gs .probe-wahl.pw-voll .pw-haupt .pw-text small { color: #cfe9ec }
-.dna.gs .probe-wahl.pw-halb .pw-haupt { background: radial-gradient(70% 90% at 92% 100%, rgba(42, 180, 189, .38), transparent 72%), radial-gradient(120% 90% at 18% 0%, #3a5a68, #2c4955 55%, #1d343e) }
+.dna.gs .probe-wahl.pw-voll .pw-haupt { background: radial-gradient(70% 90% at 92% 100%, rgba(42, 180, 189, .45), transparent 70%), radial-gradient(120% 90% at 18% 0%, #0c6f7c, #0a6774 55%, #075560) }
+.dna.gs .probe-wahl.pw-voll .pw-haupt .pw-text > span, .dna.gs .probe-wahl.pw-voll .pw-haupt .pw-text small { color: #e6f4f6 } /* ab 5,2:1 auf Petrol */
+.dna.gs .probe-wahl.pw-halb .pw-haupt { background: radial-gradient(70% 90% at 92% 100%, rgba(42, 180, 189, .38), transparent 72%), radial-gradient(120% 90% at 18% 0%, #2c4955, #233d48 55%, #1d343e) }
 .dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .pw-haupt .pw-knopf { color: #233d48; box-shadow: 0 10px 30px -8px rgba(42, 180, 189, .7) }
 .dna.gs .probe-wahl:is(.pw-voll, .pw-halb) .pw-knopf { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .55) }
 @media (prefers-reduced-motion: reduce) {

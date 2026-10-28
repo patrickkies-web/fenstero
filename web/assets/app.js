@@ -2539,7 +2539,7 @@ function instanzKuerzen() {
   if (ids.size) Fotos.weg(Array.from(ids));
   try { localStorage.removeItem(linkKey() + '.entwurf'); } catch (e) { /* ok */ }
   ['in', 'out'].forEach((k) => { const p = S.photos[k]; if (p && p.url && !p.demo) { try { URL.revokeObjectURL(p.url); } catch (e) { /* ok */ } } });
-  S.sent = { when: S.sent.when, nr: S.sent.nr || '', runde: S.sent.runde || 1, art: S.sent.art || '', uebertragen: true, kurz: true, anderswo: !!S.sent.anderswo };
+  S.sent = { when: S.sent.when, nr: S.sent.nr || '', runde: S.sent.runde || 1, art: S.sent.art || '', uebertragen: true, kurz: true, anderswo: !!S.sent.anderswo, fenster: Number(S.sent.fenster) || S.windows.length || 0 }; // die Anzahl bleibt für das Blatt (Gremium K: „Das Blatt zeigt die echte Anfrage“)
   S.windows = []; S.proj = Object.assign({}, PROJ0); S.win = baseWin(); S.editIdx = -1; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; S.nb = null; S.angelegt = 0;
   S.sync.bekannt = []; S.sync.geloescht = {};
   lokalSpeichern();
@@ -3932,13 +3932,13 @@ function anfrage2Dna() {
 }
 /* Kontakt: das Aufmaßblatt als Objekt im Fensterlicht; was getippt wird, steht sofort oben auf dem Blatt (abLive), Maße als Punkte */
 function abPapier(offen, schloss, betrieb, balken, nr) { // betrieb: Name im Kopfband statt eeziframes; balken: Maße als ruhige Balken (Bestätigung, Durchschrift ohne Maße); nr: gesendet und vom Gerät gelöscht, dann Nummer und ruhige Zeilen
-  const pr = S.proj, n = S.windows.length, el = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), pkt = (v) => (balken ? '<i class="ab-leer" style="--b: 72%"></i>' : !v ? '•.•••' : offen ? thousand(v) : thousand(v).replace(/\d/g, '•'));
+  const pr = S.proj, n = S.windows.length, gz = nr && S.sent ? Number(S.sent.fenster) || 0 : 0, el = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), pkt = (v) => (balken ? '<i class="ab-leer" style="--b: 72%"></i>' : !v ? '•.•••' : offen ? thousand(v) : thousand(v).replace(/\d/g, '•'));
   const kontakt = [pr.ort, pr.tel, pr.mail].map((t) => String(t || '').trim()).filter(Boolean);
   return '<div class="ab-papier" aria-hidden="true"><div class="ab-papier-band">' + (betrieb ? '<span class="ab-papier-betrieb">' + esc(betrieb) + '</span>' : LOGO(10) + '<span class="ab-wm" translate="no"><b>eezi</b>frames</span>') + '<span class="ab-papier-art">Aufmaßblatt</span></div><div class="ab-papier-in">' +
     '<p class="ab-papier-h" data-p="name">' + esc(nr ? 'Anfrage ' + nr : String(pr.name || '').trim() || 'Dein Aufmaß') + '</p>' +
     '<p class="ab-papier-kontakt" data-p="kontakt">' + (kontakt.length ? esc(kontakt.join(' · ')) : '<i class="ab-leer" style="--b: 38%"></i><i class="ab-leer" style="--b: 30%"></i>') + '</p>' +
-    '<p class="ab-papier-s">' + (nr && !n ? '<i class="ab-leer" style="--b: 46%"></i>' : n + (n === 1 ? ' Position' : ' Positionen') + ' · ' + el + (el === 1 ? ' Element' : ' Elemente') + (pr.gebaeude ? ' · ' + esc(lab('gebaeude', pr.gebaeude)) : '')) + '</p>' +
-    '<table class="ab-papier-tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr>' + S.windows.slice(0, 4).map((x, i) => { const d = derive(x); return '<tr><td><b>' + (i + 1) + '</b></td><td>' + esc(x.name || 'Fenster') + '</td><td>' + pkt(d.moW) + ' × ' + pkt(d.moH) + '</td><td>' + pkt(d.elW) + ' × ' + pkt(d.elH) + '</td></tr>'; }).join('') + (nr && !n ? [1, 2].map((k) => '<tr><td><b>' + k + '</b></td><td><i class="ab-leer" style="--b: 70%"></i></td><td><i class="ab-leer" style="--b: 72%"></i></td><td><i class="ab-leer" style="--b: 72%"></i></td></tr>').join('') : '') + '</table>' +
+    '<p class="ab-papier-s">' + (nr && !n ? (gz ? gz + (gz === 1 ? ' Position' : ' Positionen') : '<i class="ab-leer" style="--b: 46%"></i>') : n + (n === 1 ? ' Position' : ' Positionen') + ' · ' + el + (el === 1 ? ' Element' : ' Elemente') + (pr.gebaeude ? ' · ' + esc(lab('gebaeude', pr.gebaeude)) : '')) + '</p>' +
+    '<table class="ab-papier-tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr>' + S.windows.slice(0, 4).map((x, i) => { const d = derive(x); return '<tr><td><b>' + (i + 1) + '</b></td><td>' + esc(x.name || 'Fenster') + '</td><td>' + pkt(d.moW) + ' × ' + pkt(d.moH) + '</td><td>' + pkt(d.elW) + ' × ' + pkt(d.elH) + '</td></tr>'; }).join('') + (nr && !n ? Array.from({ length: Math.min(4, gz || 1) }, (_, i) => i + 1).map((k) => '<tr><td><b>' + k + '</b></td><td><i class="ab-leer" style="--b: 70%"></i></td><td><i class="ab-leer" style="--b: 72%"></i></td><td><i class="ab-leer" style="--b: 72%"></i></td></tr>').join('') : '') + '</table>' +
     '<div class="ab-papier-zeichnung"><span class="ab-papier-oeffnung"><span class="ab-papier-element"></span></span></div><div class="ab-papier-zeilen"><i></i><i class="k"></i><i></i></div></div>' +
     (schloss ? '<span class="ab-schloss">' + LOCK + '</span>' : '') + '</div>';
 }
@@ -5133,7 +5133,7 @@ function lgKopf(zurueck) {
   const z = zurueck === false ? null : zurueck || ['liste', 'Zurück: Fenster']; // false: ohne Zurück (Liste der Fenster)
   /* ohne Zurück (Liste der Fenster) ist das Logo wie bisher der Weg zur Startseite der Website */
   const marke = S.betrieb ? (INST ? instKopf() : '') : z ? '<span class="lg-marke" role="img" aria-label="eeziframes">' + LOGO(26) + WM() + '</span>' : '<a class="lg-marke hdr-logo" href="' + PORTAL_URL + '" aria-label="eeziframes, zur Startseite">' + LOGO(26) + WM() + '</a>';
-  return '<div class="lg-kopf"><span class="lg-kopf-l">' + (z ? '<button type="button" class="lg-kopf-zurueck" data-act="' + z[0] + '" aria-label="' + z[1] + '">' + LG_PFEIL_L + '</button>' : '') + marke + '</span>' +
+  return '<div class="lg-kopf' + (z && INST && S.betrieb ? ' mit-name' : '') + '"><span class="lg-kopf-l">' + (z ? '<button type="button" class="lg-kopf-zurueck" data-act="' + z[0] + '" aria-label="' + z[1] + '">' + LG_PFEIL_L + '</button>' : '') + marke + '</span>' +
     '<span class="lg-kopf-r"><button type="button" data-act="wohin" aria-label="Übersicht: Schritte, Fenster und Startseite"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button><button type="button" class="lg-kopf-icon" data-act="gindex" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5-1.5h5z"/></svg></button></span></div>';
 }
 /* Kapitel als Stationen auf einem Band: das laufende benannt, die übrigen als Punkte */
@@ -7775,7 +7775,7 @@ function instListeDna(weg) {
   }
   const plus = n && neuMoeglich() && linkOffen() ? '<button type="button" class="dna-pille dna-pille--leise dna-pille--klein hd-neu" data-act="new">' + PLUS + 'Fenster</button>' : '';
   const kopf = '<div class="hd li-kopf"><div class="li-titel"><h1 tabindex="-1">' + T('Ihre', 'Deine') + ' <em>Fenster.</em></h1>' + plus + '</div><p class="sub li-stand">' + stand + '</p></div>';
-  const liste = '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true).replace(/<svg[\s\S]*?<\/svg>/, zuStrich)).join('') + neuKnopf() + '</div></section>';
+  const liste = '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true).replace(/<svg[\s\S]*?<\/svg>/, zuStrich)).join('') + neuKnopf('Noch ein Fenster hinzufügen') + '</div></section>'; // nicht „Weiteres Fenster“: klang neben „Weiter zum Absenden“ gleich (Gremium K)
   const weiter = vorschau() ? '' : instWebsite() ? instWeiterKarte(du) : linkMerk(d.name, du);
   const fuss = n ? '<div class="lg-fuss li-fuss"><button type="button" class="dna-pille lg-weiter btn primary" data-act="go" data-v="anfrage">Weiter zum Absenden' + abPfeil + '</button></div>' : '';
   return { html: lgKopf(false) + dnaTisch(buehne, (weg || '') + kopf + liste + weiter + instKontaktDna(d) + rechtLinks() + fuss), dna: true, cls: 'dna li dt gs-k-teil', voll: true };
@@ -7787,7 +7787,7 @@ function instGesendetKurz(weg) {
   const d = lkDaten(), name = d.name, du = d.du, T = (sie, x) => (du ? x : sie), test = S.sent.art === 'test', nr = S.sent.nr || '';
   const buehne = abBuehne('ab-blatt gs-buehne', 'Gesendet', abPapier(false, false, name, true, nr));
   const titel = '<div class="lg-frage gs-titel"><span class="dna-label">' + (test ? 'Testanfrage ' : 'Anfrage ') + '<span class="inst-nr-wert">' + esc(nr) + '</span></span><div class="lg-frage-kopf"><h1 tabindex="-1">' + (S.sent.anderswo ? 'Schon <span class="ak">gesendet.</span>' : 'Danke, <span class="ak">gesendet.</span>') + '</h1></div>' +
-    '<p>' + esc(name) + T(' hat Ihre Anfrage seit ', ' hat deine Anfrage seit ') + esc(sentWhen()) + T(' und meldet sich bei Ihnen.', ' und meldet sich bei dir.') + '</p></div>';
+    '<p>' + esc(name) + T(' hat Ihre Anfrage seit ', ' hat deine Anfrage seit ') + esc(sentWhen()) + T(' und meldet sich bei Ihnen. Sie müssen nichts weiter tun.', ' und meldet sich bei dir. Du musst nichts weiter tun.') + '</p></div>';
   const geraet = '<section class="gs-geraet"><span class="dna-label">Auf diesem Gerät</span><p>' + T('Hier sind nur Nummer und Datum Ihrer Anfrage gespeichert; Maße, Fotos und Kontaktdaten sind von diesem Gerät gelöscht.', 'Hier sind nur Nummer und Datum deiner Anfrage gespeichert; Maße, Fotos und Kontaktdaten sind von diesem Gerät gelöscht.') + '</p>' +
     '<div class="gs-geraet-knoepfe"><button type="button" class="probe-info-link" data-act="inst-vergessen">Von diesem Gerät löschen</button></div><p class="gs-bleibt">' + T('Ihre Anfrage bei ', 'Deine Anfrage bei ') + esc(name) + ' bleibt bestehen.</p></section>';
   const fuss = '<div class="gs-fuss"><button type="button" class="dna-pille" data-act="inst-weitere">Weitere Anfrage starten' + abPfeil + '</button></div>';
@@ -7813,7 +7813,10 @@ function probeInfo() {
 function probeWahl(frisch) {
   if (!PROBE) return '';
   const P = window.Pakete; let ab = '';
-  try { const m = Math.min.apply(null, P.LISTE.map((k) => P.preis(k).monat)); if (isFinite(m)) ab = 'Ab ' + P.euro(m) + ' im Monat, netto. '; } catch (e) { ab = ''; }
+  try {
+    const g = P.LISTE.map((k) => [k, P.preis(k).monat]).sort((a, b) => a[1] - b[1]), hier = P.preis(PROBE_PAKET).monat, name = (k) => String((P.PAKETE[k] || {}).name || k).replace(/^EEZI\s+/, '');
+    if (g.length && isFinite(hier)) ab = 'Im Paket ' + name(PROBE_PAKET) + ' ' + P.euro(hier) + ' im Monat, netto' + (g[0][0] !== PROBE_PAKET ? '; ab ' + P.euro(g[0][1]) + ' mit ' + name(g[0][0]) : '') + '. ';
+  } catch (e) { ab = ''; } // Preis passend zum gezeigten Paket (Gremium F: sonst wirkt „ab …“ am Ende wie ein Köder)
   const pfeil = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>';
   const neu = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 8a5.2 5.2 0 1 0 1.6-3.8"/><path d="M2.6 2.4v2.8h2.8"/></svg>';
   const karte = (i, tag, attr, cls, klein, titel, text, knopf) => '<' + tag + ' class="pw-karte' + cls + '" ' + attr + ' style="--i: ' + i + '"><span class="pw-text">' + (klein ? '<small>' + klein + '</small>' : '') + '<b>' + titel + '</b><span>' + text + '</span></span><span class="pw-knopf" aria-hidden="true">' + knopf + '</span></' + tag + '>';
@@ -7935,7 +7938,7 @@ function instGesendet() {
   const d = lkDaten(), name = d.name, du = d.du, T = (sie, x) => (du ? x : sie), test = S.sent.art === 'test', p = d.p || {}, nr = S.sent.nr || '';
   const buehne = abBuehne('ab-blatt gs-buehne', 'Gesendet', abPapier(false, false, name, true));
   const titel = '<div class="lg-frage gs-titel"><span class="dna-label">' + (test ? 'Testanfrage ' : 'Anfrage ') + '<span class="inst-nr-wert">' + esc(nr) + '</span></span><div class="lg-frage-kopf"><h1 tabindex="-1">Danke, <span class="ak">gesendet.</span></h1></div>' +
-    '<p>' + esc(name) + T(' hat jetzt Ihre Maße, Fotos und Wünsche und meldet sich bei Ihnen.', ' hat jetzt deine Maße, Fotos und Wünsche und meldet sich bei dir.') + '</p></div>';
+    '<p>' + esc(name) + T(' hat jetzt Ihre Maße, Fotos und Wünsche und meldet sich bei Ihnen. Sie müssen nichts weiter tun.', ' hat jetzt deine Maße, Fotos und Wünsche und meldet sich bei dir. Du musst nichts weiter tun.') + '</p></div>';
   const testNote = test ? '<p class="ab-note">Vorschau: Das war eine Testanfrage. Sie geht mit „[Test]“ im Betreff an den Betrieb, zählt nicht mit und ist nach einem Tag gelöscht.</p>' : '';
   const pdf = INST_M.kopieKunde ? '<section class="gs-pdf"><div class="gs-pdf-kopf"><span class="probe-anhang-ic" aria-hidden="true">' + FILE_IC + '</span><span><span class="dna-label">' + T('Für Ihre Unterlagen', 'Für deine Unterlagen') + '</span><b>' + T('Ihre Anfrage als PDF', 'Deine Anfrage als PDF') + '</b></span></div>' +
     '<p>' + T('Durchschrift mit Ihren Fenstern, der Ausstattung und Ihren Wünschen, ohne Maße. Das vollständige Aufmaßblatt schickt ' + esc(name) + ' Ihnen gern auf Anfrage. Nur jetzt: Danach löschen wir die Planung von diesem Gerät.', 'Durchschrift mit deinen Fenstern, der Ausstattung und deinen Wünschen, ohne Maße. Das vollständige Aufmaßblatt schickt ' + esc(name) + ' dir gern auf Anfrage. Nur jetzt: Danach löschen wir die Planung von diesem Gerät.') + '</p>' +

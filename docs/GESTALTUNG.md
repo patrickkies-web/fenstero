@@ -592,9 +592,12 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     vorherigen Geschäftsausrichtung und dessen Design … möcht ich halt nicht in diesen Schritten sehen“): „Selbst ausprobieren“ öffnet die
     Beispielseite Signature von Fensterbau Brandt; die Seite liegt abgedunkelt (Schwarz zu 58 %) hinter einem Kästchen in der Palette von
     eeziframes (Anthrazit-Karte mit Lichtkante, Etikett mit violettem Punkt, weiße Pille „Seite ansehen“, Umriss „Gleich Fenster planen“,
-    320 ms ease-out, Grund 220 ms). Die Auswahl am Ende steht in den Farben des Beispielbetriebs: Signature auf Schieferblau mit Karten in
-    Schiefer und der großen Karte in Petrol mit Aquatürkis als Licht, Plus mit Karten in Schiefer und Aquatürkis als Licht, Essential im
-    Look von eeziframes. Fensterliste und die Startseite nach dem Senden folgen den Abschluss-Folien (Liste: Bühne mit den Fenstern als
+    320 ms ease-out, Grund 220 ms). Die Auswahl am Ende steht in den Farben des Beispielbetriebs und ist eine Fläche (Gremium G):
+    Signature auf Schieferblau mit der einen gefüllten Karte „Pakete ansehen“ in Petrol mit Aquatürkis als Licht, Plus mit dieser Karte
+    in Schiefer, Essential im Look von eeziframes. Die beiden anderen Wege stehen als Zeilen mit Trennlinie darunter, der Punkt am
+    Etikett bleibt violett, die Karte nennt den Preis des gezeigten Pakets und „ab …“ mit dem kleinsten (pakete.js). Am Telefon sitzt
+    das Kästchen unten, oben bleibt die Seite des Betriebs zu sehen. Im Kopf einer Instanz ist „Übersicht“ bis 430 px nur ein
+    Zeichen, damit der Name des Betriebs ganz steht. Fensterliste und die Startseite nach dem Senden folgen den Abschluss-Folien (Liste: Bühne mit den Fenstern als
     Strichzeichnungen, „Deine Fenster.“ mit Stand und Balken, Karten, „Fragen?“, die Pille „Weiter zum Absenden“; nach dem Senden das Blatt
     mit der Nummer und ruhigen Zeilen, weil Maße und Kontakt vom Gerät gelöscht sind).
   - Bestätigung nach dem Senden einer Instanz („Danke, gesendet.“, `instGesendet`, Wunsch des Inhabers, 28.10.2026): Rahmen der

@@ -31,10 +31,8 @@
     '<div class="ez-probe__karte">' +
       '<span class="ez-probe__etikett">Vorschau für Fensterbauer</span>' +
       '<h2 id="ez-probe-t" tabindex="-1">So sieht Ihre Seite aus. <span>Im Paket ' + (namen[paket] || 'Signature') + '.</span></h2>' +
-      '<p id="ez-probe-s">Fensterbau Brandt ist ein erfundener Betrieb. Für Sie passen wir diese Seite an: Ihre Bilder, Ihr Logo, Ihre Farben, ' +
-        'Ihre Ansprechpartner, und viele Texte stellen Sie selbst ein.</p>' +
-      '<p>Spielen Sie den Besuch Ihres Kunden durch: Tippen Sie auf „Fenster planen“, messen Sie ein Fenster und senden Sie die Anfrage ab. ' +
-        'Gesendet wird nichts.</p>' +
+      '<p id="ez-probe-s">Fensterbau Brandt ist ein erfundener Betrieb. Ihre Seite bekommt Ihre Bilder, Ihr Logo, Ihre Farben und Ihre Texte.</p>' +
+      '<p>Tippen Sie auf „Fenster planen“ und spielen Sie den Besuch Ihres Kunden durch. Gesendet wird nichts.</p>' +
       '<div class="ez-probe__knoepfe">' +
         '<button type="button" class="ez-probe__pille" data-zu>Seite ansehen</button>' +
         '<a class="ez-probe__leise" href="/app/?ausprobieren=' + paket + '">Gleich Fenster planen</a>' +

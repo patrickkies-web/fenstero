@@ -103,6 +103,9 @@ def fuer_web(html, p):
     html = html.replace('<link rel="stylesheet" href="muster.css">', '<link rel="stylesheet" href="muster.css">\n<link rel="stylesheet" href="ausprobieren.css">', 1)
     html = html.replace('<script src="muster.js"></script>', '<script src="muster.js"></script>\n<script src="ausprobieren.js"></script>', 1)
     assert 'href="ausprobieren.css"' in html and 'src="ausprobieren.js"' in html, p
+    # Seitensymbol in den Kopf (der Kopf der Vorlagen endet nach dem ersten Stil; im Körper liest der Browser es nicht und fragt /favicon.ico)
+    html = html.replace('</head>', '<link rel="icon" href="/favicon.svg" type="image/svg+xml"></head>', 1)
+    assert 'rel="icon"' in html, p
     assert '<script>' not in html and 'noindex' in html, p
     return html
 

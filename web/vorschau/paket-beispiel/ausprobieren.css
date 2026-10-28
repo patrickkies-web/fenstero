@@ -24,4 +24,6 @@
 .ez-probe__pille:active, .ez-probe__leise:active { transform: scale(.97); transition-duration: 0s }
 .ez-probe__pille:focus-visible, .ez-probe__leise:focus-visible { outline: 2px solid #fff; outline-offset: 3px }
 @media (max-width: 420px) { .ez-probe__knoepfe > * { flex: 1 1 100% } .ez-probe h2 { font-size: 26px } }
+/* Telefon: das Kästchen sitzt unten, oben bleibt die Seite des Betriebs zu sehen (Gremium F: „die Seite zuerst zeigen“) */
+@media (max-width: 600px) { .ez-probe { margin: auto auto calc(16px + env(safe-area-inset-bottom, 0px)) } }
 @media (prefers-reduced-motion: reduce) { .ez-probe[open], .ez-probe[open]::backdrop { animation: none } .ez-probe__pille, .ez-probe__leise { transition: none } }
