@@ -487,9 +487,10 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
 - **Aufbau:** eigener Kopf (zurück, Logo mit Wortmarke, im Kundenlink einer Instanz deren Zeichen; Übersicht, Begriffe), Kapitel als
   Stationen auf einem Band, die Bühne in Anthrazit, Frage mit i und Notiz, Karten, die rechtlichen Verweise am Ende, unten zurück als
   Umriss und „Weiter“ weiß, beim Scrollen unten stehend.
-  - Lage: Haus im Schnitt (358 × 250 px, auf schmalen Telefonen verkleinert), nicht gewählte Stockwerke schraffiert, Leuchten Violett
-    mit Indigo; Raum (weiße Karte), Stockwerk (Kachel), Brüstung (weiße Karte, nur OG und DG), Anzahl (schwarze Kachel mit Kontur,
-    Leuchten und Schraffur).
+  - Lage: Haus im Schnitt (358 × 250 px, auf schmalen Telefonen verkleinert), das gewählte Stockwerk leicht aufgehellt, die Erde
+    dunkler als die Bühne, Koralle am Fenster; seit 28.10.2026 auf Wunsch des Inhabers ohne Schraffur und ohne violettes Leuchten.
+    Raum (weiße Karte), Stockwerk (Kachel; gewählt weiß mit schwarzer Schrift, auch „1. OG“ usw.), Brüstung (weiße Karte, nur OG und DG,
+    „bodentief“ gewählt Violett), Anzahl (schwarze Kachel mit Kontur, ohne Leuchten und Schraffur).
   - Wie genau planen: Punktraster je Kapitel, gezählt wie in qTiefe (weiß gefüllt = wählst du, Ring = Standard des Fensterbauers), Zahl
     in Violett und Koralle, die Leuchten wachsen mit dem Anteil; Schalter Kurz · Üblich · Alles mit einem Satz darunter.
   - Wünsche (`frageDna`, app.css Abschnitt „Wünsche im Look der Design-DNA“): Kapitelband als Knopf (öffnet „Direkt zu einem Thema“,
@@ -533,22 +534,25 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     leise Pillen „Foto machen“ und „Ohne Foto weiter“.
   - Ergebnis, Schritt 5 (`ergebnisDna` in app.js, app.css „Ergebnis im Look der Design-DNA“; Wunsch des Inhabers vom 28.10.2026:
     „intuitive Darstellung und Übersichtlichkeit der Eingaben, Fenster darf nicht kleiner werden, ähnlich den Folien zum Maße-Eingeben“):
-    gebaut wie Messen. Die Bühne läuft randlos über die Breite (`--bh` bis 460 px, am Laptop links über die ganze Höhe und stehend beim
-    Scrollen) und trägt das 3-D-Modell der App unverändert (Drehen, Zoom, Zahnrad); das Fenster ist größer als vorher. Oben in der Bühne
-    Schritt-Chip und Überschrift „Dein Aufmaß steht.“ mit i. Die Maßschilder am Modell sind dunkle Kapseln mit Legende: gestrichelt
-    Koralle = Maueröffnung (die Linie gestrichelt wie beim Messen), Strich Violett = Fenster mit Rahmen. Werkzeuge als Reihe runder
-    Glasknöpfe unten rechts, „Zum Drehen ziehen“ unten links. Unter der Bühne Unterzeile und Notiz, dann die weiße Karte mit den
-    Eingaben in zwei Zeilen: je „Breite × Höhe“ als eine Zahl (34 bzw. 28 px, 300), Einheit klein, Legende wie am Modell, darunter
-    „Breite × Höhe“ und der Chip „kleinstes von 3“ / „sichtbar mit Rahmen“ (neue Öffnung: „Wunschmaß Rohbau“ / „rechnerisch, mit
-    Rahmen“), bei Winkelabweichung eine Zeile mit Koralle-Punkt. Darunter, wenn nötig, „Breite und Höhe vertauscht?“ bzw.
-    „Bitte nachmessen.“ als Anthrazit-Karte mit leisen Pillen („Tauschen“/„Nachmessen“, „Stimmt so“), „Aus deinen Fotos“ als Zeile
-    mit Haken, die Lage auf dem Foto (neue Öffnung) und „Falls zur Hand“ als Anthrazit-Karte zum Aufklappen. Unten zurück und
-    „Weiter: Wünsche“ (Tür: „Weiter: Wunschtür“). Die alte Fassung bleibt als `SCREENS.ergebnisAlt` im Code.
+    gebaut wie Messen. Die Bühne läuft randlos über die Breite (`--bh` 390 bis 460 px nach Bildschirmhöhe, die Szene reicht `--er-tief`
+    54 px darunter, damit das Modell unter der Überschrift steht; am Laptop links über die ganze Höhe und stehend beim Scrollen) und
+    trägt das 3-D-Modell der App unverändert (Drehen, Zoom, Zahnrad); das Fenster ist größer als vorher. Oben in der Bühne Schritt-Chip
+    und Überschrift „Dein Aufmaß steht.“ mit i. Die Maßschilder am Modell tragen die Farbe ihrer Linie (Maueröffnung Koralle, Linie
+    gestrichelt wie beim Messen; Fenster mit Rahmen Violett; Schrift Schwarz, 13 px), die Linien 3 px mit dunklem Saum. Werkzeuge als
+    Reihe runder dunkler Knöpfe unten rechts (wie „Groß ansehen“), „Zum Drehen ziehen“ unten links. Unter der Bühne Unterzeile und
+    Notiz; wenn nötig zuerst „Breite und Höhe vertauscht?“ bzw. „Bitte miss noch einmal nach.“ als Anthrazit-Karte mit leisen Pillen
+    („Tauschen“/„Nachmessen“, „Stimmt so“), weil die Pille schon auf dem ersten Bildschirm steht. Dann die weiße Karte mit den Eingaben
+    in zwei Zeilen: Kopf mit Legende und Name links, Chip rechts („kleinstes von 3“ / „sichtbar mit Rahmen“, neue Öffnung „Wunschmaß
+    Rohbau“ / „rechnerisch, mit Rahmen“), darunter Breite × Höhe als Zahlen (32 px, 300) mit „Breite“ und „Höhe“ darunter, „mm“ klein.
+    Steht am Modell „Mitte …“, sagt eine Zeile mit Koralle-Punkt „Am Modell die Mitte; es zählt das kleinste.“, bei Winkelabweichung
+    dazu „Bis … mm außer Winkel …“. Auf 390 × 844 steht die ganze Karte über der Pille. Darunter „Aus deinen Fotos“ als Zeile mit
+    Haken, die Lage auf dem Foto (neue Öffnung) und „Falls zur Hand“ als Anthrazit-Karte zum Aufklappen. Unten zurück und „Weiter:
+    Wünsche“ (Tür: „Weiter: Wunschtür“). Die alte Fassung bleibt als `SCREENS.ergebnisAlt` im Code.
   - Regel des Inhabers (27.10.2026): Beim Messen eine feste Ansicht je Element, in den Wünschen das ausgearbeitete 3-D-Modell; die
     Wünsche werden nie durch Standbilder ersetzt.
 - **Weiter ist immer weiß.** Fehlt etwas, steht eine Zeile mit Koralle-Punkt darüber („Gib dem Raum einen Namen …“, „Trag die Brüstung
   ein …“), das Feld wird koralle umrandet und bekommt den Fokus.
-- **Bewegung:** nur Zustand und Rückmeldung: Fenster, Etikett und Strich gleiten in 400 ms ins Stockwerk, Licht und Schraffur folgen,
+- **Bewegung:** nur Zustand und Rückmeldung: Fenster, Etikett und Strich gleiten in 400 ms ins Stockwerk, die Aufhellung des Stockwerks folgt,
   die Punkte füllen sich gestaffelt (14 ms je Punkt), Zahlen rasten ein. Antippen zeichnet nicht neu (lgZeigen, lpZeigen), damit das
   Gleiten sichtbar bleibt. Bei „weniger Bewegung“ alles sofort.
 - **Daten:** Raumvorschläge ergänzen den Namen; doppelte Namen werden gemeldet („Küche links / rechts / 2“). Im OG die Nummer

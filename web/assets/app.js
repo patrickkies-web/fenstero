@@ -3557,15 +3557,20 @@ function ergebnisDna() {
     '<div class="md-titel er-titel"><h1 tabindex="-1">' + (neu ? 'Dein Wunsch <em>steht.</em>' : 'Dein Aufmaß <em>steht.</em>') + '</h1>' + g + '</div></div>';
   const sub = neu ? 'Rohbauöffnung und Element als Wunschmaße' + (w.plan && w.plan.bild ? ', die Lage auf deinem Foto' : '') + '. Das endgültige Maß legt der Fachbetrieb nach der Statik fest.' : 'Maueröffnung und ' + elName() + ', so wie der Fensterbauer sie fürs Angebot braucht.';
   const unter = '<div class="md-unter"><p class="ez-unterzeile">' + esc(sub) + '</p>' + lgNotiz('ez-notizknopf') + '</div>';
-  /* Karte: die Eingaben in zwei Zeilen; die Farbe ist die der Linie am Modell */
-  const reihe = (wer, lab, b, h, tag) => '<div class="er-reihe" data-wer="' + wer + '"><span class="er-lab"><i aria-hidden="true"></i>' + esc(lab) + '</span>' +
-    '<p class="er-zahl"><b><span class="er-b" aria-label="' + esc('Breite ' + thousand(b) + ' Millimeter') + '">' + thousand(b) + '</span> × <span class="er-h" aria-label="' + esc('Höhe ' + thousand(h) + ' Millimeter') + '">' + thousand(h) + '</span></b><small>mm</small></p>' +
-    '<p class="er-unter"><span>Breite × Höhe</span><span class="er-tag">' + esc(tag) + '</span></p></div>';
+  /* Karte: die Eingaben in zwei Zeilen; die Farbe ist die der Linie und des Schilds am Modell. „Breite“ und „Höhe“ stehen unter der
+     Zahl, der Hinweis rechts in der Kopfzeile (Gremium, 28.10.2026) */
+  const reihe = (wer, lab, b, h, tag) => '<div class="er-reihe" data-wer="' + wer + '"><p class="er-kopf"><span class="er-lab"><i aria-hidden="true"></i>' + esc(lab) + '</span><span class="er-tag">' + esc(tag) + '</span></p>' +
+    '<p class="er-zahl"><span class="er-sr">' + esc('Breite ' + thousand(b) + ' mm, Höhe ' + thousand(h) + ' mm') + '</span><span class="er-b" aria-hidden="true"><b>' + thousand(b) + '</b><small>Breite</small></span><span class="er-mal" aria-hidden="true">×</span>' +
+    '<span class="er-h" aria-hidden="true"><b>' + thousand(h) + '</b><small>Höhe</small></span><span class="er-mm" aria-hidden="true">mm</span></p></div>';
+  /* Am Modell steht das Mittelmaß („Mitte …“), in der Karte das kleinste von drei: ein Satz, damit niemand zwei Werte für ein Maß liest */
+  const mitte = !neu && ((num((w.mo || {}).wm) && num(w.mo.wm) !== d.moW) || (num((w.mo || {}).hm) && num(w.mo.hm) !== d.moH));
+  const dev = Math.max(d.devW, d.devH), notiz = (mitte ? 'Am Modell die Mitte; es zählt das kleinste.' : '') + (!neu && dev > 10 ? (mitte ? ' ' : '') + 'Bis ' + dev + '&nbsp;mm außer Winkel, alle sechs Einzelmaße stehen im Aufmaßblatt.' : '');
   const karte = '<div class="er-karte" role="group" aria-label="Ergebnis">' + reihe('mo', neu ? 'Rohbauöffnung' : 'Maueröffnung', d.moW, d.moH, tMo) + reihe('el', en + ' mit Rahmen', d.elW, d.elH, tEl) +
-    (!neu && (d.devW > 10 || d.devH > 10) ? '<p class="er-winkel">Bis ' + Math.max(d.devW, d.devH) + '&nbsp;mm außer Winkel, alle sechs Einzelmaße stehen im Aufmaßblatt.</p>' : '') + '</div>';
-  /* Maße gegen das Foto: vertauscht oder stark abweichend? Dann fragen, bevor es weitergeht (nie bei der neuen Öffnung) */
+    (notiz ? '<p class="er-winkel">' + notiz + '</p>' : '') + '</div>';
+  /* Maße gegen das Foto: vertauscht oder stark abweichend? Dann fragen, bevor es weitergeht (nie bei der neuen Öffnung); die Frage steht
+     über der Karte, weil die Pille schon auf dem ersten Bildschirm steht */
   const mp = !neu && !w.massOk ? AW.massPruef(w) : null;
-  const pruef = mp ? '<div class="er-pruef mass-pruef" role="status"><p><b>' + (mp.typ === 'tausch' ? 'Breite und Höhe vertauscht?' : 'Bitte nachmessen.') + '</b>' + (mp.typ === 'tausch' ? 'Auf dem Foto ist ' + (tuer ? 'die Tür' : 'das Fenster') + ' eher ' + (mp.rk < 1 ? 'hoch als breit' : 'breit als hoch') + ', deine Maße sagen das Gegenteil.' : 'Das Foto wirkt anders proportioniert als deine Maße.') + '</p>' +
+  const pruef = mp ? '<div class="er-pruef mass-pruef" role="status"><p><b>' + (mp.typ === 'tausch' ? 'Breite und Höhe vertauscht?' : 'Bitte miss noch einmal nach.') + '</b>' + (mp.typ === 'tausch' ? 'Auf dem Foto ist ' + (tuer ? 'die Tür' : 'das Fenster') + ' eher ' + (mp.rk < 1 ? 'hoch als breit' : 'breit als hoch') + ', deine Maße sagen das Gegenteil.' : 'Das Foto wirkt anders proportioniert als deine Maße.') + '</p>' +
     '<div class="er-knoepfe">' + (mp.typ === 'tausch' ? '<button type="button" class="er-knopf" data-act="mass-tausch">Tauschen</button>' : '<button type="button" class="er-knopf" data-act="mass-nach">Nachmessen</button>') + '<button type="button" class="er-knopf" data-act="mass-ok">Stimmt so</button></div></div>' : '';
   /* Aus den Fotos: nur die Zahl, kein Inhalt (die Auswertung steht im Aufmaßblatt bzw. geht an den Betrieb) */
   const teaser = ki && ((ki.rows || []).length || (ki.chips || []).length) ? '<p class="er-ki ki-zahl">' + ER_CHECK + '<span><b>Aus deinen Fotos:</b> ' + esc(kiAnzahl(ki) + (/^1 /.test(kiAnzahl(ki)) ? (S.betrieb ? ' geht' : ' steht') : (S.betrieb ? ' gehen' : ' stehen')) + (S.betrieb ? ' mit deinem Aufmaß an ' + (S.betrieb.name || 'deinen Fensterbauer') + '.' : ' in deinem Aufmaßblatt.')) + '</span></p>'
@@ -3575,7 +3580,7 @@ function ergebnisDna() {
   const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
   const zur = einstiegHier() ? 'Zurück: Fenster' : neu ? 'Zurück: Maße' : 'Zurück: Ränder';
   const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="' + zur + '">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="wuensche">' + (tuer ? 'Weiter: Wunschtür' : 'Weiter: Wünsche') + pfeil + '</button></div>';
-  const html = lgKopf(['back', zur]) + '<div class="er-tisch">' + buehne + '<div class="er-rechts">' + unter + karte + pruef + teaser + plan + falls + rechtLinks() + fuss + '</div></div>';
+  const html = lgKopf(['back', zur]) + '<div class="er-tisch">' + buehne + '<div class="er-rechts">' + unter + pruef + karte + teaser + plan + falls + rechtLinks() + fuss + '</div></div>';
   /* über „Maße ändern“ geöffnet: oben „Fenster“ zur Übersicht aller Fenster (wie in den Wünschen), die Zurück-Taste zur Seite des Fensters */
   return { html: html, back: einstiegHier() ? ['Fenster', 'fertig', 'liste'] : neu ? ['Maße', 'planmasse'] : ['Ränder', 'rest'], dna: true, cls: 'dna er', voll: true };
 }

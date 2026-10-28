@@ -341,3 +341,37 @@ Der Inhaber: „Höhe links, Höhe rechts etc., die anderen ganzen Maße können
 (Überschrift in der Bühne, Feld unter dem Element mit Systemtastatur, „Hier auch … gemessen?“ unter der Bühne), danach „Passt.“ mit
 allen sechs Maßen. Der Bogen ohne Foto ist der des Artefakts (dunkles Blatt, Haken, Häkchen, zwei leise Pillen); seine Funktionen
 (Foto machen, ohne Foto weiter, Hinweis abschalten) sind dieselben.
+
+## Schritt 5 „Ergebnis“ (28.10.2026)
+
+Der Inhaber (zum Bildschirmfoto der bisherigen Folie): „Verändere die Ansicht visuell. Ziel ist eine intuitive Darstellung und
+Übersichtlichkeit der Eingaben. Fenster darf nicht kleiner werden und die Folie soll ähnlich der Folien sein, in welchen man die Maße
+eingeben kann.“ Gebaut wie Messen: Chip und Überschrift in der Bühne, das 3-D-Modell der App unverändert und größer als bisher,
+Unterzeile und Notiz unter der Bühne, die Eingaben als weiße Karte, unten zurück und „Weiter: Wünsche“. Gremium eine Runde
+(docs/profis/gremium/2026-10-28-konfigurator-ergebnis.md): X gewinnt in allen drei Gruppen; zwei Vetos der Kunden gegen die dunklen
+Maßschilder. Umgesetzt: Muss-Punkte und Vetos; offen als Kann: Fenster noch größer (verlangt eine Änderung an der Einpassung des
+Modells, die nicht beauftragt ist), Wort „Öffnung“/„Fenster“ im Schild (Schilder würden breiter als das Modell sie einplant), Satz zur
+Einbaufuge, Halbsatz, wer die Fotos sieht, Schild „1.760“ unter die Fensterbank.
+
+| Änderung | Zweck | Gremium | Stand |
+| --- | --- | --- | --- |
+| Überschrift und Chip in der Bühne, wie Messen | Verständnis, Ähnlichkeit | behalten (alle) | bleibt |
+| Bühne randlos, 390–460 px nach Bildschirmhöhe, Szene 54 px tiefer | Fenster nicht kleiner, Karte sichtbar | ändern: Karte ganz über dem Fuß | geändert |
+| Maßschilder in der Farbe ihrer Linie (Koralle, Violett), Linien 3 px mit Saum | Zuordnung Linie ↔ Maß | 2 Vetos gegen dunkle Kapseln | geändert |
+| Werkzeuge dunkel und deckend wie „Groß ansehen“ | Erkennbar drückbar | ändern 4:2 (Gestalter) | geändert |
+| Karte: Kopf mit Name und Chip, Zahlen mit „Breite“/„Höhe“ darunter, beide 32 px | Übersicht der Eingaben | ändern (Kunden), gleich groß (Typograf) | geändert |
+| Zeile „Am Modell die Mitte; es zählt das kleinste.“ | Kein Zweifel 1.790 gegen 1.788 | Muss (Kunden, Fensterbauer) | neu |
+| „Breite und Höhe vertauscht?“ über der Karte | Datenqualität, Pille steht schon oben | eigene Entscheidung | neu |
+| „Aus deinen Fotos“ als Zeile, „Falls zur Hand“ als Anthrazit-Karte | Ruhe | behalten | bleibt |
+| Fuß mit runder Zurück-Taste und Pille, fest unten | Hauptaktion in der Daumenzone | behalten (alle) | bleibt |
+| Laptop: Bühne links über die ganze Höhe, stehend beim Scrollen | Schreibtisch | behalten | bleibt |
+
+## Lage ohne Schraffur (28.10.2026)
+
+Der Inhaber (zu zwei Bildschirmfotos der Folie „Wo ist das Fenster?“): „Hier die gestrichelten Linien weg, dann diese lilanen Leuchten
+weg und den Knopf mit der Auswahl in welchem Geschoss nicht weiß.“ Auf Nachfrage: gemeint ist die Schraffur (schräge Streifen), der
+gewählte Knopf soll weiß gefüllt sein. Umgesetzt: keine Schraffur im Haus und in der Karte „Genau gleiche Fenster“, kein violettes
+Leuchten (Bühne und Anzahl), das gewählte Stockwerk leicht aufgehellt, die Erde dunkler, der gewählte Stockwerk-Knopf (und „1. OG“ usw.)
+weiß mit schwarzer Schrift. Das Koralle-Licht am Fenster bleibt (es ist nicht violett); „bodentief“ in der weißen Brüstungskarte bleibt
+violett, weil Weiß dort verschwände.
+

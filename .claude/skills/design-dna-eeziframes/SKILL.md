@@ -179,6 +179,10 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   in den Kacheln und kein violettes Licht, kein schwarzer Rand und keine Abdunklung um die Bühne, der Hintergrund läuft ohne Container
   hinter den Kacheln weiter und verliert sich an der weißen Karte, das Element schwebt groß in der Mitte (seine eigenen Bilder der sechs
   Elemente), am Laptop füllt die Folie den Bildschirm. Vorschlag für seine DNA (Abschnitt 9): „Erst das Bild, dann der Bau“.
+- Keine Schraffur, kein violettes Leuchten in der Lage (Korrektur des Inhabers, 28.10.2026, Folie „Wo ist das Fenster?“): Die schrägen
+  Streifen im Haus und in der Karte „Genau gleiche Fenster“ und die violetten Leuchten sollten weg, der gewählte Stockwerk-Knopf weiß
+  gefüllt sein. Auswahl auf dunkler Kachel heißt weiß mit schwarzer Schrift; Zustand zeigt sich über Helligkeit, nicht über Leuchten.
+  Vorschlag für seine DNA: G1 (Schraffur als „Rest“) und das Leuchten als Zustand in App-Folien nur noch auf sein Wort.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
