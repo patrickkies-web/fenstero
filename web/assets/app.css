@@ -2294,3 +2294,148 @@ html.dna-voll body { background: #07090a }
 
 .dna.er .md-unter { padding-top: 12px }
 .dna.er .md-unter .ez-unterzeile { font-size: 14px; line-height: 1.4 }
+
+/* ---------- Gespeichert im Look der Design-DNA (28.10.2026, Wunsch des Inhabers: „intuitive Ansicht und einfache Bedienbarkeit, die
+   Menüführung der vorherigen Folien als Anlehnung“) ----------
+   Der Boden im Fensterlicht vom Start trägt das Bild der Elementart (Anfang und Ende eines Fensters auf demselben Boden), Chip mit Haken,
+   der Name als Überschrift, darunter Art und Stand als Kapsel. Unter der Bühne Anthrazit-Flächen (G14): „Wie geht es weiter?“ mit zwei
+   Zeilen (voller weißer Kreis für das Neue, Ring für die Liste), „Dieses Fenster“ als vier Kacheln mit Zeichen (Löschen in Koralle), die
+   Änderungsgrenze als Zeile mit Punkt, „Direkt zu einem Thema“ als leise Chips. Unten zurück und die eine Pille. */
+.scr.dna.fg { padding-bottom: 0 }
+.dna .fg-tisch { position: relative; --bh: clamp(310px, calc(100svh - 504px), 380px) }
+.dna .fg-tisch::before { content: ""; position: absolute; z-index: 0; left: -16px; right: -16px; top: 0; height: calc(var(--bh) + 120px); pointer-events: none;
+  background: url(/bilder/konfigurator/buehne.webp) 42% 30% / cover no-repeat; transform: scaleX(-1);
+  -webkit-mask-image: linear-gradient(#000 0, #000 70%, rgba(0, 0, 0, .3) 86%, transparent 100%); mask-image: linear-gradient(#000 0, #000 70%, rgba(0, 0, 0, .3) 86%, transparent 100%) }
+.dna .fg-buehne { position: relative; z-index: 1; height: var(--bh); margin: 0 -16px }
+/* dunkler Verlauf hinter Chip und Überschrift: der Lichtfleck des Bodens fällt sonst hinter die Schrift (Gremium, Kontrast) */
+.dna .fg-buehne::before { content: ""; position: absolute; z-index: 1; left: 0; right: 0; top: 0; height: 200px; pointer-events: none; background: linear-gradient(rgba(7, 9, 10, .62), rgba(7, 9, 10, 0)) }
+.dna .fg-buehne .wz-chip { left: 12px; top: 12px; padding-left: 5px; background: var(--schwarz); border-color: var(--anthrazit); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16) }
+.dna .fg-chip-haken { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--weiss); color: var(--schwarz) }
+.dna .fg-chip-haken svg { width: 12px; height: 12px; stroke-width: 2.4 }
+.dna .fg-titel { position: absolute; z-index: 3; left: 16px; right: 16px; top: 50px }
+.dna .fg-titel h1 { margin: 0; font: 500 30px/1.1 var(--font-sans); letter-spacing: -.025em; color: var(--weiss); text-wrap: balance; outline: none; text-shadow: 0 1px 2px rgba(7, 9, 10, .55), 0 0 18px rgba(7, 9, 10, .55) }
+.dna .fg-titel h1 em { font-style: normal; color: #cfcbd0 }
+.dna .fg-titel p { margin: 8px 0 0; max-width: 300px; font: 400 14px/1.4 var(--font-sans); color: #e2dfe3; text-shadow: 0 1px 2px rgba(7, 9, 10, .55), 0 0 18px rgba(7, 9, 10, .55) }
+/* die gespeicherte Aufteilung als Strichzeichnung auf einer Anthrazit-Kachel, zwischen Titel und Stand, mit Kontaktschatten */
+.dna .fg-objekt { position: absolute; z-index: 2; left: 50%; top: calc((var(--bh) + 64px) / 2); transform: translate(-50%, -50%); pointer-events: none; --fs: clamp(120px, calc(var(--bh) - 190px), 176px) }
+.dna .fg-symbol { position: relative; z-index: 1; display: grid; place-items: center; width: var(--fs); height: var(--fs); border-radius: var(--rund-l); color: var(--weiss);
+  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045), 0 26px 30px -18px rgba(7, 9, 10, .75) }
+.dna .fg-symbol svg { display: block; width: 82%; height: 82% }
+.dna .fg-objekt .st-schatten { bottom: -26px }
+.dna .fg-stand { position: absolute; z-index: 3; left: 50%; bottom: 16px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px; max-width: calc(100% - 24px); height: 34px; margin: 0; padding: 0 14px 0 8px; border-radius: 999px; background: rgba(7, 9, 10, .78); border: 1px solid rgba(255, 255, 255, .08); white-space: nowrap }
+.dna .fg-stand i { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) } /* nur als Umriss: Weiß gehört dem Plus und der Pille */
+.dna .fg-stand i svg { width: 12px; height: 12px; stroke-width: 2.4 }
+.dna .fg-stand i.offen { width: 8px; height: 8px; margin: 0 4px 0 6px; background: var(--koralle) }
+.dna .fg-stand b { flex: none; font: 500 15px/1 var(--font-sans); color: var(--weiss) }
+.dna .fg-stand small { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: 400 14px/1 var(--font-sans); color: var(--silbergrau) }
+/* unter der Bühne */
+.dna .fg-rechts { position: relative; z-index: 1; display: flex; flex-direction: column }
+.dna .fg-label { margin: 0; font: 400 13px/1.3 var(--font-sans); letter-spacing: .02em; color: var(--silbergrau) }
+.dna .fg-ki { display: flex; align-items: center; gap: 10px; margin: 12px 2px 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna .fg-ki .spin { flex: none }
+.dna .fg-weiter, .dna .fg-kachel { background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+.dna .fg-weiter { margin-top: 12px; padding: 14px 8px 14px; border-radius: var(--rund-l) }
+.dna .fg-weiter .fg-label { margin: 0 8px 4px }
+.dna .fg-zeile { display: grid; grid-template-columns: 44px minmax(0, 1fr) 18px; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 8px; border: 0; border-radius: 20px; background: transparent; color: var(--weiss); text-align: left; cursor: pointer;
+  transition: transform 160ms var(--dna-druck), background-color 160ms var(--dna-druck) }
+.dna .fg-zeile + .fg-zeile { position: relative }
+.dna .fg-zeile + .fg-zeile::before { content: ""; position: absolute; left: 64px; right: 8px; top: 0; border-top: 1px solid rgba(255, 255, 255, .08) }
+.dna .fg-zeile:active { transform: scale(.98); background: rgba(255, 255, 255, .04); transition-duration: 0s }
+.dna .fg-zeile:focus-visible { outline: 2px solid var(--weiss); outline-offset: 0 }
+.dna .fg-rund { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: var(--schwarz); background: var(--weiss); box-shadow: 0 6px 16px -8px rgba(0, 0, 0, .8) }
+.dna .fg-zeile + .fg-zeile .fg-rund { color: var(--weiss); background: transparent; box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .fg-rund svg { width: 20px; height: 20px }
+.dna .fg-zeile-text { display: grid; gap: 3px; min-width: 0 }
+.dna .fg-zeile-text b { font: 500 16px/1.25 var(--font-sans); color: var(--weiss) }
+.dna .fg-zeile-text small { font: 400 14px/1.35 var(--font-sans); color: var(--silbergrau) }
+.dna .fg-chevron { color: var(--silbergrau) }
+.dna .fg-chevron svg { display: block; width: 18px; height: 18px }
+.dna .fg-satz { margin: 8px 8px 0; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, .08); font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna .fg-dieses, .dna .fg-themen { margin-top: 24px }
+.dna .fg-dieses .fg-label, .dna .fg-themen .fg-label { margin: 0 2px 10px }
+.dna .fg-kacheln { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px }
+.dna .fg-kachel.fg-breit { grid-column: 1 / -1 }
+.dna .fg-kachel span { display: grid; gap: 2px; min-width: 0 }
+.dna .fg-kachel small { font: 400 13px/1.25 var(--font-sans); color: var(--silbergrau) }
+.dna .fg-kachel { display: flex; align-items: center; gap: 10px; min-width: 0; height: 64px; padding: 0 14px; border: 0; border-radius: 20px; color: var(--weiss); font: 500 15px/1.2 var(--font-sans); text-align: left; cursor: pointer; transition: transform 160ms var(--dna-druck) }
+.dna .fg-kachel svg { flex: none; width: 20px; height: 20px; color: var(--silbergrau) }
+.dna .fg-kachel:active { transform: scale(.97); transition-duration: 0s }
+.dna .fg-kachel:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px }
+.dna .fg-kachel[aria-disabled="true"] { color: rgba(255, 255, 255, .4); cursor: default }
+.dna .fg-kachel[aria-disabled="true"] svg { color: rgba(168, 164, 169, .4) }
+/* Löschen abgesetzt: eine leise Zeile mit Abstand, nicht neben Kopieren (Gremium: niemand löscht aus Versehen) */
+.dna .fg-loeschen { display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; min-height: 44px; margin: 18px 0 0; padding: 0 14px 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--koralle); font: 500 15px/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--koralle) 45%, transparent); cursor: pointer; transition: transform 160ms var(--dna-druck) }
+.dna .fg-loeschen svg { width: 18px; height: 18px }
+.dna .fg-loeschen:active { transform: scale(.97); transition-duration: 0s }
+.dna .fg-loeschen:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px }
+.dna .fg-dieses { display: flex; flex-direction: column }
+.dna .fg-grenze, .dna .fg-grenze.note { margin: 12px 2px 0; padding: 0; border-radius: 0; background: none; box-shadow: none; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna .fg-grenze::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--silbergrau); vertical-align: 1px }
+.dna .fg-grenze.warn { color: var(--weiss) }
+.dna .fg-grenze.warn::before { background: var(--koralle) }
+.dna .fg-chips { display: flex; flex-wrap: wrap; gap: 8px }
+.dna .fg-chip-t { min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--weiss); font: 500 14px/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px rgba(168, 164, 169, .55); cursor: pointer; transition: transform 160ms var(--dna-druck) }
+.dna .fg-chip-t:active { transform: scale(.97); transition-duration: 0s }
+.dna .fg-chip-t:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px }
+.dna .fg-spaeter { margin: 20px 2px 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna.fg .foot-links.recht { margin: 24px 0 48px }
+.dna .fg-dieses > .fg-grenze.warn { margin: 0 2px 12px }
+/* Frage nach dem ganzen Haus direkt über der Pille, die Zahl der Fenster in der Pille */
+.dna .fg-fuss { padding-top: 30px; background: linear-gradient(180deg, rgba(7, 9, 10, 0), var(--schwarz) 30px) }
+.dna .fg-fuss-frage { flex-basis: 100%; margin: 0 0 -2px; text-align: center; font: 500 14px/1.3 var(--font-sans); color: var(--weiss) }
+.dna .fg-zahl { font-weight: 400; color: var(--textgrau) }
+@media (max-width: 374px) { .dna .fg-titel h1 { font-size: 26px } .dna .fg-kachel { padding: 0 12px; font-size: 14px } .dna .fg-zahl { display: none } }
+/* Laptop: Bühne links über die ganze Höhe, rechts die Spalte mit allem Weiteren und der Pille */
+@media (min-width: 1024px) {
+  .scr.dna.fg { max-width: none; padding-inline: 0 }
+  .dna.fg .lg-kopf { position: sticky; top: 0; z-index: 8; height: 60px; padding: 0 28px; background: var(--schwarz) }
+  .dna .fg-tisch { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 400px }
+  .dna .fg-tisch::before { left: 0; right: 0; height: 100%; background-size: auto 150%; background-position: 72% 30%;
+    -webkit-mask-image: linear-gradient(#000 0, #000 62%, rgba(0, 0, 0, .35) 84%, transparent 100%); mask-image: linear-gradient(#000 0, #000 62%, rgba(0, 0, 0, .35) 84%, transparent 100%) }
+  .dna .fg-buehne { position: sticky; top: 60px; align-self: start; height: max(560px, calc(100svh - 60px)); margin: 0 }
+  .dna .fg-buehne .wz-chip { left: 16px; top: 16px }
+  .dna .fg-titel { left: 24px; right: 24px; top: 58px }
+  .dna .fg-titel h1 { font-size: 40px }
+  .dna .fg-titel p { max-width: 380px; font-size: 15px }
+  .dna .fg-objekt { top: 52%; --fs: clamp(220px, 34vh, 320px) }
+  .dna .fg-stand { bottom: 22px }
+  .dna .fg-rechts { padding: 16px 32px 0 24px; background: rgba(11, 11, 13, .95) } /* deckend: graue Schrift auf dem Stein war zu schwach */
+  .dna .fg-weiter { margin-top: 0 }
+  .dna .fg-kachel { padding: 0 12px; gap: 8px }
+  .dna .fg-rechts .lg-fuss { position: sticky; bottom: 0; z-index: 2; order: 1; margin: auto -32px 0 -24px; padding: 30px 32px 16px 24px; background: linear-gradient(rgba(11, 11, 13, 0), rgb(11, 11, 13) 30px); justify-content: stretch } /* die Pille bleibt im Bild, auch wenn rechts mehr steht */
+  .dna .fg-rechts .lg-fuss .dna-pille { flex: 1 }
+  .dna.fg .fg-rechts .foot-links.recht { order: 2; margin: 12px 0 0 }
+}
+@media (prefers-reduced-motion: reduce) { .dna .fg-zeile, .dna .fg-kachel, .dna .fg-chip-t { transition: none !important } }
+
+/* ---------- Laptop wie die Start-Folie: Fotos, Lage, „Wie genau planen?“ und die Wunsch-Fragen (28.10.2026, Wunsch des Inhabers:
+   „Browseransicht bei allen Folien verbessern, Vorbild die Folie, wo man das Element auswählt“) ----------
+   Am Telefon sind .dna-tisch, .dna-links und .dna-rechts ohne eigene Form; am Laptop füllt die Folie den Bildschirm: Kopf 60 px fest
+   oben, links die Bühne über die ganze Höhe (stehend beim Scrollen), rechts eine Spalte von 380 px mit Frage, Karten und der Pille
+   unten fest, darunter die rechtlichen Verweise. */
+.dna .dna-tisch, .dna .dna-links, .dna .dna-rechts { display: contents }
+@media (min-width: 1024px) {
+  .scr.dna.dt { max-width: none; padding-inline: 0; padding-bottom: 0 }
+  .dna.dt .lg-kopf { position: sticky; top: 0; z-index: 8; height: 60px; padding: 0 28px; background: var(--schwarz) }
+  .dna.dt .dna-tisch { display: grid; grid-template-columns: minmax(0, 1fr) 380px; flex: 1; min-height: calc(100svh - 60px) }
+  .dna.dt .dna-links { position: sticky; top: 60px; align-self: start; display: flex; flex-direction: column; height: max(560px, calc(100svh - 60px)); min-width: 0; overflow: hidden }
+  .dna.dt .dna-rechts { display: flex; flex-direction: column; min-width: 0; padding: 20px 32px 0 24px }
+  .dna.dt .dna-rechts .lg-fuss { position: sticky; bottom: 0; z-index: 4; order: 1; margin: auto 0 0; padding: 20px 0 16px; background: linear-gradient(rgba(7, 9, 10, 0), var(--schwarz) 34%); justify-content: stretch }
+  .dna.dt .dna-rechts .lg-fuss .dna-pille { flex: 1 }
+  .dna.dt .dna-rechts .foot-links.recht { order: 2; margin: 4px 0 20px }
+  /* Fotos: das Foto füllt die Bühne */
+  .dna.dt .ft-buehne { flex: 1; height: auto; border-radius: 0 }
+  .dna.dt .ft-buehne .ft-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover }
+  .dna.dt.ft .dna-rechts > .ft-tipp:first-child { margin-top: 0 }
+  /* Lage und Tiefe: Band oben, darunter die Bühne in Anthrazit, das Haus so groß, wie sie es zulässt */
+  .dna.dt .dna-links > .lg-stationen { flex: none; margin: 12px 28px 4px }
+  .dna.dt .dna-links > .lg-buehne { flex: 1; height: auto; margin: 8px 28px 28px }
+  .dna.dt .lg-buehne:not(.lp-buehne) .lg-buehne-in { top: 50%; transform: translate(-50%, -50%) scale(var(--lg-s, 1)); transform-origin: center }
+  .dna.dt .lp-buehne { display: grid; place-items: center; min-height: 0 }
+  .dna.dt .lp-in { width: 100%; max-width: 440px; transform: scale(1.45); transform-origin: center }
+  .dna.dt .dna-rechts > .lg-frage:first-child { padding-top: 4px }
+  /* Wunsch-Fragen: Band oben, das Modell füllt die Bühne */
+  .dna.dt .dna-links > .wz-band { flex: none; margin: 12px 28px 8px; width: auto }
+  .dna.dt .dna-links > .wz-buehne { flex: 1; height: auto; margin: 0; border-radius: 0 }
+  .dna.dt.wz .dna-rechts .qdock { margin-top: 0 }
+}

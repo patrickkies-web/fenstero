@@ -375,3 +375,35 @@ Leuchten (Bühne und Anzahl), das gewählte Stockwerk leicht aufgehellt, die Erd
 weiß mit schwarzer Schrift. Das Koralle-Licht am Fenster bleibt (es ist nicht violett); „bodentief“ in der weißen Brüstungskarte bleibt
 violett, weil Weiß dort verschwände.
 
+## „Gespeichert“ (28.10.2026)
+
+Der Inhaber (zum Bildschirmfoto der bisherigen Seite): „Auch diese Seite sollst du visuell verbessern. Ziel ist eine intuitive Ansicht
+und einfache Bedienbarkeit für Nutzer. Die Menüführung der vorherigen Folien dient als Anlehnung.“ Wahl: Kopf, Chip, Überschrift mit
+zweiter Stimme und Fuß wie die Folien davor; der Boden im Fensterlicht vom Start als Bühne (Anfang und Ende eines Fensters auf demselben
+Boden); die beiden Wege nach vorn als Zeilen in einer Karte, alles zu diesem Fenster als Kacheln darunter. Keine Gesamtübersicht (Regel
+des Inhabers): die Aufteilung als Symbol, keine Maße, keine Wünsche. Gremium eine Runde (docs/profis/gremium/2026-10-28-konfigurator-
+gespeichert.md): X gewinnt in allen drei Gruppen, drei Vetos, alle aufgelöst.
+
+| Änderung | Zweck | Gremium | Stand |
+| --- | --- | --- | --- |
+| Kopf, Chip „✓ Gespeichert · Position n“, „Küche gespeichert.“ | Menüführung wie die vorigen Folien | behalten (alle) | bleibt |
+| Bühne: Boden im Fensterlicht, gespeicherte Aufteilung als Strichzeichnung | „gespeichert“ auf einen Blick, das eigene Fenster | Veto gegen das Musterfenster | geändert |
+| Dunkler Verlauf hinter der Schrift, Spalte am Laptop deckend | Kontrast 4,5 : 1 | Veto (Gestalter) | neu |
+| „Wie geht es weiter?“: Weiteres Fenster (+), Alle Fenster ansehen | die zwei Wege ohne Scrollen | behalten | bleibt, Texte geschärft |
+| „Alle Fenster im Haus erfasst?“ über der Pille, „Zum Aufmaßblatt · n Fenster“ | keine halben Häuser | Veto (Fensterbauer) | neu |
+| Maße/Wünsche als Kacheln, Kopieren breit „nur für baugleiche Fenster“ | einfache Bedienung, Datenqualität | Muss (Fensterbauer) | geändert |
+| „Fenster löschen“ abgesetzt als leise Pille | niemand löscht aus Versehen | Muss (Kunden) | geändert |
+| Änderungsgrenze als Zeile, zählt sie: über den Kacheln in Koralle | Frist klar | behalten | bleibt |
+| Themen als leise Chips | Sprung zum Kapitel | behalten | bleibt |
+| Laptop: Bühne links stehend, Spalte rechts, Pille unten fest | Schreibtisch | ändern: Spalte deckend | geändert |
+
+## Laptop wie die Start-Folie (28.10.2026)
+
+Der Inhaber: „Außerdem musst du die Browseransicht bei allen Folien verbessern. Als Vorbild nimmst du die Folie, wo man das Element
+auswählt, welches man konfigurieren will.“ Bestand am Laptop (1440 × 900): Start, Messen, Ränder, „Passt.“, Ergebnis und Gespeichert
+füllten den Bildschirm schon; Fotos, Lage, „Wie genau planen?“ und die Wunsch-Fragen standen als schmale Telefonspalte in der Mitte.
+Umgesetzt für diese vier: Kopf 60 px fest, links die Bühne über die ganze Höhe (Foto füllt, Haus wächst mit, Punktraster 1,45-fach,
+3-D-Modell füllt), rechts die Spalte von 380 px mit Frage, Karten und fester Pille. Am Telefon pixelgleich (Bildvergleich vorher/nachher
+bei 390 × 844: 0 Pixel Unterschied). Noch nicht so: die Liste der Fenster und die Anfrage-Seiten; sie sind noch nicht überarbeitet und
+bekommen die Ansicht mit ihrer Überarbeitung.
+

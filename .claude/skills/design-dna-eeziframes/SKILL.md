@@ -183,6 +183,11 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Streifen im Haus und in der Karte „Genau gleiche Fenster“ und die violetten Leuchten sollten weg, der gewählte Stockwerk-Knopf weiß
   gefüllt sein. Auswahl auf dunkler Kachel heißt weiß mit schwarzer Schrift; Zustand zeigt sich über Helligkeit, nicht über Leuchten.
   Vorschlag für seine DNA: G1 (Schraffur als „Rest“) und das Leuchten als Zustand in App-Folien nur noch auf sein Wort.
+- Laptop wie die Start-Folie (Wunsch des Inhabers, 28.10.2026): Jede Folie des Konfigurators füllt im Browser den Bildschirm wie
+  „Was planst du?“: Kopf 60 px, links die Bühne über die ganze Höhe, rechts eine Spalte von 380 px mit Frage, Karten und der Pille
+  unten, darunter die rechtlichen Verweise. Neue Folien bekommen diese Ansicht von Anfang an (`dnaTisch` oder eigenes Raster).
+  Vorschlag für seine DNA: in Abschnitt 9 (App-Rahmen) den Satz „Schreibtisch: Bühne links über die ganze Höhe, rechts die Spalte mit
+  der Pille“ ergänzen.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

@@ -3094,6 +3094,10 @@ function ftPlatz(seite) {
     (ki ? '<span class="ft-ki' + (ki === 'KI fertig' ? ' ist-fertig' : '') + '">' + ki + '</span>' : '') + '</button>' +
     '<button type="button" class="ft-weg" data-act="foto-weg-platz" data-v="' + seite + '" aria-label="' + esc(label + ': Foto entfernen') + '"><span aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></span></button></div>';
 }
+/* Laptop wie die Start-Folie (Wunsch des Inhabers, 28.10.2026: „Browseransicht bei allen Folien verbessern, Vorbild die Folie, wo man
+   das Element auswählt“): links die Bühne über die ganze Höhe, rechts eine Spalte mit Frage, Karten und der Pille unten. Am Telefon sind
+   die Hüllen ohne eigene Form (display: contents), die Reihenfolge bleibt die der Folie. */
+const dnaTisch = (links, rechts) => '<div class="dna-tisch"><div class="dna-links">' + links + '</div><div class="dna-rechts">' + rechts + '</div></div>';
 function fotosDna() {
   const w = S.win, neu = !!w.neu, tuer = istTuer(w), ding = tuer ? 'die Tür' : w.art === 'fest' ? 'die Verglasung' : 'das Fenster';
   const seite = S.photos.in ? 'in' : S.photos.out ? 'out' : '', p = seite ? S.photos[seite] : null, n = (S.photos.in ? 1 : 0) + (S.photos.out ? 1 : 0);
@@ -3117,7 +3121,7 @@ function fotosDna() {
     '<p class="ft-text ft-leise"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg><span>Deine Fotos sieht dein Fensterbauer erst, wenn du sendest.</span></p></div>';
   const fuss = rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Start">' + LG_PFEIL_L + '</button>' +
     '<button type="button" class="dna-pille lg-weiter" data-act="' + (n ? 'go' : 'ohne-foto') + '"' + (n ? ' data-v="' + (neu ? 'zeichnen' : 'messen') + '"' : '') + '>' + (neu ? 'Weiter zum Einzeichnen' : 'Weiter zum Messen') + pfeil + '</button></div>';
-  return { html: lgKopf(['back', 'Zurück: Start']) + buehne + tipp + frage + karte + fuss, back: ['Start', 'start'], dna: true, cls: 'dna ft' };
+  return { html: lgKopf(['back', 'Zurück: Start']) + dnaTisch(buehne, tipp + frage + karte + fuss), back: ['Start', 'start'], dna: true, cls: 'dna ft dt', voll: true };
 }
 SCREENS.fotos = () => fotosDna();
 /* Ohne Foto weiter: einmal ein Hinweis, warum ein Foto besser ist (abschaltbar, aufmass.ohnefoto.zu). Das Fenster merkt sich die Wahl
@@ -3613,6 +3617,67 @@ SCREENS.fertig = () => {
     (lk ? '<p class="sub center" style="padding: 0 10px">' + (instWebsite() ? 'Gespeichert, auch für später: Öffne diese Seite wieder, dann geht es weiter.' : 'Gespeichert, auch für später: Über den Link von ' + esc(bn) + ' kommst du jederzeit zurück.') + '</p>' : '');
   return { html: html, back: ['Fenster', 'home'], bar: { label: lk ? 'Zum Absenden' : 'Zum Aufmaßblatt', act: 'go', v: 'anfrage', sec: 'Weiteres Fenster', secAct: 'new' } };
 };
+/* ---------- Gespeichert im Look der Design-DNA (28.10.2026, Wunsch des Inhabers: „intuitive Ansicht und einfache Bedienbarkeit, die
+   Menüführung der vorherigen Folien als Anlehnung“) ----------
+   Kopf, Chip, Überschrift und Fuß wie in den Folien davor; die Bühne ist der Boden im Fensterlicht vom Start mit dem Bild der Elementart
+   (kein Bild des gestalteten Fensters, keine Maße, keine Wünsche: keine Gesamtübersicht, Entscheidung des Inhabers). Darunter „Wie geht
+   es weiter?“ als zwei Zeilen (weiteres Fenster, alle Fenster), dann „Dieses Fenster“ als vier Kacheln (Maße, Wünsche, Kopieren,
+   Löschen) mit der Änderungsgrenze, „Direkt zu einem Thema“ als Chips; unten zurück zur Liste und die Pille zum Aufmaßblatt. */
+const FG_Z = {
+  plus: '<path d="M10 4v12M4 10h12"/>',
+  liste: '<path d="M7 5.5h9M7 10h9M7 14.5h9"/><circle cx="3.6" cy="5.5" r=".9" fill="currentColor" stroke="none"/><circle cx="3.6" cy="10" r=".9" fill="currentColor" stroke="none"/><circle cx="3.6" cy="14.5" r=".9" fill="currentColor" stroke="none"/>',
+  masse: '<path d="M2.5 13.5 13.5 2.5l4 4-11 11z"/><path d="M5.5 10.5l1.6 1.6M8 8l1.6 1.6M10.5 5.5l1.6 1.6"/>',
+  wuensche: '<path d="M3 6h8M15 6h2M3 14h2M9 14h8"/><circle cx="13" cy="6" r="2"/><circle cx="7" cy="14" r="2"/>',
+  kopie: '<rect x="7" y="7" width="10" height="10" rx="2"/><path d="M13 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/>',
+  loeschen: '<path d="M3.5 5.5h13M8 5.5V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1.5M5.5 5.5l.8 10.6a1.5 1.5 0 0 0 1.5 1.4h4.4a1.5 1.5 0 0 0 1.5-1.4l.8-10.6"/>',
+  haken: '<path d="M4 10.5l4 4 8-9"/>',
+  weiter: '<path d="M8 4.5 13.5 10 8 15.5"/>'
+};
+const fgZ = (k) => '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + FG_Z[k] + '</svg>';
+function fertigDna() {
+  const w = S.win, lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'deinen Fensterbauer') : '', gespeichert = S.windows[S.editIdx] || w;
+  const st = aendStand(gespeichert), nz = Object.keys(gespeichert.notizen || {}).length, art = ST_BILD[w.art] ? w.art : 'fenster', b = ST_BILD[art];
+  const tuer = istTuer(w), nomen = tuer ? 'Diese Tür' : w.art === 'fest' ? 'Diese Verglasung' : 'Dieses Fenster', ding = tuer ? 'Tür' : w.art === 'fest' ? 'Verglasung' : 'Fenster';
+  const zu = st.fest ? ' aria-disabled="true"' : '', status = fensterStatus(gespeichert), ganz = status === 'Vollständig';
+  const teile = ['Maße', 'Wünsche'].concat(nz ? ['deine ' + (nz === 1 ? 'Notiz' : nz + ' Notizen')] : [], bilderVon(w).length || num(w.fotos) > 0 ? ['die Auswertung der Fotos'] : []);
+  const angaben = teile.slice(0, -1).join(', ') + ' und ' + teile[teile.length - 1];
+  const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
+  /* Bühne: Boden im Fensterlicht, Chip mit Haken, der Name als Überschrift, die gespeicherte Aufteilung als Strichzeichnung (das Symbol
+     der App; Gremium: ein Musterfenster ließ das Fenster falsch gespeichert aussehen), darunter Art und Stand */
+  const buehne = '<div class="fg-buehne">' +
+    '<span class="wz-chip fg-chip" aria-hidden="true"><i class="fg-chip-haken">' + fgZ('haken') + '</i>Gespeichert · Position ' + (S.editIdx + 1) + '</span>' +
+    '<div class="fg-titel"><h1 tabindex="-1"><span class="fg-name">' + esc(w.name || ding) + '</span> <em>gespeichert.</em></h1></div>' +
+    '<div class="fg-objekt" aria-hidden="true"><span class="st-schatten"></span><span class="fg-symbol">' + zuStrich(svgIcon(miniWin(gespeichert), 160)) + '</span></div>' +
+    '<p class="fg-stand fertig-stand"><i class="' + (ganz ? 'ganz' : 'offen') + '" aria-hidden="true">' + (ganz ? fgZ('haken') : '') + '</i><b>' + esc(lab('art', w.art || 'fenster')) + '</b><small>' + esc(((num(w.anzahl) || 1) > 1 ? ' · ' + w.anzahl + ' Stück' : '') + ' · ' + status) + '</small></p></div>';
+  const ki = kiLaeuftFuer(gespeichert) || kiLaeuftFuer(w) ? '<p class="fg-ki ki-laeuft" role="status"><span class="spin"></span><span>Die KI liest noch die Einbausituation. Die Auswertung kommt von selbst zu diesem Fenster.</span></p>' : '';
+  /* Wie geht es weiter: zwei Zeilen, die Pille unten führt zum Aufmaßblatt bzw. zum Absenden */
+  const zeile = (attr, z, t, sub) => '<button type="button" class="fg-zeile" ' + attr + '><span class="fg-rund">' + fgZ(z) + '</span><span class="fg-zeile-text"><b>' + t + '</b><small>' + sub + '</small></span><span class="fg-chevron">' + fgZ('weiter') + '</span></button>';
+  const weiter = '<section class="fg-weiter weiter-karte" aria-labelledby="fg-weiter-t"><h2 class="fg-label" id="fg-weiter-t">Wie geht es weiter?</h2>' +
+    zeile('data-act="new"', 'plus', 'Weiteres Fenster', 'Gleicher Weg wie eben. Keller, Bad und Dach schon dabei?') +
+    zeile('data-act="go" data-v="home"', 'liste', 'Alle Fenster ansehen', S.windows.length + ' Fenster gespeichert') +
+    '<p class="fg-satz">' + esc(angaben) + (lk ? ' gehen mit deinem Aufmaß an ' + esc(bn) + '.' : ' stehen in deinem Aufmaßblatt.') + '</p></section>';
+  /* Dieses Fenster: vier Kacheln und die Änderungsgrenze */
+  const grenze = st.fest ? '<p class="fg-grenze note warn">' + festText(st) + ' ' + (lk ? 'Änderungen klärst du direkt mit ' + esc(bn) + '.' : 'Brauchst du etwas anders, legst du es als neues Fenster an.') + '</p>'
+    : !st.frei ? '<p class="fg-grenze note warn">' + (st.kauf ? 'Seit dem Freischalten' : 'Seit dem ' + esc(datumKurz(st.bis))) + ' kannst du dieses Fenster noch ' + MAL[st.rest] + ' ändern. Jedes Speichern mit einer Änderung zählt.</p>'
+    : '<p class="fg-grenze aend-frei">' + (st.inst ? 'Bis zum Senden kannst du dieses Fenster beliebig ändern.' : st.nb ? 'Während der Nachbesserung kannst du dieses Fenster frei ändern, darum hat ' + esc(bn) + ' gebeten.' : 'Bis zum ' + esc(datumKurz(st.bis)) + ' kannst du dieses Fenster beliebig ändern, danach noch viermal.') + '</p>';
+  /* zählt die Grenze (oder ist das Fenster fest), steht sie über den Kacheln; Löschen abgesetzt in einer eigenen Zeile (Gremium) */
+  const kachel = (attr, z, t, sub, cls) => '<button type="button" class="fg-kachel' + (cls ? ' ' + cls : '') + '" ' + attr + '>' + fgZ(z) + '<span>' + t + (sub ? '<small>' + sub + '</small>' : '') + '</span></button>';
+  const zaehlt = st.fest || !st.frei;
+  const dieses = '<section class="fg-dieses" aria-labelledby="fg-dieses-t"><h2 class="fg-label" id="fg-dieses-t">' + nomen + '</h2>' + (zaehlt ? grenze : '') + '<div class="fg-kacheln">' +
+    kachel('data-act="go" data-v="ergebnis"' + zu, 'masse', 'Maße ändern') + kachel('data-act="wuensche"' + zu, 'wuensche', 'Wünsche ändern') +
+    kachel('data-act="copywin"', 'kopie', 'Kopieren', 'nur für baugleiche Fenster', 'fg-breit') + '</div>' + (zaehlt ? '' : grenze) +
+    '<button type="button" class="fg-loeschen" data-act="delwin">' + fgZ('loeschen') + '<span>' + (tuer ? 'Tür' : w.art === 'fest' ? 'Verglasung' : 'Fenster') + ' löschen</span></button></section>';
+  /* Gezielt ein Thema nachschärfen: direkt zum Kapitel, in der gewählten Tiefe */
+  const themen = st.fest ? '' : '<section class="fg-themen kap-sprung" aria-labelledby="fg-themen-t"><h2 class="fg-label" id="fg-themen-t">Direkt zu einem Thema</h2><div class="fg-chips">' +
+    KAPITEL.slice(1).map((k) => '<button type="button" class="fg-chip-t" data-act="wuensche" data-v="' + k.k + '">' + esc(k.n) + '</button>').join('') + '</div></section>';
+  const spaeter = lk ? '<p class="fg-spaeter">' + (instWebsite() ? 'Gespeichert, auch für später: Öffne diese Seite wieder, dann geht es weiter.' : 'Gespeichert, auch für später: Über den Link von ' + esc(bn) + ' kommst du jederzeit zurück.') + '</p>' : '';
+  /* an der Pille die Frage nach dem ganzen Haus und die Zahl der Fenster (Gremium: sonst kommen halbe Häuser als Anfrage) */
+  const fuss = '<div class="lg-fuss fg-fuss"><p class="fg-fuss-frage">Alle Fenster im Haus erfasst?</p><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Fenster">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="anfrage">' + (lk ? 'Zum Absenden' : 'Zum Aufmaßblatt') + '<span class="fg-zahl"> · ' + S.windows.length + ' Fenster</span>' + pfeil + '</button></div>';
+  const html = lgKopf(['back', 'Zurück: Fenster']) + '<div class="fg-tisch">' + buehne + '<div class="fg-rechts">' + ki + weiter + dieses + themen + spaeter + rechtLinks() + fuss + '</div></div>';
+  return { html: html, back: ['Fenster', 'home'], dna: true, cls: 'dna fg', voll: true };
+}
+SCREENS.fertigAlt = SCREENS.fertig;
+SCREENS.fertig = fertigDna;
 /* Anfrage: zwei kurze Seiten im Link, drei ohne Link (dann mit Kontakt) */
 const anfrageHead = (step, lk) => lk ? 'Fast fertig · ' + step + ' von ' + (instWebsite() ? 3 : 2) : 'Fürs Angebot · ' + step + ' von 3'; // Instanz, Website: dazu der Kontakt
 /* Was der gewählte Förderweg bedeutet (Quellen: BAFA, BEG EM; § 35c EStG mit ESanMV; docs/GESTALTUNG.md) */
@@ -4850,7 +4915,7 @@ function lageDna(c) {
   const anzahl = '<div class="lg-karte lg-kachel lg-kontur"><div class="lg-feld"><div class="lg-feldkopf"><span class="dna-label" id="lg-anz-l">Genau gleiche ' + (tuer ? 'Türen' : fest ? 'Verglasungen' : 'Fenster') + '</span></div><div class="lg-anzahl"><div class="lg-zahl"><output aria-labelledby="lg-anz-l" aria-live="polite">' + (w.anzahl || 1) + '</output><span class="dna-zahl__einheit">Stück</span></div>' +
     '<div class="lg-knoepfe"><button type="button" data-act="lg-anzahl" data-v="-1" aria-label="Eins weniger"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10"/></svg></button><button type="button" data-act="lg-anzahl" data-v="1" aria-label="Eins mehr"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10M8 3v10"/></svg></button></div></div>' +
     '<div class="lg-reihe" aria-hidden="true"></div><p class="lg-hilfe">Gleich heißt: selbes Stockwerk, gleiche Maße auf den Millimeter, gleiche Brüstung und Öffnungsrichtung, gleiche Wünsche.</p></div></div>';
-  return { html: lgKopf() + lgBand(c) + buehne + frage + name + stock + bru + anzahl + lgFuss(c), back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna', qpos: (c.i + 1) / c.list.length };
+  return { html: lgKopf() + dnaTisch(lgBand(c) + buehne, frage + name + stock + bru + anzahl + lgFuss(c)), back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna dt', voll: true, qpos: (c.i + 1) / c.list.length };
 }
 /* Maßstab links: Strichmarken alle 5 px, lang an Decke und Boden jedes Stockwerks */
 function lgSkala() {
@@ -4907,9 +4972,15 @@ function lgAuf() {
   if (scr.classList.contains('st')) return stZeigen();
   if (scr.classList.contains('md')) return mdAuf(scr);
   if (scr.classList.contains('er')) return; // Ergebnis: das Modell bindet die App selbst
+  if (scr.classList.contains('fg')) return; // Gespeichert: nichts nachzuziehen
   lgMass(); scr.classList.add('lg-still'); lgZeigen(); void scr.offsetWidth; requestAnimationFrame(() => scr.classList.remove('lg-still'));
 }
-function lgMass() { const b = document.querySelector('.scr.dna .lg-buehne:not(.lp-buehne)'); if (b && b.clientWidth) b.style.setProperty('--lg-s', Math.min(1, b.clientWidth / LG_B).toFixed(4)); }
+/* Maßstab des Hauses: am Telefon höchstens 1, am Laptop (Bühne links über die ganze Höhe) so groß, wie die Bühne es zulässt */
+function lgMass() {
+  const b = document.querySelector('.scr.dna .lg-buehne:not(.lp-buehne)'); if (!b || !b.clientWidth) return;
+  const breit = !!b.closest('.dt') && matchMedia('(min-width: 1024px)').matches;
+  b.style.setProperty('--lg-s', (breit ? Math.min(b.clientWidth / LG_B, b.clientHeight / 250) * 0.9 : Math.min(1, b.clientWidth / LG_B)).toFixed(4));
+}
 window.addEventListener('resize', lgMass);
 /* „Weiter“ mit Lücke: Zeile darüber, Feld markieren, hinrollen, Fokus */
 function lgVerlangen(f) {
@@ -4962,7 +5033,7 @@ function tiefeDna(c) {
   const karte = '<div class="lg-karte lg-hell"><div class="lg-feld"><div class="lg-feldkopf"><span class="dna-label" id="lp-l">Planung</span><span class="lg-stocktext lp-name"></span></div>' +
     '<div class="lg-stockwahl lp-wahl" role="group" aria-labelledby="lp-l">' + TIEFEN.map((o) => '<button type="button" data-act="tiefe" data-v="' + o.k + '" aria-pressed="false" aria-label="' + esc(o.kurz + ': ' + o.label) + '">' + esc(o.kurz) + '</button>').join('') + '</div>' +
     '<p class="lp-satz" aria-live="polite"></p></div><div class="lg-feld"><p class="lg-hilfe">Später änderbar, oben über jeder Frage.</p></div></div>';
-  return { html: lgKopf() + lgBand(c) + buehne + frage + karte + lgFuss(c), back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna', qpos: (c.i + 1) / c.list.length };
+  return { html: lgKopf() + dnaTisch(lgBand(c) + buehne, frage + karte + lgFuss(c)), back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna dt', voll: true, qpos: (c.i + 1) / c.list.length };
 }
 /* ---------- Wünsche im Look der Design-DNA (27.10.2026) ----------
    Nach der Vorschau docs/profis/konfigurator-start-vorschau/ (Folie „Wünsche“, Gremium und Profis: docs/profis/2026-10-27-konfigurator-
@@ -5000,12 +5071,14 @@ function wzKapitel(c) {
 /* Zeichnungen in Kacheln und Formen als Strichzeichnung: Flächen leer, Glas getönt, Striche 1,8 / 1,2 / 1 (gerätunabhängig); fehlt der
    Hauptstrich (Sonnenschutz), tragen Kasten und Rahmen ihn */
 function wzStrich(html) {
-  return html.replace(/<button type="button" class="(?:qopt|qf)"[\s\S]*?<\/button>/g, (knopf) => knopf.replace(/<svg[\s\S]*?<\/svg>/, (svg) => {
-    svg = svg.replace(/ width="\d+" height="\d+"/, '').replace(/fill="([^"]*)"/g, (m, v) => { v = v.toLowerCase(); if (v === 'none') return m; if (/^#(d6e6f4|cfe0f0|dbe8f5|e3eef8)$/.test(v)) return 'fill="currentColor" fill-opacity=".12"'; if (/^#(ffffff|fff|f5f5f7|fafafa|f2f2f4)$/.test(v)) return 'fill="none"'; return 'fill="currentColor" fill-opacity=".22"'; });
-    svg = svg.replace(/stroke="(?!none)[^"]*"/g, 'stroke="currentColor"').replace(/stroke-width="([\d.]+)"/g, (m, x) => { x = parseFloat(x); return 'stroke-width="' + (x >= 1.2 ? 1.8 : x >= 0.8 ? 1.2 : 1) + '" vector-effect="non-scaling-stroke"'; });
-    if (!/stroke-width="1\.8"/.test(svg)) { let k = 0; svg = svg.replace(/stroke-width="1\.2"/g, (m) => (++k <= 3 ? 'stroke-width="1.8"' : m)); }
-    return svg;
-  }));
+  return html.replace(/<button type="button" class="(?:qopt|qf)"[\s\S]*?<\/button>/g, (knopf) => knopf.replace(/<svg[\s\S]*?<\/svg>/, zuStrich));
+}
+/* Zeichnung als Strichzeichnung in currentColor: Flächen leer, Glas getönt, Striche 1,8 / 1,2 / 1 (gerätunabhängig) */
+function zuStrich(svg) {
+  svg = svg.replace(/ width="\d+" height="\d+"/, '').replace(/fill="([^"]*)"/g, (m, v) => { v = v.toLowerCase(); if (v === 'none') return m; if (/^#(d6e6f4|cfe0f0|dbe8f5|e3eef8)$/.test(v)) return 'fill="currentColor" fill-opacity=".12"'; if (/^#(ffffff|fff|f5f5f7|fafafa|f2f2f4)$/.test(v)) return 'fill="none"'; return 'fill="currentColor" fill-opacity=".22"'; });
+  svg = svg.replace(/stroke="(?!none)[^"]*"/g, 'stroke="currentColor"').replace(/stroke-width="([\d.]+)"/g, (m, x) => { x = parseFloat(x); return 'stroke-width="' + (x >= 1.2 ? 1.8 : x >= 0.8 ? 1.2 : 1) + '" vector-effect="non-scaling-stroke"'; });
+  if (!/stroke-width="1\.8"/.test(svg)) { let k = 0; svg = svg.replace(/stroke-width="1\.2"/g, (m) => (++k <= 3 ? 'stroke-width="1.8"' : m)); }
+  return svg;
 }
 function frageDna(c, q, panel, stage, designFertig, tasten) {
   panel = wzStrich(panel);
@@ -5020,8 +5093,8 @@ function frageDna(c, q, panel, stage, designFertig, tasten) {
     (designFertig ? '<button type="button" class="dna-pille dna-pille--leise wz-anpassen" data-act="qnext">Anpassen</button><button type="button" class="dna-pille lg-weiter btn primary" data-act="save">Speichern' + pfeil + '</button>'
       : '<button type="button" class="dna-pille lg-weiter btn primary" data-act="qnext">' + (last ? sichern : 'Weiter') + pfeil + '</button>') + '</div>';
   if (tasten) return { html: lgKopf() + wzBand(c) + buehne + tasten, back: ['Zurück', 'qprev'], dna: true, cls: 'dna wz wz-tasten', qpos: (c.i + 1) / n };
-  return { html: lgKopf() + wzBand(c) + buehne + '<div class="qdock wz-dock">' + kopf + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div></div>' + fuss + wzKapitel(c),
-    back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna wz', qpos: (c.i + 1) / n };
+  return { html: lgKopf() + dnaTisch(wzBand(c) + buehne, '<div class="qdock wz-dock">' + kopf + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div></div>' + fuss) + wzKapitel(c),
+    back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna wz dt', voll: true, qpos: (c.i + 1) / n };
 }
 function lpZeigen(rasten) {
   const scr = document.querySelector('.scr.dna'); if (!scr) return;
