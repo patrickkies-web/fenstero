@@ -90,30 +90,30 @@ Je Seite (Länge am Telefon in CSS-Pixeln, ein Bildschirm sind 844; „× Grün�
 
 | Seite | Adresse | Länge | Abschn. | Fragen | Tabellen | Hinweise | Quellen | Schritt | Zeichnung | Bild „Nächster Schritt“ | × Grün | Besonderheit |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: | --- |
-| Ratgeber neue Fenster: prüfen. auswählen. ausmessen | `/ratgeber/` | 9.157 | 8 | – | – | – | – | – | – | 7 leere Platzhalter | 12 | alle sieben Fotoplätze leer |
-| Aufmaßblatt Fenster als PDF: 12 Punkte. die draufgehören | `/ratgeber/aufmassblatt-fenster/` | 9.559 | 9 | 5 | 1 | 1 | 3 | 4 | aufmassblatt.svg | leerer Platzhalter | 18 |  |
-| Balkontür ausmessen: Terrassentür. Hebe-Schiebe- und PSK-Tür | `/ratgeber/balkontuer-ausmessen/` | 9.727 | 10 | 5 | 2 | 1 | 5 | 4 | balkontuer.svg | leerer Platzhalter | 18 |  |
-| Bestellmaß Fenster berechnen: Fuge je Seite. Tabelle. Beispiel | `/ratgeber/bestellmass-fenster/` | 7.529 | 8 | 4 | 2 | 1 | 4 | 4 | bestellmass.svg | leerer Platzhalter | 17 |  |
+| Ratgeber neue Fenster: prüfen, auswählen, ausmessen | `/ratgeber/` | 9.157 | 8 | – | – | – | – | – | – | 7 leere Platzhalter | 12 | alle sieben Fotoplätze leer |
+| Aufmaßblatt Fenster als PDF: 12 Punkte, die draufgehören | `/ratgeber/aufmassblatt-fenster/` | 9.559 | 9 | 5 | 1 | 1 | 3 | 4 | aufmassblatt.svg | leerer Platzhalter | 18 |  |
+| Balkontür ausmessen: Terrassentür, Hebe-Schiebe- und PSK-Tür | `/ratgeber/balkontuer-ausmessen/` | 9.727 | 10 | 5 | 2 | 1 | 5 | 4 | balkontuer.svg | leerer Platzhalter | 18 |  |
+| Bestellmaß Fenster berechnen: Fuge je Seite, Tabelle, Beispiel | `/ratgeber/bestellmass-fenster/` | 7.529 | 8 | 4 | 2 | 1 | 4 | 4 | bestellmass.svg | leerer Platzhalter | 17 |  |
 | Brüstungshöhe Fenster: 80 oder 90 cm? Mindestmaß und Geländer | `/ratgeber/bruestungshoehe-fenster/` | 7.815 | 9 | 4 | 1 | 1 | 3 | 4 | bruestung.svg | leerer Platzhalter | 17 |  |
 | Fenster DIN links oder rechts? Die Hand-Regel mit Bild | `/ratgeber/din-links-rechts/` | 6.666 | 9 | 4 | 1 | 1 | 2 | 3 | din-links-rechts.svg | leerer Platzhalter | 17 |  |
 | Dreifachverglasung oder Zweifach: Lohnt sich 3-fach-Glas? | `/ratgeber/dreifachverglasung/` | 9.559 | 9 | 5 | 1 | 1 | 9 | 3 | verglasung.svg | leerer Platzhalter | 20 |  |
 | Wie alt sind meine Fenster? Baujahr in 3 Minuten erkennen | `/ratgeber/fenster-alter-erkennen/` | 10.306 | 9 | 5 | 2 | 1 | 6 | 1 | fenster-alter.svg | leerer Platzhalter | 20 |  |
-| Fensterangebote vergleichen: Checkliste. Beispiel. Warnzeichen | `/ratgeber/fenster-angebot-vergleichen/` | 11.765 | 11 | 5 | 1 | 2 | 11 | 5 | angebote-vergleichen.svg | leerer Platzhalter | 20 |  |
+| Fensterangebote vergleichen: Checkliste, Beispiel, Warnzeichen | `/ratgeber/fenster-angebot-vergleichen/` | 11.765 | 11 | 5 | 1 | 2 | 11 | 5 | angebote-vergleichen.svg | leerer Platzhalter | 20 |  |
 | Fenster ausmessen in 6 Schritten: Anleitung auch für Altbau | `/ratgeber/fenster-ausmessen/` | 12.046 | 12 | 8 | 2 | 2 | 6 | 4 | messpunkte.svg | leerer Platzhalter | 23 |  |
-| Fenster austauschen 2026: Kosten. Förderung und Ablauf | `/ratgeber/fenster-austauschen/` | 12.566 | 10 | 7 | 1 | 1 | 15 | 2 | fenster-austauschen.svg | leerer Platzhalter | 20 |  |
-| Fenster beschlagen innen. außen oder zwischen den Scheiben? | `/ratgeber/fenster-beschlagen/` | 10.479 | 11 | 5 | 1 | 2 | 6 | 1 | fenster-beschlagen.svg | leerer Platzhalter | 20 |  |
-| Fenstermaterial im Vergleich: Kunststoff. Holz oder Alu? | `/ratgeber/fenster-material-vergleich/` | 9.637 | 11 | 5 | 1 | 1 | 7 | 3 | fenstermaterial.svg | leerer Platzhalter | 20 |  |
-| Fenster mit Rollladenkasten ausmessen: Aufsatz. Einbau. Vorbau | `/ratgeber/fenster-mit-rollladen-ausmessen/` | 8.223 | 10 | 4 | 1 | 2 | 4 | 4 | rollladen.svg | leerer Platzhalter | 19 |  |
-| Fenster-Öffnungsarten: Dreh-Kipp. Kipp. Stulp oder fest? | `/ratgeber/fenster-oeffnungsarten/` | 10.990 | 10 | 6 | 2 | 2 | 6 | 3 | fenster-oeffnungsarten.svg | leerer Platzhalter | 21 |  |
+| Fenster austauschen 2026: Kosten, Förderung und Ablauf | `/ratgeber/fenster-austauschen/` | 12.566 | 10 | 7 | 1 | 1 | 15 | 2 | fenster-austauschen.svg | leerer Platzhalter | 20 |  |
+| Fenster beschlagen innen, außen oder zwischen den Scheiben? | `/ratgeber/fenster-beschlagen/` | 10.479 | 11 | 5 | 1 | 2 | 6 | 1 | fenster-beschlagen.svg | leerer Platzhalter | 20 |  |
+| Fenstermaterial im Vergleich: Kunststoff, Holz oder Alu? | `/ratgeber/fenster-material-vergleich/` | 9.637 | 11 | 5 | 1 | 1 | 7 | 3 | fenstermaterial.svg | leerer Platzhalter | 20 |  |
+| Fenster mit Rollladenkasten ausmessen: Aufsatz, Einbau, Vorbau | `/ratgeber/fenster-mit-rollladen-ausmessen/` | 8.223 | 10 | 4 | 1 | 2 | 4 | 4 | rollladen.svg | leerer Platzhalter | 19 |  |
+| Fenster-Öffnungsarten: Dreh-Kipp, Kipp, Stulp oder fest? | `/ratgeber/fenster-oeffnungsarten/` | 10.990 | 10 | 6 | 2 | 2 | 6 | 3 | fenster-oeffnungsarten.svg | leerer Platzhalter | 21 |  |
 | Fenster reparieren oder austauschen? Entscheidung in 3 Fragen | `/ratgeber/fenster-reparieren-oder-austauschen/` | 10.773 | 9 | 5 | 3 | 1 | 11 | 2 | fenster-entscheidung.svg | leerer Platzhalter | 18 |  |
 | Fenster-Standardmaße: Tabelle mit Rohbau- und Fenstermaßen | `/ratgeber/fenster-standardmasse/` | 8.748 | 10 | 5 | 1 | 1 | 7 | 3 | fenster-standardmasse.svg | leerer Platzhalter | 18 |  |
 | Fenster undicht? Zugluft in 1 Minute prüfen und beheben | `/ratgeber/fenster-undicht/` | 9.880 | 9 | 5 | 1 | 2 | 6 | 1 | fenster-undicht.svg | leerer Platzhalter | 20 |  |
-| Fensterbank ausmessen innen und außen: Überstand. Gefälle | `/ratgeber/fensterbank-ausmessen/` | 8.851 | 10 | 5 | 1 | 1 | 5 | 4 | fensterbank.svg | leerer Platzhalter | 18 |  |
+| Fensterbank ausmessen innen und außen: Überstand, Gefälle | `/ratgeber/fensterbank-ausmessen/` | 8.851 | 10 | 5 | 1 | 1 | 5 | 4 | fensterbank.svg | leerer Platzhalter | 18 |  |
 | Fenstertausch Altbau: so vermeidest du Schimmel an der Laibung | `/ratgeber/fenstertausch-altbau/` | 11.383 | 10 | 5 | 1 | 1 | 9 | 2 | fenstertausch-altbau.svg | leerer Platzhalter | 20 |  |
-| Kellerfenster ausmessen: Maueröffnung. Zarge und Lichtschacht | `/ratgeber/kellerfenster-ausmessen/` | 9.560 | 9 | 5 | 2 | 1 | 6 | 4 | kellerfenster.svg | leerer Platzhalter | 18 |  |
-| Lüftungskonzept beim Fenstertausch: Pflicht. Lösungen. Kosten | `/ratgeber/lueftungskonzept-fenstertausch/` | 9.944 | 9 | 5 | 3 | 1 | 7 | 6 | lueftungskonzept.svg | Waschbär-Foto | 20 | letzter Schritt mit Waschbär-Foto |
-| RAL-Montage Fenster: 3 Ebenen einfach erklärt. mit Prüfliste | `/ratgeber/ral-montage-fenster/` | 11.086 | 11 | 5 | 1 | 1 | 9 | 6 | ral-montage.svg | Waschbär-Foto | 20 | letzter Schritt mit Waschbär-Foto |
-| Uw-Wert beim Fenster: Bedeutung. Berechnung. Förderung 2026 | `/ratgeber/uw-wert-fenster/` | 11.673 | 10 | 5 | 3 | 1 | 10 | 3 | uw-wert.svg | leerer Platzhalter | 18 | Inhaltsverzeichnis: „U w -Wert“ mit Lücke |
+| Kellerfenster ausmessen: Maueröffnung, Zarge und Lichtschacht | `/ratgeber/kellerfenster-ausmessen/` | 9.560 | 9 | 5 | 2 | 1 | 6 | 4 | kellerfenster.svg | leerer Platzhalter | 18 |  |
+| Lüftungskonzept beim Fenstertausch: Pflicht, Lösungen, Kosten | `/ratgeber/lueftungskonzept-fenstertausch/` | 9.944 | 9 | 5 | 3 | 1 | 7 | 6 | lueftungskonzept.svg | Waschbär-Foto | 20 | letzter Schritt mit Waschbär-Foto |
+| RAL-Montage Fenster: 3 Ebenen einfach erklärt, mit Prüfliste | `/ratgeber/ral-montage-fenster/` | 11.086 | 11 | 5 | 1 | 1 | 9 | 6 | ral-montage.svg | Waschbär-Foto | 20 | letzter Schritt mit Waschbär-Foto |
+| Uw-Wert beim Fenster: Bedeutung, Berechnung, Förderung 2026 | `/ratgeber/uw-wert-fenster/` | 11.673 | 10 | 5 | 3 | 1 | 10 | 3 | uw-wert.svg | leerer Platzhalter | 18 | Inhaltsverzeichnis: „U w -Wert“ mit Lücke |
 
 ### 4.2 Wissen für Fensterbauer (5) und Rechtstexte mit Fehlerseite (8)
 
@@ -127,9 +127,9 @@ Je Seite (Länge am Telefon in CSS-Pixeln, ein Bildschirm sind 844; „× Grün�
 | Seite | Adresse | Länge | × Grün |
 | --- | --- | ---: | ---: |
 | Aufmaß kostenpflichtig? Anfahrtspauschale richtig vereinbaren | `/fuer-fensterbauer/aufmass-kostenpflichtig/` | 8.529 | 8 |
-| Erstaufmaß und Feinaufmaß: Unterschied. Prüfliste. Toleranzen | `/fuer-fensterbauer/erstaufmass-feinaufmass/` | 9.760 | 10 |
-| Falsches Aufmaß: Wer haftet. wenn Fenster nicht passen? | `/fuer-fensterbauer/falsches-aufmass-haftung/` | 9.855 | 10 |
-| Fensterbau-Software 2026: ERP. Aufmaß-App oder Selbstaufmaß? | `/fuer-fensterbauer/fensterbau-software/` | 9.177 | 10 |
+| Erstaufmaß und Feinaufmaß: Unterschied, Prüfliste, Toleranzen | `/fuer-fensterbauer/erstaufmass-feinaufmass/` | 9.760 | 10 |
+| Falsches Aufmaß: Wer haftet, wenn Fenster nicht passen? | `/fuer-fensterbauer/falsches-aufmass-haftung/` | 9.855 | 10 |
+| Fensterbau-Software 2026: ERP, Aufmaß-App oder Selbstaufmaß? | `/fuer-fensterbauer/fensterbau-software/` | 9.177 | 10 |
 | Geplatzter Aufmaßtermin: Was er kostet und wie Sie vorbeugen | `/fuer-fensterbauer/geplatzter-aufmasstermin/` | 9.059 | 8 |
 | Impressum | `/impressum/` | 1.454 | 1 |
 | Datenschutz | `/datenschutz/` | 20.423 | 1 |
