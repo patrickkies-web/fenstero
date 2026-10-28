@@ -578,11 +578,12 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     das Gewebe des Insektenschutzes als gleichmäßigen Schleier (`meshCss`); die WebGL-Bühne liest weiter `facadeBg` und `meshBg` (_bg).
     Farbblatt und Fassade am Zahnrad im Look der Bögen, am Laptop rechts als Spalte angedockt.
   - Testansicht für Fensterbauer (Wunsch des Inhabers, 28.10.2026: „Selbst ausprobieren“ soll nicht in die Führung und nicht in das
-    eigene Aufmaß mit „an beliebig viele“ führen): `/app/?ausprobieren` zeigt den Konfigurator wie auf der Website eines Betriebs
-    („Muster Fensterbau“, Firmenfarbe Violett). Hinweise als Anthrazit-Karten mit violettem Punkt (am Anfang, bei den Kontaktdaten, über
-    der Bestätigung), am Laptop zusätzlich ein Zeichen „Test“ in Indigo neben dem Namen. Am Ende eine DNA-Folie: Bühne mit dem Blatt
-    (Kopfband mit dem Namen des Betriebs), daneben die E-Mail an den Betrieb als einzige weiße Karte mit dem Anhang als Zeile, eine volle
-    Pille „Pakete ansehen“ und „Noch einmal ausprobieren“ als Umriss. Ablauf und Technik in docs/INSTANZEN.md.
+    eigene Aufmaß mit „an beliebig viele“ führen; jeder Weg zum Ausprobieren zeigt, dass man im Bereich zum Testen ist; am Ende die
+    Ansicht des Kunden eines Betriebs mit Paket): `/app/?ausprobieren[=<paket>]` zeigt den Konfigurator wie auf der Website eines
+    Betriebs (Fensterbau Brandt, Merkmale des Pakets). Hinweise als Anthrazit-Karten mit violettem Punkt (am Anfang, bei den
+    Kontaktdaten, über der Bestätigung), im Kopf jeder Folie „Testansicht“ mit violettem Punkt unter dem Namen. Das Ende ist die
+    Bestätigung des Kunden, darüber „Pakete ansehen“ als Umriss-Pille; auf Wunsch eine DNA-Folie mit dem Blatt auf der Bühne (Kopfband mit
+    dem Namen des Betriebs) und der E-Mail an den Betrieb als einziger weißer Karte. Ablauf und Technik in docs/INSTANZEN.md.
   - Restliche Folien (Wunsch des Inhabers, 28.10.2026: „Die anderen Bereiche machst du auch. Musst selber gucken, welche Folien da noch
     fehlen.“): „Deine Fenster“ (Bühne mit den Fenstern als Strichzeichnungen, Stand mit Balken, Karten auf Anthrazit), „Fürs Angebot“
     1–3 (Haus mit Kapselreihe der getauschten Fenster, Zeitleiste und Budget, Aufmaßblatt, das sich beim Tippen füllt), Aufmaßblatt,

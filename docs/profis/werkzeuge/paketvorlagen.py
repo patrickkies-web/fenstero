@@ -94,6 +94,11 @@ def fuer_web(html, p):
     assert html.count(leiste) == 1, p
     html = html.replace(leiste, '<div class="ez-ml ez-ml--zurueck" data-theme="dunkel">\n    <div class="ez-huelle">\n      <a class="ez-ml__zurueck" href="/fuer-fensterbauer/#pakete" aria-label="Zurück zu den Paketen" title="Zurück zu den Paketen">'
                         '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 3 4.5 7l4 4"/></svg></a>')
+    # „Fenster planen“ öffnet die Testansicht der App in diesem Paket (Wunsch des Inhabers, 28.10.2026: jeder Weg zum Ausprobieren führt
+    # in den Bereich zum Testen); in der Vorlage bleibt es ein Muster-Ziel mit Rückmeldung
+    html = html.replace('href="#" tabindex="-1" data-vorlage="ziel.konfigurator"', 'href="/app/?ausprobieren=%s" tabindex="-1" data-vorlage="ziel.konfigurator"' % p)
+    html = html.replace('href="#" data-vorlage="ziel.konfigurator"', 'href="/app/?ausprobieren=%s" data-vorlage="ziel.konfigurator"' % p)
+    assert 'href="#" data-vorlage="ziel.konfigurator"' not in html and 'href="#" tabindex="-1" data-vorlage="ziel.konfigurator"' not in html, p
     assert '<script>' not in html and 'noindex' in html, p
     return html
 

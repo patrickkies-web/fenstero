@@ -2439,19 +2439,23 @@ const STORE = 'aufmass.v1';
    'instanz.<id8>.aktiv'; ein Code aus #k-… (Signature-Einladung, „auf anderem Gerät weitermachen“) hat Vorrang. Kontakt ist Pflicht,
    nach dem Senden kommen Bestätigung und „Meine Anfrage als PDF“; sobald die Bestätigung verlassen wird, bleiben auf dem Gerät nur
    Nummer, Datum und Betrieb (K1.16). Merkmale nur über INST.m (Pakete.oeffentlich), nie über den Namen des Pakets. */
-/* Testansicht für Fensterbauer (/app/?ausprobieren, „Selbst ausprobieren“ auf der Seite für Fensterbauer): der Konfigurator so, wie ihn
-   die Kunden eines Betriebs auf dessen Website erleben, als Instanz „Muster Fensterbau“, ganz im Browser. Kein Aufruf an den Server der
-   Instanzen (kein Code vom Server, kein Zwischenstand, keine Fotos hinauf), Senden ist eine Simulation (probeSenden) und zeigt danach,
-   wie die Anfrage beim Betrieb ankommt. Auf einer echten Instanz (KONFIG.instanz vom Server) gibt es sie nicht. */
+/* Testansicht für Fensterbauer (/app/?ausprobieren[=<paket>]: „Selbst ausprobieren“ auf der Seite für Fensterbauer, „Fenster planen“ in
+   den Paket-Beispielen): der Konfigurator so, wie ihn die Kunden eines Betriebs mit diesem Paket auf dessen Website erleben, am Beispiel
+   des erfundenen Betriebs Fensterbau Brandt (wie die Beispiele der Seite), ganz im Browser. Merkmale aus pakete.js (ohne Angabe Plus),
+   Firmenfarbe Aquatürkis der Brandt-Palette, wo das Paket eine Farbe hat. Kein Aufruf an den Server der Instanzen (kein Code vom Server,
+   kein Zwischenstand, keine Fotos hinauf), Senden ist eine Simulation (probeSenden). Auf einer echten Instanz (KONFIG.instanz vom
+   Server) gibt es sie nicht. */
 const PROBE = (() => { try { return new URLSearchParams(location.search).has('ausprobieren'); } catch (e) { return false; } })() && !(window.KONFIG && window.KONFIG.instanz);
+const PROBE_PAKET = (() => { if (!PROBE) return ''; let p = ''; try { p = String(new URLSearchParams(location.search).get('ausprobieren') || '').toLowerCase(); } catch (e) { p = ''; } const P = window.Pakete; return P && P.gueltig(p) ? p : 'plus'; })();
 if (PROBE) {
-  (window.KONFIG = window.KONFIG || {}).instanz = { id: 'muster01', v: 1, host: location.host, name: 'Muster Fensterbau', du: false, status: 'aktiv', vorschau: false, demo: true, probe: true,
-    m: { gestaltung: 'eigen', logo: false, farbe: true, fotos: 6, startansicht: true, kennzeichnung: 'dezent', pdfKennzeichnung: 'dezent', rechtNennung: 'name', kopieKunde: true, dashboard: false },
-    auftritt: { logo: '', grund: 'dunkel', col: '#897efc', gruss: { sie: '', du: '' }, ap: '', foto: '', tel: '', mail: '', web: '', ort: '', tiefe: '', std: '' },
-    start: { kicker: '', ueberschrift: '', text: '', bilder: [] }, farbe: '#897efc', akzent: '#897efc', kontakt: { tel: '', mail: '' }, logo: '', grenzen: { fenster: 50 } };
+  const P = window.Pakete, m = P ? P.oeffentlich(P.merkmale(PROBE_PAKET)) : { kopieKunde: true }, farbe = m.farbe ? '#2ab4bd' : '';
+  (window.KONFIG = window.KONFIG || {}).instanz = { id: 'muster01', v: 1, host: location.host, name: 'Fensterbau Brandt', du: false, status: 'aktiv', vorschau: false, demo: true, probe: true, m: m,
+    auftritt: { logo: '', grund: 'dunkel', col: farbe, gruss: { sie: '', du: '' }, ap: 'Petra Brandt', foto: '', tel: '', mail: '', web: '', ort: '', tiefe: '', std: '' },
+    start: { kicker: '', ueberschrift: '', text: '', bilder: [] }, farbe: farbe, akzent: farbe, kontakt: { tel: '', mail: '' }, logo: '', grenzen: { fenster: 50 } };
   /* Firmenfarbe wie auf der Seite einer Instanz (der Server setzt dort --accent im Kopf, functions/instanz/seiten.js) */
-  try { document.documentElement.style.setProperty('--accent', '#897efc'); document.documentElement.style.setProperty('--accent-soft', 'rgba(137, 126, 252, .14)'); } catch (e) { /* ok */ }
+  if (farbe) { try { document.documentElement.style.setProperty('--accent', farbe); document.documentElement.style.setProperty('--accent-soft', 'rgba(42, 180, 189, .14)'); } catch (e) { /* ok */ } }
 }
+const probePaketName = () => { const P = window.Pakete; return (P && P.PAKETE && P.PAKETE[PROBE_PAKET] && P.PAKETE[PROBE_PAKET].name) || PROBE_PAKET; };
 const INST = window.KONFIG && window.KONFIG.instanz && typeof window.KONFIG.instanz === 'object' && /^[a-z0-9]{8}$/.test(String(window.KONFIG.instanz.id || '')) ? window.KONFIG.instanz : null;
 const INST_M = INST ? INST.m || {} : {};
 const INST_KEY = INST ? 'instanz.' + INST.id : '';
@@ -5873,7 +5877,7 @@ function wohinBlatt() {
   }
   h += '<div class="wo-knoepfe">' + (wiz && nameDa(w) && fensterOffen() ? '<button type="button" class="btn primary" data-act="wohin-speichern">Speichern und zur Liste</button>' : '') +
     '<button type="button" class="btn ghost" data-act="wohin-liste">' + (S.screen === 'home' ? 'Zur Liste' : INST ? 'Zur Startseite' : lk ? 'Zur Startseite des Aufmaßes' : 'Zur Fensterliste') + '</button>' +
-    (lk ? '' : '<button type="button" class="link wo-web" data-act="wohin-web">Zur Startseite von eeziframes</button>') + '</div></div>';
+    (lk ? (PROBE ? '<a class="link wo-web" href="' + PROBE_FB + '">Testansicht beenden: zur Seite für Fensterbauer</a>' : '') : '<button type="button" class="link wo-web" data-act="wohin-web">Zur Startseite von eeziframes</button>') + '</div></div>';
   return h;
 }
 /* Status eines Fensters in Listen: nur vollständig oder offen, keine Angaben (die stehen im Aufmaßblatt) */
@@ -7683,7 +7687,8 @@ function sendeText() {
 /* Kopf auf der Startseite: Zeichen (Logo oder Initiale) und Name des Betriebs */
 function instKopf() {
   const d = lkDaten(), E = window.Einladung;
-  return '<span class="hdr-inst">' + (E ? E.zeichen(d.name, d.p, 'klein') : '') + '<span class="hdr-name">' + esc(d.name) + '</span>' + (PROBE ? '<span class="probe-chip" title="Testansicht für Fensterbauer: Nichts wird gesendet">Test</span>' : '') + '</span>';
+  if (PROBE) return '<span class="hdr-inst">' + (E ? E.zeichen(d.name, d.p, 'klein') : '') + '<span class="probe-namen"><span class="hdr-name">' + esc(d.name) + '</span><span class="probe-unter">Testansicht</span></span></span>'; // Testansicht: auf jeder Folie unter dem Namen
+  return '<span class="hdr-inst">' + (E ? E.zeichen(d.name, d.p, 'klein') : '') + '<span class="hdr-name">' + esc(d.name) + '</span></span>';
 }
 /* Kontakt auf der Website einer Instanz: Name (mindestens 2 Zeichen) und Telefon (mindestens 6 Ziffern) oder E-Mail, dieselbe Regel
    wie der Server (Instanzregeln.telOk/mailOk, functions/api/konten.js); ein angefangenes, falsches Feld zählt als Fehler */
@@ -7725,13 +7730,14 @@ function instWeiterKarte(du) {
   }
   return h + '</div>';
 }
-/* Testansicht für Fensterbauer: Hinweis am Anfang (erste Seite), danach knapp über der Liste */
-function probeStart(knapp) {
+/* Testansicht für Fensterbauer: Hinweis am Anfang (erste Seite), knapp über der Liste und nach dem Senden */
+function probeStart(art) {
   if (!PROBE) return '';
-  return '<section class="probe-start' + (knapp ? ' knapp' : '') + '" role="note" aria-label="Testansicht für Fensterbauer"><span class="dna-label">Testansicht für Fensterbauer</span>' +
-    (knapp ? '<p>Hier wird nichts gesendet. Am Ende sehen Sie, wie die Anfrage bei Ihnen ankommt.</p>'
-      : '<p class="probe-start-titel">So erleben Ihre Kunden Ihren Konfigurator.</p><p>„Muster Fensterbau“ steht für Ihren Betrieb: Auf Ihrer Website trägt der Konfigurator Ihren Namen und Ihre Farbe. Probieren Sie alles aus, vom ersten Maß bis zum Absenden. Gesendet wird nichts; am Ende sehen Sie, wie die Anfrage bei Ihnen ankommt.</p>') +
-    '<a class="link probe-start-link" href="' + PROBE_FB + '">Zurück zur Seite für Fensterbauer</a></section>';
+  const zurueck = '<a class="link probe-start-link" href="' + PROBE_FB + '">Zurück zur Seite für Fensterbauer</a>';
+  if (art === 'liste') return '<section class="probe-start knapp" role="note" aria-label="Testansicht für Fensterbauer"><span class="dna-label">Testansicht für Fensterbauer</span><p>Hier wird nichts gesendet. Am Ende sehen Sie den Abschluss, wie ihn Ihr Kunde sieht.</p>' + zurueck + '</section>';
+  if (art === 'gesendet') return '<section class="probe-start knapp" role="note" aria-label="Testansicht für Fensterbauer"><span class="dna-label">Testansicht für Fensterbauer</span><p>So sieht Ihr Kunde die Seite, wenn er nach dem Senden wiederkommt. Gesendet wurde nichts.</p><div class="probe-knoepfe"><a class="probe-hinweis-los" href="' + PROBE_FB + '#pakete">Pakete ansehen</a><button type="button" class="link probe-start-link" data-act="probe-neu">Noch einmal ausprobieren</button></div></section>';
+  return '<section class="probe-start" role="note" aria-label="Testansicht für Fensterbauer"><span class="dna-label">Testansicht für Fensterbauer</span>' +
+    '<p class="probe-start-titel">So erleben Ihre Kunden Ihren Konfigurator.</p><p>Am Beispiel von Fensterbau Brandt, einem erfundenen Betrieb, im Paket ' + esc(probePaketName()) + ': genau der Ablauf, den Ihre Kunden auf Ihrer Website sehen, mit Ihrem Namen statt Brandt. Probieren Sie alles aus, vom ersten Maß bis zum Absenden. Gesendet wird nichts.</p>' + zurueck + '</section>';
 }
 /* Startseite einer Instanz in allen Zuständen (erste Seite, Liste, gesendet, Planung nicht mehr da, Nachbesserung einer Einladung) */
 function instHome() {
@@ -7743,7 +7749,7 @@ function instHome() {
   if (S.instZu && !S.sent) return instZuSeite();
   if (S.sent) {
     const test = S.sent.art === 'test';
-    const html = '<section class="hero lk"><div class="ein-start-in">' + ok + '<p class="eyebrow kicker">' + (test ? 'Testanfrage ' : 'Anfrage ') + esc(S.sent.nr || '') + '</p><h1>' + (S.sent.anderswo ? 'Schon <span class="ak">gesendet</span>.' : 'Danke, <span class="ak">gesendet</span>.') + '</h1>' +
+    const html = probeStart('gesendet') + '<section class="hero lk"><div class="ein-start-in">' + ok + '<p class="eyebrow kicker">' + (test ? 'Testanfrage ' : 'Anfrage ') + esc(S.sent.nr || '') + '</p><h1>' + (S.sent.anderswo ? 'Schon <span class="ak">gesendet</span>.' : 'Danke, <span class="ak">gesendet</span>.') + '</h1>' +
       '<p class="ein-lead">' + esc(name) + T(' hat Ihre Anfrage seit ', ' hat deine Anfrage seit ') + esc(sentWhen()) + T(' und meldet sich bei Ihnen.', ' und meldet sich bei dir.') + '</p>' +
       '<div class="ein-cta"><button type="button" class="btn primary" data-act="inst-weitere">Weitere Anfrage starten' + pf + '</button></div></div></section>' + weg +
       '<section class="card inst-geraet-karte"><p class="eyebrow">Auf diesem Gerät</p><p>' + T('Hier sind nur Nummer und Datum Ihrer Anfrage gespeichert; Maße, Fotos und Kontaktdaten sind von diesem Gerät gelöscht.', 'Hier sind nur Nummer und Datum deiner Anfrage gespeichert; Maße, Fotos und Kontaktdaten sind von diesem Gerät gelöscht.') + '</p><div class="pill-row"><button type="button" class="pill" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>' +
@@ -7757,7 +7763,7 @@ function instHome() {
   }
   if (S.nb) return linkHomeInhaltAlt(I);
   if (n || angelegt() >= GRENZE.fenster) {
-    const html = weg + probeStart(true) + (web ? '' : '<div class="lk-kopf">' + E.kopf({ name: name, p: p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '', instanz: I }) + '</div>') + uebersichtKopf(T) +
+    const html = weg + probeStart('liste') + (web ? '' : '<div class="lk-kopf">' + E.kopf({ name: name, p: p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '', instanz: I }) + '</div>') + uebersichtKopf(T) +
       '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
       (vorschau() ? '' : web ? instWeiterKarte(du) : linkMerk(name, du)) + kontakt() + rechtLinks();
     return { html: html, bar: n ? { label: 'Weiter zum Absenden', act: 'go', v: 'anfrage' } : null };
@@ -7797,7 +7803,8 @@ function probeGesendet() {
   if (!S.sent || S.sent.kurz) return instHome();
   if (S.probeSicht !== 'betrieb') {
     const v = instGesendet();
-    return Object.assign({}, v, { html: '<div class="probe-hinweis" role="note"><b>Testansicht</b><span>So sieht Ihr Kunde die Bestätigung. Danach sehen Sie, wie die Anfrage bei Ihnen ankommt.</span><button type="button" class="probe-hinweis-los" data-act="probe-betrieb">So kommt sie bei Ihnen an</button></div>' + v.html, bar: { label: 'So kommt die Anfrage bei Ihnen an', act: 'probe-betrieb' } });
+    return Object.assign({}, v, { html: '<div class="probe-hinweis" role="note"><b>Testansicht · Ende</b><span>So sieht Ihr Kunde den Abschluss auf Ihrer Website. Gesendet wurde nichts.</span>' +
+      '<div class="probe-knoepfe"><a class="probe-hinweis-los" href="' + PROBE_FB + '#pakete">Pakete ansehen</a><button type="button" class="link probe-start-link" data-act="probe-betrieb">So käme die Anfrage bei Ihnen an</button></div></div>' + v.html });
   }
   const pr = S.proj, n = S.windows.length, kunde = String(pr.name || 'Ihr Kunde').slice(0, 60), offen = AW.klaerung(S.windows, pr, {}).length;
   const fotos = S.windows.reduce((a, w) => a + bilderVon(w).length, 0), nr = S.sent.nr || '';
@@ -7812,7 +7819,7 @@ function probeGesendet() {
     '<p>Ihr Kunde hat jetzt seine Bestätigung. Sie bekämen in diesem Moment diese E-Mail, das Aufmaßblatt hängt als PDF an. In der Testansicht wurde nichts gesendet.</p></div>' + mail +
     '<ul class="probe-weiter"><li><b>Angebot.</b> Sie rufen an oder schreiben das Angebot, mit allen Maßen und Wünschen.</li><li><b>Feinaufmaß.</b> Vor der Fertigung messen Sie einmal vor Ort nach.</li></ul>' +
     '<div class="probe-aktionen"><a class="dna-pille" href="' + esc(PROBE_FB) + '#pakete">Pakete ansehen' + abPfeil + '</a><button type="button" class="dna-pille dna-pille--leise" data-act="probe-neu">Noch einmal ausprobieren</button></div>' +
-    '<button type="button" class="link probe-zurueck" data-act="probe-kunde">Bestätigung des Kunden noch einmal ansehen</button>';
+    '<button type="button" class="link probe-zurueck" data-act="probe-kunde">Zurück zur Bestätigung des Kunden</button>';
   return { html: lgKopf(false) + dnaTisch(abBuehne('ab-blatt', 'Bei Ihnen eingegangen', abPapier(true, false, lkDaten().name)), '<div class="ab-inhalt">' + html + '</div>'), dna: true, cls: 'dna ab ab2 dt probe-ende', voll: true, bar: null };
 }
 const PROBE_FB = '/fuer-fensterbauer/';
