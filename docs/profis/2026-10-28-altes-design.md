@@ -148,6 +148,8 @@ auf `#1f1f1f`, Cream-Knöpfe. Die Fehlerseite erscheint auch unter `/betrieb/`, 
 `/vorschau/app-start-a1614b4e6b/` und `/vorschau/fensterbauer-79b44cf9f8/`: nicht verlinkt, mit noindex, aber über die Adresse
 erreichbar. Sie zeigen den Stand, den Startseite und Verkaufsseite inzwischen ersetzt haben.
 
+**Gelöscht am 28.10.2026 auf Wunsch des Inhabers** („die Seiten, wo keiner eh herkommt … kannst du auch einfach löschen“).
+
 ### Schon in der Design-DNA (12)
 
 Startseite Hauseigentümer (`/`) und Fensterbauer (`/fensterbauer`), Verkaufsseite `/fuer-fensterbauer/`, Paket-Vorschau
@@ -159,3 +161,13 @@ Essential, Plus und Signature (`/vorschau/paket-beispiel/`), App mit Start, Füh
 - Anmelde-Mails in Supabase (`supabase/vorlagen/anmeldecode.html`, `registrierung.html`): noch Grün auf `#161616`.
 - Mails des Servers an Fensterbauer (Code fürs Dashboard, neue Anfrage, Benachrichtigung in `functions/api/`): noch `#161616`.
 - Das Aufmaßblatt (PDF) ist seit dem 27.10.2026 in der Druckpalette der Design-DNA.
+
+## Gegenprobe nach dem Umbau (28.10.2026, abends)
+
+Dasselbe Werkzeug noch einmal über alle 61 Ansichten (lokaler Testserver, Stand von `main` nach dem Umbau der Ratgeber,
+Protokoll docs/profis/2026-10-28-ratgeber-dna.md). Von den 49 alten Ansichten stehen 41 im neuen Design: alle Ratgeber, das Wissen
+für Fensterbauer, die Rechtstexte, die Fehlerseite und Impressum, Datenschutz, Fehler- und Zustandsseite der Konfiguratoren. Die
+zwei alten Vorschauen sind gelöscht. Alt sind noch sechs Ansichten des Konfigurators beim Fensterbauer: Startbildschirm in Essential,
+Plus und Signature, das Blatt „So funktioniert es“ und das Dashboard von Signature (Anmeldung und angemeldet). Sie erscheinen nur auf
+der Domain eines eingerichteten Betriebs; online gibt es noch keinen, und „Selbst ausprobieren“ führt in die App, die schon neu ist.
+Vor dem ersten eingerichteten Betrieb umbauen.
