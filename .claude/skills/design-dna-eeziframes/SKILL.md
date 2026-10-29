@@ -271,6 +271,13 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Text überall ab 13 px. Protokoll docs/profis/2026-10-26-startseite-dna.md, Abschnitt „Umbau 29.10.2026“. Vorschläge für seine DNA:
   „Ein Objekt zum Anfassen darf von selbst pendeln, bis der Besucher es berührt“ (Abschnitt 2, Bewegungs-Gene) und „Werkzeug vor
   Vermittlung: Was der Besucher selbst tun kann, steht vorn; Weitergabe an Dritte ist ein leiser Zusatz“ (Abschnitt 4).
+- Proportionen des Konfigurators (Wunsch des Inhabers, 29.10.2026, vom iPhone aus): Am Telefon ist die helle Bühne mit dem Element ein
+  Fünftel höher (Wünsche 272 → 326 px, Fotos 250 → 300, Ergebnis 390 → 444; Messen füllt den Bildschirm schon); am Laptop bleibt die
+  Bühne, dort „kein Platzproblem“. Knöpfe, Chips, Kacheln und Zeilen überall eine Spur kleiner (52 → 48, Schrift 15 → 14, Luft 10 → 8,
+  Innenränder enger; Ziele bleiben 44 px, weil Prüfsuite und DNA es verlangen), weil sie „klobig“ wirkten und „viel Luft“ hatten. Gewählte Kacheln sind weiß mit schwarzer Schrift, ohne violettes
+  Licht, Ring und Punkt; gewählte Farbtupfen tragen einen weißen Ring. Erst Vorher/Nachher einer Folie gezeigt, dann übernommen
+  (Block „Proportionen des Konfigurators“ am Ende von web/assets/app.css; Protokoll docs/profis/2026-10-29-konfigurator-proportionen.md).
+  Vorschlag für seine DNA (Abschnitt 9): „Gewählt heißt Weiß, nie Leuchten; Ziele 44–48 px, Schrift 14 px in Knöpfen und Chips.“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
