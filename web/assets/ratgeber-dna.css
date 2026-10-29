@@ -111,6 +111,7 @@ body.rg-seite { margin: 0; background: var(--schwarz); color: var(--weiss); font
 .rg strong, .rg b { font-weight: 500; color: var(--tinte); }
 .rg a { color: var(--tinte); text-decoration: underline; text-decoration-color: var(--linie); text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .rg a[href^="#q"] { display: inline-block; margin: -4px -1px; padding: 4px 3px; font-size: 14px; line-height: 1; color: var(--tinte-2); text-decoration-color: var(--haar); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rg .rg-nb { white-space: nowrap; }
 .rg sub, .rg sup { font-size: 13px; line-height: 0; }
 .rg h1 sub, .rg h1 sup { font-size: 22px; }
 .rg h2 sub, .rg h2 sup { font-size: 20px; }

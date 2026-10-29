@@ -114,6 +114,9 @@ body.rg-seite { margin: 0; background: var(--schwarz); color: var(--weiss); font
 .rg a { color: var(--tinte); text-decoration: underline; text-decoration-color: var(--linie); text-decoration-thickness: 1px; text-underline-offset: 3px; }
 /* Belegnummern [1]: Ziel etwa 24 px (Polster), unterstrichen, zurück über den Link in den Quellen */
 .rg a[href^="#q"] { display: inline-block; margin: -4px -1px; padding: 4px 3px; font-size: 14px; line-height: 1; color: var(--tinte-2); text-decoration-color: var(--haar); white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* Belegnummern samt Leerzeichen davor und Satzzeichen danach in einer Spanne (scripts/ratgeber-bausteine.mjs): Nach dem Inline-Block
+   brach am Telefon sonst der Punkt allein in die nächste Zeile, und keine Zeile beginnt mit einer Nummer */
+.rg .rg-nb { white-space: nowrap; }
 /* Tiefstellung (Uw, Ug): feste Größen der Skala statt krummer Bruchteile */
 .rg sub, .rg sup { font-size: 13px; line-height: 0; }
 .rg h1 sub, .rg h1 sup { font-size: 22px; }

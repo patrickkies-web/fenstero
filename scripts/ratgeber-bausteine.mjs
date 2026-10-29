@@ -18,9 +18,9 @@
      nicht mehr vor
    - Feinsatz nach dem Gremium vom 28.10.2026: geschützte Leerzeichen zwischen Zahl und Einheit (auch § 4, DIN 18202, 2 × 3), Zahlen
      in Tabellen mit kleiner Einheit, das Ergebnis („es zählt“) als Zahl-Held, „Typische Fehler“ mit Kreuz, im Kasten „Häufiger Fehler“
-     der erste Satz kräftig, Belegnummern mit Rückweg aus den Quellen
+     der erste Satz kräftig, Belegnummern mit Rückweg aus den Quellen; Belegnummer und folgendes Satzzeichen ohne Umbruch (.rg-nb, 29.10.2026)
    - Muster „Antwort zuerst“ (29.10.2026, docs/SEO.md): die Symbole der Antwort-Kacheln (.rg-faelle) aus einem Satz (SYMBOLE); im HTML
-     steht <svg class="rg-sym" data-sym="NAME"></svg>, das Skript setzt Maße und Zeichen ein. Merksatz, Zahl-Kacheln und Lösungs-Karte
+     steht <svg class="rg-sym" data-sym="NAME"></svg>, das Skript setzt Maße und Zeichen ein (ein unbekannter Name ist ein Fehler). Merksatz, Zahl-Kacheln und Lösungs-Karte
      sind reines HTML mit den Klassen rg-merk, rg-zahlen und rg-loesung (Gestaltung in docs/profis/ratgeber-vorschau/ratgeber.css)
    Neue Seite: Eintrag in SEITEN_INFO und im passenden Schritt von WEG (Hauseigentümer) bzw. in FENSTERBAUER, dann
      node scripts/ratgeber-bausteine.mjs
@@ -183,24 +183,77 @@ const tabellen = (main) => main.replace(/<td( data-k="([^"]*)")?>([\s\S]*?)<\/td
 /* „Typische Fehler“: Liste mit Kreuz; im Kasten „Häufiger Fehler“ der erste Satz kräftig (Text gleich, nur Auszeichnung) */
 const fehler = (main) => main.replace(/(<h2[^>]*>[^<]*Fehler[^<]*<\/h2>\s*)<ul(?: class="rg-fehler-liste")?>/g, '$1<ul class="rg-fehler-liste">')
   .replace(/(<aside class="rg-tipp fehler"><p class="eyebrow">[^<]*<\/p><p>)(?!<b>)((?:(?!<\/p>)[\s\S])*?[.!?])(?=\s|<\/p>)/g, '$1<b>$2</b>');
-/* Symbole der Antwort-Kacheln: ein kleiner Satz einheitlicher Zeichen ohne Text, 24 × 24, Strich 1,8 mit runden Enden in currentColor,
-   Punkte gefüllt, für Bildschirmleser verborgen (der Titel der Kachel sagt alles). Scheibe: zwei Gläser mit Randverbund wie in der
-   Zeichnung fenster-beschlagen.svg, die Tropfen innen (links, Raum), zwischen den Gläsern oder außen (rechts). Software: Fertigung
-   (Branchensoftware, ERP), Beleg (Handwerkersoftware), Telefon mit Maß (Aufmaß-App vor Ort), Maßband (Selbstaufmaß) */
+/* Symbole der Antwort-Kacheln: ein Satz einheitlicher Zeichen ohne Text, 24 × 24, Strich 1,8 mit runden Enden und Ecken in currentColor,
+   Punkte gefüllt, für Bildschirmleser verborgen (der Titel der Kachel sagt alles). Im HTML steht nur der Name (data-sym), die Zeichen
+   setzt dieses Skript ein; ein Name, den es hier nicht gibt, ist ein Fehler (Lauf und Prüfsuite melden ihn). Rahmen: ein Fenster von
+   vorn (4 bis 20 breit, 3 bis 21 hoch), Scheibe: das Isolierglas im Schnitt wie in der Zeichnung fenster-beschlagen.svg.
+   Prüfen: Tropfen innen (links, Raum), zwischen den Gläsern oder außen (rechts), Dichtung, Beschlag (Griff), Fuge zur Wand, Thermometer,
+   Kalender, Flamme (Feuerzeugtest), Uhr (Lebensdauer). Entscheiden und Vergleichen: Fenster (neu), Werkzeug (reparieren), Euro (Kosten,
+   Preis), Prozent (Förderung), Liste (Checkliste, was hineingehört), Haken (prüfen, abhaken), Waage (abwägen, Nachteile).
+   Auswählen: Dreh, Dreh-Kipp und zwei Flügel mit dem Öffnungszeichen nach DIN, fest verglast, Material (Kunststoff oder Holz, Holz-Alu),
+   Glas zweifach, Rahmen und Glas (Uw), Raster (Maßordnung), Maße. Ausmessen: Maßband (selbst messen), Telefon mit Maß (Aufmaß-App,
+   vor Ort), Haus (Sonderfälle), Schwelle (Balkontür), Schiebetür, Rollladenkasten, Kellerfenster im Lichtschacht, Fensterbank, Brüstung
+   (Höhe ab Fußboden), Geländer, Aufmaßblatt. Einbauen und Recht: Lüftung, Paragraf. Fensterbauer: Fertigung (Branchensoftware, ERP,
+   Betrieb), Beleg (Angebot, Handwerkersoftware), Auto (Anfahrt), Brief (E-Mail), Anfrage (Eingang), Konfigurator (Website mit
+   Planer), KI (Funken), Magnet (Anfragen gewinnen) */
 const SCHEIBE = '<path d="M8 3h8v18H8z"/>';
+const RAHMEN = '<path d="M4 3h16v18H4z"/>';
 const TROPFEN = (x) => [7, 12, 17].map((y) => '<circle cx="' + x + '" cy="' + y + '" r="1.5" fill="currentColor" stroke="none"/>').join('');
 export const SYMBOLE = {
   'tropfen-innen': SCHEIBE + TROPFEN(4),
   'tropfen-zwischen': SCHEIBE + TROPFEN(12),
   'tropfen-aussen': SCHEIBE + TROPFEN(20),
+  dichtung: '<path d="M5 3v18M19 3v18"/><path d="M12 3c-1.8 1.5-1.8 3 0 4.5s1.8 3 0 4.5-1.8 3 0 4.5 1.8 3 0 4.5"/>',
+  beschlag: '<rect x="8.5" y="2.5" width="7" height="9" rx="3.5"/><circle cx="12" cy="7" r="1.3" fill="currentColor" stroke="none"/><path d="M10.6 11.5v8.6a1.4 1.4 0 0 0 2.8 0v-8.6"/>',
+  fuge: '<path d="M2.5 3h6v18h-6"/><path d="M15 3h6.5v18H15z"/><path d="M11.75 4.5v2.5M11.75 10.75v2.5M11.75 17v2.5"/>',
+  temperatur: '<path d="M10 13.6V5a2 2 0 0 1 4 0v8.6a4 4 0 1 1-4 0z"/><path d="M12 9v6.5"/><circle cx="12" cy="17" r="1.6" fill="currentColor" stroke="none"/>',
+  kalender: '<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  flamme: '<path d="M12 21.5c-3.3 0-6-2.5-6-5.8 0-3.8 3.3-5.6 3.8-10.2 2.3 1.4 4 3.8 4.3 6.3.8-.6 1.4-1.6 1.5-2.8 1.6 1.6 2.4 3.9 2.4 6.2 0 3.6-2.7 6.3-6 6.3z"/>',
+  uhr: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.2"/>',
+  fenster: RAHMEN + '<path d="M12 3v18M4 12h16"/>',
+  werkzeug: '<path d="M15.5 3.5a4.5 4.5 0 0 0-4.3 5.9l-7.4 7.4a1.9 1.9 0 0 0 2.7 2.7l7.4-7.4a4.5 4.5 0 0 0 5.9-4.3l-2.9 2.9-2.6-.7-.7-2.6z"/>',
+  euro: '<path d="M17.5 6.2a7 7 0 1 0 0 11.6M4 10h9M4 14h9"/>',
+  prozent: '<path d="M18.5 5.5l-13 13"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>',
+  liste: '<path d="M4 6.5 5.5 8 8 5.5M4 12.5 5.5 14 8 11.5M4 18.5 5.5 20 8 17.5M11.5 7H20M11.5 13H20M11.5 19H20"/>',
+  haken: '<circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.7 2.7L16 9.5"/>',
+  waage: '<path d="M12 4v16M8 20h8M5 7h14"/><path d="M5 7 2.5 13h5zM19 7l-2.5 6h5z"/>',
+  dreh: RAHMEN + '<path d="M4 3l16 9L4 21"/>',
+  'dreh-kipp': RAHMEN + '<path d="M4 3l16 9L4 21M4 21l8-18 8 18"/>',
+  'zwei-fluegel': '<path d="M3 3h18v18H3zM10.5 3v18M13.5 3v18"/>',
+  fest: RAHMEN + '<path d="M8 14l6-6M9 18l8-8"/>',
+  'kunststoff-holz': '<path d="M4 3h16v18H4zM12 3v18M4 9h8M4 15h8"/><path d="M16 3c-1.5 6 1.5 12 0 18"/>',
+  'holz-alu': '<path d="M4 3h11v18H4z"/><path d="M9.5 3c-1.5 6 1.5 12 0 18"/><path d="M17.5 3H20v18h-2.5"/>',
+  'glas-zweifach': SCHEIBE,
+  'rahmen-glas': RAHMEN + '<path d="M7.5 6.5h9v11h-9z"/>',
+  raster: '<path d="M3 4h18v16H3zM3 9.3h18M3 14.7h18M10 4v5.3M15 9.3v5.4M10 14.7V20"/>',
+  masse: '<path d="M8 3h13v13H8z"/><path d="M8 20h13M8 18.5v3M21 18.5v3M4 3v13M2.5 3h3M2.5 16h3"/>',
+  'selbst-messen': '<rect x="2.5" y="5.5" width="12" height="12" rx="3"/><circle cx="8.5" cy="11.5" r="2.2"/><path d="M14.5 14.5h7v3h-7M17.5 14.5v1.3M20 14.5v1.3"/>',
+  'vor-ort': '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M9.5 11h5M9.5 9.5v3M14.5 9.5v3M11 18.5h2"/>',
+  haus: '<path d="M3 11 12 4l9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/>',
+  schwelle: '<path d="M7 17.5V3h10v14.5"/><path d="M14.5 9.5v2.5"/><path d="M2 21h3.5v-3.5h13V21H22"/>',
+  schiebetuer: '<path d="M3 3h18v18H3zM12 3v18"/><path d="M6 12h3.5M7.8 10l2 2-2 2"/>',
+  rollladen: '<path d="M3 3h18v4H3z"/><path d="M5 7v14h14V7M5 10.5h14M5 14h14"/>',
+  kellerfenster: '<path d="M2 8h20"/><path d="M4 8v13h16V8"/><path d="M7 11h10v6H7zM12 11v6"/>',
+  fensterbank: '<path d="M6 3h12v12H6zM12 3v12"/><path d="M3 15h18l-1 3.5H4z"/>',
+  bruestung: '<path d="M10 3h10v10H10zM15 3v10"/><path d="M2 21h20M5 13v8M3.5 13h3"/>',
+  gelaender: '<path d="M2.5 7h19M4.5 7v13M19.5 7v13M9.5 7v13M14.5 7v13M2 20h20"/>',
+  aufmassblatt: '<path d="M6 3h8l4 4v14H6zM14 3v4h4"/><path d="M9 11h6v6H9zM12 11v6"/>',
+  lueftung: '<path d="M3 8h10.5a2.5 2.5 0 1 0-2.5-2.5M3 12h15.5a2.5 2.5 0 1 1-2.5 2.5M3 16h7"/>',
+  paragraf: '<path d="M15 5.6C14.4 4.3 13.2 3.5 11.7 3.5c-1.9 0-3.2 1.1-3.2 2.6 0 3.6 7 2.6 7 6.6 0 1.4-1 2.5-2.4 2.8M9 18.4c.6 1.3 1.8 2.1 3.3 2.1 1.9 0 3.2-1.1 3.2-2.6 0-3.6-7-2.6-7-6.6 0-1.4 1-2.5 2.4-2.8"/>',
   fertigung: '<path d="M3 20V11l5 3v-3l5 3V4.5h5V20M2 20h20"/>',
   beleg: '<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h4"/>',
-  'vor-ort': '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M9.5 11h5M9.5 9.5v3M14.5 9.5v3M11 18.5h2"/>',
-  'selbst-messen': '<rect x="2.5" y="5.5" width="12" height="12" rx="3"/><circle cx="8.5" cy="11.5" r="2.2"/><path d="M14.5 14.5h7v3h-7M17.5 14.5v1.3M20 14.5v1.3"/>'
+  auto: '<path d="M4.5 16.5H3v-4l2.5-5h10l3.5 5h2v4h-1.5M9 16.5h6"/><circle cx="7" cy="16.5" r="2"/><circle cx="17" cy="16.5" r="2"/>',
+  brief: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/>',
+  anfrage: '<path d="M3 13.5 6 5h12l3 8.5V19H3z"/><path d="M3 13.5h5l1.5 2.5h5l1.5-2.5h5"/>',
+  konfigurator: '<rect x="2.5" y="4" width="19" height="16" rx="2"/><path d="M2.5 8h19"/><path d="M6 11h5v6H6zM8.5 11v6M14 12h4M14 15h4"/>',
+  ki: '<path d="M11 4l1.7 4.8L17.5 10.5l-4.8 1.7L11 17l-1.7-4.8L4.5 10.5l4.8-1.7z"/><path d="M18 15v5M15.5 17.5h5"/>',
+  magnet: '<path d="M6 3h4v9a2 2 0 0 0 4 0V3h4v9a6 6 0 0 1-12 0z"/><path d="M6 7h4M14 7h4"/>'
 };
 const symbole = (main) => main.replace(/<svg class="rg-sym" data-sym="([a-z-]+)"[^>]*>[\s\S]*?<\/svg>/g, (m, n) => (SYMBOLE[n]
   ? '<svg class="rg-sym" data-sym="' + n + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + SYMBOLE[n] + '</svg>'
   : m));
+/* Namen von Symbolen in einer Seite, die es im Satz nicht gibt (für den Lauf unten und die Prüfsuite) */
+export const fremdeSymbole = (html) => [...html.matchAll(/<svg class="rg-sym"(?: data-sym="([^"]*)")?/g)].map((x) => x[1] || '(ohne Namen)').filter((n) => !SYMBOLE[n]);
 /* Belegnummern: die erste Stelle je Quelle bekommt eine id, die Quelle einen Link zurück dorthin */
 function belege(main) {
   main = main.replace(/<a href="#(q\d+)" id="zu-q\d+">/g, '<a href="#$1">').replace(/ <a class="rg-zurueck" href="#zu-q\d+" aria-label="[^"]*">zurück zum Text<\/a>/g, '');
@@ -212,6 +265,15 @@ function belege(main) {
   }))).join('');
   return main.replace(/(<li id="(q\d+)">[\s\S]*?)(<\/li>)/g, (m, a, q, z) => (gesetzt.has(q) ? a + ' <a class="rg-zurueck" href="#zu-' + q + '" aria-label="Zurück zum Text, Beleg ' + q.slice(1) + '">zurück zum Text</a>' + z : m));
 }
+/* Belegnummer und Satzzeichen bleiben zusammen: Der Beleglink ist ein Inline-Block (größere Zielfläche), danach durfte der Browser
+   umbrechen, und am Telefon stand der Punkt allein in der nächsten Zeile. Die Nummern (auch mehrere nacheinander) samt dem Leerzeichen
+   davor und dem unmittelbar folgenden Satzzeichen kommen in eine Spanne ohne Umbruch (.rg-nb); der Text bleibt Zeichen für Zeichen
+   gleich (die Fragen werden gegen das JSON-LD verglichen, das Leerzeichen steht deshalb direkt vor dem ersten Link). Idempotent: alte
+   Spannen werden vorher aufgelöst. */
+const BELEG = '<a href="#q\\d+"(?: id="zu-q\\d+")?>\\[\\d+\\]<\\/a>';
+const NB_RAUS = /<span class="rg-nb">((?:(?!<\/span>)[\s\S])*?)<\/span>/g;
+const NB = new RegExp('( |&nbsp;)?(' + BELEG + '(?:(?: |&nbsp;)' + BELEG + ')*[.,;:!?)]+)', 'g');
+const umbruch = (main) => main.replace(NB_RAUS, '$1').replace(NB, (m, vor, rest) => '<span class="rg-nb">' + (vor || '') + rest + '</span>');
 /* Preis direkt unter der ersten Pille: der Satz aus den Ratgebern, der Betrag aus web/config.js (nach dem Einführungspreis setzt
    functions/seo.js den neuen ein) */
 const KONFIG = (() => { const w = {}; new Function('window', fs.readFileSync(path.join(path.dirname(url.fileURLToPath(import.meta.url)), '..', 'web', 'config.js'), 'utf8'))(w); return w.KONFIG; })();
@@ -267,7 +329,7 @@ export function baue(pfad, html, zeichnungen) {
     vergeben.add(id);
     return '<h2' + (attr || '') + ' id="' + id + '">' + inhalt + '</h2>';
   });
-  main = symbole(belege(fehler(feinsatz(tabellen(main)))));
+  main = symbole(umbruch(belege(fehler(feinsatz(tabellen(main))))));
   const abschnitte = [...main.matchAll(/<h2[^>]*\sid="([^"]+)"[^>]*>([\s\S]*?)<\/h2>/g)].filter((x) => !OHNE_INHALT.includes(x[2].trim()));
   const imWeg = schrittVon(pfad) >= 0;
   if (imWeg) main = main.replace(/(\n\s*)<h2([^>]*)>Weiterlesen<\/h2>/, (x) => wegBlock(pfad, zeichnungen) + x);
@@ -355,6 +417,12 @@ if (process.argv[1] === url.fileURLToPath(import.meta.url)) {
   const fehlt = WEG.flatMap((s) => s.seiten).concat(FENSTERBAUER).filter((p) => !fs.existsSync(path.join(web, p, 'index.html')));
   if (fehlt.length) console.error('Seite fehlt (noch): ' + fehlt.join(', '));
   let n = 0;
-  for (const [, d, alt, neu] of gebaut(web)) if (neu !== alt) { fs.writeFileSync(d, neu); n++; }
+  const fremd = [];
+  for (const [p, d, alt, neu] of gebaut(web)) {
+    if (neu !== alt) { fs.writeFileSync(d, neu); n++; }
+    for (const s of fremdeSymbole(neu)) fremd.push(p + ' ' + s);
+  }
   console.log('Bausteine in ' + n + ' Dateien neu geschrieben');
+  /* Symbole nur aus dem Satz SYMBOLE: ein unbekannter Name bliebe sonst leer oder mit eigenen Pfaden stehen */
+  if (fremd.length) { console.error('Symbol nicht im Satz SYMBOLE: ' + fremd.join(', ')); process.exitCode = 1; }
 }
