@@ -315,7 +315,7 @@ dieser PLZ steht), `name`, `mail`, `plz`, `einwilligung`, `aufmass` oder `pdf`. 
 `kontakt.ort` darf das ganze Feld „PLZ und Ort“ sein; der Server trennt die PLZ ab. Telefonnummern prüft der Server mit derselben Regel wie
 die App (`vmTel`), dazu Länge, Sonder- und Servicenummern und einen Anschluss aus lauter gleichen Ziffern.
 
-Attrappen und Prüfung: `KI_ATTRAPPE=1` liefert feste, erfundene Betriebe um Köln (Fensterbau Brandt vorn); `SMS_ATTRAPPE=1` oder
+Attrappen und Prüfung: `KI_ATTRAPPE=1` liefert feste, erfundene Betriebe um Herzebrock-Clarholz (Fensterbau Brandt vorn); `SMS_ATTRAPPE=1` oder
 `DATEN_ATTRAPPE=1` nimmt den Code 123456 und verschickt nichts (`SMS_ATTRAPPE=0` schaltet das ab, dann gilt der Weg ohne Code);
 `MAIL_ATTRAPPE=1` merkt sich die Mails. Ohne Anthropic-Schlüssel und ohne Attrappe antwortet die Suche `{ betriebe: [], quelle: 'keine' }`,
 ohne SMS-Anbieter und ohne Attrappe der Code `{ ohneCode: true }`; die Anfrage geht dann ohne Code durch und steht in der Zentrale als

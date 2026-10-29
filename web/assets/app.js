@@ -4106,7 +4106,8 @@ function vmCode() {
   const karte = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Code aus der ' + (v.kanal === 'anruf' ? 'Ansage' : 'SMS')) + '<label class="ab-eingabe vm-codefeld' + (f.code ? ' ist-bad' : '') + '"><input type="text" id="vm-code" data-in="vm-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" value="' + esc(v.code || '') + '" placeholder="000000" aria-label="Code mit sechs Ziffern"' + (f.code ? ' aria-invalid="true" aria-describedby="vm-code-f"' : '') + '></label>' +
     (f.code ? '<p class="vm-feldfehler" id="vm-code-f">' + esc(f.code) + '</p>' : '') +
     (v.attrappe ? '<p class="ab-klein">Testbetrieb: Es geht keine SMS raus, der Code ist 123456.</p>' : '') +
-    '<div class="vm-codewege"><button type="button" class="ulink" data-act="vm-code-neu">Neuen Code schicken</button><button type="button" class="ulink" data-act="go" data-v="anfrage3">Nummer ändern</button></div></div></div>';
+    '<div class="vm-codewege"><button type="button" class="ulink" data-act="vm-code-neu">Neuen Code schicken</button><button type="button" class="ulink" data-act="go" data-v="anfrage3">Nummer ändern</button></div></div></div>' +
+    (f.grenze ? '<p class="ab-note warn vm-grenze">' + esc(f.grenze) + ' <button type="button" class="ulink" data-act="vm-blatt">Aufmaßblatt für dich</button></p>' : '');
   const busy = v.sendet;
   const fuss = busy ? rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Betriebe" disabled>' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter btn primary" disabled aria-busy="true">' + esc(v.sendetText || 'Wird abgeschickt …') + '</button></div>' : abFuss('Zurück: Betriebe', 'vm-bestaetigen', '', 'Bestätigen und abschicken');
   return { html: lgKopf(['back', 'Zurück: Betriebe']) + dnaTisch(buehne, frage + karte + fuss), back: ['Betriebe', 'betriebe'], dna: true, cls: 'dna ab dt vm', voll: true };
@@ -4161,6 +4162,7 @@ async function vmSenden() {
     v.sendet = false;
     if (!j || !j.ok) {
       const t = (j && j.fehler) || 'Abschicken hat nicht geklappt. Bitte gleich noch einmal.';
+      if (j && j.grenze === '90tage') { S.vmFehler = { grenze: t }; if (S.screen !== 'vcode') return go('vcode'); return render(); } // zwei Anfragen in 90 Tagen: kostenlos nicht mehr, das Blatt geht
       if (j && (j.feld === 'code' || r.status === 401)) { S.vmFehler = { code: t }; v.code = ''; if (S.screen !== 'vcode') return go('vcode'); render(); const i = document.getElementById('vm-code'); if (i) i.focus(); return; }
       if (j && j.feld === 'betriebe') { v.liste = null; S.vmFehler = { wahl: t }; return go('betriebe'); }
       if (S.screen === 'vcode') render(); return toast(t);

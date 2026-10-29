@@ -142,14 +142,14 @@ export async function kiSuche(o, plz, ort) {
 
 /* Attrappe: erfundene Betriebe (keine Namen der Testbetriebe Amsel, Fink, Specht, Meise); Adressen und Nummern sind ausgedacht */
 const ATTRAPPE = [
-  { name: 'Fensterbau Brandt', ort: 'Köln', strasse: 'Werkstattweg 7', tel: '0221 5550101', web: 'https://fensterbau-brandt.example/', km: 4, leistungen: ['Kunststoff', 'Holz', 'Holz-Alu', 'Haustüren', 'Rollläden'] },
-  { name: 'Tischlerei Lindholz', ort: 'Bergheim', strasse: 'Am Sägewerk 3', tel: '02271 555020', web: 'https://tischlerei-lindholz.example/', km: 9, leistungen: ['Holz', 'Holz-Alu', 'Haustüren'] },
-  { name: 'Fensterwerk Rheinblick', ort: 'Leverkusen', strasse: 'Uferstraße 21', tel: '0214 5550303', web: 'https://fensterwerk-rheinblick.example/', km: 12, leistungen: ['Kunststoff', 'Alu', 'Rollläden', 'Insektenschutz'] },
-  { name: 'Glas und Rahmen Nolte', ort: 'Brühl', strasse: 'Glaserweg 5', tel: '02232 555404', web: 'https://glas-rahmen-nolte.example/', km: 14, leistungen: ['Kunststoff', 'Holz'] },
-  { name: 'Holzfenster Ebbinghaus', ort: 'Bergisch Gladbach', strasse: 'Lindenhof 2', tel: '02202 555505', web: 'https://holzfenster-ebbinghaus.example/', km: 17, leistungen: ['Holz', 'Holz-Alu'] },
-  { name: 'Fenster und Türen Haverkamp', ort: 'Frechen', strasse: 'Industriestraße 40', tel: '02234 555606', web: 'https://haverkamp-fenster.example/', km: 19, leistungen: ['Kunststoff', 'Alu', 'Haustüren', 'Insektenschutz'] },
-  { name: 'Schreinerei Sörensen', ort: 'Pulheim', strasse: 'Mühlenweg 11', tel: '02238 555707', web: '', km: 23, leistungen: ['Holz', 'Haustüren'] },
-  { name: 'Kessler Fenstertechnik', ort: 'Hürth', strasse: 'Kalscheurer Weg 9', tel: '02233 555808', web: 'https://kessler-fenstertechnik.example/', km: 27, leistungen: ['Kunststoff', 'Holz-Alu', 'Rollläden'] }
+  { name: 'Fensterbau Brandt', ort: 'Herzebrock-Clarholz', strasse: 'Werkstattweg 7', tel: '05245 555010', web: 'https://fensterbau-brandt.example/', km: 3, leistungen: ['Kunststoff', 'Holz', 'Holz-Alu', 'Haustüren', 'Rollläden'] },
+  { name: 'Tischlerei Lindholz', ort: 'Rheda-Wiedenbrück', strasse: 'Am Sägewerk 3', tel: '05242 555020', web: 'https://tischlerei-lindholz.example/', km: 8, leistungen: ['Holz', 'Holz-Alu', 'Haustüren'] },
+  { name: 'Fensterwerk Emsblick', ort: 'Warendorf', strasse: 'Uferstraße 21', tel: '02581 555030', web: 'https://fensterwerk-emsblick.example/', km: 22, leistungen: ['Kunststoff', 'Alu', 'Rollläden', 'Insektenschutz'] },
+  { name: 'Glas und Rahmen Nolte', ort: 'Gütersloh', strasse: 'Glaserweg 5', tel: '05241 555040', web: 'https://glas-rahmen-nolte.example/', km: 14, leistungen: ['Kunststoff', 'Holz'] },
+  { name: 'Holzfenster Ebbinghaus', ort: 'Oelde', strasse: 'Lindenhof 2', tel: '02522 555050', web: 'https://holzfenster-ebbinghaus.example/', km: 13, leistungen: ['Holz', 'Holz-Alu'] },
+  { name: 'Fenster und Türen Haverkamp', ort: 'Harsewinkel', strasse: 'Industriestraße 40', tel: '05247 555060', web: 'https://haverkamp-fenster.example/', km: 15, leistungen: ['Kunststoff', 'Alu', 'Haustüren', 'Insektenschutz'] },
+  { name: 'Schreinerei Sörensen', ort: 'Beckum', strasse: 'Mühlenweg 11', tel: '02521 555070', web: '', km: 20, leistungen: ['Holz', 'Haustüren'] },
+  { name: 'Kessler Fenstertechnik', ort: 'Bielefeld', strasse: 'Kalscheurer Weg 9', tel: '0521 5550808', web: 'https://kessler-fenstertechnik.example/', km: 27, leistungen: ['Kunststoff', 'Holz-Alu', 'Rollläden'] }
 ];
 /* .example ist eine reservierte Domain; webText lässt sie als Website durch, damit die Zentrale einen Link zeigt */
 export const attrappeBetriebe = () => pruefen(ATTRAPPE);
