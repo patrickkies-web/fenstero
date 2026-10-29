@@ -14,14 +14,21 @@
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Gestaltung der Ratgeber: die Seiten verweisen mit Prüfsumme (?v=…, scripts/ratgeber-bausteine.mjs), daher ein Jahr unveränderlich
+/assets/ratgeber-dna.css
+  Cache-Control: public, max-age=31536000, immutable
+/assets/ratgeber-dna.js
+  Cache-Control: public, max-age=31536000, immutable
+
 # Zentrale des Inhabers: nie zwischenspeichern, nie in Suchmaschinen (X-Robots-Tag oben gilt hier immer, auch mit INDEXIERUNG=1,
 # weil die Zentrale nicht durch functions/seo.js läuft)
 /zentrale/*
   Cache-Control: no-store
 
-# Kundenkonto der Fensteranbieter (Konfigurator-Pakete): wie die Zentrale nie zwischenspeichern, nie in Suchmaschinen (worker.js setzt
-# beides zusätzlich, weil /partner* durch den Worker läuft)
-/partner/*
+# Bestellung und Kundenbereich der Aufträge (functions/auftrag/): ebenso nie zwischenspeichern, nie in Suchmaschinen
+/bestellen/*
+  Cache-Control: no-store
+/konto/*
   Cache-Control: no-store
 
 # Logo und Icon dürfen in Suchmaschinen (Logo in den strukturierten Daten); in der Pilotphase sperrt robots.txt ohnehin alles
@@ -34,3 +41,17 @@
 /bilder/*
   ! X-Robots-Tag
   Cache-Control: public, max-age=86400
+
+# Vorschauen zum Herumzeigen (z. B. Entwürfe für Seiten): nie in Suchmaschinen (X-Robots-Tag oben gilt hier immer, weil /vorschau/
+# nicht durch functions/seo.js läuft), nie zwischenspeichern; nicht in Sitemap, llms.txt und robots.txt, damit der Pfad nirgends steht
+/vorschau/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store
+
+# Vorschau des Konfigurators (scripts/konfigurator-vorschau-uebertragen.mjs): die Wünsche betten ihr Bühnenfenster (app/buehne.html, die
+# App aus /assets/) selbst ein; nur dieses Fenster darf vom eigenen Ursprung eingebettet werden, sonst gilt die CSP von oben
+/vorschau/konfigurator-5269b7215a/app/*
+  ! X-Frame-Options
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'
+  X-Frame-Options: SAMEORIGIN

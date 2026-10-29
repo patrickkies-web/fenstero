@@ -54,6 +54,7 @@ export function offeneZumErinnern(a, now) {
 export async function erinnerungenSenden(k, sp, env, now) {
   const pd = postDienst(k);
   if (!pd || !sp || !sp.betriebeAlle) return { ok: true, gesendet: 0 };
+  if (!k.betriebskonto) return { ok: true, gesendet: 0, ohneBetriebskonto: true }; // Konto eingestellt (28.10.2026): keine Mails mehr zu Aufmaß-Links
   now = now || Date.now();
   const origin = String((env && env.KANONISCH) || HAUPTADRESSE).replace(/\/+$/, '');
   let gesendet = 0, fehler = 0;

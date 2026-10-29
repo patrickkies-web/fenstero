@@ -1,0 +1,46 @@
+/* Bühnenfenster: nur die 3-D-Bühne der App, randlos über das ganze Fenster; alles andere unsichtbar (bleibt im DOM, die App rechnet damit) */
+@font-face { font-family: 'Inter'; font-style: normal; font-display: swap; font-weight: 100 900; src: url(../fonts/inter.woff2) format('woff2'); }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #07090a; }
+#app, #app * { visibility: hidden; }
+#app #w3d, #app #w3d * { visibility: visible; }
+#app #w3d { position: fixed !important; inset: 0 !important; width: 100% !important; height: 100% !important; max-width: none !important; margin: 0 !important; border-radius: 0 !important; z-index: 50; }
+/* Bedienung der App-Bühne in der Formensprache der Vorschau (Rundknöpfe wie im Ergebnis, Hinweis als Glas-Chip, gewählter Flügel Violett).
+   Nur Aussehen, Verhalten der App unverändert. */
+@font-face { font-family: 'Outfit'; font-style: normal; font-display: swap; font-weight: 100 900; src: url(../fonts/outfit.woff2) format('woff2'); }
+#w3d .w3d-knopf { min-height: 44px; min-width: 44px; color: #fff; font-family: 'Outfit', system-ui, sans-serif; background: radial-gradient(at 30% 20%, rgba(255,255,255,.16), rgba(255,255,255,.04) 70%), #07090a; box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(168,164,169,.35), 0 6px 14px -8px rgba(7,9,10,.9); }
+#w3d .w3d-knopf.eins { font-weight: 600; }
+#w3d .w3d-knopf[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px #897efc, inset 0 1px 0 rgba(255,255,255,.16); }
+#w3d .w3d-knopf:active:not(:disabled) { transform: scale(.97); }
+#w3d .w3d-knopf:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+#w3d .w3d-zoom { top: 12px; right: 12px; gap: 8px; }
+#w3d .w3d-hint { left: 12px; bottom: 12px; padding: 0 12px; height: 30px; line-height: 30px; border-radius: 999px; font: 500 13px/30px 'Outfit', system-ui, sans-serif; color: #fff; background: linear-gradient(180deg, rgba(56,56,59,.92), rgba(28,28,30,.92)); box-shadow: inset 0 1px 0 rgba(255,255,255,.18), inset 0 0 0 1px rgba(255,255,255,.06); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#w3d .w3d-selring { border: 2px solid #897efc; }
+/* Blätter der App (Haus, Farbkarte): Akzent Violett statt Grün, Schrift wie die Vorschau */
+:root { --accent: #897efc; }
+body > .fb { visibility: visible; font-family: 'Outfit', system-ui, sans-serif; }
+/* Bildschirme der App fahren mit transform ein; das machte sie zum Bezugsrahmen der Bühne (fixed). Im Bühnenfenster stehen sie still. */
+#app .scr { transform: none !important; animation: none !important; }
+/* Die App blendet Bühnen beim Hineinscrollen ein (Klasse rev); im Bühnenfenster gibt es kein Scrollen, die Bühne steht sofort */
+#app #w3d { opacity: 1 !important; transform: none !important; }
+/* Maßlinien der App in der Sprache der Vorschau: Öffnung Koralle gestrichelt, Element Violett durchgezogen, Schilder als dunkle Kapsel
+   mit Legendenstrich (wie die Werte im Ergebnis der Vorschau). Lage und Bewegung der Linien bleiben die der App. */
+#w3d .w3d-dim.mo { --dc: #f88962; }
+#w3d .w3d-dim.el { --dc: #897efc; }
+#w3d .w3d-dim .w3d-dim-line { border-radius: 0; }
+#w3d .w3d-dim.mo.v .w3d-dim-line { left: -.9px; width: 1.8px; background: repeating-linear-gradient(180deg, currentColor 0 6px, transparent 6px 10px); }
+#w3d .w3d-dim.mo.h .w3d-dim-line { top: -.9px; height: 1.8px; background: repeating-linear-gradient(90deg, currentColor 0 6px, transparent 6px 10px); }
+#w3d .w3d-dim.el.v .w3d-dim-line { left: -.9px; width: 1.8px; } #w3d .w3d-dim.el.h .w3d-dim-line { top: -.9px; height: 1.8px; }
+#w3d .w3d-dim.v .w3d-dim-cap { left: -7px; width: 14px; height: 1.8px; } #w3d .w3d-dim.h .w3d-dim-cap { top: -7px; height: 14px; width: 1.8px; }
+#w3d .w3d-dim-lab { padding: 5px 10px 5px 26px; border-radius: 999px; font: 500 14px/1.1 'Outfit', system-ui, sans-serif; letter-spacing: 0; color: #fff; background: linear-gradient(180deg, rgba(56,56,59,.94), rgba(28,28,30,.94)); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.06), 0 6px 14px -8px rgba(7,9,10,.9); }
+#w3d .w3d-dim-lab::before { content: ""; position: absolute; left: 10px; top: 50%; width: 10px; height: 1.8px; margin-top: -.9px; background: currentColor; }
+#w3d .w3d-dim.mo .w3d-dim-lab::before { background: repeating-linear-gradient(90deg, #f88962 0 4px, transparent 4px 6px); }
+#w3d .w3d-dim.el .w3d-dim-lab::before { background: #897efc; }
+#w3d .w3d-dim.is-active .w3d-dim-lab { padding: 5px 10px 5px 26px; box-shadow: inset 0 0 0 1.5px #fff; }
+/* Zoom immer oben rechts (oben links steht der Schritt-Chip der Vorschau) */
+#w3d .w3d-zoom { left: auto !important; right: 12px !important; top: 12px !important; }
+/* Vorlagen-Abgleich (27.10.2026, M1): Werkzeuge als senkrechte Leiste runder Glasknöpfe am rechten Rand; Glas nur über dem Modell (G14) */
+#w3d .w3d-zoom { flex-direction: column; gap: 8px; }
+#w3d .w3d-haus { top: 12px !important; right: 12px !important; bottom: auto !important; left: auto !important; }
+#w3d:has(.w3d-haus) .w3d-zoom { top: 64px !important; }
+#w3d .w3d-zoom .w3d-knopf, #w3d .w3d-haus .w3d-knopf { width: 44px; height: 44px; background: rgba(32,32,34,.55); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4), 0 10px 24px -12px rgba(7,9,10,.6); }
+#w3d .w3d-zoom .w3d-knopf:disabled, #w3d .w3d-haus .w3d-knopf:disabled { opacity: 1; color: rgba(255,255,255,.38); }

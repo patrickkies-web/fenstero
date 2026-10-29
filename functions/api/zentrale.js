@@ -29,7 +29,6 @@ const lebt = (e) => !!(e && e.nutzer && !entfernt(e));
 import { auswerten, tagBerlin, tagPlus, tageZwischen, tageListe, browserName, systemName, zaehlen } from './statistik.js';
 import { verkaufStand, paketVerkaufStand } from './recht.js';
 import { live } from './umgebung.js';
-import { aufgabenListe, paketeKennzahlen } from './zentrale-bestellungen.js';
 /* Betriebszeile einer Konfigurator-Instanz (docs/INSTANZEN.md): kein Altbestand, zählt nicht in dessen Kennzahlen, wird über die Instanz
    verwaltet (Seite „Instanzen“) */
 const istInstanz = (row) => !!(row && row.daten && (row.daten.konto === 'instanz' || row.daten.instanz));
@@ -219,7 +218,7 @@ function zeile(row, zr) {
   };
 }
 const stripeLink = (k, art, id) => (k.stripe && id ? 'https://dashboard.stripe.com/' + (k.stripe.test ? 'test/' : '') + art + '/' + encodeURIComponent(id) : '');
-const fensterKurz = (w) => { const d = globalThis.AW.derive(w); return { name: w.name || '', etage: globalThis.AW.lab('etage', w.etage) || '', art: globalThis.AW.lab('art', w.art || 'fenster') || 'Fenster', anzahl: Number(w.anzahl) || 1, oeffnung: d.moW && d.moH ? d.moW + ' × ' + d.moH : '', element: d.elW && d.elH ? d.elW + ' × ' + d.elH : '' }; };
+const fensterKurz = (w) => { const d = globalThis.AW.derive(w); return { name: w.name || '', etage: globalThis.AW.etageText(w) || '', art: globalThis.AW.lab('art', w.art || 'fenster') || 'Fenster', anzahl: Number(w.anzahl) || 1, oeffnung: d.moW && d.moH ? d.moW + ' × ' + d.moH : '', element: d.elW && d.elH ? d.elW + ' × ' + d.elH : '' }; };
 /* Projekte ohne Daten der Endkunden; mit einblick zusätzlich Name, Kontakt, Objekt, Notizen und das Aufmaß in Kurzform */
 function projekte(a, einblick, zr) {
   return (a.links || []).filter((l) => !l.demo).map((l) => {
@@ -421,7 +420,7 @@ export const ZENTRALE = {
   /* Übersicht: Kennzahlen und Verlauf im Zeitraum (zeitraum), letzte Vorgänge darin, Hinweise (immer der Stand von heute) */
   'GET /api/zentrale/uebersicht': async (ctx) => {
     await zugang(ctx); const sp = daten(ctx), k = ctx.k, jetzt = Date.now(), abAnfang = ctx.url.searchParams.get('von') === 'anfang';
-    const [alleRows, kaeufe, ersterWeb, entwuerfe, eigene, aufgaben, pakete] = await Promise.all([sp.betriebeAlle(), sp.zahlungenAlle().catch(() => []), abAnfang && sp.statistikErsterTag ? sp.statistikErsterTag().catch(() => null) : null, sp.entwuerfeAlle ? sp.entwuerfeAlle().catch(() => null) : null, sp.eigeneAlle ? sp.eigeneAlle().catch(() => null) : null, aufgabenListe(ctx).catch(() => null), paketeKennzahlen(ctx).catch(() => null)]);
+    const [alleRows, kaeufe, ersterWeb, entwuerfe, eigene] = await Promise.all([sp.betriebeAlle(), sp.zahlungenAlle().catch(() => []), abAnfang && sp.statistikErsterTag ? sp.statistikErsterTag().catch(() => null) : null, sp.entwuerfeAlle ? sp.entwuerfeAlle().catch(() => null) : null, sp.eigeneAlle ? sp.eigeneAlle().catch(() => null) : null]);
     const rows = altbestand(alleRows); // Kennzahlen des Altbestands ohne die Betriebszeilen der Instanzen
     const bez = kaeufe.filter((x) => x.status === 'bezahlt');
     const zr = zeitraum(ctx.url, fruehester(rows.map((r) => tagAus(r.created_at)).concat(bez.map((x) => tagAus(x.created_at)), [ersterWeb])));
@@ -477,8 +476,6 @@ export const ZENTRALE = {
       },
       verlauf: verlauf,
       /* Konfigurator-Pakete: Aufgaben (Bestellungen, Rückrufe, Nachrichten, Versand, Domains) und Kennzahlen, getrennt vom Altbestand */
-      aufgaben: aufgaben && aufgaben.tabelle ? { anzahl: aufgaben.anzahl, liste: aufgaben.liste } : null,
-      pakete: pakete,
       web: web && web.tabelle ? { aufrufe: web.summe.aufrufe, besuche: web.summe.besuche, herkunft: web.herkunft.slice(0, 5) } : null,
       aktivitaet: aktivitaet.filter((x) => x.zeit).sort((x, y) => String(y.zeit).localeCompare(String(x.zeit))).slice(0, 12),
       hinweise: hinweise

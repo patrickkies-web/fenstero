@@ -13,7 +13,7 @@
 //   h.instanzen                     { essential|plus|signature|signature2: { id, id8, slug, betrieb, paket, status, host } }
 //   h.instanz(sel, patch)           Felder einer Instanz setzen (sel: Host, slug oder { id }), → neue Zeile
 //   h.saat(body)                    weitere Instanzen anlegen ({ instanzen: [{ slug, paket, name, plz, host?, alias?, status? }] })
-//   h.attrappe()                    Inhalt der Attrappe (instanzen, hosts, anfragen, partner, bestellungen, nachrichten, betriebe,
+//   h.attrappe()                    Inhalt der Attrappe (instanzen, hosts, anfragen, nachrichten, betriebe,
 //                                   entwuerfe, ablage je Bucket, queue)
 //   h.post({ anhaenge })            verschickte Mails (Attrappe), mit anhaenge: true samt Anhängen als Base64 (anhangDaten)
 //   h.zentrale()                    angemeldete Zentrale: { cookie, kopf, api(pfad, init) }
@@ -30,7 +30,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 export const WURZEL = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const ORDNER = path.join(WURZEL, 'scripts/pruefen-instanzen');
 export const PASSWORT = 'pruef-zentrale-instanzen-23';
-export const TITEL = { 23: 'Mandant, Routing, Schutz (Instanzen)', 24: 'Eingang der Anfragen (Instanzen)', 25: 'App im Instanz-Modus', 26: 'Zentrale: Bestellungen und Instanzen', 27: 'Kundenkonto und Bestellung', 28: 'Signature-Dashboard', 29: 'Verkaufsseite, Recht, Doku', 30: 'Ende zu Ende (Instanzen)' };
+export const TITEL = { 23: 'Mandant, Routing, Schutz (Instanzen)', 24: 'Eingang der Anfragen (Instanzen)', 25: 'App im Instanz-Modus', 26: 'Aufträge: Bestellung, Kundenbereich, Zentrale', 28: 'Signature-Dashboard', 29: 'Verkaufsseite, Recht, Doku' };
 const GRUND = { KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', MAIL_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', INSTANZ_CACHE_MS: '0', ZENTRALE_PASSWORT: PASSWORT };
 
 /* Module eines Abschnitts: <n>-<name>.mjs (alphabetisch) vor <n>.mjs */

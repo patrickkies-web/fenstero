@@ -1,5 +1,16 @@
 # Abrechnung: Preise, Regeln, Zählung, Schranken
 
+> **Seit 28.10.2026 (Wort des Inhabers): Es gelten nur noch die Paketpreise (Einrichtung, Monatspreis, 0,08 € je weiterer KI-Auswertung) und
+> das Aufmaßblatt der Hauseigentümer (7,99 € bis 17.11.2026, danach 12,99 €).** Das Betriebskonto (Projekte, Kundenlinks, Code vom Kunden)
+> gibt es nicht mehr („entweder du hast ein Paket, worüber alles läuft, oder nicht; die einzige andere Variante sind einfache Kunden“).
+> Ohne `BETRIEBSKONTO` antworten `/api/konto*`, `/api/link/*` und `/api/aufmass` mit 410, `/api/status` meldet `betriebskonto: false`,
+> die Startseite zeigt keinen Betriebsbereich (kein Login, keine Tour, kein Code-Import) und räumt alte Anmeldungen im Browser weg,
+> das Aufmaßblatt trägt keinen Aufmaß-Code (letzte Seite und QR führen zu den Paketen), Erinnerungs-Mails zu Links gehen nicht mehr raus.
+> `preise.projekt` 0 und `kostenlos()` in `modell.js` bleiben; alte Abos 10/Plus kündigt der Abrechnungslauf einmal zum Ende ihres
+> Abrechnungsmonats. `/nutzungsbedingungen/` ist nur noch die Hinweisseite (keine Kosten, Löschung der Daten bis 31.12.2026, Kopie auf
+> Wunsch). Die folgenden Abschnitte beschreiben das frühere Konto; es läuft nur noch mit `BETRIEBSKONTO=1` (die Prüfsuite tut das über
+> `scripts/dev-server.mjs`, damit der Code getestet bleibt; Abschnitt 17 f prüft den Betrieb ohne Konto). Online nicht setzen.
+
 Stand: Preise und Paywalls sind eingebaut, die Regeln laufen im Browser (Pilot, nichts wird berechnet) und auf dem Server (Stufe 2, sobald Supabase und Stripe angeschlossen sind, siehe `docs/ONLINE-STELLEN.md`). Beide nutzen denselben Code: `web/assets/modell.js`.
 
 ## 1. Das Modell in einem Satz

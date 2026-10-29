@@ -1,0 +1,103 @@
+--- /tmp/claude-0/-home-user-fenstero/c0647bde-d91a-5fa0-b918-4b95b750ae5d/scratchpad/design-dna-SKILL-vorher.md	2026-10-26 14:29:37.101112106 +0000
++++ /root/.claude/skills/synced/db7726ff-1d64-495f-8b66-3fa30e4d7eb9_3a357c5c-c6ce-4c59-9c49-33d6eaceb994/design-dna/SKILL.md	2026-10-26 14:35:34.521923782 +0000
+@@ -12,14 +12,15 @@
+ 3. **Bausteine** – fertig gebaute Elemente in genau diesem Look.
+ 4. **Musterseite** – eine Seite aus allen Bausteinen. Jede neue Seite wird an ihr gemessen.
+ 
+-Für App-Bildschirme (Konfigurator von eeziframes) gelten zusätzlich die feste Farbwelt in Abschnitt 8 und der App-Rahmen in Abschnitt 9. Beides ist verbindlich, sobald dieser Skill geladen ist, auch in neuen Chats ohne Vorgeschichte.
++Für App-Bildschirme (Konfigurator von eeziframes) gelten zusätzlich die feste Farbwelt in Abschnitt 8 und der App-Rahmen in Abschnitt 9. Beides ist verbindlich, sobald dieser Skill geladen ist, auch in neuen Chats ohne Vorgeschichte. Für die Website von eeziframes gilt zusätzlich der Begleit-Skill `design-dna-eeziframes` im Projekt (.claude/skills/design-dna-eeziframes/): Palette als fertige Token-Datei, Ergänzungen der Formensprache vom 26.10.2026, Rezept je Seite, Messwerkzeuge, Prompt-Vorlage.
+ 
+ ## 0. Rangfolge
+ 
+ 1. Die Worte des Inhabers im Auftrag.
+ 2. Die Marke des Projekts: Logo, Name, echte Inhalte, echte Bilder, rechtliche Texte. Eine Markenfarbe darf `signal` oder ein Leuchtpaar ersetzen, nie den Grund.
+ 3. **Diese DNA** für Look, Komposition und Bewegung, mit der Farbwelt „Task-App dunkel“ (Abschnitt 8) als Standard-Palette. Ältere Markenregeln eines Projekts (bei eeziframes: Inter, Schriftgrößen 13/15/17/24/32/40, ein grünes Wort je Überschrift, Cream-Pille) gelten dort nicht, wo dieser Skill gestaltet; Logo, Name und Inhalte bleiben.
+-4. Handwerksregeln anderer Skills (emil-design-eng, ultimativ-webdesign, webdesign-wow, impeccable, premium-gestaltung) nur, wo sie dieser DNA nicht widersprechen. Wenn design-dna geladen ist, gilt ausdrücklich: neutraler Grund in Hell, Dunkel oder Warm statt Pflicht-Dunkel; Leuchtflächen aus Verläufen sind erlaubt; große Zahlen im dünnen Schnitt sind erlaubt; Kacheln mit echtem Inhalt (Bento) sind erlaubt.
++4. Im Projekt eeziframes der Begleit-Skill `design-dna-eeziframes` (Werte, Rezept, Entscheidungen des Inhabers).
++5. Handwerksregeln anderer Skills (emil-design-eng, impeccable) nur, wo sie dieser DNA nicht widersprechen. `premium-gestaltung`, `ultimativ-webdesign` und `webdesign-wow` gehören zur früheren Richtung und werden für Gestaltung nicht mehr geladen (Inhaber, 26.10.2026); ihre Regeln (Pille nur im Band 460–600 px, ein farbiges Wort je Überschrift, Figurenwelt, Messband-Hero) gelten nicht. Wenn design-dna geladen ist, gilt ausdrücklich: neutraler Grund in Hell, Dunkel oder Warm statt Pflicht-Dunkel; Leuchtflächen aus Verläufen sind erlaubt; große Zahlen im dünnen Schnitt sind erlaubt; Kacheln mit echtem Inhalt (Bento) sind erlaubt.
+ 
+ ## 1. Quellen laden – immer zuerst
+ 
+@@ -48,8 +49,10 @@
+ | G11 Werte als Kapselreihe | Ein Wert, Anteil oder Verlauf als Reihe abgerundeter Stäbchen (Pillenbalken): gefüllt = erreicht, grau oder schraffiert = Rest, ein Stäbchen als Marke hervorgehoben; Regler als Kapsel mit Knopf | Welcher Anteil lässt sich als Reihe zeigen? |
+ | G12 Das Objekt bricht aus dem Rahmen | Produkt, Bild oder Rendering ragt über den Rand seiner Karte hinaus, der runde Knopf sitzt auf der Kante | Was darf hier aus der Fläche treten? |
+ | G13 Runde Knöpfe | Navigation als Ring (Umriss, 44–52 px), Aktion an der Sache als voller Kreis mit Pfeil (weiß auf Dunkel, schwarz auf Hell), oft auf der Kartenecke; Werkzeuge als senkrechte Reihe runder Glas-Knöpfe | Welche Aktion gehört an genau dieses Ding? |
++| G14 Keine Fläche ist flach | Jede Karte, Kachel und Bühne hat Licht: tonaler Abfall (oben links heller, unten dunkler), 1-px-Lichtkante oben, Vignette und Lichtkante auf Fotos, Kontaktschatten unter Objekten, Lichtteich hinter der Bühne; Leuchten als reine radiale Verläufe, nie als Weichzeichner | Woher kommt hier das Licht, und was wirft Schatten? |
++| G15 Ein schweres Element je Bild | Genau eines trägt das Gewicht: der Titel in 600–700 oder die Zahl; alles andere drei Stufen leichter (Labels 400, kleine Zahlen 300, große 200–250, Lesetext in `tinte-2`) | Was ist hier das eine Schwere? |
+ 
+-**Bewegungs-Gene** (Rezepte mit Dauer und Kurve in `bewegung.md`): Auftritt aus der Unschärfe · ein Element reist durch die Szenen · Vorhang von unten mit Wechsel hell/dunkel · Teile treten mit dem Scrollen heraus · lebendes Raster · Feinzeichnung zeichnet sich · Leuchten folgt dem Wert · Zahl rastet ein · Werte erscheinen an der Sache · Schrift als Fenster · Kapselreihe füllt sich von links (Stäbchen nacheinander, 12–20 ms Versatz) · Regler-Knopf gleitet mit Federn. In der App nur Rückmeldung und Zustand (Abschnitt 9).
++**Bewegungs-Gene** (Rezepte mit Dauer und Kurve in `bewegung.md`): Auftritt aus der Unschärfe (nur im Hero; unterhalb steht alles sofort, sonst wirkt die Seite beim schnellen Scrollen zu langsam) · ein Element reist durch die Szenen · Vorhang von unten mit Wechsel hell/dunkel · Teile treten mit dem Scrollen heraus · lebendes Raster · Feinzeichnung zeichnet sich · Leuchten folgt dem Wert · Zahl rastet ein · Werte erscheinen an der Sache · Schrift als Fenster · Kapselreihe füllt sich von links (Stäbchen nacheinander, 12–20 ms Versatz) · Regler-Knopf gleitet mit Federn. In der App nur Rückmeldung und Zustand (Abschnitt 9).
+ 
+ ## 3. Ablauf je Auftrag – erst die Idee, dann die Regeln
+ 
+@@ -59,7 +62,7 @@
+ 4. **Ideenmatrix.** Für jede Szene oder Folie die Gen-Fragen beantworten und daraus mindestens sechs rohe Ideen notieren. Dann drei Richtungen: naheliegend, mutig, überraschend (zwei Vorlagen kreuzen, ein Prinzip übersetzen, einmal umdrehen). Bei klarem Auftrag die stärkste bauen und die anderen in einer Zeile nennen.
+ 5. **Bausteine zuordnen.** Je Idee: welcher Baustein trägt sie (Kennzahl, Leuchtkachel, Pille, BildImSatz, Etikett, Punktraster, Stufendiagramm, Skala, Geraetebuehne, Bento, Schriftfenster, Schritte, Szenen, Auftritt; dazu die Bausteine aus Abschnitt 10; in der App die lg-Bausteine aus Abschnitt 9)? Fehlt einer, baue ich ihn neu in derselben Sprache: Werte aus den Tokens, Bewegung aus den Rezepten.
+ 6. **Bauen.** Telefon zuerst (390 px), dann Schreibtisch (1280 px). Tokens, `bundle.css` und `bundle.js` einbinden, Schriften Outfit und Doto über Google Fonts (im Projekt lokal, wenn die CSP fremde Server verbietet). Farben nach Abschnitt 8. Zum Anschauen als eigenständige HTML-Seite wie die Musterseite; in einem Code-Projekt direkt in dessen Dateien.
+-7. **Prüfen** mit der Prüfliste (Abschnitt 4), Bildschirmfotos neben der Musterseite und der Farbmessung (Abschnitt 8). Erst wenn alles besteht, zeige ich das Ergebnis.
++7. **Prüfen** mit der Prüfliste (Abschnitt 4), Bildschirmfotos neben der Musterseite und der Farbmessung (Abschnitt 8). Bei eeziframes dazu das Rezept des Begleit-Skills: Messwerkzeuge (Bildschirme, Farben, ruhige Fassung, Layoutsprung, Zeitlupe), Gremium `profis` eine Runde, vier Detail-Profis (Bewegung, Zeichen, UX, Typografie), Abgleich mit den aktuellen Vorlagen in drei Perspektiven. Erst wenn alles besteht, zeige ich das Ergebnis.
+ 8. **Liefern.** Kurz sagen, welche Gene jede Szene oder Folie trägt, die Messtabelle der Farben und welches echte Material noch fehlt.
+ 9. **Rückfluss.** Jede Korrektur des Inhabers („zu verspielt“, „Schrift zu dünn“) schlage ich als neue Regel für Abschnitt 7 vor. Neue Vorlagen analysiere ich nach Abschnitt 6 und schlage vor, Gene, Werte oder Bausteine zu ergänzen.
+ 
+@@ -73,7 +76,9 @@
+ - Genau eine volle Pille je Bildschirm, nie farbig; am Telefon im unteren Drittel und mindestens 44 px hoch. Weitere Aktionen als runde Knöpfe (G13), nicht als zweite Pille.
+ - Text mindestens 13 px und 4,5:1 (ab 24 px 3:1); Fokusring sichtbar; nichts nur über Farbe.
+ - Telefon 390 px: nichts scrollt seitlich, keine Überschrift bricht im Wort, Etiketten bleiben im Bild und überdecken sich nicht.
+-- Bewegung: Hero steht nach spätestens 1 s; was am Scrollen hängt, folgt dem Besucher; nichts läuft länger als 5 s von selbst; bei reduzierter Bewegung steht jedes Endbild sofort.
++- Bewegung: Hero steht nach spätestens 1,3 s; was am Scrollen hängt, folgt dem Besucher; nichts läuft länger als 5 s von selbst; bei reduzierter Bewegung und ohne JavaScript steht jedes Endbild sofort; Auftritt nur im Hero.
++- Gemessen, nicht geschätzt (Website): Layoutsprung 0, kein `filter: blur` auf Flächen oder Pseudoelementen, keine lazy-Bilder in den ersten Szenen, Schriften vorab geladen, Grund sofort dunkel, Laden unter 1 s; eine volle Pille je Bildschirm, am Telefon im unteren Drittel; alle Ziele 44 px; keine Konsolenfehler.
++- Licht (G14) und Gewicht (G15): keine flache Karte, kein zweites schweres Element im selben Bild.
+ - **Nie:** linearer Blau-Lila-Verlauf, Neon, Emoji als Icons, Karten mit farbigem Seitenbalken, Karten in Karten (außer der dunklen Innenkarte mit dem Wert, G8), Statistikreihe aus drei Zahlen, erfundene Kennzahlen oder Bewertungen, frontale flache Bildschirmfotos, Standard-Hero mit Text links und Foto rechts ohne Bühne, Inter oder Roboto als Ersatzschrift, Ladebildschirm vor dem Inhalt, Zwischenschritte, die nur bestätigen, Trend nur in Grün/Rot (immer Pfeil und Vorzeichen dazu).
+ 
+ ## 5. Kurzfassung der Formensprache (falls die Quellen nicht erreichbar sind)
+@@ -90,11 +95,19 @@
+ 
+ Diese Grundwerte sind die Formen der DNA. **Die Farben werden immer durch Abschnitt 8 ersetzt** (Grau, Limette und die Glut-Paare oben gelten nur, wenn der Inhaber ausdrücklich eine andere Palette verlangt).
+ 
+-- Schrift: Outfit für alles (geometrisch, wie in allen App-Vorlagen); Überschriften Gewicht 500, eng (−0,02 bis −0,03 em), mit zweiter Stimme in `tinte-2`; Zahlen 200–500, groß (56–88 px), Einheit und Nachkommastellen klein; Riesenwort 600 bis 300 px (nur Website); Lesetext 16 px in `tinte-2`; Beschriftungen 13 px, gern als „Beschriftung — Wert“ mit Halbgeviertstrich. Doto nur für eine Punktzahl je Bildschirm.
+-- Leuchten: zwei weiche radiale Verläufe (Kern + Rand) mit Unschärfe hinter neutraler Fläche; mit Abschnitt 8: Violett mit Indigo, oder Koralle allein.
++- Schrift: Outfit für alles (geometrisch, wie in allen App-Vorlagen); Überschriften Gewicht 500 (Display-Titel der Website seit 26.10.2026: 600, −0,035 em, Zeile 0,95; G15), eng (−0,02 bis −0,03 em), mit zweiter Stimme in `tinte-2`; Zahlen 200–500, groß (56–88 px), Einheit und Nachkommastellen klein; Riesenwort 600 bis 300 px (nur Website); Lesetext 16 px in `tinte-2`; Beschriftungen 13 px, gern als „Beschriftung — Wert“ mit Halbgeviertstrich. Doto nur für eine Punktzahl je Bildschirm.
++- Leuchten: radiale Verläufe mit Zwischenstufe (Kern, 42 % bei 34 %, aus bei 72 %) statt Weichzeichner (`filter: blur` ruckelt beim Scrollen und wird seit 26.10.2026 nicht mehr auf Flächen verwendet), hinter neutraler Fläche; mit Abschnitt 8: Violett mit Indigo, oder Koralle allein.
+ - Dauern: Rückmeldung 220 ms, Zustand 320 ms, Gleiten 400 ms, Auftritt 700 ms (Staffel 70 ms), Szene 900–1200 ms (nur Website).
+ - Abstände: Seitenrand 16 px (Telefon) und 48 px (Schreibtisch), Abschnitte 72 px und 120 px, Kachelfuge 12 px. Rundung: Karten 28 px, Innenkarten 20 px, Knöpfe rund.
+ 
++**Ergänzungen vom 26.10.2026** (gelernt an der Startseite eeziframes im Abgleich mit zwölf Vorlagen; die genauen CSS-Werte stehen in `design-dna-eeziframes`, Abschnitt 3):
++- Material (G14): dunkle Karten mit radialem tonalem Abfall und 1-px-Lichtkante oben; Fotos mit Lichtkante und Vignette; Lichtteich hinter Bühnen; Kontaktschatten unter Objekten auf Weiß; Geräte mit Metallkante und Spiegelung; Glas 12 px mit Bruchkante, nur über Bild, Objekt oder Leuchten.
++- Gewicht (G15): Titel 600, Kartentitel 24/600, Labels 12 px in 400 mit 0,03 em, kleine Zahlen 300 mit Einheit 14 px, große Zahlen 200–250 mit Einheit 15 px.
++- Luft nach Hierarchie: Etikett→Titel 6 px, Titel→Text 12 px, Text→Handlung 32 px, Gruppe→Gruppe 48 px; Lesetext 36ch; Karten in drei Ebenen (Label, Titel, eine Zeile Meta oder Pille), nie ein Absatz in einer Karte.
++- Ein Zeichen je Bedeutung: `signal` als Punkt nur für „aktiv“ und am Etikett; Listenpunkte 6 px in `linie`; Haken für „inklusive“; Chevron 1,8 px mit runden Enden als Maske; Chips Indigo für Zustände, Koralle für Hinweise; Rundknöpfe mit Lichtverlauf und Ring; Striche in Zeichnungen gerätunabhängig 1,8 / 1,2 / 1 px.
++- Bewegung dosiert: Zahlen rasten von einem nahen Wert ein (700 ms), Etiketten erst Punkt und Linie, dann Text; Stationen wechseln nur über Farbe und Skalierung, Karten blenden nur; Leiste beim Hochscrollen 320 ms hin, 220 ms weg, 24 px Hysterese in beide Richtungen; Vorhang-Szenen rechnen mit der größten Bildschirmhöhe der Ausrichtung (Adressleiste); lebendes Bento nur mit Hysterese, sonst aus; Tastatur löst nie Gleiten aus.
++- Laden: Grund sofort dunkel, Schriften vorab, Bilder sofort mit `decoding="async"` und Maßen, große Bilder höchstens 1000 px breit.
++
+ ## 6. Neue Vorlagen aufnehmen
+ 
+ Je Vorlage dieselben Fragen: Was löst es aus? Was bewegt sich, und was bedeutet die Bewegung? Welcher Rhythmus? Welches Material, welches Licht? Wo liegt die Überraschung? Videos zerlege ich vorher in Einzelbilder (etwa drei je Sekunde), damit ich die Bewegung wirklich sehe. Ein Merkmal wird zum Gen, wenn es in mindestens drei Vorlagen auftaucht; vorher bleibt es Kandidat. Was im Video ein Schnitt ist, übersetze ich in eine Szene, die am Scrollen hängt.
+@@ -114,6 +127,11 @@
+ 12. Heeal.app Widget (schwarze Insel auf dem Startbildschirm) – kräftiges Wort „Walking“, Ziel klein darüber, Verlaufskachel Violett–Türkis mit Zahl „3824“ und schwarzer Kapsel „2,7 km“, Zeitleiste aus Kapseln mit Knopf und schraffiertem farbigem Abschnitt, Werte an den Enden.
+ 13. Koch-App „Cooking now“ (Foto vollflächig, in der Hand) – Glas-Chip mit Fortschrittsring „Step 2 of 5“, Glas-Karte „French Fries 80 gr“ mit Schale, die aus der Karte ragt, und weißem Pfeilkreis auf der Ecke, senkrechte Leiste runder Glas-Knöpfe, Vorschläge als Glas-Kacheln mit Foto.
+ 14. Rezept „Grilled Ribs“ (Foto vollflächig) – große weiße Überschrift auf dem Foto, Glas-Chips mit Zeichen (45 min, 2 Portionen, 620 kcal), Glas-Karte „160 gr“ mit Schale über dem Rand und Pfeilkreis, Personenzeile, Glas-Karten mit rundem Zeichen und Kapselbalken „Oven temp 120 °C“.
++15. Nintendo-Switch-App (dunkel, Spielkarten) – Anthrazit-Karten mit tonalem Abfall und Lichtkante, Figur bricht aus der Karte (G12), Fähigkeitsbalken mit Prozent, Titel 700 als das eine Schwere, Chips für Genre.
++16. Nintendo-Web (hell, gefächerte Karten) – riesiger Titel 700, Karten als Fächer mit Kontaktschatten, Raster im Hintergrund, eine rote Pille als einzige Handlung.
++17. Domus, Energiekachel (Ausschnitt) – „12.4 kWh“ in 300 mit kleiner Einheit, Stufendiagramm mit Schraffur für den Rest, Chip „−18 %“ mit Vorzeichen, Lichtkante auf Schwarz.
++
++**Abgleich vom 26.10.2026** (zwölf Bilder des Inhabers neben der Startseite eeziframes; Kopien unter docs/profis/vorlagen/2026-10-26/ im Projekt, Urteile in docs/profis/gremium/2026-10-26-startseite-dna-vorlagen-*.md): die Bilder zu 2, 3, 4, 8, 9, 10, 12, 13 und 14 noch einmal, dazu 15–17. **Neu als Gen:** G14 Keine Fläche ist flach (in allen zwölf: Lichtkante, tonaler Abfall, Vignette, Kontaktschatten) und G15 Ein schweres Element je Bild (3, 5, 12, 13, 15, 16, 17). Beide sind in der Startseite umgesetzt; der Inhaber hat das Ergebnis angenommen.
+ 
+ **Aus 8–14 neu als Gen:** G11 Kapselreihe (9, 10, 12, 14, dazu 4), G12 Objekt bricht aus dem Rahmen (11, 13, 14), G13 runde Knöpfe (8, 9, 10, 11, 13, 14). **Bestätigt und geschärft:** G1 Schraffur als Rest/Platzhalter (9, 10, 12), G3 Einheit und Nachkommastellen klein (8, 10, 13, 14), G4 Gerät auf echtem Material im harten Licht (8–12), G6 Pille mit Pfeilkreis (8), G8 dunkle Innenkarte mit dem Wert (8, 9, 10), G10 Milchglas über Foto (8, 13, 14). **Kandidaten** (noch unter drei): untere Navigation als dunkle Pille mit aktiver Pille (8), Countdown mit Punkten (8), senkrechte Werkzeugleiste (13), Schreibschrift als Signatur (11), Personenzeile mit Bildern (9, 14), Halbkreis-Anzeige mit Farbbogen (10).
+ **Farben in 8–14 und die Palette:** Limette (11), Pastell (8), Orange-Honig-Verläufe (9, 10) und Grün/Rot für Trends (10) übernehme ich nicht wörtlich. In der Palette „Task-App dunkel“ wird daraus: Verlaufskarte = Anthrazit-Kachel mit radialem Leuchten (Violett/Indigo oder Koralle), Trend = Pfeil und Vorzeichen, hoch in Violett, runter in Koralle.
+@@ -126,6 +144,7 @@
+ - 26.10.2026 – Konfigurator von Start bis Lage Folie für Folie neu („Konfigurator in Violett“). Inhaber: beim Messen kein Zwischenschritt („das nervt komplett“) – Zifferntasten offen, „Weiter“ speichert und geht zum nächsten Maß.
+ - 26.10.2026 – Andere Chats mit „design-dna“ kamen ohne Palette und Rahmen zu einem ganz anderen Look; deshalb stehen Palette (8) und App-Rahmen (9) jetzt im Skill selbst.
+ - 26.10.2026 – Sieben weitere Vorlagen (8–14, App-Oberflächen): neue Gene G11 Kapselreihe, G12 Rahmenbruch, G13 runde Knöpfe; neue Bausteine in Abschnitt 10.
++- 26.10.2026 – Startseite eeziframes (Kunden) nach dieser DNA gebaut: fünf Szenen dunkel/hell, Bento, Stufen, Etiketten, Preis als Leuchtkachel (Protokoll docs/profis/2026-10-26-startseite-dna.md, Vorschau https://claude.ai/artifact/WT1ceQezN8aauP1iTgen3i). Urteil des Inhabers: „brutal geil“. Seine Entscheidungen: Gestaltung nur nach dieser DNA, alte Skills nicht mehr laden; Gremium nur eine Runde (etwa zehn Minuten je Seite); im Hero kein Gerät und keine Maßlinien, sein Hausfoto als Bühne; Bildpille im Satz und Schriftfenster nur auf sein Wort; Wortlaut „Jetzt konfigurieren“ bleibt. Daraus: G14 und G15, Ergänzungen in Abschnitt 5, Vorlagen 15–17, Messpunkte in Abschnitt 4; `--auf-signal` auf Schwarz berichtigt (Kontrastregel in Abschnitt 8); Begleit-Skill `design-dna-eeziframes` im Projekt.
+ 
+ ## 8. Farbwelt „Task-App dunkel“ (Standard, ersetzt alle Farben aus anderen Skills und Vorlagen)
+ 
+@@ -162,7 +181,7 @@
+ **Tokens mit der DNA**
+ ```css
+ :root { --schwarz:#07090a; --anthrazit:#202022; --weiss:#fff; --silbergrau:#a8a4a9; --textgrau:#6b676c; --violett:#897efc; --koralle:#f88962; --indigo:#3c3a66;
+-  --signal:var(--violett); --auf-signal:var(--weiss); --glut-orange:var(--koralle); --glut-honig:var(--koralle); --glut-pink:var(--koralle); --glut-magenta:var(--indigo); --glut-lila:var(--violett); --glut-blau:var(--indigo); --glut-gruen:var(--violett); }
++  --signal:var(--violett); --auf-signal:var(--schwarz); --glut-orange:var(--koralle); --glut-honig:var(--koralle); --glut-pink:var(--koralle); --glut-magenta:var(--indigo); --glut-lila:var(--violett); --glut-blau:var(--indigo); --glut-gruen:var(--violett); }
+ [data-theme="dunkel"] { --grund:var(--schwarz); --grund-tief:var(--schwarz); --flaeche:var(--anthrazit); --flaeche-hoch:var(--schwarz); --tinte:var(--weiss); --tinte-2:var(--silbergrau); --linie:var(--silbergrau); --linie-fein:var(--anthrazit); --handlung:var(--weiss); --auf-handlung:var(--schwarz); --glas:var(--schwarz); --fokus:var(--violett); --schatten-glas:none; }
+ [data-theme="hell"] { --grund:var(--weiss); --grund-tief:var(--weiss); --flaeche:var(--weiss); --flaeche-hoch:var(--weiss); --tinte:var(--schwarz); --tinte-2:var(--textgrau); --linie:var(--silbergrau); --linie-fein:var(--silbergrau); --handlung:var(--schwarz); --auf-handlung:var(--weiss); --glas:var(--weiss); --fokus:var(--violett); --schatten-glas:none; }
+ ```

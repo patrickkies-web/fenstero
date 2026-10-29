@@ -62,7 +62,7 @@
     empfaengerTage: 14, rueckrufWerktage: 10, einladungErinnernTage: 3, versandVersuche: 8, versandMaxTage: 3, versandErsterMinuten: 10
   };
   const GRENZEN = {
-    anfragenIpTag: 10, fotosJeFenster: 2, fotosZusatz: 4, kiJeCode: 60, fotoTagInstanz: 1500, otpFehlerMailTag: 10,
+    anfragenIpTag: 10, testJeTag: 10, fotosJeFenster: 2, fotosZusatz: 4, kiJeCode: 60, fotoTagInstanz: 1500, otpFehlerMailTag: 10,
     dateienBestellung: 12, dateiBytes: 1000000, summeBestellung: 10000000, nachrichtenStunde: 20, eingangMails: 3,
     pdfBudget: 5000000, anhangMax: 7000000, startsTagInstanzHart: 5000,
     domains: 3, farben: 3, titel: 80, begruessung: 400, notiz: 1500, nachricht: 2000, fenster: 50
@@ -203,7 +203,8 @@
       firma: kurz(d.firma, 100), strasse: kurz(d.strasse, 100), plz: String(d.plz || '').replace(/\s/g, '').slice(0, 5), ort: kurz(d.ort, 80), land: 'DE',
       bundesland: Object.prototype.hasOwnProperty.call(BUNDESLAENDER, d.bundesland) ? d.bundesland : '',
       ust: String(d.ust || '').replace(/\s/g, '').toUpperCase().slice(0, 11), web: webAdresse(d.web), ap: kurz(d.ap, 80), rolle: kurz(d.rolle, 80), tel: kurz(d.tel, 40),
-      rechtsform: kurz(d.rechtsform, 60), vertretung: kurz(d.vertretung, 200), register: kurz(d.register, 120), kammer: kurz(d.kammer, 120), beruf: kurz(d.beruf, 120)
+      rechtsform: kurz(d.rechtsform, 60), vertretung: kurz(d.vertretung, 200), register: kurz(d.register, 120), kammer: kurz(d.kammer, 120), beruf: kurz(d.beruf, 120),
+      schlichtung: kurz(d.schlichtung, 300), dsb: kurz(d.dsb, 200)
     };
     const f = {};
     if (w.firma.length < 2) f.firma = 'Bitte den Namen des Unternehmens eingeben.';

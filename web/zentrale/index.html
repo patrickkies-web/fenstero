@@ -1,31 +1,34 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" class="au-html">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
 <title>Zentrale | eeziframes</title>
-<meta name="theme-color" content="#161616">
+<meta name="theme-color" content="#07090a">
+<style>html,body{background:#07090a}</style>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/assets/gemeinsam.css">
-<link rel="stylesheet" href="/assets/einladung.css">
-<link rel="stylesheet" href="/assets/zentrale.css">
+<link rel="stylesheet" href="/fonts/dna.css">
+<link rel="stylesheet" href="/assets/auftrag.css">
 </head>
-<body>
-<!-- Zentrale des Inhabers: Bestellungen und Instanzen der Konfigurator-Pakete, Betriebe verwalten, Kennzahlen, eigene Statistik,
-     Protokoll. Zugang nur mit ZENTRALE_PASSWORT (Cloudflare-Secret), siehe docs/ZENTRALE.md. Diese Seite enthält keine Daten; alles kommt
-     nach der Anmeldung von /api/zentrale/…. pakete.js, instanzregeln.js und einladung.js liefern Paketnamen, Statusleiste, Kontrast und die
-     Vorschau der Startseite (dieselben Dateien wie Server und App). -->
-<div id="z" class="z-wurzel" aria-live="off">
-  <main class="z-login"><div class="z-login-karte"><p class="z-text">Zentrale wird geladen …</p></div></main>
+<body class="au">
+<!-- Zentrale des Inhabers: Eingang der Aufträge (Bestellungen der Landingpages mit Konfigurator) und je Auftrag alles für den Bau der
+     Seite. Zugang nur mit ZENTRALE_PASSWORT (Cloudflare-Secret), siehe docs/ZENTRALE.md. Diese Seite enthält keine Daten; alles kommt nach
+     der Anmeldung von /api/inhaber/… (functions/auftrag/) und wird von inhaber.js gebaut. -->
+<a class="au-sr" href="#inhalt">Zum Inhalt</a>
+<div class="a-seite">
+  <header class="a-kopf" id="kopf"><a class="a-marke" href="/" aria-label="eeziframes, zur Startseite"><svg viewBox="0 0 64 64" aria-hidden="true"><rect class="fi-kachel" width="64" height="64" rx="10" fill="#000"/><g class="fi-licht" fill="#fff"><path class="fi-decke" d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path class="fi-fenster" d="M45 22 57 17.6V41.9L45 39.8Z"/><path class="fi-strahl" d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect class="fi-rand" x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#000" stroke-opacity=".1"/></svg><span class="a-wm" translate="no"><b>eezi</b>frames</span></a></header>
+  <div id="app">
+    <noscript><main class="a-raster eins" id="inhalt"><div class="a-frage"><h1>Die Zentrale braucht JavaScript.</h1></div></main></noscript>
+  </div>
 </div>
-<noscript><p class="z-text" style="padding:16px">Die Zentrale braucht JavaScript.</p></noscript>
 <script src="/assets/pakete.js"></script>
-<script src="/assets/instanzregeln.js"></script>
-<script src="/assets/einladung.js"></script>
-<script src="/assets/zentrale.js"></script>
+<script src="/assets/auftragsregeln.js"></script>
+<script src="/assets/auftrag-ui.js"></script>
+<script src="/assets/inhaber.js"></script>
 </body>
 </html>

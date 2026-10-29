@@ -1,0 +1,99 @@
+/* Palette Fensterbau Brandt (Vorgabe des Inhabers, 27.10.2026): Reinweiß #FFFFFF 40 %, Eisblau #EEF7F9 25 %, Schieferblau #233D48 15 %,
+   Tiefes Petrol #0A6774 10 %, Aquatürkis #2AB4BD 7 %, Frisches Mint #D8F1EB 3 %.
+   Signature (data-farbe="voll"): die ganze Seite in dieser Palette, Hero und „So geht es“ hell (der Generator stellt ihr Thema um).
+   Plus (data-farbe="halb"): Karten, Flächen, helle Szene und Akzente in der Palette; Schwarz als Grund der dunklen Szenen, Silbergrau
+   und Koralle als Hinweis bleiben von eeziframes. Essential bleibt eeziframes. Muster-Leiste, Etiketten und Rückmeldungen gehören zu
+   eeziframes und behalten dessen Farben. Tonstufen der sechs Farben sind erlaubt, neue Farben nicht.
+   Gemessen mit .claude/skills/design-dna-eeziframes/werkzeuge/palette.mjs und palette.py. Quelle: docs/profis/werkzeuge/farben-brandt.css */
+.ez[data-farbe] { --b-weiss: #fff; --b-eis: #eef7f9; --b-schiefer: #233d48; --b-petrol: #0a6774; --b-aqua: #2ab4bd; --b-mint: #d8f1eb;
+  --b-schiefer-hoch: #2c4955; --b-petrol-tief: #075560; --b-aqua-licht: #7fd9de; }
+/* Werkzeuge der Vorlage bleiben eeziframes */
+.ez[data-farbe] :is(.ez-ml, .ez-muster, .ez-toast, .ez-dash) { --schwarz: #07090a; --anthrazit: #202022; --weiss: #fff; --silbergrau: #a8a4a9; --textgrau: #6b676c;
+  --violett: #897efc; --koralle: #f88962; --indigo: #3c3a66; --hinweis: #f88962;
+  --ez-kachel: radial-gradient(120% 90% at 18% 0%, #363638, #202022 55%, #1c1c1e); }
+
+/* ---------- Signature: ganze Seite ---------- */
+body:has(.ez[data-farbe="voll"]), html:has(.ez[data-farbe="voll"]) { background: #233d48; }
+.ez[data-farbe="voll"] {
+  --schwarz: var(--b-schiefer); --anthrazit: var(--b-schiefer-hoch); --silbergrau: #a9c3cc; --textgrau: #4c6670;
+  --violett: var(--b-aqua); --indigo: var(--b-petrol); --koralle: var(--b-aqua);
+  --firma: var(--b-petrol); --firma-tief: var(--b-petrol-tief); --firma-licht: var(--b-aqua); --auf-firma: #fff; --hinweis: var(--b-aqua);
+  --ez-kachel: radial-gradient(120% 90% at 18% 0%, #3a5a68, var(--b-schiefer-hoch) 55%, #1d343e);
+  --ez-petrol: radial-gradient(120% 90% at 18% 0%, #13808e, var(--b-petrol) 55%, var(--b-petrol-tief));
+}
+/* Auf dunklen Flächen leuchtet Aquatürkis, auf hellen trägt Petrol */
+.ez[data-farbe="voll"] [data-theme="dunkel"] { --firma: var(--b-aqua); --firma-tief: var(--b-petrol); --firma-licht: var(--b-aqua-licht); --auf-firma: var(--b-schiefer); }
+/* Helle Szenen: Hero und „So geht es“ in Eisblau, Betrieb und Weg in Reinweiß */
+.ez[data-farbe="voll"] .dna-szene:is(:has(.ez-hero), #so) { --grund: var(--b-eis); --grund-tief: var(--b-eis); }
+.ez[data-farbe="voll"] [data-theme="hell"] { --linie: color-mix(in srgb, var(--b-schiefer) 35%, #fff); --linie-fein: color-mix(in srgb, var(--b-schiefer) 18%, #fff);
+  --kachel-rand: inset 0 0 0 1px color-mix(in srgb, var(--b-schiefer) 20%, #fff);
+  --schatten-schwebe: 0 24px 48px -16px rgba(35,61,72,.22), 0 2px 6px rgba(35,61,72,.06); --schatten-tief: 0 60px 90px -30px rgba(35,61,72,.35), 0 18px 36px -18px rgba(35,61,72,.25); }
+.ez[data-farbe="voll"] [data-theme="hell"] :is(.ez-ak, .ez-gruss em.ez-ak) { color: var(--b-petrol); }
+/* Hero */
+.ez[data-farbe="voll"] .ez-hero__buehne::before { background: radial-gradient(55% 45% at 50% 45%, color-mix(in srgb, var(--b-aqua) 34%, transparent), transparent 72%); }
+.ez[data-farbe="voll"] [data-theme="hell"] .ez-rund { background: var(--b-weiss); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--b-schiefer) 30%, #fff); }
+.ez[data-farbe="voll"] .ez-person { color: #fff; background: radial-gradient(at 30% 20%, #13808e, var(--b-petrol) 70%); }
+.ez[data-farbe="voll"] [data-theme="hell"] .ez-fakten li { background: var(--b-mint); box-shadow: none; color: var(--b-schiefer); }
+.ez[data-farbe="voll"] [data-theme="hell"] .ez-fakten__zeichen { color: var(--b-petrol); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--b-petrol) 45%, transparent); }
+/* Karten in Petrol: Konfigurator, Zeit, Kontakt; Text darauf Weiß */
+.ez[data-farbe="voll"] :is(.ez-planen, .ez-zeit, .ez-kontakt) { background: var(--ez-petrol); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.06);
+  --tinte: #fff; --tinte-2: #cfe9ec; --linie: rgba(255,255,255,.55); --linie-fein: rgba(255,255,255,.22); --handlung: #fff; --auf-handlung: var(--b-schiefer);
+  --firma: var(--b-aqua); --firma-tief: var(--b-petrol-tief); --firma-licht: var(--b-aqua-licht); color: var(--tinte); }
+.ez[data-farbe="voll"] .ez-zeit .dna-label, .ez[data-farbe="voll"] .ez-zeit small { color: var(--tinte-2); }
+.ez[data-farbe="voll"] .ez-stationen li::before { background: var(--b-petrol-tief); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.55); }
+.ez[data-farbe="voll"] .ez-stationen li.ist::before { background: var(--b-aqua); box-shadow: 0 0 0 4px color-mix(in srgb, var(--b-aqua) 35%, transparent); }
+/* „So geht es“ hell: Schritte als weiße Karten, Bildfelder in Schieferblau */
+.ez[data-farbe="voll"] #so .ez-schritt { background: var(--b-weiss); box-shadow: var(--kachel-rand), var(--schatten-schwebe); }
+.ez[data-farbe="voll"] .ez-schritt__bild--dunkel { background: radial-gradient(120% 90% at 18% 0%, #3a5a68, var(--b-schiefer) 55%, #1d343e); }
+.ez[data-farbe="voll"] .ez-schritt__bild--foto { background: var(--b-schiefer); }
+.ez[data-farbe="voll"] .ez-zeichnung .glas { fill: #3a5a68; }
+.ez[data-farbe="voll"] .ez-zeichnung .oeffnung { fill: #1d343e; }
+.ez[data-farbe="voll"] .ez-offen { background: var(--b-weiss); }
+/* Zeichen und Chips in Mint */
+.ez[data-farbe="voll"] .ez-dinge__zeichen { background: var(--b-mint); color: var(--b-petrol); box-shadow: none; }
+.ez[data-farbe="voll"] .ez-zustand { background: var(--b-petrol); }
+.ez[data-farbe="voll"] .ez-link-etikett__punkt { background: radial-gradient(circle at 50% 30%, #3a5a68, var(--b-schiefer) 70%); }
+
+/* ---------- Plus: halb Brandt, halb eeziframes ---------- */
+.ez[data-farbe="halb"] {
+  --anthrazit: var(--b-schiefer);
+  --violett: var(--b-aqua); --indigo: var(--b-petrol);
+  --firma: var(--b-petrol); --firma-tief: var(--b-petrol-tief); --firma-licht: var(--b-aqua); --auf-firma: #fff; --hinweis: var(--koralle);
+  --ez-kachel: radial-gradient(120% 90% at 18% 0%, #345664, var(--b-schiefer) 55%, #1a2f38);
+}
+.ez[data-farbe="halb"] [data-theme="dunkel"] { --firma: var(--b-aqua); --firma-tief: var(--b-petrol); --firma-licht: var(--b-aqua-licht); --auf-firma: var(--b-schiefer); }
+.ez[data-farbe="halb"] #betrieb { --grund: var(--b-eis); --grund-tief: var(--b-eis); }
+.ez[data-farbe="halb"] :is(.ez-planen, .ez-kontakt) { background: radial-gradient(120% 90% at 18% 0%, #13808e, var(--b-petrol) 55%, var(--b-petrol-tief)); }
+.ez[data-farbe="halb"] .ez-dinge__zeichen { background: var(--b-mint); color: var(--b-petrol); box-shadow: none; }
+.ez[data-farbe="halb"] .ez-zustand { background: var(--b-petrol); }
+
+/* ---------- Signature: Schluss in Aquatürkis (Kontakt und Fuß), Schrift in Schieferblau (4,8 : 1) ---------- */
+.ez[data-farbe="voll"] #kontakt { --grund: var(--b-aqua); --grund-tief: var(--b-aqua); --tinte: var(--b-schiefer); --tinte-2: var(--b-schiefer);
+  --linie: rgba(35,61,72,.5); --linie-fein: rgba(35,61,72,.22); --handlung: var(--b-schiefer); --auf-handlung: #fff; --fokus: var(--b-schiefer);
+  --silbergrau: rgba(35,61,72,.55); --firma: var(--b-schiefer); --firma-tief: var(--b-petrol-tief); --firma-licht: var(--b-petrol); --auf-firma: #fff;
+  color: var(--tinte); color-scheme: light; }
+.ez[data-farbe="voll"] #kontakt .ez-ak { color: var(--b-petrol-tief); }
+.ez[data-farbe="voll"] #kontakt .ez-kontakt { --silbergrau: #a9c3cc; }
+.ez[data-farbe="voll"] #kontakt .ez-kontakt__wege .dna-rund-knopf { background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.6); }
+.ez[data-farbe="voll"] #kontakt .ez-person { background: radial-gradient(at 30% 20%, #3a5a68, var(--b-schiefer) 70%); }
+/* Fuß als Band in Schieferblau unter dem Kontakt (volle Breite, ohne Einfluss auf das Layout) */
+.ez[data-farbe="voll"] #kontakt .ez-fuss { --tinte: #fff; --tinte-2: #c9dbe1; --silbergrau: #a9c3cc; --linie: rgba(255,255,255,.4); --linie-fein: rgba(255,255,255,.16);
+  --firma: var(--b-aqua); --fokus: #fff; color: var(--tinte); background: var(--b-schiefer);
+  box-shadow: 0 0 0 100vmax var(--b-schiefer); clip-path: inset(0 -100vmax -100vmax); }
+/* „Das brauchen Sie“: Kacheln in Eisblau, Zeichen auf Weiß; das Fenster (nur am Schreibtisch) steht auf Petrol */
+.ez[data-farbe="voll"] .ez-dinge li { background: var(--b-eis); box-shadow: none; }
+.ez[data-farbe="voll"] .ez-dinge__zeichen { background: var(--b-weiss); }
+.ez[data-farbe="voll"] .ez-bereit__bild { background: var(--ez-petrol); box-shadow: inset 0 1px 0 rgba(255,255,255,.16); }
+.ez[data-farbe="voll"] .ez-bereit__bild .dna-etikett { color: var(--b-schiefer); }
+/* Weg der Anfrage: am Telefon die längste Karte der Seite, dort hell (Weiß mit Rand), am Schreibtisch Schieferblau neben dem Text.
+   Die dunkle Innenkarte mit dem Fortschritt bleibt in beiden Fällen dunkel (G8). */
+@media (max-width: 899px) {
+  .ez[data-farbe="voll"] .ez-route { --tinte: var(--b-schiefer); --tinte-2: #4c6670; --silbergrau: #7f98a2; --linie: color-mix(in srgb, var(--b-schiefer) 35%, #fff);
+    --linie-fein: color-mix(in srgb, var(--b-schiefer) 18%, #fff); --firma: var(--b-petrol); --firma-licht: var(--b-aqua); --auf-firma: #fff; --fokus: var(--b-schiefer);
+    background: var(--b-weiss); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--b-schiefer) 20%, #fff), 0 24px 48px -16px rgba(35,61,72,.22), 0 2px 6px rgba(35,61,72,.06); }
+  .ez[data-farbe="voll"] .ez-route__text b { color: var(--tinte); }
+  .ez[data-farbe="voll"] .ez-route .ez-stand { --tinte: #fff; --tinte-2: #a9c3cc; --silbergrau: #a9c3cc; --firma: var(--b-aqua); --firma-licht: var(--b-aqua-licht); }
+}
+
+/* Leiste: Glas in Schieferblau statt Anthrazit (ganz und als schmaler Knopf) */
+.ez[data-farbe] .ez-leiste { --glas: rgba(35,61,72,.82); --glas-rand: rgba(255,255,255,.16); }

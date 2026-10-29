@@ -40,7 +40,9 @@ export const ABLAGEN = {
   fotos: { bucket: 'fotos', typen: ['image/jpeg'], max: 1000000 },
   marke: { bucket: 'marke', typen: ['image/png', 'image/jpeg', 'image/webp'], max: 2000000 },
   bestellungen: { bucket: 'bestellungen', typen: ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'application/pdf'], max: 1000000 },
-  blatt: { bucket: 'blatt', typen: ['application/pdf'], max: 10000000 }
+  blatt: { bucket: 'blatt', typen: ['application/pdf'], max: 10000000 },
+  /* Dateien der Aufträge (functions/auftrag/): Logo, Porträt, Fotos für die Landingpage, auftrag/<id>/<datei> */
+  auftraege: { bucket: 'auftraege', typen: ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'application/pdf'], max: 4000000 }
 };
 export const FOTO_MAX = 1000000;            // Bytes je Foto; die App schickt meist 0,2 bis 0,6 MB
 export const FOTOS_JE_ABLAGE = 160;         // je Link bzw. je eigenem Aufmaß: 50 Fenster mit je zwei Fotos und neu fotografierte

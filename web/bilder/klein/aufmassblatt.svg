@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400">
+
+
+<rect width="480" height="400" rx="16" fill="#ffffff"/>
+<rect x="24" y="18" width="432" height="364" rx="8" fill="#ffffff" stroke="#07090a" stroke-width="3.3"/>
+<path d="M24 26a8 8 0 0 1 8-8h416a8 8 0 0 1 8 8v38H24z" fill="#ecebec"/>
+<rect x="52" y="96" width="176" height="160" fill="none" stroke="#f88962" stroke-width="6.6"/>
+<rect x="64" y="108" width="152" height="136" fill="#eceef1" stroke="#897efc" stroke-width="5.5"/>
+<line x1="140" y1="108" x2="140" y2="244" stroke="#897efc" stroke-width="5.5"/>
+<rect x="258" y="96" width="174" height="72" rx="6" fill="#ecebec"/>
+<rect x="258" y="184" width="174" height="72" rx="6" fill="#ecebec"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+
+
+
+
+
+
+</g>
+</svg>

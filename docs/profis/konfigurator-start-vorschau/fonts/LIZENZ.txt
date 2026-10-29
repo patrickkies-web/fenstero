@@ -1,0 +1,2 @@
+Outfit (Rodrigo Fuenzalida) und Inter (Rasmus Andersson) stehen unter der SIL Open Font License 1.1, siehe OFL.txt daneben.
+Diese Dateien dienen nur der Vorschau; in der App liegen sie unter web/fonts.

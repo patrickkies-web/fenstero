@@ -191,7 +191,8 @@ export default async (h) => {
   const protA = await (await h.zentrale()).api('/api/zentrale/protokoll?art=instanz_versand');
   ok(!t15.probe.zeile && !t15.e0.entwurf && t15.eW.entwurf && t15.d.zeile && t29.d.zeile && t29.d.fotos, '24.9 Aufbewahrung: Testanfrage nach einem Tag weg, Website-Entwurf ohne Fenster nach 24 Stunden weg, mit Fenster bleibt er; zugestellte Anfrage bleibt bis Tag 30');
   ok(!t31.d.zeile && !t31.d.fotos && !t31.d.entwurf && !t31.eW.entwurf && t31.n.zeile && !t61.n.zeile && !t61.n.fotos && (protA.json.eintraege || []).some((e) => /nie zugestellt/.test(e.text) && e.text.includes((nA.r.json || {}).nr || '?')), '24.9 Essential: 30 Tage nach Zustellung samt Fotos und Zwischenstand gelöscht; Entwurf mit Fenster nach 30 Tagen still weg; nie zugestellt nach 60 Tagen mit Hinweis');
-  ok(t61.s.zeile && t61.s.fotos && t366.s.zeile && !t366.s.fotos && !!(t366.sZ && t366.sZ.daten.fotosGeloescht), '24.9 Signature: Anfrage bleibt bis Vertragsende, Originalfotos nach 365 Tagen gelöscht');
+  /* Seit 27.10.2026 bewahrt kein Paket Anfragen bis zum Vertragsende auf (Entscheidung des Inhabers): Signature löscht wie Essential und Plus */
+  ok(!t61.s.zeile && !t61.s.fotos && !t366.sZ, '24.9 Signature: wie Essential und Plus keine Aufbewahrung bis Vertragsende; ohne Zustellung nach 60 Tagen samt Fotos gelöscht');
 
   /* ---------- 24.11 Nachbesserung einer Einladung ---------- */
   const ein = (await T.test({ einladung: { instanz: I.signature.id, kunde: 'Familie Nachbessern' } })).einladung, wE = [T.fenster(0)];

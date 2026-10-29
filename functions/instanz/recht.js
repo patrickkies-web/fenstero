@@ -3,7 +3,8 @@
      impressumSeite(inst) → HTML-Dokument   datenschutzSeite(inst) → HTML-Dokument   rechtVollstaendig(recht) → { ok, fehlt: [Feld …] }
      AUFSICHT (Datenschutz-Aufsichtsbehörden der 16 Länder), aufsichtFuer(bundesland), speicherFristen(m), VORLAGE
    inst: ctx.instanz (docs/INSTANZEN.md), gebraucht werden name, recht, m (Merkmale), kontakt.
-   instanzen.recht: { firma, rechtsform, vertretung, strasse, plz, ort, land, tel, mail, register, ust, kammer, beruf, bundesland, stand }
+   instanzen.recht: { firma, rechtsform, vertretung, strasse, plz, ort, land, tel, mail, register, ust, kammer, beruf, schlichtung, dsb, bundesland, stand }
+   (schlichtung leer: Satz „nicht bereit und nicht verpflichtet“ nach § 36 VSBG; dsb nur, wenn benannt)
    Regeln:
    - Verantwortlich für die Anfragen ist der Betrieb; der technische Dienstleister (eeziframes) ist sein Auftragsverarbeiter. Bei
      rechtNennung 'name' (Essential, Plus) steht er mit Namen und Anschrift da, bei 'kategorie' (Signature) nur als „technischer
@@ -22,7 +23,9 @@ import { ANBIETER } from '../api/anbieter.js';
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const R = () => globalThis.Instanzregeln;
 
-export const VORLAGE = { stand: '2026-10-23', geprueft: false };
+/* Freigegeben vom Inhaber am 27.10.2026 („wer hat gesagt, dass die anwaltliche Prüfung noch nicht stattgefunden hat?“); Fassung vom
+   28.10.2026 nach der Prüfrunde docs/profis/2026-10-28-rechtstexte.md (Anthropic-Fristen, Empfänger, Schlichtung, Datenschutzbeauftragter) */
+export const VORLAGE = { stand: '2026-10-28', geprueft: true };
 const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 const datum = (iso) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || '')); return m ? Number(m[3]) + '. ' + MONATE[Number(m[2]) - 1] + ' ' + m[1] : String(iso || ''); };
 
@@ -53,7 +56,7 @@ const UNTER = [
   ['Cloudflare, Inc., San Francisco, USA', 'Auslieferung der Seiten, Server-Programm, Zwischenspeicher, Domain und DNS', 'weltweit verteilt; EU-US Data Privacy Framework (Art. 45 DSGVO), ergänzend Standardvertragsklauseln'],
   ['Supabase Inc., USA (Server in Frankfurt am Main)', 'Datenbank, Ablage der Fotos und Aufmaßblätter', 'Frankfurt am Main (EU); Standardvertragsklauseln für Zugriffe aus Drittländern (Support)'],
   ['Plus Five Five, Inc. (Resend), 2261 Market Street #5039, San Francisco, CA 94114, USA', 'Versand der E-Mails mit Ihrer Anfrage, Zustellprotokolle (30 Tage)', 'USA; EU-US Data Privacy Framework (Art. 45 DSGVO), ergänzend Standardvertragsklauseln'],
-  ['Anthropic Ireland, Limited, Dublin, Irland', 'KI-Auswertung der Fotos, nur mit Ihrer Einwilligung; keine Nutzung zum Training, Löschung spätestens nach 30 Tagen', 'Irland und USA; Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO)']
+  ['Anthropic Ireland, Limited, Dublin, Irland', 'KI-Auswertung der Fotos, nur mit Ihrer Einwilligung; keine Nutzung zum Training, Löschung nach Angaben von Anthropic in der Regel nach 30 Tagen (bei Prüfung eines Verstoßes gegen seine Nutzungsrichtlinien bis zu zwei Jahre)', 'Irland und USA; Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO)']
 ];
 
 /* Pflichtangaben nach § 5 DDG, soweit für jeden Betrieb nötig (Register, USt-IdNr., Kammer nur, wenn vorhanden) */
@@ -68,14 +71,19 @@ export function rechtVollstaendig(recht) {
 function seite(inst, titel, inhalt) {
   const name = (inst && inst.name) || '';
   return '<!doctype html>\n<html lang="de">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n' +
-    '<title>' + esc(titel + (name ? ' · ' + name : '')) + '</title>\n<meta name="robots" content="noindex">\n<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n<link rel="stylesheet" href="/fonts/fonts.css">\n' +
-    '<style>:root{color-scheme:dark}body{margin:0;background:#161616;color:#f3f2ee;font:500 17px/1.6 Inter,system-ui,sans-serif}main{max-width:760px;margin:0 auto;padding:32px 16px 64px}' +
-    'h1{font-size:32px;line-height:1.15;font-weight:800;letter-spacing:-.02em;margin:8px 0 24px}h2{font-size:20px;line-height:1.3;font-weight:800;margin:32px 0 8px}p,address,li{margin:0 0 12px;color:#c9c8c3;font-style:normal}ul{padding-left:20px;margin:0 0 12px}' +
-    'a{color:#f3f2ee;text-underline-offset:2px}.klein{font-size:13px;color:#93928d}.karte{border:2px solid #2b2b2b;border-radius:24px;padding:16px 20px;background:#1f1f1f;margin:0 0 16px}.karte p:last-child{margin:0}' +
-    'nav{display:flex;flex-wrap:wrap;gap:4px 16px}nav a{font-size:15px;min-height:44px;display:inline-flex;align-items:center}' +
-    '.tabelle{overflow-x:auto;margin:0 0 16px;border:2px solid #2b2b2b;border-radius:16px;background:#1f1f1f}table{width:100%;border-collapse:collapse;font-size:15px;line-height:1.45}' +
-    'th,td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid #2b2b2b;color:#c9c8c3}tr:last-child td{border-bottom:0}th{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#93928d}' +
-    '@media (max-width:600px){h1{font-size:28px}table,tbody,tr,td{display:block}thead{display:none}tr{padding:10px 12px;border-bottom:1px solid #2b2b2b}td{padding:0;border:0}td+td{margin-top:4px}td[data-k]::before{content:attr(data-k);display:block;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#93928d}}' +
+    '<title>' + esc(titel + (name ? ' · ' + name : '')) + '</title>\n<meta name="robots" content="noindex">\n<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n<link rel="stylesheet" href="/fonts/fonts.css">\n<link rel="stylesheet" href="/fonts/dna.css">\n' +
+    /* Design-DNA (28.10.2026), neutral in Schwarz, Weiß und Grau, ohne die Akzente von eeziframes: der Text als helles Blatt auf Schwarz */
+    '<style>:root{color-scheme:light}*,*::before,*::after{box-sizing:border-box}html,body{background:#07090a}body{margin:0;color:#07090a;font:400 16px/1.65 Outfit,"Avenir Next","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}' +
+    'main{margin:12px 0 0;min-height:calc(100vh - 12px);padding:24px max(16px,calc((100% - 760px) / 2)) 72px;border-radius:40px 40px 0 0;background:#fff}' +
+    'h1{font-size:clamp(34px,8.4vw,48px);line-height:1;font-weight:600;letter-spacing:-.035em;margin:20px 0 24px;text-wrap:balance}h2{font-size:clamp(21px,5vw,26px);line-height:1.2;font-weight:600;letter-spacing:-.02em;margin:44px 0 10px}' +
+    'p,address,li{margin:0 0 12px;color:#6b676c;font-style:normal}strong,b{font-weight:500;color:#07090a}ul{list-style:none;padding:0;margin:0 0 12px}ul>li{position:relative;padding-left:20px}ul>li::before{content:"";position:absolute;left:2px;top:.72em;width:6px;height:6px;border-radius:50%;background:#a8a4a9}' +
+    'a{color:#07090a;text-decoration-color:#a8a4a9;text-underline-offset:3px}.klein{font-size:13px;line-height:1.5;color:#6b676c}:focus-visible{outline:2px solid #07090a;outline-offset:3px}' +
+    '.karte{border-radius:28px;padding:20px 22px;background:#fff;box-shadow:inset 0 0 0 1px rgba(168,164,169,.45),0 24px 48px -28px rgba(7,9,10,.3);margin:0 0 16px}.karte p:last-child{margin:0}' +
+    'nav{display:flex;flex-wrap:wrap;gap:0 18px}nav a{font-size:14px;min-height:44px;display:inline-flex;align-items:center;color:#6b676c;text-decoration:none}nav a:hover{color:#07090a}' +
+    '.tabelle{overflow-x:auto;margin:0 0 16px;border-radius:20px;box-shadow:inset 0 0 0 1px rgba(168,164,169,.45),0 18px 40px -28px rgba(7,9,10,.3)}table{width:100%;border-collapse:collapse;font-size:15px;line-height:1.45}' +
+    'th,td{padding:12px 16px;text-align:left;vertical-align:top;border-bottom:1px solid rgba(168,164,169,.45);color:#6b676c}tr:last-child td{border-bottom:0}td:first-child{color:#07090a;font-weight:500}th{font-size:12px;font-weight:400;letter-spacing:.03em;color:#6b676c}' +
+    '@media (min-width:760px){main{padding-top:48px}p,address,li{font-size:17px}}' +
+    '@media (max-width:600px){table,tbody,tr,td{display:block}thead{display:none}tr{padding:12px 16px;border-bottom:1px solid rgba(168,164,169,.45)}td{padding:0;border:0}td+td{margin-top:6px}td[data-k]::before{content:attr(data-k);display:block;font-size:12px;letter-spacing:.03em;color:#6b676c}}' +
     '</style>\n</head>\n<body>\n<main>\n<nav aria-label="Rechtliches"><a href="/">Zur Startseite</a><a href="/impressum/">Impressum</a><a href="/datenschutz/">Datenschutz</a></nav>\n' + inhalt +
     '\n<p class="klein">' + (VORLAGE.geprueft ? 'Fassung vom ' + esc(datum(VORLAGE.stand)) : 'Vorlage vom ' + esc(datum(VORLAGE.stand)) + ', anwaltliche Prüfung ausstehend') + '</p>\n</main>\n</body>\n</html>\n';
 }
@@ -100,6 +108,7 @@ export function impressumSeite(inst) {
     (r.ust ? '<h2>Umsatzsteuer</h2>\n<p>Umsatzsteuer-Identifikationsnummer nach § 27a UStG: ' + esc(r.ust) + '</p>\n' : '') +
     (r.kammer || r.beruf ? '<h2>Berufsangaben</h2>\n' + zeile('Zuständige Kammer', r.kammer) + zeile('Berufsbezeichnung', r.beruf ? r.beruf + ' (verliehen in Deutschland)' : '') +
       (r.kammer && /handwerk/i.test(r.kammer) ? '<p>Berufsrechtliche Regelung: Gesetz zur Ordnung des Handwerks (Handwerksordnung), nachzulesen unter <a href="https://www.gesetze-im-internet.de/hwo/">gesetze-im-internet.de/hwo</a>.</p>\n' : '') : '') +
+    '<h2>Verbraucherstreitbeilegung</h2>\n<p>' + (String(r.schlichtung || '').trim() ? esc(r.schlichtung) : 'Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.') + '</p>\n' +
     (bl ? '<p class="klein">Sitz: ' + esc(bl) + '</p>\n' : '') +
     (r.stand ? '<p class="klein">Stand der Angaben: ' + esc(datum(r.stand)) + '</p>\n' : '');
   return seite(inst, 'Impressum', inhalt);
@@ -142,9 +151,10 @@ export function datenschutzSeite(inst) {
     '<p>' + esc(name) + (anschrift(r).length ? ', ' + anschrift(r).map(esc).join(', ') : '') + (r.vertretung ? ', vertreten durch ' + esc(r.vertretung) : '') + '<br>' +
       (tel ? 'Telefon: ' + telLink(tel) + (mail ? ', ' : '') : '') + (mail ? 'E-Mail: ' + mailLink(mail) : '') + '</p>\n' +
     '<p>Weitere Angaben stehen im <a href="/impressum/">Impressum</a>. An diese Adresse wenden Sie sich auch mit allen Fragen zum Datenschutz.</p>\n' +
+    (String(r.dsb || '').trim() ? '<p>Unseren Datenschutzbeauftragten erreichen Sie unter: ' + esc(r.dsb) + '</p>\n' : '') +
 
     h('Aufruf dieser Seiten', 'aufruf') +
-    '<p>Beim Aufruf verarbeitet unser Hosting-Dienstleister Cloudflare technisch notwendige Daten wie IP-Adresse, Zeitpunkt, aufgerufene Adresse und Browser-Kennung, um die Seiten auszuliefern und vor Angriffen zu schützen. Zugriffsprotokolle mit IP-Adressen werden nicht gespeichert. Gegen Missbrauch zählt der Server kurzzeitig, wie viele Anfragen von einem Anschluss kommen; diese Zählung liegt nur im Arbeitsspeicher und verfällt spätestens nach einem Tag. Wie oft der Konfigurator aufgerufen und genutzt wird, zählt der Server nur als Summe je Tag, ohne Cookies und ohne Angaben zu Personen. Rechtsgrundlage ist unser berechtigtes Interesse an einer sicheren Auslieferung (Art. 6 Abs. 1 lit. f DSGVO).</p>\n' +
+    '<p>Beim Aufruf verarbeitet unser Hosting-Dienstleister Cloudflare technisch notwendige Daten wie IP-Adresse, Zeitpunkt, aufgerufene Adresse und Browser-Kennung, um die Seiten auszuliefern und vor Angriffen zu schützen. Zugriffsprotokolle mit IP-Adressen werden nicht gespeichert. Gegen Missbrauch zählt der Server, wie viele Anfragen von einem Anschluss kommen; im Arbeitsspeicher kurzzeitig und als gekürzter, mit einem Geheimnis gebildeter Prüfwert (nicht die IP-Adresse selbst) höchstens zwei Tage. Wie oft der Konfigurator aufgerufen und genutzt wird, zählt der Server nur als Summe je Tag, ohne Cookies und ohne Angaben zu Personen. Rechtsgrundlage ist unser berechtigtes Interesse an einer sicheren Auslieferung (Art. 6 Abs. 1 lit. f DSGVO).</p>\n' +
 
     h('Speicherung in Ihrem Browser und Cookies', 'browser') +
     '<p>Der Konfigurator speichert Ihre Planung im lokalen Speicher Ihres Browsers (localStorage), Ihre Fotos verkleinert in einer Datenbank Ihres Browsers (IndexedDB), damit nichts verloren geht, wenn Sie die Seite neu laden. Das ist für den Dienst, den Sie nutzen, unbedingt erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG, Art. 6 Abs. 1 lit. b DSGVO). Sie löschen diese Daten, indem Sie in Ihrem Browser die Website-Daten für diese Seite entfernen.</p>\n' +
@@ -157,17 +167,17 @@ export function datenschutzSeite(inst) {
       'Wenn Sie auf „Senden“ tippen, kommen Ihre Kontaktangaben dazu (Name, Telefon oder E-Mail, auf Wunsch die Zeit, zu der Sie am besten erreichbar sind, und die Adresse des Objekts). Wir bekommen die Anfrage als E-Mail mit dem Aufmaßblatt als PDF; antworten wir darauf, geht die Antwort direkt an Sie. ' +
       'Nach dem Senden können Sie Ihre Anfrage als PDF behalten; diese Kopie entsteht in Ihrem Browser.</p>\n' +
     '<p>Rechtsgrundlage ist die Anbahnung eines Vertrags mit Ihnen (Art. 6 Abs. 1 lit. b DSGVO). Ihre Angaben sind freiwillig; ohne Kontaktangaben können wir Ihnen nicht antworten.</p>\n' +
-    (m.einladungslinks ? '<p><strong>Persönliche Einladung.</strong> Laden wir Sie mit einem persönlichen Link ein, legen wir dafür Ihren Namen und Ihre Kontaktangaben an. Wir sehen dann, ob Sie den Link geöffnet haben und wie weit Ihre Planung ist (eingeladen, in Bearbeitung, eingereicht), Ihre Angaben und Fotos aber erst, wenn Sie senden. Rechtsgrundlage ist ebenfalls Art. 6 Abs. 1 lit. b DSGVO.</p>\n' : '') +
+    (m.einladungslinks ? '<p><strong>Persönliche Einladung.</strong> Laden wir Sie mit einem persönlichen Link ein, legen wir dafür Ihren Namen und Ihre Kontaktangaben an. Wir sehen dann, ob Sie den Link geöffnet haben und wie weit Ihre Planung ist (eingeladen, in Bearbeitung, eingereicht), Ihre Angaben und Fotos aber erst, wenn Sie senden. Rechtsgrundlage für die Einladung ist Art. 6 Abs. 1 lit. b DSGVO, für die Anzeige, wie weit Ihre Planung ist, unser berechtigtes Interesse, Sie gezielt zu unterstützen (Art. 6 Abs. 1 lit. f DSGVO); dem können Sie widersprechen.</p>\n' : '') +
 
     h('Fotos und KI-Auswertung (freiwillig)', 'ki') +
-    '<p>Wenn Sie ausdrücklich einwilligen, werden Ihre Fotos durch eine KI ausgewertet, damit wir die Einbausituation besser einschätzen können (etwa Rollladenkasten, Anschlag, Fensterbank). Dafür gehen die Fotos an Anthropic (Anthropic Ireland, Limited, Dublin, Irland). Anthropic nutzt sie nicht zum Training und löscht sie spätestens nach 30 Tagen. ' +
-      'Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Sie können sie jederzeit mit Wirkung für die Zukunft widerrufen, im Konfigurator oder mit einer Nachricht an uns; ohne Einwilligung planen Sie ganz normal weiter.</p>\n' +
+    '<p>Wenn Sie ausdrücklich einwilligen, werden Ihre Fotos durch eine KI ausgewertet, damit wir die Einbausituation besser einschätzen können (etwa Rollladenkasten, Anschlag, Fensterbank). Dafür gehen die Fotos an Anthropic (Anthropic Ireland, Limited, Dublin, Irland). Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben in der Regel nach 30 Tagen; nur wenn eine Anfrage gegen die Nutzungsrichtlinien von Anthropic zu verstoßen scheint, bewahrt Anthropic sie bis zu zwei Jahre auf. Die Übermittlung in die USA stützt sich auf die EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO). ' +
+      'Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO); Zeitpunkt und Fassung des Hinweises speichern wir mit Ihrer Planung, um sie nachweisen zu können. Sie können sie jederzeit mit Wirkung für die Zukunft widerrufen, im Konfigurator oder mit einer Nachricht an uns; ohne Einwilligung planen Sie ganz normal weiter.</p>\n' +
 
     h('Dienstleister und Empfänger', 'empfaenger') +
     '<p>Den Konfigurator betreibt ' + esc(dl) + ' als unser Auftragsverarbeiter (Art. 28 DSGVO): Er stellt die Seiten bereit, speichert Planungen und Anfragen und schickt sie uns, nur nach unseren Weisungen und nach einem Vertrag zur Auftragsverarbeitung. ' +
       'Dabei setzt er diese Unterauftragnehmer ein:</p>\n' +
     tabelle(['Unterauftragnehmer', 'Leistung', 'Ort und Garantien'], UNTER) +
-    '<p>Daten aus diesem Konfigurator gehen an niemanden sonst. Wir verkaufen sie nicht und nutzen sie nicht für Werbung.</p>\n' +
+    '<p>Ihre Anfrage erreicht uns per E-Mail; für unser Postfach und die weitere Bearbeitung setzen wir eigene Dienstleister ein, die in unserem Auftrag handeln. Sonst geben wir Ihre Daten nur weiter, wenn es für Ihren Auftrag nötig ist oder ein Gesetz es verlangt. Wir verkaufen sie nicht und nutzen sie nicht für Werbung.</p>\n' +
 
     h('Speicherdauer', 'speicherdauer') +
     '<p>Wir löschen Ihre Daten, sobald sie für den Zweck nicht mehr gebraucht werden. Auf dem Server des Konfigurators gelten diese Fristen:</p>\n' +

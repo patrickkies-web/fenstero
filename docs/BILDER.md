@@ -31,15 +31,19 @@ Die drei Motive aus den Beiträgen können direkt wiederverwendet werden: der Wa
 | `start-fensterbauer` | 1120 × 1400 | Startseite, Ansicht Fensterbauer, randlos wie oben. **Da:** Bär in der Werkstatt mit Tablet | Maße · Fotos · Öffnungsarten · Positionen | 1 |
 | `app-start` | 1120 × 1400 | App, Startbild vor dem ersten Fenster. **Da:** drei Waschbären im Wohnzimmer (fotografieren, wünschen, zurücklehnen) | Fotografieren · Messen · Wünschen | 1 |
 | `gross` | 1200 × 1500 | Startseite Hauseigentümer, Abschnitt „Auch ganz groß.“ | Elementarten | 1 |
-| `fuer-fensterbauer` | 1200 × 1500 | Seite /fuer-fensterbauer/, oben | Maße · Fotos · Positionen · Bestellmaß | 1 |
-| `ratgeber` | 1600 × 1000 | Übersicht /ratgeber/, über dem Weg | Prüfen · Entscheiden · Auswählen · Ausmessen · Vergleichen · Einbauen | 2 |
-| `weg-pruefen` | 1600 × 1000 | Ratgeber, Schritt 1 (Übersicht; in den Seiten als Bild in „Nächster Schritt“) | – | 2 |
-| `weg-entscheiden` | 1600 × 1000 | Ratgeber, Schritt 2 | – | 2 |
-| `weg-auswaehlen` | 1600 × 1000 | Ratgeber, Schritt 3 | – | 2 |
-| `weg-ausmessen` | 1600 × 1000 | Ratgeber, Schritt 4 | – | 2 |
-| `weg-vergleichen` | 1600 × 1000 | Ratgeber, Schritt 5 | – | 2 |
-| `weg-einbauen` | 1600 × 1000 | Ratgeber, Schritt 6 | – | 2 |
-| `fehler` | 1600 × 1000 | Fehlerseite 404 | – | 3 |
+| `fb-sessel` | 1122 × 1402 | Seite /fuer-fensterbauer/, oben (Startbild, randlos; Telefon oben, Schreibtisch rechts). Astronaut im Sessel am Bullauge, misst das Fenster mit dem gelben Zollstock; Papierflieger, Handy und Bleistift schweben. **Da** (vom Inhaber, 23.10.2026). Seit dem Umbau mit fester Lage im Ausschnitt (Bilddetails in Bildpunkten im Kopf von `verkauf.css`); am Telefon liegt der Kopf tief im Bild (Augenlinie bei etwa 70 % statt 20–40 %), weil die Meldung oben über dem Flieger Platz braucht. Ein Nachfolger fürs Telefon: Kopf im oberen Drittel, oben links 240 × 110 px ruhige Fläche für die Meldung, Licht von rechts oben 4800–5800 K | Ihre Domain · Kunden planen selbst · PDF per E-Mail · Ihre Marke, Ihre Kunden (unter der Überschrift) | 1 |
+| `tour-aufmassblatt-15` | 920 × 872 | Seite /fuer-fensterbauer/, Abschnitt „Was in jeder Anfrage steht“: die Szene mit dem echten Aufmaßblatt (erzeugt von `scripts/tour-bild.mjs` für die Führung; der Abzug 15 muss darum erhalten bleiben); antippbar, öffnet das Blatt groß | – | – |
+| `beispiel/essential`, `beispiel/plus`, `beispiel/signature` | 640 × 400 | Seite /fuer-fensterbauer/, Paketkarten, Bereich „Beispiel · erfundener Betrieb“: echte Aufnahmen von Beispiel-Instanzen des erfundenen Betriebs Fensterbau Brandt (Gold #e3b75a), aufgenommen im Vorschau-Server mit `DATEN_ATTRAPPE=1` bei 1280 × 800 (`/__saat` mit den Instanzen brandt-e, brandt-p, brandt-s; Plus mit eigener Startseite, Signature im Dashboard mit drei eingeladenen Kunden); je unter 30 KB | – | – |
+| `beispiel/start-telefon` | 600 × 1240 | Seite /fuer-fensterbauer/, Bühne „So funktioniert es“, Bildschirm 1, und am Telefon über der ersten Schrittkarte: die Startseite der Plus-Instanz von Fensterbau Brandt bei 390 × 806, zweifach | – | – |
+| `fuer-fensterbauer` | 1200 × 1500 | nicht mehr eingebaut (früheres Startbild der Seite, Astronaut mit Zollstock); bleibt als Vorlage liegen | – | – |
+| `ratgeber` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-pruefen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-entscheiden` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-auswaehlen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-ausmessen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-vergleichen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-einbauen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `fehler` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): die Fehlerseite zeigt ein Fenster aus dem 3-D-Modell der App (`/bilder/start/reihe/trapez.webp`) auf einer Bühne | – | – |
 
 ## Prompts
 
@@ -84,6 +88,14 @@ ohne Bildschirm wählen oder den Bildschirm leer lassen).
   dort bleiben die Zeichnungen.
 - Die Prüfsuite verlangt für Bilder in Ratgebern Breite, Höhe und einen Alternativtext ab 40 Zeichen; Fotos unter `/bilder/foto/`
   dürfen WebP sein, Zeichnungen bleiben SVG.
+- Zeichnungen (`web/bilder/*.svg`, seit 28.10.2026): `python3 scripts/zeichnungen-dna.py` bringt sie in die Druckpalette der DNA, bettet
+  je Datei eine Teilmenge von Outfit ein (ein SVG als `<img>` lädt keine Schrift der Seite, sonst erschiene Arial) und schreibt
+  Kleinbilder ohne Schrift, gestrichelte Linien und Pfeilspitzen mit 2,2-mal so kräftigen Strichen nach `web/bilder/klein/` (für die
+  Zeilen der Übersicht, 96 px breit). Ein zweiter Lauf ändert nichts. Braucht fontTools und brotli (`pip install fonttools brotli`).
+- Bühne der Zeichnung im Einstieg (`web/bilder/ratgeber/buehne.webp`, 1000 × 667, 66 KB, seit 28.10.2026): Foto des Inhabers, dunkler
+  Betonboden im harten Fensterlicht mit Sprossenschatten, ohne Gegenstände und Farbstich; erzeugt nach dem Prompt im Protokoll
+  docs/profis/2026-10-28-ratgeber-dna.md, verkleinert aus 1536 × 1024. Steht nur in der Gestaltung (`.rg-bild` in
+  docs/profis/ratgeber-vorschau/ratgeber.css), mit Vignette, Lichtkante und abgedunkeltem Rand unten für die Unterschrift.
 
 ## Plätze für die Fensterbauer-Seiten (Konfigurator-Pakete, Wunsch des Inhabers vom 23.10.2026)
 
@@ -91,21 +103,18 @@ Die Seiten für Fensterbauer (Verkaufsseite, Bestellformular, Kundenkonto) sind 
 jeder längere Abschnitt eine Bildkarte: ein Bild, eine Pointe, mit dem wiederkehrenden Meister (siehe unten). Die Bilder sind
 seit dem 23.10.2026 alle erzeugt (Abschnitt „Erzeugt am 23.10.2026“); `scripts/fotos.py` legt Platzhalter nur noch an, wenn ein Original fehlt. Einbau danach in drei
 Schritten: Platz in `scripts/fotos.py` (PLAETZE) eintragen, `python3 scripts/fotos.py` laufen lassen, `<figure class="foto-karte">`
-an der genannten Stelle (Verkaufsseite in `web/fuer-fensterbauer/index.html`, Kundenkonto in `web/assets/partner.js` beim Zeichnen der
-Seite). Die Zentrale bleibt ohne Bilder (Arbeitswerkzeug). Auf den Instanzen der Betriebe (Plus, Signature) stehen nur die eigenen
+an der genannten Stelle (Verkaufsseite in `web/fuer-fensterbauer/index.html`). Bestellung, Kundenbereich und Zentrale (seit 27.10.2026,
+`web/assets/auftrag-ui.js`) zeigen die Seiten von Fensterbau Brandt und die Vorschau der eigenen Seite, keine weiteren Bilder. Auf den Instanzen der Betriebe (Plus, Signature) stehen nur die eigenen
 Fotos des Betriebs, nie Bilder von eeziframes; Essential nutzt das eeziframes-Design und darf `app-start` wiederverwenden.
 
 | Name | Format | Wo genau | Chips auf dem Foto | Priorität |
 |---|---|---|---|---|
 | `fb-anfrage` | 1600 × 1000 | Verkaufsseite, Abschnitt „Was in jeder Anfrage steht“ (`#was-in-jeder-anfrage-steht`), nach dem ersten Absatz, vor der Liste | Maße · Fotos · Zeichnung · Klärungsliste | 1 |
-| `fb-kunden-planen` | Ihr Fachwissen im Wohnzimmer des Kunden, ohne hinzufahren: Vater und Tochter messen abends mit dem Handy, ein winziger Meister auf der Fensterbank zeigt, wo. Chips: Abends · Ohne Termin · Mit Anleitung · 5 Minuten je Fenster (Bild vom Inhaber, 23.10.) | A cosy living room in the evening; a father and his young daughter hold a smartphone up toward their large window, and on the windowsill stands a tiny fifteen-centimetre-tall master window maker in his early fifties with a short grey beard and a dark blue work jacket, pointing with a yellow folding rule at the window frame as if giving instructions, the family looking at him with delight, warm lamp light |
-| `fb-kundenschutz` | 1600 × 1000 | Verkaufsseite, Abschnitt „Ihre Kunden bleiben Ihre Kunden“, nach dem ersten Absatz | Ihre Marke · Ihre Domain · Ihre Daten | 2 |
+| `fb-kunden-planen` | Ihr Fachwissen im Wohnzimmer des Kunden, ohne hinzufahren: Vater und Tochter messen abends mit dem Handy, ein winziger Meister auf der Fensterbank zeigt, wo. Chips unter dem Foto (ohne Glas): Abends · Ohne Termin · Mit Anleitung; „5 Minuten je Fenster“ entfällt, bis es belegt ist (Bild vom Inhaber, 23.10.) | A cosy living room in the evening; a father and his young daughter hold a smartphone up toward their large window, and on the windowsill stands a tiny fifteen-centimetre-tall master window maker in his early fifties with a short grey beard and a dark blue work jacket, pointing with a yellow folding rule at the window frame as if giving instructions, the family looking at him with delight, warm lamp light |
+| `fb-kundenschutz` | 1600 × 1000 | Verkaufsseite, Abschnitt „Ihre Kunden bleiben Ihre Kunden“, nach dem ersten Absatz. Seit dem 23.10.2026 nicht auf der Seite (kein Platzhalter mehr auf einer veröffentlichten Seite); kommt als Astronaut-Szene wieder, sobald das Bild da ist (Licht von rechts oben, Lampen aus, vor #161616) | Ihre Marke · Ihre Domain · Ihre Daten | 2 |
 | `fb-pakete` | 1600 × 1000 | Verkaufsseite, direkt über den drei Paketkarten (`#pakete`) | Ihr Name · Ihre Farbe · Ihr Logo | 1 |
 | `fb-ablauf` | 1600 × 1000 | Verkaufsseite, Abschnitt „Von der Bestellung bis zum Livegang“, vor der Schrittliste | Bestellen · Einrichten · Freigeben · Live | 2 |
-| `fb-frage` | 1600 × 1000 | Verkaufsseite, Abschnitt „Bestellen oder anfragen“, neben dem Frageformular (1280 links vom Formular, Telefon darüber) | Rückruf · Nachricht · Unverbindlich | 2 |
-| `partner-start` | 1200 × 1500 | Kundenkonto `/partner/`, Anmeldeseite vor der Code-Eingabe, rechts neben dem Text (1280), am Telefon oben | Essential · Plus · Signature | 1 |
-| `partner-gestaltung` | 1600 × 1000 | Bestellformular, Schritt „Gestaltung“ (Plus, Signature), über den Feldern | Logo · Farbe · Fotos · Text | 2 |
-| `partner-warten` | 1600 × 1000 | Kundenkonto, Hauptkarte in den Ständen „Bezahlt“, „In Einrichtung“, „Domain gesichert“, über dem Text | Wir richten ein · Vorschau · Freigabe | 2 |
+| `fb-frage` | 1600 × 1000 | Verkaufsseite, Abschnitt „Bestellen oder anfragen“, neben dem Frageformular (1280 links vom Formular, Telefon darüber). Seit dem 23.10.2026 nicht auf der Seite, bis das Bild da ist; besser noch ein echtes Porträt des Inhabers (4:5, Fensterlicht von rechts oben) | Rückruf · Nachricht · Unverbindlich | 2 |
 | `partner-live` | 1600 × 1000 | Kundenkonto, Hauptkarte im Stand „Live“, über dem Text | Live · Link für Ihre Website | 2 |
 | `instanz-danke` | 1600 × 1000 | Essential-Instanz, Bestätigung nach dem Senden (Plus und Signature zeigen hier ein eigenes Foto des Betriebs, falls vorhanden, sonst nichts) | Gesendet · PDF für dich · Der Betrieb meldet sich | 3 |
 
@@ -135,9 +144,6 @@ plain light grey studio background, photorealistic, no text.*
 | `fb-pakete` | Drei Stufen, die dritte glänzt: Fenster wie bei einer Autopremiere. | A dark showroom with three white window frames presented like sports cars at a launch, each on its own podium under a spotlight; the first plain, the second with a warm brand-coloured frame, the third in brand colour with a golden crest and a velvet rope, visitors' silhouettes in the foreground |
 | `fb-ablauf` | In Tagen statt Monaten: Mit Kreide gezeichnet, und es wird echt. | The master window maker drawing a window with white chalk on a bare plastered wall; the chalk lines are turning into a real white window with glass and a garden view behind it, halfway finished, dust in the light, hopeful |
 | `fb-frage` | Rufen Sie an: Das alte Telefon springt vom Tisch. | An old red rotary telephone on a workbench ringing so hard it jumps into the air, sawdust and a folding rule flying up around it, the master window maker reaching for it from the side, bright workshop light, playful |
-| `partner-start` | Ihr eigener Laden: Der Schlüssel ist ein Fenster. | The master window maker holding up an oversized golden key whose bow is shaped like a window frame, standing in front of a glowing shop front at dusk, proud, warm light spilling onto the pavement |
-| `partner-gestaltung` | Ihre Farbe, nur dort, wo sie hingehört: Der Eimer färbt genau die Rahmen. | A painter pouring a bucket of bright brand-coloured paint over the facade of a house; the paint runs down and colours only the window frames perfectly while the wall stays white, the master window maker watching with crossed arms, afternoon light |
-| `partner-warten` | Wir richten ein, Sie schlafen: Wichtel bauen nachts das Fenster. | The master window maker asleep in a hammock in his workshop at night; a dozen tiny elves in work clothes assemble a white window frame on the bench by lamplight, carrying screws and a tiny spirit level, cosy and funny |
 | `partner-live` | Eröffnung: Das rote Band fällt. | The master window maker cutting a red ribbon stretched across a giant freestanding window frame on a town square, confetti in the air, a small crowd clapping, morning sun, celebratory |
 | `instanz-danke` | Gesendet: Der Flieger fliegt zum Betrieb. | A paper airplane leaving a living room through the open window toward the city at sunset, a relaxed homeowner on the sofa behind it with the phone face-down, the plane already far over the rooftops, warm light |
 

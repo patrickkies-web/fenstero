@@ -12,7 +12,7 @@
 //      paketbedingungen-<PAKET_STAND>.pdf   § 1 bis § 15
 //      av-vertrag-<PAKET_STAND>.pdf         Anlage: Vertrag zur Auftragsverarbeitung
 //    Sie gehen mit der Eingangsbestätigung an den Besteller (functions/api/bestellung.js) und müssen da sein, bevor die Paket-Kasse im
-//    Live-Modus öffnet (paketVerkaufStand in functions/api/recht.js). jsPDF aus web/vendor/, Schrift Inter wie im Aufmaßblatt.
+//    Live-Modus öffnet (paketVerkaufStand in functions/api/recht.js). jsPDF aus web/vendor/, Schrift Outfit wie im Aufmaßblatt.
 //    Jedes PDF trägt in den Metadaten (Keywords) die Prüfsumme seines Textes: scripts/pruefen-instanzen/29.mjs vergleicht sie mit der
 //    Seite, so fällt ein vergessener Lauf auf. Solange die Seite Platzhalter (<mark class="ph">) enthält, steht auf jeder PDF-Seite
 //    „Entwurf zur anwaltlichen Prüfung“.
@@ -28,7 +28,8 @@ const { bauen } = await import(pathToFileURL(path.join(WURZEL, 'functions/pakete
 const { PAKET_STAND, paketPdfs, standText } = await import(pathToFileURL(path.join(WURZEL, 'functions/api/recht.js')).href);
 
 /* Seiten mit Bausteinen (Pfad in web/) */
-export const SEITEN = ['fuer-fensterbauer/index.html', 'konfigurator-bedingungen/index.html', 'datenschutz/index.html'];
+export const SEITEN = ['fuer-fensterbauer/index.html', 'konfigurator-bedingungen/index.html', 'datenschutz/index.html',
+  'vorschau/paket-beispiel/essential.html', 'vorschau/paket-beispiel/plus.html', 'vorschau/paket-beispiel/signature.html'];
 const BEDINGUNGEN = 'konfigurator-bedingungen/index.html';
 const datei = (rel) => path.join(WURZEL, 'web', rel);
 
@@ -41,7 +42,8 @@ const text = (html) => entities(String(html).replace(/<br\s*\/?>/gi, '\n').repla
 /* Blöcke in Reihenfolge: { art: 'h1'|'h2'|'h3'|'p'|'klein'|'li'|'tabelle', text | zeilen } */
 export function bloecke(html) {
   const main = (/<main[^>]*>([\s\S]*?)<\/main>/.exec(html) || [])[1] || '';
-  const ohne = main.replace(/<!--[\s\S]*?-->/g, '');
+  /* Navigation („Auf dieser Seite“, scripts/recht-bausteine.mjs) gehört nicht zum Vertragstext */
+  const ohne = main.replace(/<!--[\s\S]*?-->/g, '').replace(/<nav\b[\s\S]*?<\/nav>/g, '');
   const out = [];
   const re = /<table[^>]*>([\s\S]*?)<\/table>|<ul[^>]*>([\s\S]*?)<\/ul>|<ol[^>]*>([\s\S]*?)<\/ol>|<h([123])([^>]*)>([\s\S]*?)<\/h\4>|<p([^>]*)>([\s\S]*?)<\/p>/g;
   let m;
@@ -92,13 +94,14 @@ const t = (s) => String(s == null ? '' : s).replace(/[ -​ ]/g, ' ').replac
 export async function pdfBauen(v) {
   const J = await laden(), S = globalThis.BlattSchrift;
   const doc = new J({ unit: 'mm', format: 'a4', compress: true });
-  doc.addFileToVFS('Inter-Medium.ttf', S.medium); doc.addFont('Inter-Medium.ttf', 'InterMedium', 'normal');
-  doc.addFileToVFS('Inter-Bold.ttf', S.bold); doc.addFont('Inter-Bold.ttf', 'InterBold', 'normal');
-  doc.addFileToVFS('Inter-ExtraBold.ttf', S.extra); doc.addFont('Inter-ExtraBold.ttf', 'InterExtraBold', 'normal');
+  /* Outfit wie Website und Aufmaßblatt (Design-DNA): 400 Text, 500 Zwischenüberschriften, 600 Überschriften */
+  doc.addFileToVFS('Outfit-Regular.ttf', S.normal); doc.addFont('Outfit-Regular.ttf', 'OutfitRegular', 'normal');
+  doc.addFileToVFS('Outfit-Medium.ttf', S.mittel); doc.addFont('Outfit-Medium.ttf', 'OutfitMedium', 'normal');
+  doc.addFileToVFS('Outfit-SemiBold.ttf', S.halb); doc.addFont('Outfit-SemiBold.ttf', 'OutfitSemiBold', 'normal');
   const TINTE = [22, 22, 22], GRAU = [104, 104, 109], LINIE = [220, 219, 214], WARN = [161, 98, 7];
   const M = 20, B = 210 - 2 * M, OBEN = 26, UNTEN = 297 - 22;
   let y = OBEN;
-  const schrift = (art, groesse, farbe) => { doc.setFont(art === 'fett' ? 'InterExtraBold' : art === 'halb' ? 'InterBold' : 'InterMedium', 'normal'); doc.setFontSize(groesse); doc.setTextColor.apply(doc, farbe || TINTE); };
+  const schrift = (art, groesse, farbe) => { doc.setFont(art === 'fett' ? 'OutfitSemiBold' : art === 'halb' ? 'OutfitMedium' : 'OutfitRegular', 'normal'); doc.setFontSize(groesse); doc.setTextColor.apply(doc, farbe || TINTE); };
   const platz = (h) => { if (y + h > UNTEN) { doc.addPage(); y = OBEN; return true; } return false; };
   const zeilen = (s, breite) => doc.splitTextToSize(t(s), breite);
 

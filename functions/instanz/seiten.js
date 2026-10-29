@@ -57,9 +57,15 @@ function kopfzeilen(o) {
 const antwort = (body, status, o) => new Response(body, { status: status || 200, headers: kopfzeilen(o) });
 
 /* ---------- Neutrale Seiten: Fehler, in Vorbereitung, pausiert, beendet ---------- */
-const STIL = ':root{color-scheme:dark}body{margin:0;background:#161616;color:#f3f2ee;font:500 17px/1.6 Inter,system-ui,sans-serif}main{max-width:640px;margin:0 auto;padding:48px 16px 64px}' +
-  'h1{font-size:32px;line-height:1.2;font-weight:800;margin:8px 0 16px}p{margin:0 0 12px;color:#c9c8c3}a{color:#f3f2ee}.klein{font-size:13px;color:#93928d}' +
-  '.knopf{display:inline-block;margin-top:12px;padding:12px 20px;border-radius:999px;background:#f1f0ea;color:#161616;font-weight:800;text-decoration:none}.kontakt a{display:block;margin:6px 0}';
+/* Design-DNA (28.10.2026), neutral in Schwarz, Weiß und Grau, ohne die Akzente von eeziframes (die Seite steht unter der Domain des
+   Betriebs): Titel 600, Text in Silbergrau, die eine volle Pille weiß mit Pfeilkreis, Kontakt als Umriss-Pillen */
+const STIL = ':root{color-scheme:dark}*,*::before,*::after{box-sizing:border-box}html,body{background:#07090a}body{margin:0;color:#fff;font:400 17px/1.6 Outfit,"Avenir Next","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}' +
+  'main{max-width:640px;min-height:100vh;margin:0 auto;padding:64px 16px;display:flex;flex-direction:column;justify-content:center}' +
+  'h1{font-size:clamp(34px,8.4vw,48px);line-height:1;font-weight:600;letter-spacing:-.035em;margin:10px 0 16px;text-wrap:balance}p{margin:0 0 12px;color:#a8a4a9}a{color:#fff;text-underline-offset:3px}' +
+  '.klein{font-size:13px;line-height:1.5;letter-spacing:.03em;color:#a8a4a9}.klein a{display:inline-block;padding:12px 0}:focus-visible{outline:2px solid #fff;outline-offset:3px}' +
+  '.knopf{display:inline-flex;align-items:center;gap:12px;min-height:52px;margin-top:20px;padding:6px 6px 6px 24px;border-radius:999px;background:#fff;color:#07090a;font-size:15px;font-weight:500;text-decoration:none}' +
+  '.knopf::after{content:"";width:40px;height:40px;border-radius:50%;background:#07090a url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 14 14%27%3E%3Cpath d=%27M2 7h10M8 3l4 4-4 4%27 fill=%27none%27 stroke=%27%23fff%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E") center/14px no-repeat}' +
+  '.kontakt{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.kontakt a{display:inline-flex;align-items:center;min-height:44px;padding:0 20px;border-radius:999px;box-shadow:inset 0 0 0 1px #a8a4a9;text-decoration:none}';
 export function fehlerSeite(status, inst, o) {
   o = o || {};
   const name = inst && inst.name ? inst.name : '', art = o.art || (status === 404 ? 'fehlt' : status === 410 ? 'beendet' : 'stoerung');
@@ -74,8 +80,9 @@ export function fehlerSeite(status, inst, o) {
   const k = inst && inst.kontakt ? inst.kontakt : {}, tel = String(k.tel || '').trim(), mail = String(k.mail || '').trim();
   const kontakt = art === 'pausiert' && (tel || mail) ? '<p class="kontakt">' + (tel ? '<a href="tel:' + esc(tel.replace(/[^\d+]/g, '')) + '">' + esc(tel) + '</a>' : '') + (mail ? '<a href="mailto:' + esc(mail) + '">' + esc(mail) + '</a>' : '') + '</p>' : '';
   const html = '<!doctype html>\n<html lang="de">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>' + esc(T[0] + (mitName ? ' · ' + name : '')) + '</title>\n' +
-    '<meta name="robots" content="noindex">\n<link rel="stylesheet" href="/fonts/fonts.css">\n<style>' + STIL + '</style>\n</head>\n<body>\n<main>\n' +
+    '<meta name="robots" content="noindex">\n<link rel="stylesheet" href="/fonts/fonts.css">\n<link rel="stylesheet" href="/fonts/dna.css">\n<style>' + STIL + '</style>\n</head>\n<body>\n<main>\n' +
     (mitName ? '<p class="klein">' + esc(name) + '</p>\n' : '') + '<h1>' + esc(T[1]) + '</h1>\n' + (T[2] ? '<p>' + esc(T[2]) + '</p>\n' : '') + kontakt +
+    (art === 'pausiert' ? '<p class="klein">Haben Sie hier schon geplant? Ihre Planung bleibt auf Ihrem Gerät gespeichert; sobald der Fensterplaner wieder erreichbar ist, geht es dort weiter.</p>\n' : '') +
     (art === 'fehlt' && inst ? '<p><a class="knopf" href="/">Zur Startseite</a></p>\n' : '') +
     (inst && art !== 'fehlt' ? '<p class="klein"><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a></p>\n' : '') + '</main>\n</body>\n</html>\n';
   return antwort(o.method === 'HEAD' ? null : html, status, { extra: status === 503 ? { 'Retry-After': '600' } : null });

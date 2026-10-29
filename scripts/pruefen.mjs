@@ -45,13 +45,26 @@
 // dazu der Angleich an die Detailtiefe: ein Kapitelkonzept (Leiste, Kicker, Übersicht), Tiefe-Pille neben „Notiz“ mit Browser-Zurück,
 // Notiz und i an jeder Detailfrage, RAL-Farbwahl bei den Detailfarben, Zifferntasten für die neuen Maße, Stulp mit Seitenteilen,
 // Standard mit dem Namen des Betriebs, keine Gesamtübersicht und ein Entwurf, der „Mehr zu …“ und die Tiefe behält.
-// Abschnitte 23 bis 30 prüfen die Konfigurator-Instanzen in drei Paketen (docs/INSTANZEN.md); sie stehen je in einem Modul unter
+// Abschnitte 23 bis 29 prüfen die Konfigurator-Instanzen in drei Paketen (docs/INSTANZEN.md) und die Aufträge; sie stehen je in einem Modul unter
 // scripts/pruefen-instanzen/ und laufen gegen einen eigenen Testserver mit Attrappen (Hilfsobjekt h, scripts/pruefen-instanzen/hilfe.mjs).
 // 23 Mandant, Routing, Schutz (vorneweg 23-fundament.mjs: Pakete, Regeln, Speicher, Sitzungen, Post, Bremsen, Testserver) · 24 Eingang ·
-// 25 App im Instanz-Modus · 26 Zentrale · 27 Kundenkonto und Bestellung · 28 Signature-Dashboard · 29 Verkaufsseite, Recht · 30 Ende zu Ende.
+// 25 App im Instanz-Modus · 26 Aufträge: Bestellung, Kundenbereich, Zentrale (docs/BESTELLUNG.md) · 28 Signature-Dashboard · 29 Verkaufsseite,
+// Recht. Die früheren Abschnitte 27 (Kundenkonto /partner/) und 30 (Ende zu Ende über die alte Bestellung) sind mit diesen Teilen entfallen.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:net';
+/* Messen (Fassung des Inhabers, 27.10.2026): das Feld unter dem Element antippen, Ziffern über die Tastatur; die Pille erscheint mit
+   dem Wert, „Weiter“ prüft, speichert und geht zum nächsten Maß (nach Maß 4 zu den Rändern, die wie bisher bleiben) */
+async function massTippen(pg, wert) {
+  await pg.waitForSelector('#mess-eingabe');
+  await pg.fill('#mess-eingabe', ''); await pg.click('#mess-feld'); await pg.keyboard.type(wert);
+  await pg.click('#mess-weiter'); await pg.waitForTimeout(550);
+}
+/* Rand wie die Mitte: „Hier auch … gemessen?“; sind alle vier gleich, fragt die Folie einmal nach („Stimmt so“) */
+async function randWieMitte(pg) {
+  await pg.waitForSelector('#mess-gleich'); await pg.waitForTimeout(600); await pg.click('#mess-gleich'); await pg.waitForTimeout(550);
+  if (await pg.locator('#mess-stimmt').count()) { await pg.click('#mess-stimmt'); await pg.waitForTimeout(550); }
+}
 
 const require = createRequire(process.env.PW_PFAD ? process.env.PW_PFAD.replace(/\/?$/, '/') + 'x.js' : import.meta.url);
 const { chromium } = require('playwright-core');
@@ -128,7 +141,7 @@ if (teil(1)) {
     ok((pfad === '/gibtsnicht' ? r.status() === 404 : r.status() === 200) && (await page.title()).includes(titel), pfad + ' lädt (' + r.status() + ', „' + (await page.title()) + '“)');
     const ohneWorker = pfad === '/zentrale/' ? text.replace(/\bfenstero\b/g, '') : text; // die Zentrale nennt dem Inhaber den internen Worker-Namen bei Cloudflare
     ok(!/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(ohneWorker) && !/claude\.ai/i.test(text), pfad + ': keine alten Namen, kein claude.ai');
-    ok(!/EEZI/.test(text) && (pfad === '/gibtsnicht' || await page.locator('.wm').count() > 0), pfad + ': Marke eeziframes klein, auch in Versalzeilen' + (pfad === '/gibtsnicht' ? '' : ', mit Wortmarke'));
+    ok(!/EEZI/.test(text) && (pfad === '/gibtsnicht' || await page.locator('.wm, .a-wm').count() > 0), pfad + ': Marke eeziframes klein, auch in Versalzeilen' + (pfad === '/gibtsnicht' ? '' : ', mit Wortmarke'));
     ok(await page.locator('svg .fi-kachel').count() > 0 && await page.locator('svg .fi-strahl').count() > 0 && await page.locator('svg .fi-fluegel').count() === 0, pfad + ': Logo (Licht fällt durch ein Fenster) da, auch auf der Fehlerseite');
     ok(!text.includes('wa zamm'), pfad + ': kein Spruch mehr');
     sauber(page, pfad + ': keine Fehler, keine CSP-Verstöße, keine fremden Server');
@@ -144,13 +157,21 @@ if (teil(2)) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  ok(await page.locator('.fx-pilot').isVisible(), 'Pilot-Hinweis sichtbar');
-  ok(await page.locator('.einf-bar').first().isVisible() && /Einführungspreis bis 17\. November: Aufmaßblatt 7,99\s€/.test(await page.locator('.einf-bar').first().innerText()) && /Noch \d+ Tage|Nur noch heute/.test(await page.locator('.einf-bar .rest').first().innerText()), 'Startseite: Banner zum Einführungspreis ganz oben, mit Countdown');
-  ok(await page.locator('.hero .einf-chip').count() === 0 && (await page.locator('.hero.b2c .eyebrow').textContent()).trim() === 'In Minuten zum Aufmaß für jeden Fensterbauer' && (await page.locator('.strip .einf').innerText()).includes('danach 12,99 €'), 'Startseite: Einführungspreis nur im Band ganz oben und in der Preiskachel (danach 12,99 €), im Startbild direkt die Zeile „In Minuten zum Aufmaß für jeden Fensterbauer“');
+  /* Ansicht Hauseigentümer: die Startseite nach der Design-DNA im Schatten-DOM von #startseite (startseite.js), mit eigenem Kopf, eigener
+     Leiste und eigener Fußzeile; das Pilotband steht dort nicht (der Satz zur Pilotphase steht im Fuß), in der Ansicht Fensterbauer schon */
+  ok(await page.locator('.fx-pilot').count() === 1 && !(await page.locator('.fx-pilot').isVisible()), 'Startseite (Hauseigentümer): Pilotband ausgeblendet');
+  const sn2 = await page.evaluate(() => { const r = document.getElementById('startseite'), s = r && r.shadowRoot; return s ? { text: s.textContent.replace(/\s+/g, ' '), h1: s.querySelector('h1').textContent.replace(/\s+/g, ' ').trim(), einf: document.querySelectorAll('.einf-bar').length, top: !!document.querySelector('.top'), foot: !!document.querySelector('footer.foot'), fuss: !!s.querySelector('footer.ez-fuss .ez-fuss__pilot'), leiste: getComputedStyle(s.querySelector('.ez-leiste')).position, szenen: s.querySelectorAll('.dna-szene').length, schrift: getComputedStyle(s.querySelector('h1')).fontFamily } : null; });
+  ok(!!sn2 && sn2.h1 === 'Fensterplanung ganz eezi.' && sn2.einf === 0 && !sn2.top && !sn2.foot && sn2.fuss && sn2.leiste === 'fixed' && sn2.szenen === 5 && /^Outfit/.test(sn2.schrift), 'Startseite (Hauseigentümer): fünf Szenen in Outfit, h1 „Fensterplanung ganz eezi.“, eigene Leiste und Fußzeile mit Satz zur Pilotphase, kein Einführungsband, keine Kopf- oder Fußzeile des Portals');
+  ok(!!sn2 && /Einführungspreis/.test(sn2.text) && /bis 17\. November, danach 12,99 €/.test(sn2.text) && /7,99 ?€ ?einmal fürs Aufmaßblatt/.test(sn2.text) && /Das Aufmaßblatt kostet einmal 7,99 €/.test(sn2.text), 'Startseite: Preis aus modell.js (7,99 €), Einführungspreis im Abschnitt „Preis“ (danach 12,99 €)');
   await foto(page, 'portal-desktop');
+  await page.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' });
+  ok(await page.locator('.fx-pilot').count() === 1 && !(await page.locator('.fx-pilot').isVisible()), 'Startseite (Fensterbauer): Pilotband ausgeblendet, der Satz zur Pilotphase steht im Fuß der eingebetteten Seite');
+  await page.goto(BASE + '/#wie', { waitUntil: 'networkidle' });
+  ok(await page.locator('.fx-pilot').isVisible(), 'Pilot-Hinweis sichtbar (So funktioniert es für Betriebe)');
   await page.click('.fx-pilot button.zu');
   await page.reload({ waitUntil: 'networkidle' });
   ok(await page.locator('.fx-pilot').count() === 0, 'Pilot-Hinweis bleibt nach Schließen weg');
+  await page.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await page.waitForSelector('.vk-einbettung .fb[data-fb-an="1"]', { timeout: 8000 }).catch(() => null);
   const links = await page.$$eval('footer a', (as) => as.map((a) => a.getAttribute('href')));
   ok(links.includes('/impressum/') && links.includes('/datenschutz/'), 'Fußzeile verlinkt Impressum und Datenschutz');
   ok(await page.evaluate(() => typeof unpack === 'function' && !!unpack('x') === false), 'Portal-Code geladen');
@@ -160,35 +181,46 @@ if (teil(2)) {
   // Ansicht: Umschalter oben, Anker, Knöpfe nur für die gewählte Zielgruppe
   const ctxA = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const pa = await neueSeite(ctxA);
-  const zustand = () => pa.evaluate(() => ({ a: ((document.querySelector('.top .ansicht [aria-pressed="true"]') || {}).textContent || ''), n: document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].map((h) => h.textContent.trim()), b2c: !!document.querySelector('.hero.b2c'), b2b: !!document.querySelector('.hero.b2b'), vk: !!document.querySelector('.vk-einbettung .vk-hero'), still: document.querySelector('.top').classList.contains('cta-still'), top: [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), hash: location.hash, screen: S.screen }));
+  /* Ansicht Hauseigentümer: Kopf und Ansicht stehen im Baustein (Schatten-DOM von #startseite), Fensterbauer: im Kopf der eingebetteten Seite (.vk-einbettung .ez-kopf); auf den übrigen Seiten für Betriebe in der Kopfzeile des Portals */
+  const zustand = () => pa.evaluate(() => { const sr = (document.getElementById('startseite') || {}).shadowRoot || null, top = document.querySelector('.top'), ek = document.querySelector('.vk-einbettung .ez-kopf'); return { a: ((sr ? sr.querySelector('.ez-kopf nav.ez-ansicht a[aria-current]') : ek ? ek.querySelector('nav.ez-ansicht a[aria-current]') : document.querySelector('.top .ansicht [aria-pressed="true"]')) || { textContent: '' }).textContent.trim(), n: sr ? sr.querySelectorAll('.ez-kopf nav.ez-ansicht a').length : ek ? ek.querySelectorAll('nav.ez-ansicht a').length : document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].concat(sr ? [...sr.querySelectorAll('h1')] : []).map((h) => h.textContent.replace(/\s+/g, ' ').trim()), b2c: !!sr, b2b: !!document.querySelector('.hero.b2b'), vk: !!document.querySelector('.vk-einbettung .fb #hero'), still: !!top && top.classList.contains('cta-still'), top: sr ? [...sr.querySelectorAll('.ez-kopf a.dna-pille')].map((b) => b.innerText.trim()) : ek ? [...ek.querySelectorAll('a.dna-pille')].map((b) => b.innerText.trim()) : [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), portalKopf: !!top, portalFuss: !!document.querySelector('footer.foot'), hash: location.hash, pfad: location.pathname, screen: S.screen }; });
   /* Ansicht Fensterbauer: portal.js lädt die Paket-Landingpage /fuer-fensterbauer/ nach und bettet sie ein; darauf warten */
-  const einbettung = async () => { await pa.waitForSelector('.vk-einbettung .vk-hero, .vk-einbettung.vk-rueckfall', { timeout: 8000 }).catch(() => null); await pa.waitForTimeout(300); };
+  const einbettung = async () => { await pa.waitForSelector('.vk-einbettung .fb[data-fb-an="1"], .vk-einbettung.vk-rueckfall', { timeout: 8000 }).catch(() => null); await pa.waitForTimeout(300); };
   await pa.goto(BASE + '/', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   let z = await zustand();
-  ok(z.n === 2 && z.a === 'Hauseigentümer' && z.b2c && !z.b2b && !z.vk && z.h1.length === 1 && /Fenster ausmessen/.test(z.h1[0]) && z.top.includes('Fenster ausmessen') && !z.top.some((t) => /Anmelden|starten/i.test(t)), 'Ansicht Hauseigentümer (Standard): Umschalter oben, nur Inhalte für Hauseigentümer, Knopf „Fenster ausmessen“, kein Anmelden oder Starten für Betriebe');
-  ok(await pa.locator('.top a.btn.primary[href$="/app/"]').count() === 1 && await pa.locator('.wechsel [data-act="ansicht"][data-v="betrieb"]').count() === 1 && await pa.locator('a.tcard[href="/ratgeber/fenster-ausmessen/"]').count() === 1, 'Hauseigentümer: „Fenster ausmessen“ führt in die App, Ratgeber verlinkt, am Ende der Weg zur Ansicht für Fensterbauer');
-  await pa.click('.top .ansicht [data-v="betrieb"]'); await einbettung();
+  ok(z.n === 2 && z.a === 'Hauseigentümer' && z.b2c && !z.b2b && !z.vk && z.h1.length === 1 && /Fensterplanung ganz eezi/.test(z.h1[0]) && z.top.includes('Jetzt konfigurieren') && !z.top.some((t) => /Anmelden|starten/i.test(t)), 'Ansicht Hauseigentümer (Standard): Ansicht oben im Baustein, nur Inhalte für Hauseigentümer, Knopf „Jetzt konfigurieren“, kein Anmelden oder Starten für Betriebe');
+  ok(await pa.locator('.ez-kopf a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.ez-hero a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.ez-fb a[href="/fensterbauer"]').count() === 1 && await pa.locator('.ez-ratgeber a[href="/ratgeber/fenster-ausmessen/"]').count() === 1, 'Hauseigentümer: „Jetzt konfigurieren“ führt in die App, gleich in den ersten Schritt (#ausmessen), Ratgeber verlinkt, am Ende der Weg zur Ansicht für Fensterbauer');
+  await pa.click('.ez-kopf nav.ez-ansicht a[href="/fensterbauer"]'); await einbettung();
   z = await zustand();
-  ok(z.a === 'Fensterbauer' && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Ihr eigener Fenster-Konfigurator/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Anmelden') && z.top.includes('Kostenlos starten') && !z.top.includes('Fenster ausmessen') && z.still, 'Ansicht Fensterbauer: Anker #fensterbauer, die Paket-Landingpage eingebettet mit genau einem h1, keine Startbilder der Ansichten, „Anmelden“ und „Kostenlos starten“ (als Ring, solange „Pakete ansehen“ im Bild ist)');
-  ok(await pa.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, am Ende der Weg zu den Hauseigentümern');
-  ok(await pa.locator('.vk-einbettung .vk-paket').count() === 3 && await pa.locator('.vk-einbettung form[data-vk-frage]').count() === 1 && await pa.locator('.vk-einbettung .vk-ablauf').count() === 1 && await pa.locator('.vk-einbettung .rg-pfad').count() === 0, 'Einbettung: drei Paketkarten, das Anfrageformular und der Ablauf sind da, die Brotkrumen der Seite nicht');
-  await pa.click('.vk-einbettung .rg-inhalt a[href="#pakete"]'); await pa.waitForTimeout(900);
-  const sprung = await pa.evaluate(() => { const h = document.getElementById('pakete'), t = document.querySelector('.top').getBoundingClientRect(), r = h ? h.getBoundingClientRect() : null; return { screen: S.screen, hash: location.hash, unterKopf: !!r && r.top >= t.bottom - 1 && r.top < t.bottom + 80 }; });
-  ok(sprung.screen === 'landing' && sprung.hash === '#fensterbauer' && sprung.unterKopf, 'Sprungmarke „Die Pakete“ im Inhaltsverzeichnis scrollt den Abschnitt unter die Kopfzeile; Ansicht und Anker #fensterbauer bleiben');
+  ok(z.a === 'Fensterbauer' && z.n === 2 && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Anfragen mit Aufmaß/.test(z.h1[0]) && z.pfad === '/fensterbauer' && !z.hash && z.top.includes('Paket anfragen') && !z.top.some((t) => /Anmelden|starten|ausmessen/i.test(t)) && !z.portalKopf && !z.portalFuss, 'Ansicht Fensterbauer: Adresse /fensterbauer ohne Anker, die Paket-Landingpage eingebettet mit ihrem eigenen Kopf (Umschalter, „Paket anfragen“), genau einem h1 und eigener Fußzeile; keine Kopf- oder Fußzeile des Portals, keine Startbilder der Ansichten');
+  ok(await pa.locator('.vk-einbettung .ez-kopf nav.ez-ansicht a[href="/#hauseigentuemer"]').count() === 1 && await pa.locator('.vk-einbettung .ez-kopf nav.ez-ansicht a[aria-current][href="/fensterbauer"]').count() === 1 && await pa.locator('.vk-einbettung .ez-wissen a.ez-linkzeile[href="/#hauseigentuemer"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, oben der Umschalter (Fensterbauer bleibt in der Ansicht), am Ende der Weg zu den Hauseigentümern');
+  ok(await pa.locator('.vk-einbettung .ez-paket').count() === 3 && await pa.locator('.vk-einbettung form#anfrage-form[action="/api/auftrag/frage"]').count() === 1 && await pa.locator('.vk-einbettung .ez-livegang').count() === 1 && await pa.locator('.vk-einbettung .fb .ez-kopf').isVisible() && await pa.locator('.vk-einbettung .fb .ez-fuss .ez-fuss__pilot').count() === 1 && await pa.evaluate(() => getComputedStyle(document.querySelector('.vk-einbettung .fb .ez-leiste')).position === 'fixed' && getComputedStyle(document.querySelector('.vk-einbettung .fb .dna-szene')).position === 'sticky'), 'Einbettung: drei Paketkarten, das Anfrageformular und der Livegang sind da, dazu Kopf, Leiste, Vorhang und Fußzeile der Seite wie auf /fuer-fensterbauer/');
+  await pa.click('.vk-einbettung .ez-aktionen a[href="#pakete"]'); await pa.waitForTimeout(1800);
+  const sprung = await pa.evaluate(() => { const h = document.getElementById('pakete'), r = h ? h.getBoundingClientRect() : null; return { screen: S.screen, hash: location.hash, pfad: location.pathname, oben: !!r && r.top >= -1 && r.top < 80 }; });
+  ok(sprung.screen === 'landing' && sprung.pfad === '/fensterbauer' && !sprung.hash && sprung.oben, 'Knopf „Pakete ansehen“ im Startbild scrollt den Abschnitt an den oberen Rand; Ansicht und Adresse /fensterbauer bleiben');
   await pa.reload({ waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   ok((await zustand()).a === 'Fensterbauer', 'Gewählte Ansicht bleibt nach dem Neuladen');
   await pa.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   z = await zustand();
-  ok(z.a === 'Hauseigentümer' && z.b2c && !z.vk, 'Anker /#hauseigentuemer öffnet die Ansicht für Hauseigentümer');
+  ok(z.a === 'Hauseigentümer' && z.b2c && !z.vk && z.pfad === '/' && !z.hash, 'Anker /#hauseigentuemer öffnet die Ansicht für Hauseigentümer, die Adresse wird / ohne Anker');
+  await pa.goto(BASE + '/fensterbauer', { waitUntil: 'networkidle' }); await einbettung();
+  z = await zustand();
+  ok(z.a === 'Fensterbauer' && z.vk && z.pfad === '/fensterbauer' && !z.hash, 'Adresse /fensterbauer öffnet die Ansicht für Fensterbauer direkt');
+  await pa.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await einbettung();
+  z = await zustand();
+  ok(z.a === 'Fensterbauer' && z.vk && z.pfad === '/fensterbauer' && !z.hash, 'Früherer Anker /#fensterbauer öffnet die Ansicht und wird zu /fensterbauer');
+  await pa.click('.vk-einbettung .ez-kopf nav.ez-ansicht a[href="/#hauseigentuemer"]'); await pa.waitForTimeout(400);
+  z = await zustand();
+  ok(z.a === 'Hauseigentümer' && z.b2c && z.pfad === '/' && !z.hash, 'Von /fensterbauer per Umschalter zu den Hauseigentümern: Adresse /, ohne Neuladen');
   await pa.goto(BASE + '/#betriebe', { waitUntil: 'networkidle' }); await einbettung();
   z = await zustand();
-  ok(z.a === 'Fensterbauer' && z.vk && z.hash === '#fensterbauer', 'Früherer Anker /#betriebe öffnet die Ansicht für Fensterbauer');
+  ok(z.a === 'Fensterbauer' && z.vk && z.pfad === '/fensterbauer' && !z.hash, 'Früherer Anker /#betriebe öffnet die Ansicht für Fensterbauer');
+  await pa.goto(BASE + '/#wie', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   await pa.click('.top [data-act="go"][data-v="preise"]'); await pa.waitForTimeout(300);
   z = await zustand();
-  ok(z.screen === 'preise' && z.a === 'Fensterbauer', 'Preise gehören zur Ansicht Fensterbauer, der Umschalter zeigt es');
+  ok(z.screen === 'preise' && z.a === 'Fensterbauer' && z.portalKopf && z.top.includes('Anmelden'), 'Preise gehören zur Ansicht Fensterbauer; dort zeichnet das Portal die Kopfzeile mit Umschalter und „Anmelden“ für Bestandsbetriebe');
   await pa.click('.top .ansicht [data-v="kunde"]'); await pa.waitForTimeout(300);
   z = await zustand();
-  ok(z.screen === 'landing' && z.a === 'Hauseigentümer' && z.b2c && z.hash === '#hauseigentuemer', 'Von den Preisen per Umschalter zur Startseite der Hauseigentümer');
+  ok(z.screen === 'landing' && z.a === 'Hauseigentümer' && z.b2c && z.pfad === '/' && !z.hash, 'Von den Preisen per Umschalter zur Startseite der Hauseigentümer');
   await pa.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
   await pa.goto(BASE + '/?von=pdf', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   z = await zustand();
@@ -199,7 +231,7 @@ if (teil(2)) {
   const pf = await neueSeite(ctxA);
   await pf.route('**/fuer-fensterbauer/', (r) => r.fulfill({ status: 500, contentType: 'text/html', body: 'Störung' }));
   await pf.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await pf.waitForTimeout(500);
-  ok(await pf.locator('.vk-einbettung.vk-rueckfall a[href="/fuer-fensterbauer/"]').count() === 1 && await pf.locator('.vk-einbettung .vk-hero, .vk-einbettung[aria-busy]').count() === 0 && await pf.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1, 'Rückfall ohne Verkaufsseite: Karte „Pakete ansehen“ mit Link zur Seite statt leerer Fläche');
+  ok(await pf.locator('.vk-einbettung.vk-rueckfall a[href="/fuer-fensterbauer/"]').count() === 1 && await pf.locator('.vk-einbettung .fb, .vk-einbettung[aria-busy]').count() === 0 && await pf.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1, 'Rückfall ohne Verkaufsseite: Karte „Pakete ansehen“ mit Link zur Seite statt leerer Fläche');
   pf.probleme = pf.probleme.filter((p) => !/HTTP 500: .*\/fuer-fensterbauer\/$|status of 500/.test(p)); // die nachgestellte Störung selbst (Antwort und Konsolenzeile)
   sauber(pf, 'Rückfall ohne Fehler');
   await ctxA.close();
@@ -209,8 +241,16 @@ if (teil(2)) {
   await mp.goto(BASE + '/', { waitUntil: 'networkidle' });
   await mp.waitForTimeout(800);
   ok(await mp.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'Portal: kein seitliches Scrollen bei 390 px');
-  const kopf = await mp.evaluate(() => { const t = document.querySelector('.top'), u = t.querySelector('.ansicht'), r = u.getBoundingClientRect(), k = [...u.querySelectorAll('button')]; return { breit: Math.round(r.width), zeile: r.top > t.querySelector('.logo-s').getBoundingClientRect().bottom - 2, voll: k.every((b) => b.scrollWidth <= b.clientWidth + 1 && b.getBoundingClientRect().height >= 44), passt: t.scrollWidth <= t.clientWidth + 1, hoehe: Math.round(t.getBoundingClientRect().height) }; });
-  ok(kopf.zeile && kopf.breit >= 340 && kopf.voll && kopf.passt && kopf.hoehe <= 124, 'Telefon: Umschalter als eigene Zeile der Kopfzeile, volle Breite, beide Wörter ganz lesbar, Ziele ab 44 px (Kopf ' + kopf.hoehe + ' px)');
+  const kopf = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot, t = sr.querySelector('.ez-kopf'), u = t.querySelector('nav.ez-ansicht'), m = t.querySelector('.ez-marke'), r = u.getBoundingClientRect(), k = [...u.querySelectorAll('a')]; return { zeile: r.top >= m.getBoundingClientRect().bottom - 2, voll: k.every((b) => b.scrollWidth <= b.clientWidth + 1 && b.getBoundingClientRect().height >= 44), passt: t.scrollWidth <= t.clientWidth + 1, hoehe: Math.round(r.bottom - t.getBoundingClientRect().top) }; });
+  ok(kopf.zeile && kopf.voll && kopf.passt && kopf.hoehe <= 140, 'Telefon: Ansicht als eigene Zeile unter Marke und Pille, beide Wörter ganz lesbar, Ziele ab 44 px (Kopf ' + kopf.hoehe + ' px)');
+  /* „Mehr erfahren“ gleitet zu „So geht es“, ohne die Adresse zu ändern (Sprungmarken im Schatten-DOM, startseite.js) */
+  await mp.evaluate(() => document.getElementById('startseite').shadowRoot.querySelector('.ez-hero a[href="#so"]').click()); await mp.waitForTimeout(1500);
+  const so2 = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot, so = sr.getElementById('so'), r = so.getBoundingClientRect(); return { oben: Math.round(r.top), hash: location.hash, pfad: location.pathname, screen: S.screen }; });
+  ok(so2.oben > -40 && so2.oben < 120 && so2.hash === '' && so2.screen === 'landing', '„Mehr erfahren“ springt zu „So geht es“, Adresse und Ansicht bleiben (' + JSON.stringify(so2) + ')');
+  /* Vorhang im Schatten-DOM: Szenen höher als der Bildschirm kleben erst mit ihrem Ende (--dna-szene-oben), sonst bliebe ihr unterer Teil
+     unerreichbar (Fehler vom 26.10.2026: Schritt 3 und 4 von „So geht es“ und „Was im Aufmaß steckt“ waren am Telefon nie zu sehen) */
+  const vorhang = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot; return [...sr.querySelectorAll('.dna-szene')].map((s) => ({ soll: Math.min(0, window.innerHeight - s.offsetHeight), ist: parseFloat(s.style.getPropertyValue('--dna-szene-oben')) })); });
+  ok(vorhang.length === 5 && vorhang.every((v) => Math.abs(v.soll - v.ist) <= 1), 'Startseite (Telefon): jede Szene klebt erst mit ihrem Ende, alle Inhalte erreichbar (' + vorhang.map((v) => v.ist).join(', ') + ')');
   await foto(mp, 'portal-telefon');
   sauber(mp, 'Portal (Telefon) ohne Fehler');
   await mob.close();
@@ -234,8 +274,8 @@ if (teil(3)) {
 
   await page.click('[data-act="new"]');
   await page.waitForSelector('.scr[data-screen="start"]');
-  ok(await page.locator('.qopt[data-act="situation"]').count() === 2 && await page.locator('.qopt[data-act="art"]').count() === 6 && /Schritt 1 von 6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen oder neu) und das Element (Fenster, Balkon- oder Terrassentür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand) zur Wahl');
-  await page.click('.bb .btn.primary');
+  ok(await page.locator('.st-stelle [role="radio"][data-act="situation"]').count() === 2 && await page.locator('.st-bento [role="radio"][data-act="art"]').count() === 6 && /Schritt\s1\svon\s6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen oder neu) und das Element (Fenster, Balkon- oder Terrassentür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand) zur Wahl');
+  await page.click('.lg-weiter');
   await page.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
   const kiPosts = [], kiUrls = [];
   page.on('response', (r) => { if (r.url().includes('/api/ki?') && r.request().method() === 'POST') { kiPosts.push(r.status()); kiUrls.push(r.url()); } });
@@ -262,17 +302,12 @@ if (teil(3)) {
   ok(kiApi.wand.s === 200 && /^wand, out/.test(kiApi.wand.auftrag) && kiApi.alt.s === 200 && /^einbau, in/.test(kiApi.alt.auftrag) && kiApi.weg.s === 400, 'KI-Server: neue Öffnung mit Wand-Auftrag, alter Name „fakten“ gilt als Einbau, „struktur“ gibt es nicht mehr');
   await foto(page, 'app-fotos');
 
-  // vier Maße über die Zifferntasten, dann vier Ränder „wie Mitte“
-  await page.click('.bb .btn.primary');
-  for (const wert of ['1480', '1410', '1370', '1230']) {
-    await page.waitForSelector('.keypad');
-    for (const z of wert) await page.click('.keypad button[data-v="' + z + '"]');
-    await page.click('.keypad button[data-v="ok"]');
-    await page.waitForTimeout(250);
-  }
-  for (let i = 0; i < 4; i++) { await page.waitForSelector('[data-act="rest-same"]'); await page.click('[data-act="rest-same"]'); await page.waitForTimeout(200); }
-  await page.waitForSelector('.bb .btn.primary');
-  await page.click('.bb .btn.primary');
+  // vier Maße über „Maß eingeben“, die Zifferntasten und „Bestätigen“, dann vier Ränder „Hier auch … gemessen?“
+  await page.click('.lg-weiter');
+  for (const wert of ['1480', '1410', '1370', '1230']) await massTippen(page, wert);
+  for (let i = 0; i < 4; i++) await randWieMitte(page);
+  await page.waitForSelector('.ez-folie.ist-passt #mess-weiter'); await page.waitForTimeout(500); // nach „Passt.“ ist die Pille 0,45 s taub (Doppeltipp)
+  await page.click('#mess-weiter');
   await page.waitForSelector('[data-screen="ergebnis"]');
   const erg = await page.evaluate(() => { const d = derive(S.win); return [d.moW, d.moH, d.elW, d.elH].join('×'); });
   ok(erg === '1370×1480×1230×1410', 'Ergebnis stimmt: ' + erg);
@@ -280,35 +315,35 @@ if (teil(3)) {
   // Name des Fensters ist Pflicht: ohne Namen kein Weiter und kein Speichern; nach dem Tippen geht „Weiter“ gleich beim ersten Antippen
   await page.evaluate(() => { S.win.name = ''; S.q = 'lage'; S.screen = 'frage'; render(true); }); await page.waitForTimeout(300);
   await page.click('[data-act="qnext"]'); await page.waitForTimeout(300);
-  const n1 = await page.evaluate(() => ({ q: S.q, inv: document.getElementById('t-name').getAttribute('aria-invalid'), fokus: document.activeElement && document.activeElement.id, satz: (document.getElementById('t-name-f') || {}).textContent || '', pflicht: /Name des Fensters\s*Pflichtfeld/.test((document.querySelector('label[for="t-name"]') || {}).textContent || '') }));
+  const n1 = await page.evaluate(() => ({ q: S.q, inv: document.getElementById('t-name').getAttribute('aria-invalid'), fokus: document.activeElement && document.activeElement.id, satz: (document.getElementById('lg-grund') || {}).textContent || '', zeile: !(document.getElementById('lg-grund') || { hidden: true }).hidden, markiert: !!document.querySelector('.lg-name-feld.lg-markiert'), pflicht: /Raum\s*Pflicht/.test((document.querySelector('.lg-feld .lg-feldkopf') || {}).textContent || '') && document.getElementById('t-name').required }));
   await page.evaluate(() => saveWin()); await page.waitForTimeout(200);
   const n2 = await page.evaluate(() => ({ q: S.q, screen: S.screen, n: S.windows.length }));
   await page.fill('#t-name', 'Wohnzimmer'); await page.click('[data-act="qnext"]'); await page.waitForTimeout(300);
   const n3 = await page.evaluate(() => ({ q: S.q, name: S.win.name }));
-  ok(n1.q === 'lage' && n1.inv === 'true' && n1.fokus === 't-name' && /Bitte gib dem Fenster einen Namen/.test(n1.satz) && n1.pflicht && n2.q === 'lage' && n2.screen === 'frage' && n2.n === 0 && n3.q !== 'lage' && n3.name === 'Wohnzimmer', 'Name des Fensters ist Pflicht: ohne Namen kein Weiter und kein Speichern, Hinweis am Feld mit Fokus; nach dem Tippen geht „Weiter“ beim ersten Antippen');
+  ok(n1.q === 'lage' && n1.inv === 'true' && n1.fokus === 't-name' && /Gib dem Raum einen Namen, dann geht es weiter/.test(n1.satz) && n1.zeile && n1.markiert && n1.pflicht && n2.q === 'lage' && n2.screen === 'frage' && n2.n === 0 && n3.q !== 'lage' && n3.name === 'Wohnzimmer', 'Name des Fensters ist Pflicht: ohne Namen kein Weiter und kein Speichern, Zeile über „Weiter“, Feld markiert, Fokus im Feld; nach dem Tippen geht „Weiter“ beim ersten Antippen');
   // Eigenes Aufmaß: speichern, dann die Paywall: Vorschau mit Preis, kein Code und keine Datei vor der Zahlung
   await page.evaluate(() => { S.win.name = 'Wohnzimmer'; saveWin(); S.screen = 'teilen'; render(true); }); await page.waitForTimeout(400); // der Name ist Pflicht (Frage „Wo ist das Fenster?“)
   let t3 = await page.evaluate(() => document.body.textContent);
   ok(/Dein Aufmaßblatt ist fertig/.test(t3) && /Freischalten · 7,99 €/.test(t3) && /inkl\. MwSt\./.test(t3) && /Messen, Fotos und 3-D-Modell bleiben kostenlos/.test(t3), 'Paywall: Aufmaßblatt für 7,99 € inkl. MwSt., Messen bleibt kostenlos');
-  ok(!/AM1\./.test(t3) && !/Code kopieren/.test(t3) && await page.locator('[data-act="k-dl"], [data-act="teil-pdf"]').count() === 0 && await page.locator('.dv-blur').count() === 1 && await page.locator('.dv-tab tr').count() === 2, 'Vor der Zahlung: Vorschau mit Übersicht, Positionen verschwommen, kein Code, keine Datei');
+  ok(!/AM1\./.test(t3) && !/Code kopieren/.test(t3) && await page.locator('[data-act="k-dl"], [data-act="teil-pdf"]').count() === 0 && await page.locator('.dv-blur, .ab-papier .ab-schloss').count() === 1 && await page.locator('.dv-tab tr, .ab-papier-tab tr').count() === 2, 'Vor der Zahlung: Vorschau mit Übersicht, Positionen verschwommen, kein Code, keine Datei');
   await foto(page, 'app-paywall');
   await page.evaluate(() => go('home')); await page.waitForTimeout(300);
   ok(/Dein Aufmaßblatt · 7,99 €/.test(await page.evaluate(() => document.body.textContent)) && await page.locator('[data-act="k-dl"]').count() === 0, 'Startseite: Karte mit Preis statt kostenloser Datei');
   await page.evaluate(() => go('teilen')); await page.waitForTimeout(200);
   // Kasse, Schritt 1 (ohne Konto): die E-Mail ist Pflicht; den AGB stimmt man an der Kasse zu, für genau diesen Kauf
   await page.click('[data-act="k-start"]'); await page.waitForSelector('#k-mail');
-  await page.click('.bb .btn.primary'); await page.waitForTimeout(200);
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForTimeout(200);
   ok(await page.locator('.kf.bad').count() === 1 && await page.locator('.kcheck').count() === 0 && await page.evaluate(() => S.screen === 'konto'), 'Ohne E-Mail geht es nicht zur Zahlung; die AGB kommen erst an der Kasse');
-  await page.fill('#k-mail', 'kunde@beispiel.de'); await page.click('.bb .btn.primary'); await page.waitForTimeout(300);
+  await page.fill('#k-mail', 'kunde@beispiel.de'); await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForTimeout(300);
   t3 = await page.evaluate(() => document.body.textContent);
   ok(/Schritt 2 von 2/.test(t3) && /Aufmaßblatt als PDF/.test(t3) && /7,99 €/.test(t3) && /darin 19 % MwSt\./.test(t3) && /1,28 €/.test(t3) && /Testkauf abschließen/.test(t3) && /Pilotphase: Testkauf/.test(t3), 'Kasse: 7,99 € mit ausgewiesener MwSt. (1,28 €), im Pilot als Testkauf gekennzeichnet');
   const kasse2 = await page.evaluate(() => ({ haken: Array.from(document.querySelectorAll('.kasse-recht .kcheck')).map((l) => l.textContent.trim()), an: Array.from(document.querySelectorAll('.kasse-recht .kcheck input')).some((i) => i.checked), wr: !!document.querySelector('.kasse-recht a[href="/agb/#widerrufsbelehrung"]') && !!document.querySelector('.kasse-recht a[href="/agb/#widerrufsformular"]') && !!document.querySelector('.kasse-recht a[href="/agb/"]') }));
   ok(kasse2.haken.length === 2 && kasse2.haken[0] === 'Ich akzeptiere die AGB (Stand: ' + RECHT.standText(RECHT.AGB_STAND) + ').' && kasse2.haken[1] === RECHT.ZUSTIMMUNG && !kasse2.an && kasse2.wr, 'Kasse: zwei leere Haken, AGB mit Stand und die Zustimmung zur sofortigen Bereitstellung im Wortlaut des Servers; Widerrufsbelehrung und Muster-Widerrufsformular verlinkt');
   await foto(page, 'app-kasse');
-  await page.click('.bb .btn.primary'); await page.waitForTimeout(200);
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForTimeout(200);
   ok(await page.locator('.kerr').count() === 3 && await page.evaluate(() => !(S.kauf && S.kauf.paid) && S.screen === 'kasse'), 'Ohne Zahlungsart, AGB und Zustimmung zur sofortigen Bereitstellung kein Kauf');
   await page.click('[data-act="k-pay"][data-v="PayPal"]'); await page.click('[data-in="kc"][data-f="bedingungen"]'); await page.click('[data-in="kc"][data-f="widerruf"]');
-  await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gekauft"]'); await page.waitForTimeout(400);
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForSelector('[data-screen="gekauft"]'); await page.waitForTimeout(400);
   ok(/Freigeschaltet\./.test(await page.evaluate(() => document.body.textContent)) && await page.evaluate(() => S.kauf.paid === true && S.kauf.test === true && !S.kauf.token) && await page.evaluate(() => { const e = document.querySelector('.okmark-l[data-lottie="fertig"]'); return !!(e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0); }), 'Testkauf: freigeschaltet, der Haken zeichnet sich (Lottie), als Test gekennzeichnet, ohne Nachweis');
   await foto(page, 'app-gekauft');
   await page.reload({ waitUntil: 'networkidle' }); await page.waitForTimeout(300);
@@ -327,14 +362,14 @@ if (teil(3)) {
   const dl3Pfad = await dl3.path(), pdfBytes = fs.readFileSync(dl3Pfad);
   ok(pdfBytes.subarray(0, 5).toString() === '%PDF-', 'Datei ist ein echtes PDF');
   const roh3 = pdfBytes.toString('latin1'), txt3 = pdfText(await dl3.path());
-  ok(/InterExtraBold/.test(roh3) && /InterMedium/.test(roh3) && !/Maven/.test(roh3), 'PDF trägt die Schrift der Website (Inter, eingebettet)');
+  ok(/OutfitSemiBold/.test(roh3) && /OutfitRegular/.test(roh3) && /InterBlack/.test(roh3) && !/Maven/.test(roh3), 'PDF trägt die Schrift der Website (Outfit, Wortmarke in Inter, eingebettet)');
   ok(/Code vom Kunden/.test(txt3) && /Scannen: Anmeldung/.test(txt3) && roh3.includes('/URI (' + BASE + '/?von=pdf)') && /AM1\./.test(txt3) && /Aufmaß digital übernehmen/.test(txt3), 'PDF an den Fensterbauer: Anleitung mit QR-Link und Aufmaß-Code');
   /* Aufbau (Strang S5): Seite 1 mit Weg, Box für den Fensterbauer und Klärungsliste; je Position eine Seite; am Ende Code und eeziframes für eigene Kunden; Kennung auf jeder Seite */
   const seiteTxt = (n) => { try { return cp.execFileSync('pdftotext', ['-layout', '-f', String(n), '-l', String(n), dl3Pfad, '-']).toString('utf8'); } catch (e) { return ''; } };
   const s1 = seiteTxt(1), s2 = seiteTxt(2), info3 = (() => { try { return cp.execFileSync('pdfinfo', [dl3Pfad]).toString('utf8'); } catch (e) { return ''; } })();
   const kenn = (/AM-[A-Z2-9]{6}/.exec(s1) || [''])[0], nSeiten = +((/Pages:\s+(\d+)/.exec(info3) || [0, 0])[1]);
   ok(/4 von 5 Schritten erledigt/i.test(s1) && /Ihr Schritt: Angebot/.test(s1) && /FÜR SIE ALS FENSTERBAUER/.test(s1) && /MIT DEM KUNDEN ZU KLÄREN/.test(s1) && /MAUERÖFFNUNG/.test(s2) && /WÜNSCHE DES KUNDEN/.test(s2) && /Ansicht von innen/.test(s2), 'Aufmaßblatt Seite 1: der Weg (4 von 5 erledigt), Box für den Fensterbauer, Klärungsliste; Position 1 auf ihrer eigenen Seite mit Zeichnung und Wünschen');
-  ok(/AUFMASSE IHRER EIGENEN KUNDEN/.test(seiteTxt(nSeiten)) && /Ihre Kunden messen selbst/.test(seiteTxt(nSeiten)) && /Scannen: Projekt anlegen/.test(seiteTxt(nSeiten)) && /3 Projekte kostenlos/.test(seiteTxt(nSeiten)) && /Aufmaß digital übernehmen/.test(seiteTxt(nSeiten)), 'Aufmaßblatt, letzte Seite: Aufmaß-Code und eeziframes für die eigenen Kunden des Fensterbauers');
+  ok(/AUFMA(?:SS|ẞ)E IHRER EIGENEN KUNDEN/.test(seiteTxt(nSeiten)) && /Ihre Kunden messen selbst/.test(seiteTxt(nSeiten)) && /Scannen: Projekt anlegen/.test(seiteTxt(nSeiten)) && /3 Projekte kostenlos/.test(seiteTxt(nSeiten)) && /Aufmaß digital übernehmen/.test(seiteTxt(nSeiten)), 'Aufmaßblatt, letzte Seite: Aufmaß-Code und eeziframes für die eigenen Kunden des Fensterbauers');
   ok(!!kenn && nSeiten >= 3 && seiteTxt(nSeiten).includes(kenn) && seiteTxt(2).includes(kenn) && /Seite 1 von/.test(s1) && /Title:\s+Aufmaßblatt/.test(info3), 'Kennung ' + kenn + ', Datum und „Seite x von y“ auf jeder Seite, Dokumenttitel gesetzt');
   const seite3 = (() => { try { return cp.execFileSync('pdftotext', ['-f', '3', '-l', '3', dl3Pfad, '-']).toString('utf8'); } catch (e) { return ''; } })();
   ok(/Für Fensterbauer: Aufmaß per Code/.test(seite3) && /eeziframes/.test(seite3) && !/EEZI/.test(txt3), 'Senkrechter Markenstreifen steht auch auf einer Positionsseite; Marke im PDF überall klein');
@@ -347,7 +382,7 @@ if (teil(3)) {
   const [dl4] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('.share-way [data-act="k-dl"]')]);
   ok(/\.pdf$/.test(dl4.suggestedFilename()), 'Eigen-Kunde lädt seine freigeschaltete PDF: ' + dl4.suggestedFilename());
   const txt4 = pdfText(await dl4.path());
-  ok(/DEIN FENSTER-AUFMASS/.test(txt4) && /DEIN WEG ZU NEUEN FENSTERN/.test(txt4) && /FÜR DEINEN FENSTERBAUER/.test(txt4) && /Jetzt senden/.test(txt4), 'Ausgabe für den Kunden: Du-Ansprache, der nächste Schritt ist das Senden');
+  ok(/DEIN FENSTER-AUFMA(?:SS|ẞ)/.test(txt4) && /DEIN WEG ZU NEUEN FENSTERN/.test(txt4) && /FÜR DEINEN FENSTERBAUER/.test(txt4) && /Jetzt senden/.test(txt4), 'Ausgabe für den Kunden: Du-Ansprache, der nächste Schritt ist das Senden');
   await foto(page, 'app-zwei-wege');
   sauber(page, 'Messablauf ohne Fehler');
 
@@ -357,7 +392,7 @@ if (teil(3)) {
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   const posts2 = [];
   p2.on('request', (r) => { if (r.url().includes('/api/ki?')) posts2.push(r.url()); });
-  await p2.click('[data-act="new"]'); await p2.waitForSelector('.scr[data-screen="start"]'); await p2.click('.bb .btn.primary');
+  await p2.click('[data-act="new"]'); await p2.waitForSelector('.scr[data-screen="start"]'); await p2.click('.lg-weiter');
   await p2.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpeg });
   await p2.waitForSelector('.fx-dialog');
   await p2.click('.fx-nein');
@@ -393,11 +428,11 @@ if (teil(4)) {
   // zwei fertige Fenster in den Link legen (wie nach dem Messen)
   await page.evaluate((code) => { localStorage.setItem('aufmass.k.' + code, JSON.stringify({ windows: demoProject(), proj: {}, name: '' })); }, link.code);
   await page.reload({ waitUntil: 'networkidle' });
-  await page.click('.bb .btn.primary'); // Weiter zum Absenden
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); // Weiter zum Absenden
   await page.waitForSelector('[data-screen="anfrage"]');
-  await page.click('.bb .btn.primary');
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter');
   await page.waitForSelector('[data-screen="anfrage2"]');
-  await page.click('.bb .btn.primary'); // Prüfen und senden
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); // Prüfen und senden
   await page.waitForSelector('[data-screen="blatt"]');
   text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('mit allen Maßen und Wünschen') && !text.includes('Fotos und Wünschen'), 'Prüfen-Seite verspricht keine Fotos');
@@ -409,7 +444,7 @@ if (teil(4)) {
     return { wege: wege.join(','), code: /AM1\./.test(sichtbar), t1: t1, t2: t2, nurAn: /gehen nur an /.test(document.body.textContent) };
   });
   ok(ks4.wege === 'blatt,blatt,blatt,blatt,blatt,blatt' && !ks4.code && /bekommst du von/.test(ks4.t1) && /bekommst du von/.test(ks4.t2) && ks4.nurAn, 'Kundenschutz im Link: kein Weg zu Aufmaßblatt, Code, Kasse oder Konto, die PDF gibt es nur vom Betrieb; Prüfen-Seite: geht nur an den Betrieb (' + ks4.wege + ')');
-  await page.click('.bb .btn.primary'); // An … senden
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); // An … senden
   await page.waitForSelector('[data-screen="gesendet"]');
   text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('Jetzt abschicken.') && !text.includes('Gesendet.'), 'Pilot: „Jetzt abschicken“ statt „Gesendet“');
@@ -423,7 +458,7 @@ if (teil(4)) {
   // Link-Kunde: keine Kopie mit Maßen, die gibt der Betrieb weiter (Zusage „Ihr Kunde bleibt Ihr Kunde“)
   ok(await page.locator('.datei-card [data-act="k-dl"]').count() === 0 && /Frag Fensterbau Brandt/.test(text), 'Link-Kunde bekommt keine PDF, sondern den Hinweis auf seinen Betrieb');
 
-  await page.click('.bb .btn[data-act="go"][data-v="home"]'); // Fertig (ghost: Cream nur für „Per WhatsApp senden“)
+  await page.click('.bb .btn[data-act="go"][data-v="home"], .scr.dna .lg-fuss [data-act="go"][data-v="home"]'); // Fertig (ghost: Cream nur für „Per WhatsApp senden“)
   await page.waitForTimeout(300);
   text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('Fast erledigt.') && text.includes('Code senden'), 'Startseite erinnert ans Code-Senden');
@@ -450,7 +485,7 @@ if (teil(4)) {
     const [d2] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), pdfKnopf.click()]);
     ok(/\.pdf$/.test(d2.suggestedFilename()), 'Portal-PDF: ' + d2.suggestedFilename());
     let txtB = ''; try { txtB = (await import('node:child_process')).execFileSync('pdftotext', ['-layout', await d2.path(), '-']).toString('utf8'); } catch (e) { txtB = ''; }
-    ok(/BESTELLMASS-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB) && /Übersicht/.test(txtB) && !/eeziframes-Konto\./.test(txtB), 'Portal-PDF in den Farben des Betriebs: Bestellmaß, keine Werbeseite');
+    ok(/RICHTMA(?:SS|ẞ)/.test(txtB) && !/BESTELLMA(?:SS|ẞ)/.test(txtB) && /Fensterbau Brandt/.test(txtB) && /Übersicht/.test(txtB) && !/eeziframes-Konto\./.test(txtB), 'Portal-PDF in den Farben des Betriebs: Richtmaß fürs Angebot (nie „Bestellmaß“), keine Werbeseite');
   } else ok(false, 'Portal-PDF-Knopf gefunden');
   sauber(page, 'Portal-PDF ohne Fehler');
   // Einladungsseite (Strang S4), Pilotbetrieb: der Betrieb vorn, eeziframes klein als Übermittler, nichts überlappt, Anrede und
@@ -506,6 +541,15 @@ if (teil(4)) {
 /* ---------- 5. Rechtsseiten ---------- */
 if (teil(5)) {
   console.log('5. Rechtsseiten');
+  /* Bausteine der Rechtstexte und der Fehlerseite aus einer Quelle (scripts/recht-bausteine.mjs, seit 28.10.2026): Kopf mit den
+     Schriften der DNA, Fuß mit „Für Fensterbauer“ und der eigenen Seite, lange Texte mit „Auf dieser Seite“ */
+  {
+    const rb = await import(new URL('./recht-bausteine.mjs', import.meta.url).href), rs = rb.gebaut();
+    const anders = rs.filter(([, , alt, neu]) => alt !== neu).map(([p]) => p);
+    const ohneInhalt = rs.filter(([p, , alt]) => ['/agb/', '/datenschutz/', '/konfigurator-bedingungen/'].includes(p) && !/<nav class="recht-inhalt"/.test(alt)).map(([p]) => p);
+    const ohneFb = rs.filter(([, , alt]) => !/<footer class="fuss">[\s\S]*href="\/fuer-fensterbauer\/"[\s\S]*<\/footer>/.test(alt)).map(([p]) => p);
+    ok(!anders.length && !ohneInhalt.length && !ohneFb.length && rs.length === 8, 'Rechtstexte und Fehlerseite so, wie scripts/recht-bausteine.mjs sie baut (Schriften, Fuß mit „Für Fensterbauer“, „Auf dieser Seite“ bei AGB, Datenschutz, Paketbedingungen)' + (anders.length ? ' (nicht neu gebaut: ' + anders.join(', ') + ')' : '') + (ohneInhalt.length ? ' (ohne Verzeichnis: ' + ohneInhalt.join(', ') + ')' : '') + (ohneFb.length ? ' (Fuß ohne Für Fensterbauer: ' + ohneFb.join(', ') + ')' : ''));
+  }
   const ctx = await browser.newContext(telefon);
   const page = await neueSeite(ctx);
   for (const [pfad, name] of [['/datenschutz/', 'datenschutz'], ['/impressum/', 'impressum'], ['/agb/', 'agb'], ['/nutzungsbedingungen/', 'nutzungsbedingungen'], ['/cookies/', 'cookies'], ['/widerruf/', 'widerruf']]) {
@@ -601,14 +645,14 @@ if (teil(6)) {
   // Startseite: beide Zielgruppen, kein Marktplatz
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
-  const start = await page.evaluate(() => document.body.textContent);
-  ok(/Fenster ausmessen\. Selbst\. eezi\./.test(start) && !/Fenster-Konfigurator, unter Ihrer Marke/.test(start) && await page.locator('.hero.b2c a[href$="/app/"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: ausmessen oder Führung, nichts für Betriebe');
-  await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForSelector('.vk-einbettung .vk-hero', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
+  const start = await page.evaluate(() => { const r = document.getElementById('startseite'); return (document.body.textContent + ' ' + (r && r.shadowRoot ? r.shadowRoot.textContent : '')).replace(/\s+/g, ' '); });
+  ok(/Fensterplanung ganz eezi\./.test(start) && !/Anfragen mit Aufmaß/.test(start) && await page.locator('.ez-hero a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await page.locator('.ez-fuss-satz a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: konfigurieren (gleich in den ersten Schritt der App, #ausmessen) oder Führung, nichts für Betriebe');
+  await page.click('.ez-kopf nav.ez-ansicht a[href="/fensterbauer"]'); await page.waitForSelector('.vk-einbettung .fb[data-fb-an="1"]', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
   const startB = await page.evaluate(() => document.body.textContent);
-  ok(/Ihr eigener Fenster-Konfigurator, unter Ihrer Marke/.test(startB) && !/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c, .hero.b2b').count() === 0, 'Startseite, Ansicht Fensterbauer: die Paket-Landingpage eingebettet, nichts für Hauseigentümer, keine Werbung mehr für Aufmaß-Links');
-  ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test(start + startB), 'Kein Marktplatz mehr auf der Startseite');
+  ok(/Anfragen mit Aufmaß\. Unter Ihrer Marke\./.test(startB.replace(/\s+/g, ' ')) && !/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c, .hero.b2b').count() === 0, 'Startseite, Ansicht Fensterbauer: die Paket-Landingpage eingebettet, nichts für Hauseigentümer, keine Werbung mehr für Aufmaß-Links');
+  ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test((start + startB).replace(/Kein Portal und kein Marktplatz/g, '')), 'Kein Marktplatz mehr auf der Startseite');
   /* der Kundenschutz steht jetzt in der eingebetteten Verkaufsseite (Band „Ihre Kunden bleiben Ihre Kunden“, Zusagen der Paketbedingungen) */
-  ok(await page.locator('.vk-einbettung #kundenschutz').count() === 1 && await page.locator('.vk-einbettung a[href="/konfigurator-bedingungen/#kundenschutz"]').count() === 1 && /Ihre Kunden bleiben Ihre Kunden/.test(startB) && (startB.match(/Nur Ihr Betrieb:|Nur an Sie:|In Ihrem Auftrag:|Kein Weiterverkauf:/g) || []).length === 4, 'Startseite für Fensterbauer: Abschnitt Kundenschutz mit vier Zusagen und Verweis auf die Paketbedingungen');
+  ok(await page.locator('.vk-einbettung #kundenschutz').count() === 1 && await page.locator('.vk-einbettung a[href="/konfigurator-bedingungen/"]').count() >= 1 && /Ihre Kunden bleiben Ihre Kunden/.test(startB) && (startB.match(/Nur Ihr Betrieb\.|Nur an Sie\.|Kein Weiterverkauf\.|Im Auftrag, in Frankfurt\./g) || []).length === 4, 'Startseite für Fensterbauer: Abschnitt Kundenschutz mit vier Zusagen, Paketbedingungen verlinkt');
   await foto(page, 'portal-start');
   sauber(page, 'Logik und Übersichten ohne Fehler');
   await ctx.close();
@@ -620,25 +664,26 @@ if (teil(6)) {
   await p2.evaluate(() => { const w = demoProject(); const halb = Object.assign({}, w[0], { name: 'Halb gemessen', w: '', h: '', el: { h: '', w: '' }, mo: { hm: 1200, wm: 1000, hl: '', hr: '', wt: '', wb: '' } }); localStorage.setItem('aufmass.k.pruef1', JSON.stringify({ windows: [halb], proj: {}, name: 'Test Betrieb' })); });
   await p2.reload({ waitUntil: 'networkidle' });
   await p2.evaluate(() => { S.screen = 'blatt'; render(true); }); await p2.waitForTimeout(300);
-  ok(await p2.locator('.bb .btn.primary[disabled]').count() === 1 && /kein Fenster ist vollständig/.test(await p2.evaluate(() => document.body.innerText)), 'Senden gesperrt, solange kein Fenster vollständig ist');
+  ok(await p2.locator('.bb .btn.primary[disabled], .scr.dna .lg-weiter[disabled]').count() === 1 && /kein Fenster ist vollständig/.test(await p2.evaluate(() => document.body.innerText)), 'Senden gesperrt, solange kein Fenster vollständig ist');
   await foto(p2, 'app-senden-gesperrt');
   await p2.evaluate(() => { S.windows.push(Object.assign({}, demoProject()[1], { name: 'Komplett' })); persist(); render(true); }); await p2.waitForTimeout(300);
-  ok(await p2.locator('.bb .btn.primary[disabled]').count() === 0 && /trotzdem senden/.test(await p2.evaluate(() => document.body.innerText)), 'Mit einem vollständigen Fenster geht Senden, Lücke wird genannt');
-  await p2.click('.bb .btn.primary'); await p2.waitForSelector('[data-screen="gesendet"]'); await p2.waitForTimeout(400);
+  ok(await p2.locator('.bb .btn.primary[disabled], .scr.dna .lg-weiter[disabled]').count() === 0 && /trotzdem senden/.test(await p2.evaluate(() => document.body.innerText)), 'Mit einem vollständigen Fenster geht Senden, Lücke wird genannt');
+  await p2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await p2.waitForSelector('[data-screen="gesendet"]'); await p2.waitForTimeout(400);
   const code1 = await codeAusNachricht(p2);
   ok(await p2.evaluate(() => { const e = document.querySelector('.okmark-l[data-lottie="senden"]'); return !!(e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0); }), 'Abschicken: der Flieger fliegt (Lottie)');
   await p2.evaluate(() => { S.windows[0].name = 'Nachträglich geändert'; S.proj.notiz = 'anders'; render(true); }); await p2.waitForTimeout(200);
   ok(!!code1 && await codeAusNachricht(p2) === code1, 'Der Aufmaß-Code bleibt nach dem Senden eingefroren');
   // Scroll-Reveal: Blöcke tragen .rev und sind sichtbar
-  ok(await p2.evaluate(() => { const k = document.querySelectorAll('.scr > .rev'); return k.length >= 3 && Array.from(k).slice(0, 2).every((e) => e.classList.contains('in')); }), 'Blöcke erscheinen nacheinander (Scroll-Reveal aktiv)');
+  ok(await p2.evaluate(() => { if (document.querySelector('.scr.dna')) return !document.querySelector('.scr .rev:not(.in)'); const k = document.querySelectorAll('.scr > .rev'); return k.length >= 3 && Array.from(k).slice(0, 2).every((e) => e.classList.contains('in')); }), 'Blöcke erscheinen nacheinander (Scroll-Reveal aktiv); Folien im Look der Design-DNA stehen sofort, nichts bleibt verborgen');
   // Alle Maße da: die Maßlinien zeichnen sich nacheinander
   await p2.evaluate(() => { S.betrieb = null; });
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await p2.click('[data-act="new"]'); await p2.waitForTimeout(200);
   await p2.evaluate(() => { S.win.mo = { hm: 1480, wm: 1370, hl: '', hr: '', wt: '', wb: '' }; go('rest'); });
-  for (let i = 0; i < 4; i++) { await p2.waitForSelector('[data-act="rest-same"]'); await p2.click('[data-act="rest-same"]'); await p2.waitForTimeout(150); }
+  for (let i = 0; i < 4; i++) await randWieMitte(p2);
   await p2.waitForTimeout(400);
-  ok(/Alle Maße da/.test(await p2.evaluate(() => document.body.textContent)) && await p2.locator('.w3d-dim.is-drawing').count() >= 2, '„Alle Maße da“: Maßlinien zeichnen sich nacheinander');
+  const passt = await p2.evaluate(() => ({ t: document.querySelector('.scr').textContent, zahl: (document.getElementById('passt-zahl') || {}).textContent || '', reihen: document.querySelectorAll('.ez-passt__reihe').length, linien: document.querySelectorAll('#mess-passt g').length, zaehlt: document.querySelectorAll('#mess-passt g.ist-zaehlt').length, schilder: Array.from(document.querySelectorAll('.ez-passt__schild')).filter((e) => e.getBoundingClientRect().width > 0).map((e) => e.textContent).join('|'), pillen: document.querySelectorAll('.scr .lg-fuss .dna-pille').length, w3d: !!document.querySelector('.w3d-stage'), rest: S.rest.i }));
+  ok(/Passt\./.test(passt.t) && passt.zahl === '1.370 × 1.480' && passt.reihen === 6 && passt.linien === 6 && passt.zaehlt === 6 && passt.schilder === '1.370mm|1.480mm' && passt.pillen === 1 && !passt.w3d && passt.rest === 4, '„Passt.“: die Öffnung von vorn mit allen sechs Maßen (die kleinsten kräftig, ihr Wert am Modell), das Maß der Öffnung groß (' + passt.zahl + '), je Richtung drei Messungen, eine Hauptaktion, kein 3-D');
   await foto(p2, 'app-masse-da');
   // Bewegtbilder (Lottie) in Tokenfarben, Haptik, Scroll-Bindung
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
@@ -660,8 +705,8 @@ if (teil(6)) {
   await p4.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   const frage = async (id, set) => { await p4.evaluate(([id, set]) => { const w = demoProject()[0]; Object.assign(w, set || {}); S.win = w; S.q = id; S.selSash = 0; S.screen = 'frage'; render(true); }, [id, set || {}]); await p4.waitForTimeout(500); };
   await frage('form');
-  const kacheln = await p4.evaluate(() => { const k = Array.from(document.querySelectorAll('.qformen .qf')), r = k.map((e) => e.getBoundingClientRect()), pan = document.querySelector('.qpanel').getBoundingClientRect(); return { n: k.length, eineReihe: r.every((x) => Math.abs(x.top - r[0].top) < 1), gleich: r.every((x) => Math.abs(x.width - r[0].width) < 1 && Math.abs(x.height - r[0].height) < 1), drin: r.every((x) => x.left >= pan.left - 1 && x.right <= pan.right + 1), name: (document.querySelector('.qformen + .qcur') || {}).textContent }; });
-  ok(kacheln.n === 5 && kacheln.eineReihe && kacheln.gleich && kacheln.drin && /Rechteck/.test(kacheln.name), 'Formen: fünf gleich große Kacheln in einer Reihe, alle sichtbar, Name der gewählten darunter');
+  const kacheln = await p4.evaluate(() => { const k = Array.from(document.querySelectorAll('.qformen .qf')), r = k.map((e) => e.getBoundingClientRect()), pan = document.querySelector('.qpanel').getBoundingClientRect(); return { n: k.length, zweiSpalten: Math.abs(r[0].top - r[1].top) < 1 && r[2].top > r[0].top + 20 && Math.abs(r[0].left - r[2].left) < 1, gleich: r.every((x) => Math.abs(x.width - r[0].width) < 1 && Math.abs(x.height - r[0].height) < 1), drin: r.every((x) => x.left >= pan.left - 1 && x.right <= pan.right + 1), namen: k.map((e) => getComputedStyle(e, '::after').content).join('|'), name: (document.querySelector('.qformen + .qcur') || {}).textContent }; });
+  ok(kacheln.n === 5 && kacheln.zweiSpalten && kacheln.gleich && kacheln.drin && /Rechteck/.test(kacheln.namen) && /Rechteck/.test(kacheln.name), 'Formen: fünf gleich große Kacheln mit Zeichnung und Namen in zwei Spalten (Design-DNA), alle sichtbar, Name der gewählten darunter');
   const loch = () => p4.evaluate(() => { const st = document.getElementById('w3d'), wand = st.querySelector('[data-r="wall-in"]'), pts = (wand.style.clipPath.match(/px/g) || []).length / 2; return { struct: st.getAttribute('data-struct'), pts: pts, clip: wand.style.clipPath, glas: (st.querySelector('[data-r="glass-0"]').style.clipPath || '').slice(0, 12), streifen: st.querySelectorAll('.w3d-rs').length }; });
   const l0 = await loch();
   await p4.click('.qformen [data-v="rundbogen"]'); await p4.waitForTimeout(800);
@@ -782,14 +827,14 @@ if (teil(6)) {
   // Neue Öffnung: Start → Fotos → Einzeichnen (Ecke ziehen, Lupe) → Maße → Ergebnis mit Lage
   await p5.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await p5.click('[data-act="new"]'); await p5.waitForSelector('.scr[data-screen="start"]');
-  await p5.click('.qopt[data-act="situation"][data-v="neu"]'); await p5.waitForTimeout(300);
-  await p5.click('.qopt[data-act="art"][data-v="fenster"]'); await p5.waitForTimeout(200);
-  const startNeu = await p5.evaluate(() => ({ neu: S.win.neu, note: !!document.querySelector('.qgroup .note'), bar: document.querySelector('.bb .btn.primary').textContent }));
-  await p5.click('.bb .btn.primary'); await p5.waitForTimeout(300);
-  const fotosNeu = await p5.evaluate(() => ({ h1: document.querySelector('.hd h1').textContent, bar: Array.from(document.querySelectorAll('.bb .btn:not(.bb-zurueck)')).map((b) => b.textContent).join('|'), steps: stepsFor(S.win).join(',') }));
+  await p5.click('[data-act="situation"][data-v="neu"]'); await p5.waitForTimeout(300);
+  await p5.click('[data-act="art"][data-v="fenster"]'); await p5.waitForTimeout(200);
+  const startNeu = await p5.evaluate(() => ({ neu: S.win.neu, note: !!document.querySelector('.scr[data-screen="start"] .st-stelle-text .st-punkt') && !!document.querySelector('.st-rahmen'), bar: document.querySelector('.lg-weiter').textContent }));
+  await p5.click('.lg-weiter'); await p5.waitForTimeout(300);
+  const fotosNeu = await p5.evaluate(() => ({ h1: document.querySelector('.lg-frage h1').textContent, bar: Array.from(document.querySelectorAll('.lg-fuss .lg-weiter')).map((b) => b.getAttribute('data-act') + ':' + b.textContent).join('|'), steps: stepsFor(S.win).join(',') }));
   await p5.evaluate(() => useDemo()); await p5.waitForTimeout(1800);
-  fotosNeu.weiter = await p5.evaluate(() => document.querySelector('.bb .btn.primary').textContent);
-  await p5.click('.bb .btn.primary'); await p5.waitForTimeout(700);
+  fotosNeu.weiter = await p5.evaluate(() => document.querySelector('.lg-weiter').getAttribute('data-act') + ':' + document.querySelector('.lg-weiter').textContent);
+  await p5.click('.lg-weiter'); await p5.waitForTimeout(700);
   const z0 = await p5.evaluate(() => ({ screen: S.screen, ecken: document.querySelectorAll('.zcorner').length, raster: document.querySelectorAll('.zgrid line').length, dim: !!document.querySelector('.zdim'), e: JSON.stringify(S.win.plan.ecken[2]) }));
   const dot = await p5.$('[data-r="zc-2"] .dot'); const bb = await dot.boundingBox();
   await p5.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2); await p5.mouse.down(); await p5.mouse.move(bb.x + 40, bb.y + 50, { steps: 6 }); await p5.waitForTimeout(100);
@@ -798,15 +843,15 @@ if (teil(6)) {
   const z1 = await p5.evaluate(() => ({ e: JSON.stringify(S.win.plan.ecken[2]), lupe: document.querySelector('[data-r="zlupe"]').hidden }));
   await p5.click('[data-act="plan-rect"]'); await p5.waitForTimeout(200);
   const z2 = await p5.evaluate(() => { const P = S.win.plan.ecken; return Math.abs(P[0][1] - P[1][1]) < 1e-9 && Math.abs(P[1][0] - P[2][0]) < 1e-9; });
-  ok(startNeu.neu && startNeu.note && /Fotos/.test(startNeu.bar) && /Stelle/.test(fotosNeu.h1) && fotosNeu.bar === 'Ohne Foto weiter' && /Einzeichnen/.test(fotosNeu.weiter) && fotosNeu.steps === 'start,fotos,zeichnen,planmasse,ergebnis,frage' && z0.screen === 'zeichnen' && z0.ecken === 4 && z0.raster === 4 && z0.dim && z0.e !== z1.e && lupe && z1.lupe && z2, 'Neue Öffnung: eigener Weg mit Einzeichnen, vier Ecken mit Raster, Lupe beim Ziehen, „Rechteck ausrichten“');
-  await p5.click('.qnav .btn.primary'); await p5.waitForTimeout(900);
+  ok(startNeu.neu && startNeu.note && /Fotos/.test(startNeu.bar) && /Stelle/.test(fotosNeu.h1) && fotosNeu.bar === 'ohne-foto:Weiter zum Einzeichnen' && /^go:Weiter zum Einzeichnen/.test(fotosNeu.weiter) && fotosNeu.steps === 'start,fotos,zeichnen,planmasse,ergebnis,frage' && z0.screen === 'zeichnen' && z0.ecken === 4 && z0.raster === 4 && z0.dim && z0.e !== z1.e && lupe && z1.lupe && z2, 'Neue Öffnung: eigener Weg mit Einzeichnen, vier Ecken mit Raster, Lupe beim Ziehen, „Rechteck ausrichten“');
+  await p5.click('.qnav .btn.primary, .scr.dna.zn .lg-weiter'); await p5.waitForTimeout(900);
   const pm = await p5.evaluate(() => ({ screen: S.screen, d: derive(S.win), bild: (S.win.plan.bild || '').length, rows: document.querySelectorAll('input[data-in="plan"]').length }));
   await p5.click('[data-act="plan-bump"][data-f="h"][data-v="50"]'); await p5.waitForTimeout(300);
   const pm2 = await p5.evaluate(() => { const d = derive(S.win); return { moH: d.moH, elH: d.elH, mo: S.win.mo.hl === S.win.mo.hr && S.win.mo.hl === d.moH }; });
-  await p5.click('.bb .btn.primary'); await p5.waitForTimeout(900);
-  const erg = await p5.evaluate(() => ({ screen: S.screen, tags: Array.from(document.querySelectorAll('.result .tag')).map((t) => t.textContent), bild: !!document.querySelector('.plan-bild'), back: document.querySelector('.hdr-btn[data-act="back"] span').textContent }));
+  await p5.click('.bb .btn.primary, .scr.dna .lg-weiter'); await p5.waitForTimeout(900);
+  const erg = await p5.evaluate(() => ({ screen: S.screen, tags: Array.from(document.querySelectorAll('.result .tag, .er-tag')).map((t) => t.textContent), bild: !!document.querySelector('.plan-bild'), back: (() => { const s = document.querySelector('.hdr-btn[data-act="back"] span'), k = document.querySelector('.scr.dna .lg-kopf-zurueck'); return s ? s.textContent : k ? k.getAttribute('aria-label').replace(/^Zurück: /, '') : ''; })() })); // Ergebnis im Look der Design-DNA: Zurück im eigenen Kopf
   const code = await p5.evaluate(() => { const o = unpackProject(packProject([S.win], S.proj, null)); return { bild: o.w[0].plan.bild, ecken: o.w[0].plan.ecken.length, neu: o.w[0].neu }; });
-  ok(pm.screen === 'planmasse' && pm.d.moW === 1230 && pm.d.elW === 1200 && pm.bild > 5000 && pm.rows === 4 && pm2.moH === 1530 && pm2.elH === 1500 && pm2.mo && erg.screen === 'ergebnis' && erg.tags.every((t) => /Wunschmaß|rechnerisch/.test(t)) && erg.bild && erg.back === 'Maße' && code.bild === '' && code.ecken === 4 && code.neu, 'Wunschmaße: Vorgabe je Art, Element 15 mm je Seite kleiner, Ergebnis als Wunschmaß mit Lage auf dem Foto; das Foto bleibt auf dem Gerät');
+  ok(pm.screen === 'planmasse' && pm.d.moW === 1230 && pm.d.elW === 1200 && pm.bild > 5000 && pm.rows === 4 && pm2.moH === 1530 && pm2.elH === 1500 && pm2.mo && erg.screen === 'ergebnis' && erg.tags.length === 2 && erg.tags.every((t) => /Wunschmaß|rechnerisch/.test(t)) && erg.bild && erg.back === 'Maße' && code.bild === '' && code.ecken === 4 && code.neu, 'Wunschmaße: Vorgabe je Art, Element 15 mm je Seite kleiner, Ergebnis als Wunschmaß mit Lage auf dem Foto; das Foto bleibt auf dem Gerät');
   await foto(p5, 'app-neu-ergebnis');
   sauber(p5, 'Elementarten, Sonnenschutz und neue Öffnung ohne Fehler');
   await ctx5.close();
@@ -847,7 +892,7 @@ if (teil(6)) {
   const l27 = await lam7();
   await p7.click('[data-w3d="fahren"]'); await p7.waitForTimeout(2600);
   const l37 = await lam7();
-  ok(/rotateX\(-52deg\)/.test(l07.t0) && l07.wenden === 'false' && l17.wenden === 'true' && /rotateX\(-6deg\)/.test(l17.t0) && /Hochfahren/.test(l27.fahren) && l27.u > l07.u && /Herunterfahren/.test(l37.fahren) && /rotateX\(-86deg\)/.test(l37.t0) && l37.u < l07.u && l07.hoch >= 44, 'Raffstore: Lamellen wenden (zu und offen), herunter- und hochfahren, oben liegen die Lamellen als Paket; Knöpfe ab 44 px');
+  ok(/rotateX\(-78deg\)/.test(l07.t0) && l07.wenden === 'false' && l17.wenden === 'true' && /rotateX\(-6deg\)/.test(l17.t0) && /Hochfahren/.test(l27.fahren) && l27.u > l07.u && /Herunterfahren/.test(l37.fahren) && /rotateX\(-86deg\)/.test(l37.t0) && l37.u < l07.u && l07.hoch >= 44, 'Raffstore: Lamellen wenden (zu und offen), herunter- und hochfahren, oben liegen die Lamellen als Paket; Knöpfe ab 44 px');
   await p7.evaluate(() => { W3D_BEHANG.stand = 0.55; W3D_BEHANG.wend = 0; });
   await frage7('material', { teilung: '2p' });
   const zoomKn7 = await p7.evaluate(() => ({ da: !!document.querySelector('#w3d [data-w3d="plus"]') && !!document.querySelector('#w3d [data-w3d="minus"]'), eins: document.querySelector('#w3d [data-w3d="eins"]').hidden, touch: getComputedStyle(document.getElementById('w3d')).touchAction, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width), netz: parseFloat(document.querySelector('#w3d [data-r="mesh"]').style.width) }));
@@ -855,6 +900,12 @@ if (teil(6)) {
   const zoom7 = await p7.evaluate(() => ({ z: W3DZ.w3d.z, cls: document.getElementById('w3d').classList.contains('is-zoom'), eins: document.querySelector('#w3d [data-w3d="eins"]').hidden, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }));
   await p7.click('#w3d [data-w3d="eins"]'); await p7.waitForTimeout(500);
   const zoom7b = await p7.evaluate(() => ({ z: W3DZ.w3d.z, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }));
+  /* Herauszoomen bis 0,5: Minus zweimal, dann gesperrt; „1:1“ sichtbar, kein Verschieben; „1:1“ holt zurück */
+  await p7.click('#w3d [data-w3d="minus"]'); await p7.waitForTimeout(450); await p7.click('#w3d [data-w3d="minus"]'); await p7.waitForTimeout(500);
+  const zoom7c = await p7.evaluate(() => { const k = (r) => document.querySelector('#w3d [data-w3d="' + r + '"]'); return { z: W3DZ.w3d.z, minus: k('minus').disabled, eins: k('eins').hidden, cls: document.getElementById('w3d').classList.contains('is-zoom'), s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }; });
+  await p7.click('#w3d [data-w3d="eins"]'); await p7.waitForTimeout(500);
+  const zoom7d = await p7.evaluate(() => W3DZ.w3d.z);
+  ok(zoom7c.z === 0.5 && zoom7c.minus && !zoom7c.eins && !zoom7c.cls && Math.abs(zoom7c.s / zoomKn7.s - 0.5) < 0.02 && zoom7d === 1, 'Zoom im Modell: herauszoomen bis 0,5 (Minus zweimal, dann gesperrt), „1:1“ holt zurück (' + JSON.stringify(zoom7c) + ')');
   const cdp7 = await ctx7.newCDPSession(p7), bb7 = await (await p7.$('#w3d')).boundingBox(), cx7 = bb7.x + bb7.width / 2, cy7 = bb7.y + bb7.height / 2;
   const finger7 = (type, pts) => cdp7.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map((p, i) => ({ x: p[0], y: p[1], id: i })) });
   await finger7('touchStart', [[cx7 - 30, cy7], [cx7 + 30, cy7]]);
@@ -863,7 +914,7 @@ if (teil(6)) {
   const pinch7 = await p7.evaluate(() => W3DZ.w3d.z);
   await frage7('sprossen', { teilung: '2p' });
   const spross7 = await p7.evaluate(() => !document.querySelector('#w3d [data-r="zoom"]') && W3DZ.w3d.z === 1);
-  ok(zoomKn7.netz > 20 && zoomKn7.da && zoomKn7.eins && zoomKn7.touch === 'none' && zoom7.z > 1.5 && zoom7.cls && !zoom7.eins && zoom7.s > zoomKn7.s * 1.4 && zoom7b.z === 1 && pinch7 > 2 && spross7, 'Zoom im Modell: Knöpfe + und −, „1:1“ setzt zurück, zwei Finger zoomen, neu gelegt statt skaliert; in der Sprossenfrage aus');
+  ok(zoomKn7.netz > 20 && zoomKn7.da && zoomKn7.eins && /^(none|pan-y)$/.test(zoomKn7.touch) && zoom7.z > 1.5 && zoom7.cls && !zoom7.eins && zoom7.s > zoomKn7.s * 1.4 && zoom7b.z === 1 && pinch7 > 2 && spross7, 'Zoom im Modell: Knöpfe + und −, „1:1“ setzt zurück, zwei Finger zoomen, neu gelegt statt skaliert; in der Sprossenfrage aus');
   const erg7 = await p7.evaluate(() => {
     /* Bühne wie im Ergebnis (alle acht Maße, gleiche Werte je Richtung), außerhalb eines festen Bildschirms */
     const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:16px;top:80px;width:358px;z-index:99'; document.body.appendChild(box);
@@ -888,10 +939,10 @@ if (teil(6)) {
   /* Farben (S2): fast alle RAL-Töne zur Wahl, Farbblatt mit Suche und Familien, Name und Nummer bis in Aufmaßblatt, Betrieb und Server */
   const ctxF = await browser.newContext(telefon), pF = await neueSeite(ctxF);
   await pF.goto(BASE + '/app/', { waitUntil: 'networkidle' });
-  const frageF = async (id, set) => { await pF.evaluate(([id, set]) => { const w = demoProject()[0]; Object.assign(w, set || {}); S.win = w; S.q = id; S.selSash = 0; S.screen = 'frage'; render(true); }, [id, set || {}]); await pF.waitForTimeout(400); };
+  const frageF = async (id, set) => { await pF.evaluate(([id, set]) => { const w = demoProject()[0]; Object.assign(w, set || {}); S.win = w; S.q = id; S.selSash = 0; S.screen = 'frage'; render(true); }, [id, set || {}]); await pF.waitForSelector('.qpanel .qcur', { timeout: 5000 }).catch(() => {}); await pF.waitForTimeout(500); };
   await frageF('fa');
   const rf0 = await pF.evaluate(() => ({ ral: RAL.liste.filter((e) => e.art === 'ral').length, holz: RAL.liste.filter((e) => e.art === 'holz').map((e) => e.name), sonder: RAL.liste.filter((e) => e.art === 'sonder').map((e) => e.key), schnell: Array.from(document.querySelectorAll('.qpanel .fw-raster .qsw')).map((b) => b.getAttribute('data-v')).join(), quer: document.documentElement.scrollWidth > innerWidth + 1, klein: Array.from(document.querySelectorAll('.qpanel .qsw .c')).filter((c) => c.getBoundingClientRect().width < 44).length, cur: document.querySelector('.qpanel .qcur').textContent, hinweis: /Bildschirm/.test(document.querySelector('.qpanel').textContent) }));
-  ok(rf0.ral === 216 && ['Golden Oak', 'Nussbaum', 'Eiche hell', 'Eiche dunkel', 'Mooreiche', 'Winchester', 'Sheffield Oak', 'Douglasie', 'Oregon', 'Mahagoni', 'Macoré', 'Schwarzbraun'].every((n) => rf0.holz.includes(n)) && ['db703', 'sand7016', 'eloxal'].every((k) => rf0.sonder.includes(k)) && rf0.schnell === '9016,7016,9001,7035,7039,8022,9005,7012,6005,8019,7021,5011' && !rf0.quer && rf0.klein === 0 && /Anthrazitgrau.*RAL 7016/.test(rf0.cur) && rf0.hinweis, 'Farben: alle 216 RAL-Classic-Töne, gängige Holzdekore und Sonderfarben; in der Frage die zwölf beliebtesten als Raster (Tupfen ab 44 px), die gewählte mit Name und Nummer, Hinweis auf echte Muster');
+  ok(rf0.ral === 216 && ['Golden Oak', 'Nussbaum', 'Eiche hell', 'Eiche dunkel', 'Mooreiche', 'Winchester', 'Sheffield Oak', 'Douglasie', 'Oregon', 'Mahagoni', 'Macoré', 'Schwarzbraun'].every((n) => rf0.holz.includes(n)) && ['db703', 'sand7016', 'eloxal'].every((k) => rf0.sonder.includes(k)) && rf0.schnell === '9016,7016,9001,7035,7039,8022,9005,7012,6005,8019,7021,5011' && !rf0.quer && rf0.klein === 0 && /Anthrazitgrau.*RAL 7016/.test(rf0.cur) && rf0.hinweis, 'Farben: alle 216 RAL-Classic-Töne, gängige Holzdekore und Sonderfarben; in der Frage die zwölf beliebtesten als Raster (Tupfen ab 44 px), die gewählte mit Name und Nummer, Hinweis auf echte Muster (' + JSON.stringify({ schnell: rf0.schnell, quer: rf0.quer, klein: rf0.klein, cur: rf0.cur, hinweis: rf0.hinweis }) + ')');
   await pF.click('.qpanel [data-farbblatt="fa"]:not([data-familie])'); await pF.waitForTimeout(400);
   const rf1 = await pF.evaluate(() => { const b = document.querySelector('.fb-blatt').getBoundingClientRect(), st = document.getElementById('w3d').getBoundingClientRect(); return { n: document.querySelectorAll('.fb .fb-f').length, fam: document.querySelectorAll('.fb-fam .chip').length, modell: st.top < b.top - 80, gross: Array.from(document.querySelectorAll('.fb .fb-f .c')).slice(0, 5).every((c) => c.getBoundingClientRect().width >= 44), hinweis: /Bildschirm weichen/.test(document.querySelector('.fb').textContent), hilfe: !!document.querySelector('.fb .fb-hilfe'), offen: !!document.querySelector('.fb .qoffen'), dialog: document.querySelector('.fb').getAttribute('role') === 'dialog' }; });
   await pF.click('.fb .fb-f[data-v="1015"]'); await pF.waitForTimeout(300);
@@ -1016,7 +1067,7 @@ if (teil(6)) {
   sauber(d6, 'Direktlink ins Projekt ohne Fehler'); await c6d.close();
   /* Nacharbeit portal, Telefon abgemeldet: das Logo neben „Zurück“ (Registrierung, ohne Schriftzug) und die Schrittknöpfe der Tour sind mindestens 44 px breit */
   const c6z = await browser.newContext(telefon), z6 = await neueSeite(c6z);
-  await z6.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await z6.waitForTimeout(300);
+  await z6.goto(BASE + '/#wie', { waitUntil: 'networkidle' }); await z6.waitForTimeout(300); // „So funktioniert es“: dort zeichnet das Portal die Kopfzeile mit „Kostenlos starten“ (die Ansicht Fensterbauer der Startseite hat den Kopf der eingebetteten Seite)
   await z6.click('.top [data-act="reg"]'); await z6.waitForTimeout(300);
   const masz6 = (sel) => z6.evaluate((sel) => Array.from(document.querySelectorAll(sel)).filter((e) => e.getClientRects().length).map((e) => { const r = e.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; }), sel);
   const logo6 = await masz6('.top .logo-s.neben-zurueck');
@@ -1056,8 +1107,8 @@ if (teil(7)) {
   await foto(page, 'app-nachbesserung');
   await page.evaluate(() => { S.windows[1].mo.wb = 900; S.windows[1].name = 'Bad (nachgemessen)'; persist(); S.screen = 'blatt'; render(true); });
   await page.waitForTimeout(300);
-  ok(/Erneut an Fensterbau Brandt senden/.test(await page.evaluate(() => document.querySelector('.bb .btn.primary').textContent)), 'Prüfen-Seite sagt „Erneut senden“');
-  await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gesendet"]');
+  ok(/Erneut an Fensterbau Brandt senden/.test(await page.evaluate(() => document.querySelector('.bb .btn.primary, .scr.dna .lg-weiter').textContent)), 'Prüfen-Seite sagt „Erneut senden“');
+  await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForSelector('[data-screen="gesendet"]');
   const code2 = await codeAusNachricht(page);
   ok(await page.evaluate((c) => unpackProject(c).r === 2 && !S.nb && S.sent.runde === 2, code2), 'Erneuter Code trägt Runde 2, App ist wieder im Zustand „gesendet“');
   // Betrieb: Code übernehmen → ersetzt, nichts gebucht
@@ -1076,7 +1127,7 @@ if (teil(7)) {
   ok(/~3$/.test(url3), 'Zweite Nachbesserung: Runde 3');
   await page.goto(url3, { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
   await page.evaluate(() => { const w = demoProject()[0]; S.windows = [Object.assign({}, w, { name: 'Garage', w: 2400, h: 2100, el: { w: 2400, h: 2100 }, mo: { hm: 2130, hl: 2130, hr: 2130, wm: 2430, wt: 2430, wb: 2430 } })]; persist(); S.screen = 'blatt'; render(true); });
-  await page.waitForTimeout(200); await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gesendet"]');
+  await page.waitForTimeout(200); await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForSelector('[data-screen="gesendet"]');
   const code3 = await codeAusNachricht(page);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   await tun('sheet', 'linkimport'); await page.waitForSelector('#code-in'); await page.fill('#code-in', code3); await tun('linkimport'); await page.waitForTimeout(500);
@@ -1094,7 +1145,7 @@ if (teil(7)) {
   st = await page.evaluate(() => ({ nb: S.nb, n: S.windows.length, txt: document.body.textContent }));
   ok(st.nb && st.nb.teil && st.n === 0 && /nicht gespeichert/.test(st.txt), 'Ohne gespeicherte Angaben erklärt die App, nur das betroffene Fenster neu zu messen');
   await page.evaluate(() => { S.windows = [Object.assign({}, demoProject()[1], { name: 'Backstube' })]; persist(); S.screen = 'blatt'; render(true); });
-  await page.waitForTimeout(200); await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gesendet"]');
+  await page.waitForTimeout(200); await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); await page.waitForSelector('[data-screen="gesendet"]');
   const code4 = await codeAusNachricht(page);
   ok(await page.evaluate((c) => { const o = unpackProject(c); return o.r === 2 && o.m === 1; }, code4), 'Code meldet Teil-Nachbesserung');
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
@@ -1138,7 +1189,7 @@ if (teil(8)) {
   const stempel = Date.now().toString(36), mail = 'test-' + stempel + '@beispiel.de', firma = 'Fensterbau Prüf ' + stempel, tel = '0221 ' + String(Date.now()).slice(-7);
   await page.goto(BASE2 + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
   ok(await page.locator('.fx-pilot').count() === 0 && await page.evaluate(() => Server.an && !Server.online() && !S.role), 'Portal im Servermodus: kein Pilot-Hinweis, noch nicht angemeldet');
-  ok(/7,99/.test(await page.evaluate(() => document.body.textContent)), 'Startseite nennt den Preis vom Server');
+  ok(/7,99/.test(await page.evaluate(() => { const r = document.getElementById('startseite'); return document.body.textContent + (r && r.shadowRoot ? r.shadowRoot.textContent : ''); })), 'Startseite nennt den Preis vom Server');
   // Registrierung: E-Mail → Code 123456 → Betrieb eintragen
   await tun('reg', 'betrieb'); await page.waitForSelector('#lg-mail');
   ok(/Konto für Ihren Betrieb/.test(await page.evaluate(() => document.body.textContent)) && await page.locator('#lg-pw').count() === 0, 'Registrierung beginnt mit der E-Mail, ohne Passwort');
@@ -1177,9 +1228,9 @@ if (teil(8)) {
   ok(st1.ok && st1.status === 'geoeffnet' && st1.betrieb === firma && st1.kunde === 'Familie Server', 'Server weiß, dass der Kunde den Link geöffnet hat');
   await kp.evaluate((code) => { localStorage.setItem('aufmass.k.' + code, JSON.stringify({ windows: demoProject(), proj: {}, name: '' })); }, l1.code);
   await kp.reload({ waitUntil: 'networkidle' }); await kp.waitForTimeout(500);
-  await kp.click('.bb .btn.primary'); await kp.waitForSelector('[data-screen="anfrage"]'); await kp.click('.bb .btn.primary'); await kp.waitForSelector('[data-screen="anfrage2"]'); await kp.click('.bb .btn.primary'); await kp.waitForSelector('[data-screen="blatt"]');
+  await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="anfrage"]'); await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="anfrage2"]'); await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="blatt"]');
   ok(/mit allen Maßen und Wünschen, dazu die Auswertung der Fotos/.test(await kp.evaluate(() => document.body.innerText)), 'Prüfen-Seite verspricht Maße, Wünsche und Fotoauswertung');
-  await kp.click('.bb .btn.primary'); await kp.waitForSelector('[data-screen="gesendet"]'); await kp.waitForTimeout(500);
+  await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="gesendet"]'); await kp.waitForTimeout(500);
   const ges = await kp.evaluate(() => ({ txt: document.body.innerText, sent: S.sent, code: !!document.getElementById('code-box'), feier: (function () { const e = document.querySelector('.okmark-l[data-lottie="fertig"]'); return e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0 ? 1 : 0; })() }));
   ok(/Gesendet\./.test(ges.txt) && !/Jetzt abschicken/.test(ges.txt) && !/Nur im Prototyp/.test(ges.txt) && ges.sent && ges.sent.uebertragen === true && !ges.code && ges.feier === 1, 'Aufmaß direkt übertragen: „Gesendet“, kein Code-Umweg, kein Prototyp-Hinweis, gefeiert');
   await foto(kp, 'srv-app-gesendet');
@@ -1297,17 +1348,17 @@ if (teil(8)) {
   const kctx2 = await browser.newContext({ ...telefon, acceptDownloads: true }), kp2 = await neueSeite(kctx2, BASE2);
   await kp2.goto(BASE2 + '/app/', { waitUntil: 'networkidle' }); await kp2.waitForTimeout(400);
   await kp2.evaluate(() => { S.windows = demoProject(); Object.assign(S.proj, { name: 'Haus Prüf', ort: '50667 Köln' }); persist(); go('teilen'); }); await kp2.waitForTimeout(400);
-  ok(await kp2.evaluate(() => SERVER.zahlung && SERVER.attrappe && PREIS() === 7.99 && !FREI()) && await kp2.locator('.dv-blur').count() === 1, 'App kennt die Kasse des Servers, Blatt ist noch gesperrt');
+  ok(await kp2.evaluate(() => SERVER.zahlung && SERVER.attrappe && PREIS() === 7.99 && !FREI()) && await kp2.locator('.dv-blur, .ab-papier .ab-schloss').count() === 1, 'App kennt die Kasse des Servers, Blatt ist noch gesperrt');
   await kp2.click('[data-act="k-start"]'); await kp2.waitForSelector('#s-mail'); // Freischalten nur mit Konto: E-Mail und Code
   ok(await kp2.evaluate(() => S.screen === 'sichern' && S.sichern.zweck === 'kauf' && /brauchst du ein Konto/.test(document.body.innerText)), 'Freischalten im Servermodus: erst das Aufmaß sichern (E-Mail und Code, kein Passwort)');
-  await kp2.fill('#s-mail', 'kaeufer@beispiel.de'); await kp2.click('[data-in="sc"][data-f="agb"]'); await kp2.click('.bb .btn.primary'); await kp2.waitForSelector('#s-code');
-  await kp2.fill('#s-code', '123456'); await kp2.click('.bb .btn.primary'); await kp2.waitForSelector('[data-screen="kasse"]', { timeout: 10000 }); await kp2.waitForTimeout(300);
+  await kp2.fill('#s-mail', 'kaeufer@beispiel.de'); await kp2.click('[data-in="sc"][data-f="agb"]'); await kp2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp2.waitForSelector('#s-code');
+  await kp2.fill('#s-code', '123456'); await kp2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp2.waitForSelector('[data-screen="kasse"]', { timeout: 10000 }); await kp2.waitForTimeout(300);
   const kasse = await kp2.evaluate(() => document.body.innerText);
   ok(/Weiter zu Stripe · 7,99 €/.test(kasse) && /Zahlungsdienstleisters Stripe/.test(kasse) && /Kredit- oder Debitkarte \(auf passenden Geräten auch Apple Pay oder Google Pay\)/.test(kasse) && /Testbetrieb/.test(kasse) && /Rechnung an kaeufer@beispiel\.de/.test(kasse) && !/Testkauf/.test(kasse) && await kp2.locator('[data-act="k-pay"]').count() === 0, 'Kasse im Servermodus: Zahlung bei Stripe mit den Zahlungsarten des Servers, Rechnung an die E-Mail des Kontos, keine Scheinauswahl, kein Testkauf');
-  await kp2.click('.bb .btn.primary'); await kp2.waitForTimeout(200);
+  await kp2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp2.waitForTimeout(200);
   ok(await kp2.evaluate(() => S.screen === 'kasse' && !(S.kauf && S.kauf.paid)) && await kp2.locator('.kerr').count() === 2, 'Ohne Zustimmung zu AGB und sofortiger Bereitstellung keine Kasse');
   await kp2.click('[data-in="kc"][data-f="bedingungen"]'); await kp2.click('[data-in="kc"][data-f="widerruf"]');
-  await kp2.click('.bb .btn.primary');
+  await kp2.click('.bb .btn.primary, .scr.dna .lg-weiter');
   await kp2.waitForFunction(() => typeof S !== 'undefined' && S.screen === 'gekauft' && S.kauf && S.kauf.paid, null, { timeout: 12000 }); await kp2.waitForTimeout(500);
   const kauf = await kp2.evaluate(() => ({ token: S.kauf.token, session: S.kauf.session, kennung: S.kauf.kennung, test: !!S.kauf.test, url: location.search, txt: document.body.innerText, feier: (function () { const e = document.querySelector('.okmark-l[data-lottie="fertig"]'); return e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0 ? 1 : 0; })() }));
   ok(/Freigeschaltet\./.test(kauf.txt) && /^test_/.test(kauf.session || '') && (kauf.token || '').length === 32 && !kauf.test && kauf.url === '' && kauf.feier === 1, 'Zurück von der Kasse: freigeschaltet mit Nachweis vom Server, Adresse bereinigt');
@@ -1315,7 +1366,7 @@ if (teil(8)) {
   const nwFalsch = await api('/api/zahlung/nachweis?kennung=' + encodeURIComponent(kauf.kennung) + '&session=' + encodeURIComponent(kauf.session) + '&token=' + encodeURIComponent('x'.repeat(32)));
   const unbez = await api('/api/zahlung/pruefen?session=' + encodeURIComponent('cs_offen_' + stempel) + '&kennung=' + encodeURIComponent(kauf.kennung));
   ok(nw.ok === true && nwFalsch.ok === false && unbez.bezahlt === false, 'Nachweis ist auf dem Server prüfbar; gefälschter Nachweis und unbezahlte Sitzung schalten nichts frei');
-  await kp2.click('.bb .btn.primary'); await kp2.waitForTimeout(400);
+  await kp2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp2.waitForTimeout(400);
   ok(await kp2.locator('#code-box').count() === 1 && /Dein Aufmaß, dein Blatt/.test(await kp2.evaluate(() => document.body.innerText)), 'Nach dem Kauf: Code und Datei da');
   const [dl8] = await Promise.all([kp2.waitForEvent('download', { timeout: 10000 }), kp2.click('[data-act="k-dl"]')]);
   ok(/\.pdf$/.test(dl8.suggestedFilename()), 'Gekaufte PDF lädt: ' + dl8.suggestedFilename());
@@ -1332,7 +1383,7 @@ if (teil(8)) {
   const w1 = await kp3.evaluate(() => ({ paid: !!(S.kauf && S.kauf.paid), wartet: (S.kauf && S.kauf.wartet) || '', screen: S.screen, txt: document.body.innerText, toast: S.toast || '', url: location.search }));
   ok(!w1.paid && /^wartet_/.test(w1.wartet) && w1.screen === 'teilen' && /Deine Zahlung ist unterwegs/.test(w1.txt) && /Bitte nicht noch einmal bezahlen/.test(w1.txt) && /unterwegs/.test(w1.toast) && w1.url === '', 'Zahlung noch unterwegs: nicht freigeschaltet, Hinweis „nicht noch einmal bezahlen“ statt „abgebrochen“');
   await foto(kp3, 'srv-app-zahlung-unterwegs');
-  await kp3.click('.bb .btn.primary'); await kp3.waitForTimeout(400);
+  await kp3.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp3.waitForTimeout(400);
   ok(await kp3.evaluate(() => S.screen === 'teilen' && /unterwegs/.test(S.toast || '') && !!S.kauf.wartet), 'Freischalten, während die Zahlung unterwegs ist: keine zweite Kasse, nur der Hinweis');
   await kp3.evaluate(() => { S.kauf.wartet = 'test_spaeter'; persist(); });
   await kp3.reload({ waitUntil: 'networkidle' }); await kp3.waitForTimeout(600);
@@ -1353,7 +1404,7 @@ if (teil(8)) {
   // Abrechnungslauf (Cron) mit Attrappen im selben Prozess: offene Projektbuchungen werden zur Sammelrechnung, nichts doppelt
   {
     const umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), stM = await import('../functions/api/stripe.js'), ko = await import('../functions/api/konten.js');
-    const k = umg.konfig({ DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1' }); globalThis.Abrechnung.setPreise(k.preise);
+    const k = umg.konfig({ DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', BETRIEBSKONTO: '1' }); globalThis.Abrechnung.setPreise(k.preise); // frühere Abrechnung je Projekt (seit 28.10.2026 nur mit Schalter)
     const sp = spM.speicher(k), zd = stM.zahlungsdienst(k);
     const row = await sp.betriebAnlegen({ auth_user: 'u-cron', mail: 'cron@beispiel.de', name: 'Cron GmbH', plz: '50667', tel_norm: '', name_norm: 'cron', daten: { konto: 'service', pay: { type: 'SEPA-Lastschrift', label: 'DE •••• 0000' }, links: [], book: [{ id: 'b1', kind: 'aufmass', ref: 'l1', when: 'heute', month: '2026-10', text: 'Aufmaß · Test', sub: '', betrag: 9, badge: 'nächste Rechnung', status: 'offen' }, { id: 'b0', kind: 'aufmass', ref: 'l0', when: 'gestern', month: '2026-10', text: 'Aufmaß · Frei', sub: '', betrag: 0, badge: 'kostenlos', status: 'offen' }], freeUsed: 3, rechnungen: [], notif: [] } });
     await sp.betriebFelder(row.id, { stripe_customer: 'cus_test_cron' });
@@ -1424,12 +1475,14 @@ if (teil(9)) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE', acceptDownloads: true });
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
-  const fuehrungDa = await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1;
-  await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForTimeout(300);
+  const fuehrungDa = await page.locator('.ez-fuss-satz a[href$="/app/#fuehrung"]').count() === 1;
+  await page.click('.ez-kopf nav.ez-ansicht a[href="/fensterbauer"]'); await page.waitForTimeout(300);
   ok(fuehrungDa && await page.locator('.vk-einbettung').count() === 1 && await page.locator('.hero.b2b [data-act="tour"]').count() === 0, 'Startseite: „Führung starten“ in der Ansicht für Hauseigentümer; die Ansicht für Fensterbauer zeigt die Paket-Landingpage und wirbt nicht mehr für die Tour (sie bleibt über „Anmelden“ und /#tour erreichbar)');
   /* ohne die eingebettete Verkaufsseite: ihre „Live-Demos“ sind echte Konfigurator-Instanzen der Pakete, keine Demo-Konten */
   const ohneDemo = async (wo) => { const t = await page.evaluate(() => { const b = document.body.cloneNode(true); b.querySelectorAll('.vk-einbettung').forEach((e) => e.remove()); return b.textContent; }); return !/\bDemo\b|Demo-Zugang|Beispieldaten|Beispiel-IBAN|Demo-Ansicht/.test(t) && await page.locator('[data-act="demo-as"], [data-act="reg-fill"], [data-act="pay-fill"], [data-act="l-sim"], [data-act="demo-project"], [data-act="demo"]').count() === 0 ? true : wo; };
   ok(await ohneDemo('Startseite') === true, 'Startseite ohne Demo-Konten und Beispiel-Registrierung');
+  /* „Anmelden“ und „Kostenlos starten“ stehen in der Kopfzeile des Portals auf „So funktioniert es“ und „Preise“; die Ansicht Fensterbauer der Startseite trägt den Kopf der eingebetteten Seite */
+  await page.goto(BASE + '/#wie', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
   await page.click('.top [data-act="sheet"][data-v="login"]'); await page.waitForTimeout(300);
   ok(await ohneDemo('Anmelden') === true && await page.locator('.sheet [data-act="tour"]').count() === 1, 'Anmelden: keine Demo-Zugänge mehr, dafür der Weg in die Tour');
   await page.evaluate(() => { S.sheet = null; render(); });
@@ -1464,11 +1517,11 @@ if (teil(9)) {
   const fs9b = await import('node:fs'), url9b = await import('node:url'), tourBild = await import('./tour-bild.mjs');
   const tourInfo = JSON.parse(fs9b.readFileSync(url9b.fileURLToPath(new URL('../web/bilder/tour-aufmassblatt.json', import.meta.url)), 'utf8'));
   const tourDaten = await page.evaluate(tourBild.DATEN_AUS_SEITE);
-  ok(!!tb9 && tb9.src === '/bilder/tour-aufmassblatt-20.webp' && /Bestellmaß-Vorschlag 1\.749 × 1\.389 mm/.test(tb9.alt) && tb9.w === tourInfo.breite && tb9.h === tourInfo.hoehe && !tb9.skizze && tourInfo.abzuege.every((a) => fs9b.existsSync(url9b.fileURLToPath(new URL('../web/bilder/tour-aufmassblatt-' + a + '.webp', import.meta.url)))), 'Tour, Bestellmaß und PDF: echter Ausschnitt von Seite 1 des Aufmaßblatts zum gewählten Abzug (' + (tb9 ? tb9.src + ', ' + tb9.w + ' × ' + tb9.h : 'kein Bild') + '), keine Skizze mehr');
+  ok(!!tb9 && tb9.src === '/bilder/tour-aufmassblatt-20.webp' && /Richtmaß fürs Angebot 1\.749 × 1\.389 mm/.test(tb9.alt) && tb9.w === tourInfo.breite && tb9.h === tourInfo.hoehe && !tb9.skizze && tourInfo.abzuege.every((a) => fs9b.existsSync(url9b.fileURLToPath(new URL('../web/bilder/tour-aufmassblatt-' + a + '.webp', import.meta.url)))), 'Tour, Bestellmaß und PDF: echter Ausschnitt von Seite 1 des Aufmaßblatts zum gewählten Abzug (' + (tb9 ? tb9.src + ', ' + tb9.w + ' × ' + tb9.h : 'kein Bild') + '), keine Skizze mehr');
   ok(tourBild.fingerabdruck(tourDaten) === tourInfo.stand, 'Tour-Ausschnitt passt zum aktuellen Aufmaßblatt (sonst neu erzeugen: PW_PFAD=/opt/node-tools node scripts/tour-bild.mjs)');
   const [dlB] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('[data-act="tour-pdf"]')]);
   let txtB = ''; try { txtB = (await import('node:child_process')).execFileSync('pdftotext', ['-layout', await dlB.path(), '-']).toString('utf8'); } catch (e) { txtB = ''; }
-  ok(/Beispiel/.test(dlB.suggestedFilename()) && /AM-BEISPIEL/.test(txtB) && /BESTELLMASS-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB), 'Beispiel-PDF für Betriebe: mit Bestellmaß, gekennzeichnet als Beispiel');
+  ok(/Beispiel/.test(dlB.suggestedFilename()) && /AM-BEISPIEL/.test(txtB) && /RICHTMA(?:SS|ẞ)/.test(txtB) && /Fensterbau Brandt/.test(txtB), 'Beispiel-PDF für Betriebe: mit Richtmaß, gekennzeichnet als Beispiel');
   await page.click('.tour-schritte [data-v="5"]'); await page.click('[data-act="tour-nb"]'); await page.waitForTimeout(200);
   await page.click('.tour-schritte [data-v="6"]'); await page.click('[data-act="tour-code"]'); await page.waitForTimeout(200);
   ok(await page.locator('.tour-ergebnis').count() === 1, 'Code übernehmen zeigt das neue Projekt');
@@ -1494,7 +1547,7 @@ if (teil(9)) {
     const st = await ap.evaluate(() => ({ id: TOUR[S.tour.i], fakt: !!document.querySelector('.tour-fakt .tf-q'), gesperrt: document.querySelectorAll('.gesperrt[aria-disabled="true"], .farbfeld.gesperrt').length }));
     schritte.push(st);
     if (st.id === 'fotos') await ap.waitForTimeout(1900);
-    if (i < 8) { await ap.click('.bb .btn.primary'); await ap.waitForTimeout(350); }
+    if (i < 8) { await ap.click('.bb .btn.primary, .scr.dna .lg-weiter'); await ap.waitForTimeout(350); }
   }
   ok(schritte.map((x) => x.id).join(',') === 'start,fotos,messen,oeffnung,material,farbe,glas,sonne,blatt' && schritte.every((x) => x.fakt), 'Führung: neun Schritte, in jedem ein Fakt mit Quelle');
   ok(['start', 'oeffnung', 'material', 'farbe', 'glas', 'sonne'].every((id) => schritte.find((x) => x.id === id).gesperrt > 0), 'Führung: einige Optionen tragen ein Schloss (Element, Öffnung, Material, Farbe, Glas, Sonnenschutz)');
@@ -1502,7 +1555,7 @@ if (teil(9)) {
   const [dlA] = await Promise.all([ap.waitForEvent('download', { timeout: 10000 }), ap.click('[data-act="tour-pdf"]')]);
   let txtA = ''; try { txtA = (await import('node:child_process')).execFileSync('pdftotext', ['-layout', await dlA.path(), '-']).toString('utf8'); } catch (e) { txtA = ''; }
   ok(/AM-BEISPIEL/.test(txtA) && /BEISPIEL/.test(txtA) && !/AM1\./.test(txtA) && /DEIN WEG ZU NEUEN FENSTERN/.test(txtA), 'Beispiel-PDF der Führung: Wasserzeichen, ohne Aufmaß-Code, Seite 1 mit dem Weg');
-  await ap.click('.hdr-btn[data-act="back"]'); await ap.waitForTimeout(300);
+  await ap.click('.hdr-btn[data-act="back"], .scr.dna .lg-kopf-zurueck'); await ap.waitForTimeout(300);
   ok(await ap.evaluate(() => !S.tour && S.screen === 'home' && S.windows.length === 1) && await ap.evaluate(() => localStorage.getItem('aufmass.v1')) === vorher, 'Führung beenden: eigenes Projekt unverändert');
   await ap.goto(BASE + '/app/#fuehrung', { waitUntil: 'networkidle' }); await ap.waitForTimeout(300);
   ok(await ap.evaluate(() => S.screen === 'tour' && TOUR[S.tour.i] === 'start'), '#fuehrung (von der Startseite) öffnet die Führung');
@@ -1541,7 +1594,7 @@ if (teil(9)) {
   const pVoll = await blattDatei('voll', { notiz: 'Rollladen im Bad klemmt.', tel: '0171 2345678', mail: 'weber@beispiel.de', erreich: 'ab', baujahr: '1965' }, false);
   ok(zeichnungUeberFuss(pVoll) && !/vollständig nach Pos/.test(alleT(pVoll)), 'Aufmaßblatt mit allen Kontaktdaten und kurzer Nachricht: Seite 1 passt, Nachricht ungekürzt');
   const pZwei = await blattDatei('zwei', {}, false);
-  const badS = [2, 3, 4, 5].find((n) => /MAUERÖFFNUNG/.test(seiteT(pZwei, n)) && /Bad/.test(seiteT(pZwei, n).split('\n').slice(0, 8).join(' ')));
+  const badS = [2, 3, 4, 5, 6, 7, 8].find((n) => /MAUERÖFFNUNG/.test(seiteT(pZwei, n)) && /Bad/.test(seiteT(pZwei, n).split('\n').slice(0, 8).join(' ')));
   ok(!!badS && !/Bad, Fortsetzung/.test(alleT(pZwei)) && /EINBAUSITUATION AUS DEN FOTOS/.test(seiteT(pZwei, badS)) && /Vor Ort prüfen/.test(seiteT(pZwei, badS)) && /WÜNSCHE DES KUNDEN|DEINE WÜNSCHE/.test(seiteT(pZwei, badS)), 'Aufmaßblatt: Position 2 steht samt Wünschen und Fotoauswertung auf einer Seite (Zeichnung kleiner statt Rest auf neuer Seite)');
   sauber(bp, 'Aufmaßblatt-Prüfung ohne Fehler');
   await ctx3.close();
@@ -1563,7 +1616,7 @@ if (teil(10)) {
     const r = await roh(s.pfad);
     const titel = (r.text.match(/<title>([^<]*)<\/title>/) || [])[1] || '', beschr = (r.text.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
     const rechts = ['/impressum/', '/datenschutz/', '/agb/', '/nutzungsbedingungen/', '/cookies/', '/widerruf/', '/konfigurator-bedingungen/'].includes(s.pfad), ld = ldjson(r.text);
-    ok(r.status === 200 && (r.text.match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titel) && titel.length <= 75 && (rechts || (beschr.length >= 70 && beschr.length <= 170)), s.pfad + ': ohne JavaScript genau ein h1, Titel mit Marke (' + titel.length + ' Zeichen)' + (rechts ? '' : ', Beschreibung (' + beschr.length + ' Zeichen)'));
+    ok(r.status === 200 && (r.text.replace(/<template[\s\S]*?<\/template>/g, '').match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titel) && titel.length <= 75 && (rechts || (beschr.length >= 70 && beschr.length <= 170)), s.pfad + ': ohne JavaScript genau ein h1, Titel mit Marke (' + titel.length + ' Zeichen)' + (rechts ? '' : ', Beschreibung (' + beschr.length + ' Zeichen)'));
     ok(!/<meta name="robots"/.test(r.text) && r.h.get('x-robots-tag') === seo.SPERRE && !!r.h.get('content-security-policy') && r.h.get('link') === '<' + BASE + s.pfad + '>; rel="canonical"', s.pfad + ': Pilotphase per Kopfzeile noindex (kein Meta-Tag), CSP und Canonical vom Worker');
     if (!rechts) ok(ld.length > 0 && ld.every((x) => x && x['@context'] === 'https://schema.org') && !/"(url|@id|item|mainEntityOfPage|logo)":"\//.test(r.text) && (r.text.match(/<meta property="og:image" content="([^"]*)"/) || [])[1] === BASE + '/og.png', s.pfad + ': strukturierte Daten (JSON-LD) lesbar, Adressen darin und im Vorschaubild absolut');
     for (const m of r.text.matchAll(/href="(\/[^"#]*)/g)) intern.add(m[1]);
@@ -1574,25 +1627,25 @@ if (teil(10)) {
 
   /* b) Startseite und App: Textfassung für Leser ohne JavaScript, mit JavaScript übernimmt die App */
   const start = await roh('/'), app = await roh('/app/');
-  ok(/<div class="vorab">/.test(start.text) && /<h1>Fenster ausmessen\. Selbst\. eezi\.<\/h1>/.test(start.text) && /Aufmaß-App für Fenster/.test(start.text) && /auf einen Blick/.test(start.text), 'Startseite ohne JavaScript: Textfassung mit h1, Erklärung und Fakten');
+  ok(/<div class="vorab">/.test(start.text) && /<h1>Fensterplanung ganz eezi\.<\/h1>/.test(start.text) && /Aufmaß-App für Fenster/.test(start.text) && /auf einen Blick/.test(start.text), 'Startseite ohne JavaScript: Textfassung mit h1, Erklärung und Fakten');
   ok(/<div class="vorab">/.test(app.text) && /<h1>Fenster ausmessen: kostenlose Aufmaß-App im Browser<\/h1>/.test(app.text), 'App ohne JavaScript: Textfassung mit h1');
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
-  ok(await page.locator('.vorab').count() === 0 && await page.locator('h1').count() === 1 && /Fenster ausmessen\. Selbst\. eezi\./.test(await page.locator('h1').first().textContent()), 'Startseite mit JavaScript: App statt Textfassung, genau ein h1 (im Hero)');
+  ok(await page.locator('.vorab').count() === 0 && await page.locator('h1').count() === 1 && /Fensterplanung ganz eezi\./.test((await page.locator('h1').first().textContent()).replace(/\s+/g, ' ')), 'Startseite mit JavaScript: App statt Textfassung, genau ein h1 (im Hero des Bausteins)');
   const fuss = await page.$$eval('footer a', (as) => as.map((a) => a.getAttribute('href')));
   ok(fuss.includes('/ratgeber/') && fuss.includes('/fuer-fensterbauer/'), 'Fußzeile der Startseite verlinkt Ratgeber und die Seite für Fensterbauer');
   /* Die Seite für Fensterbauer verkauft die Konfigurator-Pakete (Bauplan E28); Tour und Registrierung des Betriebsbereichs bleiben
-     über /#tour und /#fensterbauer erreichbar, werden dort aber nicht mehr beworben */
+     über /#tour und /fensterbauer erreichbar, werden dort aber nicht mehr beworben */
   await page.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
-  const fbAlt = await page.evaluate(() => document.querySelectorAll('a[href="/#tour"], a[href="/#fensterbauer"], a[href$="/#tour"], a[href$="/#fensterbauer"]').length + (/Kostenlos starten/.test(document.body.innerText) ? 1 : 0));
+  const fbAlt = await page.evaluate(() => document.querySelectorAll('a[href="/#tour"], a[href="/#fensterbauer"], a[href="/fensterbauer"], a[href$="/#tour"], a[href$="/#fensterbauer"], a[href$="/fensterbauer"]').length + (/Kostenlos starten/.test(document.body.innerText) ? 1 : 0));
   await page.goto(BASE + '/#tour', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
   const tour1 = fbAlt === 0 && await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour');
   await page.evaluate(() => tourEnde()); await page.waitForTimeout(300); // Tour beenden räumt den eigenen Eintrag im Verlauf ab (Zurück im Browser, S6)
   await page.evaluate(() => { location.hash = 'tour'; }); await page.waitForTimeout(400);
   ok(tour1 && await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour'), 'Seite für Fensterbauer ohne Tour, Registrierung und „Kostenlos starten“ des Betriebsbereichs; /#tour öffnet die Tour weiterhin, auch als Sprungmarke auf der Startseite');
   await page.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
-  ok(await page.locator('.vorab').count() === 0 && await page.locator('a[href$="/ratgeber/fenster-ausmessen/"]').count() >= 1 && await page.locator('a[href$="/#fensterbauer"]').count() >= 1, 'App mit JavaScript: Textfassung weg, Anleitung verlinkt, Fensterbauer kommen in ihre Ansicht');
+  ok(await page.locator('.vorab').count() === 0 && await page.locator('a[href$="/ratgeber/fenster-ausmessen/"]').count() >= 1 && await page.locator('a[href$="/fensterbauer"]').count() >= 1, 'App mit JavaScript: Textfassung weg, Anleitung verlinkt, Fensterbauer kommen in ihre Ansicht');
   sauber(page, 'Startseite und App mit Textfassung ohne Fehler');
   await ctx.close();
   const nojs = await browser.newContext(Object.assign({}, telefon, { javaScriptEnabled: false })), np = await nojs.newPage();
@@ -1603,20 +1656,53 @@ if (teil(10)) {
   for (const [gname, opts] of [['Telefon', telefon], ['Desktop', { viewport: { width: 1280, height: 860 }, locale: 'de-DE' }]]) {
     const c = await browser.newContext(opts), sp = await neueSeite(c);
     for (const s of seo.SEITEN.filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x.pfad))) {
+      /* /fuer-fensterbauer/ selbst folgt seit dem 26.10.2026 der Design-DNA (eigene Schriftskala, docs/GESTALTUNG.md): dort nur Querscrollen und Marke */
+      const fbSeite = s.pfad === '/fuer-fensterbauer/';
       await sp.goto(BASE + s.pfad, { waitUntil: 'networkidle' });
       const m = await sp.evaluate(() => {
         const groessen = new Set(), klein = [], w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n;
         while ((n = w.nextNode())) { if (!n.textContent.trim()) continue; const el = n.parentElement; if (el.closest('script, style')) continue; groessen.add(parseFloat(getComputedStyle(el).fontSize)); }
         document.querySelectorAll('.rg-kopf a, .rg-fuss a, .rg-cta a, .rg-karte, .rg-frage summary').forEach((a) => { const r = a.getBoundingClientRect(); if (r.width && r.height && (r.height < 44 || r.width < 44)) klein.push((a.textContent || '').trim().slice(0, 24) + ' ' + Math.round(r.width) + '×' + Math.round(r.height)); });
         /* Paketnamen (EEZI Essential, EEZI Signature) und das zitierte Zeichen „Powered by EEZIframes“ sind vorgegeben (Bauplan §2b, E27) */
-        const t = document.body.innerText.replace(/EEZI (Essential|Signature)\b/g, '').replace(/Powered by EEZIframes/g, '');
-        return { groessen: [...groessen].sort((a, b) => a - b), klein, quer: document.documentElement.scrollWidth > innerWidth + 1, marke: !/EEZI/.test(t) && !/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(t) && !!document.querySelector('.rg-kopf .wm') };
+        const t = document.body.innerText.replace(/EEZI (Essential|Signature)\b/gi, '').replace(/Powered by EEZIframes/gi, '');
+        return { groessen: [...groessen].sort((a, b) => a - b), klein, quer: document.documentElement.scrollWidth > innerWidth + 1, marke: !/EEZI/.test(t) && !/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(t) && !!document.querySelector('.rg-kopf .wm, .fb .ez-kopf .ez-wm') };
       });
-      const erlaubt = gname === 'Telefon' ? [13, 15, 17, 24, 32] : [13, 15, 17, 24, 40];
+      if (fbSeite) { m.groessen = []; m.klein = []; }
+      /* Schriftskala der Design-DNA seit 28.10.2026 nach dem Gremium (docs/profis/ratgeber-vorschau/ratgeber.css): Brotkrumen, Band, Chip
+         und Fuß 13, Etikett und Meta 14 (vorher 12), Tabelle und Einheit 15, Kurz gesagt (Telefon) und Verzeichnis (Schreibtisch) 16,
+         Text 17, Frage 18, Zeilentitel 20, Quellen 22, Zahl in der Tabelle und Titel der Übersicht 28, Zwischentitel und Ende in einer
+         Größe 30/40 (vorher 28/38 gegen 30/40), Titel 36/56, Zahl der Übersicht 88/120 (Telefon/Schreibtisch) */
+      const erlaubt = gname === 'Telefon' ? [13, 14, 15, 16, 17, 18, 20, 22, 28, 30, 36, 88] : [13, 14, 15, 16, 17, 18, 20, 22, 28, 40, 56, 120];
       ok(m.groessen.every((g) => erlaubt.includes(g)) && !m.klein.length && !m.quer && m.marke, gname + ' ' + s.pfad + ': Schriftgrößen ' + m.groessen.join('/') + ', Ziele ab 44 px, Marke klein' + (m.klein.length ? ' (zu klein: ' + m.klein.join('; ') + ')' : '') + (m.quer ? ', Querscrollen!' : ''));
     }
     sauber(sp, gname + ': Ratgeber und Seite für Fensterbauer ohne Fehler, ohne CSP-Verstöße, ohne fremde Server');
     await c.close();
+  }
+
+  /* c2) Seite für Fensterbauer (Design-DNA, seit 26.10.2026): Pille und Haken-Zeile mit dem Preis im ersten Bildschirm, genau eine volle
+     Pille je Bildschirm, Kopfzeile mit echten Zielen, die Leiste kommt erst beim Hochscrollen, kein Querscrollen bei 320 px */
+  {
+    const c = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE', isMobile: true, hasTouch: true }), sp = await neueSeite(c);
+    await sp.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' }); await sp.waitForTimeout(1800);
+    const kopf = await sp.evaluate(() => {
+      const r = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; };
+      const ziele = [...document.querySelectorAll('.fb .ez-kopf a')].map((a) => a.getAttribute('href'));
+      const volle = [...document.querySelectorAll('.fb .dna-pille:not(.dna-pille--leise)')].filter((p) => { const b = p.getBoundingClientRect(); return b.width && b.top >= 0 && b.bottom <= innerHeight; }).length;
+      return { pille: (r('.fb .ez-hero .ez-aktionen .dna-pille') || {}).bottom, haken: (r('.fb .ez-hero .ez-chips') || {}).bottom, volle, ziele, leer: document.querySelectorAll('.fb a[href="#"]').length };
+    });
+    ok(kopf.pille > 0 && kopf.pille <= 844 && kopf.haken > 0 && kopf.haken <= 844 && kopf.volle === 1 && !kopf.leer && ['/', '/#hauseigentuemer', '/fuer-fensterbauer/', '#bestellen'].every((z) => kopf.ziele.includes(z)), 'Fensterbauer, Telefon 390 × 844: „Pakete ansehen“ und die Haken-Zeile mit dem Preis im ersten Bildschirm (Pille unten bei ' + Math.round(kopf.pille) + ' px), genau eine volle Pille, Kopfzeile mit echten Zielen, kein leerer Link');
+    await sp.evaluate(() => window.scrollTo(0, 2400)); await sp.waitForTimeout(400);
+    const leisteWeg = await sp.evaluate(() => !document.querySelector('.fb .ez-leiste').classList.contains('ist-da'));
+    await sp.evaluate(() => window.scrollTo(0, 2300)); await sp.waitForTimeout(500);
+    const leisteDa = await sp.evaluate(() => document.querySelector('.fb .ez-leiste').classList.contains('ist-da') && !!document.querySelector('.fb .ez-leiste .ez-ansicht a[aria-current]'));
+    ok(leisteWeg && leisteDa, 'Fensterbauer: die Leiste mit dem Umschalter kommt erst beim Hochscrollen zurück');
+    sauber(sp, 'Fensterbauer: Abnahme ohne Fehler');
+    await c.close();
+    const c3 = await browser.newContext({ viewport: { width: 320, height: 640 }, locale: 'de-DE' }), s3 = await neueSeite(c3);
+    await s3.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' }); await s3.waitForTimeout(400);
+    const quer320 = await s3.evaluate(async () => { let q = false; for (let y = 0; y < document.documentElement.scrollHeight; y += 600) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 40)); if (document.documentElement.scrollWidth > innerWidth + 1) q = true; } return q; });
+    ok(!quer320, 'Fensterbauer bei 320 px: kein Querscrollen über die ganze Seite');
+    await c3.close();
   }
 
   /* d) Pilotphase: alles gesperrt */
@@ -1656,10 +1742,10 @@ if (teil(10)) {
   ok(ausDatei['X-Robots-Tag'] === seo.SPERRE && Object.entries(seo.SICHERHEIT).every(([k, v]) => ausDatei[k] === v) && Object.keys(ausDatei).every((k) => k === 'X-Robots-Tag' || k in seo.SICHERHEIT), 'Kopfzeilen in functions/seo.js und web/_headers stimmen überein');
   const dateien = [], such = (d, rel) => { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { if (e.isDirectory()) such(path10.join(d, e.name), rel + e.name + '/'); else if (e.name === 'index.html') dateien.push(rel); } };
   such(path10.join(WURZEL, 'web'), '/');
-  const oeffentlich = dateien.filter((p) => p !== '/zentrale/' && p !== '/partner/' && p !== '/betrieb/'); // nicht öffentlich: Zentrale, Kundenkonto der Fensteranbieter, Dashboard der Instanzen (nur auf deren Domains)
+  const oeffentlich = dateien.filter((p) => p !== '/zentrale/' && p !== '/bestellen/' && p !== '/konto/' && p !== '/betrieb/' && p !== '/nutzungsbedingungen/' && !p.startsWith('/vorschau/')); // nicht in der Sitemap: Zentrale, Bestellung und Kundenbereich der Fensteranbieter, die Hinweisseite zum eingestellten Betriebskonto (noindex), Dashboard der Instanzen (nur auf deren Domains), Vorschauen zum Herumzeigen (noindex)
   ok(oeffentlich.length === seo.SEITEN.length && oeffentlich.every((p) => seo.SEITEN.some((s) => s.pfad === p)), 'Sitemap kennt jede öffentliche Seite in web/ (' + oeffentlich.length + ')');
   ok(dateien.includes('/zentrale/') && !seo.SEITEN.some((s) => s.pfad.startsWith('/zentrale')) && !seo.istSeite('/zentrale/') && !seo.llms('https://eeziframes.com', {}).includes('zentrale'), 'Zentrale des Inhabers: nicht in Sitemap und llms.txt, keine Seite für Suchmaschinen');
-  ok(dateien.includes('/partner/') && !seo.SEITEN.some((s) => s.pfad.startsWith('/partner')) && !seo.istSeite('/partner/') && /Disallow: \/partner\//.test(seo.robots('https://eeziframes.com', true)), 'Kundenkonto der Fensteranbieter (/partner/): nicht in der Sitemap, keine Seite für Suchmaschinen, in robots.txt gesperrt');
+  ok(['/bestellen/', '/konto/'].every((p) => dateien.includes(p) && !seo.SEITEN.some((s) => s.pfad.startsWith(p)) && !seo.istSeite(p) && seo.robots('https://eeziframes.com', true).includes('Disallow: ' + p)) && !dateien.includes('/partner/'), 'Bestellung und Kundenbereich der Fensteranbieter (/bestellen/, /konto/): nicht in der Sitemap, keine Seite für Suchmaschinen, in robots.txt gesperrt; das alte Kundenkonto /partner/ gibt es nicht mehr');
   const routen = JSON.parse((fs10.readFileSync(path10.join(WURZEL, 'wrangler.jsonc'), 'utf8').match(/"run_worker_first":\s*(\[[^\]]*\])/) || [])[1] || '[]');
   const passt = (r, p) => (r.endsWith('*') ? p.startsWith(r.slice(0, -1)) : p === r);
   ok(seo.SEITEN.every((s) => seo.istSeite(s.pfad) && routen.some((r) => passt(r, s.pfad))) && ['/robots.txt', '/sitemap.xml', '/llms.txt'].every((p) => routen.includes(p)), 'Worker übernimmt alle Seiten, robots.txt, sitemap.xml und llms.txt (run_worker_first in wrangler.jsonc)');
@@ -1672,10 +1758,10 @@ if (teil(10)) {
      Zentrale, Logo.svg in App und Betriebsbereich; das PDF mit denselben Punkten; das Bild für die E-Mails (scripts/marke-bilder.mjs) */
   const gem10 = fs10.readFileSync(path10.join(WURZEL, 'web/assets/gemeinsam.js'), 'utf8'), innen10 = (gem10.match(/var LOGO_INNEN = '([^']*)';/) || [])[1] || '';
   const statisch10 = '<svg viewBox="0 0 64 64" aria-hidden="true">' + innen10 + '</svg>', seiten10 = [];
-  (function such10(d) { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { const f = path10.join(d, e.name); if (e.isDirectory()) such10(f); else if (e.name.endsWith('.html') && !f.includes(path10.sep + 'zentrale' + path10.sep) && !f.includes(path10.sep + 'betrieb' + path10.sep) && !seo.BESTAETIGUNG['/' + e.name]) seiten10.push(f); } })(path10.join(WURZEL, 'web')); // Dashboard der Instanzen: Marke des Betriebs, ohne eeziframes
+  (function such10(d) { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { const f = path10.join(d, e.name); if (e.isDirectory()) such10(f); else if (e.name.endsWith('.html') && !f.includes(path10.sep + 'zentrale' + path10.sep) && !f.includes(path10.sep + 'betrieb' + path10.sep) && !f.includes(path10.sep + 'vorschau' + path10.sep) && !seo.BESTAETIGUNG['/' + e.name]) seiten10.push(f); } })(path10.join(WURZEL, 'web')); // Dashboard der Instanzen: Marke des Betriebs, ohne eeziframes
   const ohneZeichen10 = seiten10.filter((f) => !fs10.readFileSync(f, 'utf8').includes(statisch10)).map((f) => path10.relative(WURZEL, f));
   const lies10 = (f) => fs10.readFileSync(path10.join(WURZEL, f), 'utf8'), bl10 = lies10('web/assets/blatt.js');
-  ok(/fi-strahl/.test(innen10) && seiten10.length >= 19 && !ohneZeichen10.length && lies10('web/favicon.svg').includes(innen10) && lies10('web/assets/zentrale.js').includes(innen10) && ['[26.4, 12.2]', '[57, 17.6]', '[44.2, 41]', '[11.7, 64]'].every((s) => bl10.includes(s)) && !/fi-fluegel|rx="16" fill="#000"/.test(seiten10.map((f) => fs10.readFileSync(f, 'utf8')).join('') + gem10) && /ZEICHEN_PNG = 'iVBOR/.test(lies10('functions/api/marke.js')), 'Das neue Zeichen steht überall gleich: ' + seiten10.length + ' Seiten, Favicon, Zentrale, App und Betriebsbereich, im PDF mit denselben Punkten, als Bild für die E-Mails' + (ohneZeichen10.length ? '; fehlt in ' + ohneZeichen10.join(', ') : ''));
+  ok(/fi-strahl/.test(innen10) && seiten10.length >= 19 && !ohneZeichen10.length && lies10('web/favicon.svg').includes(innen10) && lies10('web/assets/auftrag-ui.js').includes(innen10) && ['[26.4, 12.2]', '[57, 17.6]', '[44.2, 41]', '[11.7, 64]'].every((s) => bl10.includes(s)) && !/fi-fluegel|rx="16" fill="#000"/.test(seiten10.map((f) => fs10.readFileSync(f, 'utf8')).join('') + gem10) && /ZEICHEN_PNG = 'iVBOR/.test(lies10('functions/api/marke.js')), 'Das neue Zeichen steht überall gleich: ' + seiten10.length + ' Seiten, Favicon, Zentrale, App und Betriebsbereich, im PDF mit denselben Punkten, als Bild für die E-Mails' + (ohneZeichen10.length ? '; fehlt in ' + ohneZeichen10.join(', ') : ''));
   const apple10 = fs10.readFileSync(path10.join(WURZEL, 'web/apple-touch-icon.png'));
   ok(apple10.readUInt32BE(16) === 180 && apple10.readUInt32BE(20) === 180, 'Apple-Icon 180 × 180 mit dem neuen Zeichen (scripts/marke-bilder.mjs)');
   const konf = {}; new Function('window', fs10.readFileSync(path10.join(WURZEL, 'web/config.js'), 'utf8'))(konf);
@@ -1687,8 +1773,9 @@ if (teil(10)) {
   const PK = globalThis.Pakete, pkEur = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2).replace('.', ',')) + '\u202f€';
   const fbPakete = PK.LISTE.every((x) => fb.includes(pkEur(PK.preis(x).monat)) && fb.includes(pkEur(PK.preis(x).einrichtung)) && fb.includes(PK.PAKETE[x].name));
   const fbAlteTarife = ['Abo 10', eur(pr.projekt) + ' netto', 'jedes weitere ' + eur(pr.abo.extra), 'ersten ' + pr.frei + ' Projekte', 'Kostenlos starten'].filter((x) => fb.includes(x));
-  ok(fbPakete && !fbAlteTarife.length && [start.text, app.text, ab, fa, ...neuPreis].every((t) => t.includes(eur(pr.aufmass))), 'Preise auf den statischen Seiten: Aufmaßblatt wie in config.js (' + eur(pr.aufmass) + ', auch in den neuen Ratgebern), Seite für Fensterbauer mit den Paketpreisen aus pakete.js und ohne die Tarife des Betriebsbereichs' + (fbAlteTarife.length ? ' (noch da: ' + fbAlteTarife.join(', ') + ')' : ''));
-  ok(/<h2 id="kundenschutz">Ihre Kunden bleiben Ihre Kunden<\/h2>/.test(fb) && ['Nur Ihr Betrieb:', 'Nur an Sie:', 'In Ihrem Auftrag:', 'Kein Weiterverkauf:'].every((x) => fb.includes(x)) && fb.includes('href="/konfigurator-bedingungen/#kundenschutz"') && /<h2 id="kundenschutz">/.test(fs10.readFileSync(path10.join(WURZEL, 'web/konfigurator-bedingungen/index.html'), 'utf8')), 'Seite für Fensterbauer: Kundenschutz mit vier Zusagen und Verweis auf § 10 der Paketbedingungen');
+  /* Ratgeber setzen ein geschütztes Leerzeichen zwischen Betrag und € (scripts/ratgeber-bausteine.mjs, Feinsatz seit 28.10.2026) */
+  ok(fbPakete && !fbAlteTarife.length && [start.text, app.text, ab, fa, ...neuPreis].every((t) => t.replace(/&nbsp;/g, ' ').includes(eur(pr.aufmass))), 'Preise auf den statischen Seiten: Aufmaßblatt wie in config.js (' + eur(pr.aufmass) + ', auch in den neuen Ratgebern), Seite für Fensterbauer mit den Paketpreisen aus pakete.js und ohne die Tarife des Betriebsbereichs' + (fbAlteTarife.length ? ' (noch da: ' + fbAlteTarife.join(', ') + ')' : ''));
+  ok(/<section class="ez-schutz" data-theme="hell" id="kundenschutz"[^>]*>\s*<span class="dna-label">Kundenschutz<\/span>\s*<h3 class="dna-titel-s" id="schutz-titel">Ihre Kunden bleiben Ihre Kunden\.<\/h3>/.test(fb) && ['<b>Nur Ihr Betrieb.</b>', '<b>Nur an Sie.</b>', '<b>Kein Weiterverkauf.</b>', '<b>Im Auftrag, in Frankfurt.</b>'].every((x) => fb.includes(x)) && fb.includes('href="/konfigurator-bedingungen/"') && /<h2 id="kundenschutz">/.test(fs10.readFileSync(path10.join(WURZEL, 'web/konfigurator-bedingungen/index.html'), 'utf8')), 'Seite für Fensterbauer: Kundenschutz mit vier Zusagen, Paketbedingungen verlinkt (dort § 10 Kundenschutz)');
   /* g) Domains: www zählt als Hauptdomain, die Cloudflare-Testadresse bleibt gesperrt (functions/seo.js direkt geprüft) */
   const probe = async (adresse, env) => { const r = await seo.behandeln(new Request(adresse), env, async () => new Response('<!doctype html><title>x</title><meta property="og:image" content="/og.png">', { headers: { 'content-type': 'text/html; charset=utf-8' } })); return { robots: r.headers.get('x-robots-tag'), link: r.headers.get('link'), text: await r.text() }; };
   const www = await probe('https://www.eeziframes.com/ratgeber/', { INDEXIERUNG: '1' }), wdev = await probe('https://fenstero.beispiel.workers.dev/ratgeber/', { INDEXIERUNG: '1' });
@@ -1697,31 +1784,48 @@ if (teil(10)) {
   const um = (a, m) => { const r = seo.umleitung(new Request(a, { method: m || 'GET' })); return r ? r.status + ' ' + r.headers.get('location') : null; };
   const httpKan = await probe('http://eeziframes.com/ratgeber/', { INDEXIERUNG: '1' });
   ok(um('http://eeziframes.com/ratgeber/?x=1') === '301 https://eeziframes.com/ratgeber/?x=1' && um('https://www.eeziframes.com/app/') === '301 https://eeziframes.com/app/' && um('http://www.eeziframes.com/') === '301 https://eeziframes.com/' && um('https://eeziframes.com/') === null && um('http://localhost:8788/') === null && um('http://eeziframes.com/', 'POST') === null && um('http://eeziframes.com/verifyforzoho.html') === null && um('https://eeziframes.com/ratgeber') === '301 https://eeziframes.com/ratgeber/' && um('https://eeziframes.com/ratgeber/fenster-ausmessen?x=1') === '301 https://eeziframes.com/ratgeber/fenster-ausmessen/?x=1' && um('https://eeziframes.com/index.html') === '301 https://eeziframes.com/' && um('http://www.eeziframes.com/app/index.html') === '301 https://eeziframes.com/app/' && um('https://eeziframes.com/assets/app.js') === null && um('https://eeziframes.com/bilder/messpunkte.svg') === null && um('https://eeziframes.com/zentrale') === null && ['/app', '/ratgeber', '/fuer-fensterbauer', '/impressum'].every((p) => routen.includes(p)) && httpKan.link === '<https://eeziframes.com/ratgeber/>; rel="canonical"' && httpKan.text.includes('content="https://eeziframes.com/og.png"'), 'Domain: http://, www., Seiten ohne Schrägstrich und …/index.html leiten dauerhaft (301) auf https://eeziframes.com/…/ um (nicht lokal, nicht POST, nicht die Bestätigungsdatei, keine Dateien); Canonical immer mit https');
+  let fbHolt = ''; const fbAdr = await seo.behandeln(new Request('https://eeziframes.com/fensterbauer'), { INDEXIERUNG: '1' }, async (r) => { fbHolt = new URL(r.url).pathname; return new Response('<!doctype html><head><title>x</title></head>', { headers: { 'content-type': 'text/html; charset=utf-8' } }); });
+  ok(fbAdr && fbAdr.status === 200 && fbHolt === "/" && fbAdr.headers.get('link') === '<https://eeziframes.com/fuer-fensterbauer/>; rel="canonical"' && (await fbAdr.text()).includes('<link rel="canonical" href="https://eeziframes.com/fuer-fensterbauer/">') && !seo.SEITEN.some((x) => x.pfad === '/fensterbauer') && routen.includes('/fensterbauer'), 'Adresse /fensterbauer: liefert die Startseite (Ansicht Fensterbauer ohne Anker), kanonisch /fuer-fensterbauer/, nicht in der Sitemap, Route im Worker');
   ok(wdev.robots === seo.SPERRE && /User-agent: \*\nDisallow: \/\n/.test(rbDev), 'Domain: die Cloudflare-Testadresse (…workers.dev) bleibt auch mit Freigabe gesperrt');
 
   /* Einführungspreis (EINFUEHRUNG in functions/api/umgebung.js): bis 17.11.2026 Startpreise und Hinweise, ab 18.11. 0:00 Uhr von selbst die regulären */
   const umg = await import(new URL('../functions/api/umgebung.js', import.meta.url).href);
   const VOR = '2026-11-17T23:59:59+01:00', NACH = '2026-11-18T00:00:00+01:00';
-  const kv = umg.konfig({ JETZT: VOR }), kn = umg.konfig({ JETZT: NACH }), ke = umg.konfig({ JETZT: VOR, PREIS_ABO: '49' });
-  ok(kv.preise.aufmass === 7.99 && kv.preise.abo.grund === 49 && kv.preise.plus === 79 && kv.einfuehrung && kv.einfuehrung.danach.aufmass === 12.99 && kn.preise.aufmass === 12.99 && kn.preise.abo.grund === 69 && kn.preise.plus === 119 && kn.preise.projekt === 9 && kn.einfuehrung === null && ke.einfuehrung === null && ke.hinweise.some((h) => /^PREIS_ABO:/.test(h)), 'Einführungspreis: bis 17.11. 7,99 €, 49 € und 79 €, ab 18.11. 0:00 Uhr 12,99 €, 69 € und 119 € (Projektpreis bleibt); gesetzte PREIS_… schalten den Wechsel ab und stehen als Hinweis in /api/status');
+  const kv = umg.konfig({ JETZT: VOR }), kn = umg.konfig({ JETZT: NACH }), ke = umg.konfig({ JETZT: VOR, PREIS_ABO: '49' }), kab = umg.konfig({ JETZT: NACH, BETRIEBSKONTO: '1' });
+  ok(kv.preise.aufmass === 7.99 && kv.preise.abo.grund === 49 && kv.preise.plus === 79 && kv.einfuehrung && kv.einfuehrung.danach.aufmass === 12.99 && kn.preise.aufmass === 12.99 && kn.preise.abo.grund === 69 && kn.preise.plus === 119 && kn.preise.projekt === 0 && kn.preise.frei === 0 && kab.preise.projekt === 9 && kab.preise.frei === 3 && kn.einfuehrung === null && ke.einfuehrung === null && ke.hinweise.some((h) => /^PREIS_ABO:/.test(h)), 'Einführungspreis: bis 17.11. 7,99 €, 49 € und 79 €, ab 18.11. 0:00 Uhr 12,99 €, 69 € und 119 €; Betriebskonto ohne Projektpreis (kostenlos), 9 € nur mit BETRIEBSKONTO=1; gesetzte PREIS_… schalten den Wechsel ab und stehen als Hinweis in /api/status');
+  /* Seit 28.10.2026 gibt es das Betriebskonto nicht mehr (ohne BETRIEBSKONTO). Das Modell bucht ohne Preise kostenlos, nie gesperrt, keine Tarife;
+     /nutzungsbedingungen/ ist nur noch die Hinweisseite zum Ende des Kontos */
+  {
+    await import('../web/assets/modell.js');
+    const XK = globalThis.Abrechnung, vorher = JSON.parse(JSON.stringify(XK.preise()));
+    XK.setPreise(kn.preise);
+    const ak = { links: [], konto: 'service' }, jetztK = Date.now();
+    for (let i = 0; i < 5; i++) { const l = { id: 'lk' + i, kunde: 'Kunde ' + i, nr: 'K' + i }; ak.links.unshift(l); XK.receiveAufmass(ak, l, { windows: [{}], fotos: 0 }, 'Link', jetztK); }
+    const wk = XK.planWechsel(ak, 'plus', jetztK), nbK = await roh('/nutzungsbedingungen/');
+    ok(XK.kostenlos() && XK.lockedLinks(ak).length === 0 && ak.book.every((b) => b.betrag === 0 && b.badge === 'kostenlos') && wk.art === 'kostenlos' && XK.konto(ak) === 'service' &&
+      /<title>Konto für Fensterbauer eingestellt/.test(nbK.text) && /<meta name="robots" content="noindex">/.test(nbK.text) && /löschen wir bis spätestens 31\. Dezember 2026/.test(nbK.text) && /Es fallen keine Kosten mehr an/.test(nbK.text) && /href="\/konfigurator-bedingungen\/"/.test(nbK.text) && !/9&nbsp;€|9 € je Projekt|im Monat/.test(nbK.text) && !seo.SEITEN.some((x) => x.pfad === '/nutzungsbedingungen/'),
+      'Ohne Betriebskonto: Modell ohne Preise kostenlos, kein Tarifwechsel; /nutzungsbedingungen/ als Hinweisseite (eingestellt, keine Kosten, Löschung bis 31.12.2026, Verweis auf die Paketbedingungen, noindex, nicht in der Sitemap)');
+    XK.setPreise(vorher);
+  }
   const einfFehler = [];
   for (const s10 of seo.SEITEN) {
     const datei = path10.join(WURZEL, 'web', s10.pfad, 'index.html'); if (!fs10.existsSync(datei)) continue;
     const roh10 = fs10.readFileSync(datei, 'utf8');
     const aus = async (jetzt) => { const r = await seo.behandeln(new Request('https://eeziframes.com' + s10.pfad, { headers: { 'if-none-match': '"alt"' } }), { INDEXIERUNG: '1', JETZT: jetzt }, async (req) => (req.headers.get('if-none-match') ? new Response(null, { status: 304, headers: { etag: '"alt"' } }) : new Response(roh10, { headers: { 'content-type': 'text/html; charset=utf-8', etag: '"alt"' } }))); return { status: r.status, etag: r.headers.get('etag'), text: r.status === 200 ? await r.text() : '' }; };
-    const vor = await aus(VOR), nach = await aus(NACH), recht = ['/agb/', '/nutzungsbedingungen/'].includes(s10.pfad);
+    const vor = await aus(VOR), nach = await aus(NACH), recht = s10.pfad === '/agb/';
     /* Seiten für Fensterbauer: kein Band mehr (sie verkaufen die Pakete), aber wie der Ratgeber ohne ETag, weil der Worker ihre
        Bausteine je Umgebung einsetzt (functions/pakete-seite.js) */
     const mitBanner = /^\/ratgeber\//.test(s10.pfad), ohneBand = /^\/fuer-fensterbauer\//.test(s10.pfad);
     if (ohneBand ? (vor.status !== 200 || vor.etag || /einf-bar/.test(vor.text)) : mitBanner ? (vor.status !== 200 || vor.etag || !/<a class="einf-bar" href="[^"]+"><span><span class="txt"><b>Einführungspreise? bis 17\. November:<\/b>[\s\S]*?<span class="rest">Nur noch heute<\/span>/.test(vor.text)) : vor.status !== 304) einfFehler.push(s10.pfad + (ohneBand ? ' (vorher Banner oder ETag)' : mitBanner ? ' (vorher kein Banner mit Countdown oder alte Fassung aus dem Browser-Cache möglich)' : ' (vorher kein 304)'));
     if (/einf-bar/.test(nach.text)) einfFehler.push(s10.pfad + ' (Banner nach dem Stichtag)');
     if (nach.status !== 200 || (nach.etag && !recht)) einfFehler.push(s10.pfad + ' (danach alte Fassung aus dem Browser-Cache möglich)');
-    if (recht) { if (!/7,99 € bei Kauf bis einschließlich 17\. November 2026|49 € im Monat bei Abschluss bis einschließlich 17\. November 2026/.test(nach.text) || !/12,99 €|69 € im Monat bei Abschluss ab dem 18\. November 2026/.test(nach.text)) einfFehler.push(s10.pfad + ' (nennt nicht beide Zeiträume)'); continue; }
+    /* AGB nennen beide Zeiträume des Aufmaßblatts */
+    if (recht) { if (!/7,99 € bei Kauf bis einschließlich 17\. November 2026/.test(nach.text) || !/12,99 €/.test(nach.text)) einfFehler.push(s10.pfad + ' (nennt nicht beide Zeiträume)'); continue; }
     if (/7,99|class="einf"|49(&nbsp;|\u00a0| )€ im Monat|79(&nbsp;|\u00a0| )€|"price":"(7\.99|49\.00|79\.00)"/.test(nach.text)) einfFehler.push(s10.pfad + ' (alter Preis nach dem Stichtag)');
     if (/7,99/.test(roh10) && !/12,99/.test(nach.text)) einfFehler.push(s10.pfad + ' (neuer Preis fehlt)');
   }
   const startRoh = fs10.readFileSync(path10.join(WURZEL, 'web/index.html'), 'utf8'), fbRoh = fs10.readFileSync(path10.join(WURZEL, 'web/fuer-fensterbauer/index.html'), 'utf8');
-  ok(!einfFehler.length && /class="einf"> \(Einführungspreis bis 17\. November 2026, danach 12,99&nbsp;€\)/.test(startRoh) && !/Einführungspreis|class="einf"/.test(fbRoh), 'Einführungspreis auf den Seiten: vorher mit Hinweis, ab dem Stichtag reguläre Preise ohne Hinweis und ohne ETag (kein veralteter Stand aus dem Browser-Cache); AGB und Nutzungsbedingungen nennen beide Zeiträume; die Seite für Fensterbauer hat keinen Einführungspreis mehr' + (einfFehler.length ? ' (' + einfFehler.join(', ') + ')' : ''));
+  ok(!einfFehler.length && /class="einf"> \(Einführungspreis bis 17\. November 2026, danach 12,99&nbsp;€\)/.test(startRoh) && !/Einführungspreis|class="einf"/.test(fbRoh), 'Einführungspreis auf den Seiten: vorher mit Hinweis, ab dem Stichtag reguläre Preise ohne Hinweis und ohne ETag (kein veralteter Stand aus dem Browser-Cache); AGB nennen beide Zeiträume; die Seite für Fensterbauer hat keinen Einführungspreis mehr' + (einfFehler.length ? ' (' + einfFehler.join(', ') + ')' : ''));
   const llVor = seo.llms('https://eeziframes.com', { JETZT: VOR }), llNach = seo.llms('https://eeziframes.com', { JETZT: NACH });
   ok(/Einführungspreis bis 17\.11\.2026/.test(llVor) && !/Einführungspreis/.test(llNach) && llNach.includes('12,99 €') && llNach.includes(PK.preis('essential').monat + ' € im Monat') && !/Abo 10|119 € im Monat/.test(llVor + llNach), 'llms.txt: Einführungspreis des Aufmaßblatts mit Stichtag, danach nur der reguläre Preis; für Fensterbauer die Paketpreise, keine Tarife des Betriebsbereichs');
 
@@ -1741,7 +1845,9 @@ if (teil(10)) {
   let faqZahl = 0;
   for (const pf of seo.SEITEN.map((x) => x.pfad).filter((x) => /^\/(ratgeber|fuer-fensterbauer|app)\//.test(x))) {
     const t = (await roh(pf)).text, fragen = ldjson(t).flatMap((x) => (x && x['@graph']) || [x]).filter((x) => x && x['@type'] === 'FAQPage').flatMap((x) => x.mainEntity || []);
-    const vis = new Map(Array.from(t.matchAll(/<summary>([\s\S]*?)<\/summary><div>([\s\S]*?)<\/div><\/details>/g)).map((m) => [sichtbar(m[1]), sichtbar(m[2])]));
+    /* Ratgeber: <summary>Frage</summary><div>Antwort</div>; Seite für Fensterbauer: <summary><span>Frage</span>…</summary><div class="frage-antwort">Antwort</div> */
+    const vis = new Map(Array.from(t.matchAll(/<summary>([\s\S]*?)<\/summary><div>([\s\S]*?)<\/div><\/details>/g)).map((m) => [sichtbar(m[1]), sichtbar(m[2])])
+      .concat(Array.from(t.matchAll(/<summary><span>((?:(?!<\/summary>)[\s\S])*?)<\/span>(?:(?!<\/summary>)[\s\S])*<\/summary><div class="frage-antwort">([\s\S]*?)<\/div><\/details>/g)).map((m) => [sichtbar(m[1]), sichtbar(m[2])])));
     faqZahl += fragen.length;
     for (const q of fragen) if (vis.get(q.name) !== (q.acceptedAnswer || {}).text) faqFehler.push(pf + ' „' + q.name + '“');
   }
@@ -1762,7 +1868,8 @@ if (teil(10)) {
   for (const [pf, , alt] of bauSeiten) {
     if (pf === '/ratgeber/') { if (!bau.WEG.every((x, k) => alt.includes('<h2 id="schritt-' + (k + 1) + '">')) || !imWeg.concat(bau.FENSTERBAUER).every((u) => alt.includes('href="' + u + '"'))) wegFehler.push(pf); continue; }
     const inhalt = (alt.match(/<nav class="rg-inhalt"[\s\S]*?<\/nav>/) || [''])[0];
-    if (!/Auf dieser Seite · \d+ Min\. Lesezeit/.test(inhalt) || (inhalt.match(/<li>/g) || []).length < 3) wegFehler.push(pf + ' (Auf dieser Seite)');
+    if (bau.OHNE_INHALTSVERZEICHNIS.includes(pf)) { if (inhalt) wegFehler.push(pf + ' (Landingpage ohne „Auf dieser Seite“)'); }
+    else if (!/Auf dieser Seite · \d+ Min\. Lesezeit/.test(inhalt) || (inhalt.match(/<li>/g) || []).length < 3) wegFehler.push(pf + ' (Auf dieser Seite)');
     if (imWeg.includes(pf) && ((alt.match(/aria-current="step"/g) || []).length !== 1 || !/class="rg-karte rg-weiter"/.test(alt))) wegFehler.push(pf + ' (Weg)');
   }
   ok(!bauFehler.length && !ohneHeimat.length && !wegFehler.length && bauSeiten.length >= 30, 'Leseführung aller Ratgeber (' + bauSeiten.length + ' Seiten, scripts/ratgeber-bausteine.mjs): „Auf dieser Seite“ mit Lesezeit, Weg in sechs Schritten mit „Nächster Schritt“, Übersicht als Weg, gleiche Fußzeile mit jeder Seite' + (bauFehler.length ? ' (nicht neu gebaut: ' + bauFehler.join(', ') + ')' : '') + (ohneHeimat.length ? ' (ohne Platz im Weg oder in der Fußzeile: ' + ohneHeimat.join(', ') + ')' : '') + (wegFehler.length ? ' (' + wegFehler.join(', ') + ')' : ''));
@@ -1788,12 +1895,12 @@ if (teil(10)) {
   /* Ratgeber ohne Eingaben: keine Formulare, keine leeren Tabellen zum Ausfüllen, keine Vorlage zum Ausdrucken, kein Rechner (das Aufmaß entsteht in der App) */
   const eingabeFehler = [];
   for (const pf of seo.SEITEN.map((x) => x.pfad).filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x))) {
-    /* die Seite für Fensterbauer darf ihr Anfrageformular für die Pakete haben (POST /api/partner/frage), sonst nichts zum Ausfüllen */
-    const t = (await roh(pf)).text.replace(pf === '/fuer-fensterbauer/' ? /<form class="vk-form" method="post" action="\/api\/partner\/frage" data-vk-frage>[\s\S]*?<\/form>/ : /^$/, '');
+    /* die Seite für Fensterbauer darf ihr Anfrageformular für die Pakete haben (POST /api/auftrag/frage), sonst nichts zum Ausfüllen */
+    const t = (await roh(pf)).text.replace(pf === '/fuer-fensterbauer/' ? /<form class="ez-form" id="anfrage-form" data-theme="hell" method="post" action="\/api\/auftrag\/frage">[\s\S]*?<\/form>/ : /^$/, '');
     if (/<(form|input|select|textarea)\b|contenteditable|rg-leer|rechner\.js|<td><\/td>/i.test(t)) eingabeFehler.push(pf);
   }
   const ohneRechner = (await fetch(BASE + '/assets/rechner.js')).status === 404, bm = (await roh('/ratgeber/bestellmass-fenster/')).text, ab2 = (await roh('/ratgeber/aufmassblatt-fenster/')).text;
-  ok(!eingabeFehler.length && ohneRechner && /bis 1,5 m<\/td><td data-k="weiß">10 mm/.test(bm) && /Gibt es hier eine Vorlage zum Ausdrucken\?<\/summary><div><p>Nein\./.test(ab2) && /Aufmaßblatt in der App erstellen/.test(ab2) && !/Vorlage für drei Fenster/.test(ab2), 'Ratgeber ohne Eingaben: keine Formulare, keine leeren Tabellen, keine Vorlage zum Ausdrucken, kein Rechner; das Aufmaßblatt entsteht in der App' + (eingabeFehler.length ? ' (' + eingabeFehler.join(', ') + ')' : ''));
+  ok(!eingabeFehler.length && ohneRechner && /bis 1,5(?: |&nbsp;)m<\/td><td[^>]* data-k="weiß">10(?: |&nbsp;)(?:<span class="rg-einheit">)?mm/.test(bm) && /Gibt es hier eine Vorlage zum Ausdrucken\?<\/summary><div><p>Nein\./.test(ab2) && /Aufmaßblatt in der App erstellen/.test(ab2) && !/Vorlage für drei Fenster/.test(ab2), 'Ratgeber ohne Eingaben: keine Formulare, keine leeren Tabellen, keine Vorlage zum Ausdrucken, kein Rechner; das Aufmaßblatt entsteht in der App' + (eingabeFehler.length ? ' (' + eingabeFehler.join(', ') + ')' : ''));
   const gctx = await browser.newContext(telefon), gp = await neueSeite(gctx);
   await gp.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await gp.evaluate(() => { S.gloss = 'dinlr'; render(); }); await gp.waitForTimeout(200);
@@ -1817,7 +1924,7 @@ if (teil(11)) {
     const { api } = await import('../functions/api/router.js'), ko = await import('../functions/api/konten.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), stM = await import('../functions/api/stripe.js');
     const X = globalThis.Abrechnung, W = 'whsec_pruefung', B = 'https://eeziframes.com';
     const fs11 = await import('node:fs'), path11 = await import('node:path'), url11 = await import('node:url'), W11 = path11.resolve(path11.dirname(url11.fileURLToPath(import.meta.url)), '..');
-    const env = { STRIPE_SECRET_KEY: 'sk_test_pruefung11', STRIPE_WEBHOOK_SECRET: W, DATEN_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruefung' };
+    const env = { STRIPE_SECRET_KEY: 'sk_test_pruefung11', STRIPE_WEBHOOK_SECRET: W, DATEN_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruefung', BETRIEBSKONTO: '1' }; // frühere Abrechnung je Projekt
     const k = umg.konfig(env), sp = spM.speicher(k), zd = stM.zahlungsdienst(k);
     const rufe = async (pfad, body, token, e) => { const h = { accept: 'application/json', origin: B }; if (body) h['content-type'] = 'application/json'; if (token) h.authorization = 'Bearer ' + token; const r = await api(new Request(B + pfad, { method: body ? 'POST' : 'GET', headers: h, body: body ? JSON.stringify(body) : undefined }), e || env, null); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
     const senden = async (w) => { const r = await api(new Request(B + '/api/zahlung/webhook', { method: 'POST', headers: { 'stripe-signature': w.kopf, 'content-type': 'application/json' }, body: w.roh }), env, null); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
@@ -2048,6 +2155,15 @@ if (teil(11)) {
     st.fehlerBei(null);
     const zOk = await zRufe('/api/zentrale/betriebe/' + zb.id + '/abrechnen', {}, zKeks), zNach = await sp.betriebHolen(zb.id), zProt = (await sp.protokollLesen({ betrieb: zb.id, anzahl: 10 })) || [];
     ok(/^__Host-zentrale=/.test(zKeks) && zFehl._status === 502 && /^Abrechnung fehlgeschlagen: /.test(zFehl.fehler || '') && zVor.daten.book[0].status === 'offen' && zOk._status === 200 && zOk.ergebnis.rechnungen === 1 && zNach.daten.book[0].status === 'berechnet' && zProt.some((e) => e.art === 'abrechnung' && e.text === 'Abrechnung fehlgeschlagen') && zProt.some((e) => e.art === 'abrechnung' && e.text === 'Sammelrechnung erstellt'), 'Zentrale „Jetzt abrechnen“: Scheitert Stripe, stehen der Grund im Dialog und „Abrechnung fehlgeschlagen“ im Protokoll, die Buchung bleibt offen; der nächste Versuch rechnet ab');
+    // Gutscheincodes: die Kasse der Einrichtung (Pakete) nimmt Codes aus dem Stripe-Dashboard an; der Betrag nach Rabatt kommt aus der Kasse
+    await import(new URL('../web/assets/pakete.js', import.meta.url).href);
+    const zahl11 = await import('../functions/auftrag/zahlung.js'), gsN = st.log.length;
+    const gsA = { id: 'auf_gutschein', nr: 'A-0099', paket: 'essential', angaben: { betrieb: { firma: 'Gutschein Fensterbau', plz: '50667', ort: 'Köln' } } };
+    const gsK = await zahl11.kasse({ k: k, env: {} }, gsA, { id: 'kd_gutschein', mail: 'gutschein@beispiel.de' }, { zurueck: B + '/bestellen/?kasse={SESSION}', abbruch: B + '/bestellen/' });
+    const gsP = (kassenSeit(gsN)[0] || {}).p || {}, gsVoll = Math.round(globalThis.Pakete.preis('essential').einrichtung * 100 * 1.19);
+    st.abschliessen(gsK.id, { betrag: Math.round(gsVoll / 2) });
+    const gsR = await zahl11.kassePruefen({ k: k, env: {} }, gsK.id);
+    ok(String(gsP.allow_promotion_codes) === 'true' && gsP.metadata.art === 'auftrag' && gsR.bezahlt && gsR.betragCent === Math.round(gsVoll / 2) && kassenSeit(0).length > 1 && !kassenSeit(0).some((e) => (e.p.metadata || {}).art !== 'auftrag' && String(e.p.allow_promotion_codes) === 'true'), 'Gutscheincodes: die Kasse der Einrichtung zeigt das Codefeld von Stripe, nach 50 % Rabatt zählt der bezahlte Betrag (' + (gsR.betragCent / 100).toFixed(2) + ' € statt ' + (gsVoll / 100).toFixed(2) + ' €); die Kasse des Aufmaßblatts bleibt ohne Codes');
     if (process.env.STRIPE_PROTOKOLL) (await import('node:fs')).writeFileSync(process.env.STRIPE_PROTOKOLL, JSON.stringify(st.log, null, 1));
   } catch (e) {
     ok(false, 'Stripe-Anbindung ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
@@ -2105,7 +2221,7 @@ if (teil(13)) {
   console.log('13. Zentrale des Inhabers');
   const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), ze = await import('../functions/api/zentrale.js'), stat = await import('../functions/api/statistik.js');
   const B = 'https://eeziframes.com', PW = 'pruef-passwort-zentrale-13', GEHEIM = 'JBSWY3DPEHPK3PXPJBSWY3DP', stempel = Date.now().toString(36), seoSperre = (await import('../functions/seo.js')).SPERRE;
-  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef13' }, env2 = Object.assign({}, env, { ZENTRALE_2FA: GEHEIM });
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef13', BETRIEBSKONTO: '1' }, env2 = Object.assign({}, env, { ZENTRALE_2FA: GEHEIM });
   let ipNr = 1; const neueIp = () => '198.51.100.' + (ipNr++);
   const rufe = async (pfad, o) => {
     o = o || {}; const h = Object.assign({ accept: 'application/json', origin: B, 'cf-connecting-ip': o.ip || '192.0.2.10' }, o.kopf || {});
@@ -2335,131 +2451,7 @@ if (teil(13)) {
     ok(false, 'Zentrale ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
   }
 
-  // p) Oberfläche im Browser, auf einem eigenen Testserver mit Zentrale
-  const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
-  const port = await freierPort(), B4 = 'http://localhost:' + port;
-  const kind = cp.spawn(process.execPath, [pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW }), stdio: ['ignore', 'ignore', 'pipe'] });
-  kind.stderr.on('data', (dd) => process.stderr.write('  [Server 4] ' + dd));
-  const aus4 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus4);
-  try {
-    let bereit = false; for (let i = 0; i < 60 && !bereit; i++) { await new Promise((r) => setTimeout(r, 200)); try { bereit = (await fetch(B4 + '/api/zentrale/status').then((r) => r.json())).eingerichtet === true; } catch (e) { /* noch nicht */ } }
-    ok(bereit, 'Testserver mit Zentrale läuft: ' + B4);
-    const http = async (p, body, token) => { const r = await fetch(B4 + p, { method: body ? 'POST' : 'GET', headers: Object.assign({ accept: 'application/json', origin: B4 }, body ? { 'content-type': 'application/json' } : {}, token ? { authorization: 'Bearer ' + token } : {}), body: body ? JSON.stringify(body) : undefined }); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
-    const mailU = 'ui-' + stempel + '@beispiel.de', TU = tok(mailU);
-    await http('/api/konto/registrieren', { firma: 'Fensterbau Oberfläche', ap: 'Uwe Ober', tel: '0221 6' + String(Date.now()).slice(-6), plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, TU);
-    const pr = await http('/api/konto/projekte', { kunde: 'Familie Unsichtbar', kontakt: '0171 1111111', plan: ['Fenster'], days: 14 }, TU), codeU = pr.konto.acc.links.find((l) => l.id === pr.id).code;
-    await http('/api/aufmass', { v: 1, b: codeU, w: fenster, p: { name: 'Familie Unsichtbar' }, t: Date.now() });
-    const MENSCH = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36'; // Headless-Chromium meldet sich als HeadlessChrome und zählt deshalb als Bot
-    const zctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE', acceptDownloads: true, userAgent: MENSCH }), zp = await neueSeite(zctx, B4);
-    const r0 = await zp.goto(B4 + '/zentrale/', { waitUntil: 'networkidle' });
-    ok(r0.headers()['x-robots-tag'] === seoSperre && r0.headers()['cache-control'] === 'no-store' && /Zentrale/.test(await zp.title()) && await zp.locator('#z-pw').count() === 1 && await zp.locator('svg .fi-kachel').count() === 1, '/zentrale/: Anmeldung mit Logo, noindex, nicht zwischengespeichert');
-    await zp.fill('#z-pw', 'falsch-falsch-falsch'); await zp.click('form[data-form="anmelden"] button[type="submit"]'); await zp.waitForSelector('.z-login .err');
-    ok(/stimmt nicht/.test(await zp.locator('.z-login .err').textContent()) && await zp.locator('.z-stats').count() === 0, 'Falsches Passwort: Hinweis, keine Zentrale');
-    zp.probleme = zp.probleme.filter((x) => !/401/.test(x));
-    await zp.fill('#z-pw', PW); await zp.click('form[data-form="anmelden"] button[type="submit"]'); await zp.waitForSelector('.z-stats');
-    const ck = (await zctx.cookies()).find((c) => c.name === '__Host-zentrale');
-    ok(!!ck && ck.httpOnly && ck.secure && ck.sameSite === 'Strict' && !(await zp.evaluate(() => document.cookie)).includes('zentrale') && await zp.evaluate(() => !Object.keys(localStorage).length && !Object.keys(sessionStorage).length), 'Sitzung als Cookie, das kein Skript lesen kann; nichts im Speicher des Browsers');
-    ok(/Zweiter Faktor fehlt/.test(await zp.evaluate(() => document.body.innerText)) && await zp.locator('.z-chart svg').count() >= 3, 'Übersicht: Kennzahlen, Diagramme, Hinweis auf den zweiten Faktor');
-    await foto(zp, 'zentrale-uebersicht');
-    // Zeitraum: Voreinstellung, eigener Zeitraum (gilt auf allen Seiten), „Gesamt“; gezeigt wird nur, was darin passiert ist
-    const zrSteht = (re) => zp.waitForFunction((q) => new RegExp(q).test((document.querySelector('.z-zr-text') || {}).textContent || ''), re.source);
-    const aufmZahl = () => zp.evaluate(() => { const s = Array.from(document.querySelectorAll('.stat')).find((x) => /Aufmaße eingegangen/.test(x.textContent)); return s ? +s.querySelector('b').textContent : NaN; });
-    await zp.click('.z-zr-seg [data-v="7"]'); await zrSteht(/\(7 Tage\)/); const a7 = await aufmZahl();
-    await zp.click('.z-zr-seg [data-v="frei"]'); await zp.waitForSelector('#z-von'); const fokusVon = await zp.evaluate(() => document.activeElement && document.activeElement.id);
-    await zp.fill('#z-von', '2020-01-31'); await zp.fill('#z-bis', '2020-01-01'); await zp.click('form[data-form="zeitraum"] button[type="submit"]'); await zrSteht(/01\.01\.2020 bis 31\.01\.2020 \(31 Tage\)/);
-    const altText = await zp.evaluate(() => document.body.innerText), aAlt = await aufmZahl();
-    await zp.fill('#z-von', '2020-01-01'); await zp.fill('#z-von-zeit', '08:30'); await zp.fill('#z-bis', '2020-01-01'); await zp.fill('#z-bis-zeit', '17:00'); await zp.click('form[data-form="zeitraum"] button[type="submit"]');
-    await zrSteht(/01\.01\.2020, 08:30 Uhr bis 01\.01\.2020, 17:00 Uhr \(9 Stunden\)/); const uhrText = await zp.evaluate(() => document.body.innerText);
-    await zp.goto(B4 + '/zentrale/#kaeufe'); await zrSteht(/2020/); const kaeufeAlt = await zp.evaluate(() => document.body.innerText);
-    await zp.goto(B4 + '/zentrale/#uebersicht'); await zrSteht(/2020/); await zp.click('.z-zr-seg [data-v="anfang"]'); await zrSteht(/^Ausgewertet: (?!01\.01\.2020)/); const aAnf = await aufmZahl();
-    ok(a7 >= 1 && fokusVon === 'z-von' && aAlt === 0 && /keine neuen im Zeitraum/.test(altText) && /Im Zeitraum ist nichts passiert/.test(altText) && /Im Zeitraum kein Aufmaßblatt verkauft/.test(kaeufeAlt) && /, ganze Tage/.test(uhrText) && aAnf >= a7, 'Zeitraum in der Zentrale: 7 Tage, eigener Zeitraum mit Tagen und Uhrzeit (vertauschte Tage werden getauscht, gilt auf allen Seiten), Gesamt; gezeigt wird nur, was darin passiert ist');
-    await foto(zp, 'zentrale-zeitraum');
-    await zp.click('.z-zr-seg [data-v="30"]'); await zrSteht(/\(30 Tage\)/);
-    // Anzeigen: Seite mit Vergleich und Verlauf, Link für die Anzeige mit bereinigtem Kampagnennamen
-    await zp.goto(B4 + '/zentrale/#anzeigen'); await zp.waitForSelector('#z-l-url'); await zp.selectOption('#z-l-ziel', 'fensterbauer'); await zp.selectOption('#z-l-netz', 'facebook'); await zp.fill('#z-l-kamp', 'Kunde nicht da!');
-    const anzUI = await zp.evaluate(() => ({ link: document.getElementById('z-l-url').value, fokus: document.activeElement && document.activeElement.id, text: document.body.innerText, nav: !!document.querySelector('.z-nav a[href="#anzeigen"][aria-current="page"]') }));
-    ok(anzUI.link === B4 + '/?utm_source=facebook&utm_medium=paid&utm_campaign=kunde-nicht-da#fensterbauer' && anzUI.fokus === 'z-l-kamp' && anzUI.nav && /Vergleich mit vorher/.test(anzUI.text) && /Besuche je Stunde/.test(anzUI.text) && /utm_source=\{\{site_source_name\}\}/.test(await zp.inputValue('#z-l-meta')), 'Anzeigen im Browser: Vergleich, Verlauf je Stunde, Link für die Anzeige (Ziel, Netz, Kampagne) und URL-Parameter für Meta');
-    await foto(zp, 'zentrale-anzeigen');
-    await zp.goto(B4 + '/zentrale/#betriebe'); await zp.waitForSelector('.z-tab');
-    await zp.fill('#z-suche', 'Oberfläche'); await zp.waitForTimeout(150);
-    ok(await zp.locator('.z-tab tbody tr').count() === 1 && (await zp.inputValue('#z-suche')) === 'Oberfläche', 'Suche filtert beim Tippen, das Feld behält den Fokus und den Text');
-    await zp.click('.z-tab tbody tr td:nth-child(3)'); await zp.waitForSelector('.z-aktionen');
-    const det = await zp.evaluate(() => document.body.innerText);
-    ok(/Fensterbau Oberfläche/.test(det) && /P-\d{4}-001/.test(det) && !/Unsichtbar|1111111/.test(det), 'Klick auf die Zeile öffnet den Betrieb; Kunden nur als Projektnummer');
-    await foto(zp, 'zentrale-betrieb');
-    await zp.click('[data-act="dlg"][data-v="sperren"]'); await zp.waitForSelector('#d-grund');
-    ok(await zp.evaluate(() => document.activeElement && document.activeElement.id === 'd-grund'), 'Dialog „Sperren“: Fokus im Feld für die Begründung');
-    await zp.fill('#d-grund', 'Prüfung der Sperre'); await zp.click('.z-dialog button[type="submit"]'); await zp.waitForSelector('.z-hinweis.bad');
-    ok(/Prüfung der Sperre/.test(await zp.locator('.z-hinweis.bad').textContent()), 'Gesperrt: Hinweis mit Begründung am Betrieb');
-    const pctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), pp = await neueSeite(pctx, B4);
-    await pp.goto(B4 + '/', { waitUntil: 'networkidle' });
-    await pp.evaluate((s) => localStorage.setItem('aufmass.sitzung', JSON.stringify(s)), { token: TU, refresh: 'test-refresh', mail: mailU });
-    await pp.reload({ waitUntil: 'networkidle' }); await pp.waitForTimeout(500);
-    const gesp = await pp.evaluate(() => ({ online: Server.online(), sitzung: localStorage.getItem('aufmass.sitzung'), toast: (document.getElementById('toast') || {}).textContent || '' }));
-    pp.probleme = pp.probleme.filter((x) => !/403/.test(x));
-    ok(!gesp.online && !gesp.sitzung && /gesperrt/.test(gesp.toast) && /Prüfung der Sperre/.test(gesp.toast), 'Betriebsbereich: gesperrter Betrieb wird abgemeldet und sieht die Begründung');
-    const lk = await http('/api/link/' + codeU);
-    ok(lk._status === 404 && /nicht aktiv/.test(lk.fehler || ''), 'Kundenlink eines gesperrten Betriebs ruht');
-    await zp.click('[data-act="dlg"][data-v="entsperren"]'); await zp.click('.z-dialog button[type="submit"]'); await zp.waitForFunction(() => !document.querySelector('.z-hinweis.bad'));
-    await pp.evaluate((s) => localStorage.setItem('aufmass.sitzung', JSON.stringify(s)), { token: TU, refresh: 'test-refresh', mail: mailU });
-    await pp.reload({ waitUntil: 'networkidle' }); await pp.waitForTimeout(500);
-    ok(await pp.evaluate(() => Server.online()), 'Entsperrt: der Betrieb kommt wieder in sein Konto');
-    sauber(pp, 'Betriebsbereich mit Sperre ohne Fehler'); await pctx.close();
-    await zp.click('[data-act="dlg"][data-v="export"]'); await zp.waitForSelector('.z-dialog #d-grund');
-    const warnt = /zweite Faktor eingerichtet sein/.test(await zp.locator('.z-dialog').textContent());
-    await zp.fill('#d-grund', 'Auskunftsersuchen zur Prüfung'); await zp.click('.z-dialog button[type="submit"]'); await zp.waitForSelector('.z-dialog .err');
-    ok(warnt && /zweiten Faktor/.test(await zp.locator('.z-dialog .err').textContent()), 'Export ohne zweiten Faktor: Dialog warnt, der Server lehnt ab');
-    zp.probleme = zp.probleme.filter((x) => !/403/.test(x));
-    await zp.click('.z-dialog [data-act="dlg-zu"]');
-    // Eigene Aufrufe zählen nicht, fremde schon
-    const summe = () => zp.evaluate(async () => (await (await fetch('/api/zentrale/statistik?tage=7', { headers: { 'x-zentrale': '1' } })).json()).summe.aufrufe);
-    const vorA = await summe();
-    await zp.goto(B4 + '/', { waitUntil: 'networkidle' });
-    const fctx = await browser.newContext({ locale: 'de-DE', userAgent: MENSCH }), fp = await fctx.newPage(); await fp.goto(B4 + '/ratgeber/fenster-ausmessen/', { waitUntil: 'networkidle' }); await fctx.close();
-    await zp.goto(B4 + '/zentrale/#statistik'); await zp.waitForSelector('.z-chart svg'); await zp.waitForTimeout(200);
-    ok((await summe()) === vorA + 1, 'Statistik im Browser: Aufrufe des angemeldeten Inhabers zählen nicht, fremde schon');
-    await foto(zp, 'zentrale-statistik');
-    await zp.goto(B4 + '/zentrale/#einstellungen'); await zp.waitForSelector('[data-act="2fa-neu"]'); await zp.click('[data-act="2fa-neu"]'); await zp.waitForSelector('.z-qr');
-    const geheimUI = await zp.inputValue('#z-geheim');
-    await zp.fill('#z-probe', '000000'); await zp.click('form[data-form="2fa-probe"] button[type="submit"]'); await zp.waitForTimeout(150);
-    const falschUI = await zp.locator('#z-2fa .err').count();
-    await zp.fill('#z-probe', await ze.totpCode(geheimUI, Math.floor(Date.now() / 30000))); await zp.click('form[data-form="2fa-probe"] button[type="submit"]'); await zp.waitForSelector('#z-2fa .z-hinweis.ok');
-    ok(/^[A-Z2-7]{32}$/.test(geheimUI) && falschUI === 1 && /ZENTRALE_2FA/.test(await zp.locator('#z-2fa .z-hinweis.ok').textContent()), 'Zweiter Faktor einrichten: Schlüssel und QR-Code im Browser, falscher Code abgewiesen, richtiger bestätigt, Anleitung für Cloudflare');
-    await foto(zp, 'zentrale-zweiter-faktor');
-    sauber(zp, 'Zentrale ohne Fehler, ohne CSP-Verstöße, ohne fremde Server');
-    // Gestaltung: erlaubte Schriftgrößen, Ziele ab 44 px, kein Querscrollen, am Schreibtisch und am Telefon, hell und dunkel
-    const messen = (seite) => seite.evaluate(() => {
-      const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'; };
-      const groessen = new Set(), klein = [];
-      document.querySelectorAll('body *').forEach((el) => { if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
-      document.querySelectorAll('a, button, input, select, textarea, summary').forEach((el) => { if (!sichtbar(el)) return; const h = el.getBoundingClientRect().height; if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px: ' + (el.textContent || el.value || '').trim().slice(0, 24) + ')'); });
-      return { groessen: Array.from(groessen).sort((a, b) => a - b), klein: klein, quer: document.scrollingElement.scrollWidth > window.innerWidth + 1 };
-    });
-    const seiten = ['#uebersicht', '#betriebe', '#kaeufe', '#statistik', '#anzeigen', '#protokoll', '#einstellungen'];
-    const pruefeGestaltung = async (ctxOpt, erlaubt, name) => {
-      const c = await browser.newContext(Object.assign({ locale: 'de-DE' }, ctxOpt));
-      const s = await neueSeite(c, B4), befund = [];
-      await s.goto(B4 + '/zentrale/#betriebe', { waitUntil: 'networkidle' }); await s.fill('#z-pw', PW); await s.click('form[data-form="anmelden"] button[type="submit"]'); await s.waitForSelector('.z-tab'); const idDetail = await s.evaluate(() => (document.querySelector('.z-zeile') || {}).getAttribute('href'));
-      for (const h of seiten.concat([idDetail])) {
-        await s.goto(B4 + '/zentrale/' + h, { waitUntil: 'networkidle' }); await s.waitForTimeout(250);
-        const m = await messen(s), fremd = m.groessen.filter((g) => !erlaubt.includes(g));
-        if (fremd.length || m.klein.length || m.quer) befund.push(h + ': ' + (fremd.length ? 'Größen ' + fremd.join(', ') + ' ' : '') + (m.klein.length ? 'klein ' + m.klein.slice(0, 4).join('; ') + ' ' : '') + (m.quer ? 'Querscrollen' : ''));
-      }
-      const animiert = ctxOpt.reducedMotion ? await s.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length) : 0;
-      ok(!befund.length && !animiert, 'Gestaltung ' + name + ': nur Schriftgrößen ' + erlaubt.join(' · ') + ', Ziele ab 44 px, kein Querscrollen' + (ctxOpt.reducedMotion ? ', bei „weniger Bewegung“ keine Animation' : '') + (befund.length ? '\n      ' + befund.join('\n      ') : '') + (animiert ? ' (' + animiert + ' laufend)' : ''));
-      if (name === 'Telefon, dunkel') { await s.goto(B4 + '/zentrale/#uebersicht', { waitUntil: 'networkidle' }); await s.waitForTimeout(200); ok((await s.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(22, 22, 22)', 'Dunkle Bühne: Grund aus den Tokens'); await foto(s, 'zentrale-telefon-dunkel'); }
-      sauber(s, 'Gestaltung ' + name + ' ohne Fehler'); await c.close();
-    };
-    await pruefeGestaltung({ viewport: { width: 1280, height: 900 } }, [13, 15, 17, 22, 30], 'Schreibtisch');
-    await pruefeGestaltung({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, colorScheme: 'dark', reducedMotion: 'reduce' }, [13, 15, 17, 22, 26], 'Telefon, dunkel');
-    await zp.click('[data-act="abmelden"]'); await zp.waitForSelector('#z-pw');
-    const nachAb = await zp.evaluate(async () => (await fetch('/api/zentrale/uebersicht', { headers: { 'x-zentrale': '1' } })).status);
-    zp.probleme = zp.probleme.filter((x) => !/401/.test(x));
-    ok(nachAb === 401, 'Abmelden: zurück zur Anmeldung, Daten nicht mehr erreichbar');
-    await zctx.close();
-  } catch (e) {
-    ok(false, 'Zentrale im Browser ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
-  } finally { aus4(); }
+  /* Die Oberfläche der alten Zentrale ist ersetzt (27.10.2026): Die neue Zentrale (/zentrale/, Aufträge) prüft Abschnitt 26 im Browser. */
 }
 
 /* ---------- 14. Fortsetzen, keine Gesamtansicht vor dem Freischalten, Grenzen gegen Mehrfachnutzung, Zwischenstand beim Kundenlink ---------- */
@@ -2467,7 +2459,7 @@ if (teil(14)) {
   console.log('14. Fortsetzen, Paywall, Grenzen, Zwischenstand beim Kundenlink');
   const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), ze = await import('../functions/api/zentrale.js');
   const X = globalThis.Abrechnung, B = 'https://eeziframes.com', PW = 'pruef-passwort-zentrale-14', TAG = 864e5, stempel = Date.now().toString(36);
-  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef14' };
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef14', BETRIEBSKONTO: '1' };
   const sp = spM.speicher(umg.konfig(env));
   let ipNr = 1; const neueIp = () => '198.51.100.' + (60 + (ipNr++ % 150));
   const rufe = async (pfad, o) => {
@@ -2641,7 +2633,7 @@ if (teil(14)) {
   const messenApp = (seite) => seite.evaluate(() => {
     const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && r.bottom > 0 && r.top < innerHeight * 4; };
     const groessen = new Set(), klein = [];
-    document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg')) return; if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
+    document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg') || el.closest('.dna')) return; /* Design-DNA: eigene Schriftrollen */ if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
     /* Textlinks im Fließtext (WCAG 2.5.8, Ausnahme „inline“) zählen nicht als Zielfläche */
     document.querySelectorAll('#app a, #app button, #app input, #app summary').forEach((el) => { if (!sichtbar(el) || el.closest('svg') || el.matches('.ulink') || el.closest('.sheet')) return; const h = el.getBoundingClientRect().height; if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px: ' + (el.textContent || '').trim().slice(0, 24) + ')'); });
     return { groessen: Array.from(groessen).sort((a, b) => a - b), klein: klein, quer: document.scrollingElement.scrollWidth > innerWidth + 1 };
@@ -2655,17 +2647,17 @@ if (teil(14)) {
   try {
     await page.goto(BASE + '/app/', { waitUntil: 'networkidle' });
     await fensterAnlegen(page, [['Wohnzimmer', 1230, 1410], ['Küche', 1010, 1210], ['Bad', 610, 810]]); await page.waitForTimeout(400);
-    const h1 = await page.evaluate(() => { const l = document.querySelector('.liste-in'), c = document.querySelectorAll('.liste-in .wincard'); return { h1: document.querySelector('.hd h1').textContent, n: c.length, oben: l ? Math.round(l.getBoundingClientRect().top) : 9999, karten: Array.from(c).map((x) => x.textContent).join(' | '), hero: !!document.querySelector('.hero'), bar: document.querySelector('.bb .btn.primary').textContent, angelegt: angelegt(), wids: S.windows.every((w) => w.wid && w.t0 && w.aend === 0) }; });
-    ok(h1.h1 === 'Weiter, wo du warst.' && h1.n === 3 && h1.oben < 500 && !h1.hero && h1.bar === 'Aufmaßblatt fertigstellen' && h1.angelegt === 3 && h1.wids, 'Angefangenes Aufmaß: „Weiter, wo du warst.“, die Liste steht oben (ab ' + h1.oben + ' px) statt unter dem Startbild, kein „Fenster ausmessen“ mehr');
+    const h1 = await page.evaluate(() => { const l = document.querySelector('.liste-in'), c = document.querySelectorAll('.liste-in .wincard'); return { h1: document.querySelector('.hd h1').textContent, n: c.length, oben: l ? Math.round(l.getBoundingClientRect().top) : 9999, karten: Array.from(c).map((x) => x.textContent).join(' | '), hero: !!document.querySelector('.hero'), bar: document.querySelector('.bb .btn.primary, .scr.dna .lg-weiter').textContent, angelegt: angelegt(), wids: S.windows.every((w) => w.wid && w.t0 && w.aend === 0), stand: (document.querySelector('.hd .ueb-zeile') || {}).textContent || '', balken: (document.querySelector('.hd .ueb-prog') || { getAttribute: () => '' }).getAttribute('aria-valuenow'), nr: document.querySelectorAll('.liste-in .wincard .ic .pos').length, st: document.querySelectorAll('.liste-in .wincard .st.voll').length, neu: !!document.querySelector('.hd .hd-neu') }; });
+    ok(h1.h1 === 'Deine Fenster.' && /Alle 3 Fenster sind vollständig/.test(h1.stand) && h1.balken === '3' && h1.nr === 3 && h1.st === 3 && h1.neu && h1.n === 3 && h1.oben < 500 && !h1.hero && h1.bar === 'Aufmaßblatt fertigstellen' && h1.angelegt === 3 && h1.wids, 'Angefangenes Aufmaß: „Deine Fenster.“ mit Stand und Balken, die Liste steht oben (ab ' + h1.oben + ' px) statt unter dem Startbild, kein „Fenster ausmessen“ mehr');
     ok(/vollständig/i.test(h1.karten) && !/\d\.\d{3}\s×\s\d/.test(h1.karten) && !/\d mm/.test(h1.karten), 'Liste vor dem Freischalten: nur der Stand („Vollständig“) statt Zahlen');
     await foto(page, 'app-aufmass-fortsetzen');
     await page.click('.liste-in .wincard[data-i="0"]'); await page.waitForSelector('[data-screen="fertig"]'); await page.waitForTimeout(200);
-    const f0 = await page.evaluate(() => ({ fold: document.querySelectorAll('details.fold .kv').length, zu: !document.querySelector('.zu-karte') && !/Alle Angaben/.test(document.querySelector('.scr').textContent) && /Wie geht es weiter/.test((document.querySelector('.weiter-karte') || {}).textContent || '') && document.querySelectorAll('.btn.primary').length === 1, fakten: document.querySelector('.center p:not(.eyebrow)').textContent, frei: (document.querySelector('.aend-frei') || {}).textContent || '', zurueck: document.querySelector('.hdr-btn[data-act="back"]').textContent, alle: !!document.querySelector('.pill.voll[data-v="home"]') }));
-    ok(f0.fold === 0 && f0.zu && !/\d mm/.test(f0.fakten) && /beliebig ändern, danach noch viermal/.test(f0.frei) && f0.zurueck === 'Aufmaß' && f0.alle, 'Fenster gespeichert: keine Übersicht „Alle Angaben“ und keine Maße, dafür „Wie geht es weiter?“ und nur eine Hauptaktion; Hinweis auf 7 Tage freies Ändern; zurück heißt „Aufmaß“, dazu „Alle Fenster ansehen“');
+    const f0 = await page.evaluate(() => ({ fold: document.querySelectorAll('details.fold .kv').length, zu: !document.querySelector('.zu-karte') && !/Alle Angaben/.test(document.querySelector('.scr').textContent) && /Wie geht es weiter/.test((document.querySelector('.weiter-karte') || {}).textContent || '') && document.querySelectorAll('.btn.primary, .dna-pille:not(.dna-pille--leise)').length === 1, fakten: (document.querySelector('.fertig-stand, .center p:not(.eyebrow)') || {}).textContent || '', frei: (document.querySelector('.aend-frei') || {}).textContent || '', zurueck: (() => { const h = document.querySelector('.hdr-btn[data-act="back"]'), k = document.querySelector('.scr.dna .lg-kopf-zurueck'); return h ? h.textContent : k ? k.getAttribute('aria-label').replace(/^Zurück: /, '') : ''; })(), alle: !!document.querySelector('.pill.voll[data-v="home"], .fg-zeile[data-v="home"]') })); // Gespeichert im Look der Design-DNA: eigener Kopf, eine Pille
+    ok(f0.fold === 0 && f0.zu && !/\d mm/.test(f0.fakten) && /beliebig ändern, danach noch viermal/.test(f0.frei) && f0.zurueck === 'Fenster' && f0.alle, 'Fenster gespeichert: keine Übersicht „Alle Angaben“ und keine Maße, dafür „Wie geht es weiter?“ und nur eine Hauptaktion; Hinweis auf 7 Tage freies Ändern; zurück heißt „Fenster“ (zur Übersicht), dazu „Alle Fenster ansehen“');
     await foto(page, 'app-fenster-gesperrt');
     const mFertig = await messenApp(page);
     await page.evaluate(() => go('teilen')); await page.waitForTimeout(300);
-    const tab = await page.evaluate(() => Array.from(document.querySelectorAll('.dv-tab tr')).slice(1).map((tr) => Array.from(tr.children).slice(2).map((td) => td.textContent).join(' ')));
+    const tab = await page.evaluate(() => Array.from(document.querySelectorAll('.dv-tab tr, .ab-papier-tab tr')).slice(1).map((tr) => Array.from(tr.children).slice(2).map((td) => td.textContent).join(' ')));
     ok(tab.length === 3 && tab.every((z) => !/\d/.test(z) && /•/.test(z)), 'Vorschau des Blatts: Positionen und Räume, die Maße nur als Platzhalter');
     await page.evaluate(() => { const k = kauf(); k.paid = true; k.test = true; persist(); go('home'); }); await page.waitForTimeout(250);
     const nachKauf = await page.evaluate(() => document.querySelector('.liste-in').textContent);
@@ -2673,8 +2665,8 @@ if (teil(14)) {
     ok(!/\d mm/.test(nachKauf) && /vollständig/i.test(nachKauf) && await page.locator('details.fold .kv').count() === 0 && await page.locator('.zu-karte').count() === 0 && !/Alle Angaben|\d mm/.test(await page.locator('.scr').textContent()), 'Auch nach dem Freischalten keine Gesamtübersicht: Liste und gespeichertes Fenster ohne Maße und ohne „Alle Angaben“ (die stehen in der PDF)');
     // Portal: angefangenes Aufmaß → „Aufmaß fortsetzen“
     await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
-    const po = await page.evaluate(() => ({ top: (document.querySelector('.top a.btn.primary') || {}).textContent, hero: (document.querySelector('.hero.b2c a.btn.primary') || {}).textContent, hint: (document.querySelector('.hint.fortsetzen') || {}).textContent || '' }));
-    ok(po.top === 'Aufmaß fortsetzen' && po.hero === 'Aufmaß fortsetzen' && /3 Fenster erfasst/.test(po.hint), 'Startseite (Hauseigentümer) mit angefangenem Aufmaß: „Aufmaß fortsetzen“ statt „Jetzt ausmessen“');
+    const po = await page.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot; return { top: ((sr.querySelector('.ez-kopf a.dna-pille') || {}).textContent || '').trim(), hero: ((sr.querySelector('.ez-hero a.dna-pille') || {}).textContent || '').trim(), hint: (sr.querySelector('.ez-weiter:not([hidden])') || {}).textContent || '' }; });
+    ok(po.top === 'Aufmaß fortsetzen' && po.hero === 'Aufmaß fortsetzen' && /3 Fenster erfasst/.test(po.hint), 'Startseite (Hauseigentümer) mit angefangenem Aufmaß: „Aufmaß fortsetzen“ statt „Jetzt konfigurieren“, dazu wie viele Fenster erfasst sind');
     await page.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
     // Grenze: 50 angelegte Fenster, Löschen gibt keinen Platz zurück
     await page.evaluate(() => { S.angelegt = 49; persist(); render(); });
@@ -2692,7 +2684,7 @@ if (teil(14)) {
     await page.evaluate(() => { for (let k = 0; k < 3; k++) { S.win = kopie(S.windows[0]); S.editIdx = 0; act('delwin', document.body); } go('home'); }); await page.waitForTimeout(250);
     const leerGrenze = await page.evaluate(() => ({ n: S.windows.length, a: angelegt(), h1: (document.querySelector('.hd h1') || {}).textContent || '', stand: (document.querySelector('.hd .sub, .hd p:not(.eyebrow)') || {}).textContent || '', neu: !!document.querySelector('.note.grenze [data-act="aufmass-neu"]'), bar: !!document.querySelector('.bb') }));
     await page.evaluate(() => { S.editIdx = -1; go('fertig'); act('delwin', document.body); }); await page.waitForTimeout(100);
-    ok(leerGrenze.n === 0 && leerGrenze.a === 50 && leerGrenze.h1 === 'Weiter, wo du warst.' && /kein Fenster erfasst/.test(leerGrenze.stand) && leerGrenze.neu && !leerGrenze.bar && await page.evaluate(() => /gibt es nicht mehr/.test(S.toast) && S.screen === 'home'), 'An der Grenze und alles gelöscht: kein Startbild mit totem Knopf, sondern die Erklärung mit „Neues Aufmaß beginnen“; Löschen eines verschwundenen Fensters meldet sich ehrlich');
+    ok(leerGrenze.n === 0 && leerGrenze.a === 50 && leerGrenze.h1 === 'Deine Fenster.' && /kein Fenster erfasst/.test(leerGrenze.stand) && leerGrenze.neu && !leerGrenze.bar && await page.evaluate(() => /gibt es nicht mehr/.test(S.toast) && S.screen === 'home'), 'An der Grenze und alles gelöscht: kein Startbild mit totem Knopf, sondern die Erklärung mit „Neues Aufmaß beginnen“; Löschen eines verschwundenen Fensters meldet sich ehrlich');
     await page.click('.note.grenze [data-act="aufmass-neu"]'); await page.waitForSelector('.neu-frage');
     await page.click('[data-act="aufmass-neu-ja"]'); await page.waitForTimeout(250);
     ok(await page.evaluate(() => S.windows.length === 0 && angelegt() === 0 && !FREI() && /Erstes Fenster ausmessen/.test(document.body.textContent)), 'Für ein weiteres Haus: neues Aufmaß nach Rückfrage, die Freischaltung gilt nur für das alte');
@@ -2706,8 +2698,8 @@ if (teil(14)) {
     const c2 = await aendern('Gaube 2'), c3 = await aendern('Gaube 3'), c4 = await aendern('Gaube 4');
     ok(/noch viermal ändern/.test(hinweis0) && c1.aend === 1 && /noch dreimal/.test(c1.toast) && c0 === 1 && c2.aend === 2 && c3.aend === 3 && c4.aend === 4 && /letzte Änderung/.test(c4.toast), 'Nach der ersten Woche: Hinweis „noch viermal“, jedes Speichern mit Änderung zählt (Speichern ohne Änderung nicht), die vierte ist die letzte');
     await page.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; go('fertig'); }); await page.waitForTimeout(150);
-    const fest = await page.evaluate(() => ({ zu: document.querySelectorAll('.pill[aria-disabled="true"]').length, note: (document.querySelector('.note.warn') || {}).textContent || '' }));
-    await page.locator('.pill[data-act="wuensche"]').dispatchEvent('click'); await page.waitForTimeout(100); // aria-disabled: antippbar, erklärt sich
+    const fest = await page.evaluate(() => ({ zu: document.querySelectorAll('.pill[aria-disabled="true"], .fg-kachel[aria-disabled="true"]').length, note: (document.querySelector('.note.warn') || {}).textContent || '' }));
+    await page.locator('.pill[data-act="wuensche"], .fg-kachel[data-act="wuensche"]').dispatchEvent('click'); await page.waitForTimeout(100); // aria-disabled: antippbar, erklärt sich
     const nachKlick = await page.evaluate(() => ({ screen: S.screen, toast: S.toast }));
     const c5 = await aendern('Gaube 5'), karte = await page.evaluate(() => { go('home'); return document.querySelector('.liste-in .wincard').textContent; });
     ok(fest.zu === 2 && /ist fest/.test(fest.note) && nachKlick.screen === 'fertig' && /ist fest/.test(nachKlick.toast) && c5.aend === 4 && c5.name === 'Gaube 4' && /fest/.test(karte), 'Nach vier Änderungen ist das Fenster fest: „Maße/Wünsche ändern“ gesperrt, Speichern ändert nichts, die Liste zeigt „fest“');
@@ -2764,8 +2756,8 @@ if (teil(14)) {
     await foto(s1, 'app-link-weitermachen');
     const c2 = await browser.newContext(telefon), s2 = await neueSeite(c2, B5);
     await s2.goto(url, { waitUntil: 'networkidle' }); await s2.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 }); await s2.waitForTimeout(300);
-    const zwei = await s2.evaluate(() => ({ namen: S.windows.map((w) => w.name).join(','), a: angelegt(), merk: (document.querySelector('.merk-karte') || {}).textContent || '', h1: (document.querySelector('.hd h1') || {}).textContent, karten: document.querySelector('.liste-in').textContent, bar: document.querySelector('.bb .btn.primary').textContent }));
-    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.a === 2 && zwei.h1 === 'Weiter, wo Sie waren.' && /auch für ein anderes Gerät/.test(zwei.merk) && /Der Link gilt bis/.test(zwei.merk) && zwei.bar === 'Weiter zum Absenden', 'Anderes Gerät, leerer Speicher: dieselbe Liste aus dem Zwischenstand, Hinweis „jederzeit weitermachen“ mit Gültigkeit');
+    const zwei = await s2.evaluate(() => ({ namen: S.windows.map((w) => w.name).join(','), a: angelegt(), merk: (document.querySelector('.merk-karte') || {}).textContent || '', h1: (document.querySelector('.hd h1') || {}).textContent, karten: document.querySelector('.liste-in').textContent, bar: document.querySelector('.bb .btn.primary, .scr.dna .lg-weiter').textContent }));
+    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.a === 2 && zwei.h1 === 'Ihre Fenster.' && /auch für ein anderes Gerät/.test(zwei.merk) && /Der Link gilt bis/.test(zwei.merk) && zwei.bar === 'Weiter zum Absenden', 'Anderes Gerät, leerer Speicher: dieselbe Liste aus dem Zwischenstand, Hinweis „jederzeit weitermachen“ mit Gültigkeit');
     ok(/vollständig/i.test(zwei.karten) && !/\d mm/.test(zwei.karten), 'Kundenlink: in der Liste keine Maße (die bekommt der Betrieb)');
     await s2.click('.liste-in .wincard[data-i="0"]'); await s2.waitForSelector('[data-screen="fertig"]');
     ok(await s2.locator('details.fold .kv').count() === 0 && await s2.locator('.zu-karte').count() === 0 && /gehen mit deinem Aufmaß an Fensterbau Weitermachen/.test(await s2.locator('.weiter-karte').textContent()) && await s2.locator('[data-act="k-start"]').count() === 0, 'Kundenlink: keine Liste aller Angaben vor dem Senden, kein Kaufknopf');
@@ -2887,7 +2879,7 @@ if (teil(15)) {
   console.log('15. Konten für Hauseigentümer (Gast, Aufmaß sichern, Anmelden, Kauf nur mit Konto)');
   const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), ze = await import('../functions/api/zentrale.js');
   const B = 'https://eeziframes.com', TAG = 864e5, stempel = Date.now().toString(36), t = Date.now();
-  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef15' };
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef15', BETRIEBSKONTO: '1' };
   const sp = spM.speicher(umg.konfig(env));
   let ipNr = 1;
   const rufe = async (pfad, o) => {
@@ -2974,24 +2966,24 @@ if (teil(15)) {
   const aus6 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus6);
   const fensterAnlegen = (seite, liste) => seite.evaluate((liste) => { liste.forEach((f) => { S.win = Object.assign(baseWin(), { name: f[0], mo: { hm: f[2] + 70, hl: f[2] + 70, hr: f[2] + 70, wm: f[1] + 140, wt: f[1] + 140, wb: f[1] + 140 }, el: { w: f[1], h: f[2] }, w: f[1], h: f[2], fotos: 2 }); S.editIdx = -1; saveWin(); }); go('home'); }, liste);
   const ruhig = (seite) => seite.waitForFunction(() => S.sync && S.sync.geladen && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
-  const anmelden = async (seite, mail, agb) => { await seite.fill('#s-mail', mail); if (agb) await seite.click('[data-in="sc"][data-f="agb"]'); await seite.click('.bb .btn.primary'); await seite.waitForSelector('#s-code'); await seite.fill('#s-code', '123456'); await seite.click('.bb .btn.primary'); };
+  const anmelden = async (seite, mail, agb) => { await seite.fill('#s-mail', mail); if (agb) await seite.click('[data-in="sc"][data-f="agb"]'); await seite.click('.bb .btn.primary, .scr.dna .lg-weiter'); await seite.waitForSelector('#s-code'); await seite.fill('#s-code', '123456'); await seite.click('.bb .btn.primary, .scr.dna .lg-weiter'); };
   const mail6 = 'haus6-' + stempel + '@beispiel.de';
   try {
     let bereit = false; for (let i = 0; i < 60 && !bereit; i++) { await new Promise((r) => setTimeout(r, 200)); try { bereit = (await fetch(B6 + '/api/status').then((r) => r.json())).konten === true; } catch (e) { /* noch nicht */ } }
     ok(bereit, 'Testserver mit Konten läuft: ' + B6);
     const c1 = await browser.newContext(telefon), s1 = await neueSeite(c1, B6);
     await s1.goto(B6 + '/app/', { waitUntil: 'networkidle' }); await s1.waitForTimeout(300);
-    const start = await s1.evaluate(() => ({ anmelden: !!document.querySelector('.hero [data-act="anmelden"]'), text: document.querySelector('.hero').textContent }));
+    const start = await s1.evaluate(() => ({ anmelden: !!document.querySelector('.hero [data-act="anmelden"], .wl-kopf [data-act="anmelden"]'), text: document.querySelector('.hero, .wl-kopf').textContent }));
     ok(start.anmelden && /Schon ein Aufmaß gesichert\?/.test(start.text), 'Startbild als Gast: „Schon ein Aufmaß gesichert? Anmelden“');
     await fensterAnlegen(s1, [['Wohnzimmer', 1230, 1410], ['Küche', 1010, 1210]]); await s1.waitForTimeout(300);
     const gast = await s1.evaluate(() => { const k = document.querySelector('.konto-karte'), l = document.querySelector('.liste-in'); return { text: k ? k.textContent : '', nachListe: !!(k && l && k.getBoundingClientRect().top > l.getBoundingClientRect().bottom), vorDatei: !!(k && document.querySelector('.datei-card') && k.getBoundingClientRect().top < document.querySelector('.datei-card').getBoundingClientRect().top), offen: S.sync.offen, ks: !!KS }; });
     ok(/Nur auf diesem Gerät/.test(gast.text) && /Aufmaß sichern/.test(gast.text) && gast.nachListe && gast.vorDatei && gast.offen && !gast.ks, 'Gast mit Fenstern: Karte „Nur auf diesem Gerät · Aufmaß sichern“ direkt unter der Liste; noch nichts auf dem Server');
     await foto(s1, 'app-gast-sichern');
     await s1.click('.konto-karte [data-act="sichern"]'); await s1.waitForSelector('#s-mail');
-    await s1.click('.bb .btn.primary'); await s1.waitForTimeout(200);
+    await s1.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s1.waitForTimeout(200);
     ok(await s1.locator('.kf.bad').count() === 1 && await s1.locator('.kcheck.bad').count() === 1 && await s1.evaluate(() => S.screen === 'sichern' && S.sichern.schritt === 1), 'Sichern: ohne E-Mail und Zustimmung kein Code');
     await foto(s1, 'app-sichern-mail');
-    await s1.fill('#s-mail', mail6); await s1.click('[data-in="sc"][data-f="agb"]'); await s1.click('.bb .btn.primary'); await s1.waitForSelector('#s-code'); await s1.waitForTimeout(250);
+    await s1.fill('#s-mail', mail6); await s1.click('[data-in="sc"][data-f="agb"]'); await s1.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s1.waitForSelector('#s-code'); await s1.waitForTimeout(250);
     await foto(s1, 'app-sichern-code');
     const codeSchirm = await s1.evaluate(() => ({ max: document.getElementById('s-code').getAttribute('maxlength'), text: document.body.innerText, link: (document.querySelector('.link-statt-code') || {}).textContent || '' }));
     ok(codeSchirm.max === '10' && !/sechsstellig/.test(codeSchirm.text) && /Wir haben dir einen Code an/.test(codeSchirm.text) && /Link statt eines Codes, öffne ihn in diesem Browser: Dein Aufmaß liegt bisher nur hier/.test(codeSchirm.link), 'Code-Schritt: Feld für 6 bis 10 Stellen (Länge stellt man bei Supabase ein), kein „sechsstellig“; Hinweis, einen Link statt Code in diesem Browser zu öffnen');
@@ -3000,9 +2992,9 @@ if (teil(15)) {
     const laengen = [];
     for (const pfad of ['/api/kunde/anmelden', '/api/konto/bestaetigen']) for (const c of ['12345', '87654321', '9876543210', '12345678901']) laengen.push(await codeLaenge(pfad, c));
     ok(laengen.every((f, i) => ([1, 2].includes(i % 4) ? /stimmt nicht/.test(f) : /Bitte den Code aus der E-Mail eingeben/.test(f))), 'Anmeldecode mit 8 oder 10 Stellen wird geprüft (Supabase: Email OTP Length), 5 oder 11 Stellen gelten nicht als Code (App und Betriebsbereich)');
-    await s1.fill('#s-code', '999999'); await s1.click('.bb .btn.primary'); await s1.waitForTimeout(500);
+    await s1.fill('#s-code', '999999'); await s1.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s1.waitForTimeout(500);
     const falschC = await s1.evaluate(() => ({ screen: S.screen, err: (S.sichern && S.sichern.err.code) || '', ks: !!KS }));
-    await s1.fill('#s-code', '123456'); await s1.click('.bb .btn.primary');
+    await s1.fill('#s-code', '123456'); await s1.click('.bb .btn.primary, .scr.dna .lg-weiter');
     await s1.waitForFunction(() => S.screen === 'home' && KS, null, { timeout: 8000 }); await ruhig(s1); await s1.waitForTimeout(300);
     const gesichert = await s1.evaluate(async () => ({ karte: document.querySelector('.konto-karte').textContent, liste: (await kontoJson('/api/kunde/aufmasse')).aufmasse, kennung: S.kauf.kennung }));
     ok(falschC.screen === 'sichern' && /stimmt nicht/.test(falschC.err) && !falschC.ks && /Gesichert/.test(gesichert.karte) && gesichert.liste.length === 1 && gesichert.liste[0].kennung === gesichert.kennung && gesichert.liste[0].fenster === 2, 'Nach dem Code: Aufmaß im Konto (2 Fenster), Karte „Gesichert“; ein falscher Code meldet sich');
@@ -3010,19 +3002,19 @@ if (teil(15)) {
     // zweites Gerät: Anmelden, die Liste ist da; Änderung kommt zurück aufs erste Gerät
     const c2 = await browser.newContext(telefon), s2 = await neueSeite(c2, B6);
     await s2.goto(B6 + '/app/', { waitUntil: 'networkidle' }); await s2.waitForTimeout(250);
-    await s2.click('.hero [data-act="anmelden"]'); await s2.waitForSelector('#s-mail');
+    await s2.click('.hero [data-act="anmelden"], .wl-kopf [data-act="anmelden"]'); await s2.waitForSelector('#s-mail');
     ok(await s2.locator('[data-in="sc"]').count() === 0 && /Weiter mit deinem Aufmaß/.test(await s2.evaluate(() => document.body.innerText)), 'Anmelden auf einem anderen Gerät: nur E-Mail und Code, ohne erneute Zustimmung');
     await anmelden(s2, mail6, false);
     await s2.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 }); await s2.waitForTimeout(300);
     const zwei = await s2.evaluate(() => ({ namen: S.windows.map((w) => w.name).join(','), h1: document.querySelector('.hd h1').textContent, karte: (document.querySelector('.konto-karte') || {}).textContent || '' }));
-    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.h1 === 'Weiter, wo du warst.' && /Gesichert/.test(zwei.karte), 'Anderes Gerät nach dem Anmelden: dasselbe Aufmaß, „Weiter, wo du warst.“');
+    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.h1 === 'Deine Fenster.' && /Gesichert/.test(zwei.karte), 'Anderes Gerät nach dem Anmelden: dasselbe Aufmaß, „Deine Fenster.“');
     await s2.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.win.name = 'Wohnzimmer links'; saveWin(); go('home'); }); await ruhig(s2);
     await s1.reload({ waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.windows[0] && S.windows[0].name === 'Wohnzimmer links', null, { timeout: 8000 });
     ok(true, 'Änderung auf dem zweiten Gerät ist nach dem Neuladen auch auf dem ersten da');
     // Kauf auf Gerät 2 (mit Konto direkt zur Kasse), Gerät 1 bekommt den Kauf; danach endet die freie Woche
-    await s2.evaluate(() => go('teilen')); await s2.waitForTimeout(200); await s2.click('.bb .btn.primary'); await s2.waitForSelector('[data-screen="kasse"]', { timeout: 8000 });
+    await s2.evaluate(() => go('teilen')); await s2.waitForTimeout(200); await s2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s2.waitForSelector('[data-screen="kasse"]', { timeout: 8000 });
     const kasse = await s2.evaluate(() => document.body.innerText);
-    await s2.click('[data-in="kc"][data-f="bedingungen"]'); await s2.click('[data-in="kc"][data-f="widerruf"]'); await s2.click('.bb .btn.primary');
+    await s2.click('[data-in="kc"][data-f="bedingungen"]'); await s2.click('[data-in="kc"][data-f="widerruf"]'); await s2.click('.bb .btn.primary, .scr.dna .lg-weiter');
     await s2.waitForFunction(() => S.kauf && S.kauf.paid && S.screen === 'gekauft', null, { timeout: 10000 });
     await s1.reload({ waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.kauf && S.kauf.paid, null, { timeout: 8000 });
     const nach = await s1.evaluate(() => { S.win = kopie(S.windows[1]); S.editIdx = 1; go('fertig'); return { frei: FREI(), note: (document.querySelector('.note.warn') || {}).textContent || '' }; });
@@ -3062,14 +3054,14 @@ if (teil(15)) {
     await s1.evaluate((m) => localStorage.setItem('aufmass.kunde.anfrage', JSON.stringify({ mail: m, zweck: 'anmelden', at: Date.now() })), mail6);
     await s1.goto(linkAdr(tok6), { waitUntil: 'networkidle' });
     await s1.waitForFunction(() => KS && S.windows.length > 0, null, { timeout: 8000 }); await s1.waitForTimeout(200);
-    const link = await s1.evaluate(() => ({ hash: location.hash, mail: KS.mail, n: S.windows.length, screen: S.screen, anfrage: localStorage.getItem('aufmass.kunde.anfrage') }));
+    const link = await s1.evaluate(() => ({ hash: location.hash, pfad: location.pathname, mail: KS.mail, n: S.windows.length, screen: S.screen, anfrage: localStorage.getItem('aufmass.kunde.anfrage') }));
     ok(link.hash === '' && link.mail === mail6 && link.n >= 1 && link.screen === 'home' && !link.anfrage, 'Anmeldelink im Browser, der den Code angefordert hat: ohne Rückfrage angemeldet, zuletzt bearbeitetes Aufmaß geladen, Adresse bereinigt');
     // Ein Link, den dieser Browser nicht angefordert hat (etwa untergeschoben): erst die Rückfrage mit der Adresse des Kontos
     const c3 = await browser.newContext(telefon), s3 = await neueSeite(c3, B6);
     await s3.goto(B6 + '/app/', { waitUntil: 'networkidle' }); await fensterAnlegen(s3, [['Gast-Bad', 600, 800]]); await s3.waitForTimeout(250);
     const vorLink = (await fetch(B6 + '/api/kunde/aufmasse', { headers: { authorization: 'Bearer ' + tok6, accept: 'application/json' } }).then((r) => r.json())).aufmasse.length;
     await s3.goto(linkAdr(tok6), { waitUntil: 'networkidle' }); await s3.waitForFunction(() => S.screen === 'linkanmelden', null, { timeout: 8000 }); await s3.waitForTimeout(200);
-    const frageL = await s3.evaluate(() => ({ hash: location.hash, ks: !!KS, gespeichert: localStorage.getItem('aufmass.kunde'), text: document.body.innerText }));
+    const frageL = await s3.evaluate(() => ({ hash: location.hash, pfad: location.pathname, ks: !!KS, gespeichert: localStorage.getItem('aufmass.kunde'), text: document.body.innerText }));
     await foto(s3, 'app-link-rueckfrage');
     await s3.click('[data-act="link-anmelden-nein"]'); await s3.waitForTimeout(300);
     const nein = await s3.evaluate(() => ({ ks: !!KS, gespeichert: localStorage.getItem('aufmass.kunde'), n: S.windows.length, screen: S.screen }));
@@ -3149,7 +3141,7 @@ if (teil(15)) {
     const messen = (seite) => seite.evaluate(() => {
       const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && r.bottom > 0 && r.top < innerHeight * 4; };
       const groessen = new Set(), klein = [];
-      document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg')) return; if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
+      document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg') || el.closest('.dna')) return; /* Design-DNA: eigene Schriftrollen */ if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
       document.querySelectorAll('#app a, #app button, #app input').forEach((el) => { if (!sichtbar(el) || el.closest('svg') || el.matches('.ulink') || el.type === 'checkbox') return; const h = el.getBoundingClientRect().height; if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px)'); });
       return { groessen: Array.from(groessen), klein: klein, quer: document.scrollingElement.scrollWidth > innerWidth + 1 };
     });
@@ -3233,8 +3225,15 @@ if (teil(16)) {
   const ab0 = await a16.evaluate(() => ({ da: qList(S.win).some((q) => q.id === 'absturz'), titel: document.querySelector('.hd h1').textContent, karten: document.querySelectorAll('.qpanel .qopt').length, knopf: document.querySelector('.qoffen').getAttribute('aria-pressed'), kl: AW.klaerung([S.win], S.proj).map((r) => r.v).join('|') }));
   await a16.click('.qpanel [data-act="absturz"][data-v="gelaender"]'); await a16.waitForTimeout(200);
   const ab1 = await a16.evaluate(() => ({ wert: S.win.absturz, zeile: (specRows(S.win).find((r) => r.k === 'Absturzsicherung') || {}).v, kl: AW.klaerung([S.win], S.proj).map((r) => r.v).join('|'), eg: (S.win.etage = 'eg', qList(S.win).some((q) => q.id === 'absturz')) }));
+  /* „Unten fest“ setzt ein festes Unterlicht aus Glas (Höhe bis etwa 90 cm über dem Boden), ein anderer Weg nimmt es wieder weg */
+  await a16.evaluate(() => { S.win.etage = 'og'; S.win.bru = 450; S.win.ul = false; S.q = 'absturz'; render(true); }); await a16.waitForTimeout(200);
+  await a16.click('.qpanel [data-act="absturz"][data-v="fest"]'); await a16.waitForTimeout(200);
+  const ab2 = await a16.evaluate(() => ({ ul: S.win.ul, ulA: S.win.ulA, ulH: S.win.ulH }));
+  await a16.click('.qpanel [data-act="absturz"][data-v="gelaender"]'); await a16.waitForTimeout(200);
+  const ab3 = await a16.evaluate(() => ({ ul: S.win.ul }));
+  ok(ab2.ul === true && ab2.ulA === 'glas' && ab2.ulH === 450 && ab3.ul === false, 'Absturzsicherung „Unten fest“: festes Unterlicht aus Glas bis 90 cm über dem Boden (450 mm bei 450 mm Brüstung) in Modell und Zeichnung; „Geländer“ nimmt es wieder weg');
   await a16.evaluate(() => { S.win.etage = 'og'; S.win.bru = ''; S.q = 'lage'; render(true); }); await a16.waitForTimeout(200);
-  const lage = await a16.evaluate(() => !!document.querySelector('.qpanel #f-bru'));
+  const lage = await a16.evaluate(() => { const f = document.querySelector('.scr.dna #f-bru'); return !!f && f.getBoundingClientRect().height > 0; });
   ok(ab0.da && /Absturz/.test(ab0.titel) && ab0.karten === 4 && ab0.knopf === 'true' && /Absturzsicherung nötig \(OG, Brüstung 450 mm\): bitte beraten/.test(ab0.kl) && ab1.wert === 'gelaender' && /Geländer außen/.test(ab1.zeile) && /Geländer außen/.test(ab1.kl) && !ab1.eg && lage, 'Absturzsicherung: im OG bei 450 mm Brüstung von selbst gefragt (vier Wege oder „weiß ich noch nicht“), Wahl im Blatt und in der Klärungsliste; im EG keine Frage; im OG ohne Brüstung fragt die Lage nach ihr');
   await a16.evaluate(() => { S.win.bru = 900; S.win.etage = 'eg'; S.q = 'rc'; render(true); }); await a16.waitForTimeout(200);
   const rc0 = await a16.evaluate(() => ({ titel: document.querySelector('.hd h1').textContent, rc1: !!document.querySelector('.qpanel [data-v="rc1"]'), text: document.querySelector('.qpanel').textContent }));
@@ -3298,28 +3297,28 @@ if (teil(16)) {
 
   /* e2) Ohne Foto weiter: Hinweis, warum ein Foto besser ist, abschaltbar; neue Öffnung ohne Einzeichnen; Klärungsliste für den Betrieb */
   await a16.evaluate(() => { localStorage.removeItem('aufmass.ohnefoto.zu'); newWin(); go('fotos'); }); await a16.waitForTimeout(250);
-  const of0 = await a16.evaluate(() => Array.from(document.querySelectorAll('.bb button:not(.bb-zurueck)')).map((b) => b.className + ':' + b.textContent).join('|'));
-  await a16.click('.bb [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
+  const of0 = await a16.evaluate(() => Array.from(document.querySelectorAll('.lg-fuss button:not(.lg-zurueck)')).map((b) => b.getAttribute('data-act') + ':' + b.textContent).join('|'));
+  await a16.click('.lg-fuss [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
   const of1 = await a16.evaluate(() => ({ text: (document.querySelector('.sheet.ofoto') || {}).textContent || '', screen: S.screen }));
-  await a16.check('.sheet.ofoto input[data-in="ohnefoto-zu"]');
+  await a16.click('.sheet.ofoto .ofoto-haekchen'); // Häkchen wie im Artefakt: die ganze Zeile schaltet
   await a16.click('.sheet.ofoto [data-act="ohne-foto-weiter"]'); await a16.waitForTimeout(250);
   const of2 = await a16.evaluate(() => ({ screen: S.screen, ohne: S.win.ohneFoto, zu: localStorage.getItem('aufmass.ohnefoto.zu'), blatt: !!document.querySelector('.sheet.ofoto') }));
   await a16.evaluate(() => { S.win.neu = true; go('fotos'); }); await a16.waitForTimeout(200);
-  await a16.click('.bb [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
+  await a16.click('.lg-fuss [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
   const of3 = await a16.evaluate(() => ({ screen: S.screen, blatt: !!document.querySelector('.sheet.ofoto'), zurueck: SCREENS.planmasse().back[1], einbau: (specRows(S.win).find((r) => r.k === 'Einbau') || {}).v }));
   await a16.evaluate(() => { localStorage.removeItem('aufmass.ohnefoto.zu'); newWin(); go('fotos'); }); await a16.waitForTimeout(200);
-  await a16.click('.bb [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
+  await a16.click('.lg-fuss [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
   await a16.setInputFiles('.sheet.ofoto input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg16 }); await a16.waitForTimeout(400);
-  const of4 = await a16.evaluate(() => ({ blatt: !!document.querySelector('.sheet.ofoto'), foto: !!S.photos.in, fotos: S.win.fotos, weiter: (document.querySelector('.bb .btn.primary') || {}).textContent || '' }));
+  const of4 = await a16.evaluate(() => ({ blatt: !!document.querySelector('.sheet.ofoto'), foto: !!S.photos.in, fotos: S.win.fotos, weiter: (document.querySelector('.lg-weiter') || {}).textContent || '' }));
   const ofw = (o) => AW16.mk(Object.assign({ ohneFoto: true }, o)), kl16o = (wins) => AW16.klaerung(wins, {}).filter((r) => r.kurz === 'Ohne Fotos' || r.kurz === 'Sturz und Statik').map((r) => r.k + ': ' + r.v).join('|'), ohneF = (wins) => AW16.klaerung(wins, {}).filter((r) => r.kurz === 'Ohne Fotos');
   const of5 = { eins: kl16o([ofw({ name: 'Bad' })]), alle: kl16o([ofw(), ofw({ neu: true })]), kurz: AW16.klaerKurz([ofw(), AW16.mk({}), ofw({ fotos: 2 }), ofw()], {}).filter((x) => /^Ohne Fotos/.test(x)).join(', '), nachgereicht: ohneF([ofw({ fotos: 1 })]).length, ohneWahl: ohneF([AW16.mk({})]).length };
   const ent16 = await import(new URL('../functions/api/entwurf.js', import.meta.url).href), wo16 = { name: 'X', mo: { hm: 1200 } }, wo16b = Object.assign({}, wo16, { ohneFoto: true });
   const of6 = (await a16.evaluate(([a, b]) => aenderungFp(a) === aenderungFp(b) && fensterFp(a) !== fensterFp(b), [wo16, wo16b])) && ent16.aenderungFp(wo16) === ent16.aenderungFp(wo16b);
-  ok(of0 === 'btn ghost:Ohne Foto weiter' && of1.screen === 'fotos' && /Mit Foto wird dein Aufmaß besser\./.test(of1.text) && /Rollladenkasten, Laibung, Fensterbänke und Fassade/.test(of1.text) && /Diesen Hinweis nicht mehr anzeigen/.test(of1.text) && /Foto machen/.test(of1.text) &&
+  ok(of0 === 'ohne-foto:Weiter zum Messen' && of1.screen === 'fotos' && /Mit Foto wird dein Aufmaß besser\./.test(of1.text) && /Rollladenkasten, Laibung, Fensterbänke und Fassade/.test(of1.text) && /Diesen Hinweis nicht mehr anzeigen/.test(of1.text) && /Foto machen/.test(of1.text) &&
     of2.screen === 'messen' && of2.ohne === true && of2.zu === '1' && !of2.blatt && of3.screen === 'planmasse' && !of3.blatt && of3.zurueck === 'fotos' && /ohne Foto, Lage nicht eingezeichnet/.test(of3.einbau) &&
     !of4.blatt && of4.foto && of4.fotos === 1 && /Weiter zum Messen/.test(of4.weiter) &&
     of5.eins === 'Pos. 1 Bad: Ohne Fotos erfasst: Einbausituation (Rollladenkasten, Laibung, Fensterbänke, Fassade) vor Ort aufnehmen.' && /^Pos\. 2: Neue Öffnung.*\|Alle Positionen: Ohne Fotos erfasst: .* und Lage der neuen Öffnung vor Ort aufnehmen\.$/.test(of5.alle) && of5.kurz === 'Ohne Fotos (Pos. 1, 4)' && of5.nachgereicht === 0 && of5.ohneWahl === 0 && of6,
-    'Ohne Foto weiter: unten nur dieser Knopf, Hinweis warum ein Foto besser ist, „Nicht mehr anzeigen“ hält (aufmass.ohnefoto.zu), neue Öffnung ohne Einzeichnen mit Rückweg zu den Fotos, „Foto machen“ öffnet die Kamera und schließt den Hinweis; Klärungsliste „Ohne Fotos“ je Position oder für alle, nicht nach einem nachgereichten Foto; die Wahl zählt in App und Server nicht als Änderung');
+    'Ohne Foto: „Weiter zum Messen“ zeigt erst den Hinweis, warum ein Foto besser ist, „Nicht mehr anzeigen“ hält (aufmass.ohnefoto.zu), neue Öffnung ohne Einzeichnen mit Rückweg zu den Fotos, „Foto machen“ öffnet die Kamera und schließt den Hinweis; Klärungsliste „Ohne Fotos“ je Position oder für alle, nicht nach einem nachgereichten Foto; die Wahl zählt in App und Server nicht als Änderung');
 
   /* f) Gestaltung übernehmen */
   await a16.evaluate((MO) => {
@@ -3352,8 +3351,15 @@ if (teil(16)) {
   const pdf16 = path16.join(os16.tmpdir(), 'eeziframes-pruefung-klaerung.pdf'); fs16.writeFileSync(pdf16, Buffer.from(b64, 'base64'));
   const pt = (n) => { try { return cp16.execFileSync('pdftotext', ['-layout'].concat(n ? ['-f', String(n), '-l', String(n)] : []).concat([pdf16, '-'])).toString('utf8'); } catch (e) { return ''; } };
   /* Neues Vorgehen (Strang S5): Seite 1 Übersicht mit der Klärungsliste (Pflicht zuerst), danach je Position eine Seite, am Ende die Übersicht */
-  const s1 = pt(1), alle16 = pt(0), nS16 = (() => { try { return +((/Pages:\s+(\d+)/.exec(cp16.execFileSync('pdfinfo', [pdf16]).toString('utf8')) || [0, 0])[1]); } catch (e) { return 0; } })(), posSeite = [2, 3].find((n) => /MAUERÖFFNUNG/.test(pt(n)) && /WÜNSCHE DES KUNDEN/.test(pt(n)));
-  ok(/MIT DEM KUNDEN ZU KLÄREN/.test(s1) && /PFLICHT/.test(s1) && /Absturzsicherung nötig \(OG, Brüstung 600 mm\)/.test(s1) && /Bauordnung/.test(s1) && posSeite && /Übersicht\./.test(pt(nS16 - 1) + pt(nS16)) && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(alle16) && /Förderwert\s+Uw höchstens 0,95/.test(alle16) && /offen, bitte beraten/.test(alle16) && /Absturz-\s/.test(alle16) && !/Absturzsicheru\s/.test(alle16) && /Auf einen Blick/.test(alle16) && /Kasten: Einbaukasten innen im Sturz/.test(alle16), 'PDF: Seite 1 zeigt die Klärungsliste mit Grund je Punkt, Pflicht zuerst; danach je Position eine Seite mit Maueröffnung, Wünschen, Zielwert, „offen“ (Beschriftung an der Wortfuge getrennt) und KI-Fachangaben; am Ende die Übersicht');
+  const s1 = pt(1), alle16 = pt(0), nS16 = (() => { try { return +((/Pages:\s+(\d+)/.exec(cp16.execFileSync('pdfinfo', [pdf16]).toString('utf8')) || [0, 0])[1]); } catch (e) { return 0; } })(), posSeite = [2, 3, 4, 5, 6].find((n) => /MAUERÖFFNUNG/.test(pt(n)) && /WÜNSCHE DES KUNDEN/.test(pt(n)));
+  ok(/MIT DEM KUNDEN ZU KLÄREN/.test(s1) && /PFLICHT/.test(s1) && /Absturzsicherung nötig \(OG, Brüstung 600 mm\)/.test(s1) && /Bauordnung/.test(s1) && posSeite && [1, 2, 3, 4, 5].some((n) => n < posSeite && /Übersicht\./.test(pt(n))) && /Aufstellung\./.test(alle16) && nS16 > posSeite && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(alle16) && /Förder(?:wert|ziel)\s+Uw höchstens 0,95/.test(alle16) && /offen, bitte beraten/.test(alle16) && (/Absturz-\s/.test(alle16) || /Absturzsicherung\s/.test(alle16)) && !/Absturzsicheru\s/.test(alle16) && /Auf einen Blick/.test(alle16) && /Kasten: Einbaukasten innen im Sturz/.test(alle16), 'PDF: Seite 1 zeigt die Klärungsliste mit Grund je Punkt, Pflicht zuerst; danach je Position eine Seite mit Maueröffnung, Wünschen, Zielwert, „offen“ (Beschriftung an der Wortfuge getrennt) und KI-Fachangaben; vor den Positionen die Übersicht nach Geschoss und die Aufstellung nach Gewerk');
+  /* Durchschrift für den Kunden (Variante anfrage): kein Maß des Projekts, keine Angabe in mm, Hinweis auf das vollständige Blatt beim
+     Betrieb, Telefonnummer in einer Zeile, keine Aufstellung */
+  const ds16 = await a16.evaluate(async () => { const b = window.Blatt.pdf({ variante: 'anfrage', sie: true, marke: { name: 'Fensterbau Test', tel: '0221 123 456 0', mail: 'anfrage@fensterbau-test.de', host: 'fensterbau-test.de' }, nr: 'A-2026-0001', fenster: S.windows, projekt: S.proj, kunde: { name: 'Familie Weber' }, ausgabe: 'bytes' }); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); const werte = []; S.windows.forEach((w) => { const d = AW.derive(w); [d.moW, d.moH, d.elW, d.elH, w.bru].concat(Object.values(w.mo || {})).forEach((v) => { if (Number(v) >= 300) werte.push(Number(v)); }); }); return { b64: btoa(s), werte: werte }; });
+  const ds16p = path16.join(os16.tmpdir(), 'eeziframes-pruefung-durchschrift.pdf'); fs16.writeFileSync(ds16p, Buffer.from(ds16.b64, 'base64'));
+  const dsT = (() => { try { return cp16.execFileSync('pdftotext', ['-layout', ds16p, '-']).toString('utf8'); } catch (e) { return ''; } })();
+  const th16 = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.'), leck16 = ds16.werte.filter((v) => new RegExp('(^|[^\\d.,])(' + v + '|' + th16(v).replace('.', '\\.') + ')(?![\\d.,]\\d)').test(dsT));
+  ok(dsT.length > 200 && !leck16.length && !/\d\s*mm\b/.test(dsT) && /DURCHSCHRIFT · OHNE MA(?:SS|ẞ)E/.test(dsT) && /Das vollständige Aufmaßblatt mit Maßen schickt Fensterbau Test/.test(dsT) && /Telefon 0221 123 456 0/.test(dsT) && !/Aufstellung\./.test(dsT) && /Ihre Positionen\./.test(dsT), 'Durchschrift für den Kunden: kein Maß des Projekts (' + ds16.werte.length + ' Werte geprüft' + (leck16.length ? ', gefunden: ' + leck16.join(', ') : '') + '), Hinweis auf das vollständige Blatt beim Betrieb, Telefonnummer in einer Zeile, keine Aufstellung');
   const rund = await a16.evaluate(() => { const w = Object.assign(baseWin(), { name: 'Terrasse', offen: { fa: true }, absturz: 'gelaender', erreichbar: 'ja', massOk: true }); artSetzen(w, 'balkon'); w.bt.griffA = 'abschliessbar'; const o = unpackProject(packProject([w], Object.assign({}, PROJ0, { foerdweg: 'steuer' }), null)); const alt = unpackProject(packProject([baseWin()], PROJ0, null)); return { offen: o.w[0].offen, absturz: o.w[0].absturz, erreichbar: o.w[0].erreichbar, ok: o.w[0].massOk, bt: o.w[0].bt, fw: o.p.foerdweg, altOffen: JSON.stringify(alt.w[0].offen) }; });
   ok(rund.offen.fa && rund.absturz === 'gelaender' && rund.erreichbar === 'ja' && rund.ok === true && rund.bt.griffA === 'abschliessbar' && rund.fw === 'steuer' && rund.altOffen === '{}', 'Aufmaß-Code trägt offene Punkte, Absturzsicherung, Erreichbarkeit, Balkontür und Förderweg; ohne Angaben bleibt nichts offen');
   sauber(a16, 'Erstaufmaß in der App ohne Fehler');
@@ -3371,6 +3377,8 @@ if (teil(16)) {
   /* i) Aus der Durchsicht: nichts entscheidet still eine Vorgabe, Rückwege bleiben sicher, lange Listen passen ins PDF */
   const kl = (wins, p) => AW16.klaerung(wins, p || {}).map((r) => r.k + ': ' + r.v).join('\n');
   ok(AW16.uwZiel(AW16.mk({ art: 'hst', hst: { schema: 'A', richtung: 'R', schwelle: 'flach' }, offen: { schwelle: true } }), pB).wert === 0.95 && !/Glas für|3-fach-Glas/.test(kl([AW16.mk({ glas: '2' })], { foerdweg: 'bafa', gebaeude: 'denkmal' })) && /schafft praktisch nur 3-fach-Glas/.test(kl([AW16.mk({ glas: '2' })], { foerdweg: 'bafa' })), 'Förderung: offene Schwelle zählt nicht als barrierearm; im Baudenkmal (Uw 1,4) kein Hinweis, dass nur 3-fach-Glas reicht');
+  const kl850 = AW16.klaerung([AW16.mk({ etage: 'og', bru: 850 })], {}), kl790 = AW16.klaerung([AW16.mk({ etage: 'og', bru: 790 })], {});
+  ok(kl850.some((r) => /^absturz-/.test(r.id) && r.gruppe === 'vorort' && /Absturzhöhe prüfen \(OG, Brüstung 850 mm\): bis 12 m Absturzhöhe genügen 80 cm/.test(r.v)) && !kl850.some((r) => /Absturzsicherung nötig/.test(r.v)) && kl790.some((r) => r.gruppe === 'pflicht' && /Absturzsicherung nötig \(OG, Brüstung 790 mm\)/.test(r.v)), 'Brüstung 80 bis 89 cm im OG: „Absturzhöhe prüfen“ vor Ort statt Pflicht (über 12 m 90 cm); unter 80 cm bleibt es Pflicht');
   ok(/Absturzsicherung nötig \(OG, bodentief\)/.test(kl([AW16.mk({ etage: 'og', bru: 0 })])) && /Absturzsicherung nötig \(DG, bodentief laut Foto\)/.test(kl([AW16.mk({ etage: 'dg', bru: '', ki: { fach: { bruestung: 'bodentief' } } })])) && /Fensterbank außen laut Foto aus Faserzement: vor dem Ausbau auf Asbest prüfen/.test(kl([AW16.mk({ ki: { fach: { fba: 'faserzement' } } })])) && !/Lüftungskonzept nach DIN 1946-6 erforderlich/.test(kl([AW16.mk({ anzahl: 4 })], {})) && /Zahl der Fenster im Haus fehlt/.test(kl([AW16.mk({ anzahl: 4 })], {})) && AW16.klaerKurz([AW16.mk({ mo: MO(1230, 1410), el: { w: 1230, h: 1410 }, ki: { fach: { fbi: 'faserzement' } } })], {}).join() === 'Asbest prüfen (Pos. 1)', 'Klärungsliste: Brüstung 0 heißt bodentief, „laut Foto“ nur ohne Maß; Faserzement-Fensterbank als Asbest-Prüfpunkt; ohne Zahl der Fenster im Haus kein Lüftungskonzept, aber die Frage nach der Zahl');
   const ctxD = await browser.newContext(telefon), d16 = await neueSeite(ctxD);
   await d16.goto(BASE + '/app/', { waitUntil: 'networkidle' });
@@ -3391,13 +3399,30 @@ if (teil(16)) {
   const keineExtras = await d16.evaluate(() => !S.win.offen.glasfn && S.win.glasfn.length === 0);
   ok(br.offen && br.breite === 18 && /offen, bitte beraten, 18 mm/.test(br.zeile) && radio.offen && radio.knopf === 'true' && !getippt && geloescht.offen && geloescht.wunsch === '' && /außen offen, bitte beraten/.test(geloescht.zeile) && !nachListe.offen && nachListe.fa === '9016' && keineExtras, 'Nichts entscheidet still: die Sprossenbreite lässt die Sprossenart offen; „Weiß ich noch nicht“ erneut antippen bleibt offen (nur Glas-Extras: aus heißt keine); eine getippte und wieder gelöschte Farbe ist wieder offen, nach einer Farbe aus der Liste nicht');
   await d16.evaluate((MO) => { const w = Object.assign(baseWin(), { name: 'Kind', etage: 'og', bru: '', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 } }); S.win = w; S.q = 'lage'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(200);
-  await d16.click('.qpanel [data-act="bump"][data-f="bru"][data-v="10"]'); await d16.waitForTimeout(150);
-  const lage16 = await d16.evaluate(() => ({ bru: S.win.bru, feld: !!document.querySelector('.qpanel #f-bru') }));
-  await d16.click('.qpanel [data-act="bump"][data-f="bru"][data-v="-10"]'); await d16.click('.qpanel [data-act="bump"][data-f="bru"][data-v="-10"]'); await d16.waitForTimeout(150);
-  const lage16b = await d16.evaluate(() => ({ bru: S.win.bru, feld: !!document.querySelector('.qpanel #f-bru'), frage: qList(S.win).some((q) => q.id === 'absturz') }));
+  await d16.fill('#f-bru', '86'); await d16.waitForTimeout(150);
+  const lage16 = await d16.evaluate(() => ({ bru: S.win.bru, mm: document.getElementById('lg-bru-mm').textContent, warn: !document.querySelector('.scr.dna .lg-warn').hidden }));
+  await d16.fill('#f-bru', '75'); await d16.waitForTimeout(150);
+  const lage16b = await d16.evaluate(() => ({ bru: S.win.bru, warn: !document.querySelector('.scr.dna .lg-warn').hidden, frage: qList(S.win).some((q) => q.id === 'absturz') }));
+  await d16.click('.scr.dna [data-act="lg-boden"]'); await d16.waitForTimeout(150);
+  const lage16c = await d16.evaluate(() => ({ bru: S.win.bru, tief: document.querySelector('[data-act="lg-boden"]').getAttribute('aria-pressed'), feld: document.getElementById('f-bru').value, mm: document.getElementById('lg-bru-mm').textContent }));
   await d16.evaluate(() => { S.win.bru = 0; S.q = 'absturz'; render(true); }); await d16.waitForTimeout(150);
   const sub0 = await d16.evaluate(() => document.querySelector('.hd').textContent);
-  ok(lage16.bru === 860 && lage16.feld && lage16b.bru === 840 && lage16b.feld && lage16b.frage && /Bodentief im OG: Unter 80 cm \(über 12 m Höhe 90 cm\)/.test(sub0) && !/laut Foto/i.test(sub0), 'Lage im OG: das Feld für die Brüstung bleibt beim Antippen stehen und beginnt bei einem üblichen Maß (850 mm); 0 mm heißt bodentief, nicht „laut Foto“; Regel 80 cm, ab 12 m 90 cm');
+  ok(lage16.bru === 860 && /= 860 mm/.test(lage16.mm) && !lage16.warn && lage16b.bru === 750 && lage16b.warn && lage16b.frage && lage16c.bru === 0 && lage16c.tief === 'true' && lage16c.feld === '' && /Bodentief/.test(lage16c.mm) && /Bodentief im OG: Unter 80 cm \(über 12 m Höhe 90 cm\)/.test(sub0) && !/laut Foto/i.test(sub0), 'Lage im OG: Brüstung in cm, gespeichert in mm („= 860 mm“), der Satz zur Absturzsicherung erst unter 80 cm, „bodentief“ heißt 0 mm und leert das Feld; Regel 80 cm, ab 12 m 90 cm');
+  // Lage im Look der Design-DNA: ein Kopf mit Logo, kein Querscrollen, OG-Nummer im Blatt, Brüstung im OG Pflicht, doppelte Namen
+  await d16.evaluate((MO) => { const k = Object.assign(baseWin(), { name: 'Küche', etage: 'eg', mo: MO, el: { w: 1230, h: 1410 } }); S.windows = [k]; const w = Object.assign(baseWin(), { name: '', etage: 'eg', bru: '', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 } }); S.win = w; S.editIdx = -1; S.q = 'lage'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
+  const dna0 = await d16.evaluate(() => ({ koepfe: document.querySelectorAll('header.hdr, .lg-kopf').length, logo: !!document.querySelector('.lg-kopf .lg-marke .fi-logo'), quer: document.querySelector('.scroll').scrollWidth > document.querySelector('.scroll').clientWidth + 1 || document.documentElement.scrollWidth > innerWidth + 1, schrift: getComputedStyle(document.querySelector('.lg-frage h1')).fontFamily, weiter: !document.querySelector('.lg-weiter').disabled }));
+  await d16.click('.lg-vorschlaege [data-v="Küche"]'); await d16.waitForTimeout(150);
+  const dna1 = await d16.evaluate(() => ({ name: S.win.name, doppelt: !document.querySelector('.lg-doppelt').hidden, wahl: Array.from(document.querySelectorAll('.lg-doppelt-wahl button')).map((b) => b.textContent).join('|'), etikett: document.querySelector('.lg-et-name').textContent }));
+  await d16.click('.lg-doppelt-wahl button'); await d16.click('.lg-stockwahl [data-v="og"]'); await d16.click('[data-act="lg-og"][data-v="2"]'); await d16.waitForTimeout(150);
+  await d16.click('.lg-weiter'); await d16.waitForTimeout(450);
+  const dna2 = await d16.evaluate(() => ({ q: S.q, name: S.win.name, og: S.win.ogNr, grund: document.getElementById('lg-grund').textContent, zeile: !document.getElementById('lg-grund').hidden, markiert: !!document.querySelector('.lg-bru-feld.lg-markiert'), fokus: document.activeElement && document.activeElement.id, haus: document.querySelector('.lg-haus text[data-t="og"]').textContent, text: document.querySelector('.lg-stocktext').textContent, blatt: (specRows(S.win).find((r) => r.k === 'Lage') || {}).v }));
+  await d16.click('.lg-vorschlaege [data-v="Bad"]'); await d16.waitForTimeout(100);
+  const dna3 = await d16.evaluate(() => S.win.name);
+  await d16.fill('#f-bru', '90'); await d16.waitForTimeout(150);
+  const dna4 = await d16.evaluate(() => ({ zeile: !document.getElementById('lg-grund').hidden, markiert: !!document.querySelector('.lg-markiert') }));
+  await d16.click('.lg-weiter'); await d16.waitForTimeout(300);
+  const dna5 = await d16.evaluate(() => S.q);
+  ok(dna0.koepfe === 1 && dna0.logo && !dna0.quer && /Outfit/.test(dna0.schrift) && dna0.weiter && dna1.name === 'Küche' && dna1.doppelt && dna1.wahl === 'Küche links|Küche rechts|Küche 2' && dna1.etikett === 'Küche' && dna2.q === 'lage' && dna2.name === 'Küche links' && dna2.og === 2 && /Brüstung/.test(dna2.grund) && dna2.zeile && dna2.markiert && dna2.fokus === 'f-bru' && dna2.haus === '2. OG' && dna2.text === '2. Obergeschoss' && /Küche links, 2\. OG/.test(dna2.blatt) && dna3 === 'Bad links' && !dna4.zeile && !dna4.markiert && dna5 !== 'lage', 'Lage (Design-DNA): ein Kopf mit Logo, Outfit, kein Querscrollen; Vorschlag ergänzt den Namen, doppelter Name mit Vorschlägen; im OG 1./2./3. OG („2. OG“ im Haus und im Blatt); ohne Brüstung kein Weiter (Zeile, Feld markiert, Fokus); danach geht es weiter');
   /* Gestaltung: nichts vorgewählt bei gleichen Vorgaben; „Doch neu gestalten“ nach dem Speichern nimmt keine gespeicherten Änderungen zurück */
   await d16.evaluate((MO) => { S.windows = []; S.editIdx = -1; S.angelegt = 0; const a = Object.assign(baseWin(), { name: 'Flur', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = a; saveWin(); const b = Object.assign(baseWin(), { name: 'Gast', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = b; S.editIdx = -1; S.designVorher = null; S.q = 'design'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
   const vorgewaehlt = await d16.evaluate(() => ({ gedrueckt: document.querySelectorAll('.qpanel .qopt[aria-pressed="true"]').length, nav: Array.from(document.querySelectorAll('.qnav button')).map((b) => b.textContent.trim()).filter(Boolean).join() }));
@@ -3415,14 +3440,14 @@ if (teil(16)) {
   ok(/3 Wünsche offen/.test(karten16.win) && /3 Wünsche offen/.test(karten16.check) && !/Glas|Material/.test(karten16.win + karten16.check) && karten16.proj === '' && !anfr.note && anfr.feld === '' && /z\. B\. 12/.test(anfr.ph), 'Karten zählen offene Wünsche (Glas, Material, Insektenschutz), ohne sie zu nennen; die Zahl der Fenster im Haus hat keine Vorgabe mehr, ohne sie kein Hinweis aufs Lüftungskonzept');
   /* PDF: eine lange Klärungsliste wird über die Seiten geteilt, nichts fällt weg; offene Angaben in der Übersicht */
   const b64L = await d16.evaluate(async () => {
-    const a = []; for (let i = 0; i < 20; i++) { const w = Object.assign(baseWin(), { name: 'Zimmer ' + (i + 1), etage: 'og', bru: 500, erreichbar: 'ja', sart: 'rollladen', roll: 'aufsatz', antrieb: 'motor', w: 1000, h: 1200, mo: { hm: 1260, hl: 1260, hr: 1260, wm: 1060, wt: 1060, wb: 1060 }, el: { w: 1000, h: 1200 }, offen: { fa: true, glas: true, insekt: true }, wid: 'z' + i, t0: zeit() }); a.push(w); }
+    const a = []; for (let i = 0; i < 20; i++) { const w = Object.assign(baseWin(), { name: 'Zimmer ' + (i + 1), etage: 'og', bru: 500 + i, erreichbar: 'ja', sart: 'rollladen', roll: 'aufsatz', antrieb: 'motor', w: 1000, h: 1200, mo: { hm: 1260, hl: 1260, hr: 1260, wm: 1060, wt: 1060, wb: 1060 }, el: { w: 1000, h: 1200 }, offen: { fa: true, glas: true, insekt: true }, wid: 'z' + i, t0: zeit() }); a.push(w); }
     S.windows = a; S.proj = Object.assign({}, PROJ0, { name: 'Familie Lang', total: 24, foerdweg: 'offen' }); S.kauf = { paid: true, mail: 'test@beispiel.de' };
     await blattSchrift(); const blob = await blattPDF('fensterbauer'); const buf = new Uint8Array(await blob.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000)); return btoa(s);
   });
   const pdfL = path16.join(os16.tmpdir(), 'eeziframes-pruefung-klaerung-lang.pdf'); fs16.writeFileSync(pdfL, Buffer.from(b64L, 'base64'));
   const txtL = (() => { try { return cp16.execFileSync('pdftotext', ['-layout', pdfL, '-']).toString('utf8'); } catch (e) { return ''; } })();
-  const zaehle = (re) => (txtL.match(re) || []).length, absturzZeilen = zaehle(/Absturzsicherung nötig \(OG, Brüstung 500 mm\)/g), rcZeilen = zaehle(/Die Polizei empfiehlt RC2\./g), stromZeilen = zaehle(/Elektrischer Antrieb gewünscht/g);
-  ok(absturzZeilen === 20 && rcZeilen === 20 && stromZeilen === 20 && /Alle Positionen\s+[^\n]*Insektenschutz: offen, bitte beraten/.test(txtL) && /MIT DEM KUNDEN ZU KLÄREN, FORTSETZUNG/.test(txtL) && /Insektenschutz\s+offen/.test(txtL), 'PDF mit 20 Positionen: die lange Klärungsliste geht mit „Fortsetzung“ über die Seiten, alle Absturz-, RC2- und Strom-Zeilen und die offenen Wünsche stehen darin; die Übersicht zeigt offene Angaben als offen (' + absturzZeilen + ' / ' + rcZeilen + ' / ' + stromZeilen + ')');
+  const zaehle = (re) => (txtL.match(re) || []).length, absturzZeilen = zaehle(/Absturzsicherung nötig \(OG, Brüstung 5\d\d mm\)/g), rcZeilen = zaehle(/Die Polizei empfiehlt RC2\./g), stromZeilen = zaehle(/Elektrischer Antrieb gewünscht/g);
+  ok(absturzZeilen === 40 && rcZeilen === 21 && stromZeilen === 21 && /Alle Positionen\s+[^\n]*Die Polizei empfiehlt RC2/.test(txtL) && /Alle Positionen\s+[^\n]*Insektenschutz: offen, bitte beraten/.test(txtL) && /MIT DEM KUNDEN ZU KLÄREN, FORTSETZUNG/.test(txtL) && /Insektenschutz\s+offen/.test(txtL), 'PDF mit 20 Positionen: die lange Klärungsliste geht mit „Fortsetzung“ über die Seiten; je Position eine Absturz-Zeile, gleiche Punkte (RC2, Strom) in einer Zeile „Alle Positionen“, dazu jeder Punkt ausgeschrieben auf seiner Positionsseite; die Übersicht zeigt offene Angaben als offen (' + absturzZeilen + ' / ' + rcZeilen + ' / ' + stromZeilen + ')');
   sauber(d16, 'Nachbesserungen aus der Durchsicht ohne Fehler');
   await ctxD.close();
   const ctxQ = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' }), q16 = await neueSeite(ctxQ);
@@ -3435,7 +3460,7 @@ if (teil(16)) {
   const messen16 = (seite) => seite.evaluate(() => {
     const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && r.bottom > 0 && r.top < innerHeight * 4; };
     const groessen = new Set(), klein = [];
-    document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg') || el.closest('.w3d')) return; if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
+    document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg') || el.closest('.w3d') || el.closest('.dna')) return; /* Design-DNA: eigene Schriftrollen */ if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
     document.querySelectorAll('#app a, #app button, #app input, #app summary').forEach((el) => { if (!sichtbar(el) || el.closest('svg') || el.closest('.w3d') || el.matches('.ulink') || el.closest('.sheet')) return; const h = (el.matches('input') && el.closest('label') || el).getBoundingClientRect().height; /* ein Feld im Label: getippt wird das Label (Foto-Kachel) */ if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px: ' + (el.textContent || '').trim().slice(0, 24) + ')'); });
     return { groessen: Array.from(groessen).sort((x, y) => x - y), klein: klein, quer: document.scrollingElement.scrollWidth > innerWidth + 1 };
   });
@@ -3479,11 +3504,12 @@ if (teil(16)) {
     const nzAlle = await sk.evaluate((MO) => {
       const fehlt = [], ohneWo = [], ohnePfeil = []; let n = 0;
       S.windows = demoProject(); persist(); newWin(); Object.assign(S.win, { name: 'Küche', mo: Object.assign({}, MO), el: { w: 1230, h: 1360 } });
-      const pruef = (wo) => { n++; if (!document.querySelector('.hd .nz-knopf')) fehlt.push(wo); if (!document.querySelector('.hdr-wo')) ohneWo.push(wo); };
-      ['start', 'fotos', 'messen', 'rest', 'ergebnis'].forEach((sc) => { go(sc); pruef(sc); if (sc !== 'messen' && sc !== 'rest' && !document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
+      /* Messen und Ränder (Messen im Raum): die Notiz steht im Info-Blatt, oben steht nur die Überschrift */
+      const pruef = (wo) => { n++; const raum = wo === 'messen' || wo === 'rest'; if (raum) { S.gloss = wo === 'messen' ? MESS[S.mess.step].g : 'raender'; render(); } if (!document.querySelector(raum ? '.sheet [data-act="notiz-auf"]' : '.hd .nz-knopf, .scr.dna .lg-notiz-knopf')) fehlt.push(wo); if (raum) { S.gloss = null; render(); } if (!document.querySelector('.hdr-wo, .scr.dna .lg-kopf [data-act="wohin"]')) ohneWo.push(wo); }; // Design-DNA (Lage): Notiz und Übersicht im eigenen Kopf
+      ['start', 'fotos', 'messen', 'rest', 'ergebnis'].forEach((sc) => { go(sc); if (sc === 'rest') { S.rest.i = 0; render(); } pruef(sc); if (sc !== 'messen' && sc !== 'rest' && !document.querySelector('.bb .bb-zurueck, .scr.dna .lg-fuss .lg-zurueck')) ohnePfeil.push(sc); });
       ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { artSetzen(S.win, art); S.win.sart = 'rollladen'; S.win.iart = 'rollo'; qList(S.win).forEach((q) => { if (q.id === 'notiz') return; S.q = q.id; go('frage'); pruef(art + ':' + q.id); }); });
-      S.win.neu = true; go('planmasse'); pruef('planmasse'); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push('planmasse'); S.win.neu = false; artSetzen(S.win, 'fenster');
-      ['anfrage', 'anfrage2', 'anfrage3'].forEach((sc) => { go(sc); if (!document.querySelector('.hd .nz-knopf')) fehlt.push(sc); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
+      S.win.neu = true; go('planmasse'); pruef('planmasse'); if (!document.querySelector('.bb .bb-zurueck, .scr.dna .lg-fuss .lg-zurueck')) ohnePfeil.push('planmasse'); S.win.neu = false; artSetzen(S.win, 'fenster');
+      ['anfrage', 'anfrage2', 'anfrage3'].forEach((sc) => { go(sc); if (!document.querySelector('.hd .nz-knopf, .scr.dna .lg-notiz-knopf')) fehlt.push(sc); if (!document.querySelector('.bb .bb-zurueck, .scr.dna .lg-fuss .lg-zurueck')) ohnePfeil.push(sc); }); // Fürs Angebot im Look der Design-DNA
       return { fehlt: fehlt, ohneWo: ohneWo, ohnePfeil: ohnePfeil, n: n };
     }, MOK);
     ok(nzAlle.n > 100 && !nzAlle.fehlt.length && !nzAlle.ohneWo.length && !nzAlle.ohnePfeil.length, 'Konfigurator: „Notiz“ und „Übersicht“ auf jedem Schritt und jeder Frage (' + nzAlle.n + ' Bildschirme) und den Anfrage-Seiten, unten überall der Pfeil zurück' + (nzAlle.fehlt.length + nzAlle.ohneWo.length + nzAlle.ohnePfeil.length ? ': ' + nzAlle.fehlt.concat(nzAlle.ohneWo, nzAlle.ohnePfeil).slice(0, 8).join(', ') : ''));
@@ -3503,31 +3529,40 @@ if (teil(16)) {
       nzM.sauber === JSON.stringify({ fa: 'Haustür', lang: 'x'.repeat(500) }) && nzM.fromApp === JSON.stringify({ glas: 'Schallschutz?' }) && nzM.proj === JSON.stringify({ anfrage: 'Haustür auch' }) && nzM.alt === '{}' && nzM.stelle === 'Öffnung, Flügel 2|unbekannt' && nzM.liste === 'start,fa' && nzM.server,
     'Notiz: Blatt mit Textfeld, gespeicherte Notiz am Knopf erkennbar und beim Öffnen wieder da, Esc schließt; sie geht ins gespeicherte Fenster, in den Aufmaß-Code (Projekt-Notizen der Anfrage ebenso), zählt in App und Server nicht als Änderung; das Modell säubert (500 Zeichen, nur gültige Stellen), alte Aufmaße ohne Notizen bleiben gültig');
     /* Gespeichert: keine Gesamtübersicht */
-    const fertigK = await sk.evaluate(() => ({ screen: S.screen, t: document.querySelector('.scr').textContent, cream: document.querySelectorAll('.btn.primary').length }));
+    const fertigK = await sk.evaluate(() => ({ screen: S.screen, t: document.querySelector('.scr').textContent, cream: document.querySelectorAll('.btn.primary, .dna-pille:not(.dna-pille--leise)').length }));
     ok(fertigK.screen === 'fertig' && !/Alle Angaben|\d mm|Farbe wie|Aus deinen Fotos gelesen/.test(fertigK.t) && /Wie geht es weiter\?/.test(fertigK.t) && fertigK.cream === 1, 'Nach dem Speichern: keine Übersicht aller Angaben, keine Maße und keine Notiztexte, dafür „Wie geht es weiter?“ mit genau einer Hauptaktion');
-    /* Zifferntasten: Pfeil zurück unten links, „Weiter“ über die ganze Breite; Browser-Zurück bleibt in der App */
-    await sk.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await sk.waitForTimeout(250);
+    /* Messen (Fassung des Inhabers, 27.10.2026): feste Ansicht je Element statt 3-D, die Überschrift oben in der Bühne, unter dem Element
+       das Feld (Systemtastatur, keine Zifferntasten), Unterzeile und Notiz unter der Bühne; die Pille erscheint erst mit dem Wert,
+       „Weiter“ prüft, speichert und geht zu Maß 2 auf derselben Folie; der Pfeil führt zum vorigen Maß mit seinem Wert; Browser-Zurück bleibt in der App */
+    await sk.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await sk.waitForTimeout(500);
     const adresse = sk.url();
-    for (const z of ['1', '3', '9', '0']) await sk.click('.keypad [data-v="' + z + '"]');
-    await sk.click('.keypad [data-v="ok"]'); await sk.waitForTimeout(250);
-    const tasten = await sk.evaluate(() => { const k = Array.from(document.querySelectorAll('.keypad button')).map((b) => b.getAttribute('data-v')), pad = document.querySelector('.keypad').getBoundingClientRect(), okb = document.querySelector('.keypad [data-v="ok"]').getBoundingClientRect(), zb = document.querySelector('.keypad [data-v="zurueck"]').getBoundingClientRect(), eins = document.querySelector('.keypad [data-v="1"]').getBoundingClientRect(); return { reihe: k.slice(9).join(','), voll: okb.width > pad.width - 4, gleich: Math.abs(zb.height - eins.height) < 1 && Math.abs(zb.width - eins.width) < 1, step: S.mess.step }; });
-    await sk.click('.keypad [data-v="zurueck"]'); await sk.waitForTimeout(200);
-    const zurueck1 = await sk.evaluate(() => ({ step: S.mess.step, cur: S.mess.cur }));
+    const dock = await sk.evaluate(() => { const st = document.getElementById('mess-buehne'), h1 = document.getElementById('mess-h1'), ein = document.getElementById('mess-eingabe'), fe = document.getElementById('mess-feld').getBoundingClientRect(), b = st.getBoundingClientRect(), u = document.querySelector('.md-unter');
+      return { tasten: document.querySelectorAll('.ez-taste').length, eingabe: !!ein && ein.getAttribute('inputmode') === 'numeric', titelInBuehne: st.contains(h1), feldUnten: fe.bottom <= b.bottom && fe.top > b.top + b.height / 2, unterUnter: !!u && u.getBoundingClientRect().top >= b.bottom - 1 && !!u.querySelector('.lg-notiz-knopf') && !!u.querySelector('#mess-unterzeile'),
+        bild: /\/bilder\/konfigurator\/mess\/fenster\.webp$/.test(document.getElementById('mess-bild').src), w3d: !!document.querySelector('.w3d-stage'), h1: h1.textContent, i: document.getElementById('mess-i').getAttribute('data-k'), pillen: document.querySelectorAll('.scr .lg-fuss .dna-pille').length, pilleWeg: getComputedStyle(document.getElementById('mess-weiter')).visibility === 'hidden', hoch: Math.round(b.height), ziele: Array.from(document.querySelectorAll('#mess-zurueck, #mess-feld, #mess-gross-auf')).every((x) => x.getBoundingClientRect().height >= 44) }; });
+    await sk.click('#mess-feld'); await sk.keyboard.type('1390'); await sk.waitForTimeout(150);
+    const getippt = await sk.evaluate(() => ({ wert: document.getElementById('mess-eingabe').value, zeile: document.getElementById('mess-zeile').textContent, pille: getComputedStyle(document.getElementById('mess-weiter')).visibility + ':' + document.getElementById('mess-weiter').textContent }));
+    await sk.click('#mess-weiter'); await sk.waitForTimeout(900);
+    const best = await sk.evaluate(() => ({ hm: S.win.mo.hm, step: S.mess.step, screen: S.screen, h1: document.getElementById('mess-h1').textContent, wert: document.getElementById('mess-eingabe').value, pilleWeg: document.getElementById('mess-weiter').classList.contains('ist-weg'), cur: S.mess.cur, sperre: document.getElementById('mess-feld').className, zeile: document.getElementById('mess-zeile').textContent }));
+    await sk.click('#mess-zurueck'); await sk.waitForTimeout(300);
+    const zurueck1 = await sk.evaluate(() => ({ step: S.mess.step, wert: document.getElementById('mess-eingabe').value, h1: document.getElementById('mess-h1').textContent }));
     await sk.goBack(); await sk.waitForTimeout(300);
     const zurueck2 = await sk.evaluate(() => ({ screen: S.screen, href: location.href }));
     await sk.click('[data-act="gindex"]'); await sk.waitForSelector('.g-index'); await sk.goBack(); await sk.waitForTimeout(250);
     const zurueck3 = await sk.evaluate(() => ({ screen: S.screen, blatt: !!document.querySelector('.g-index') }));
-    ok(tasten.reihe === 'zurueck,0,del,ok' && tasten.voll && tasten.gleich && tasten.step === 1 && zurueck1.step === 0 && zurueck1.cur === '1390' && zurueck2.screen === 'fotos' && zurueck2.href === adresse && zurueck3.screen === 'fotos' && !zurueck3.blatt,
-      'Zifferntasten: unten Pfeil zurück (gleich groß), 0, Löschen, darunter „Weiter“ über die ganze Breite; der Pfeil führt zum vorigen Maß mit seinem Wert; die Zurück-Taste des Browsers geht einen Schritt zurück (Adresse bleibt) und schließt zuerst ein offenes Blatt');
+    const ok16 = !dock.tasten && dock.eingabe && dock.titelInBuehne && dock.feldUnten && dock.unterUnter && dock.bild && !dock.w3d && dock.h1 === 'Höhe der Öffnung.' && dock.i === 'oeffnung-hoehe' && dock.pillen === 1 && dock.pilleWeg && dock.hoch >= 400 && dock.ziele &&
+      getippt.wert === '1.390' && /139\s*cm/.test(getippt.zeile) && /^visible:Weiter zu Maß\s2/.test(getippt.pille) &&
+      best.hm === 1390 && best.step === 1 && best.screen === 'messen' && best.h1 === 'Höhe des Fensters.' && best.wert === '' && best.pilleWeg && /Maß\s1 gespeichert: 1\.390/.test(best.zeile) &&
+      zurueck1.step === 0 && zurueck1.wert === '1.390' && zurueck1.h1 === 'Höhe der Öffnung.' && zurueck2.screen === 'fotos' && zurueck2.href === adresse && zurueck3.screen === 'fotos' && !zurueck3.blatt;
+    ok(ok16, 'Messen (Fassung des Inhabers): Überschrift in der Bühne, Feld unter dem Element mit Systemtastatur statt Zifferntasten, Unterzeile und Notiz unter der Bühne; die Pille erscheint mit dem Wert, „Weiter“ speichert und zeigt Maß 2 auf derselben Folie mit leerem Feld; der Pfeil führt zum vorigen Maß mit seinem Wert; die Zurück-Taste des Browsers bleibt in der App (Adresse bleibt)' + (ok16 ? '' : ' ' + JSON.stringify([dock, getippt, best, zurueck1, zurueck2, zurueck3, adresse])));
     /* Foto groß mit Zoom */
     await sk.evaluate(() => useDemo()); await sk.waitForFunction(() => S.photos.in && S.photos.out, null, { timeout: 8000 }); await sk.evaluate(() => render()); await sk.waitForTimeout(200);
-    await sk.click('.tile[data-act="foto-gross"][data-v="in"]'); await sk.waitForSelector('.fz');
+    await sk.click('.ft-bild[data-act="foto-gross"][data-v="in"]'); await sk.waitForSelector('.fz');
     await sk.click('[data-act="foto-zoom"][data-v="1"]'); await sk.waitForTimeout(350);
     const zoom1 = await sk.evaluate(() => document.querySelector('.fz-wert').textContent);
     const bb = await sk.locator('.fz-buehne').boundingBox(); await sk.mouse.dblclick(bb.x + bb.width / 2, bb.y + bb.height / 2); await sk.waitForTimeout(350);
     const zoom2 = await sk.evaluate(() => ({ wert: document.querySelector('.fz-wert').textContent, touch: getComputedStyle(document.querySelector('.fz-buehne')).touchAction, knoepfe: Array.from(document.querySelectorAll('.fz-akt > *')).map((b) => b.textContent.trim()).join('|') }));
     await sk.goBack(); await sk.waitForTimeout(250);
-    const zoom3 = await sk.evaluate(() => ({ fz: !!document.querySelector('.fz'), screen: S.screen, kamera: !!document.querySelector('.tile input[type="file"]') }));
+    const zoom3 = await sk.evaluate(() => ({ fz: !!document.querySelector('.fz'), screen: S.screen, kamera: !!document.querySelector('.ft-platz input[type="file"]') }));
     ok(zoom1 === '160 %' && zoom2.wert === '100 %' && zoom2.touch === 'none' && zoom2.knoepfe === 'Neu aufnehmen|Notiz|Löschen' && !zoom3.fz && zoom3.screen === 'fotos' && !zoom3.kamera, 'Foto groß: Antippen der Kachel öffnet die Großansicht statt der Kamera, „+“ zoomt (160 %), Doppeltipp zurück auf 100 %, Wischen nur dort abgefangen, „Neu aufnehmen“, „Notiz“, „Löschen“; die Zurück-Taste schließt sie');
     /* Entwurf übersteht Neuladen; Verlassen mit offenen Änderungen fragt */
     await sk.evaluate((MO) => { S.win.mo = Object.assign({}, MO); S.win.el = { w: 1230, h: 1360 }; S.q = 'material'; go('frage'); }, MOK); await sk.waitForTimeout(700);
@@ -3535,7 +3570,7 @@ if (teil(16)) {
     const ent = await sk.evaluate(() => ({ screen: S.screen, karte: (document.querySelector('.entwurf-karte') || {}).textContent || '' }));
     await sk.click('[data-act="entwurf-weiter"]'); await sk.waitForTimeout(400);
     const ent2 = await sk.evaluate(() => ({ screen: S.screen, q: S.q, name: S.win.name, hm: S.win.mo.hm, fotos: !!S.photos.in }));
-    await sk.click('.hdr-wo'); await sk.waitForSelector('.sheet.wohin');
+    await sk.click('.hdr-wo, .lg-kopf [data-act="wohin"]'); await sk.waitForSelector('.sheet.wohin');
     const wo = await sk.evaluate(() => ({ schritte: document.querySelectorAll('.wo-schritt').length, fenster: document.querySelectorAll('.wo-fenster button').length, angaben: /\d mm|Kunststoff|Weiß/.test(document.querySelector('.wo-fenster').textContent) }));
     await sk.click('[data-act="wohin-liste"]'); await sk.waitForSelector('.sheet.verlassen');
     const vl = await sk.evaluate(() => Array.from(document.querySelectorAll('.sheet.verlassen button')).map((b) => b.textContent).join('|'));
@@ -3635,11 +3670,11 @@ if (teil(16)) {
   const pdf5p = path16.join(os16.tmpdir(), 'eeziframes-pruefung-s5.pdf'); fs16.writeFileSync(pdf5p, Buffer.from(pdf5.b64, 'base64'));
   const pt5 = (n) => { try { return cp16.execFileSync('pdftotext', ['-layout'].concat(n ? ['-f', String(n), '-l', String(n)] : []).concat([pdf5p, '-'])).toString('utf8'); } catch (e) { return ''; } };
   const raw5 = fs16.readFileSync(pdf5p).toString('latin1'), s5t1 = pt5(1), s5all = pt5(0);
-  ok(pdf5.logo && pdf5.mit > pdf5.ohne && /InterExtraBold/.test(raw5) && !/Maven/.test(raw5) && /Familie Weber\./.test(s5t1) && /Übersicht\./.test(s5t1) && /MIT DEM KUNDEN ZU KLÄREN/.test(s5t1) && /1 von \d+ geklärt/.test(s5all) && /geklärt, /.test(s5all) && /1\.759 × 1\.364/.test(s5all) && /NOTIZ DES KUNDEN ZU/.test(s5all) && /WÜNSCHE DES KUNDEN/.test(s5all) && /BESTELLMASS-VORSCHLAG/.test(s5all) && !/3-D-Ansicht/.test(s5all), 'PDF des Betriebs: Logo im Kopf, Inter, Seite 1 mit Übersicht und Klärungsliste samt Stand, Notiz des Kunden an der Stelle, Bestellmaß mit Abzug unten');
+  ok(pdf5.logo && pdf5.mit > pdf5.ohne && /OutfitSemiBold/.test(raw5) && !/Maven/.test(raw5) && /Familie Weber\./.test(s5t1) && /Übersicht\./.test(s5all) && /KLÄRLISTE/.test(s5all) && /PROJEKTSTANDARD/.test(s5t1) && /1 von \d+ geklärt/.test(s5all) && /geklärt, /.test(s5all) && /1\.759 × 1\.364/.test(s5all) && /NOTIZ DES KUNDEN ZU/.test(s5all) && /WÜNSCHE DES KUNDEN/.test(s5all) && /RICHTMA(?:SS|ẞ)/.test(s5all) && !/BESTELLMA(?:SS|ẞ)/.test(s5all) && !/3-D-Ansicht/.test(s5all), 'PDF des Betriebs: Logo im Kopf, Outfit, Seite 1 mit Projektstandard, Übersicht und Klärliste samt Stand, Notiz des Kunden an der Stelle, Richtmaß mit Abzug unten');
   /* Die Ansicht Fensterbauer bettet seit dem 23.10.2026 die Paket-Landingpage ein (ihr 3-D-Modell gehört zur Planung des Kunden im
      Konfigurator); die frühere Werbung „Holen Sie es in Ihr Konto“ ist weg, was ankommt, nennt „So funktioniert es“ */
   const land5 = await s5.evaluate(() => { const vorher = S.ansicht; S.ansicht = 'betrieb'; const h = SCREENS.landing().html + '\n' + SCREENS.wie().html; S.ansicht = vorher; return h; });
-  ok(/class="vk-einbettung rg"/.test(land5) && !/3-D-Ansicht/.test(land5) && !/Holen Sie es in Ihr (<span class="ak">)?Konto/.test(land5) && /Bestellmaß-Vorschlag je Position/.test(land5), 'Kein Versprechen einer 3-D-Ansicht für Betriebe mehr: die Ansicht Fensterbauer bettet die Paket-Landingpage ein, „So funktioniert es“ nennt das Aufmaßblatt mit Bestellmaß-Vorschlag je Position');
+  ok(/class="vk-einbettung"/.test(land5) && !/3-D-Ansicht/.test(land5) && !/Holen Sie es in Ihr (<span class="ak">)?Konto/.test(land5) && /Bestellmaß-Vorschlag je Position/.test(land5), 'Kein Versprechen einer 3-D-Ansicht für Betriebe mehr: die Ansicht Fensterbauer bettet die Paket-Landingpage ein, „So funktioniert es“ nennt das Aufmaßblatt mit Bestellmaß-Vorschlag je Position');
   /* Nacharbeit portal: Fußzeile des PDF bei 60 Zeichen Firmenname, Kontakt des Kunden im Kopf und im PDF, Zwischentitel, Fotos im Pilotbetrieb */
   const lang5 = await s5.evaluate(async () => {
     const c = BC(), alt = c.name, l = A().links.find((x) => x.id === 'l1'); c.name = 'Fensterbau und Glaserei Mustermann-Schmidt GmbH & Co. KG Köln';
@@ -3726,8 +3761,8 @@ if (teil(16)) {
   const g46Kz16 = voll({ offen: { fa: true, fba: true, einbau: true }, sart: 'rollladen', roll: 'aufsatz' }), g46Wk16 = AW16.wuensche(g46Kz16, { tiefe: 'kurz' }), g46Wn16 = AW16.wuensche(g46Kz16, { tiefe: 'normal' });
   const g46Klk16 = AW16.klaerung([g46Kz16], { total: 9, tiefe: 'kurz' }), g46Kln16 = AW16.klaerung([g46Kz16], { total: 9, tiefe: 'normal' });
   const g46Zk16 = (W, id) => W.gruppen.find((g) => g.id === id).zeilen;
-  ok(g46Wk16.offen.join() === 'Farbe außen' && !g46Klk16.some((r) => /Fensterbank außen|Rollladenkasten/.test(r.v)) && g46Kln16.some((r) => /Rollladenkasten, Fensterbank außen: offen/.test(r.v)) && g46Zk16(g46Wk16, 'bank')[0].std && g46Zk16(g46Wk16, 'beschlag')[0].std && /Kasten und Farbe nach Standard des Fensterbauers/.test(g46Zk16(g46Wk16, 'sonne')[0].t) && g46Zk16(g46Wk16, 'montage')[0].std && !g46Zk16(g46Wn16, 'bank')[0].std,
-    '„Das Wichtigste“: Fensterbank, Kasten, Griff und Montage „nach Standard des Fensterbauers“, nicht offen und ohne Klärungspunkt; bei „Die üblichen Wünsche“ bleibt das Startwert-„offen“');
+  ok(g46Wk16.offen.join() === 'Farbe außen' && !g46Klk16.some((r) => /Fensterbank außen|Rollladenkasten/.test(r.v)) && g46Kln16.some((r) => /Rollladenkasten, Fensterbank außen: offen/.test(r.v)) && g46Zk16(g46Wk16, 'bank')[0].std && g46Zk16(g46Wk16, 'beschlag')[0].std && /Kasten nach Standard des Fensterbauers, silber/.test(g46Zk16(g46Wk16, 'sonne')[0].t) && g46Zk16(g46Wk16, 'montage')[0].std && !g46Zk16(g46Wn16, 'bank')[0].std,
+    '„Das Wichtigste“: Fensterbank, Kasten, Griff und Montage „nach Standard des Fensterbauers“, nicht offen und ohne Klärungspunkt, die Farbe des Rollladens gefragt (seit 28.10.2026 bei jeder Tiefe); bei „Die üblichen Wünsche“ bleibt das Startwert-„offen“');
   ok(AW16.wuensche(voll({ offen: { griff: true } }), { tiefe: 'kurz' }).offen.join() === 'Griff' && !g46Zk16(AW16.wuensche(voll({ griffM: 'design' }), { tiefe: 'kurz' }), 'beschlag')[0].std && g46Wk16.standard.indexOf('Oberfläche') >= 0 && g46Zk16(g46Wk16, 'fenster').length && g46Wk16.gruppen.find((g) => g.id === 'fenster').standard.join() === 'Oberfläche,Profilform,Rahmenansicht,Dichtung' && !g46Wk16.standard.some((x) => /Gitter|Lüfter|Kindersicherung/.test(x)) && AW16.wuensche(g46Kz16, {}).standard.length === 0,
     'Standard je Gruppe: geltende, nicht gewählte Angaben mit eigener Ausführung (nicht Gitter oder Lüfter); ein selbst getipptes „Weiß ich noch nicht“ bleibt offen; ohne Tiefe (ältere Aufmaße) keine Standard-Zeile');
   const gew16 = AW16.mk({ offen: { fba: true }, offenWahl: { fba: 1 } });
@@ -3792,13 +3827,13 @@ if (teil(17)) {
   ok(/id="widerrufsbelehrung"/.test(agb17) && /Sie können Ihr Widerrufsrecht auch online unter/.test(agb17) && /Eingangsbestätigung mit Informationen zum Inhalt der Widerrufserklärung sowie dem Datum und der Uhrzeit ihres Eingangs/.test(agb17) && /id="widerrufsformular"/.test(agb17) && /Erlöschen des Widerrufsrechts/.test(agb17) && /Bestätigung des Vertrags auf einem dauerhaften Datenträger/.test(agb17) && /7,99 €/.test(agb17) && /§ 19 UStG/.test(agb17), 'AGB: Widerrufsbelehrung mit Online-Funktion und Eingangsbestätigung, Erlöschen bei digitalen Inhalten, Muster-Widerrufsformular, Preis mit beiden Umsatzsteuer-Fällen');
   const konf17 = {}; new Function('window', fs17.readFileSync(path17.join(W17, 'web/config.js'), 'utf8'))(konf17);
   const pr17 = konf17.KONFIG.preise, nb17 = t17['/nutzungsbedingungen/'];
-  ok(/§ 14 BGB/.test(nb17) && /id="avv"/.test(nb17) && /Unterauftragsverarbeiter/.test(nb17) && /Technische und organisatorische Maßnahmen/.test(nb17) && ['ersten ' + pr17.frei + ' Projekte', pr17.projekt + ' € je Projekt', pr17.abo.grund + ' € im Monat bei Abschluss bis einschließlich', 'mit ' + pr17.abo.inkl + ' Projekten je Kalendermonat', 'jedes weitere ' + pr17.abo.extra + ' €', pr17.plus + ' € im Monat'].every((t) => nb17.includes(t)), 'Nutzungsbedingungen für Fensterbauer: nur Unternehmer, Preise wie in config.js, Vertrag über die Auftragsverarbeitung mit Maßnahmen und Unterauftragsverarbeitern');
+  ok(pr17.projekt === 0 && pr17.frei === 0 && konf17.KONFIG.betriebskonto === false && /<title>Konto für Fensterbauer eingestellt · eeziframes<\/title>/.test(nb17) && /<meta name="robots" content="noindex">/.test(nb17) && /§ 2 Ende des Kontos/.test(nb17) && /Ihr Vertrag über das Konto endet damit/.test(nb17) && /ein laufendes Abo 10 oder Plus beenden wir zum Ende seines laufenden Abrechnungsmonats/.test(nb17) && /löschen wir bis spätestens 31\. Dezember 2026/.test(nb17) && /Art\. 20 DSGVO/.test(nb17) && /<a href="\/konfigurator-bedingungen\/">Paketbedingungen<\/a>/.test(nb17) && !/€ je Projekt|€ im Monat/.test(nb17), 'Nutzungsbedingungen für Fensterbauer: nur noch Hinweis zum Ende des Kontos (keine Kosten, alte Abos enden, Löschung bis 31.12.2026, Kopie auf Wunsch, Verweis auf die Paketbedingungen), noindex; config.js ohne Betriebskonto und ohne Projektpreis');
   ok(/Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen/.test(t17['/datenschutz/']) && /id="widerruf"/.test(t17['/datenschutz/']) && /Resend \(Plus Five Five, Inc\./.test(t17['/datenschutz/']) && /Öffnungs- und Klickmessung ist ausgeschaltet/.test(t17['/datenschutz/']) && !/Brevo/.test(t17['/datenschutz/']) && /href="\/cookies\/"/.test(t17['/datenschutz/']), 'Datenschutz: Aufsichtsbehörde NRW, Abschnitt zur Widerrufsfunktion, E-Mail-Dienstleister, Verweis auf die Cookies-Seite');
   /* Cookies: jeder Speicher-Eintrag aus dem Code steht auf der Seite */
   const code17 = ['app.js', 'portal.js', 'gemeinsam.js'].map((f) => fs17.readFileSync(path17.join(W17, 'web/assets', f), 'utf8')).join('\n');
   const schl17 = Array.from(new Set((code17.match(/'aufmass\.[a-z0-9.]+'/g) || []).map((x) => x.slice(1, -1).replace(/\.$/, '.…'))));
   const fehlt17 = schl17.filter((x) => !t17['/cookies/'].includes('<code>' + x + '</code>'));
-  ok(schl17.length >= 12 && !fehlt17.length && /__Host-zentrale/.test(t17['/cookies/']) && !/document\.cookie/.test(code17), 'Cookies-Seite nennt jeden Speicher-Eintrag aus dem Code (' + schl17.length + ') und das Sitzungs-Cookie der Zentrale; die Website setzt selbst keine Cookies' + (fehlt17.length ? ': es fehlen ' + fehlt17.join(', ') : ''));
+  ok(schl17.length >= 12 && !fehlt17.length && ['__Host-kunde', '__Host-inhaber', '__Host-zentrale'].every((c) => t17['/cookies/'].includes('<code>' + c + '</code>')) && !/document\.cookie/.test(code17), 'Cookies-Seite nennt jeden Speicher-Eintrag aus dem Code (' + schl17.length + ') und die Sitzungs-Cookies von Kundenbereich, Zentrale und Verwaltung der App; die Website setzt selbst keine Cookies' + (fehlt17.length ? ': es fehlen ' + fehlt17.join(', ') : ''));
   /* b) „Vertrag widerrufen“ auf jeder Seite, hervorgehoben */
   const ohne17 = [];
   for (const sx of seo17.SEITEN.concat([{ pfad: '/gibtsnicht' }])) { const t = (await holen17(BASE, sx.pfad)).text; if (!/class="(rg-widerruf|widerruf-knopf)" href="\/widerruf\/">Vertrag widerrufen</.test(t)) ohne17.push(sx.pfad); }
@@ -3807,8 +3842,9 @@ if (teil(17)) {
   await s17a.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await s17a.waitForTimeout(300);
   const app17 = await s17a.evaluate(() => { const a = document.querySelector('.foot-links.recht a.widerruf[href="/widerruf/"]'), r = a ? a.getBoundingClientRect() : null; return !!r && r.height >= 44 && !!document.querySelector('.foot-links.recht a[href="/agb/"]') && !!document.querySelector('.foot-links.recht a[href="/cookies/"]'); });
   await s17a.goto(BASE + '/', { waitUntil: 'networkidle' }); await s17a.waitForTimeout(300);
-  const portal17 = await s17a.evaluate(() => { const a = document.querySelector('.foot a.foot-widerruf[href="/widerruf/"]'), r = a ? a.getBoundingClientRect() : null; return !!r && r.height >= 44 && !!document.querySelector('.foot a[href="/nutzungsbedingungen/"]') && !!document.querySelector('.foot a[href="/agb/"]'); });
-  ok(app17 && portal17, 'App und Startseite: „Vertrag widerrufen“ als Knopf ab 44 px, dazu AGB, Cookies und Nutzungsbedingungen');
+  /* Startseite (Ansicht Hauseigentümer): eigene Fußzeile im Schatten-DOM von #startseite, „Vertrag widerrufen“ als Pille */
+  const portal17 = await s17a.evaluate(() => { const sr = (document.getElementById('startseite') || {}).shadowRoot, f = sr ? sr.querySelector('footer.ez-fuss') : document.querySelector('.foot'), a = f ? f.querySelector('a.widerruf-knopf[href="/widerruf/"], a.foot-widerruf[href="/widerruf/"]') : null, r = a ? a.getBoundingClientRect() : null; return !!r && r.height >= 44 && !!f.querySelector('a[href="/konfigurator-bedingungen/"]') && !f.querySelector('a[href="/nutzungsbedingungen/"]') && !!f.querySelector('a[href="/agb/"]'); });
+  ok(app17 && portal17, 'App und Startseite: „Vertrag widerrufen“ als Knopf ab 44 px, dazu AGB, Cookies und Paketbedingungen (keine Nutzungsbedingungen mehr)');
   sauber(s17a, 'App und Startseite mit den neuen Rechtslinks ohne Fehler'); await c17a.close();
   /* c) Ohne Mailversand und ohne Datenbank (Pilot) nimmt der Server keinen Widerruf an, statt ihn zu verlieren */
   const pilot17 = await fetch(BASE + '/api/widerruf', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'Test', vertrag: 'Aufmaßblatt', mail: 'test@beispiel.de' }) }), pj17 = await pilot17.json();
@@ -3841,14 +3877,14 @@ if (teil(17)) {
 
   /* e) Rechtstexte nach der unabhängigen Prüfung */
   const bel17 = agb17.slice(agb17.indexOf('id="widerrufsbelehrung"'), agb17.indexOf('Ende der Widerrufsbelehrung'));
-  ok(/Telefon: <a href="tel:\+4915256950998">0152 56950998<\/a>, E-Mail: <a href="mailto:ask@eeziframes\.com">ask@eeziframes\.com<\/a>/.test(bel17) && agb17.indexOf('id="erloeschen"') > agb17.indexOf('Ende der Widerrufsbelehrung') && !/Erlöschen/.test(bel17) && agb17.includes('<meta name="stand" content="' + RECHT.AGB_STAND + '">') && nb17.includes('<meta name="stand" content="' + RECHT.NB_STAND + '">') && agb17.includes('Stand: ' + RECHT.standText(RECHT.AGB_STAND)) && nb17.includes('Stand: ' + RECHT.standText(RECHT.NB_STAND)), 'AGB: Widerrufsbelehrung mit Telefonnummer, der Hinweis zum Erlöschen steht nach dem Ende der Belehrung; Stand von AGB und Nutzungsbedingungen wie in functions/api/recht.js');
+  ok(/Telefon: <a href="tel:\+4915256950998">0152 56950998<\/a>, E-Mail: <a href="mailto:ask@eeziframes\.com">ask@eeziframes\.com<\/a>/.test(bel17) && agb17.indexOf('id="erloeschen"') > agb17.indexOf('Ende der Widerrufsbelehrung') && !/Erlöschen/.test(bel17) && agb17.includes('<meta name="stand" content="' + RECHT.AGB_STAND + '">') && nb17.includes('<meta name="stand" content="' + RECHT.NB_STAND + '">') && agb17.includes('Stand: ' + RECHT.standText(RECHT.AGB_STAND)) && nb17.includes('Stand: ' + RECHT.standText(RECHT.NB_STAND)), 'AGB: Widerrufsbelehrung mit Telefonnummer, der Hinweis zum Erlöschen steht nach dem Ende der Belehrung; Stand von AGB und Hinweisseite der Nutzungsbedingungen wie in functions/api/recht.js');
   ok(/frühestens drei Jahre nach dem Kauf/.test(agb17) && /Mit dem Kauf des Aufmaßblatts endet die Zeit für freies Ändern/.test(agb17) && /Auf der Kassenseite der App/.test(agb17) && /Eingabefehler berichtigen Sie/.test(agb17) && /Online abrufen können Sie den Vertragstext nach dem Kauf nicht/.test(agb17) && /Absatz 1 bleibt unberührt/.test(agb17) && /Für die kostenlosen Funktionen bemühen wir uns/.test(agb17), 'AGB: Kündigung eines Kontos mit Kauf erst nach drei Jahren, der Kauf beendet die freie Woche, Bestellschritte mit der Kassenseite, Eingabefehler, Vertragstext, Haftung, Mängelrechte bei Störungen');
-  const avv17 = nb17.slice(nb17.indexOf('id="avv"'));
-  ok(!/Gerichtsstand/.test(nb17) && /Abrechnungsmonat/.test(nb17) && /bis zu zwei Kalendertage vor dem Einzug/.test(nb17) && /Preiserhöhungen und Änderungen der Hauptleistungen gelten nur mit Ihrer Zustimmung/.test(nb17) && /10\. Verantwortung des Betriebs/.test(avv17) && /Inspektionen/.test(avv17) && /als eigener Verantwortlicher|selbst verantworten/.test(avv17) && !/Anthropic/.test(avv17) && /sieben Tagen/.test(avv17), 'Nutzungsbedingungen: kein Gerichtsstand, Abo je Abrechnungsmonat, SEPA-Ankündigung wie bei Stripe, Zustimmung durch Schweigen nur für Nebensachen; AVV mit Rollen, Sicherung, Kontrollen und Pflichten des Betriebs, ohne die KI-Auswertung');
-  ok(/<h2 id="kundenschutz">§ 11 Kundenschutz<\/h2>/.test(nb17) && /Ihr Kunde sieht beim Messen nur Ihren Betrieb/.test(nb17) && /Kein anderer Betrieb kann es über eeziframes öffnen oder in sein Konto übernehmen/.test(nb17) && /weder das Aufmaßblatt noch einen Code, mit dem ein anderer Betrieb das Aufmaß übernehmen könnte/.test(nb17) && /verkaufen keine Anfragen oder Kontaktdaten/.test(nb17) && /ohne Einhaltung einer Frist kündigen/.test(nb17) && /<h2>§ 13 Haftung<\/h2>/.test(nb17) && /<h2>§ 15 Schlussbestimmungen<\/h2>/.test(nb17) && !/Kundenschutz-?Garantie/.test(nb17), 'Nutzungsbedingungen § 11 Kundenschutz: nur der eigene Betrieb im Link, kein Zugriff anderer Betriebe, kein Blatt und kein Code vom Anbieter, keine Ansprache und kein Verkauf, fristlose Kündigung bei Verstoß; folgende Paragrafen neu nummeriert');
+  /* Seit 28.10.2026 kein Betriebskonto mehr: AGB, Datenschutz, Cookies und Impressum kennen weder Aufmaß-Link noch Code vom Kunden */
+  const ds17 = t17['/datenschutz/'], ohneBk17 = ['/agb/', '/datenschutz/', '/cookies/', '/impressum/'].filter((p) => /Link eines (Fensterbauers|Betriebs)|Aufmaß-Code|Code vom Kunden|Betriebsbereich|Bereich für Fensterbauer|href="\/nutzungsbedingungen\/"/.test(t17[p]));
+  ok(!ohneBk17.length && /Frühere Konten für Betriebe\.<\/strong> Bis zum 27\. Oktober 2026/.test(ds17) && /löschen wir bis spätestens 31\. Dezember 2026/.test(ds17) && /<h2[^>]*>8\. Konten und Zahlungen<\/h2>/.test(ds17) && /<strong>Speicherort\.<\/strong>/.test(ds17) && /Ihr Aufmaß übertragen Sie selbst: Sie schicken das Aufmaßblatt \(PDF\)/.test(ds17) && /Paketbedingungen für Fensterbauer/.test(t17['/impressum/']) && /Planen Sie im Konfigurator auf der Website eines Fensterbauers, ist dieser Ihr Anbieter/.test(agb17) && /§ 2 Abs\. 3/.test(agb17) && !/Aufmaß-Link/.test(agb17), 'Ohne Betriebskonto: AGB, Datenschutz, Cookies und Impressum ohne Link eines Betriebs, ohne Aufmaß-Code und ohne Nutzungsbedingungen; Datenschutz mit Speicherort, Versand als PDF und dem Abschnitt zu den früheren Konten (Löschung bis 31.12.2026)' + (ohneBk17.length ? ': noch in ' + ohneBk17.join(', ') : ''));
   ok(/__cf_bm/.test(t17['/cookies/']) && /cf_clearance/.test(t17['/cookies/']) && /method="post" action="\/api\/widerruf"/.test(t17['/widerruf/']) && /Anthropic Ireland, Limited/.test(t17['/datenschutz/']) && /KI-Einwilligung widerrufen/.test(t17['/datenschutz/']) && !/sobald eeziframes mit Datenbank und Zahlungsdienst läuft/.test(t17['/datenschutz/']) && /Anmeldeprotokolle/.test(t17['/datenschutz/']), 'Cookies mit den Sicherheits-Cookies von Cloudflare; Widerrufsformular auch ohne JavaScript; Datenschutz mit Anthropic Ireland, Widerruf der KI-Einwilligung, Anmeldeprotokollen, ohne Vorbehalt zur Pilotphase');
   const gem17 = fs17.readFileSync(path17.join(W17, 'web/assets/gemeinsam.js'), 'utf8'), portalQ17 = fs17.readFileSync(path17.join(W17, 'web/assets/portal.js'), 'utf8');
-  ok(/Anthropic Ireland, Ltd\./.test(gem17) && /spätestens nach 30 Tagen/.test(gem17) && /jederzeit widerrufen/.test(gem17) && /Ich registriere mich als Unternehmer \(§ 14 BGB\)/.test(portalQ17) && /Nur für Unternehmer \(§ 14 BGB\)/.test(portalQ17) && /Angebot nur für Unternehmer im Sinne von § 14 BGB/.test((await holen17(BASE, '/fuer-fensterbauer/')).text), 'KI-Dialog nennt Anthropic Ireland, die Löschung nach 30 Tagen und den Widerruf; Betriebe registrieren sich als Unternehmer, Preise für Betriebe mit Hinweis „nur für Unternehmer“');
+  ok(/Anthropic Ireland, Ltd\./.test(gem17) && /in der Regel nach 30 Tagen/.test(gem17) && /jederzeit widerrufen/.test(gem17) && /Ich registriere mich als Unternehmer \(§ 14 BGB\)/.test(portalQ17) && /Nur für Unternehmer \(§ 14 BGB\)/.test(portalQ17) && /Angebot nur für Unternehmer im Sinne von § 14 BGB/.test((await holen17(BASE, '/fuer-fensterbauer/')).text), 'KI-Dialog nennt Anthropic Ireland, die Löschung nach 30 Tagen und den Widerruf; Betriebe registrieren sich als Unternehmer, Preise für Betriebe mit Hinweis „nur für Unternehmer“');
 
   /* f) App: „Vertrag widerrufen“ unter jedem Bildschirm, im Glossar-Blatt, KI-Einwilligung widerrufbar */
   const c17b = await browser.newContext(telefon), s17b = await neueSeite(c17b);
@@ -3953,10 +3989,36 @@ if (teil(17)) {
   const altB17 = XB17.datum(jetztB17 - 5 * 864e5), LB17 = (id, status, created, extra) => Object.assign({ id: id, code: 'c' + id, nr: 'P-' + id, kunde: 'Kunde ' + id, status: status, progress: 0, created: created, expires: XB17.dateIn(30, jetztB17), log: {} }, extra || {});
   const erB17 = await sp17.betriebAnlegen({ auth_user: 'u-er17', mail: 'er17@beispiel.de', name: 'Erinnerung GmbH', plz: '50667', tel_norm: '02219917', name_norm: 'erinnerung17', daten: { ap: 'Eva Erin', mail: 'er17@beispiel.de', prefs: { mail: true, remind: true }, links: [LB17('a', 'gesendet', altB17), LB17('b', 'geoeffnet', altB17), LB17('c', 'gesendet', XB17.datum(jetztB17)), LB17('d', 'arbeit', altB17, { progress: 2 }), LB17('e', 'erstellt', altB17), LB17('f', 'eingegangen', altB17)] } });
   await sp17.betriebAnlegen({ auth_user: 'u-aus17', mail: 'aus17@beispiel.de', name: 'Ohne Erinnerung GmbH', plz: '50667', tel_norm: '02219918', name_norm: 'ohneerinnerung17', daten: { mail: 'aus17@beispiel.de', prefs: { remind: false }, links: [LB17('g', 'gesendet', altB17)] } });
-  const er1B17 = await benM17.erinnerungenSenden(k17, sp17, {}), er2B17 = await benM17.erinnerungenSenden(k17, sp17, {});
+  /* Ohne Betriebskonto (Standard seit 28.10.2026) gehen keine Erinnerungen zu Aufmaß-Links raus; der alte Lauf mit BETRIEBSKONTO=1 */
+  const er0B17 = await benM17.erinnerungenSenden(k17, sp17, {}), kBk17 = Object.assign({}, k17, { betriebskonto: true });
+  ok(er0B17.gesendet === 0 && er0B17.ohneBetriebskonto === true && !postM17.attrappePost.some((m) => /^(er17|aus17)@/.test(m.an)), 'Ohne Betriebskonto: keine Erinnerungs-Mails zu Aufmaß-Links an frühere Betriebe');
+  const er1B17 = await benM17.erinnerungenSenden(kBk17, sp17, {}), er2B17 = await benM17.erinnerungenSenden(kBk17, sp17, {});
   const erMailsB17 = postM17.attrappePost.filter((m) => /^(er17|aus17)@/.test(m.an)), erNachB17 = await sp17.betriebHolen(erB17.id || (erB17[0] || {}).id);
   ok(er1B17.gesendet >= 1 && er2B17.gesendet === 0 && erMailsB17.length === 1 && erMailsB17[0].an === 'er17@beispiel.de' && /2 Kunden haben noch nicht gemessen/.test(erMailsB17[0].betreff) && erMailsB17[0].html.includes('/#projekt-a') && erMailsB17[0].html.includes('/#projekt-b') && !erMailsB17[0].html.includes('/#projekt-c') && !!erNachB17 && erNachB17.daten.links.filter((l) => l.erinnert).map((l) => l.id).join(',') === 'a,b', 'Erinnerung an offene Links: einmal je Projekt nach 3 Tagen, nur verschickt oder geöffnet und ohne Maß, abschaltbar');
   aus17();
+
+  /* f) Ohne Betriebskonto, wie online seit 28.10.2026 (BETRIEBSKONTO nicht gesetzt): eigener Testserver mit BETRIEBSKONTO=0 */
+  const port0 = await freierPort(), B0 = 'http://localhost:' + port0;
+  const kind0 = cp17.spawn(process.execPath, [path17.join(W17, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port0), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', BETRIEBSKONTO: '0' }), stdio: ['ignore', 'ignore', 'pipe'] });
+  kind0.stderr.on('data', (dd) => process.stderr.write('  [Server ohne Konto] ' + dd));
+  const aus0 = () => { try { kind0.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus0);
+  let st0 = null; for (let i = 0; i < 60 && !(st0 && st0.ok); i++) { await new Promise((r) => setTimeout(r, 200)); try { st0 = await fetch(B0 + '/api/status').then((r) => r.json()); } catch (e) { /* noch nicht */ } }
+  const r0a = await fetch(B0 + '/api/konto', { headers: { accept: 'application/json' } }), j0a = await r0a.json().catch(() => ({}));
+  const r0b = await fetch(B0 + '/api/link/abc123'), r0c = await fetch(B0 + '/api/aufmass', { method: 'POST', headers: { 'content-type': 'application/json', origin: B0 }, body: '{}' });
+  ok(!!st0 && st0.ok && st0.betriebskonto === false && st0.preise.projekt === 0 && r0a.status === 410 && r0b.status === 410 && r0c.status === 410 && /Paket/.test(j0a.fehler || '') && /fuer-fensterbauer/.test(j0a.fehler || ''), 'Ohne Betriebskonto: /api/status meldet es aus, Konto, Kundenlinks und Aufmaß-Eingang antworten 410 mit Verweis auf die Pakete');
+  const c0 = await browser.newContext(telefon), s0 = await neueSeite(c0, B0);
+  await s0.addInitScript(() => { try { if (!sessionStorage.getItem('alt0')) { sessionStorage.setItem('alt0', '1'); localStorage.setItem('aufmass.portal.v1', JSON.stringify({ v: 5, screen: 'projects', role: 'betrieb', cur: 'srv' })); localStorage.setItem('aufmass.sitzung', JSON.stringify({ access_token: 'alt', mail: 'alt@beispiel.de' })); } } catch (e) { /* ohne Speicher */ } });
+  await s0.goto(B0 + '/', { waitUntil: 'networkidle' }); await s0.waitForTimeout(500);
+  const p0 = await s0.evaluate(() => ({ portal: localStorage.getItem('aufmass.portal.v1'), sitzung: localStorage.getItem('aufmass.sitzung'), screen: S.screen, role: S.role }));
+  await s0.goto(B0 + '/#fensterbauer', { waitUntil: 'networkidle' }); await s0.waitForTimeout(500);
+  const f0 = await s0.evaluate(() => document.body.innerText);
+  ok(p0.portal === null && p0.sitzung === null && p0.screen === 'landing' && !p0.role && !/Code vom Kunden|Tour für Fensterbauer|Preise für Betriebe|Projekt anlegen/.test(f0), 'Ohne Betriebskonto: Startseite räumt alte Anmeldung und Portal-Speicher weg, kein Betriebsbereich, keine Tour, kein Code vom Kunden');
+  await s0.goto(B0 + '/app/', { waitUntil: 'networkidle' }); await s0.waitForTimeout(500);
+  const b640 = await s0.evaluate(async () => { S.windows = demoProject(); await blattSchrift(); const pdf = blattPDF('fensterbauer', {}); if (!pdf) return ''; const u = new Uint8Array(await pdf.arrayBuffer()); let s = ''; for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); });
+  const fs0 = await import('node:fs'), os0 = await import('node:os'), pdf0Pfad = path17.join(os0.tmpdir(), 'ohne-konto-' + process.pid + '.pdf'); fs0.writeFileSync(pdf0Pfad, Buffer.from(b640, 'base64'));
+  const txt0 = (() => { try { return cp17.execFileSync('pdftotext', ['-layout', pdf0Pfad, '-']).toString('utf8'); } catch (e) { return ''; } })(), roh0 = fs0.readFileSync(pdf0Pfad).toString('latin1'); fs0.rmSync(pdf0Pfad, { force: true });
+  ok(!!b640 && /Ihr eigener Fenster-Konfigurator|Ihr eigener Konfigurator/.test(txt0) && /Scannen: Pakete ansehen/.test(txt0) && roh0.includes('/fuer-fensterbauer/?von=pdf') && !/Code vom Kunden|AM1\.|Projekte kostenlos|Scannen: Anmeldung|Scannen: Projekt anlegen/.test(txt0), 'Ohne Betriebskonto: Aufmaßblatt ohne Aufmaß-Code, letzte Seite und QR führen zu den Paketen');
+  sauber(s0, 'Ohne Betriebskonto: Startseite und App ohne Fehler'); await c0.close(); aus0();
 }
 
 if (teil(18)) {
@@ -3975,7 +4037,7 @@ if (teil(18)) {
   try {
     const fotosMachen = async (s) => {
       const jpg = Buffer.from(await s.evaluate(() => { const c = document.createElement('canvas'); c.width = 900; c.height = 1200; const g = c.getContext('2d'); g.fillStyle = '#e9e3da'; g.fillRect(0, 0, 900, 1200); g.fillStyle = '#fff'; g.fillRect(220, 200, 460, 760); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; }), 'base64');
-      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await s.click('.bb .btn.primary');
+      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await s.click('.lg-weiter');
       await s.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
       await s.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg });
       if (await s.waitForSelector('.fx-dialog', { timeout: 3000 }).then(() => true, () => false)) await s.click('.fx-ja');
@@ -4020,7 +4082,7 @@ if (teil(18)) {
     await s18c.evaluate(() => { go('blatt'); }); await s18c.waitForTimeout(200);
     const vorSenden = await s18c.evaluate(() => ({ hinweis: (document.querySelector('.ki-laeuft') || {}).textContent || '', voll: derive(S.windows[0]).complete }));
     await s18c.evaluate(() => { act('send', document.body); }); await s18c.waitForTimeout(150); // nicht auf das Senden warten: der Zustand währenddessen zählt
-    const wartet = await s18c.evaluate(() => ({ wartet: S.kiWartet, sent: !!S.sent, knopf: (document.querySelector('.bb .btn.primary') || {}).textContent || '', aus: !!(document.querySelector('.bb .btn.primary') || {}).disabled, toast: S.toast || '' }));
+    const wartet = await s18c.evaluate(() => ({ wartet: S.kiWartet, sent: !!S.sent, knopf: (document.querySelector('.bb .btn.primary, .scr.dna .lg-weiter') || {}).textContent || '', aus: !!(document.querySelector('.bb .btn.primary, .scr.dna .lg-weiter') || {}).disabled, toast: S.toast || '' }));
     await s18c.waitForFunction(() => S.sent && S.sent.uebertragen, null, { timeout: 20000 });
     const beimBetrieb = (await api18('/api/konto', null, tok18)).konto.acc.links.find((l) => l.code === code18);
     const kiBetrieb = beimBetrieb && beimBetrieb.aufmass && beimBetrieb.aufmass.windows[0] && beimBetrieb.aufmass.windows[0].ki;
@@ -4041,7 +4103,7 @@ if (teil(19)) {
   const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js');
   const fo = await import('../functions/api/fotos.js'), ze = await import('../functions/api/zentrale.js'), auth = await import('../functions/api/auth.js');
   const B = 'https://eeziframes.com', TAG = 864e5, stempel = Date.now().toString(36);
-  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef19' }, k19 = umg.konfig(env), sp = spM.speicher(k19), ab = fo.ablage(k19);
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef19', BETRIEBSKONTO: '1' }, k19 = umg.konfig(env), sp = spM.speicher(k19), ab = fo.ablage(k19);
   let ipNr = 1; const hinten = [];
   const rufe = async (pfad, o) => {
     o = o || {}; const h = { accept: 'application/json', origin: B, 'cf-connecting-ip': '203.0.113.' + (10 + (ipNr++ % 200)) };
@@ -4138,7 +4200,7 @@ if (teil(19)) {
     const bis = async (s, fn, ms, arg) => { const ende = Date.now() + (ms || 10000); while (Date.now() < ende) { if (await s.evaluate(fn, arg)) return true; await new Promise((r) => setTimeout(r, 200)); } return false; };
     const jpg = Buffer.from(jpegs[0], 'base64');
     const fotosMachen = async (s) => {
-      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await s.click('.bb .btn.primary');
+      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await s.click('.lg-weiter');
       await s.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
       await s.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg });
       if (await s.waitForSelector('.fx-dialog', { timeout: 2500 }).then(() => true, () => false)) await s.click('.fx-ja');
@@ -4161,7 +4223,7 @@ if (teil(19)) {
     await oeffnen(s1b, 0);
     const zurueck = await bis(s1b, () => !!(S.photos.in && /^blob:/.test(S.photos.in.url) && S.photos.out && /^blob:/.test(S.photos.out.url)), 5000);
     await s1b.evaluate(() => go('fotos')); await s1b.waitForTimeout(300);
-    const kacheln = await s1b.evaluate(() => Array.from(document.querySelectorAll('.tile img')).filter((i) => /^blob:/.test(i.src) && i.complete && i.naturalWidth > 0).length);
+    const kacheln = await s1b.evaluate(() => Array.from(document.querySelectorAll('.ft-platz img')).filter((i) => /^blob:/.test(i.src) && i.complete && i.naturalWidth > 0).length);
     ok(zurueck && kacheln === 2, 'Nach dem Neuladen: das gespeicherte Fenster zeigt seine Fotos wieder (vom Gerät)');
     await s1b.evaluate(() => { go('blatt'); }); await s1b.waitForTimeout(200);
     await s1b.evaluate(() => { act('send', document.body); });
@@ -4337,9 +4399,14 @@ if (teil(20)) {
   ok(s3a.gl && s3a.lam >= 10 && s3a.fs && s3a.zug && !s3a.alt && s3a.deckt > 0.5, 'WebGL: Raffstore wie im CSS-Modell aus einzelnen Lamellen, mit Führungsschienen, Endschiene und Aufzugbändern mit eigener Farbe (' + s3a.lam + ' Lamellen)');
   const lam20 = () => g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const n = Buehne3D.pruef.rollen(st).filter((r) => /^lam-\d+$/.test(r)).length, z = 'lam-' + (n - 1), l0 = Buehne3D.pruef.matrix(st, 'lam-0'), lz = Buehne3D.pruef.matrix(st, z), e0 = st.querySelector('[data-r="lam-0"]'), ez = st.querySelector('[data-r="' + z + '"]'); return { n: n, rot: l0 ? l0[6] : 0, y: lz ? lz[13] : 0, w0: e0._tf && e0._tf.zt ? e0._tf.zt.d : 0, wz: ez._tf && ez._tf.zt ? [ez._tf.zt.d, ez._tf.zt.v] : [0, 0], pos: W3D_BEHANG.pos, fahrt: st.classList.contains('is-fahrt') }; });
   const m20a = await lam20();
-  await g5.click('#w3d [data-w3d="wenden"]'); await g5.waitForTimeout(2000);
+  /* Ohne Grafikchip kommen Bilder der Bühne selten (SwiftShader, teils unter einem Bild je Sekunde): nach dem Wenden und während der Fahrt
+     wird je 100 ms ein Bild angestoßen (pruef.zeit, ohne auf den Grafikchip zu warten), wie es ein flüssiger Bildlauf von selbst täte */
+  const bildAnstossen = () => g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.zeit(st); return st.classList.contains('is-fahrt'); });
+  await g5.click('#w3d [data-w3d="wenden"]'); await bildAnstossen(); await g5.waitForTimeout(2000);
   const m20b = await lam20();
-  await g5.click('#w3d [data-w3d="fahren"]'); await g5.waitForTimeout(3500);
+  await g5.click('#w3d [data-w3d="fahren"]');
+  for (let i = 0; i < 80; i++) { await g5.waitForTimeout(100); if (!(await bildAnstossen())) break; }
+  await g5.waitForTimeout(500);
   const m20c = await lam20();
   /* die Fahrt legt app.js bildweise und ohne Übergang (w3dFahrt): die letzte Lage kam sofort (d 1, kein Versatz), danach steht der Behang unten */
   ok(Math.abs(m20b.rot - m20a.rot) > 0.3 && m20b.w0 === 600 && m20c.y > m20b.y + 5 && m20c.wz[0] <= 1 && m20c.wz[1] === 0 && m20c.pos === 1 && !m20c.fahrt, 'WebGL: „Lamellen wenden“ dreht die Lamellen (0,6 s), „Herunterfahren“ fährt sie bildweise mit der Endschiene aus dem Paket (ohne Übergang und Versatz je Lamelle), wie im CSS-Modell');
@@ -4419,6 +4486,16 @@ if (teil(20)) {
   const st20 = await g6.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), aus: Buehne3D.pruef.aus(st), zoom: st.classList.contains('is-zoom') }; });
   ok(st20.zoom && st20.gl && !st20.aus, 'Selbsttest nur bei 1:1: ein gezoomter erster Blick schaltet die WebGL-Bühne nicht ab');
   sauber(g6, 'Selbsttest im Zoom ohne Fehler'); await c20f.close();
+  /* Einstieg wie von der Website (#ausmessen): Schritt 1 zeigt das Element als feste Ansicht (Regel des Inhabers: beim Messen kein 3-D).
+     Die erste Bühne kommt in den Fragen; der Selbsttest schaltet WebGL dort nicht ab (sonst zeigt jede Frage das CSS-Modell) */
+  const c20s = await browser.newContext(ctx20), g8 = await neueSeite(c20s), w20s = [];
+  g8.on('console', (m) => { if (/Selbsttest/.test(m.text())) w20s.push(m.text()); });
+  await g8.goto(BASE + '/app/?gl=voll#ausmessen', { waitUntil: 'networkidle' }); await g8.waitForTimeout(1500);
+  const sa20 = await g8.evaluate(() => ({ screen: S.screen, fest: !!document.querySelector('.st-buehne-dna .st-objekt img') && !document.querySelector('.w3d-stage') }));
+  await g8.evaluate(() => { const w = demoProject()[0]; S.win = w; S.q = 'material'; S.selSash = 0; S.screen = 'frage'; render(true); }); await g8.waitForTimeout(1200);
+  const sb20 = await g8.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), u: Buehne3D.unterstuetzt(), aus: Buehne3D.pruef.aus(st) }; });
+  ok(sa20.screen === 'start' && sa20.fest && sb20.gl && sb20.u && !sb20.aus && !w20s.length, 'Einstieg über #ausmessen: Schritt 1 zeigt das Element als feste Ansicht (beim Messen kein 3-D), die Fragen zeichnen danach in WebGL (' + JSON.stringify([sa20, sb20, w20s]) + ')');
+  sauber(g8, 'Einstieg über #ausmessen ohne Fehler'); await c20s.close();
 }
 
 if (teil(21)) {
@@ -4457,7 +4534,8 @@ if (teil(21)) {
   const tw = await a21.evaluate(() => Array.from(document.querySelectorAll('[data-act="tiefe"]')).map((b) => b.getAttribute('data-v')).join(','));
   await a21.click('[data-act="tiefe"][data-v="kurz"]'); await a21.waitForTimeout(300);
   const tk = await a21.evaluate(() => ({ t: S.proj.tiefe, pille: !!document.querySelector('.qtiefe') }));
-  ok(tw === 'kurz,normal,genau' && tk.t === 'kurz', 'Tiefe wählen: drei Karten, „Das Wichtigste“ setzt die Tiefe (' + tw + ')');
+  const tk2 = await a21.evaluate(() => ({ n: document.querySelector('.scr.dna .lp-n').textContent, rest: document.querySelector('.scr.dna .lp-rest').textContent, ja: document.querySelectorAll('.scr.dna .lp-punkte i.ja').length, alle: document.querySelectorAll('.scr.dna .lp-punkte i').length, gedrueckt: (document.querySelector('.scr.dna [data-act="tiefe"][aria-pressed="true"]') || {}).textContent, zahl: qSichtbar(S.win).filter((q) => q.id !== 'tiefe').length, modell: !!document.querySelector('.scr.dna #w3d') }));
+  ok(tw === 'kurz,normal,genau' && tk.t === 'kurz' && tk2.gedrueckt === 'Kurz' && +tk2.n === tk2.ja && +tk2.n + +tk2.rest === tk2.alle && +tk2.n > 0 && +tk2.rest > 0 && !tk2.modell, 'Tiefe wählen (Design-DNA): Kurz · Üblich · Alles, „Kurz“ setzt die Tiefe; Punktraster je Kapitel, Zahl „wählst du“ und „plant dein Fensterbauer“ ergeben alle Fragen, kein 3-D-Modell (' + tw + '; ' + tk2.n + ' + ' + tk2.rest + ')');
   /* Standard des Fensterbauers in der Frage, Wahl und Zurücknehmen */
   await a21.evaluate(() => { S.proj.tiefe = 'genau'; S.q = 'gitter'; render(true); }); await a21.waitForTimeout(300);
   const st21 = await a21.evaluate(() => ({ std: !!document.querySelector('.qstd'), wahl: Array.from(document.querySelectorAll('[data-act="detail"]')).map((b) => b.getAttribute('data-v')).join(',') }));
@@ -4476,14 +4554,15 @@ if (teil(21)) {
   /* c) 3-D: neue Bauarten und Teile haben Flächen mit Maß */
   const teile21 = await a21.evaluate(async () => {
     const warte = (ms) => new Promise((f) => setTimeout(f, ms)), out = {};
-    const zeige = async (set, art, rollen, psk) => { const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set); if (psk) { w.psk.schema = psk; w.sashes = pskFluegel(psk, w.psk.richtung); } S.win = w; S.q = 'griff'; S.screen = 'frage'; render(true); await warte(250); const st = document.getElementById('w3d'); return rollen.map((r) => { const el = st.querySelector('[data-r="' + r + '"]'); return r + ':' + (el && ((el._f && el._f.W > 0.5 && el._f.H > 0.5) || (el._s && el._s.w > 0.5 && el._s.h > 0.5)) ? 1 : 0); }).join(' '); };
+    const zeige = async (set, art, rollen, psk, frage) => { const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set); if (psk) { w.psk.schema = psk; w.sashes = pskFluegel(psk, w.psk.richtung); } S.win = w; S.q = frage || 'griff'; S.screen = 'frage'; render(true); await warte(250); const st = document.getElementById('w3d'); return rollen.map((r) => { const el = st.querySelector('[data-r="' + r + '"]'); return r + ':' + (el && ((el._f && el._f.W > 0.5 && el._f.H > 0.5) || (el._s && el._s.w > 0.5 && el._s.h > 0.5)) ? 1 : 0); }).join(' '); };
     out.fenster = await zeige({ leiste: 'beide', oeffner: 'kette', luefter: 'schall', baender: 'sichtbar', gitter: 'stab', fba: 'alu', fbaKappe: 'kunststoff' }, '', ['li-t', 'la-l', 'oeff', 'luef', 'bd-o-0', 'gitter', 'sa-l', 'sa-r']);
     /* Sonnenschutz aus dem CSS-Modell (S3): Führungsschienen fs-*, beim Raffstore einzelne Lamellen und Aufzugbänder */
     out.sonne = await zeige({ sart: 'raffstore', roll: 'vorbau', antrieb: 'solar' }, '', ['fs-l', 'fs-r', 'solar', 'lam-0', 'band-l']);
     out.klapp = await zeige({ sart: 'klappladen', roll: 'keiner' }, '', ['kl-l', 'kl-r']);
     out.balkon = await zeige({ etage: 'og', absturz: 'gelaender', paneel: 'paneel' }, 'balkon', ['gel', 'gel-h', 'pan-i-0', 'riegel-i-0']);
     out.psk = await zeige({}, 'psk', ['sash-3'], 'C');
-    out.form = await zeige({ form: 'dreieck' }, '', ['rs-0', 'el-front']);
+    /* Festverglasung ohne Griff-Frage: die App spränge auf „Lage“ (Design-DNA, ohne Modell), deshalb die Glas-Frage */
+    out.form = await zeige({ form: 'dreieck' }, '', ['rs-0', 'el-front'], '', 'glas');
     out.pskT = S.win.sashes.map((x) => x.t).join();
     return out;
   });
@@ -4526,13 +4605,13 @@ if (teil(22)) {
   await p.tap('#t-wunschA'); await p.keyboard.type('wie Garagentor'); await p.tap('.qnav .btn.primary'); await p.waitForTimeout(600);
   const t2 = await p.evaluate(() => ({ q: S.q, wunschA: S.win.wunschA }));
   await p.evaluate(() => { const w = demoProject()[0]; Object.assign(w, { neu: true, art: 'fest' }); S.win = w; S.editIdx = -1; go('planmasse'); }); await p.waitForTimeout(400);
-  await p.tap('#p-w'); await p.fill('#p-w', ''); await p.keyboard.type('2000'); await p.tap('.bb .btn.primary'); await p.waitForTimeout(600);
+  await p.tap('#p-w'); await p.fill('#p-w', ''); await p.keyboard.type('2000'); await p.tap('.bb .btn.primary, .scr.dna .lg-weiter'); await p.waitForTimeout(600);
   const t3 = await p.evaluate(() => ({ screen: S.screen, wm: S.win.mo.wm }));
   await p.evaluate(() => go('planmasse')); await p.waitForTimeout(300);
   await p.tap('#p-w'); await p.fill('#p-w', ''); await p.keyboard.type('2100'); await p.tap('#p-h'); await p.waitForTimeout(300);
   const t3b = await p.evaluate(() => ({ fokus: document.activeElement && document.activeElement.id, wm: S.win.mo.wm }));
   ok(t1.screen === 'fertig' && /Termin/.test(t1.notiz || '') && t2.q !== 'fa' && t2.wunschA === 'wie Garagentor' && t3.screen === 'ergebnis' && t3.wm === 2000 && t3b.fokus === 'p-h' && t3b.wm === 2100,
-    'Erster Tipp zählt nach einem Textfeld: Fenster speichern, Weiter (eigene Farbe), Weiter zum Ergebnis; das nächste Feld behält den Fokus (' + JSON.stringify([t1.screen, t2.q, t3.screen, t3b.fokus]) + ')');
+    'Erster Tipp zählt nach einem Textfeld: Fenster speichern, Weiter (eigene Farbe), Maße ansehen; das nächste Feld behält den Fokus (' + JSON.stringify([t1.screen, t2.q, t3.screen, t3b.fokus]) + ')');
   // Maßschilder in der Bühne (mind. 8 px Rand), auch bei breiten Elementen; Zoom in der Übersicht unten rechts, nichts überdeckt sich
   const buehne = () => p.evaluate(() => {
     const st = document.getElementById('w3d'); if (!st) return { fehlt: 1 };
@@ -4550,10 +4629,30 @@ if (teil(22)) {
     await p.evaluate(([art, W, H, neu, scr]) => { const w = demoProject()[0]; Object.assign(w, { art: art, neu: neu }); planMasse(w, 'w', W); planMasse(w, 'h', H); S.win = w; S.editIdx = -1; go(scr); if (scr === 'planmasse') { planMasse(S.win, 'w', W); planMasse(S.win, 'h', H); render(); } }, [art, W, H, neu, scr]);
     await p.waitForTimeout(1500); const m = await buehne(); if (m.fehler.length) schilder.push(art + ' ' + W + ' ' + scr + ': ' + m.fehler.join(', '));
   }
-  for (const gleich of [false, true]) { // Übersicht nach den Rändern: gleiche Maße einmal, ungleiche an den äußeren Linien
-    await p.evaluate((g) => { const w = demoProject()[0]; if (g) { const m = w.mo; m.hl = m.hr = m.hm; m.wt = m.wb = m.wm; } S.win = w; S.editIdx = -1; go('rest'); S.rest.i = 4; render(); }, gleich);
-    await p.waitForTimeout(1800); const m = await buehne(); if (m.fehler.length) schilder.push('Ränder ' + (gleich ? 'gleich' : 'ungleich') + ': ' + m.fehler.join(', '));
+  /* Messen (Fassung des Inhabers): Lupen, Chip, „Groß ansehen“, Überschrift und Feld in der Bühne, nichts überdeckt sich; das Feld über dem Fuß */
+  const buehneMd = () => p.evaluate(() => {
+    const st = document.getElementById('mess-buehne'); if (!st) return { fehler: ['keine Bühne'] };
+    const b = st.getBoundingClientRect(), sicht = (e) => { const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity === 0) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+    const t = [];
+    st.querySelectorAll('.ez-passt__schild, .ez-mass__ende, #mess-feld, .ez-gross-auf, .ez-glaschip, .md-titel').forEach((e) => { if (sicht(e)) t.push([(e.id || e.className.split(' ')[0]) + ' ' + e.textContent.trim().slice(0, 14), e.getBoundingClientRect()]); });
+    const fehler = [];
+    t.forEach(([n, a], i) => { if (a.left < b.left + 2 || a.right > b.right - 2 || a.top < b.top || a.bottom > b.bottom) fehler.push(n + ' am Rand'); t.slice(i + 1).forEach(([m, c]) => { if (Math.min(a.right, c.right) - Math.max(a.left, c.left) > 1 && Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top) > 1) fehler.push(n + ' über ' + m); }); });
+    const fe = document.getElementById('mess-feld').getBoundingClientRect(), fu = document.querySelector('.lg-fuss').getBoundingClientRect(); if (fe.height && innerWidth < 1024 && fe.bottom > fu.top + 1) fehler.push('Feld unter dem Fuß'); // am Laptop steht der Fuß rechts in der Spalte
+    return { fehler: fehler };
+  });
+  for (const [W, H] of [[390, 844], [320, 640], [1440, 900]]) {
+    await p.setViewportSize({ width: W, height: H });
+    for (const art of ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw']) for (let n = 0; n < 8; n++) {
+      await p.evaluate(([art, n]) => { const w = demoProject()[0]; artSetzen(w, art); S.win = w; S.editIdx = -1; if (n < 4) { S.mess.step = n; S.mess.cur = ''; go('messen'); } else { S.rest.i = n - 4; S.rest.cur = ''; go('rest'); } render(true); }, [art, n]);
+      await p.waitForTimeout(260); const m = await buehneMd();
+      if (m.fehler.length) schilder.push(W + ' ' + art + ' ' + (n < 4 ? 'Maß ' + (n + 1) : 'Rand ' + (n - 3)) + ': ' + m.fehler.join(', '));
+    }
+    for (const gleich of [false, true]) { // „Passt.“ nach den Rändern: gleiche Maße einmal, ungleiche an den äußeren Linien
+      await p.evaluate((g) => { const w = demoProject()[0]; if (g) { const m = w.mo; m.hl = m.hr = m.hm; m.wt = m.wb = m.wm; } S.win = w; S.editIdx = -1; S.rest.i = 4; go('rest'); render(true); }, gleich);
+      await p.waitForTimeout(900); const m = await buehneMd(); if (m.fehler.length) schilder.push(W + ' Passt ' + (gleich ? 'gleich' : 'ungleich') + ': ' + m.fehler.join(', '));
+    }
   }
+  await p.setViewportSize({ width: 390, height: 844 });
   ok(!schilder.length, 'Maße am Modell: alle Schilder mit Abstand in der Bühne, auch bei 4,20 m breiten Elementen und nach den Rändern, nichts überdeckt sich' + (schilder.length ? ' (' + schilder.join(' | ') + ')' : ''));
   // Sonnenschutz: Knöpfe unten rechts in einer Reihe, Beschriftung oben links, Bühne mindestens 220 px, keine Überdeckung (auch klein)
   const sonne = [];
@@ -4581,28 +4680,28 @@ if (teil(22)) {
   ok(!eyeUeber.length, 'Bei 320 px Breite läuft die Eyebrow nicht unter die Knöpfe i und Notiz' + (eyeUeber.length ? ' (' + eyeUeber.join(', ') + ')' : ''));
   // Genau ein grünes Wort je Titel (Schritte und alle Fragen)
   const titel = [];
-  for (const scr of ['start', 'fotos', 'messen', 'rest', 'ergebnis', 'anfrage', 'anfrage2', 'anfrage3']) { await p.evaluate((scr) => { const w = demoProject()[0]; S.win = w; S.editIdx = -1; S.windows = [w]; go(scr); }, scr); await p.waitForTimeout(150); titel.push([scr, await p.evaluate(() => document.querySelectorAll('.hd h1 .ak').length)]); }
-  for (const q of await p.evaluate(() => qList(demoProject()[0]).map((x) => x.id))) { await frage20(q); titel.push([q, await p.evaluate(() => document.querySelectorAll('.hd h1 .ak').length)]); }
+  for (const scr of ['start', 'fotos', 'messen', 'rest', 'ergebnis', 'anfrage', 'anfrage2', 'anfrage3']) { await p.evaluate((scr) => { const w = demoProject()[0]; S.win = w; S.editIdx = -1; S.windows = [w]; go(scr); if (scr === 'rest') { S.rest.i = 0; S.rest.cur = ''; render(); } }, scr); await p.waitForTimeout(150); titel.push([scr, await p.evaluate(() => (document.querySelector('.scr.dna h1 em') ? 1 : document.querySelectorAll('.hd h1 .ak').length))]); }
+  for (const q of await p.evaluate(() => qList(demoProject()[0]).map((x) => x.id))) { await frage20(q); titel.push([q, await p.evaluate(() => (document.querySelector('.scr.dna h1 em') ? 1 : document.querySelectorAll('.hd h1 .ak').length))]); } // Design-DNA (Lage): zweite Stimme in Grau statt grünem Wort
   const ohneAk = titel.filter((x) => x[1] !== 1).map((x) => x[0]);
   ok(titel.length > 30 && !ohneAk.length, 'Jeder Schritt- und Fragentitel hat genau ein grünes Wort (' + titel.length + ' Titel' + (ohneAk.length ? ', ohne: ' + ohneAk.join(', ') : '') + ')');
   // Blätter: linksbündig, Kicker grün, ein grünes Wort; Fokus ins Blatt, Tab bleibt drin, zurück an den Auslöser; Textfeld der Notiz mit Namen
   const blatt = () => p.evaluate(() => { const sh = document.querySelector('.sheet[aria-modal="true"]'); if (!sh) return null; const h = sh.querySelector('h2'), e = sh.querySelector('.eyebrow'); return { links: getComputedStyle(h).textAlign === 'left', ak: h.querySelectorAll('.ak').length, kicker: e.classList.contains('kicker'), drin: sh.contains(document.activeElement) }; });
   const fokusAct = () => p.evaluate(() => document.activeElement && document.activeElement.getAttribute('data-act'));
   const tabDrin = async (n) => { for (let i = 0; i < n; i++) { await p.keyboard.press(i % 5 === 2 ? 'Shift+Tab' : 'Tab'); if (!await p.evaluate(() => document.querySelector('.sheet[aria-modal="true"]').contains(document.activeElement))) return false; } return true; };
-  await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Bad'; S.windows = [demoProject()[1]]; S.win = w; S.editIdx = -1; S.q = 'lage'; go('frage'); }); await p.waitForTimeout(300);
+  await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Bad'; S.windows = [demoProject()[1]]; S.win = w; S.editIdx = -1; S.q = 'material'; go('frage'); }); await p.waitForTimeout(300);
   await p.focus('.hd [data-act="notiz-auf"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(400);
   const nz = await blatt(), nzName = await p.getAttribute('#nz-text', 'aria-label'); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const nzZu = await fokusAct();
-  await p.focus('.hdr-wo'); await p.keyboard.press('Enter'); await p.waitForTimeout(300);
+  await p.focus('.hdr-wo, .lg-kopf [data-act="wohin"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(300);
   const wo = await blatt(), woTab = await tabDrin(25); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const woZu = await fokusAct();
-  await p.focus('.hdr-wo'); await p.keyboard.press('Enter'); await p.waitForTimeout(300); await p.click('.sheet [data-act="wohin-liste"]'); await p.waitForTimeout(300);
+  await p.focus('.hdr-wo, .lg-kopf [data-act="wohin"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(300); await p.click('.sheet [data-act="wohin-liste"]'); await p.waitForTimeout(300);
   const vl = await blatt(), vlTab = await tabDrin(20); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const vlZu = await fokusAct();
-  await p.click('.hdr-gl'); await p.waitForTimeout(300); const gi = await blatt(); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+  await p.click('.hdr-gl, .lg-kopf [data-act="gindex"]'); await p.waitForTimeout(300); const gi = await blatt(); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
   ok([nz, wo, vl, gi].every((b) => b && b.links && b.ak === 1 && b.kicker && b.drin), 'Blätter (Notiz, Übersicht, Verlassen, Begriffe): linksbündig, Kicker grün, ein grünes Wort, Fokus im Blatt');
   ok(/^Deine Notiz zu /.test(nzName || '') && nzZu === 'notiz-auf' && woTab && woZu === 'wohin' && vlTab && vlZu === 'wohin', 'Notiz-Textfeld hat einen Namen; Tab bleibt in Übersicht und Verlassen-Blatt; Esc gibt den Fokus an den Auslöser zurück (' + [nzZu, woZu, vlZu].join(', ') + ')');
   // Zurück nach „Wünsche ändern“: über die Fragen zur Fensterseite, dann zur Liste (nicht durch alle Messschritte)
   await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Wohnzimmer links'; S.windows = [w]; S.win = JSON.parse(JSON.stringify(w)); S.editIdx = 0; go('fertig'); }); await p.waitForTimeout(300);
   await p.click('[data-act="wuensche"]'); await p.waitForTimeout(300);
-  for (let i = 0; i < 3; i++) { await p.click('.qnav .btn.primary'); await p.waitForTimeout(300); }
+  for (let i = 0; i < 3; i++) { await p.click('.qnav .btn.primary, .lg-weiter'); await p.waitForTimeout(300); }
   const spur = [];
   for (let i = 0; i < 20; i++) { await p.evaluate(() => history.back()); await p.waitForTimeout(500); const st = await p.evaluate(() => S.screen); spur.push(st); if (st === 'home') break; }
   await p.evaluate(() => { S.win = JSON.parse(JSON.stringify(S.windows[0])); S.editIdx = 0; go('fertig'); }); await p.waitForTimeout(300);
@@ -4614,17 +4713,20 @@ if (teil(22)) {
   const frageB = async (id, set, tiefe) => { await p.evaluate(([id, set, tiefe]) => { S.verlassen = null; S.wohin = false; S.notiz = null; S.gloss = null; S.glossIndex = false; const w = demoProject()[0]; Object.assign(w, set || {}); if (w.seiten) seitenAnwenden(w); S.proj.tiefe = tiefe || 'normal'; S.win = w; S.editIdx = -1; S.q = id; S.selSash = 0; S.qMass = null; S.screen = 'frage'; render(true); }, [id, set || {}, tiefe || '']); await p.waitForTimeout(450); };
   const leisteZeigt = () => p.evaluate(() => { const l = document.querySelector('.qleiste'), a = l && l.querySelector('[aria-current]'); if (!a) return false; const r = l.getBoundingClientRect(), b = a.getBoundingClientRect(); return b.left >= r.left - 1 && b.right <= r.right + 1; });
   await frageB('material', {}, 'normal');
-  const kl = await p.evaluate(() => { const l = document.querySelector('.qleiste'), b = Array.from(l.querySelectorAll('.ql')); return { label: l.getAttribute('aria-label'), namen: b.map((x) => x.textContent).join('|'), jetzt: b.filter((x) => x.getAttribute('aria-current') === 'step').map((x) => x.textContent).join(), haken: b.filter((x) => x.classList.contains('fertig')).length, kicker: document.querySelector('.qdock .hd .eyebrow').textContent, tools: Array.from(document.querySelectorAll('.qdock .hd-tools > *')).map((x) => x.className.split(' ')[0]).join(',') }; });
-  const kl0 = await leisteZeigt();
-  await p.click('.qleiste .ql[data-kap="sonne"]'); await p.waitForTimeout(500);
-  const kl2 = await p.evaluate(() => { const c = qCurrent(), kicker = document.querySelector('.qdock .hd .eyebrow').textContent, jetzt = document.querySelector('.qleiste [aria-current]').textContent; S.wohin = true; render(); const wo = Array.from(document.querySelectorAll('.wo-abschnitte .chip')).map((x) => x.textContent).join('|'); S.wohin = false; render(); return { q: S.q, erste: c.list.find((q) => q.kap === 'sonne').id, kicker: kicker, jetzt: jetzt, wohin: wo }; });
-  const kl3 = await leisteZeigt();
-  ok(kl.label === 'Kapitel der Wünsche' && kl.namen === 'Lage|Aufbau|Material & Farbe|Glas & Sprossen|Griff & Schutz|Sonnenschutz|Einbau' && kl.jetzt === 'Material & Farbe' && kl.haken === 2 && /^Material & Farbe · 1 von \d+$/.test(kl.kicker) && kl.tools === 'qtiefe,nz-knopf' && kl0 &&
-    kl2.q === kl2.erste && /^Sonnenschutz · 1 von \d+$/.test(kl2.kicker) && kl2.jetzt === 'Sonnenschutz' && kl3 && kl2.wohin === kl.namen,
-    'Ein Kapitelkonzept: Leiste mit den sieben Kapiteln, erledigte mit Haken, das aktuelle im Blick; Kicker „Kapitel · i von n“ mit Tiefe-Pille und Notiz daneben; Antippen springt auf die erste sichtbare Frage, die Übersicht zeigt dieselben Kapitel (' + kl.kicker + ' → ' + kl2.kicker + ')');
+  /* Wünsche im Look der Design-DNA (27.10.2026): das Kapitel steht im Band (Name, Stationen, „3 von 7“), Antippen öffnet „Direkt zu einem
+     Thema“ mit allen sieben Kapiteln; über der Frage nur noch „Frage i von n“ */
+  const kl = await p.evaluate(() => { const band = document.querySelector('.wz-band'); return { label: band.getAttribute('aria-label'), jetzt: band.querySelector('b').textContent, stationen: band.querySelectorAll('.lg-band i').length, haken: band.querySelectorAll('.lg-band i.fertig').length, kicker: document.querySelector('.qdock .hd .eyebrow').textContent, tools: Array.from(document.querySelectorAll('.qdock .hd-tools > *')).map((x) => x.className.split(' ')[0]).join(',') }; });
+  await p.click('.wz-band'); await p.waitForSelector('.wz-bogen');
+  const kb = await p.evaluate(() => { const b = Array.from(document.querySelectorAll('.wz-kapitel .ql')); return { namen: b.map((x) => x.childNodes[1].textContent).join('|'), jetzt: b.filter((x) => x.getAttribute('aria-current') === 'step').map((x) => x.childNodes[1].textContent).join(), fokus: document.activeElement.classList.contains('wz-rund') }; });
+  await p.click('.wz-kapitel .ql[data-kap="sonne"]'); await p.waitForTimeout(500);
+  const kl2 = await p.evaluate(() => { const c = qCurrent(), kicker = document.querySelector('.qdock .hd .eyebrow').textContent, jetzt = document.querySelector('.wz-band b').textContent, bogen = !!document.querySelector('.wz-bogen'); S.wohin = true; render(); const wo = Array.from(document.querySelectorAll('.wo-abschnitte .chip')).map((x) => x.textContent).join('|'); S.wohin = false; render(); return { q: S.q, erste: c.list.find((q) => q.kap === 'sonne').id, kicker: kicker, jetzt: jetzt, bogen: bogen, wohin: wo }; });
+  ok(/^Kapitel 3 von 7: Material und Farbe\. Direkt zu einem Thema$/.test(kl.label) && kl.jetzt === 'Material & Farbe' && kl.stationen === 7 && kl.haken === 2 && /^Frage 1 von \d+$/.test(kl.kicker) && kl.tools === 'qtiefe,nz-knopf' &&
+    kb.namen === 'Lage|Aufbau|Material & Farbe|Glas & Sprossen|Griff & Schutz|Sonnenschutz|Einbau' && kb.jetzt === 'Material & Farbe' && kb.fokus &&
+    kl2.q === kl2.erste && /^Frage 1 von \d+$/.test(kl2.kicker) && kl2.jetzt === 'Sonnenschutz' && !kl2.bogen && kl2.wohin === kb.namen,
+    'Ein Kapitelkonzept (Design-DNA): Band mit sieben Stationen, erledigte gefüllt, das laufende benannt; Antippen öffnet „Direkt zu einem Thema“ mit denselben Kapiteln und springt auf die erste sichtbare Frage; Kicker „Frage i von n“ mit Tiefe und Notiz daneben (' + kl.kicker + ' → ' + kl2.kicker + ')');
   // Tiefe-Pille: Wahl öffnen, Tiefe ändern, mit der Zurück-Taste des Browsers zurück zur Frage
   await p.click('.qdock .qtiefe'); await p.waitForTimeout(400);
-  const tp1 = await p.evaluate(() => ({ q: S.q, sub: (document.querySelector('.qdock .hd > p') || {}).textContent || '' }));
+  const tp1 = await p.evaluate(() => ({ q: S.q, sub: (document.querySelector('.qdock .hd > p, .scr.dna .lg-frage > p') || {}).textContent || '' })); // Design-DNA: Unterzeile der Frage
   await p.click('[data-act="tiefe"][data-v="genau"]'); await p.waitForTimeout(300);
   await p.evaluate(() => history.back()); await p.waitForTimeout(500);
   const tp2 = await p.evaluate(() => ({ q: S.q, tiefe: S.proj.tiefe, screen: S.screen }));
@@ -4643,7 +4745,7 @@ if (teil(22)) {
     const varianten = [['fenster', {}], ['fenster', { sart: 'raffstore', roll: 'vorbau', antrieb: 'motor', etage: 'og', bru: 500, absturz: 'gelaender', insekt: 'spann', glasfn: ['sicht'], material: 'holz', fba: 'alu', fbi: 'werzalit', bars: 1 }], ['fenster', { sart: 'rollladen', roll: 'vorbau', sfTeile: 'eigen' }], ['fenster', { sart: 'screen', roll: 'aufsatz' }], ['fenster', { sart: 'klappladen' }], ['fenster', { teilung: '2s', seiten: 'beide' }], ['balkon', { etage: 'og', absturz: 'glas' }], ['hst', {}], ['psk', {}], ['fsw', {}], ['fest', {}]];
     varianten.forEach(([art, set]) => {
       const w = baseWin(); artSetzen(w, art); Object.assign(w, set, { name: 'X', offen: {} }); if (set.bars) { w.bars = []; barCount(w, 'v', 1); } if (w.teilung === '2s') w.sashes = sashesFor('2s'); if (w.seiten) seitenAnwenden(w); S.win = w;
-      qSichtbar(w).forEach((q) => { S.q = q.id; render(true); const b = document.querySelector('.qdock .hd h1 .qg'), k = b && b.getAttribute('data-k'); gesehen.add(q.id); if (!k || !GLOSS[k] || !/^Erklärung: /.test(b.getAttribute('aria-label') || '')) ohne.push(art + ':' + q.id); });
+      qSichtbar(w).forEach((q) => { S.q = q.id; render(true); const b = document.querySelector('.qdock .hd h1 .qg, .scr.dna .lg-frage h1 .lg-i'), k = b && b.getAttribute('data-k'); /* Design-DNA (Lage): i am Titel */ gesehen.add(q.id); if (!k || !GLOSS[k] || !(/^Erklärung: /.test(b.getAttribute('aria-label') || '') || (b.matches('.lg-i') && b.getAttribute('aria-label') === GLOSS[k].t))) ohne.push(art + ':' + q.id); });
     });
     return { ohne: ohne, fehlt: AW.DETAIL.map((d) => d.k).filter((k) => !gesehen.has(k)), n: gesehen.size, gloss: Object.keys(GLOSS).length, optG: [].concat.apply([], Object.keys(OPT_G).map((g) => Object.keys(OPT_G[g]).map((k) => OPT_G[g][k]))).filter((x) => !GLOSS[x]) };
   });
@@ -4680,20 +4782,20 @@ if (teil(22)) {
   await p.click('.qpanel .st-wert'); await p.waitForTimeout(300); await p.evaluate(() => history.back()); await p.waitForTimeout(500);
   const zt5 = await p.evaluate(() => ({ offen: !!S.qMass, q: S.q, screen: S.screen }));
   const zt6 = await p.evaluate(() => { const out = []; S.proj.tiefe = 'genau'; [['seiten', { seiten: 'beide' }, ''], ['paneel', { paneel: 'paneel', paneelH: 400 }, 'balkon'], ['ul', { ul: true, ulA: 'glas', ulH: 400 }, '']].forEach(([q, set, art]) => { const w = baseWin(); if (art) artSetzen(w, art); Object.assign(w, { name: 'X' }, set); if (w.seiten) seitenAnwenden(w); S.win = w; S.q = q; S.screen = 'frage'; render(true); const b = document.querySelector('.qpanel .st-wert'); out.push(q + ':' + (b ? b.getAttribute('data-f') : '-')); }); return out.join(' '); });
-  ok(zt0.wert === 'Standard' && zt1.top === zt0.top && zt1.h === zt0.h && zt1.reihe === 'zurueck,0,del,ok' && !zt1.nav && zt1.fokus === 'qm-ein' && zt1.ziele && zt1.quer && zt2.v === 190 && zt2.wert === '190 mm' && zt2.nav && zt2.stepper &&
+  ok(zt0.wert === 'Standard' && zt1.top === zt0.top && zt1.h === zt0.h && zt1.reihe === '0,del,zurueck,ok' && !zt1.nav && zt1.fokus === 'qm-ein' && zt1.ziele && zt1.quer && zt2.v === 190 && zt2.wert === '190 mm' && zt2.nav && zt2.stepper &&
     zt3.v === 190 && /zwischen 80 und 400/.test(zt3.msg) && zt3.offen && !zt4.offen && zt4.v === 190 && zt4.q === 'fbaTiefe' && !zt5.offen && zt5.q === 'fbaTiefe' && zt5.screen === 'frage' && zt6 === 'seiten:seitenB paneel:paneelH ul:ulH',
     'Zifferntasten für die neuen Maße: Tipp auf den Wert im Stufenregler (− und + bleiben 44 px), unten Pfeil zurück, 0, Löschen, „Übernehmen“; das Modell bleibt an seinem Platz; außerhalb von 80 bis 400 mm ein Hinweis; Pfeil und Zurück-Taste schließen ohne Änderung; ebenso bei Seitenteilen, Paneel und Unterlicht (' + zt6 + ')');
   // Stulp mit Seitenteilen: Kapitel, Stufe, Aktion lässt die Seitenteile außen; „Gestaltung übernehmen“ nimmt den Gehflügel und die Wunschfarben mit
   await p.evaluate(() => { S.proj.tiefe = 'genau'; const w = baseWin(); Object.assign(w, { name: 'Wohnen', offen: {}, teilung: '2s', sashes: sashesFor('2s'), seiten: 'beide', seitenB: 400 }); seitenAnwenden(w); barCount(w, 'v', 1); S.win = w; S.editIdx = -1; S.q = 'stulp'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(300);
-  const st0 = await p.evaluate(() => { const c = qCurrent(), ids = c.alle.map((q) => q.id); return { kap: c.q.kap, s: c.q.s, kicker: document.querySelector('.qdock .hd .eyebrow').textContent, bed: ids.indexOf('stulpBed') > ids.indexOf('stulp') }; });
+  const st0 = await p.evaluate(() => { const c = qCurrent(), ids = c.alle.map((q) => q.id); return { kap: c.q.kap, s: c.q.s, kicker: document.querySelector('.wz-band b').textContent, bed: ids.indexOf('stulpBed') > ids.indexOf('stulp') }; });
   await p.click('[data-act="stulp"][data-v="L"]'); await p.waitForTimeout(400);
   const st1 = await p.evaluate(() => { const w = S.win; return { folge: w.sashes.map((x) => (x.st ? 'S' : x.steh ? 'H' : x.t)).join(''), geh: gehFluegel(w), steh: w.sashes.map((x, i) => (stehFluegel(w, i) ? i : -1)).filter((i) => i >= 0).join(), felder: new Set(w.bars.map((b) => b.s)).size }; });
   const st2 = await p.evaluate(() => { const src = kopie(S.win); src.wunschGf = 'Messing matt'; src.wunschSf = 'DB 703'; const w = baseWin(); Object.assign(w, { teilung: '2s', sashes: sashesFor('2s') }); designAnwenden(w, src); return w.sashes.map((x) => (x.steh ? 'H' : x.t)).join('') + '|' + w.wunschGf + '|' + w.wunschSf; });
-  ok(st0.kap === 'aufbau' && st0.s === 1 && /^Aufbau · /.test(st0.kicker) && st0.bed && st1.folge === 'SDKHS' && st1.geh === 1 && st1.steh === '2' && st1.felder === 4 && st2 === 'DKH|Messing matt|DB 703',
+  ok(st0.kap === 'aufbau' && st0.s === 1 && st0.kicker === 'Aufbau' && st0.bed && st1.folge === 'SDKHS' && st1.geh === 1 && st1.steh === '2' && st1.felder === 4 && st2 === 'DKH|Messing matt|DB 703',
     'Stulp mit Seitenteilen: „Welcher Flügel geht zuerst auf?“ im Kapitel Aufbau (Stufe 1), „Wie öffnet der zweite Flügel?“ danach; die Wahl lässt die Seitenteile außen, Sprossen in allen Feldern; „Gestaltung übernehmen“ nimmt Gehflügel und Wunschfarben mit (' + st1.folge + ', ' + st2 + ')');
   // Standard mit dem Namen des Betriebs im Kundenlink
-  const stdB = await p.evaluate(() => { const alt = S.betrieb; S.betrieb = { name: 'Fensterbau Brandt' }; S.proj.tiefe = 'genau'; const w = baseWin(); w.name = 'X'; S.win = w; S.q = 'griffM'; S.screen = 'frage'; render(true); const zeile = document.querySelector('.qpanel .qstd b').textContent; S.q = 'tiefe'; render(true); const sub = document.querySelector('.qdock .hd > p').textContent; S.betrieb = alt; S.q = 'griffM'; render(true); return { zeile: zeile, sub: sub, eigen: document.querySelector('.qpanel .qstd b').textContent }; });
-  ok(stdB.zeile === 'Standard von Fensterbau Brandt' && /^Den Rest macht Fensterbau Brandt nach seinem Standard/.test(stdB.sub) && stdB.eigen === 'Standard des Fensterbauers', 'Im Kundenlink heißt der Standard nach dem Betrieb („Standard von Fensterbau Brandt“), die Tiefe-Frage sagt, wer den Rest macht');
+  const stdB = await p.evaluate(() => { const alt = S.betrieb; S.betrieb = { name: 'Fensterbau Brandt' }; S.proj.tiefe = 'genau'; const w = baseWin(); w.name = 'X'; S.win = w; S.q = 'griffM'; S.screen = 'frage'; render(true); const zeile = document.querySelector('.qpanel .qstd b').textContent; S.q = 'tiefe'; render(true); const sub = document.querySelector('.qdock .hd > p, .scr.dna .lg-frage > p').textContent; S.betrieb = alt; S.q = 'griffM'; render(true); return { zeile: zeile, sub: sub, eigen: document.querySelector('.qpanel .qstd b').textContent }; });
+  ok(stdB.zeile === 'Standard von Fensterbau Brandt' && /plant Fensterbau Brandt nach seinem Standard/.test(stdB.sub) && stdB.eigen === 'Standard des Fensterbauers', 'Im Kundenlink heißt der Standard nach dem Betrieb („Standard von Fensterbau Brandt“), die Tiefe-Frage sagt, wer den Rest macht');
   // Keine Gesamtübersicht: Detailangaben nur im bezahlten Blatt, nicht nach dem Speichern, im Ergebnis oder in der Liste
   const kgB = await p.evaluate(() => { const w = demoProject()[0]; Object.assign(w, { name: 'Bad', gitter: 'zier', profil: 'stil', oeffner: 'kette', dicht: 'beige', griffM: 'stil', leiste: 'beide' }); S.windows = [w]; S.win = kopie(w); S.editIdx = 0; const t = []; ['fertig', 'ergebnis', 'home'].forEach((sc) => { go(sc); t.push(document.querySelector('.scr').textContent); }); return { t: t.join(' '), blatt: specRows(w).some((r) => r.k === 'Fenstergitter') }; });
   ok(!/Ziergitter|Stilprofil|Kettenantrieb|Beige|Stilgriff|Abdeckleisten/.test(kgB.t) && kgB.blatt, 'Keine Gesamtübersicht: Detailangaben stehen weder nach dem Speichern noch im Ergebnis noch in der Liste, nur im Aufmaßblatt');
@@ -4705,7 +4807,7 @@ if (teil(22)) {
   await p.reload({ waitUntil: 'networkidle' }); await p.waitForTimeout(400);
   await p.click('[data-act="entwurf-weiter"]'); await p.waitForTimeout(400);
   const eM1 = await p.evaluate(() => ({ q: S.q, mehr: !!(MEHR.get(S.win) || {}).material, tiefe: S.proj.tiefe }));
-  await p.click('.qnav .btn.primary'); await p.waitForTimeout(400);
+  await p.click('.qnav .btn.primary, .lg-weiter'); await p.waitForTimeout(400);
   const eM2 = await p.evaluate(() => ({ q: S.q, sichtbar: qSichtbar(S.win).filter((q) => q.kap === 'material').length, alle: qList(S.win).filter((q) => q.kap === 'material').length }));
   ok(eM0.kap === 'material' && eM0.q !== 'fi' && eM1.q === 'tiefe' && eM1.mehr && eM1.tiefe === 'kurz' && eM2.q === eM0.q && eM2.sichtbar === eM2.alle, 'Entwurf: aufgeklappte Kapitel („Mehr zu …“) und der Rückweg von der Tiefe überstehen das Neuladen; Weiter führt zurück zur Frage (' + eM0.q + ')');
   /* Nacharbeit nach dem Merge von #46 (Prüfbefunde app): Zeilen und Chips mit i, „Mehr zu …“, Tiefe-Pille mitten in den Detailfragen,
@@ -4730,7 +4832,8 @@ if (teil(22)) {
         const kreis = i && i.querySelector('svg > circle'), gedrueckt = c.querySelector('.chip').getAttribute('aria-pressed') === 'true';
         if (lb.scrollWidth > lb.clientWidth + 1) return lb.textContent + ' abgeschnitten';
         if (i && rechts > i.getBoundingClientRect().left + 13) return lb.textContent + ' unter dem i';
-        if (i && gedrueckt && getComputedStyle(kreis).fill !== 'rgb(241, 240, 234)') return lb.textContent + ' i unlesbar';
+        /* lesbar: heller Kreis mit dunklem Zeichen (bisher) oder, in den Wünschen der Design-DNA, weißer Ring und weißes Zeichen auf Schwarz */
+        if (i && gedrueckt && getComputedStyle(kreis).fill !== 'rgb(241, 240, 234)' && !(i.closest('.dna') && getComputedStyle(i).color === 'rgb(255, 255, 255)')) return lb.textContent + ' i unlesbar';
         return '';
       }).filter(Boolean));
       r.forEach((x) => chipsI.push(breite + ' ' + q + ': ' + x));
@@ -4751,7 +4854,7 @@ if (teil(22)) {
   for (const [von, t0, t1, weg] of [['griffM', 'genau', 'kurz', 'weiter'], ['oberfl', 'genau', 'normal', 'browser'], ['griff', 'normal', 'kurz', 'zurueck']]) {
     await frageB(von, {}, t0); await p.click('.qdock .qtiefe'); await p.waitForTimeout(300);
     await p.click('[data-act="tiefe"][data-v="' + t1 + '"]'); await p.waitForTimeout(200);
-    if (weg === 'weiter') await p.click('.qnav .btn.primary'); else if (weg === 'zurueck') await p.click('.qnav [data-act="qprev"]'); else await p.evaluate(() => history.back());
+    if (weg === 'weiter') await p.click('.qnav .btn.primary, .lg-weiter'); else if (weg === 'zurueck') await p.click('.qnav [data-act="qprev"], .lg-zurueck'); else await p.evaluate(() => history.back());
     await p.waitForTimeout(450);
     tzW.push(await p.evaluate((v) => { const alle = qList(S.win).map((q) => q.id), sicht = qSichtbar(S.win).map((q) => q.id).filter((x) => x !== 'tiefe'), j = alle.indexOf(v); return { von: v, q: S.q, soll: sicht.find((x) => alle.indexOf(x) > j), screen: S.screen }; }, von));
   }
@@ -4762,11 +4865,11 @@ if (teil(22)) {
   await pE.evaluate(() => { const k = demoProject()[0]; k.name = 'Küche'; S.windows = [k]; persist(); const w = demoProject()[1]; w.name = 'Bad'; delete w.wid; S.win = w; S.editIdx = -1; S.q = 'lage'; go('frage'); entwurfJetzt(); S.win = baseWin(); go('blatt'); });
   await pE.waitForTimeout(400);
   const eS0 = await pE.evaluate(() => ({ karte: (document.querySelector('.ek-warn') || {}).textContent || '', knoepfe: document.querySelectorAll('.ek-warn [data-act="entwurf-weiter"], .ek-warn [data-act="entwurf-weg"]').length }));
-  await pE.click('.bb .btn.primary'); await pE.waitForTimeout(400);
+  await pE.click('.bb .btn.primary, .scr.dna .lg-weiter'); await pE.waitForTimeout(400);
   const eS1 = await pE.evaluate(() => { const sh = document.querySelector('.sheet[aria-modal="true"]'); return { titel: sh ? sh.querySelector('h2').textContent : '', ak: sh ? sh.querySelectorAll('h2 .ak').length : 0, fokus: !!sh && sh.contains(document.activeElement), sent: !!S.sent }; });
   await pE.evaluate(() => history.back()); await pE.waitForTimeout(450);
   const eS2 = await pE.evaluate(() => ({ blatt: !!document.querySelector('.sheet[aria-modal="true"]'), screen: S.screen, sent: !!S.sent }));
-  await pE.click('.bb .btn.primary'); await pE.waitForTimeout(400); await pE.click('.sheet [data-act="send-ohne"]'); await pE.waitForSelector('[data-screen="gesendet"]'); await pE.waitForTimeout(300);
+  await pE.click('.bb .btn.primary, .scr.dna .lg-weiter'); await pE.waitForTimeout(400); await pE.click('.sheet [data-act="send-ohne"]'); await pE.waitForSelector('[data-screen="gesendet"]'); await pE.waitForTimeout(300);
   const eS3 = await pE.evaluate(() => ({ sent: !!S.sent, entwurf: Object.keys(localStorage).filter((k) => /\.entwurf$/.test(k)).length }));
   ok(/„Bad“ ist angefangen und nicht gespeichert/.test(eS0.karte) && /nicht mit an Fensterbau Elster/.test(eS0.karte) && eS0.knoepfe === 2 && eS1.titel === 'Bad fehlt noch' && eS1.ak === 1 && eS1.fokus && !eS1.sent && !eS2.blatt && eS2.screen === 'blatt' && !eS2.sent && eS3.sent && !eS3.entwurf,
     'Angefangenes Fenster beim Senden: „Prüfen“ nennt es mit Fortsetzen und Verwerfen, „Senden“ fragt erst nach (die Zurück-Taste schließt die Frage), „Ohne … senden“ räumt den Entwurf weg');
@@ -4774,7 +4877,7 @@ if (teil(22)) {
   await ctxE.close();
   // Führung, letzter Schritt: die Box „Für den Fensterbauer“ steht im Vorschaublatt (vorher traf sie die Regel des Farbblatts .fb)
   const ctxT = await browser.newContext(telefon), pT = await neueSeite(ctxT);
-  await pT.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await pT.click('.hero [data-act="tour-start"]'); await pT.waitForTimeout(400);
+  await pT.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await pT.click('.hero [data-act="tour-start"], .wl-kopf [data-act="tour-start"]'); await pT.waitForTimeout(400);
   await pT.evaluate(() => tourGehe(TOUR.length - 1)); await pT.waitForTimeout(1200);
   const tbB = await pT.evaluate(() => { const b = document.querySelector('.tb-box.tb-fb'), bl = b && b.closest('.tb-blatt'); if (!b || !bl) return null; const r = b.getBoundingClientRect(), rb = bl.getBoundingClientRect(); return { drin: r.left >= rb.left && r.right <= rb.right && r.top >= rb.top && r.bottom <= rb.bottom, pos: getComputedStyle(b).position, alt: document.querySelectorAll('.tb-box.fb').length }; });
   ok(tbB && tbB.drin && tbB.pos === 'static' && !tbB.alt, 'Führung, letzter Schritt: „Für den Fensterbauer“ steht im Vorschaublatt, nicht über dem Titel');
@@ -4784,7 +4887,7 @@ if (teil(22)) {
   const ctxK = await browser.newContext(telefon), pK = await neueSeite(ctxK);
   await pK.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   const jpegK = Buffer.from(await pK.evaluate(() => { const c = document.createElement('canvas'); c.width = 600; c.height = 800; const g = c.getContext('2d'); g.fillStyle = '#e9e3da'; g.fillRect(0, 0, 600, 800); g.fillStyle = '#a9c8e8'; g.fillRect(150, 150, 300, 500); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; }), 'base64');
-  await pK.click('[data-act="new"]'); await pK.waitForSelector('.scr[data-screen="start"]'); await pK.click('.bb .btn.primary');
+  await pK.click('[data-act="new"]'); await pK.waitForSelector('.scr[data-screen="start"]'); await pK.click('.lg-weiter');
   await pK.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
   await pK.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpegK });
   const kiOffen = await pK.waitForSelector('.fx-dialog', { timeout: 5000 }).then(() => true, () => false);
@@ -4795,11 +4898,11 @@ if (teil(22)) {
   /* Feinschliff am Modell (23.10.2026, docs/GESTALTUNG.md): Zifferntasten kleiner mit „Zurück“, Dock rollt nach, Kamera bleibt am Griff,
      Aufsatzkasten auf dem Rahmen samt Blende, Aufteilung am Regler, Haus am Zahnrad, Raffstore-Fahrt als Ganzes */
   await p.evaluate(() => { S.verlassen = null; S.wohin = false; S.notiz = null; S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await p.waitForTimeout(400);
-  const fs1 = await p.evaluate(() => { const k = document.querySelector('.keypad [data-v="5"]').getBoundingClientRect(), z = document.querySelector('.keypad .zur'), st = document.getElementById('w3d').getBoundingClientRect(); return { key: Math.round(k.height), zur: z.textContent.trim(), zurH: Math.round(z.getBoundingClientRect().height), stage: Math.round(st.height), ok: Math.round(document.querySelector('.keypad .ok').getBoundingClientRect().height) }; });
+  const fs1 = await p.evaluate(() => { const z = document.getElementById('mess-zurueck'), h = document.getElementById('mess-weiter'), st = document.getElementById('mess-buehne').getBoundingClientRect(), fe = document.getElementById('mess-feld').getBoundingClientRect(), f = document.querySelector('.lg-fuss').getBoundingClientRect(); return { zur: z.getAttribute('aria-label') || '', zurH: Math.round(z.getBoundingClientRect().height), ok: Math.round(h.getBoundingClientRect().height), stage: Math.round(st.height), breit: Math.round(st.width) === innerWidth, feld: Math.round(fe.height), tasten: document.querySelectorAll('.ez-taste').length, frei: fe.bottom <= f.top + 1 }; });
   await frageB('rc', { erreichbar: '' }, 'normal');
-  const fs2a = await p.evaluate(() => document.querySelector('.qdock').scrollTop);
+  const fs2a = await p.evaluate(() => document.querySelector('.scroll').scrollTop);
   await p.click('.qpanel [data-act="erreichbar"][data-v="ja"]'); await p.waitForTimeout(1200);
-  const fs2 = await p.evaluate(() => { const d = document.querySelector('.qdock'), b = document.querySelector('.qpanel .qlabel'); return { top: Math.round(d.scrollTop), sicht: !!b && b.getBoundingClientRect().top < d.getBoundingClientRect().bottom - 20 }; });
+  const fs2 = await p.evaluate(() => { const d = document.querySelector('.scroll'), b = document.querySelector('.qpanel .qlabel'), f = document.querySelector('.lg-fuss'); return { top: Math.round(d.scrollTop), sicht: !!b && b.getBoundingClientRect().top < (f ? f.getBoundingClientRect().top : innerHeight) - 20 }; });
   await frageB('griff', { griff: 'standard', teilung: '2p', sashes: [{ t: 'DK', din: 'L' }, { t: 'DK', din: 'R' }] }, 'normal'); await p.waitForTimeout(1300);
   const fs3a = await p.evaluate(() => ({ z: W3DZ.w3d.z, x: Math.round(W3DZ.w3d.x), y: Math.round(W3DZ.w3d.y) }));
   await p.click('.qnav [data-act="qnext"]'); await p.waitForTimeout(150);
@@ -4829,8 +4932,14 @@ if (teil(22)) {
   await p.click('#w3d [data-w3d="fahren"]'); await p.waitForTimeout(500);
   const fs7a = await p.evaluate(() => ({ fahrt: document.getElementById('w3d').classList.contains('is-fahrt'), pos: W3D_BEHANG.pos, stand: W3D_BEHANG.stand, u: parseFloat(document.querySelector('[data-r="behang-u"]').style.transform.split(',')[1]), delay: getComputedStyle(document.querySelector('[data-r="lam-5"]')).transitionDelay }));
   await p.waitForTimeout(1900);
-  const fs7b = await p.evaluate(() => ({ fahrt: document.getElementById('w3d').classList.contains('is-fahrt'), pos: W3D_BEHANG.pos, u: parseFloat(document.querySelector('[data-r="behang-u"]').style.transform.split(',')[1]), lam0: /rotateX\(-52deg\)/.test(document.querySelector('[data-r="lam-0"]').style.transform) }));
-  ok(fs1.key >= 40 && fs1.key <= 44 && fs1.zur === 'Zurück' && fs1.zurH === fs1.key && fs1.ok >= 44 && fs1.stage >= 220, 'Feinschliff, Zifferntasten beim Messen: Tasten ' + fs1.key + ' px mit „Zurück“ als beschriftetem Knopf, „Weiter“ ' + fs1.ok + ' px, das Modell ' + fs1.stage + ' px hoch');
+  const fs7b = await p.evaluate(() => ({ fahrt: document.getElementById('w3d').classList.contains('is-fahrt'), pos: W3D_BEHANG.pos, u: parseFloat(document.querySelector('[data-r="behang-u"]').style.transform.split(',')[1]), lam0: /rotateX\(-78deg\)/.test(document.querySelector('[data-r="lam-0"]').style.transform) }));
+  /* Detailschärfe (Lamellen mit Bördelkanten aus gebürstetem Aluminium, Leiterkordeln vor und hinter den Lamellen, Schienen mit Einlaufrinne, Rollladenpanzer mit Wölbung je Lamelle und Gummilippe an der Endschiene) */
+  const fs8a = await p.evaluate(() => { const q = (r) => document.querySelector('[data-r="' + r + '"]'), l = q('lam-0'), k = q('kord-lv'), kh = q('kord-rh'); return { art: l._art, stops: (l.style.background.match(/rgb\(/g) || []).length, kord: !!k && parseFloat(k.style.width) > 0 && parseFloat(k.style.height) > 0 && k.className.indexOf('w3d-kordel') >= 0, kordZ: k && kh ? parseFloat(k.style.transform.split(',')[2]) < parseFloat(kh.style.transform.split(',')[2]) : false, fsl: /^linear-gradient\(90deg/.test(q('fs-l').style.background), fsr: /^linear-gradient\(270deg/.test(q('fs-r').style.background), uArt: q('behang-u')._art }; });
+  await frageB('panzer', { sart: 'rollladen', roll: 'vorbau', panzer: 'alu' }, 'genau'); await p.waitForTimeout(500);
+  const fs8b = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, neig: b._relief && b._relief[1], stops: (b.style.background.match(/rgb\(/g) || []).length, rep: /^repeating-linear-gradient\(/.test(b.style.background), lippe: /rgb\(42, 43, 45\)/.test(st.querySelector('[data-r="behang-u"]').style.background) }; });
+  await frageB('schlitz', { sart: 'rollladen', roll: 'vorbau', schlitz: 'mit' }, 'genau'); await p.waitForTimeout(500);
+  const fs8c = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, schlitz: /^radial-gradient\(/.test(b.style.background) && /repeating-linear-gradient\(/.test(b.style.background) }; });
+  ok(!fs1.tasten && /^Zurück/.test(fs1.zur) && fs1.zurH >= 44 && fs1.ok >= 44 && fs1.breit && fs1.stage >= 400 && fs1.feld >= 44 && fs1.frei, 'Messen: die Bühne über die ganze Breite (' + fs1.stage + ' px hoch), keine Zifferntasten, das Feld (' + fs1.feld + ' px) über dem Fuß, runder Pfeil zurück neben der Pille (' + fs1.ok + ' px) (' + JSON.stringify(fs1) + ')');
   ok(fs2a === 0 && fs2.top > 40 && fs2.sicht, 'Feinschliff, Dock rollt nach der Wahl „Ja, leicht“ nach: Empfehlung und Einbruchschutz-Stufen stehen im Blick (' + fs2.top + ' px)');
   ok(fs3a.z > 2.4 && fs3b.q === 'gf' && fs3b.z === fs3a.z && fs3b.x === fs3a.x && fs3b.y === fs3a.y && fs3c.z > 2.4, 'Feinschliff, Kamera bleibt am Griff: von „Griff“ zur Griff-Farbe kein Zoom auf 1:1 und zurück (' + JSON.stringify([fs3a, fs3b, fs3c]) + ')');
   ok(fs4.raff === 230 && fs4.kasten === 230 && fs4.roll === 200 && fs4.vorbau < 100 && fs4.blende, 'Feinschliff, Aufsatzkasten: das Element endet 230 mm (Raffstore) bzw. 200 mm (Rollladen) unter der Öffnung, beim Vorbau nicht; die Blende ist eine Detailangabe nur beim Aufsatzkasten');
@@ -4839,15 +4948,17 @@ if (teil(22)) {
   ok(fs6a.da && fs6a.h >= 44 && fs6b.blatt && fs6b.chips === 4 && fs6b.toene === 6 && fs6b.ry === 152 && fs6c.f === 'klinker' && fs6c.t === 'rotbunt' && fs6c.e && fs6c.wall && fs6c.toene === 6 && fs6c.text === 'Klinker, rotbunt' && /Fassade laut Kunde: Klinker, rotbunt/.test(fs6c.rows) && !fs6d.blatt && fs6d.q === 'fa' && fs6d.fokus === 'haus',
     'Feinschliff, Haus am Zahnrad: Blatt mit vier Arten und sechs Tönen, Kamera von außen, Klinker rotbunt färbt die Wand sofort und steht im Blatt als Angabe des Kunden; Escape schließt und gibt den Fokus ans Zahnrad');
   ok(fs7a.fahrt && fs7a.stand === 1 && fs7a.pos > 0.05 && fs7a.pos < 0.95 && fs7a.delay === '0s' && !fs7b.fahrt && fs7b.pos === 1 && fs7b.u > fs7a.u && fs7b.lam0, 'Feinschliff, Raffstore fährt als Ganzes: bildweise aus dem Stand (nach 0,5 s unterwegs, ohne Versatz je Lamelle), nach der Fahrt unten mit offenen Lamellen (' + (+fs7a.pos).toFixed(2) + ')');
+  ok(fs8a.art === 'alub' && fs8a.stops >= 7 && fs8a.kord && fs8a.kordZ && fs8a.fsl && fs8a.fsr && fs8a.uArt === 'alub' && fs8b.art === 'alub' && fs8b.relief === 37 && fs8b.neig > 0.3 && fs8b.stops >= 7 && fs8b.rep && fs8b.lippe && fs8c.art === '' && fs8c.relief === 40 && fs8c.schlitz,
+    'Feinschliff, Detailschärfe am Sonnenschutz: Lamellen mit Bördelkanten aus gebürstetem Aluminium und Leiterkordeln vor und hinter den Lamellen, Schienen mit Einlaufrinne zur Öffnung; Rollladenpanzer je Lamelle gewölbt (Alu 37 mm, Kunststoff 40 mm, Lichtschlitze darüber) mit Gummilippe an der Endschiene (' + JSON.stringify([fs8a, fs8b, fs8c]) + ')');
   sauber(p, 'Konfigurator ohne Hürden: keine Fehler');
   await ctx.close();
 }
 
-/* ---------- 23–30. Konfigurator-Instanzen (docs/INSTANZEN.md) ----------
+/* ---------- 23–29. Konfigurator-Instanzen (docs/INSTANZEN.md) und Aufträge (26, docs/BESTELLUNG.md) ----------
    Je Abschnitt ein Modul scripts/pruefen-instanzen/<n>.mjs (dazu <n>-<name>.mjs, die vorher laufen): export default async (h) => {}.
    h (scripts/pruefen-instanzen/hilfe.mjs) bringt einen eigenen Testserver mit Attrappen und den Instanzen essential.localhost,
    plus.localhost, signature.localhost und signature2.localhost mit. Ein Fehler im Modul zählt als fehlgeschlagene Prüfung. */
-const INSTANZ_TEILE = [23, 24, 25, 26, 27, 28, 29, 30].filter((n) => teil(n));
+const INSTANZ_TEILE = [23, 24, 25, 26, 28, 29].filter((n) => teil(n));
 if (INSTANZ_TEILE.length) {
   const inst = await import('./pruefen-instanzen/hilfe.mjs');
   let h = null;

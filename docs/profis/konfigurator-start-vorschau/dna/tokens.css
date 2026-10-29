@@ -1,0 +1,33 @@
+/* Design-DNA-Tokens für eeziframes, Farben nach „Task-App dunkel“ (Vorgabe des Inhabers, 26.10.2026).
+   Acht Farben, sonst nichts: grund = Schwarz, flaeche = Anthrazit, tinte = Weiß, tinte-2 = Silbergrau, signal = Violett;
+   alle Glut-Farben sind Violett, Indigo und Koralle. Themen wechseln nur an Szenengrenzen (data-theme). */
+:root { --schwarz: #07090a; --anthrazit: #202022; --weiss: #ffffff; --silbergrau: #a8a4a9; --textgrau: #6b676c; --violett: #897efc; --koralle: #f88962; --indigo: #3c3a66; color-scheme: dark; }
+:root, [data-theme="hell"] {
+  --grund: var(--weiss); --grund-tief: var(--weiss); --flaeche: var(--weiss); --flaeche-hoch: var(--weiss);
+  --tinte: var(--schwarz); --tinte-2: var(--textgrau); --linie: var(--silbergrau); --linie-fein: var(--silbergrau);
+  --handlung: var(--schwarz); --auf-handlung: var(--weiss);
+  --glas: rgba(255,255,255,.8); --glas-rand: rgba(255,255,255,.95); --fokus: var(--schwarz);
+  --kachel-rand: inset 0 0 0 1px var(--silbergrau);
+  --schatten-schwebe: 0 24px 48px -16px rgba(7,9,10,.22), 0 2px 6px rgba(7,9,10,.06);
+  --schatten-tief: 0 60px 90px -30px rgba(7,9,10,.45), 0 18px 36px -18px rgba(7,9,10,.35);
+  --schatten-glas: inset 0 1px 0 rgba(255,255,255,.9), 0 10px 30px -10px rgba(7,9,10,.25);
+}
+[data-theme="dunkel"] {
+  --grund: var(--schwarz); --grund-tief: var(--schwarz); --flaeche: var(--anthrazit); --flaeche-hoch: var(--anthrazit);
+  --tinte: var(--weiss); --tinte-2: var(--silbergrau); --linie: var(--silbergrau); --linie-fein: var(--anthrazit);
+  --handlung: var(--weiss); --auf-handlung: var(--schwarz);
+  --glas: rgba(32,32,34,.8); --glas-rand: rgba(255,255,255,.14); --fokus: var(--weiss);
+  --kachel-rand: none;
+  --schatten-schwebe: 0 24px 48px -16px rgba(0,0,0,.7), 0 2px 6px rgba(0,0,0,.4);
+  --schatten-tief: 0 60px 90px -30px rgba(0,0,0,.9), 0 18px 36px -18px rgba(0,0,0,.7);
+  --schatten-glas: inset 0 1px 0 rgba(255,255,255,.12), 0 10px 30px -10px rgba(0,0,0,.6);
+}
+:root {
+  --signal: var(--violett); --auf-signal: var(--schwarz);
+  --glut-orange: var(--violett); --glut-honig: var(--indigo); --glut-pink: var(--koralle); --glut-magenta: var(--indigo);
+  --glut-lila: var(--indigo); --glut-blau: var(--violett); --glut-gruen: var(--violett);
+  --raum-1: 4px; --raum-2: 8px; --raum-3: 12px; --raum-4: 16px; --raum-5: 24px; --raum-6: 32px; --raum-7: 48px; --raum-8: 72px; --raum-9: 120px;
+  --rund-s: 12px; --rund-m: 20px; --rund-l: 28px; --rund-xl: 40px; --rund-pille: 999px;
+  --font-sans: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-punkt: "Doto", ui-monospace, "SF Mono", monospace;
+}

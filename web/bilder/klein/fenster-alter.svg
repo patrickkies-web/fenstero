@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 420" width="480" height="420">
+
+
+<rect width="480" height="420" rx="16" fill="#ffffff"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+
+<rect x="24" y="54" width="432" height="128" fill="#ecebec" stroke="#07090a" stroke-width="4.4"/>
+<rect x="44" y="74" width="412" height="108" fill="#eceef1"/>
+<rect x="44" y="74" width="412" height="34" fill="#c4c1c5"/>
+<line x1="44" y1="108" x2="456" y2="108" stroke="#07090a" stroke-width="3.3"/>
+<line x1="44" y1="74" x2="44" y2="182" stroke="#07090a" stroke-width="4.4"/>
+
+
+
+
+<line x1="24" y1="252" x2="456" y2="252" stroke="#ecebec" stroke-width="4.4"/>
+
+<path d="M62 344c-14 0-20-10-20-20 0-14 12-20 20-36 8 16 20 22 20 36 0 10-6 20-20 20z" fill="#f88962"/>
+<g fill="#f88962" opacity=".55">
+<path d="M190 340c-9 0-13-6-13-13 0-9 8-13 13-23 5 10 13 14 13 23 0 7-4 13-13 13z"/>
+<path d="M250 340c-9 0-13-6-13-13 0-9 8-13 13-23 5 10 13 14 13 23 0 7-4 13-13 13z"/>
+<path d="M370 340c-9 0-13-6-13-13 0-9 8-13 13-23 5 10 13 14 13 23 0 7-4 13-13 13z"/>
+</g>
+<path d="M310 340c-9 0-13-6-13-13 0-9 8-13 13-23 5 10 13 14 13 23 0 7-4 13-13 13z" fill="#897efc"/>
+
+
+
+</g>
+</svg>

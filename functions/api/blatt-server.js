@@ -140,27 +140,27 @@ export async function blattFuerEingang(k, inst, z, o) { return (await blattBauen
 export async function blattAnfrage(k, inst, z) {
   const B = await blattLaden();
   const e = eingabe(inst, z, 'anfrage'), l = (z && z.daten) || {};
-  e.marke = { name: e.betrieb.name, host: inst.haupthost || inst.host || '' };
+  const pf = inst.profil || {}, kt = inst.kontakt || {};
+  e.marke = { name: e.betrieb.name, host: inst.haupthost || inst.host || '', ap: pf.ap || '', tel: pf.tel || kt.tel || '', mail: pf.mail || kt.mail || '' };
   const logo = await logoLaden(k, inst); if (logo) e.marke.logo = { data: logo.data, w: logo.w, h: logo.h, grund: logo.grund };
   e.betrieb = { name: e.betrieb.name, nr: l.nr || '' };
   e.sie = !inst.du;
-  const f = await fotosLaden(k, z.code, (l.aufmass || {}).windows, R().GRENZEN.pdfBudget);
-  e.fotos = f.fotos;
+  e.fotos = {}; // die Durchschrift zeigt keine Fotos
   const bytes = B.pdf(e);
   if (!bytes || !bytes.length) throw new Error('Kein PDF entstanden');
   return bytes;
 }
 
-/* Schlichtes PDF aus Text: Titel, dann Absätze bzw. Abschnitte mit Überschrift; Inter wie im Aufmaßblatt, A4, Seitenzahlen */
+/* Schlichtes PDF aus Text: Titel, dann Absätze bzw. Abschnitte mit Überschrift; Outfit wie im Aufmaßblatt, A4, Seitenzahlen */
 export async function textPdf(titel, abschnitte) {
   await blattLaden();
   const J = globalThis.jspdf.jsPDF, S = globalThis.BlattSchrift;
   const doc = new J({ unit: 'mm', format: 'a4', compress: true });
   let schrift = ['helvetica', 'normal'], fett = ['helvetica', 'bold'];
   try {
-    doc.addFileToVFS('Inter-Medium.ttf', S.medium); doc.addFont('Inter-Medium.ttf', 'InterMedium', 'normal');
-    doc.addFileToVFS('Inter-ExtraBold.ttf', S.extra); doc.addFont('Inter-ExtraBold.ttf', 'InterExtraBold', 'normal');
-    schrift = ['InterMedium', 'normal']; fett = ['InterExtraBold', 'normal'];
+    doc.addFileToVFS('Outfit-Regular.ttf', S.normal); doc.addFont('Outfit-Regular.ttf', 'OutfitRegular', 'normal');
+    doc.addFileToVFS('Outfit-SemiBold.ttf', S.halb); doc.addFont('Outfit-SemiBold.ttf', 'OutfitSemiBold', 'normal');
+    schrift = ['OutfitRegular', 'normal']; fett = ['OutfitSemiBold', 'normal'];
   } catch (e) { /* Helvetica */ }
   const M = 20, B = 210 - 2 * M, UNTEN = 297 - 20;
   const t = (s) => String(s == null ? '' : s).replace(/[\u2000-\u200b\u202f]/g, ' ').replace(/[\u2010-\u2012]/g, '-').replace(/\u00ad/g, '');

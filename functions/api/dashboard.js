@@ -136,9 +136,10 @@ export async function dashboardSicht(ctx, o) {
     if (e && OFFEN.includes(l.status) && m.fortschritt) l.fortschritt = { fenster: fensterZahl(e.meta), zuletzt: e.updated_at || '' };
     return l;
   });
-  /* Website-Besucher, die gerade planen (anonym, nur die Zahl): Zwischenstände dieser Instanz ohne Projekt, in den letzten 24 Stunden */
+  /* Website-Besucher, die gerade planen (anonym, nur die Zahl): Zwischenstände dieser Instanz ohne Projekt mit mindestens einem Fenster, in den
+     letzten 24 Stunden (ein leerer Entwurf, etwa nach „Weitere Anfrage starten“, ist noch keine Planung) */
   const grenze = iso(jetzt - TAG);
-  const web = ents.filter((e) => e.meta && e.meta.instanz && e.meta.instanz.id === zeile.id && !codes.has(e.code) && !e.meta.gesendet && !e.meta.anfrageWeg && String(e.updated_at || '') >= grenze);
+  const web = ents.filter((e) => e.meta && e.meta.instanz && e.meta.instanz.id === zeile.id && !codes.has(e.code) && !e.meta.gesendet && !e.meta.anfrageWeg && fensterZahl(e.meta) > 0 && String(e.updated_at || '') >= grenze);
   const d = row.daten || {}, acc = {};
   Object.keys(d).forEach((k2) => { if (!OHNE.includes(k2)) acc[k2] = d[k2]; });
   const haupthost = inst.haupthost, basis = basisVon(haupthost, ctx.url), f = (zeile.marke || {}).farbe;
@@ -147,7 +148,7 @@ export async function dashboardSicht(ctx, o) {
   acc.website = { laufend: web.length, fenster: web.reduce((s, e) => s + fensterZahl(e.meta), 0), zuletzt: web.reduce((x, e) => (String(e.updated_at || '') > x ? String(e.updated_at || '') : x), '') };
   acc.instanz = {
     name: inst.name, host: haupthost, basis: basis + '/', status: zeile.status, pauseBis: zeile.pause_bis || null, endeAm: zeile.ende_am || null, du: !!inst.du,
-    kundenkonto: String((ctx.env && ctx.env.KANONISCH) || HAUPTADRESSE).replace(/\/+$/, '') + '/partner/',
+    kundenkonto: String((ctx.env && ctx.env.KANONISCH) || HAUPTADRESSE).replace(/\/+$/, '') + '/konto/',
     m: { dashboard: !!m.dashboard, einladungslinks: !!m.einladungslinks, fortschritt: !!m.fortschritt, pdfKennzeichnung: m.pdfKennzeichnung || 'keine' },
     darf: { lesen: R().darf(zeile.status, 'dashboardLesen'), schreiben: R().felder(zeile.status, 'dashboardSchreiben'), einladen: R().darf(zeile.status, 'einladen') && !!m.einladungslinks, export: R().darf(zeile.status, 'export') },
     zugang: (Array.isArray(zeile.zugang) ? zeile.zugang : []).filter((z) => z && !z.aus).map((z) => ({ mail: z.mail, name: z.name || '', rolle: z.rolle === 'inhaber' ? 'inhaber' : 'team', ich: !!(ctx.nutzer && z.uid === ctx.nutzer.id) })),

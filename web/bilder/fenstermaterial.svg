@@ -1,53 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400" role="img" aria-labelledby="t d"><style id="schrift">@font-face{font-family:"Outfit";font-weight:400 699;src:url(data:font/woff2;base64,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) format("woff2")}@font-face{font-family:"Outfit";font-weight:700 900;src:url(data:font/woff2;base64,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) format("woff2")}</style>
 <title id="t">Vier Rahmenmaterialien im Schnitt</title>
 <desc id="d">Schnitte durch vier Fensterrahmen mit Glas: Kunststoff mit mehreren Kammern, Holz, Holz-Alu mit einer Aluminiumschale außen und Aluminium. Darunter je eine Eigenschaft: pflegeleicht und günstig, warm und reparierbar, außen mit Aluschale, schlank und langlebig.</desc>
 <rect width="480" height="400" rx="16" fill="#ffffff"/>
-<g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
 <!-- Kunststoff -->
 <g transform="translate(24 24)">
-<rect width="204" height="160" rx="10" fill="#f6f5f1"/>
-<rect x="20" y="14" width="64" height="80" fill="#ffffff" stroke="#141414" stroke-width="2"/>
-<path d="M41 14V94M62 14V94M20 41H84M20 67H84" stroke="#141414" stroke-width="1.5" fill="none"/>
-<rect x="84" y="28" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="48" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="68" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect width="204" height="160" rx="10" fill="#f6f6f7"/>
+<rect x="20" y="14" width="64" height="80" fill="#ffffff" stroke="#07090a" stroke-width="2"/>
+<path d="M41 14V94M62 14V94M20 41H84M20 67H84" stroke="#07090a" stroke-width="1.5" fill="none"/>
+<rect x="84" y="28" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="1.5"/>
+<rect x="84" y="48" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="1.5"/>
+<rect x="84" y="68" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="1.5"/>
 <text x="20" y="124" font-weight="700">Kunststoff</text>
-<text x="20" y="148" fill="#3d3d3a">pflegeleicht, günstig</text>
+<text x="20" y="148" fill="#202022">pflegeleicht, günstig</text>
 </g>
 <!-- Holz -->
 <g transform="translate(252 24)">
-<rect width="204" height="160" rx="10" fill="#f6f5f1"/>
-<rect x="20" y="14" width="64" height="80" fill="#efe4d2" stroke="#141414" stroke-width="2"/>
-<path d="M28 20C40 38 30 64 44 90M52 18C62 40 52 66 64 92M72 20C78 38 70 64 78 88" stroke="#141414" stroke-width="1" stroke-opacity=".45" fill="none"/>
-<rect x="84" y="28" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="48" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="68" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect width="204" height="160" rx="10" fill="#f6f6f7"/>
+<rect x="20" y="14" width="64" height="80" fill="#efeeef" stroke="#07090a" stroke-width="2"/>
+<path d="M28 20C40 38 30 64 44 90M52 18C62 40 52 66 64 92M72 20C78 38 70 64 78 88" stroke="#07090a" stroke-width="1" stroke-opacity=".45" fill="none"/>
+<rect x="84" y="28" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="1.5"/>
+<rect x="84" y="48" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="1.5"/>
+<rect x="84" y="68" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="1.5"/>
 <text x="20" y="124" font-weight="700">Holz</text>
-<text x="20" y="148" fill="#3d3d3a">warm, reparierbar</text>
+<text x="20" y="148" fill="#202022">warm, reparierbar</text>
 </g>
 <!-- Holz-Alu -->
 <g transform="translate(24 208)">
-<rect width="204" height="160" rx="10" fill="#f6f5f1"/>
-<rect x="20" y="14" width="64" height="80" fill="#efe4d2" stroke="#141414" stroke-width="2"/>
-<path d="M30 20C42 38 32 64 46 90M56 18C66 40 56 66 68 92" stroke="#141414" stroke-width="1" stroke-opacity=".45" fill="none"/>
-<rect x="8" y="10" width="12" height="88" rx="2" fill="#b9bcc2" stroke="#141414" stroke-width="1.5"/>
-<rect x="84" y="28" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="48" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="68" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect width="204" height="160" rx="10" fill="#f6f6f7"/>
+<rect x="20" y="14" width="64" height="80" fill="#efeeef" stroke="#07090a" stroke-width="2"/>
+<path d="M30 20C42 38 32 64 46 90M56 18C66 40 56 66 68 92" stroke="#07090a" stroke-width="1" stroke-opacity=".45" fill="none"/>
+<rect x="8" y="10" width="12" height="88" rx="2" fill="#c4c1c5" stroke="#07090a" stroke-width="1.5"/>
+<rect x="84" y="28" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="1.5"/>
+<rect x="84" y="48" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="1.5"/>
+<rect x="84" y="68" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="1.5"/>
 <text x="20" y="124" font-weight="700">Holz-Alu</text>
-<text x="20" y="148" fill="#3d3d3a">außen Aluschale</text>
+<text x="20" y="148" fill="#202022">außen Aluschale</text>
 </g>
 <!-- Aluminium -->
 <g transform="translate(252 208)">
-<rect width="204" height="160" rx="10" fill="#f6f5f1"/>
-<rect x="20" y="14" width="26" height="80" fill="#b9bcc2" stroke="#141414" stroke-width="2"/>
-<rect x="46" y="14" width="12" height="80" fill="#141414"/>
-<rect x="58" y="14" width="26" height="80" fill="#b9bcc2" stroke="#141414" stroke-width="2"/>
-<rect x="84" y="28" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="48" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="68" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect width="204" height="160" rx="10" fill="#f6f6f7"/>
+<rect x="20" y="14" width="26" height="80" fill="#c4c1c5" stroke="#07090a" stroke-width="2"/>
+<rect x="46" y="14" width="12" height="80" fill="#07090a"/>
+<rect x="58" y="14" width="26" height="80" fill="#c4c1c5" stroke="#07090a" stroke-width="2"/>
+<rect x="84" y="28" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="1.5"/>
+<rect x="84" y="48" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="1.5"/>
+<rect x="84" y="68" width="70" height="8" fill="#eceef1" stroke="#897efc" stroke-width="1.5"/>
 <text x="20" y="124" font-weight="700">Aluminium</text>
-<text x="20" y="148" fill="#3d3d3a">schlank, langlebig</text>
+<text x="20" y="148" fill="#202022">schlank, langlebig</text>
 </g>
 </g>
 </svg>

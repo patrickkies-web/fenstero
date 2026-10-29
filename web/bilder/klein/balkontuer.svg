@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 440" width="480" height="440">
+
+
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#f88962"/></marker></defs>
+<rect width="480" height="440" rx="16" fill="#ffffff"/>
+<rect x="16" y="16" width="448" height="356" fill="#ecebec"/>
+<rect x="150" y="54" width="180" height="318" fill="#eceef1"/>
+<rect x="158" y="62" width="164" height="300" fill="none" stroke="#202022" stroke-width="6.6"/>
+<rect x="158" y="356" width="164" height="12" fill="#897efc"/>
+<rect x="150" y="54" width="180" height="318" fill="none" stroke="#f88962" stroke-width="6.6"/>
+<line x1="16" y1="372" x2="464" y2="372" stroke="#07090a" stroke-width="6.6"/>
+<g stroke="#f88962" stroke-width="5.5">
+<line x1="152" y1="84" x2="328" y2="84"/><line x1="152" y1="210" x2="328" y2="210"/><line x1="152" y1="336" x2="328" y2="336"/>
+<line x1="176" y1="56" x2="176" y2="370"/><line x1="240" y1="56" x2="240" y2="370"/><line x1="304" y1="56" x2="304" y2="370"/>
+</g>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+
+
+
+
+
+</g>
+</svg>

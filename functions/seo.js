@@ -18,10 +18,10 @@ export const STAND = '2026-10-21';
 /* Alle Seiten für die Sitemap, wichtigste zuerst. stand = letzte inhaltliche Änderung (lastmod in der Sitemap, IndexNow); bei
    Ratgeberseiten gleich dem dateModified im JSON-LD und dem „Stand“ auf der Seite (prüft die Suite) */
 export const SEITEN = [
-  { pfad: '/', prio: '1.0', stand: '2026-10-23' },
-  { pfad: '/app/', prio: '0.9', stand: '2026-10-18' },
+  { pfad: '/', prio: '1.0', stand: '2026-10-28' },
+  { pfad: '/app/', prio: '0.9', stand: '2026-10-28' },
   { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-23' },
+  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-28' },
   { pfad: '/ratgeber/balkontuer-ausmessen/', prio: '0.8', stand: '2026-10-21' },
   { pfad: '/ratgeber/fenster-mit-rollladen-ausmessen/', prio: '0.8', stand: '2026-10-21' },
   { pfad: '/ratgeber/bestellmass-fenster/', prio: '0.8', stand: '2026-10-21' },
@@ -50,11 +50,10 @@ export const SEITEN = [
   { pfad: '/fuer-fensterbauer/geplatzter-aufmasstermin/', prio: '0.7', stand: '2026-10-23' },
   { pfad: '/fuer-fensterbauer/fensterbau-software/', prio: '0.7', stand: '2026-10-23' },
   { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-21' },
-  { pfad: '/impressum/', prio: '0.2', stand: '2026-10-16' },
-  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-23' },
-  { pfad: '/agb/', prio: '0.2', stand: '2026-10-18' },
-  { pfad: '/nutzungsbedingungen/', prio: '0.2', stand: '2026-10-18' },
-  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-23' },
+  { pfad: '/impressum/', prio: '0.2', stand: '2026-10-28' },
+  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-28' },
+  { pfad: '/agb/', prio: '0.2', stand: '2026-10-28' },
+  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-28' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
 ].concat(PAKETE_SEITEN);
 
@@ -91,13 +90,15 @@ export function robots(origin, an) {
     'Content-Signal: search=yes, ai-input=yes, ai-train=yes',
     'Allow: /',
     'Disallow: /api/',
-    'Disallow: /partner/',
+    'Disallow: /bestellen/',
+    'Disallow: /konto/',
     '',
     '# Suchen in KI-Assistenten: ausdrücklich willkommen',
     KI_SUCHE.map((b) => 'User-agent: ' + b).join('\n'),
     'Allow: /',
     'Disallow: /api/',
-    'Disallow: /partner/',
+    'Disallow: /bestellen/',
+    'Disallow: /konto/',
     '',
     'Sitemap: ' + origin + '/sitemap.xml',
     ''
@@ -119,13 +120,13 @@ export function absolut(html, b) {
 }
 
 /* Kopfzeilen einer Seite: Sicherheit wie in _headers; in der Pilotphase X-Robots-Tag: noindex, mit Freigabe ohne; dazu der Canonical-Hinweis */
-export async function seite(antwort, env, url) {
+export async function seite(antwort, env, url, kanonisch) {
   const h = new Headers(antwort.headers);
   for (const [k, v] of Object.entries(SICHERHEIT)) if (!h.has(k)) h.set(k, v);
   if (frei(env, url)) h.delete('X-Robots-Tag'); else h.set('X-Robots-Tag', SPERRE);
   const html = antwort.status === 200 && /text\/html/.test(h.get('content-type') || '');
   if (!html) return new Response(antwort.body, { status: antwort.status, statusText: antwort.statusText, headers: h });
-  const b = basis(env, url), kan = b + kanonischerPfad(url.pathname), nach = !einfuehrungLaeuft(env) && !RECHT_MIT_ZEITRAUM.includes(url.pathname);
+  const b = basis(env, url), kan = b + (kanonisch || kanonischerPfad(url.pathname)), nach = !einfuehrungLaeuft(env) && !RECHT_MIT_ZEITRAUM.includes(url.pathname);
   const mitTag = einfuehrungLaeuft(env) && BANNER_SEITEN.test(url.pathname); // Banner mit Countdown: der Text ändert sich jeden Tag
   h.set('Link', '<' + kan + '>; rel="canonical"');
   h.delete('content-length');
@@ -137,9 +138,9 @@ export async function seite(antwort, env, url) {
 }
 
 /* Einführungspreis (EINFUEHRUNG in functions/api/umgebung.js): Ab dem Stichtag nennen die Seiten die regulären Preise und die
-   Hinweise <span class="einf">…</span> fallen weg, ohne dass jemand die Dateien ändert. AGB und Nutzungsbedingungen nennen beide
+   Hinweise <span class="einf">…</span> fallen weg, ohne dass jemand die Dateien ändert. Die AGB nennen beide
    Zeiträume selbst (Vertragstext mit Stand) und bleiben, wie sie sind. Die Prüfsuite gibt jede Seite einmal nach dem Stichtag aus. */
-const RECHT_MIT_ZEITRAUM = ['/agb/', '/nutzungsbedingungen/'];
+const RECHT_MIT_ZEITRAUM = ['/agb/'];
 const BANNER_SEITEN = /^\/(ratgeber|fuer-fensterbauer)\//;
 const zahl = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace('.', ','));
 const NACH_EINFUEHRUNG = [
@@ -168,7 +169,7 @@ export function banner(pfad, env) {
   const text = '<b>Einführungspreis bis ' + bis + ':</b> Aufmaßblatt ' + geld(v.aufmass) + ' <span class="spaeter">· danach ' + geld(d.aufmass) + '</span>';
   return '<a class="einf-bar" href="/app/"><span><span class="txt">' + text + '</span><span class="rest">' + rest + '</span><span class="los">Jetzt ausmessen →</span></span></a>';
 }
-const mitBanner = (html, pfad, env) => { const b = BANNER_SEITEN.test(pfad) && konfig(env).einfuehrung ? banner(pfad, env) : ''; return b ? html.replace(/<body[^>]*>/, (m) => m + '\n' + b) : html; };
+const mitBanner = (html, pfad, env) => { const b = BANNER_SEITEN.test(pfad) && konfig(env).einfuehrung ? banner(pfad, env) : ''; return b ? html.replace(/<body[^>]*>(?:\n<a class="rg-skip"[^>]*>[^<]*<\/a>)?/, (m) => m + '\n' + b) : html; };
 
 /* Canonical und og:url zusätzlich im HTML: Bing und KI-Crawler lesen die Seite selbst, nicht immer die Kopfzeilen */
 export function kopf(html, kan) {
@@ -263,7 +264,7 @@ export function llms(origin, env) {
     '- [Wie misst man ein Fenster mit Rollladenkasten?](' + u('/ratgeber/fenster-mit-rollladen-ausmessen/') + '): beim Aufsatzkasten bis zur Oberkante des Kastens, beim Einbaukasten bis zu seiner Unterkante, beim Vorbaurollladen die Öffnung wie immer.',
     '- [DIN links oder DIN rechts?](' + u('/ratgeber/din-links-rechts/') + '): von der Seite gesehen, zu der das Fenster aufgeht, also meist von innen; Bänder links heißt DIN links (DIN 107).',
     '- [Wie hoch muss eine Fensterbrüstung sein?](' + u('/ratgeber/bruestungshoehe-fenster/') + '): mindestens 80 cm, bei mehr als 12 m Absturzhöhe 90 cm, wenn draußen mehr als 1 m tiefer liegt (Musterbauordnung, von den meisten Ländern übernommen; Bayern weicht ab).',
-    '- [Gibt es eine App, mit der man Fenster selbst ausmisst?](' + u('/app/') + '): ja, eeziframes im Browser, ohne Installation; Messen kostenlos, Aufmaßblatt als PDF ' + eur(p.aufmass) + ', über den Link eines Fensterbauers kostenlos.',
+    '- [Gibt es eine App, mit der man Fenster selbst ausmisst?](' + u('/app/') + '): ja, eeziframes im Browser, ohne Installation; Messen kostenlos, Aufmaßblatt als PDF ' + eur(p.aufmass) + ', im Konfigurator auf der Website eines Fensterbauers kostenlos.',
     '- [Warum beschlagen Fenster, und was bedeutet es?](' + u('/ratgeber/fenster-beschlagen/') + '): innen ist die Raumluft zu feucht oder die Scheibe zu kalt (ein Vier-Personen-Haushalt gibt rund 8 bis 12 Liter Wasser am Tag ab, Ziel 40 bis 60 % Luftfeuchte); außen beschlägt gut dämmendes Glas, das ist kein Mangel; zwischen den Scheiben ist der Randverbund undicht, dann hilft nur neues Glas oder ein neues Fenster.',
     '- [Was tun, wenn es am Fenster zieht?](' + u('/ratgeber/fenster-undicht/') + '): mit dem Papiertest die Stelle finden; alte Dichtungen durch neue Gummiprofile ersetzen, Beschläge vom Fachbetrieb einstellen lassen; die Fuge zur Wand muss mit Dichtbändern angeschlossen sein, Bauschaum allein reicht nicht. Bei Fenstern von vor 1995 ist meist ein neues Fenster sinnvoll.',
     '- [Wie erkenne ich, wie alt meine Fenster sind?](' + u('/ratgeber/fenster-alter-erkennen/') + '): am Aufdruck auf dem Abstandhalter zwischen den Scheiben, dort steht oft das Herstellungsdatum der Verglasung. Einfachglas, Kasten- und Verbundfenster stammen meist von bis 1978, unbeschichtetes Isolierglas von 1978 bis 1995, Wärmeschutzglas ab etwa 1995. Das BBSR setzt für Rahmen 50 Jahre und mehr an, für Isolierglas 30, für Dichtungsprofile 20.',
@@ -316,6 +317,7 @@ export function umleitung(request) {
   if (index) url.pathname = kanonischerPfad(url.pathname);
   return new Response(null, { status: 301, headers: { location: url.href, 'cache-control': 'public, max-age=86400' } });
 }
+export const ANSICHT_FB = /^\/fensterbauer\/?$/;
 const ohneBedingung = (r) => { const h = new Headers(r.headers); h.delete('if-none-match'); h.delete('if-modified-since'); return new Request(r.url, { method: r.method, headers: h }); };
 export async function behandeln(request, env, holen) {
   const url = new URL(request.url);
@@ -324,6 +326,9 @@ export async function behandeln(request, env, holen) {
   if (url.pathname === '/robots.txt') return text(robots(basis(env, url), frei(env, url)), 'text/plain; charset=utf-8');
   if (url.pathname === '/sitemap.xml') return frei(env, url) ? text(sitemap(basis(env, url)), 'application/xml; charset=utf-8') : text('Nicht freigegeben.\n', 'text/plain; charset=utf-8', 404);
   if (url.pathname === '/llms.txt') return text(llms(basis(env, url), env), 'text/plain; charset=utf-8', 200, frei(env, url) ? null : { 'x-robots-tag': SPERRE });
+  /* /fensterbauer: die Startseite in der Ansicht für Fensterbauer (portal.js liest den Pfad), Adresse ohne Anker statt /#fensterbauer;
+     derselbe Inhalt wie /fuer-fensterbauer/, daher dorthin kanonisch und nicht in der Sitemap */
+  if (ANSICHT_FB.test(url.pathname)) return await seite(await holen(new Request(new URL('/', url).href, request)), env, url, '/fuer-fensterbauer/');
   if (istSeite(url.pathname)) return await seite(await holen(einfuehrungLaeuft(env) && !BANNER_SEITEN.test(url.pathname) ? request : ohneBedingung(request)), env, url);
   return null;
 }

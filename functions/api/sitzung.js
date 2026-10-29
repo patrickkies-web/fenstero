@@ -1,7 +1,8 @@
-/* eeziframes · Sitzungen und Zweck-Token für Kundenkonto (/partner/ auf eeziframes.com) und Dashboard der Instanzen (/betrieb/)
+/* eeziframes · Sitzungen und Zweck-Token für Kundenbereich (/konto/ und /bestellen/ auf eeziframes.com, Bereich kunde), Zentrale
+   (/zentrale/, Bereich inhaber) und Dashboard der Instanzen (/betrieb/)
    Muster wie die Zentrale (zentrale.js, Sitzung): Der Server unterschreibt die Sitzung selbst (HMAC-SHA-256 über SITZUNG_GEHEIMNIS),
    der Browser bekommt sie nur als Cookie, das Skripte nicht lesen können. Kein Supabase-Token im Browser (Bauplan K1.1, E11).
-   - Sitzung { v, bereich: 'partner'|'betrieb', aud: Host, sub, mail, iat, exp, n } im Cookie __Host-partner bzw. __Host-betrieb
+   - Sitzung { v, bereich: 'kunde'|'inhaber'|'betrieb', aud: Host, sub, mail, iat, exp, n } im Cookie __Host-<bereich>
      (HttpOnly, Secure, SameSite=Strict, Path=/). Sie gilt nur in ihrem Bereich und nur auf dem Host, der sie ausgestellt hat.
    - Schreibende Anfragen mit Sitzung verlangen die Kopfzeile Origin der eigenen Adresse (gegen Anfragen fremder Seiten).
    - frisch: Anmeldung jünger als FRISTEN.frischMinuten (15); Geld-Aktionen verlangen das (sonst 401 { frisch: true }).
@@ -15,7 +16,7 @@
 import '../../web/assets/instanzregeln.js';
 import { ApiFehler, hmac, b64url, gleich, zufall, jetztAus } from './umgebung.js';
 
-export const BEREICHE = ['partner', 'betrieb'];
+export const BEREICHE = ['betrieb', 'kunde', 'inhaber'];
 const R = () => globalThis.Instanzregeln;
 const TAG = 864e5;
 const b64urlText = (s) => b64url(new TextEncoder().encode(s));
@@ -48,11 +49,12 @@ function cookieWert(request, name) {
 const cookie = (bereich, wert, sekunden) => cookieName(bereich) + '=' + wert + '; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=' + Math.max(0, Math.floor(sekunden));
 
 /* Sitzung ausstellen; Rückgabe: Wert für die Kopfzeile Set-Cookie */
-export async function sitzungSetzen(ctx, bereich, wer) {
+/* stunden: kürzere Dauer als FRISTEN.sitzungTage (Zentrale des Inhabers: 8 Stunden) */
+export async function sitzungSetzen(ctx, bereich, wer, stunden) {
   if (!BEREICHE.includes(bereich)) throw new ApiFehler('Unbekannter Bereich.', 500);
   wer = wer || {};
   if (!wer.sub) throw new ApiFehler('Anmeldung ohne Kennung.', 500);
-  const t = jetzt(ctx), dauer = R().FRISTEN.sitzungTage * TAG;
+  const t = jetzt(ctx), dauer = stunden > 0 ? Math.min(stunden * 3600000, R().FRISTEN.sitzungTage * TAG) : R().FRISTEN.sitzungTage * TAG;
   const p = { v: 1, bereich: bereich, aud: hostAus(ctx.url), sub: String(wer.sub), mail: String(wer.mail || '').toLowerCase(), iat: t, exp: t + dauer, n: zufall(6) };
   return cookie(bereich, await signieren(ctx.k, 'sitzung', p), dauer / 1000);
 }

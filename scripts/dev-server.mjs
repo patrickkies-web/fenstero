@@ -31,6 +31,8 @@ const WEB = path.join(ROOT, 'web');
 const PORT = Number(process.env.PORT || 8788);
 const ATTRAPPE = process.env.KI_ATTRAPPE === '1';
 const env = Object.assign({}, process.env, {
+  /* Die Prüfsuite prüft die abgeschaltete Abrechnung je Projekt weiter (umgebung.js); BETRIEBSKONTO=0 zeigt das kostenlose Konto wie online */
+  BETRIEBSKONTO: process.env.BETRIEBSKONTO || '1',
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || (ATTRAPPE ? 'attrappe' : ''),
   KI_MODELL: process.env.KI_MODELL || ''
 });
@@ -66,7 +68,7 @@ const { speicher, attrappeStand } = await import(pathToFileURL(path.join(ROOT, '
 const { ablage, ABLAGEN } = await import(pathToFileURL(path.join(ROOT, 'functions/api/fotos.js')).href);
 const sitzung = await import(pathToFileURL(path.join(ROOT, 'functions/api/sitzung.js')).href);
 const { zahlungsdienst } = await import(pathToFileURL(path.join(ROOT, 'functions/api/stripe.js')).href);
-const { istPaketEreignis, paketEreignis } = await import(pathToFileURL(path.join(ROOT, 'functions/api/bestellung.js')).href);
+const { istAuftragEreignis, auftragEreignis } = await import(pathToFileURL(path.join(ROOT, 'functions/auftrag/index.js')).href);
 
 /* _headers lesen: Zeile ohne Einzug = Pfad (mit * am Ende), eingerückt = Kopfzeile, „! Name“ nimmt eine Kopfzeile wieder weg */
 const regeln = [];
@@ -83,7 +85,7 @@ try {
 const passt = (muster, p) => (muster.endsWith('*') ? p.startsWith(muster.slice(0, -1)) : p === muster);
 const kopfzeilen = (p) => regeln.filter((r) => passt(r.muster, p)).flatMap((r) => r.kopf);
 
-const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.pdf': 'application/pdf' };
+const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.woff': 'font/woff', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.pdf': 'application/pdf' };
 
 async function datei(p) {
   try { const s = await stat(p); return s.isFile() ? p : s.isDirectory() ? 'dir' : null; } catch (e) { return null; }
@@ -179,16 +181,16 @@ async function dev(request, url) {
     case '/__saat': return devJson({ ok: true, instanzen: await saat(body) });
     case '/__instanz': { const r = await instanzSetzen(body); return r ? devJson({ ok: true, instanz: r }) : devJson({ ok: false, fehler: 'unbekannt' }, 404); }
     case '/__attrappe': return devJson(Object.assign({ ok: true }, attrappeStand(), { ablage: Object.fromEntries(Object.keys(ABLAGEN).map((a) => [a, ablage(konfig(env), a).alle()])), queue: queueLog }));
-    /* Stripe-Ereignis der Konfigurator-Pakete wie über den Webhook (zahlung.js → bestellung.js paketEreignis), nur mit der Zahlungs-Attrappe:
-       ohne Stripe gibt es kein Webhook-Geheimnis. Body { type, object }, z. B. invoice.payment_failed mit { subscription: <Abo der Bestellung> } */
+    /* Stripe-Ereignis der Aufträge wie über den Webhook (zahlung.js → functions/auftrag/ auftragEreignis), nur mit der Zahlungs-Attrappe:
+       ohne Stripe gibt es kein Webhook-Geheimnis. Body { type, object }, z. B. invoice.payment_failed mit { metadata: { art: 'auftrag', auftrag: <id> } } */
     case '/__stripe': {
       if (env.ZAHLUNG_ATTRAPPE !== '1' || env.STRIPE_SECRET_KEY) return devJson({ ok: false, fehler: 'nur mit ZAHLUNG_ATTRAPPE=1 ohne Stripe' }, 400);
       const k = konfig(env), c = neuerCtx(), sp = speicher(k);
       const ctx = { k, env, sp, zd: zahlungsdienst(k), request, url, body: null, roh: '', params: {}, waitUntil: c.waitUntil, instanz: null, zaehlen: () => {} };
       const ev = { id: 'evt_dev_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), type: String(body.type || ''), data: { object: body.object || {} } };
-      const paket = await istPaketEreignis(ctx, ev), ergebnis = paket ? await paketEreignis(ctx, ev) : null;
+      const auftrag = istAuftragEreignis(ev), ergebnis = auftrag ? await auftragEreignis(ctx, ev) : null;
       await Promise.all(c.offen);
-      return devJson({ ok: true, paket, ergebnis });
+      return devJson({ ok: true, auftrag, ergebnis });
     }
     case '/__sitzung': { const ctx = { k: konfig(env), env, request, url }; const b = url.searchParams.get('bereich') || 'betrieb'; return devJson({ ok: true }, 200, { 'set-cookie': await sitzung.sitzungSetzen(ctx, b, { sub: url.searchParams.get('sub') || 'pruef-nutzer', mail: 'pruef@beispiel.example' }) }); }
     case '/__sitzung/lesen': { const ctx = { k: konfig(env), env, request, url }; return devJson({ ok: true, sitzung: await sitzung.sitzungLesen(ctx, url.searchParams.get('bereich') || 'betrieb') }); }

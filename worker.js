@@ -20,9 +20,9 @@ import { eingangVerarbeiten } from './functions/api/eingang.js';
 import { konfig } from './functions/api/umgebung.js';
 import { speicher } from './functions/api/speicher.js';
 
-/* Bereiche ohne Suchmaschinen und ohne Zwischenspeicher: Zentrale, Kundenkonto, Dashboard (laufen über run_worker_first durch den
-   Worker, damit die Kopfzeilen sicher dran sind, auch wenn Cloudflare _headers an Antworten aus dem Worker nicht anwendet) */
-const GESCHUETZT = /^\/(zentrale|partner|betrieb)(\/|$)/;
+/* Bereiche ohne Suchmaschinen und ohne Zwischenspeicher: Zentrale, Bestellung, Kundenbereich, Dashboard (laufen über run_worker_first
+   durch den Worker, damit die Kopfzeilen sicher dran sind, auch wenn Cloudflare _headers an Antworten aus dem Worker nicht anwendet) */
+const GESCHUETZT = /^\/(zentrale|bestellen|konto|betrieb)(\/|$)/;
 function sicher(antwort, ohneCache) {
   const h = new Headers(antwort.headers);
   for (const [k, v] of Object.entries(SICHERHEIT)) if (!h.has(k)) h.set(k, v);

@@ -18,14 +18,14 @@
       spross: { wiener: 'Wiener Sprosse', szr: 'Innenliegende Sprossen', auf: 'Aufgesetzte Sprossen', echt: 'Glasteilende Sprossen' },
       aufseite: { beide: 'innen und außen', aussen: 'nur außen', innen: 'nur innen' },
       glas: { '2': '2-fach', '3': '3-fach' },
-      glasfn: { schall: 'Schallschutz', vsg: 'Sicherheitsglas', sicht: 'Sichtschutz', sonne: 'Sonnenschutz', extraklar: 'Weißglas (extraklar)', vogel: 'Vogelschutzglas', selbstr: 'selbstreinigend' },
+      glasfn: { schall: 'Schallschutz', vsg: 'Verbundsicherheitsglas (VSG)', sicht: 'Sichtschutz', sonne: 'Sonnenschutz', extraklar: 'Weißglas (extraklar)', vogel: 'Vogelschutzglas', selbstr: 'selbstreinigend' },
       griff: { standard: 'Standard', abschliessbar: 'abschließbar', druckknopf: 'mit Druckknopf', ohne: 'ohne Griff (verdeckt oder elektrisch)', motor: 'elektrisch' },
       hstGriff: { standard: 'Hebegriff', abschliessbar: 'Hebegriff, abschließbar', motor: 'elektrisch (Taster oder App)' },
       art: { fenster: 'Fenster', balkon: 'Balkon- oder Terrassentür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür (Parallel-Schiebe-Kipp)', fsw: 'Faltschiebewand' },
       pskSchema: { A: '2-teilig (1 Schiebeflügel vor 1 Festteil)', A3: '3-teilig (1 Schiebeflügel vor 2 Festteilen)', C: '4-teilig (2 Schiebeflügel mittig vor 2 Festteilen)' },
       griffA: { keiner: 'kein Griff außen', ziehgriff: 'Ziehgriff mit Schnäpper', abschliessbar: 'abschließbar, Schlüssel außen' },
       boden: { bleibt: 'Fußboden bleibt, wie er ist', neu: 'Fußboden wird erneuert' },
-      absturz: { balkon: 'Balkon oder Terrasse davor, keine nötig', gelaender: 'Geländer außen (französischer Balkon)', glas: 'Glasbrüstung in der Laibung', fest: 'unteres Feld fest, Sicherheitsglas' },
+      absturz: { balkon: 'Balkon oder Terrasse davor, keine nötig', gelaender: 'Geländer außen (französischer Balkon)', glas: 'Glasbrüstung in der Laibung', fest: 'unteres Feld fest, Verbundsicherheitsglas (VSG)' },
       erreichbar: { ja: 'leicht erreichbar', nein: 'nicht leicht erreichbar' },
       erreich: { vm: 'vormittags', nm: 'nachmittags', ab: 'abends' }, // wann der Kunde am besten erreichbar ist (Kontakt in der App)
       foerdweg: { bafa: 'BAFA-Zuschuss (BEG EM)', steuer: 'Steuerbonus (§ 35c EStG)', keine: 'keine', offen: 'noch offen' },
@@ -111,6 +111,8 @@
     const istTuer = (w) => w.art === 'hst' || w.art === 'fsw' || w.art === 'balkon' || w.art === 'psk';
     const tuerCfg = (w) => (w.art === 'hst' ? w.hst : w.art === 'fsw' ? w.fsw : w.art === 'psk' ? w.psk : w.art === 'balkon' ? w.bt : null) || {};
     const lab = (g, k) => (OPT[g] && OPT[g][k]) || '';
+    /* Geschoss als Text: im Obergeschoss mit Nummer, wenn der Kunde sie gewählt hat („2. OG“), sonst wie bisher */
+    const etageText = (w) => (w && w.etage === 'og' && w.ogNr > 0 ? w.ogNr + '. OG' : lab('etage', w && w.etage));
     /* Farben (S2): alle RAL-Classic-Töne, Holzdekore und Sonderfarben aus ral.js (im Browser globalThis.RAL, auf dem Server per require).
        col(k) → [Name, Code, Hex] für den gespeicherten Schlüssel; Unbekanntes bleibt sichtbar statt still Verkehrsweiß zu werden. */
     let ralCache, ralVersucht = false;
@@ -153,12 +155,13 @@
     /* ---------- Fragen der App: Kapitel und Stufe (eine Quelle für App, Klärungsliste, Betrieb und Blatt) ----------
        FRAGE.kap: Kapitel je Frage (Schlüssel wie in qList von app.js, ohne Nummer: typ-0 → typ). FRAGE.stufe: 2 heißt „die üblichen
        Wünsche“, was viele mögen, für ein erstes Angebot aber nicht braucht; sonst 1, das Wichtigste (Pflichtthemen sind immer 1).
-       Detailangaben tragen ihre Stufe im Register DETAIL (s). */
+       Detailangaben tragen ihre Stufe im Register DETAIL (s). Ist ein Sonnenschutz, ein Sichtschutz innen, Klappläden oder ein
+       Insektenschutz gewählt, kommt die Frage nach seiner Farbe bei jeder Tiefe (Stufe 1; Wunsch des Inhabers, 28.10.2026). */
     const FRAGE = {
       kap: { lage: 'vorweg', absturz: 'vorweg', design: 'vorweg', tiefe: 'vorweg', form: 'aufbau', teilung: 'aufbau', typ: 'aufbau', din: 'aufbau', stulp: 'aufbau', felder: 'aufbau', hsts: 'aufbau', hstr: 'aufbau', pskS: 'aufbau', pskR: 'aufbau', fswn: 'aufbau', fsws: 'aufbau', fswg: 'aufbau', ol: 'aufbau', ul: 'aufbau', richtung: 'aufbau', schwelle: 'aufbau', boden: 'aufbau',
         material: 'material', fa: 'material', fi: 'material', glas: 'glas', glasfn: 'glas', orn: 'glas', sprossen: 'glas', spross: 'glas', aufseite: 'glas', breite: 'glas', griff: 'bedienung', griffA: 'bedienung', gf: 'bedienung', rc: 'bedienung',
         sart: 'sonne', einbau: 'sonne', sfarbe: 'sonne', antrieb: 'sonne', insekt: 'sonne', iart: 'sonne', ifarbe: 'sonne', fbi: 'bank', fba: 'bank', montage: 'bank', notiz: 'bank' },
-      stufe: { ul: 2, richtung: 2, boden: 2, glasfn: 2, orn: 2, sprossen: 2, spross: 2, aufseite: 2, breite: 2, griff: 2, griffA: 2, gf: 2, einbau: 2, sfarbe: 2, iart: 2, ifarbe: 2, fbi: 2, fba: 2, montage: 2 }
+      stufe: { ul: 2, richtung: 2, boden: 2, glasfn: 2, orn: 2, sprossen: 2, spross: 2, aufseite: 2, breite: 2, griff: 2, griffA: 2, gf: 2, einbau: 2, iart: 2, fbi: 2, fba: 2, montage: 2 }
     };
     /* Detailtiefe des Projekts (p.tiefe: kurz 1, normal 2, genau 3): Was bei dieser Tiefe nicht gefragt wurde, macht der Fensterbauer
        nach seinem Standard. nachTiefe(w, p) gibt dafür eine Kopie des Fensters zurück:
@@ -247,7 +250,7 @@
       /* Aufsatzkasten: die Blende außen vor dem Kasten ist verputzt bzw. verblendet wie die Fassade oder eine Alu-Blende in Kastenfarbe */
       { k: 'blende', s: 2, kap: 'sonne', n: 'Blende des Aufsatzkastens', gilt: (w) => sonneDa(w) && w.roll === 'aufsatz', design: true },
       { k: 'klBauart', s: 2, kap: 'sonne', n: 'Klappläden', gilt: (w) => w.sart === 'klappladen' && !istOffen(w, 'sart'), design: true },
-      { k: 'klFarbe', s: 2, kap: 'sonne', n: 'Farbe Klappläden', gilt: (w) => w.sart === 'klappladen' && !istOffen(w, 'sart'), design: true },
+      { k: 'klFarbe', s: 1, kap: 'sonne', n: 'Farbe Klappläden', gilt: (w) => w.sart === 'klappladen' && !istOffen(w, 'sart'), design: true },
       { k: 'lamelle', s: 3, kap: 'sonne', n: 'Lamellen', gilt: (w) => sonneDa(w) && w.sart === 'raffstore', design: true },
       { k: 'fuehrung', s: 3, kap: 'sonne', n: 'Führung', gilt: (w) => sonneDa(w) && w.sart === 'raffstore', design: true },
       { k: 'panzer', s: 3, kap: 'sonne', n: 'Rollladenpanzer', gilt: (w) => sonneDa(w) && w.sart === 'rollladen', design: true },
@@ -255,7 +258,7 @@
       { k: 'transp', s: 3, kap: 'sonne', n: 'Screen-Gewebe', gilt: (w) => sonneDa(w) && w.sart === 'screen', design: true },
       { k: 'bedien', s: 3, kap: 'sonne', n: 'Bedienseite', gilt: sonneDa },
       { k: 'sensor', s: 3, kap: 'sonne', n: 'Steuerung', mehr: true, gilt: (w) => sonneDa(w) && ['motor', 'smart', 'solar'].indexOf(w.antrieb) >= 0 && !istOffen(w, 'antrieb'), design: true },
-      { k: 'insFarbe', s: 3, kap: 'sonne', wg: 'insekt', n: 'Farbe Insektenschutz', gilt: insektDa, design: true },
+      { k: 'insFarbe', s: 1, kap: 'sonne', wg: 'insekt', n: 'Farbe Insektenschutz', gilt: insektDa, design: true },
       { k: 'insGewebe', s: 3, kap: 'sonne', wg: 'insekt', n: 'Insektenschutzgewebe', gilt: insektDa, design: true },
       { k: 'fbiFarbe', s: 3, kap: 'bank', n: 'Fensterbank innen, Farbe', gilt: (w) => offenGilt(w, 'fbi') && w.fbi !== 'behalten' && !istOffen(w, 'fbi'), design: true },
       { k: 'fbaFarbe', s: 3, kap: 'bank', n: 'Fensterbank außen, Farbe', gilt: (w) => bankAussen(w) && w.fba === 'alu', design: true },
@@ -387,7 +390,9 @@
       const f = w.ki && w.ki.fach;
       return !!(f && (f.bruestung === 'bodentief' || f.bruestung === 'niedrig'));
     }
-    const absturzText = (w) => (w.absturz ? lab('absturz', w.absturz) : OFFEN_TEXT);
+    /* Brüstung 800 bis 899 mm (Fenster, gemessen): reicht bis 12 m Absturzhöhe; ob mehr nötig ist, klärt der Betrieb vor Ort (Klärung „Absturzhöhe prüfen“), kein offener Wunsch */
+    const absturzGrenz = (w) => !istTuer(w) && bruDa(w) && num(w.bru) >= 800;
+    const absturzText = (w) => (w.absturz ? lab('absturz', w.absturz) : absturzGrenz(w) ? 'nur über 12 m Absturzhöhe nötig, vor Ort prüfen' : OFFEN_TEXT);
     /* ---------- Förderung ----------
        Zielwerte nach den technischen Mindestanforderungen der BEG EM und der ESanMV (Steuerbonus, Anlage 4), beide gleich: Fenster, Balkon-
        und Terrassentüren Uw ≤ 0,95; barrierearm oder einbruchhemmend und mit Sonderverglasung (z. B. Schallschutz ab Rw 40 dB) ≤ 1,1;
@@ -450,7 +455,7 @@
         ['Breiten', 'oben ' + th(mo.wt) + ' · Mitte ' + th(mo.wm) + ' · unten ' + th(mo.wb)],
         ['Höhen', 'links ' + th(mo.hl) + ' · Mitte ' + th(mo.hm) + ' · rechts ' + th(mo.hr)],
         [istTuer(w) ? 'Türelement' : 'Fensterelement', d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm mit Rahmen' + (w.neu ? ' (Wunschmaß)' : '') : 'nicht gemessen'],
-        ['Lage', (w.name || 'ohne Raum') + ', ' + (lab('etage', w.etage) || 'EG') + (num(w.bru) ? ', Brüstung ' + th(w.bru) + ' mm' : '') + (num(w.laib) ? ', Laibung innen ' + th(w.laib) + ' mm' : '') + (num(w.wand) ? ', Wand ' + th(w.wand) + ' mm' : '')],
+        ['Lage', (w.name || 'ohne Raum') + ', ' + (etageText(w) || 'EG') + (num(w.bru) ? ', Brüstung ' + th(w.bru) + ' mm' : '') + (num(w.laib) ? ', Laibung innen ' + th(w.laib) + ' mm' : '') + (num(w.wand) ? ', Wand ' + th(w.wand) + ' mm' : '')],
         ['Einbau', w.neu ? 'Neue Öffnung: ' + (ohneFotos(w) ? 'ohne Foto, Lage nicht eingezeichnet' : 'Lage vom Kunden auf dem Foto eingezeichnet') + ', Maße sind Wunschmaße. Sturz und Statik vor dem Durchbruch prüfen.' : 'Austausch' + (ohneFotos(w) ? ' ohne Fotos' : '') + ', Feinaufmaß vor Ort'],
         ['Element', lab('art', art) || 'Fenster'],
         ['Öffnung', opening(w) + (w.richtung === 'aussen' && !istTuer(w) && art !== 'fest' ? ', öffnet nach außen' : '')],
@@ -513,6 +518,30 @@
       if (w.neu) return [!d.moW ? 'Breite' : '', !d.moH ? 'Höhe' : ''].filter(Boolean);
       return Object.keys(MASS_NAME).filter((k) => !num(mo[k])).map((k) => MASS_NAME[k]).concat(!d.elW || !d.elH ? ['Element'] : []);
     }
+    /* Rettungsfenster grob nachgerechnet: lichte Öffnung des größten Flügels etwa Element je Flügel minus 120 mm Profil (Blendrahmen und
+       Flügel beidseitig), Höhe ohne Oberlicht; beim Stulpfenster beide Flügel zusammen (ohne Pfosten in der Mitte). Nur eine Schätzung fürs
+       Gespräch, verbindlich ist das Feinaufmaß. Rückgabe { ok, b, h, text } in m */
+    /* Laibung laut Foto gefliest (Befund der KI in Worten) */
+    const laibungGefliest = (w) => { const k = w && w.ki; if (!k) return false; return /flies/i.test([].concat(k.chips || [], (k.rows || []).filter((r) => /laibung/i.test(r[0])).map((r) => r[1])).join(' ')); };
+    /* Fuge: Elemente ab 2,5 m oder dunkle Profile ab 2 m Breite brauchen eine Fuge nach Größe und Farbe, nicht den pauschalen Abzug */
+    function fugeHinweis(w) {
+      const d = derive(w), b = d.elW || d.moW || 0, hex = farbe(w, 'aussen')[2] || '', c = /^#?([0-9a-f]{6})$/i.exec(hex), n = c ? parseInt(c[1], 16) : 0xffffff;
+      const hell = c ? (0.2126 * (n >> 16) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255 : 1, dunkel = hell < 0.35;
+      if (b >= 2500) return 'Element ' + th(b) + ' mm breit' + (dunkel ? ', dunkles Profil' : '');
+      if (dunkel && b >= 2000 && !istOffen(w, 'fa')) return 'Dunkles Profil außen, ' + th(b) + ' mm breit';
+      return '';
+    }
+    const PROFIL_MM = 120;
+    function rettung(w) {
+      const d = derive(w), S = (w.sashes || sashesFor(w.teilung)).filter((x) => !x.st), auf = S.filter((x) => x.t !== 'F' && x.t !== 'K');
+      const m = (v) => String(Math.round(v / 10) / 100).replace('.', ',');
+      if (!d.elW || !d.elH) return { ok: null, text: 'Ohne Maße des Fensters nicht nachzurechnen.' };
+      if (!auf.length) return { ok: false, text: 'Laut Angaben ohne Drehflügel: als Rettungsweg ungeeignet.' };
+      const stulp = S.some((x) => x.steh), b = (stulp ? d.elW : d.elW / S.length) - PROFIL_MM, h = d.elH - (w.ol ? Math.round(d.elH * 0.28) : 0) - (w.ul ? num(w.ulH) || 400 : 0) - PROFIL_MM;
+      const bru = num(w.bru), zuHoch = bruDa(w) && bru > 1200, ok = b >= 900 && h >= 1200 && !zuHoch;
+      const fehlt = [b < 900 ? 'zu schmal' : '', h < 1200 ? 'zu niedrig' : '', zuHoch ? 'Brüstung ' + m(bru) + ' m zu hoch' : ''].filter(Boolean);
+      return { ok: ok, b: b, h: h, text: 'Laut Maßen etwa ' + m(b) + ' × ' + m(h) + ' m im Lichten' + (stulp ? ' (beide Flügel)' : '') + ': ' + (ok ? 'reicht, beim Feinaufmaß bestätigen.' : fehlt.join(', ') + '; als Rettungsweg ein größeres Fenster oder ein Dachfenster einplanen.') };
+    }
     function klaerung(wins, p, l) {
       p = p || {}; l = l || {}; wins = (wins || []).map((w) => nachTiefe(w, p));
       const out = [], pos = (w, i) => 'Pos. ' + (i + 1) + (w.name ? ' ' + w.name : '');
@@ -524,14 +553,25 @@
       /* Pflicht: Absturzsicherung, Lüftung, Statik, Denkmal, Rettungsweg */
       /* Geländer: Form und Farbe aus den Detailangaben gehören zur Absturzsicherung (Füllung und Höhe sind Pflicht, nicht Geschmack) */
       const gelText = (w) => [detailGilt(w, 'gelForm') && w.gelForm ? lab('gelForm', w.gelForm) : '', detailGilt(w, 'gelFarbe') && w.gelFarbe ? optName('gelFarbe', w.gelFarbe, String(w.gelFarbe)) : ''].filter(Boolean).join(', ');
-      wins.forEach((w, i) => { if (absturzFrage(w) && w.absturz !== 'balkon') dazu(pos(w, i), 'Absturzsicherung nötig (' + (lab('etage', w.etage) || 'OG') + bruText(w) + '): ' + (w.absturz ? lab('absturz', w.absturz) + (gelText(w) ? ', ' + gelText(w) : '') : 'bitte beraten'), 'pflicht', 'Absturzsicherung', i, 'absturz-' + wk(w, i), 'Bauordnung (§ 38 MBO): Brüstung mindestens 80 cm, über 12 m Absturzhöhe 90 cm; Türen ohne Balkon davor immer.'); });
+      /* Brüstung 80 bis 89 cm: Pflicht nur bei mehr als 12 m Absturzhöhe, also „vor Ort prüfen“ statt Pflicht (Gremium F, 27.10.2026) */
+      wins.forEach((w, i) => {
+        if (!absturzFrage(w) || w.absturz === 'balkon') return;
+        const wahl = w.absturz ? lab('absturz', w.absturz) + (gelText(w) ? ', ' + gelText(w) : '') : '', grenz = absturzGrenz(w);
+        if (grenz) dazu(pos(w, i), 'Absturzhöhe prüfen (' + (etageText(w) || 'OG') + bruText(w) + '): bis 12 m Absturzhöhe genügen 80 cm Brüstung, darüber sind 90 cm nötig. ' + (wahl ? 'Gewählt: ' + wahl + '.' : 'Über 12 m eine Absturzsicherung einplanen.'), 'pruefen', 'Absturzhöhe', i, 'absturz-' + wk(w, i), 'Bauordnung (§ 38 MBO): Brüstung mindestens 80 cm, über 12 m Absturzhöhe 90 cm.');
+        else dazu(pos(w, i), 'Absturzsicherung nötig (' + (etageText(w) || 'OG') + bruText(w) + '): ' + (wahl ? wahl + ', im Angebot einplanen' : 'bitte beraten'), 'pflicht', 'Absturzsicherung', i, 'absturz-' + wk(w, i), 'Bauordnung (§ 38 MBO): Brüstung mindestens 80 cm, über 12 m Absturzhöhe 90 cm; Türen ohne Balkon davor immer.');
+      });
       const nE = wins.reduce((a, x) => a + (num(x.anzahl) || 1), 0), tot = num(p.total);
       const lu = []; wins.forEach((w, i) => { if (detailGilt(w, 'luefter') && w.luefter && w.luefter !== 'ohne') lu.push(i); });
       if (tot && nE > tot / 3) dazu('Lüftung', 'Lüftungskonzept nach DIN 1946-6 erforderlich: ' + nE + ' von ' + tot + ' Fenstern werden getauscht, mehr als ein Drittel.' + (lu.length ? ' Die gewünschten Lüfter (' + (lu.length === wins.length && wins.length > 1 ? 'alle Positionen' : 'Pos. ' + lu.map((i) => i + 1).join(', ')) + ') im Konzept nennen.' : ''), 'pflicht', 'Lüftungskonzept', null, 'lueftung', 'Dichte neue Fenster: ohne Konzept drohen Feuchte und Schimmel.');
       wins.forEach((w, i) => { if (w.neu) dazu(pos(w, i), 'Neue Öffnung: Sturz und Statik vor dem Durchbruch klären.', 'pflicht', 'Sturz und Statik', i, 'statik-' + wk(w, i), 'Durchbruch in der Außenwand, die Wand trägt oft.'); });
       if (geb === 'denkmal' || lgeb === 'denkmal') dazu('Gebäude', 'Baudenkmal: Genehmigung der Denkmalbehörde vor dem Auftrag einholen; Teilung, Sprossen und Farben sind oft vorgegeben.', 'bau', 'Denkmalschutz', null, 'denkmal', 'Ohne Genehmigung drohen Rückbau und Bußgeld.');
-      const dg = []; wins.forEach((w, i) => { if (w.etage === 'dg' && (w.art || 'fenster') === 'fenster') dg.push(i); });
-      if (dg.length) dazu(mehrere(dg), 'Dachgeschoss: Ist ein Fenster zweiter Rettungsweg, braucht es im Lichten mindestens 0,90 × 1,20 m und höchstens 1,20 m Brüstung.', 'bau', 'Rettungsweg', dg.length === 1 ? dg[0] : dg, 'rettung', 'Landesbauordnung (§ 35 MBO), wenn es keine zweite Treppe gibt.');
+      /* Rettungsweg im Dachgeschoss (§ 37 Abs. 5 MBO, in den Ländern die eigene Bauordnung): je Fenster mit den gemessenen Maßen grob
+         nachgerechnet (rettung()), damit das Blatt sagt, ob es reicht, statt nur zu fragen */
+      wins.forEach((w, i) => {
+        if (w.etage !== 'dg' || (w.art || 'fenster') !== 'fenster') return;
+        const r = rettung(w);
+        dazu(pos(w, i), 'Dachgeschoss: Ist ein Fenster zweiter Rettungsweg, braucht es im Lichten mindestens 0,90 × 1,20 m und höchstens 1,20 m Brüstung. ' + r.text, 'bau', 'Rettungsweg', i, 'rettung-' + wk(w, i), 'Bauordnung (§ 37 Abs. 5 MBO, z. B. § 37 BauO NRW), wenn es keine zweite Treppe gibt.');
+      });
       /* Mit dem Kunden: Förderung, Glas, Einbruchschutz, Eigentümer, Fußboden, Umfang, Fensterzahl, Maße, Farbwunsch, Fensterbank, Notizen, offene Wünsche */
       const fw = foerdWeg(p);
       if (fw === 'bafa') dazu('Förderung', 'BAFA-Zuschuss gewünscht: Energieeffizienz-Experte einbinden, Antrag vor Beginn, Vertrag nur mit Förderklausel. Uw-Zielwerte bei den Positionen.', 'foerder', 'Förderung BAFA', null, 'foerd', 'Ohne Antrag vor Beginn gibt es keinen Zuschuss.');
@@ -565,7 +605,7 @@
       });
       wins.forEach((w, i) => {
         if (istTuer(w) || w.neu || bruDa(w) || absturzFrage(w) || (w.etage !== 'og' && w.etage !== 'dg')) return;
-        dazu(pos(w, i), 'Brüstungshöhe fehlt: im ' + lab('etage', w.etage) + ' nötig, um die Absturzsicherung zu beurteilen.', 'mass', 'Brüstung fehlt', i, 'bru-' + wk(w, i), 'Unter 80 cm (über 12 m Höhe 90 cm) braucht es eine Absturzsicherung.');
+        dazu(pos(w, i), 'Brüstungshöhe fehlt: im ' + etageText(w) + ' nötig, um die Absturzsicherung zu beurteilen.', 'mass', 'Brüstung fehlt', i, 'bru-' + wk(w, i), 'Unter 80 cm (über 12 m Höhe 90 cm) braucht es eine Absturzsicherung.');
       });
       wins.forEach((w, i) => { if (!w.neu && !istTuer(w) && w.form !== 'rund' && w.fbi && w.fbi !== 'behalten' && !istOffen(w, 'fbi') && !num(w.laib)) dazu(pos(w, i), 'Laibungstiefe innen fehlt: für die neue Fensterbank innen nötig.', 'mass', 'Laibung fehlt', i, 'laib-' + wk(w, i), 'Die Tiefe der Fensterbank hängt von der Laibung ab.'); });
       out.forEach((r) => { if (/^(unvoll|bru|laib)-/.test(r.id)) r.gruppe = 'kunde'; });
@@ -601,6 +641,24 @@
       wins.forEach((w, i) => { if (motor(w) && !(w.ki && w.ki.fach && w.ki.fach.strom === true)) dazu(pos(w, i), 'Elektrischer Antrieb gewünscht: Strom am Fenster ' + (w.ki && w.ki.fach && w.ki.fach.strom === false ? 'laut Foto nicht zu sehen' : 'klären') + ', gegebenenfalls Elektriker einplanen.', 'pruefen', 'Strom für den Antrieb', i, 'strom-' + wk(w, i), (w.antrieb === 'smart' ? 'Smart Home und Motor' : 'Ein Motor') + ' braucht Strom am Fenster.'); });
       /* Unterputzkasten im Bestand: der Kasten liegt in der Wand, der Sturz muss auf (nicht bei „nach Standard“ oder offen) */
       wins.forEach((w, i) => { if (!w.neu && sartVon(w) !== 'klappladen' && kastenAktiv(w) && !istOffen(w, 'sart') && w.roll === 'unterputz' && !istOffen(w, 'einbau') && !istStd(w, 'einbau')) dazu(pos(w, i), 'Unterputzkasten im Bestand: Sturz öffnen, Platz, Statik und Anschluss an Putz und Dämmung vor Ort prüfen.', 'pruefen', 'Unterputzkasten', i, 'unterputz-' + wk(w, i), 'Der Kasten liegt in der Wand und wird überputzt; beim Austausch ist das ein Eingriff in den Sturz.'); });
+      /* Was das Richtmaß verändert, steht auch hier (nicht nur am Maß): Anschlag laut Foto, Kastenhöhe beim Aufsatzkasten, Fuge bei großen
+         oder dunklen Elementen (Gremium F, 28.10.2026) */
+      wins.forEach((w, i) => {
+        if (w.neu) return;
+        const f = (w.ki && w.ki.fach) || {}, an = f.anschlagI === 'innen' ? 'innen' : f.anschlagA === 'aussen' ? 'außen' : '';
+        if (an) dazu(pos(w, i), 'Anschlag ' + an + ' laut Foto: Das Richtmaß ist ohne Anschlag gerechnet; Maß und Anschlussfuge beim Feinaufmaß festlegen.', 'pruefen', 'Anschlag', i, 'anschlag-' + wk(w, i), 'Mit Anschlag wird das Element größer als die lichte Öffnung bestellt.');
+        if (kastenAktiv(w) && !istOffen(w, 'sart') && sartVon(w) !== 'klappladen' && w.roll === 'aufsatz' && !istOffen(w, 'einbau') && !istStd(w, 'einbau')) dazu(pos(w, i), 'Aufsatzkasten: Kastenhöhe nach System und Behang festlegen; die Höhe des Fensters ist das Richtmaß minus Kasten.', 'pruefen', 'Kastenhöhe', i, 'kasten-' + wk(w, i), 'Der Aufsatzkasten sitzt auf dem Fenster und gehört zur Höhe des Elements.');
+        if (f.rollladen === 'einbau' && !(kastenAktiv(w) && w.roll === 'unterputz')) dazu(pos(w, i), 'Alter Rollladenkasten innen laut Foto: ausbauen und den Sturz schließen, dämmen und luftdicht anschließen oder als Revision weiter nutzen; im Angebot einplanen.', 'kunde', 'Alter Kasten', i, 'altkasten-' + wk(w, i), 'Alte Einbaukästen sind die größte Wärmebrücke am Fenster und oft undicht.');
+        const fuge = fugeHinweis(w); if (fuge) dazu(pos(w, i), fuge + ': Anschlussfuge nach Größe und Farbe festlegen (Längenausdehnung), der pauschale Abzug reicht oft nicht.', 'pruefen', 'Fuge', i, 'fuge-' + wk(w, i), 'Dunkle und große Profile dehnen sich in der Sonne stärker aus.');
+        /* Innenlaibung verputzen, aber die Laibung ist laut Foto gefliest */
+        if (w.putz && !istOffen(w, 'montage') && !istStd(w, 'montage') && laibungGefliest(w)) dazu(pos(w, i), 'Laibung laut Foto gefliest, gewählt ist „Innenlaibung verputzen“: Fliesen ergänzen oder beiputzen mit dem Kunden klären.', 'kunde', 'Fliesenlaibung', i, 'fliesen-' + wk(w, i), 'Beim Ausbau brechen die Fliesen an der Laibung oft ab.');
+      });
+      /* Einbruchschutz RC2 und RC3: Griff und Glas gehören dazu (DIN EN 1627, Glas nach DIN EN 356) */
+      wins.forEach((w, i) => {
+        if (istOffen(w, 'rc') || !(w.rc === 'rc2' || w.rc === 'rc3') || w.art === 'fest') return;
+        const glas = w.rc === 'rc3' ? 'P5A' : 'P4A', griffOk = w.griff === 'abschliessbar' || w.griff === 'motor' || istStd(w, 'griff');
+        dazu(pos(w, i), lab('rc', w.rc) + ' gewählt: Verglasung ' + glas + ' (DIN EN 356) einplanen' + (griffOk ? '' : ', dazu ein abschließbarer Griff (gewählt: ' + (lab(w.art === 'hst' ? 'hstGriff' : 'griff', w.griff) || 'Standard') + ')') + '.', 'kunde', 'Einbruchschutz ' + lab('rc', w.rc), i, 'rcglas-' + wk(w, i), 'Ohne geprüftes Glas und abschließbaren Griff erreicht das Fenster die Klasse nicht.');
+      });
       /* Gedämmte Fassade laut Foto und neue Fensterbank außen: Endkappen mit Gleitabschluss, sonst reißt der Putz */
       wins.forEach((w, i) => { const f = (w.ki && w.ki.fach) || {}; if (f.fassade === 'wdvs' && offenGilt(w, 'fba') && w.fba && w.fba !== 'behalten' && !istOffen(w, 'fba') && w.fbaKappe !== 'gleit') dazu(pos(w, i), 'Fassade laut Foto gedämmt (WDVS): Fensterbank außen mit Gleitabschluss einplanen' + (w.fbaKappe && detailGilt(w, 'fbaKappe') ? ', gewählt sind Endkappen aus ' + lab('fbaKappe', w.fbaKappe) : '') + '.', 'pruefen', 'Gleitabschluss', i, 'gleit-' + wk(w, i), 'Feste Endkappen reißen den Putz der Dämmung auf, dann dringt Wasser ein.'); });
       /* Alarmkontakt: das Kabel muss vor dem Einbau liegen */
@@ -610,7 +668,7 @@
       wins.forEach((w, i) => {
         const f = (w.ki && w.ki.fach) || {}, d = derive(w), og = w.etage === 'og' || w.etage === 'dg';
         if (f.geruest === true) dazu(pos(w, i), 'Gerüst laut Foto nötig: einplanen und mit dem Kunden absprechen.', 'ki', 'Gerüst', i, 'geruest-' + wk(w, i), 'Von innen lässt sich hier nicht montieren.');
-        else if (og && f.geruest !== false && d.elW * d.elH >= 3e6) dazu(pos(w, i), 'Großes Element im ' + lab('etage', w.etage) + ' (' + th(d.elW) + ' × ' + th(d.elH) + ' mm): Transport, Gerüst oder Hebegerät prüfen.', 'ki', 'Transport und Montage', i, 'gross-' + wk(w, i), 'Ab etwa 3 m² ist das Element zu schwer, um es durchs Treppenhaus zu tragen.');
+        else if (og && f.geruest !== false && d.elW * d.elH >= 3e6) dazu(pos(w, i), 'Großes Element im ' + etageText(w) + ' (' + th(d.elW) + ' × ' + th(d.elH) + ' mm): Transport, Gerüst oder Hebegerät prüfen.', 'ki', 'Transport und Montage', i, 'gross-' + wk(w, i), 'Ab etwa 3 m² ist das Element zu schwer, um es durchs Treppenhaus zu tragen.');
       });
       wins.forEach((w, i) => {
         const k = w.ki || {};
@@ -648,6 +706,8 @@
     const notizGruppe = (k) => (/^(typ|din)-\d+$/.test(k) ? 'fenster' : NOTIZ_GRUPPE[k] || NOTIZ_GRUPPE[String(k).toLowerCase()] || (DMAP[k] ? DMAP[k].wg : '') || 'allgemein');
     const ARTKURZ = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Faltschiebewand' };
     const istOT = (t) => String(t || '').indexOf(OFFEN_TEXT) >= 0 || /\boffen\b/.test(String(t || '')) && /^(Material offen|Farbe offen|Antrieb offen)/.test(String(t || ''));
+    /* Glas, das aus anderen Wünschen folgt: VSG im festen unteren Feld (Absturzsicherung), geprüftes Glas für RC2 und RC3 */
+    const glasPflicht = (w) => [absturzFrage(w) && w.absturz === 'fest' ? 'VSG im unteren Feld, absturzsichernd (DIN 18008-4)' : '', !istOffen(w, 'rc') && w.art !== 'fest' && (w.rc === 'rc2' || w.rc === 'rc3') ? (w.rc === 'rc3' ? 'P5A' : 'P4A') + ' nach DIN EN 356 für ' + lab('rc', w.rc) : ''].filter(Boolean);
     function wuensche(w, p) {
       w = nachTiefe(w, p);
       const art = w.art || 'fenster', tuer = istTuer(w), z = uwZiel(w, p), S = w.sashes || sashesFor(w.teilung), n = S.filter((x) => !x.st).length || 1, nAuf = fluegelZahl(w);
@@ -659,7 +719,7 @@
           .concat(teilungText(w) ? [zeile('Aufteilung', teilungText(w))] : [], w.form && w.form !== 'rechteck' ? [zeile('Form', lab('form', w.form))] : [], [zeile('Material', istOffen(w, 'material') ? OFFEN_TEXT : lab('material', w.material) || 'Kunststoff')],
             (w.bars || []).length ? [zeile('Sprossen', ov(w, 'spross', lab('spross', w.spross) + (w.spross === 'auf' ? ' (' + lab('aufseite', w.aufSeite) + ')' : '')) + ', ' + w.breite + ' mm, ' + w.bars.length + ' Stück')] : []) },
         { id: 'farbe', titel: 'Farbe', zeilen: [zeile('außen', farbZeile(w, 'aussen'), { hex: fa[2] }), zeile('innen', w.gleich ? 'wie außen' : farbZeile(w, 'innen'), { hex: fi[2] })] },
-        { id: 'glas', titel: 'Glas', zeilen: [zeile('Verglasung', ov(w, 'glas', lab('glas', w.glas) || '3-fach'))].concat(glasExtras ? [zeile('Extras', glasExtras)] : [], z ? [zeile('Förderwert', uwText(z))] : []) },
+        { id: 'glas', titel: 'Glas', zeilen: [zeile('Verglasung', ov(w, 'glas', lab('glas', w.glas) || '3-fach'))].concat(glasExtras ? [zeile('Extras', glasExtras)] : [], glasPflicht(w).map((x) => zeile('Nötig', x)), z ? [zeile('Förderwert', uwText(z))] : []) },
         { id: 'beschlag', titel: 'Beschlag und Sicherheit', zeilen: [zeile('Griff', griffText(w))].concat(art === 'balkon' ? [zeile('Griff außen', ov(w, 'griffA', lab('griffA', (w.bt || {}).griffA) || 'kein Griff'))] : [], [zeile('Einbruchschutz', rcText(w))], absturzFrage(w) ? [zeile('Absturzsicherung', absturzText(w))] : []) },
         { id: 'sonne', titel: 'Sonnenschutz', zeilen: [zeile('außen', sonne(w)), zeile('innen', innen(w))] },
         { id: 'insekt', titel: 'Insektenschutz', zeilen: [zeile('Insektenschutz', ov(w, 'insekt', lab('insekt', w.insekt) || 'keiner'))] },
@@ -732,8 +792,13 @@
       if (anschlag) warn.push('Anschlag ' + (f.anschlagI === 'innen' && f.anschlagA === 'aussen' ? 'innen und außen' : f.anschlagI === 'innen' ? 'innen' : 'außen') + ' laut Foto');
       if (!w.neu && dev > 10) warn.push('Öffnung bis ' + dev + ' mm außer Winkel');
       if (massPruef(w)) warn.push('Maße und Foto passen nicht zusammen');
+      /* Aufsatzkasten: Die Höhe ist die des Elements samt Kasten; Fuge bei großen oder dunklen Elementen nicht pauschal */
+      const aufsatz = !w.neu && kastenAktiv(w) && !istOffen(w, 'sart') && sartVon(w) !== 'klappladen' && w.roll === 'aufsatz' && !istOffen(w, 'einbau') && !istStd(w, 'einbau');
+      if (aufsatz) warn.push('Höhe samt Aufsatzkasten, Kastenhöhe offen');
+      if (fugeHinweis(w)) warn.push('Fuge nach Größe und Farbe');
       const bw = d.moW - 2 * a.seite, bh = d.moH - a.oben - u;
-      return { b: bw, h: bh, text: th(bw) + ' × ' + th(bh) + ' mm', formel: (w.neu ? 'Rohbauöffnung' : 'Öffnung') + ' minus ' + a.seite + ' mm je Seite, ' + a.oben + ' mm oben' + (u ? ', ' + u + ' mm unten' : ''), warn: warn,
+      /* sicher: ohne Vorbehalt; anschlag: Zahl nicht belastbar (Feinaufmaß nötig); aufsatz: Breite belastbar, Höhe samt Kasten */
+      return { b: bw, h: bh, sicher: !warn.length, anschlag: anschlag, aufsatz: aufsatz, text: th(bw) + ' × ' + th(bh) + ' mm', formel: (w.neu ? 'Rohbauöffnung' : 'Öffnung') + ' minus ' + a.seite + ' mm je Seite, ' + a.oben + ' mm oben' + (u ? ', ' + u + ' mm unten' : ''), warn: warn,
         warnText: warn.length ? 'Vor Ort prüfen: ' + warn.join(', ') + (anschlag ? '; der Vorschlag ist ohne Anschlag gerechnet.' : '.') : '' };
     }
     /* ---------- Zeichnung fürs Aufmaß ----------
@@ -993,12 +1058,12 @@
       if (tuer) o += path(R(bx - 1, by + bh - 0.6, bw + 2, 1.6), '#ddd6cb', ink, 0.5);
       return '<svg viewBox="0 0 64 64" width="' + (size || 44) + '" height="' + (size || 44) + '" aria-hidden="true">' + o + '</svg>';
     }
-    return { OPT: OPT, TYP: TYP, lab: lab, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor,
+    return { OPT: OPT, TYP: TYP, lab: lab, etageText: etageText, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor,
       DETAIL: DETAIL, detailGilt: detailGilt, detailText: detailText, detailRows: detailRows, RC_RANG: RC_RANG, rcAb: rcAb,
       OFFEN_TEXT: OFFEN_TEXT, OFFEN_NAME: OFFEN_NAME, offenName: offenName, istOffen: istOffen, offenGilt: offenGilt, offenListe: offenListe, griffText: griffText, montageText: montageText, fassadeText: fassadeText, teilungText: teilungText, teilFrei: teilFrei, anteileGueltig: anteileGueltig, rcText: rcText,
       nachTiefe: nachTiefe, tiefeVon: tiefeVon, tiefeKopf: tiefeKopf, FRAGE: FRAGE, FRAGE_STUFE: FRAGE_STUFE, STD_TEXT: STD_TEXT, istStd: istStd, TIEFE_NAME: TIEFE_NAME, tiefeText: tiefeText, fluegelZahl: fluegelZahl, oeffnungKurz: oeffnungKurz, absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz,
       /* Strang S5: Aufmaß beim Betrieb und im PDF */
-      sartVon: sartVon, kastenAktiv: kastenAktiv, KLAER_GRUPPEN: KLAER_GRUPPEN, klaerGruppen: klaerGruppen, notizenVon: notizenVon, notizGruppe: notizGruppe, massLuecken: massLuecken, wuensche: wuensche, abzugVon: abzugVon, bestellmass: bestellmass, ZF: ZF, plan: plan, zeichnungSVG: zeichnungSVG, textBreite: textBreite };
+      sartVon: sartVon, kastenAktiv: kastenAktiv, KLAER_GRUPPEN: KLAER_GRUPPEN, klaerGruppen: klaerGruppen, notizenVon: notizenVon, notizGruppe: notizGruppe, massLuecken: massLuecken, wuensche: wuensche, abzugVon: abzugVon, bestellmass: bestellmass, glasPflicht: glasPflicht, rettung: rettung, fugeHinweis: fugeHinweis, laibungGefliest: laibungGefliest, ZF: ZF, plan: plan, zeichnungSVG: zeichnungSVG, textBreite: textBreite };
   })();
 
   /* ---------- Notizen je Stelle (Strang S1) ----------
@@ -1069,7 +1134,7 @@
         .concat(w.neu ? [] : [['Breiten', 'oben ' + t('wt') + ' · Mitte ' + t('wm') + ' · unten ' + t('wb')], ['Höhen', 'links ' + t('hl') + ' · Mitte ' + t('hm') + ' · rechts ' + t('hr')]],
           !w.neu && dev > 5 ? [['Außer Winkel', 'bis ' + dev + ' mm, das kleinste Maß zählt']] : [],
           [[AW.istTuer(w) ? 'Türelement' : 'Element', d.elW && d.elH ? AW.th(d.elW) + ' × ' + AW.th(d.elH) + ' mm mit Rahmen' + (w.neu ? ', gerechnet' : '') : 'nicht gemessen'],
-            ['Lage', (AW.lab('etage', w.etage) || 'EG') + (AW.istTuer(w) ? ', bodentief' : AW.bruDa(w) ? (AW.num(w.bru) ? ', Brüstung ' + AW.th(w.bru) + ' mm' : ', bodentief') : ', Brüstung nicht gemessen') + (AW.num(w.laib) ? ', Laibung innen ' + AW.th(w.laib) + ' mm' : '') + (AW.num(w.wand) ? ', Wand ' + AW.th(w.wand) + ' mm' : '')],
+            ['Lage', (AW.etageText(w) || 'EG') + (AW.istTuer(w) ? ', bodentief' : AW.bruDa(w) ? (AW.num(w.bru) ? ', Brüstung ' + AW.th(w.bru) + ' mm' : ', bodentief') : ', Brüstung nicht gemessen') + (AW.num(w.laib) ? ', Laibung innen ' + AW.th(w.laib) + ' mm' : '') + (AW.num(w.wand) ? ', Wand ' + AW.th(w.wand) + ' mm' : '')],
             ['Einbau', w.neu ? 'neue Öffnung, Lage ' + (AW.ohneFotos(w) ? 'nicht eingezeichnet' : 'auf dem Foto eingezeichnet') : 'Austausch' + (AW.ohneFotos(w) ? ', ohne Fotos' : '')]]);
     }
     function aufmassText(l, o) {
@@ -1110,7 +1175,8 @@
   /* ---------- Abrechnung ---------- */
   const Abrechnung = (() => {
     /* Preise netto für Betriebe, brutto für Hauseigentümer; aus /config.js bzw. vom Server (/api/status) überschreibbar */
-    const PREISE0 = { aufmass: 7.99, projekt: 9, frei: 3, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true, freiTage: 14 };
+    /* projekt 0: Betriebskonto kostenlos (seit 28.10.2026, Nutzungsbedingungen § 4); die Abrechnung je Projekt nur, wenn der Server einen Preis meldet */
+    const PREISE0 = { aufmass: 7.99, projekt: 0, frei: 0, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true, freiTage: 14 };
     let PREISE = JSON.parse(JSON.stringify(PREISE0));
     if (typeof window !== 'undefined' && window.KONFIG && window.KONFIG.preise) PREISE = Object.assign({}, PREISE, window.KONFIG.preise, { abo: Object.assign({}, PREISE.abo, window.KONFIG.preise.abo || {}) });
     function setPreise(p) { if (!p) return PREISE; PREISE = Object.assign({}, PREISE, p, { abo: Object.assign({}, PREISE.abo, p.abo || {}) }); return PREISE; }
@@ -1183,11 +1249,15 @@
     const aufmassOf = (wins, proj) => ({ windows: wins, proj: proj, fotos: wins.reduce((s, w) => s + (w.fotos || 0), 0), elemente: wins.reduce((s, w) => s + (AW.num(w.anzahl) || 1), 0) });
 
     /* ---------- Buchungen ----------
+       0. Seit 28.10.2026 ist das Betriebskonto kostenlos (projekt 0, kostenlos()): jede Buchung „kostenlos“, nie gesperrt, keine Tarife.
+          Die Regeln 2 bis 4 gelten nur, wenn der Server einen Projektpreis meldet (BETRIEBSKONTO=1, nur die Prüfsuite).
        1. Gebucht wird beim ersten Eingang je Projekt, zum Tarif, der in diesem Moment gilt; Nachbesserungen im selben Projekt kosten nichts. Eine Buchung wird nie geändert oder gelöscht.
        2. Start: die ersten 3 Projekte je Betrieb frei (zählt über die Buchungen), danach 9 € je Projekt, nur mit Zahlungsart.
        3. Abo 10: 49 € im Monat, 10 Projekte im Kalendermonat inklusive, jedes weitere 5 €. Plus: 79 € im Monat, unbegrenzt.
        4. Ohne Zahlungsart bleibt ein kostenpflichtiges Aufmaß gesperrt: es kommt an, wird gespeichert, die Maße bleiben verborgen, bis eine Zahlungsart da ist. */
     const freeQuota = (a) => (a.freeQuota != null ? a.freeQuota : PREISE.frei);
+    /* Betriebskonto kostenlos: kein Projektpreis, also keine Tarife, keine Sperre, keine Zahlungsart */
+    const kostenlos = () => !(Number(PREISE.projekt) > 0);
     function ledger(a) {
       if (!a.book) { a.book = []; a.freeUsed = 0; (a.links || []).slice().reverse().filter((l) => l.status === 'eingegangen' && !l.demo).forEach((l) => { l.locked = !bookAufmass(a, l); }); }
       return a.book;
@@ -1196,13 +1266,15 @@
     const lockedLinks = (a) => (a.links || []).filter((l) => l.status === 'eingegangen' && l.locked && !l.demo);
     const aboGenutzt = (a, now) => { const k = monthKey(now); return ledger(a).filter((b) => b.kind === 'aufmass' && b.inkl && b.month === k).length; };
     const aboFrei = (a, now) => Math.max(0, PREISE.abo.inkl - aboGenutzt(a, now));
-    function bookAufmass(a, l, extra, now) {
+    function bookAufmass(a, l, extra, now, alsStart) {
       const book = a.book || (a.book = []), ref = extra ? l.id + '#' + extra : l.id;
       if (book.some((b) => b.kind === 'aufmass' && b.ref === ref)) return true;
       const am = l.aufmass || {}, sub = [((l.log || {}).eingegangen || stamp(now)), l.nr, am.windows ? nW(am.windows.length, 'Position', 'Positionen') : '', extra ? 'anderes Aufmaß in Runde ' + extra : ''].filter(Boolean).join(' · ');
       let betrag = 0, badge, inkl = false;
-      const k = konto(a);
+      /* alsStart: ein gesperrtes Aufmaß kam unter Start an (ohne Zahlungsart gibt es kein Abo) und wird zu diesem Tarif gebucht (Regel 1) */
+      const k0 = konto(a), k = alsStart && k0 !== 'instanz' ? 'service' : k0;
       if (k === 'instanz') badge = 'im Paket';
+      else if (kostenlos()) badge = 'kostenlos';
       else if (k === 'plus') badge = 'inklusive (Plus)';
       else if (k === 'abo') {
         const genutzt = aboGenutzt(a, now);
@@ -1223,8 +1295,8 @@
       const size = nW(aufmass.windows.length, 'Position', 'Positionen') + ' mit ' + nW(aufmass.fotos || 0, 'Foto', 'Fotos');
       return { ok: !l.locked, notif: l.locked ? { t: 'Aufmaß eingegangen: ' + l.kunde, s: size + '. Zum Ansehen eine Zahlungsart hinterlegen; Ihre kostenlosen Aufmaße sind verbraucht.', to: ['link', l.id] } : { t: 'Aufmaß eingegangen: ' + l.kunde, s: size + '. ' + (l.nr || ''), to: ['link', l.id] } };
     }
-    /* Nach Zahlungsart oder Tarifwechsel: wartende Aufmaße freischalten, ältestes zuerst */
-    function unlockWaiting(a, now) { let n = 0; lockedLinks(a).slice().reverse().forEach((l) => { if (bookAufmass(a, l, null, now)) { l.locked = false; n++; } }); return n; }
+    /* Nach Zahlungsart oder Tarifwechsel: wartende Aufmaße freischalten, ältestes zuerst, zum Tarif beim Eingang (Start; Nutzungsbedingungen § 5 Abs. 1) */
+    function unlockWaiting(a, now) { let n = 0; lockedLinks(a).slice().reverse().forEach((l) => { if (bookAufmass(a, l, null, now, true)) { l.locked = false; n++; } }); return n; }
     function bookPlan(a, k, now) {
       const key = monthKey(now), preis = k === 'plus' ? PREISE.plus : PREISE.abo.grund;
       const schon = ledger(a).filter((b) => (b.kind === 'plus' || b.kind === 'abo') && b.month === key);
@@ -1236,6 +1308,7 @@
     /* Tarif wechseln: nach oben sofort (Monat wird gebucht), nach unten zum Monatsende vorgemerkt. Rückgabe: was passiert ist */
     function planWechsel(a, k, now) {
       if (konto(a) === 'instanz' || k === 'instanz') return { art: 'paket', msg: 'Das Paket wechselt nur über die Bestellung.' };
+      if (kostenlos() && k !== 'service') return { art: 'kostenlos', msg: 'Ihr Konto ist kostenlos; Tarife gibt es nicht mehr.' };
       const alt = konto(a); k = RANG[k] !== undefined ? k : 'service';
       if (k === alt) { if (a.downgrade) { a.downgrade = null; return { art: 'bleibt', msg: planName(k) + ' läuft weiter' }; } return { art: 'gleich', msg: planName(k) + ' ist schon Ihr Tarif' }; }
       if (RANG[k] > RANG[alt]) {
@@ -1250,6 +1323,8 @@
     /* Beim Start und einmal pro Minute: was die Zeit erledigt. Rückgabe: Meldungen für den Betrieb */
     function tickKonto(a, now) {
       now = now || Date.now(); const out = []; let dirty = false;
+      /* Konto kostenlos: früher gesperrte Aufmaße werden sichtbar */
+      if (kostenlos() && konto(a) !== 'instanz' && lockedLinks(a).length) { const n = unlockWaiting(a, now); if (n) { dirty = true; out.push({ t: nW(n, 'Aufmaß', 'Aufmaße') + ' freigeschaltet', s: 'Ihr Konto ist jetzt kostenlos, ohne Zahlungsart.' }); } }
       if (a.downgrade) { const d = parseDE(a.downgrade.at); if (d && now > d.getTime()) { const alt = konto(a); a.konto = a.downgrade.to; a.downgrade = null; dirty = true; out.push({ t: 'Tarif gewechselt', s: planName(alt) + ' ist ausgelaufen, wie vorgemerkt. Jetzt: ' + planName(konto(a)) + '.', to: ['abrechnung'] }); } }
       if ((konto(a) === 'plus' || konto(a) === 'abo') && a.pay && !ledger(a).some((b) => (b.kind === 'plus' || b.kind === 'abo') && b.month === monthKey(now))) { bookPlan(a, konto(a), now); dirty = true; }
       (a.links || []).forEach((l) => { if (['erstellt', 'gesendet', 'geoeffnet', 'arbeit'].includes(l.status)) { const d = parseDE(l.expires); if (d && now > d.getTime()) { l.status = 'abgelaufen'; l.log = l.log || {}; l.log.abgelaufen = l.expires; dirty = true; } } });
@@ -1401,7 +1476,7 @@
 
     return { preise: preise, setPreise: setPreise, einfuehrung: einfuehrung, setEinfuehrung: setEinfuehrung, einfBis: einfBis, einfRest: einfRest, einfText: einfText, planName: planName, konto: konto, RANG: RANG, NB_MAX: NB_MAX, NB_TAGE: NB_TAGE, OFFEN_TAGE: OFFEN_TAGE, VERLAENGERN_TAGE: VERLAENGERN_TAGE, monthKey: monthKey, monthLabel: monthLabel, monthEnd: monthEnd, stamp: stamp, datum: datum, dateIn: dateIn, parseDE: parseDE, hashN: hashN, nW: nW, newCode: newCode, newId: newId, nextNr: nextNr, normTel: normTel, normFirma: normFirma,
       unpack: unpack, fromApp: fromApp, fingerprint: fingerprint, fromAppProj: fromAppProj, aufmassOf: aufmassOf,
-      freeQuota: freeQuota, ledger: ledger, freeLeft: freeLeft, lockedLinks: lockedLinks, aboGenutzt: aboGenutzt, aboFrei: aboFrei, bookAufmass: bookAufmass, receiveAufmass: receiveAufmass, unlockWaiting: unlockWaiting, bookPlan: bookPlan, planWechsel: planWechsel, tickKonto: tickKonto,
+      freeQuota: freeQuota, kostenlos: kostenlos, ledger: ledger, freeLeft: freeLeft, lockedLinks: lockedLinks, aboGenutzt: aboGenutzt, aboFrei: aboFrei, bookAufmass: bookAufmass, receiveAufmass: receiveAufmass, unlockWaiting: unlockWaiting, bookPlan: bookPlan, planWechsel: planWechsel, tickKonto: tickKonto,
       passt: passt, ueberschneidung: ueberschneidung, klaerUmziehen: klaerUmziehen, nbMoeglich: nbMoeglich, nbAnfragen: nbAnfragen, nbZurueck: nbZurueck, neuesProjekt: neuesProjekt, listeProjekte: listeProjekte, projektAendern: projektAendern, importCode: importCode, fortschritt: fortschritt, linkZu: linkZu };
   })();
 

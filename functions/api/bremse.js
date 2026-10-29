@@ -46,10 +46,16 @@ export async function budget(ctx, schluessel, max, o) {
   }
   return { ok: stand <= max, stand: stand, alarm: !!o.alarm && stand === o.alarm };
 }
-/* Nur lesen, ohne zu zählen (Zentrale, Hinweise) */
+/* Monat als Periode 'JJJJ-MM-01' nach deutschem Kalender; versatz -1 = Vormonat (Abrechnung des KI-Kontingents) */
+export function monatsPeriode(ms, versatz) {
+  const t = tagBerlin(new Date(ms)); let j = Number(t.slice(0, 4)), m = Number(t.slice(5, 7)) + (versatz || 0);
+  while (m < 1) { m += 12; j--; } while (m > 12) { m -= 12; j++; }
+  return j + '-' + String(m).padStart(2, '0') + '-01';
+}
+/* Nur lesen, ohne zu zählen (Zentrale, Kundenbereich, Abrechnung); o.periode: ein bestimmter Tag oder Monat ('JJJJ-MM-01') */
 export async function budgetStand(ctx, schluessel, o) {
   o = o || {};
-  const t = jetztAus(ctx && ctx.env), tag = tagBerlin(new Date(t)), periode = o.monat ? tag.slice(0, 8) + '01' : tag, key = 'budget:' + String(schluessel).slice(0, 110);
+  const t = jetztAus(ctx && ctx.env), tag = tagBerlin(new Date(t)), periode = o.periode || (o.monat ? tag.slice(0, 8) + '01' : tag), key = 'budget:' + String(schluessel).slice(0, 110);
   const sp = ctx && ctx.sp;
   if (sp && sp.zaehlerLesen) { try { const r = await sp.zaehlerLesen(periode, [key]); if (r) return r[key] || 0; } catch (e) { /* weiter */ } }
   return speicherZaehler.get(periode + '|' + key) || 0;

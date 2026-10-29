@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 340" width="480" height="340">
+
+
+<rect width="480" height="340" rx="16" fill="#ffffff"/>
+
+<g>
+<rect x="50" y="56" width="150" height="196" fill="#eceef1"/>
+<rect x="50" y="56" width="150" height="196" fill="none" stroke="#202022" stroke-width="17.6"/>
+<path d="M56 62L194 154L56 246" fill="none" stroke="#897efc" stroke-width="5.5"/>
+<rect x="42" y="76" width="7" height="22" rx="2" fill="#07090a"/><rect x="42" y="210" width="7" height="22" rx="2" fill="#07090a"/>
+<rect x="186" y="142" width="8" height="34" rx="3" fill="#07090a"/>
+</g>
+<g transform="translate(480 0) scale(-1 1)">
+<rect x="50" y="56" width="150" height="196" fill="#eceef1"/>
+<rect x="50" y="56" width="150" height="196" fill="none" stroke="#202022" stroke-width="17.6"/>
+<path d="M56 62L194 154L56 246" fill="none" stroke="#897efc" stroke-width="5.5"/>
+<rect x="42" y="76" width="7" height="22" rx="2" fill="#07090a"/><rect x="42" y="210" width="7" height="22" rx="2" fill="#07090a"/>
+<rect x="186" y="142" width="8" height="34" rx="3" fill="#07090a"/>
+</g>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" fill="#07090a" text-anchor="middle">
+
+
+</g>
+</svg>
