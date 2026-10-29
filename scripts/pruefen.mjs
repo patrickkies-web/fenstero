@@ -4966,7 +4966,7 @@ if (teil(22)) {
    Je Abschnitt ein Modul scripts/pruefen-instanzen/<n>.mjs (dazu <n>-<name>.mjs, die vorher laufen): export default async (h) => {}.
    h (scripts/pruefen-instanzen/hilfe.mjs) bringt einen eigenen Testserver mit Attrappen und den Instanzen essential.localhost,
    plus.localhost, signature.localhost und signature2.localhost mit. Ein Fehler im Modul zählt als fehlgeschlagene Prüfung. */
-const INSTANZ_TEILE = [23, 24, 25, 26, 28, 29].filter((n) => teil(n));
+const INSTANZ_TEILE = [23, 24, 25, 26, 28, 29, 31].filter((n) => teil(n));
 if (INSTANZ_TEILE.length) {
   const inst = await import('./pruefen-instanzen/hilfe.mjs');
   let h = null;

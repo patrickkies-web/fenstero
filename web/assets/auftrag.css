@@ -496,3 +496,35 @@ a.a-platz-wahl { text-decoration: none; color: inherit; }
 .a-blatt p.a-ki-kern { color: var(--weiss); font-weight: 500; }
 .a-ki-liste { margin: 14px 0 0; padding: 12px 0 0; border-top: 1px solid rgba(255,255,255,.08); list-style: none; display: grid; gap: 6px; font: 400 14px/1.4 var(--font-sans); color: var(--silbergrau); }
 .a-ki-liste b { font-weight: 500; color: var(--weiss); }
+
+/* ---------- Zentrale: Vermittlung (docs/VERMITTLUNG.md, Abschnitt 10) ---------- */
+/* Umschalter „Aufträge | Vermittlung“: zwei Links in einer dunklen Kapsel, aktiv mit Violett und Punkt, die Zahl der neuen in Koralle */
+.a-umschalter { display: inline-flex; max-width: 100%; gap: 4px; margin: 6px 0 0; padding: 4px; border-radius: var(--rund-pille); background: var(--kachel); box-shadow: var(--kachel-kante); }
+.a-umschalter a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: var(--rund-pille); color: var(--silbergrau); font: 500 15px/1 var(--font-sans); text-decoration: none; white-space: nowrap; transition: background-color 220ms ease, color 220ms ease, transform 160ms var(--dna-druck); }
+.a-umschalter a:active { transform: scale(.97); transition-duration: 0s; }
+.a-umschalter a[aria-current="page"] { background: var(--violett); color: var(--schwarz); }
+.a-umschalter a[aria-current="page"]::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--schwarz); }
+.a-umschalter-zahl { min-width: 22px; height: 22px; padding: 0 7px; border-radius: var(--rund-pille); display: inline-grid; place-items: center; background: var(--koralle); color: var(--schwarz); font: 600 13px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+@media (hover: hover) and (pointer: fine) { .a-umschalter a:not([aria-current]):hover { background: var(--indigo); color: var(--weiss); } }
+/* Großer Anruf-Knopf (tel:) auf weißer Karte: Ring, Hörer im schwarzen Kreis, Nummer groß; die volle Pille bleibt im Fuß */
+.a-anruf { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; margin: 12px 0 8px; padding: 6px 20px 6px 6px; border-radius: var(--rund-pille); box-shadow: inset 0 0 0 1.5px var(--silbergrau); color: var(--schwarz); text-decoration: none; transition: transform 160ms var(--dna-druck), background-color 220ms ease; }
+.a-anruf:active { transform: scale(.98); transition-duration: 0s; }
+.a-anruf > i { width: 48px; height: 48px; flex: none; border-radius: 50%; background: var(--schwarz); color: var(--weiss); display: grid; place-items: center; }
+.a-anruf > i svg { width: 18px; height: 18px; }
+.a-anruf > span { min-width: 0; }
+.a-anruf b { display: block; font: 500 20px/1.15 var(--font-sans); letter-spacing: -.01em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.a-anruf small { display: block; margin-top: 2px; font: 400 13px/1.3 var(--font-sans); color: var(--textgrau); }
+.a-anruf:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) { .a-anruf:hover { background: rgba(7,9,10,.05); } }
+@media (min-width: 560px) { .a-anruf { display: inline-flex; width: auto; min-width: 300px; } }
+/* Ergebnis des Anrufs (Segment auf Weiß): längere Wörter brechen in der Kapsel um, nichts läuft seitlich hinaus */
+.a-betrieb .a-segment button { padding: 0 8px; font-size: 14px; line-height: 1.15; }
+.a-notiz-betrieb textarea { min-height: 72px; }
+.a-senden-teil { border-top: 1px solid rgba(7,9,10,.08); }
+/* Stand der Vermittlung: Wahl als Kapseln, die umbrechen; gewählt mit Violett und Punkt */
+.a-wahl { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 0 16px; }
+.a-wahl button { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 0; border-radius: var(--rund-pille); background: transparent; color: var(--schwarz); box-shadow: inset 0 0 0 1.5px var(--silbergrau); font: 500 15px/1 var(--font-sans); cursor: pointer; transition: background-color 220ms ease, transform 160ms var(--dna-druck); }
+.a-wahl button:active { transform: scale(.97); transition-duration: 0s; }
+.a-wahl button[aria-pressed="true"] { background: var(--violett); box-shadow: none; }
+.a-wahl button[aria-pressed="true"]::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--schwarz); }
+.a-neu-betrieb { border-top: 0; }
