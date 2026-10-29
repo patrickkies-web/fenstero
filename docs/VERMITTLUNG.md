@@ -256,3 +256,38 @@ Budgets (`bremse.js`), Kundenkonto `/partner/` und Zentrale (`zentrale.js`).
 | Startregion | 50 km um Herzebrock-Clarholz |
 | Straße | freiwillig |
 | KI ohne bestätigte E-Mail oder Nummer | 8 Auswertungen je Gerät und Tag |
+
+## 10. Umsetzung Stufe 1 (Auftrag des Inhabers, 29.10.2026)
+
+Wortlaut: „Ich hätte gerne die Auswahl entweder kostenlos oder [Aufmaßblatt bezahlen] … im letzten Schritt … dass eine KI aussucht in
+der Gegend von dem Menschen, also die Adresse, die eingegeben wurde, welche Betriebe dort in der Nähe sind, und der kann dann
+selbstständig auswählen, welche Betriebe dieses Aufmaßblatt bekommen würden, und dann drückt er auf Abschicken … damit ich weiß, welche
+Betriebe ich kontaktieren kann, und das würde ich dann telefonisch tun und diesem Betrieb das Aufmaßblatt schicken. Leg das alles an,
+visuell an meine Seite angepasst.“
+
+Daraus: Der Kunde wählt die Betriebe, eeziframes fragt sie telefonisch an und schickt das Aufmaßblatt nur an die, die zustimmen. Der
+Text in der App sagt genau das („Wir fragen bei den Betrieben an …“), nicht „gesendet“.
+
+### Weg in der App (nur eeziframes.com ohne Betriebslink, nicht auf Instanzen)
+
+Haus → Zeit und Budget → **Weiche** (Folie `weg`): „Angebote aus deiner Nähe, kostenlos“ oder „Aufmaßblatt für dich, Preis wie
+`PREIS()`“ → Kontakt (`anfrage3`; auf Weg A Pflicht: Name, PLZ und Ort, Telefon; E-Mail freiwillig) → A: **Betriebe** (Folie
+`betriebe`: KI-Suche zur PLZ, Auswahl bis drei, Einwilligung, „Abschicken“) → **Code** (Folie `vcode`: Code per SMS bzw. Anruf,
+Zifferntasten) → **Angefragt** (Folie `angefragt`) · B: wie bisher Freischalten (`teilen`, Kasse). Ohne Server (Pilot) gibt es nur B.
+
+### Schnittstelle
+
+`GET /api/status` liefert zusätzlich `vermittlung: { an, suche: 'ki'|'attrappe'|'', sms: 'sms'|'attrappe'|'' }`; `an` nur mit Daten
+und Mailversand.
+
+| Route | Eingabe | Antwort |
+|---|---|---|
+| `POST /api/vermittlung/suche` | `{ plz, ort }` | `{ ok, betriebe: [{ id, name, ort, km, leistungen }], umkreis, quelle: 'ki'|'zwischenspeicher'|'attrappe'|'keine' }` ohne Telefon und Website (die sieht nur die Zentrale); höchstens 8, nach km; Zwischenspeicher je PLZ 30 Tage; Bremse je IP und Tagesgrenze `VERMITTLUNG_SUCHE_TAG_MAX` (300) mit Mail bei 80 % |
+| `POST /api/vermittlung/code` | `{ tel }` | `{ ok, kanal: 'sms'|'anruf', an: '0171 ••• 4567', token, attrappe? }` (Code 6 Ziffern, 10 Minuten, Token mit HMAC ohne Speicher); ohne SMS-Anbieter und ohne Attrappe `{ ok, ohneCode: true }`; höchstens 3 Codes je Nummer und Tag |
+| `POST /api/vermittlung/senden` | `{ kontakt: { name, ort, tel, mail, erreich }, plz, betriebe: [id, …] (0–3, leer = „Betrieb für mich suchen“), token, code, einwilligung: { fassung, text }, aufmass: '<packProject>', eckdaten: { fenster, elemente, gebaeude, baujahr, zeit, budget, foerdweg }, pdf: '<Base64>' }` | `{ ok, nr: 'V-2026-0001' }`; höchstens 2 Anfragen je Nummer in 90 Tagen; PDF in der Ablage `vermittlung`; Mail an `MAIL_KONTAKT` mit PDF und den gewählten Betrieben samt Telefon und Website; Bestätigung an den Kunden ohne PDF, falls E-Mail angegeben |
+
+Zentrale (`/zentrale/`, Sitzung des Inhabers): `GET /api/inhaber/vermittlungen`, `GET …/:id`, `GET …/:id/pdf`,
+`POST …/:id/betrieb { bid, status, notiz }` (offen, nicht erreicht, will, will nicht), `POST …/:id/betrieb-neu { name, ort, tel, web }`,
+`POST …/:id/senden { bid, mail, zustimmung: true, kunde: true }` (Mail mit PDF an den Betrieb nur mit Zustimmung im Gespräch, die mit
+Zeit im Verlauf steht; höchstens drei; auf Wunsch eine Mail an den Kunden, welcher Betrieb sein Aufmaß hat), `POST …/:id/stand`,
+`POST …/:id/notiz`. Aufbewahrung 180 Tage, dann löscht der Tageslauf Anfrage und PDF.
