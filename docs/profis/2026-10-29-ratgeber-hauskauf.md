@@ -70,4 +70,28 @@ Alle drei gehören zu Schritt 2 „Entscheiden“.
 
 ## Ergebnis
 
-(wird nach dem Bau ergänzt)
+Acht neue Ratgeberseiten, je mit Zeichnung in der Druckpalette, nach dem Muster „Antwort zuerst“ (Kurz gesagt, drei Antwort-Kacheln,
+Abschnitte als Fragen mit Merksatz, Tabellen, Selbstcheck, eine Lösungs-Karte mit dem Weg in die App, Schritte als HowTo, Häufige
+Fragen wortgleich im JSON-LD, Quellen mit Rückweg). Eingebunden in den Weg (Entscheiden: Haus gekauft, Förderung 2026, Förderung
+beantragen, Steuerbonus, Fenster oder Fassade, Etappen; Auswählen: Raum für Raum, Fenster vergrößern), die Übersicht, alle Fußzeilen,
+die Sitemap (51 Adressen) und llms.txt (Seiten und „Kurze Antworten“).
+
+Aufhänger für eeziframes je Seite an drei Stellen: die Pille „Fenster ausmessen, kostenlos“ im Einstieg (mit Preis des Aufmaßblatts
+darunter), die Lösungs-Karte am Entscheidungspunkt in der Mitte und der Schritt „erfassen und messen“ in der Schrittliste.
+
+Befunde aus der Recherche:
+- Das Gebäudeenergiegesetz heißt seit 29.07.2026 Gebäudemodernisierungsgesetz; die Nachrüstpflichten stehen in § 35 und § 69, die
+  frühere Austauschpflicht für über 30 Jahre alte Heizkessel ist weggefallen; neu ist das Beratungsgespräch für Käufer (§ 80).
+- Die Förderrichtlinie BEG EM gilt amtlich in der Fassung vom 17. August 2026 (BAnz AT 27.08.2026 B1), rückwirkend seit 21.07.2026.
+  Die Fassung „vom 17. Juli 2026“ auf energiewechsel.de ist eine Vorabfassung. Zwölf bestehende Ratgeber zitierten sie; Datum und
+  Link sind umgestellt, der Inhalt war für Fenster richtig.
+- Der iSFP-Bonus gilt für Fenster seit 21.07.2026 nur auf Ausgaben über 30.000 €; Klimageschwindigkeits- und Einkommensbonus gelten
+  nur für Heizungen. Viele Quellen im Netz nennen noch „20 % mit iSFP“.
+- Keine belastbaren Beträge für Durchbruch, Sturz und Statiker gefunden; die Seite Fenster vergrößern nennt die Posten ohne Beträge.
+
+Offen: Musterbescheinigung zu § 35c nur über Sekundärquellen (bundesfinanzministerium.de nicht erreichbar), Haushalt 2027
+(Beschluss geplant 27.11.2026), Zinssätze der KfW-Kredite 358/359 (tagesaktuell), Kosten des Energieeffizienz-Experten.
+
+Geprüft: Prüfsuite Abschnitt 10 (Auffindbarkeit, Ratgeber) mit allen 291 Prüfungen grün; Seiten am Telefon (390 px) und am
+Schreibtisch (1280 px) angesehen. Ein Gremium lief nicht: Die Seiten folgen der bestehenden Ratgeber-Vorlage vom 28.10.2026, die
+Gestaltung ist unverändert.
