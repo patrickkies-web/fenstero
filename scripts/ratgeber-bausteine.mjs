@@ -19,6 +19,9 @@
    - Feinsatz nach dem Gremium vom 28.10.2026: geschützte Leerzeichen zwischen Zahl und Einheit (auch § 4, DIN 18202, 2 × 3), Zahlen
      in Tabellen mit kleiner Einheit, das Ergebnis („es zählt“) als Zahl-Held, „Typische Fehler“ mit Kreuz, im Kasten „Häufiger Fehler“
      der erste Satz kräftig, Belegnummern mit Rückweg aus den Quellen
+   - Muster „Antwort zuerst“ (29.10.2026, docs/SEO.md): die Symbole der Antwort-Kacheln (.rg-faelle) aus einem Satz (SYMBOLE); im HTML
+     steht <svg class="rg-sym" data-sym="NAME"></svg>, das Skript setzt Maße und Zeichen ein. Merksatz, Zahl-Kacheln und Lösungs-Karte
+     sind reines HTML mit den Klassen rg-merk, rg-zahlen und rg-loesung (Gestaltung in docs/profis/ratgeber-vorschau/ratgeber.css)
    Neue Seite: Eintrag in SEITEN_INFO und im passenden Schritt von WEG (Hauseigentümer) bzw. in FENSTERBAUER, dann
      node scripts/ratgeber-bausteine.mjs
    Das Skript ist idempotent; scripts/pruefen.mjs (Abschnitt 10) prüft, dass jede Seite genau so aussieht, wie es sie bauen würde. */
@@ -174,6 +177,24 @@ const tabellen = (main) => main.replace(/<td( data-k="([^"]*)")?>([\s\S]*?)<\/td
 /* „Typische Fehler“: Liste mit Kreuz; im Kasten „Häufiger Fehler“ der erste Satz kräftig (Text gleich, nur Auszeichnung) */
 const fehler = (main) => main.replace(/(<h2[^>]*>[^<]*Fehler[^<]*<\/h2>\s*)<ul(?: class="rg-fehler-liste")?>/g, '$1<ul class="rg-fehler-liste">')
   .replace(/(<aside class="rg-tipp fehler"><p class="eyebrow">[^<]*<\/p><p>)(?!<b>)((?:(?!<\/p>)[\s\S])*?[.!?])(?=\s|<\/p>)/g, '$1<b>$2</b>');
+/* Symbole der Antwort-Kacheln: ein kleiner Satz einheitlicher Zeichen ohne Text, 24 × 24, Strich 1,8 mit runden Enden in currentColor,
+   Punkte gefüllt, für Bildschirmleser verborgen (der Titel der Kachel sagt alles). Scheibe: zwei Gläser mit Randverbund wie in der
+   Zeichnung fenster-beschlagen.svg, die Tropfen innen (links, Raum), zwischen den Gläsern oder außen (rechts). Software: Fertigung
+   (Branchensoftware, ERP), Beleg (Handwerkersoftware), Telefon mit Maß (Aufmaß-App vor Ort), Maßband (Selbstaufmaß) */
+const SCHEIBE = '<path d="M8 3h8v18H8z"/>';
+const TROPFEN = (x) => [7, 12, 17].map((y) => '<circle cx="' + x + '" cy="' + y + '" r="1.5" fill="currentColor" stroke="none"/>').join('');
+export const SYMBOLE = {
+  'tropfen-innen': SCHEIBE + TROPFEN(4),
+  'tropfen-zwischen': SCHEIBE + TROPFEN(12),
+  'tropfen-aussen': SCHEIBE + TROPFEN(20),
+  fertigung: '<path d="M3 20V11l5 3v-3l5 3V4.5h5V20M2 20h20"/>',
+  beleg: '<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h4"/>',
+  'vor-ort': '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M9.5 11h5M9.5 9.5v3M14.5 9.5v3M11 18.5h2"/>',
+  'selbst-messen': '<rect x="2.5" y="5.5" width="12" height="12" rx="3"/><circle cx="8.5" cy="11.5" r="2.2"/><path d="M14.5 14.5h7v3h-7M17.5 14.5v1.3M20 14.5v1.3"/>'
+};
+const symbole = (main) => main.replace(/<svg class="rg-sym" data-sym="([a-z-]+)"[^>]*>[\s\S]*?<\/svg>/g, (m, n) => (SYMBOLE[n]
+  ? '<svg class="rg-sym" data-sym="' + n + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + SYMBOLE[n] + '</svg>'
+  : m));
 /* Belegnummern: die erste Stelle je Quelle bekommt eine id, die Quelle einen Link zurück dorthin */
 function belege(main) {
   main = main.replace(/<a href="#(q\d+)" id="zu-q\d+">/g, '<a href="#$1">').replace(/ <a class="rg-zurueck" href="#zu-q\d+" aria-label="[^"]*">zurück zum Text<\/a>/g, '');
@@ -240,7 +261,7 @@ export function baue(pfad, html, zeichnungen) {
     vergeben.add(id);
     return '<h2' + (attr || '') + ' id="' + id + '">' + inhalt + '</h2>';
   });
-  main = belege(fehler(feinsatz(tabellen(main))));
+  main = symbole(belege(fehler(feinsatz(tabellen(main)))));
   const abschnitte = [...main.matchAll(/<h2[^>]*\sid="([^"]+)"[^>]*>([\s\S]*?)<\/h2>/g)].filter((x) => !OHNE_INHALT.includes(x[2].trim()));
   const imWeg = schrittVon(pfad) >= 0;
   if (imWeg) main = main.replace(/(\n\s*)<h2([^>]*)>Weiterlesen<\/h2>/, (x) => wegBlock(pfad, zeichnungen) + x);
