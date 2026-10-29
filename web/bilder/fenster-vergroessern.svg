@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400" role="img" aria-labelledby="t d">
+<title id="t">Fenster vergrößern: heute und geplant</title>
+<desc id="d">Wandansicht von innen in zwei Bildern. Links heute: ein kleines Fenster mit Brüstung darunter, die Brüstungshöhe als Maßlinie. Rechts geplant: eine breitere, bodentiefe Öffnung als Strichlinie um die Lage des alten Fensters, darin das neue Fenster. Darüber ein neuer, längerer Sturz, den ein Statiker rechnet. Unten ist die Brüstung weggenommen; dort stellt sich die Frage nach der Absturzsicherung.</desc>
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#07090a"/></marker><marker id="k" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#f88962"/></marker></defs>
+<rect width="480" height="400" rx="16" fill="#ffffff"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="16" fill="#07090a">
+<text x="126" y="42" text-anchor="middle" font-weight="700" font-size="18">heute</text>
+<text x="354" y="42" text-anchor="middle" font-weight="700" font-size="18">geplant</text>
+<rect x="24" y="56" width="204" height="304" fill="#ecebec"/>
+<rect x="252" y="56" width="204" height="304" fill="#ecebec"/>
+<rect x="24" y="360" width="432" height="18" fill="#d2d0d3"/>
+<line x1="24" y1="360" x2="456" y2="360" stroke="#07090a" stroke-width="2"/>
+<rect x="70" y="108" width="112" height="12" fill="#a8a4a9"/>
+<rect x="76" y="120" width="100" height="120" fill="#eceef1" stroke="#897efc" stroke-width="3"/>
+<line x1="126" y1="120" x2="126" y2="240" stroke="#897efc" stroke-width="3"/>
+<rect x="70" y="240" width="112" height="7" fill="#a8a4a9"/>
+<line x1="50" y1="247" x2="50" y2="358" stroke="#f88962" stroke-width="2" marker-start="url(#k)" marker-end="url(#k)"/>
+<text x="0" y="0" transform="translate(42 304) rotate(-90)" text-anchor="middle" fill="#b4502f">Brüstung</text>
+<line x1="230" y1="200" x2="250" y2="200" stroke="#07090a" stroke-width="2" marker-end="url(#p)"/>
+<rect x="266" y="104" width="176" height="16" fill="#202022"/>
+<text x="354" y="94" text-anchor="middle" font-weight="700">neuer Sturz (Statik)</text>
+<rect x="278" y="120" width="152" height="240" fill="#eceef1" stroke="#897efc" stroke-width="3"/>
+<rect x="279.5" y="241.5" width="149" height="117" fill="#fde3d8"/>
+<line x1="278" y1="240" x2="430" y2="240" stroke="#897efc" stroke-width="3"/>
+<line x1="354" y1="120" x2="354" y2="240" stroke="#897efc" stroke-width="3"/>
+<rect x="304" y="120" width="100" height="120" fill="none" stroke="#a8a4a9" stroke-width="2" stroke-dasharray="5 5"/>
+<rect x="272" y="114" width="164" height="246" fill="none" stroke="#f88962" stroke-width="2.5" stroke-dasharray="8 6"/>
+<text x="354" y="290" text-anchor="middle" font-weight="700">Brüstung weg:</text>
+<text x="354" y="312" text-anchor="middle">Absturzsicherung?</text>
+</g>
+</svg>
