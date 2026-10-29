@@ -85,9 +85,13 @@ const plzOk = (p) => /^\d{5}$/.test(p) && Number(p) >= 1000;
 
 /* ---------- Stand ---------- */
 const geheimnis = (k) => (k.sitzung && k.sitzung.geheimnis) || '';
-/* an: Datenbank (oder Attrappe), Mailversand, Sitzungsgeheimnis (Code-Token) und Ablage für das Aufmaßblatt sind da */
-export const vermittlungAn = (k) => !!(vermittlungDaten(k) && k.post && geheimnis(k) && ablage(k, 'vermittlung'));
-export const vermittlungStatus = (k, env) => ({ an: vermittlungAn(k), suche: sucheArt(env), sms: smsArt(env) });
+/* an: eingeschaltet (VERMITTLUNG=an; lokal mit der Daten-Attrappe von selbst), Datenbank (oder Attrappe), Mailversand,
+   Sitzungsgeheimnis (Code-Token) und Ablage für das Aufmaßblatt sind da. Der Schalter, weil online Datenbank, Mail und Sitzung schon
+   laufen: ohne ihn ginge die Vermittlung beim Hochladen von selbst an, bevor die Tabellen (schema.sql), der SMS-Anbieter und die
+   geprüften Rechtstexte da sind (Inhaber, 29.10.2026: online ja, Vermittlung erst auf sein Zeichen) */
+export const vermittlungFrei = (k, env) => !!(k && k.datenAttrappe) || String((env && env.VERMITTLUNG) || '').trim().toLowerCase() === 'an';
+export const vermittlungAn = (k, env) => !!(vermittlungFrei(k, env) && vermittlungDaten(k) && k.post && geheimnis(k) && ablage(k, 'vermittlung'));
+export const vermittlungStatus = (k, env) => ({ an: vermittlungAn(k, env), suche: sucheArt(env), sms: smsArt(env) });
 const tagMax = (env) => { const n = Number(env && env.VERMITTLUNG_SUCHE_TAG_MAX); return env && env.VERMITTLUNG_SUCHE_TAG_MAX !== undefined && env.VERMITTLUNG_SUCHE_TAG_MAX !== '' && Number.isFinite(n) ? Math.max(1, n) : 300; };
 const kurzHash = async (k, s) => hex(await hmac(geheimnis(k) || 'ohne', s)).slice(0, 20);
 const codeHash = async (k, tel, code) => hex(await hmac(geheimnis(k) || 'ohne', 'vcode|' + tel + '|' + code));
@@ -131,7 +135,7 @@ async function code(ctx) {
   if (!(await bremse(ctx, 'OTP', 'vcode:' + q)) || !erlaubt('vcodeip:' + q, 12, 60 * MIN)) throw new ApiFehler('Zu viele Codes in kurzer Zeit. Bitte in ein paar Minuten noch einmal.', 429);
   const dienst = smsDienst(ctx.env);
   if (!dienst) return { ok: true, ohneCode: true, kanal: t.kanal, an: t.an };
-  if (!vermittlungAn(ctx.k)) throw new ApiFehler('Die Vermittlung ist hier noch nicht eingerichtet.', 503);
+  if (!vermittlungAn(ctx.k, ctx.env)) throw new ApiFehler('Die Vermittlung ist hier noch nicht eingerichtet.', 503);
   const bu = await budget(ctx, 'vcode:' + (await kurzHash(ctx.k, 'vtel|' + t.e164)), 3);
   if (!bu.ok) throw new ApiFehler('Für diese Nummer gab es heute schon drei Codes. Bitte versuch es morgen noch einmal.', 429, { feld: 'tel' });
   const c = dienst.art === 'attrappe' ? '123456' : String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000));
@@ -174,7 +178,7 @@ const verlauf = (z, von, text) => { (z.verlauf = z.verlauf || []).push({ zeit: Z
 async function senden(ctx) {
   const b = ctx.body || {}, q = quelle(ctx.request);
   if (!(await bremse(ctx, 'FORM', 'vsenden:' + q)) || !erlaubt('vsenden:' + q, 20, 60 * MIN)) throw new ApiFehler('Zu viele Anfragen. Bitte in ein paar Minuten noch einmal.', 429);
-  if (!vermittlungAn(ctx.k)) throw new ApiFehler('Die Vermittlung ist hier noch nicht eingerichtet.', 503);
+  if (!vermittlungAn(ctx.k, ctx.env)) throw new ApiFehler('Die Vermittlung ist hier noch nicht eingerichtet.', 503);
   const d = vermittlungDaten(ctx.k), jetzt = jetztVon(ctx), ko = b.kontakt && typeof b.kontakt === 'object' ? b.kontakt : {}, f = {};
   /* Ort: die App schickt das Feld „PLZ und Ort“ ganz; die PLZ steht schon in plz und wird hier abgetrennt (Ort darf dann fehlen) */
   const name = kurz(ko.name, 80), ort = kurz(ko.ort, 80).replace(/^\d{5}[\s,·-]*/, '').replace(/[\s,·-]*\d{5}$/, '').slice(0, 60), mail = kurz(ko.mail, 120).toLowerCase(), plz = String(b.plz == null ? '' : b.plz).trim(), t = telefon(ko.tel);

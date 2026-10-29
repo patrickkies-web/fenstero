@@ -541,6 +541,7 @@
 /* Leiser Zusatz beim Preis (Gewichtung des Inhabers, 29.10.2026): die Weitergabe an Fensterbetriebe als Möglichkeit, nicht als
    Leistung; kein Etikett, kein durchgestrichener Preis, keine Pille, nur ein Textweg. Dünne Linie oben statt eigener Karte. */
 .ez-preisspalte { display: grid; gap: var(--raum-5); min-width: 0; }
+.ez-weitergabe[hidden] { display: none; }
 .ez-weitergabe { display: grid; gap: 8px; justify-items: start; padding: var(--raum-4) 4px 0; border-top: 1px solid rgba(168,164,169,.5); max-width: 46ch; }
 .ez-weitergabe p { margin: 0; font: 400 15px/1.5 var(--font-sans); color: var(--tinte-2); text-wrap: pretty; }
 .ez-weitergabe b { font-weight: 500; color: var(--tinte); }

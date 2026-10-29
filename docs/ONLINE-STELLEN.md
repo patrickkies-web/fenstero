@@ -279,10 +279,11 @@ Neue Bestellung in der Zentrale öffnen → **Seite beginnen** (Anruf zur Wunsch
 
 ## Vermittlung „Angebote aus deiner Nähe“ (Stufe 1)
 
-Hauseigentümer wählen am Ende der App bis zu drei Fensterbetriebe aus ihrer Nähe, die eine KI sucht, bestätigen ihre Telefonnummer per
+Hauseigentümer wählen am Ende der App zwei bis fünf Fensterbetriebe aus ihrer Nähe, die eine KI sucht, bestätigen ihre Telefonnummer per
 Code und schicken ab; du rufst die Betriebe aus der Zentrale an und schickst das Aufmaßblatt nur an die, die zustimmen
-([VERMITTLUNG.md](VERMITTLUNG.md), Abschnitt 10; Bedienung in [ZENTRALE.md](ZENTRALE.md)). Die App zeigt den Weg, sobald `/api/status`
-`"vermittlung": { "an": true }` meldet: Datenbank, Mailversand (`MAIL_API_KEY`, `MAIL_KONTAKT`) und `SITZUNG_GEHEIMNIS` sind da.
+([VERMITTLUNG.md](VERMITTLUNG.md), Abschnitt 10; Bedienung in [ZENTRALE.md](ZENTRALE.md)). Die App und die Startseite zeigen den Weg, sobald `/api/status`
+`"vermittlung": { "an": true }` meldet: die Variable `VERMITTLUNG=an` ist gesetzt, Datenbank, Mailversand (`MAIL_API_KEY`, `MAIL_KONTAKT`) und
+`SITZUNG_GEHEIMNIS` sind da. **Seit dem 29.10.2026 ist der Code online, die Vermittlung aber aus**, bis du sie mit Schritt 5 einschaltest.
 
 1. **Supabase:** `supabase/schema.sql` noch einmal komplett ausführen (Abschnitt „Vermittlung“ legt `vermittlungen`, `vermittlung_suche`
    und die Nummernfolge an; den Bucket `vermittlung` legt der Server beim ersten Aufmaßblatt selbst an).
@@ -296,9 +297,16 @@ Code und schicken ab; du rufst die Betriebe aus der Zentrale an und schickst das
    `SMS_ABSENDER` (Absender der SMS, bis 11 Zeichen, Vorgabe `eeziframes`) und `SMS_STIMME` (Stimme des Anrufs für Festnetz, Vorgabe
    `de-de-female`). Vor dem Start einmal an dein Handy und an eine Festnetznummer probieren. Ohne `SMS_API_KEY` geht die Anfrage ohne Code
    durch und steht in der Zentrale als „Nummer nicht bestätigt“.
+4. **Rechtstexte:** Entwurf und Fragen an den Anwalt in [VERMITTLUNG-RECHT.md](VERMITTLUNG-RECHT.md); nach der Prüfung Datenschutz
+   (Abschnitt 6a) und Nutzungsbedingungen (§ 4a) mit neuem Stand einbauen.
+5. **Einschalten:** bei Cloudflare die Variable `VERMITTLUNG` mit dem Wert `an` anlegen. Danach `/api/status` öffnen: `"vermittlung"`
+   zeigt `"an": true`. Ausschalten: Variable löschen. Ist sie an, sollte auch die Startseite in den festen Texten für Suchmaschinen die
+   Weitergabe nennen (in `web/index.html` am 29.10.2026 herausgenommen: Satz in der Beschreibung der App, dritte Offer im JSON-LD, Zeile
+   „Kosten“).
 
 | Name | Art | Wofür |
 |---|---|---|
+| `VERMITTLUNG` | Variable | `an` schaltet die Vermittlung ein (App, Startseite, Server); ohne bleibt sie aus |
 | `SMS_API_KEY` | Secret | Codes per SMS und Anruf über seven.io (`functions/api/vermittlung-sms.js`) |
 | `SMS_ABSENDER`, `SMS_STIMME` | Variablen | Absender der SMS, Stimme der Ansage |
 | `VERMITTLUNG_SUCHE_TAG_MAX` | Variable | neue KI-Suchen am Tag über alle (Vorgabe 300, Mail bei 80 %) |

@@ -58,6 +58,8 @@
       a.setAttribute('href', d.app);
       if (t) t.textContent = (d.weiter ? d.appLabel : a.getAttribute('data-ez-app')) + (/\s$/.test(t.textContent) ? ' ' : '');
     });
+    /* Weitergabe an Fensterbetriebe: nur, wenn der Server die Vermittlung eingeschaltet hat (VERMITTLUNG=an, /api/status) */
+    const wg = root.querySelector('[data-ez="weitergabe"]'); if (wg) wg.hidden = !d.vermittlung;
     const weiter = root.querySelector('[data-ez="weiter"]');
     if (weiter) { weiter.hidden = !d.weiter; weiter.textContent = d.weiter ? 'Dein Aufmaß ist angefangen: ' + d.weiter + ' Fenster erfasst, gespeichert in diesem Browser.' : ''; }
     const zahl = root.querySelector('[data-ez="preiszahl"]');

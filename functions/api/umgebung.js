@@ -67,6 +67,8 @@
                               functions/api/cloudflare.js); ohne: die Zentrale zeigt eine Klick-Anleitung
      CF_ACCOUNT_ID            Kontokennung bei Cloudflare (32 Zeichen, rechts auf der Kontoübersicht), nur zusammen mit CF_API_TOKEN
      Vermittlung (functions/api/vermittlung.js, docs/VERMITTLUNG.md Abschnitt 10; gelesen dort, nicht in konfig):
+     VERMITTLUNG=an           schaltet die Vermittlung ein (online erst, wenn schema.sql gelaufen ist, SMS_API_KEY steht und die
+                              Rechtstexte geprüft und eingebaut sind; lokal mit DATEN_ATTRAPPE=1 von selbst an)
      SMS_API_KEY              Secret, Schlüssel von seven.io für den Code per SMS bzw. Anruf (ohne: Anfragen ohne Code, „nicht bestätigt“)
      SMS_ABSENDER, SMS_STIMME Absender der SMS (Vorgabe eeziframes), Stimme der Ansage (Vorgabe de-de-female)
      VERMITTLUNG_SUCHE_TAG_MAX neue KI-Suchen nach Fensterbetrieben am Tag (Vorgabe 300, Mail an MAIL_KONTAKT bei 80 %)
