@@ -550,8 +550,9 @@
   color: var(--tinte); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1.5px var(--violett), var(--schatten-schwebe); }
 .ez-gratis__kopf { display: flex; align-items: center; gap: var(--raum-3); flex-wrap: wrap; }
 .ez-gratis__titel { margin: 0; font: 600 30px/1 var(--font-sans); letter-spacing: .04em; text-transform: uppercase; color: var(--weiss); }
-.ez-gratis p { margin: 0; max-width: 46ch; font: 400 15px/1.5 var(--font-sans); color: var(--tinte-2); text-wrap: pretty; }
-.ez-gratis .ez-gratis__zusage { color: var(--tinte); font-weight: 500; }
+/* beide Absätze in Weiß, damit man sie gut lesen kann (Inhaber, 29.10.2026) */
+.ez-gratis p { margin: 0; max-width: 46ch; font: 400 15px/1.5 var(--font-sans); color: var(--weiss); text-wrap: pretty; }
+.ez-gratis .ez-gratis__zusage { font-weight: 500; }
 .ez-gratis__los { margin-top: var(--raum-2); }
 .ez-gratis::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; box-shadow: 0 0 0 2px var(--violett); opacity: 0; pointer-events: none; }
 .ez-gratis.ist-puls::after { animation: ez-gratis-puls 1.4s cubic-bezier(.23, 1, .32, 1) .3s 3; }

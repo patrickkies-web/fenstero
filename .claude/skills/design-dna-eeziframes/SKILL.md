@@ -283,11 +283,12 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Vorschlag für seine DNA (Abschnitt 9): „Gewählt heißt Weiß, nie Leuchten; Ziele 44–48 px, Schrift 14 px in Knöpfen und Chips.“
 - Gratis-Weg groß über dem Preis (Inhaber, 29.10.2026, abends; ersetzt auf der Startseite den „leisen Zusatz“ aus dem Punkt
   „Startseite als Planungswerkzeug“): Über der Karte mit 7,99 € steht eine dunkle Karte (G14) mit violettem Ring, Etikett „Empfohlen“
-  (Koralle) und daneben groß in Weiß „KOSTENLOS“, darunter sein Text („Am Ende des Konfigurators zeigen wir dir mehrere Betriebe in
-  deiner Nähe. Erlaubst du uns, mindestens zwei Betrieben deiner Wahl dein Aufmaß zu schicken, erhältst du das Aufmaß kostenlos und on
-  top das gesamte Aufmaß als PDF. Keine versteckten Kosten, keine Datenweitergabe an weitere und keine Belästigung durch Sonstige.
-  Garantiert.“) und „Kostenlos weiter“ als leise Pille. Dieselbe Karte hängt in der App ganz oben auf den Folien zum Bezahlen (erster
-  Satz dort „Statt zu bezahlen: Wir zeigen dir …“). Beim Erscheinen läuft dreimal ein violetter Ring nach außen und der Pfeil stupst
+  (Koralle) und daneben groß in Weiß „KOSTENLOS“, darunter sein Text, auf seinen Wunsch in Rechtschreibung und Grammatik korrigiert
+  („Am Ende des Konfigurators zeigen wir dir mehrere Betriebe in deiner Nähe. Erlaubst du uns, dein Aufmaß an mindestens zwei Betriebe
+  deiner Wahl zu schicken, erhältst du es kostenlos und obendrein das gesamte Aufmaß als PDF. Keine versteckten Kosten, keine
+  Weitergabe deiner Daten an weitere Betriebe und keine Belästigung durch Dritte. Garantiert.“), beide Absätze in Weiß („dass man das
+  gut lesen kann“), und „Kostenlos weiter“ als leise Pille. Dieselbe Karte hängt in der App ganz oben auf den Folien zum Bezahlen (dort
+  „Wir zeigen dir mehrere Betriebe … erhältst du es kostenlos statt für 7,99 € und obendrein …“). Beim Erscheinen läuft dreimal ein violetter Ring nach außen und der Pfeil stupst
   (1,4 s je Takt, einmal je Seitenaufruf bzw. Folie, ruhige Fassung ohne), nie in Schleife. Sichtbar nur bei eingeschalteter
   Vermittlung. Vorschlag für seine DNA: „Ein Angebot, das Geld spart, darf über dem Preis stehen und einmal auf sich aufmerksam machen.“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).

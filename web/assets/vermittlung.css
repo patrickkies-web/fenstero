@@ -65,7 +65,8 @@ g.vm-pkt.ist-gewaehlt text { font: 600 12px var(--font-sans); fill: var(--schwar
 .dna .vm-gratis-kopf { display: flex; align-items: center; gap: 12px; flex-wrap: wrap }
 .dna .vm-gratis-gross .vm-karte-etikett { position: static; margin: 0 }
 .dna .vm-gratis-titel { font: 600 28px/1 var(--font-sans) !important; letter-spacing: .04em; text-transform: uppercase; color: var(--weiss) }
-.dna .vm-gratis-gross .vm-gratis-zusage { color: var(--weiss); font-weight: 500 }
+.dna .vm-gratis-gross p { color: var(--weiss) }
+.dna .vm-gratis-gross .vm-gratis-zusage { font-weight: 500 }
 .dna .vm-gratis-los { margin-top: 4px; gap: 10px }
 .dna .vm-gratis-hinweis::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; box-shadow: 0 0 0 2px var(--violett); opacity: 0; pointer-events: none }
 .dna .vm-gratis-hinweis.ist-puls::after { animation: vm-gratis-puls 1.4s cubic-bezier(.23, 1, .32, 1) .3s 3 }

@@ -4495,8 +4495,8 @@ function vmGratisKarte() {
   if (!vermAn() || FREI() || (S.verm && S.verm.gesendet)) return '';
   const puls = !VM_PULS.has(S.screen); VM_PULS.add(S.screen);
   return '<div class="vm-gratis-hinweis vm-gratis-gross' + (puls ? ' ist-puls' : '') + '"><div class="vm-gratis-kopf"><span class="vm-karte-etikett">Empfohlen</span><b class="vm-gratis-titel">Kostenlos</b></div>' +
-    '<p>Statt zu bezahlen: Wir zeigen dir mehrere Betriebe in deiner Nähe. Erlaubst du uns, mindestens ' + VM_ZAHL[VM_MIN] + ' Betrieben deiner Wahl dein Aufmaß zu schicken, erhältst du das Aufmaß kostenlos und on top das gesamte Aufmaß als PDF, statt ' + esc(euro(PREIS())) + ' zu zahlen.</p>' +
-    '<p class="vm-gratis-zusage">Keine versteckten Kosten, keine Datenweitergabe an weitere und keine Belästigung durch Sonstige. Garantiert.</p>' +
+    '<p>Wir zeigen dir mehrere Betriebe in deiner Nähe. Erlaubst du uns, dein Aufmaß an mindestens ' + VM_ZAHL[VM_MIN] + ' Betriebe deiner Wahl zu schicken, erhältst du es kostenlos statt für ' + esc(euro(PREIS())) + ' und obendrein das gesamte Aufmaß als PDF.</p>' +
+    '<p class="vm-gratis-zusage">Keine versteckten Kosten, keine Weitergabe deiner Daten an weitere Betriebe und keine Belästigung durch Dritte. Garantiert.</p>' +
     '<button type="button" class="dna-pille dna-pille--leise vm-gratis-los" data-act="vm-gratis">Kostenlos weiter' + abPfeil + '</button></div>';
 }
 const vmMitGratis = (v) => (v && v.html ? Object.assign(v, { html: vmGratisKarte() + v.html }) : v);
