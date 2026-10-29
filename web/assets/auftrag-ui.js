@@ -49,7 +49,8 @@
     haken: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     laden: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v7.5M4.5 7.5 8 11l3.5-3.5M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     kopie: '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 3.5A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
-    aussen: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 3h4v4M13 3 7.5 8.5M11.5 9.5v3a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    aussen: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 3h4v4M13 3 7.5 8.5M11.5 9.5v3a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    telefon: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.6 2.5H3.9a1.4 1.4 0 0 0-1.4 1.5 10 10 0 0 0 9.5 9.5 1.4 1.4 0 0 0 1.5-1.4v-1.7a.9.9 0 0 0-.7-.9l-2-.5a.9.9 0 0 0-.9.3l-.7.8a7.2 7.2 0 0 1-3.2-3.2l.8-.7a.9.9 0 0 0 .3-.9l-.5-2a.9.9 0 0 0-1-.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>'
   };
   function icon(n) { const s = h('span', { style: 'display:contents' }); s.innerHTML = SVG[n] || ''; return s.firstChild; }
   /* Zeichen wie überall (eine Quelle: scripts/logo-setzen.py, LOGO_INNEN in gemeinsam.js); auf Dunkel färbt auftrag.css Kachel und Rand */

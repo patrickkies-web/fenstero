@@ -3,12 +3,15 @@
    Monatsumsatz der laufenden Abos), Filter, Zeilen mit Stand, nächstem Schritt und Hinweisen (geändert, Nachrichten, Wechsel).
    Auftrag (#auftrag/<id>): der nächste Schritt als Pille (Seite beginnen, Vorschau bereitstellen, Live schalten), Prompt für Claude zum
    Kopieren, Material (Logo, Porträt, Fotos zum Herunterladen, Farben, Texte, Website), Betrieb und Impressum, Adresse und Anfragen,
-   Nachrichten, interne Notiz, Zahlung und Abo, Verlauf, weitere Übergänge (Auftrag.UEBERGAENGE). Server: functions/auftrag/ (INHABER). */
+   Nachrichten, interne Notiz, Zahlung und Abo, Verlauf, weitere Übergänge (Auftrag.UEBERGAENGE). Server: functions/auftrag/ (INHABER).
+   Vermittlung (#vermittlung, #vermittlung/<id>; Umschalter „Aufträge | Vermittlung“ oben im Eingang mit der Zahl der neuen): Anfragen der
+   Hauseigentümer an bis zu drei Fensterbetriebe; je Betrieb Anruf-Knopf, Ergebnis des Anrufs, Notiz und, wenn er will, „Aufmaß schicken“
+   nur mit dem Häkchen der Zustimmung im Gespräch. Server: functions/api/vermittlung.js, docs/VERMITTLUNG.md Abschnitt 10. */
 (function () {
   'use strict';
   const U = window.AuftragUI, A = window.Auftrag, P = window.Pakete, h = U.h;
   const wurzel = document.getElementById('app');
-  const S = { stand: null, liste: null, filter: 'tun', auftrag: null, start: true };
+  const S = { stand: null, liste: null, filter: 'tun', auftrag: null, start: true, vliste: null, vneu: 0, vfilter: 'offen', vermittlung: null };
   const kurz = U.kurzname;
   const WARTEN = ['Kunde füllt aus', 'Warten auf Freigabe', ''];
   const zuTun = (a) => WARTEN.indexOf(a.naechster || '') < 0 || a.ungelesen > 0 || a.geaendert || !!a.wechsel;
@@ -22,9 +25,9 @@
   ];
 
   /* ---------- Gerüst ---------- */
-  function kopf(zurueck) {
+  function kopf(zurueck, label) {
     const rechts = S.stand && S.stand.angemeldet ? [U.ring('Abmelden', { class: 'klein', on: { click: abmelden } })] : [];
-    const k = U.kopf({ zurueck: zurueck || null, zurueckLabel: 'Zum Eingang', zusatz: 'Zentrale', rechts: rechts });
+    const k = U.kopf({ zurueck: zurueck || null, zurueckLabel: label || 'Zum Eingang', zusatz: 'Zentrale', rechts: rechts });
     k.id = 'kopf';
     const alt = document.getElementById('kopf'); if (alt) alt.replaceWith(k);
   }
@@ -68,7 +71,7 @@
   async function abmelden() { await U.api('POST', '/api/inhaber/abmelden', {}).catch(() => null); S.stand.angemeldet = false; location.hash = ''; anmeldung(); }
 
   /* ---------- Eingang ---------- */
-  async function eingangLaden() { const r = await U.api('GET', '/api/inhaber/auftraege'); S.liste = r.auftraege; S.kasse = r.kasse || null; }
+  async function eingangLaden() { const [r] = await Promise.all([U.api('GET', '/api/inhaber/auftraege'), vermittlungenLaden().catch(() => null)]); S.liste = r.auftraege; S.kasse = r.kasse || null; }
   function eingang(o) {
     kopf();
     const l = S.liste || [], tun = l.filter(zuTun), live = l.filter((a) => a.stand === 'live');
@@ -84,7 +87,7 @@
     }));
     const auswahl = l.filter((FILTER.find((f) => f.k === S.filter) || FILTER[0]).f);
     const zeilen = auswahl.length ? h('ol', { class: 'a-eingang' }, auswahl.map(zeile)) : h('p', { class: 'a-leer', text: S.filter === 'tun' ? 'Nichts zu tun. Neue Bestellungen erscheinen hier, dazu eine E-Mail an Sie.' : 'Keine Aufträge in dieser Ansicht.' });
-    seite({ frage: U.frage(tun.length ? 'Eingang. *' + (tun.length === 1 ? 'Ein Auftrag' : tun.length + ' Aufträge') + ' für Sie.*' : 'Eingang. *Alles erledigt.*', null), inhalt: [zahlen, kasseKarte(), filter, U.karte(null, null, zeilen, { class: 'a-karte a-eingang-karte' })], stehen: o && o.stehen });
+    seite({ band: umschalter('auftraege'), frage: U.frage(tun.length ? 'Eingang. *' + (tun.length === 1 ? 'Ein Auftrag' : tun.length + ' Aufträge') + ' für Sie.*' : 'Eingang. *Alles erledigt.*', null), inhalt: [zahlen, kasseKarte(), filter, U.karte(null, null, zeilen, { class: 'a-karte a-eingang-karte' })], stehen: o && o.stehen });
   }
   /* Paket-Kasse: offen (mit Modus) oder zu, mit den Gründen vom Server; Bestellungen enden sonst als unverbindliche Anfrage */
   const MODUS = { test: 'Stripe im Testmodus, ohne echtes Geld', live: 'Stripe mit echtem Geld', attrappe: 'Attrappe ohne Stripe' };
@@ -296,9 +299,157 @@
     return U.kachel([h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Nachrichten' })), liste, h('div', { class: 'a-schreiben' }, h('div', { class: 'a-flaeche dunkel' }, feld), knopf)], 'a-nachrichten-kachel');
   }
 
+  /* ---------- Vermittlung (docs/VERMITTLUNG.md, Abschnitt 10) ----------
+     Der Kunde hat bis zu drei Betriebe gewählt; Sie rufen an und schicken das Aufmaß nur an die, die im Gespräch zustimmen (das Häkchen
+     ist Pflicht, die Zeit steht im Verlauf). Telefon und Website der Betriebe sieht nur die Zentrale, nie die App. */
+  const V_STAND = { neu: 'Neu', in_arbeit: 'In Arbeit', vermittelt: 'Vermittelt', kein_betrieb: 'Kein Betrieb', erledigt: 'Erledigt' };
+  const V_STATUS = { offen: 'Noch nicht angerufen', nicht_erreicht: 'Nicht erreicht', will: 'Will', will_nicht: 'Will nicht' };
+  const V_OFFEN = ['neu', 'in_arbeit'];
+  const VFILTER = [
+    { k: 'offen', t: 'Offen', f: (v) => V_OFFEN.indexOf(v.stand) >= 0 },
+    { k: 'vermittelt', t: 'Vermittelt', f: (v) => v.stand === 'vermittelt' },
+    { k: 'alle', t: 'Alle', f: () => true }
+  ];
+  const telHref = (tel) => 'tel:' + String(tel || '').replace(/[^\d+]/g, '');
+  const vpfad = (v) => '/api/inhaber/vermittlungen/' + v.id;
+  async function vermittlungenLaden() { const r = await U.api('GET', '/api/inhaber/vermittlungen'); S.vliste = r.vermittlungen || []; S.vneu = r.neu || 0; return r; }
+  async function vermittlungLaden(id) { const r = await U.api('GET', '/api/inhaber/vermittlungen/' + id); S.vermittlung = r.vermittlung; return r.vermittlung; }
+  /* Umschalter oben im Eingang: zwei echte Links, aktiv mit Füllung und Punkt, bei der Vermittlung die Zahl der neuen */
+  function umschalter(aktiv) {
+    const n = S.vneu || 0;
+    const link = (k, href, text, zahl) => h('a', { href: href, 'aria-current': k === aktiv ? 'page' : null, 'aria-label': zahl ? text + ', ' + zahl + ' neu' : null }, h('span', { text: text }), zahl ? h('span', { class: 'a-umschalter-zahl', 'aria-hidden': 'true', text: String(zahl) }) : null);
+    return h('nav', { class: 'a-umschalter', 'aria-label': 'Bereich der Zentrale' }, link('auftraege', '#', 'Aufträge', 0), link('vermittlung', '#vermittlung', 'Vermittlung', n));
+  }
+  function vermittlungen(o) {
+    kopf();
+    const l = S.vliste || [], neu = l.filter((v) => v.stand === 'neu').length;
+    const anrufe = l.filter((v) => V_OFFEN.indexOf(v.stand) >= 0).reduce((s, v) => s + (v.offen || 0), 0), verm = l.filter((v) => v.stand === 'vermittelt').length;
+    const zahlen = U.kachel([h('p', { class: 'a-label-klein', style: 'margin:0' }, U.chip('Vermittlung', 'aktiv')),
+      h('div', { class: 'a-zahlen' },
+        h('div', { class: 'a-zahl gross' }, h('b', { text: String(neu) }), h('span', { text: neu === 1 ? 'neue Anfrage' : 'neue Anfragen' })),
+        h('div', { class: 'a-zahl' }, h('b', { text: String(anrufe) }), h('span', { text: anrufe === 1 ? 'Anruf offen' : 'Anrufe offen' })),
+        h('div', { class: 'a-zahl' }, h('b', { text: String(verm) }), h('span', { text: 'vermittelt' })))], 'leucht a-zahlen-kachel');
+    const filter = h('div', { class: 'a-filter', role: 'group', 'aria-label': 'Filter' }, VFILTER.map((f) => h('button', { type: 'button', 'aria-pressed': String(S.vfilter === f.k), on: { click: () => { S.vfilter = f.k; vermittlungen({ stehen: true }); } } }, f.t, h('span', { class: 'a-zaehler', text: String(l.filter(f.f).length) }))));
+    const auswahl = l.filter((VFILTER.find((f) => f.k === S.vfilter) || VFILTER[0]).f);
+    const zeilen = auswahl.length ? h('ol', { class: 'a-eingang' }, auswahl.map(vzeile)) : h('p', { class: 'a-leer', text: S.vfilter === 'offen' ? 'Keine offenen Anfragen. Neue kommen hier an, dazu eine E-Mail an Sie mit dem Aufmaßblatt.' : 'Keine Anfragen in dieser Ansicht.' });
+    seite({ band: umschalter('vermittlung'), frage: U.frage(neu ? 'Vermittlung. *' + (neu === 1 ? 'Eine neue Anfrage' : neu + ' neue Anfragen') + '.*' : 'Vermittlung. *Nichts Neues.*', null),
+      inhalt: [zahlen, filter, U.karte(null, null, zeilen, { class: 'a-karte a-eingang-karte' })], stehen: o && o.stehen });
+  }
+  function vzeile(v) {
+    const chips = [U.chip(V_STAND[v.stand] || v.stand, v.stand === 'neu' ? 'hinweis' : v.stand === 'vermittelt' ? 'aktiv' : 'leise'), U.chip(v.bestaetigt ? 'Nummer bestätigt' : 'Nummer nicht bestätigt', v.bestaetigt ? 'leise' : 'hinweis')];
+    if (v.offen && V_OFFEN.indexOf(v.stand) >= 0) chips.push(U.chip(v.offen + (v.offen === 1 ? ' Anruf offen' : ' Anrufe offen'), 'hinweis'));
+    if (v.gesendet) chips.push(U.chip('an ' + v.gesendet + (v.gesendet === 1 ? ' Betrieb' : ' Betriebe'), 'aktiv'));
+    return h('li', null, h('a', { class: 'a-eingang-zeile', href: '#vermittlung/' + v.id },
+      h('span', { class: 'a-ez-haupt' }, h('b', { text: v.name || 'Ohne Namen' }), h('span', { class: 'a-ez-neben', text: [v.nr, (v.plz + ' ' + v.ort).trim(), v.anzeige, v.gewaehlt ? v.gewaehlt + (v.gewaehlt === 1 ? ' Betrieb gewählt' : ' Betriebe gewählt') : 'Betrieb für mich suchen'].filter(Boolean).join(' · ') })),
+      h('span', { class: 'a-ez-stand' }, h('span', { class: 'a-ez-chips' }, chips)),
+      h('span', { class: 'a-ez-zeit', text: U.zeit(v.created_at) })));
+  }
+  /* Großer Anruf-Knopf (tel:): Ring mit Hörer im schwarzen Kreis; die eine volle Pille bleibt unten der nächste Anruf */
+  function anrufKnopf(tel, anzeige, was) {
+    if (!tel) return h('p', { class: 'a-hilfe', style: 'padding:6px 0 10px', text: 'Keine Telefonnummer bekannt.' });
+    return h('a', { class: 'a-anruf', href: telHref(tel), 'aria-label': was + ': ' + anzeige }, h('i', null, U.icon('telefon')), h('span', null, h('b', { text: anzeige }), h('small', { text: was })));
+  }
+  function vermittlungZeigen(v, o) {
+    o = o || {};
+    S.vermittlung = v;
+    kopf('#vermittlung', 'Zur Vermittlung');
+    const k = v.kunde || {}, ew = v.einwilligung || {}, inhalt = [];
+    const neuLaden = async (r, text) => { if (text) U.toast(text); vermittlungZeigen(r.vermittlung, { stehen: true }); vermittlungenLaden().catch(() => null); };
+    /* Hinweis oben: Recht (Mail an Betriebe nur nach Zustimmung im Gespräch) und Frist */
+    inhalt.push(U.kachel([h('p', { class: 'a-hinweis', style: 'margin:0;color:var(--weiss)', text: (v.betriebe || []).length ? 'Rufen Sie die Betriebe an. Das Aufmaß geht per E-Mail nur an die, die im Gespräch zustimmen; höchstens drei.' : 'Der Kunde möchte, dass Sie einen Betrieb für ihn finden. Tragen Sie unten Betriebe ein und rufen Sie an.' }),
+      h('p', { class: 'a-hinweis', style: 'margin:8px 0 0;color:var(--silbergrau)', text: 'Anfrage und Aufmaßblatt werden am ' + U.datum(v.loeschenAm) + ' gelöscht (180 Tage nach dem Eingang).' })], 'a-hinweise'));
+    /* Kunde */
+    inhalt.push(U.karte('Kunde', v.bestaetigt ? 'Nummer per Code bestätigt' : 'Nummer nicht bestätigt', [
+      anrufKnopf(k.tel, k.anzeige || k.tel, 'Kunde anrufen'),
+      kv([['Name', k.name], ['E-Mail', k.mail ? h('a', { href: 'mailto:' + k.mail, text: k.mail }) : 'keine angegeben'], ['Erreichbar', k.erreich], ['Ort', (v.plz + ' ' + (k.ort || '')).trim()],
+        ['Einwilligung', ew.zeit ? 'Fassung ' + (ew.fassung || '–') + ', ' + U.zeit(ew.zeit) + (ew.netz ? ', Netz ' + ew.netz : '') : '']]),
+      ew.text ? h('details', { class: 'a-mehr' }, h('summary', { text: 'Wortlaut der Einwilligung' }), h('p', { class: 'a-hilfe', style: 'padding:0 0 14px;white-space:pre-wrap', text: ew.text })) : null]));
+    /* Eckdaten und Aufmaßblatt */
+    inhalt.push(U.karte('Eckdaten', v.aufmassZeichen ? 'Aufmaß im Blatt' : null, [kv(v.eckZeilen || []),
+      h('div', { class: 'a-knoepfe', style: 'padding:10px 0 16px' }, v.pdf ? U.ring([U.icon('aussen'), ' Aufmaßblatt (PDF)'], { href: vpfad(v) + '/pdf', target: '_blank', rel: 'noopener', class: 'klein a-pdf' }) : h('p', { class: 'a-hilfe', text: 'Das Aufmaßblatt ist nicht mehr da.' }))]));
+    /* Betriebe */
+    const gesendet = (v.betriebe || []).filter((x) => x.gesendet).length;
+    (v.betriebe || []).forEach((x) => inhalt.push(betriebKarte(v, x, gesendet, neuLaden)));
+    inhalt.push(neuBetriebKarte(v, neuLaden));
+    /* Stand und Notiz */
+    const staende = h('div', { class: 'a-wahl', role: 'group', 'aria-label': 'Stand der Vermittlung' }, Object.keys(V_STAND).map((s) => h('button', { type: 'button', 'aria-pressed': String(v.stand === s), on: { click: async () => {
+      try { neuLaden(await U.api('POST', vpfad(v) + '/stand', { stand: s }), 'Stand: ' + V_STAND[s]); } catch (e) { U.toast(e.message); } } } }, V_STAND[s])));
+    inhalt.push(U.karte('Stand der Vermittlung', null, staende));
+    const notiz = h('textarea', { rows: '4', maxlength: '4000', 'aria-label': 'Interne Notiz', placeholder: 'Nur für Sie: Absprachen, Rückrufe, Ergebnis …' }); notiz.value = v.notiz || '';
+    inhalt.push(U.karte('Interne Notiz', 'sieht niemand außer Ihnen', [h('div', { class: 'a-flaeche' }, notiz), h('div', { class: 'a-knoepfe', style: 'padding:10px 0 16px' }, U.ring('Notiz speichern', { class: 'klein', on: { click: async () => { try { await U.api('POST', vpfad(v) + '/notiz', { text: notiz.value }); v.notiz = notiz.value; U.toast('Notiz gespeichert'); } catch (e) { U.toast(e.message); } } } }))]));
+    inhalt.push(U.karte('Verlauf', null, h('ol', { class: 'a-verlauf' }, (v.verlauf || []).slice().reverse().map((x) => h('li', null, h('small', { text: U.zeit(x.zeit) + ' · ' + ({ kunde: 'Kunde', inhaber: 'Sie', system: 'System' }[x.von] || x.von) }), x.text)))));
+    /* die eine Pille: der nächste Anruf (sonst der Kunde) */
+    const naechster = (v.betriebe || []).find((x) => (x.status === 'offen' || x.status === 'nicht_erreicht') && x.tel);
+    const pille = naechster ? U.pille('Anrufen: ' + naechster.name, { href: telHref(naechster.tel) }) : k.tel ? U.pille('Kunde anrufen', { href: telHref(k.tel) }) : null;
+    const offen = v.offen || 0;
+    seite({ band: h('p', { class: 'a-band-text', text: v.nr + ' · eingegangen ' + U.zeit(v.created_at) }), frage: U.frage((k.name || 'Ohne Namen') + ' aus ' + (k.ort || v.plz) + '. *' + (offen && V_OFFEN.indexOf(v.stand) >= 0 ? (offen === 1 ? 'Ein Anruf offen' : offen + ' Anrufe offen') : V_STAND[v.stand] || '') + '.*', null),
+      inhalt: inhalt, fuss: pille ? [pille] : null, stehen: o.stehen });
+  }
+  function betriebKarte(v, x, gesendet, neuLaden) {
+    const k = v.kunde || {}, art = x.gesendet ? 'aktiv' : x.status === 'will' ? 'aktiv' : x.status === 'nicht_erreicht' ? 'hinweis' : 'leise';
+    const teile = [anrufKnopf(x.tel, x.tel, 'Betrieb anrufen'),
+      kv([['Ort', [x.ort, x.km != null ? x.km + ' km' : ''].filter(Boolean).join(' · ')], ['Leistungen', (x.leistungen || []).join(', ')], ['Website', x.web ? h('a', { href: x.web, target: '_blank', rel: 'noopener noreferrer', text: x.web.replace(/^https?:\/\//, '').replace(/\/$/, '') }) : ''], ['Straße', x.strasse],
+        ['Herkunft', x.quelle === 'inhaber' ? 'von Ihnen eingetragen' : x.gewaehlt ? 'vom Kunden gewählt' : ''], x.gesendet ? ['Aufmaß', 'geschickt am ' + U.zeit(x.gesendet.zeit) + ' an ' + x.gesendet.mail + ' (Zustimmung ' + U.zeit(x.gesendet.zustimmung) + ')'] : null])];
+    /* Ergebnis des Anrufs */
+    teile.push(h('div', { class: 'a-feld' }, h('span', { class: 'a-label', text: 'Ergebnis des Anrufs' }), U.segment([{ w: 'nicht_erreicht', t: 'Nicht erreicht' }, { w: 'will', t: 'Will' }, { w: 'will_nicht', t: 'Will nicht' }], x.status, async (w) => {
+      try { neuLaden(await U.api('POST', vpfad(v) + '/betrieb', { bid: x.id, status: w }), x.name + ': ' + V_STATUS[w]); } catch (e) { U.toast(e.message); }
+    }, 'Ergebnis des Anrufs bei ' + x.name)));
+    const notiz = h('textarea', { rows: '2', maxlength: '1000', 'aria-label': 'Notiz zu ' + x.name, placeholder: 'z. B. Rückruf Montag ab 8 Uhr' }); notiz.value = x.notiz || '';
+    notiz.addEventListener('change', async () => { try { await U.api('POST', vpfad(v) + '/betrieb', { bid: x.id, notiz: notiz.value }); x.notiz = notiz.value; U.toast('Notiz gespeichert'); } catch (e) { U.toast(e.message); } });
+    teile.push(h('div', { class: 'a-feld a-notiz-betrieb' }, h('span', { class: 'a-label', text: 'Notiz' }), h('div', { class: 'a-flaeche' }, notiz)));
+    /* Will: E-Mail, Häkchen der Zustimmung, Aufmaß schicken (höchstens drei Betriebe) */
+    if (x.status === 'will' && !x.gesendet && gesendet >= 3) teile.push(h('p', { class: 'a-hilfe', style: 'padding:4px 0 16px', text: 'Das Aufmaß ging schon an drei Betriebe; mehr sind nicht erlaubt.' }));
+    else if (x.status === 'will') {
+      const mail = U.feld({ k: 'mail', label: 'E-Mail des Betriebs', typ: 'email', modus: 'email', wert: x.mail || '', platzhalter: 'info@betrieb.de', max: 120 });
+      const zu = U.haken({ k: 'zustimmung', text: 'Hat im Gespräch zugestimmt, dass wir die Anfrage per Mail schicken', an: false });
+      const kunde = k.mail ? U.haken({ text: 'Kunden per E-Mail sagen, dass ' + x.name + ' sein Aufmaß hat', an: true }) : null;
+      const knopf = U.ring(x.gesendet ? 'Noch einmal schicken' : 'Aufmaß schicken', { class: 'a-senden' });
+      const teil = h('div', { class: 'a-senden-teil' }, mail, zu, kunde, h('div', { class: 'a-knoepfe', style: 'padding:6px 0 16px' }, knopf));
+      knopf.addEventListener('click', async () => {
+        if (knopf.dataset.wartet) return;
+        const f = {}, adr = mail.eingabe.value.trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(adr)) f.mail = 'Bitte die E-Mail-Adresse des Betriebs eintragen.';
+        if (!zu[0].eingabe.checked) f.zustimmung = 'Ohne Zustimmung im Gespräch geht keine Mail an den Betrieb.';
+        const erstes = U.fehlerZeigen(teil, f); if (erstes) { U.zuFeld(erstes); return; }
+        knopf.dataset.wartet = '1'; knopf.setAttribute('aria-disabled', 'true');
+        try { neuLaden(await U.api('POST', vpfad(v) + '/senden', { bid: x.id, mail: adr, zustimmung: true, kunde: !!(kunde && kunde.eingabe.checked) }), 'Aufmaß an ' + x.name + ' geschickt'); }
+        catch (e) { delete knopf.dataset.wartet; knopf.removeAttribute('aria-disabled'); if (e.daten && e.daten.felder) U.fehlerZeigen(teil, e.daten.felder); U.toast(e.message); }
+      });
+      teile.push(teil);
+    }
+    return U.karte(x.name, U.chip(x.gesendet ? 'Aufmaß geschickt' : V_STATUS[x.status] || x.status, art), teile, { class: 'a-karte a-betrieb', 'data-bid': x.id });
+  }
+  /* Weiteren Betrieb eintragen (selbst gefunden oder vom Kunden genannt) */
+  function neuBetriebKarte(v, neuLaden) {
+    const name = U.feld({ k: 'name', label: 'Name des Betriebs', platzhalter: 'Tischlerei Muster', max: 80 });
+    const ort = U.feld({ k: 'ort', label: 'Ort', optional: true, platzhalter: 'Gütersloh', max: 60 });
+    const tel = U.feld({ k: 'tel', label: 'Telefon', typ: 'tel', modus: 'tel', optional: true, platzhalter: '05241 123456', max: 40 });
+    const web = U.feld({ k: 'web', label: 'Website', typ: 'url', modus: 'url', optional: true, platzhalter: 'www.betrieb.de', max: 200 });
+    const knopf = U.ring('Betrieb eintragen', { class: 'klein' });
+    const bereich = h('div', null, name, ort, tel, web, h('div', { class: 'a-knoepfe', style: 'padding:6px 0 16px' }, knopf));
+    knopf.addEventListener('click', async () => {
+      if (knopf.dataset.wartet) return;
+      if (name.eingabe.value.trim().length < 2) { U.fehlerSetzen(name, 'Bitte den Namen des Betriebs eintragen.'); name.eingabe.focus(); return; }
+      knopf.dataset.wartet = '1';
+      try { neuLaden(await U.api('POST', vpfad(v) + '/betrieb-neu', { name: name.eingabe.value, ort: ort.eingabe.value, tel: tel.eingabe.value, web: web.eingabe.value }), 'Betrieb eingetragen'); }
+      catch (e) { delete knopf.dataset.wartet; if (e.daten && e.daten.felder) U.zuFeld(U.fehlerZeigen(bereich, e.daten.felder)); else U.toast(e.message); }
+    });
+    return U.karte(null, null, h('details', { class: 'a-mehr a-neu-betrieb' }, h('summary', { text: 'Weiteren Betrieb eintragen' }), bereich));
+  }
+
   /* ---------- Weiche ---------- */
   async function route() {
     if (!S.stand || !S.stand.angemeldet) { anmeldung(); return; }
+    const mv = /^#vermittlung\/([0-9a-z-]{8,})$/i.exec(location.hash);
+    if (mv) {
+      try { vermittlungZeigen(await vermittlungLaden(mv[1])); } catch (e) { if (e.status === 401) { S.stand.angemeldet = false; anmeldung(); return; } U.toast(e.message); location.hash = '#vermittlung'; }
+      return;
+    }
+    if (location.hash === '#vermittlung') {
+      try { await vermittlungenLaden(); } catch (e) { if (e.status === 401) { S.stand.angemeldet = false; anmeldung(); return; } S.vliste = S.vliste || []; U.toast(e.message); }
+      vermittlungen();
+      return;
+    }
     const m = /^#auftrag\/([0-9a-z-]{8,})$/i.exec(location.hash);
     if (m) {
       try { zeigen(await auftragLaden(m[1])); } catch (e) { if (e.status === 401) { S.stand.angemeldet = false; anmeldung(); return; } U.toast(e.message); history.replaceState(null, '', location.pathname); eingang(); }

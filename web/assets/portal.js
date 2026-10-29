@@ -611,7 +611,7 @@ function afterRender(anim) {
   });
   /* Ansicht Hauseigentümer: den Baustein der Startseite aufbauen (startseite.js), Preise und Einstieg von hier */
   const sn = scr.querySelector('#startseite');
-  if (sn && window.Startseite) window.Startseite.auf(sn, { app: appEinstieg(), appLabel: eigenesAufmass() ? 'Aufmaß fortsetzen' : 'Jetzt konfigurieren', weiter: eigenesAufmass() || 0, fuehrung: APP_OPEN + '#fuehrung', preis: eur2(P().aufmass), einf: X.einfText('aufmass'), zuBetrieb: () => zurAnsicht('betrieb') });
+  if (sn && window.Startseite) window.Startseite.auf(sn, { vermittlung: !!(Server.status && Server.status.vermittlung && Server.status.vermittlung.an), app: appEinstieg(), appLabel: eigenesAufmass() ? 'Aufmaß fortsetzen' : 'Jetzt konfigurieren', weiter: eigenesAufmass() || 0, fuehrung: APP_OPEN + '#fuehrung', preis: eur2(P().aufmass), einf: X.einfText('aufmass'), zuBetrieb: () => zurAnsicht('betrieb') });
   /* Ansicht Fensterbauer: die eingebettete Seite für Fensterbauer füllen oder darauf fensterbauer.js starten (siehe „Einbettung der Seite für Fensterbauer“) */
   const vk = scr.querySelector('.vk-einbettung');
   if (vk) einbettungAuf(vk);

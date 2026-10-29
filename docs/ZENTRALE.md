@@ -4,6 +4,8 @@ Die Zentrale unter `https://eeziframes.com/zentrale/` ist dein Eingang für alle
 
 Code: `web/zentrale/index.html`, `web/assets/inhaber.js`, Stil `web/assets/auftrag.css`, Server `functions/auftrag/index.js` (Routen `/api/inhaber/…`). Ablauf und Stände der Aufträge: [BESTELLUNG.md](BESTELLUNG.md). Geprüft in `scripts/pruefen-instanzen/26.mjs`.
 
+Seit 29.10.2026 kommen hier auch die Anfragen der **Vermittlung** an (Hauseigentümer, die Angebote von bis zu drei Fensterbetrieben wollen; [VERMITTLUNG.md](VERMITTLUNG.md), Abschnitt 10). Server `functions/api/vermittlung.js` (Routen `/api/inhaber/vermittlungen/…`), geprüft in `scripts/pruefen-instanzen/31.mjs`.
+
 ## Einrichten
 
 1. **Passwort:** Cloudflare → Workers & Pages → **fenstero** → Settings → Variables and Secrets → **Add**, Typ **Secret**, Name `ZENTRALE_PASSWORT`, Wert mindestens 12 Zeichen (besser 20 und mehr, aus dem Passwort-Manager). **Deploy**.
@@ -28,6 +30,17 @@ Code: `web/zentrale/index.html`, `web/assets/inhaber.js`, Stil `web/assets/auftr
 | **KI-Auswertungen** | verknüpfter Konfigurator (beim Live-Schalten über die Adresse, sonst hier von Hand), genutzt im Monat in Prozent, ob der Kunde weitere freigeschaltet hat, bisher weitere mit Betrag, Abrechnungen der Vormonate mit Stripe-Posten |
 | **Zahlung und Abo, Kunde, Verlauf** | Einrichtung und Abo mit Stripe-Kennungen, Zustimmung mit Fassung und Zeitpunkt, Konto des Kunden, jeder Schritt mit Zeit und Urheber |
 | **Weitere Schritte** | je Stand die erlaubten Übergänge: zurück in Arbeit, zurück in den Entwurf, pausieren, beenden (zum Monatsende oder sofort), stornieren (mit Erstattung) |
+
+## Vermittlung
+
+Oben im Eingang steht der Umschalter **Aufträge | Vermittlung**; neben „Vermittlung“ die Zahl der neuen Anfragen (Koralle). Jede neue Anfrage kommt außerdem als Mail an `MAIL_KONTAKT`, mit dem Aufmaßblatt als PDF und den gewählten Betrieben samt Telefon und Website.
+
+| Bereich | Inhalt |
+|---|---|
+| **Liste** (`#vermittlung`) | Zahlen: neue Anfragen, offene Anrufe, vermittelt; Filter Offen, Vermittelt, Alle; je Zeile Name, Nummer `V-JJJJ-NNNN`, PLZ und Ort, Telefon (gekürzt), wie viele Betriebe gewählt sind (oder „Betrieb für mich suchen“), Zeit, Stand, „Nummer bestätigt“ oder „nicht bestätigt“, offene Anrufe, an wie viele Betriebe das Aufmaß ging |
+| **Anfrage** (`#vermittlung/<id>`) | Hinweis (Mail an Betriebe nur nach Zustimmung im Gespräch, höchstens drei; Löschdatum); **Kunde** mit großem Anruf-Knopf, E-Mail, Erreichbarkeit, Ort und der Einwilligung (Fassung, Zeit, gekürztes Netz, Wortlaut zum Aufklappen); **Eckdaten** und „Aufmaßblatt (PDF)“; je **Betrieb** eine Karte mit Anruf-Knopf (tel:), Ort und km, Leistungen, Website, Straße, Herkunft (vom Kunden gewählt oder von Ihnen eingetragen), dem Ergebnis des Anrufs (Nicht erreicht, Will, Will nicht) und einer Notiz (speichert beim Verlassen des Felds); bei **Will** die E-Mail des Betriebs, das Häkchen „Hat im Gespräch zugestimmt, dass wir die Anfrage per Mail schicken“ (Pflicht), auf Wunsch eine Mail an den Kunden, und „Aufmaß schicken“; **Weiteren Betrieb eintragen** (Name, Ort, Telefon, Website); **Stand** (Neu, In Arbeit, Vermittelt, Kein Betrieb, Erledigt); interne Notiz; Verlauf. Die eine Pille unten ist der nächste Anruf („Anrufen: …“), danach „Kunde anrufen“ |
+
+So läuft es: Betrieb anrufen, Ergebnis antippen (der erste Anruf setzt „Neu“ auf „In Arbeit“). Will er die Anfrage, im Gespräch fragen, ob wir sie per Mail schicken dürfen; dann E-Mail eintragen, Häkchen setzen, „Aufmaß schicken“. Der Betrieb bekommt eine sachliche Mail in Sie-Form mit dem Aufmaßblatt, den Kontaktdaten des Kunden und den Eckdaten („Vermittelt von eeziframes“, Impressum im Fuß); Zustimmung und Versand stehen mit Zeit im Verlauf, der Stand wird „Vermittelt“. Höchstens drei Betriebe bekommen das Aufmaß. Ohne Häkchen geht nie eine Mail an einen Betrieb (§ 7 UWG). Anfrage und Aufmaßblatt löscht der Tageslauf 180 Tage nach dem Eingang.
 
 ## Sicherheit
 

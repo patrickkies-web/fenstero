@@ -1,0 +1,158 @@
+/* eeziframes · Vermittlung „Angebote aus deiner Nähe“ (29.10.2026, docs/VERMITTLUNG.md, Abschnitt 10) im Look der Design-DNA
+   Folien weg (Weiche), betriebe (Umkreis und Auswahl), vcode (Code), angefragt (Bestätigung); dazu der Kontakt auf Weg A (anfrage3).
+   Rahmen, Bühne, Karten und Pille kommen aus app.css (.scr.dna.ab, .ab-buehne, .qpanel, .lg-fuss); hier nur, was neu ist.
+   Violett nur als Punkt und Marke (Haus, nächste Ziffer, laufende Station), Auswahl auf Anthrazit wird weiß mit schwarzer Schrift. */
+
+/* ---------- Bühne: Umkreis um das Haus ---------- */
+.dna .vm-buehne { background: radial-gradient(circle, rgba(168, 164, 169, .16) 1px, transparent 1.6px) 0 0 / 18px 18px, radial-gradient(120% 90% at 18% 0%, #2c2c2e, var(--anthrazit) 52%, #121214) }
+.dna .vm-buehne::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(60% 55% at 50% 48%, transparent 40%, rgba(7, 9, 10, .55)) } /* Vignette: das Raster läuft zum Rand aus */
+.dna .vm-umkreis-wrap { position: absolute; z-index: 2; inset: 46px 8px 8px; pointer-events: none }
+.dna .vm-umkreis { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible }
+.vm-ringe circle { fill: none; stroke: rgba(168, 164, 169, .38); stroke-width: 1.2 }
+.vm-ringe circle:last-child { stroke: rgba(168, 164, 169, .7); stroke-width: 1.5 }
+.vm-ticks line { stroke: rgba(168, 164, 169, .45); stroke-width: 1; stroke-linecap: round }
+.vm-ticks line.lang { stroke: var(--silbergrau); stroke-width: 1.5 }
+.vm-km text { font: 400 11px var(--font-sans); fill: var(--silbergrau); letter-spacing: .02em; paint-order: stroke; stroke: var(--schwarz); stroke-width: 3px; stroke-linejoin: round }
+.vm-linie { stroke: var(--weiss); stroke-width: 1.2; stroke-dasharray: 3 4; stroke-linecap: round; opacity: .75 }
+circle.vm-pkt { fill: var(--anthrazit); stroke: var(--silbergrau); stroke-width: 1.5 }
+circle.vm-pkt.ist-beispiel { fill: var(--weiss); stroke: none }
+g.vm-pkt.ist-gewaehlt circle { fill: var(--weiss); stroke: var(--schwarz); stroke-width: 1.5 }
+g.vm-pkt.ist-gewaehlt text { font: 600 12px var(--font-sans); fill: var(--schwarz); stroke: none }
+.vm-hof { fill: var(--indigo) }
+.vm-du { fill: var(--violett) }
+.vm-du-t { font: 500 12px var(--font-sans); fill: var(--weiss); paint-order: stroke; stroke: var(--schwarz); stroke-width: 4px; stroke-linejoin: round }
+.vm-etikett rect { fill: var(--schwarz); stroke: rgba(255, 255, 255, .16); stroke-width: 1 }
+.vm-etikett text { font: 500 11.5px var(--font-sans); fill: var(--weiss) }
+/* Suche läuft: ein Lichtkegel kreist um das Haus (Rückmeldung, kein Ladebildschirm); ruhige Fassung ohne Drehen */
+.vm-kegel path { fill: url(#vm-kegel-v) }
+.vm-kegel { transform-box: view-box; transform-origin: 180px 134px; animation: vm-dreh 2.8s linear infinite }
+@keyframes vm-dreh { to { transform: rotate(-360deg) } }
+
+/* ---------- Weiche: zwei Karten nebeneinander (Inhaber, 29.10.2026) ----------
+   Anthrazit, gewählt weiß mit schwarzer Schrift; die Gratis-Karte mit violettem Ring und dem Etikett „Empfohlen“ (Koralle, schwarze Schrift);
+   der Preis ist die Zahl (G3), daneben der durchgestrichene Preis als Anker */
+.dna .vm-wege { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 20px }
+.dna .vm-karte { position: relative; display: grid; align-content: start; gap: 8px; width: 100%; min-height: 176px; padding: 14px 14px 16px; border: 0; border-radius: var(--rund-l, 28px); text-align: left; cursor: pointer; color: var(--weiss);
+  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045);
+  transition: transform 160ms var(--dna-druck), background-color 220ms ease, color 220ms ease }
+.dna .vm-karte:active { transform: scale(.98); transition-duration: 0s }
+.dna .vm-karte--gratis { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1.5px var(--violett) }
+.dna .vm-karte[aria-pressed="true"] { background: var(--weiss); color: var(--schwarz); box-shadow: 0 18px 32px -20px rgba(7, 9, 10, .9) }
+.dna .vm-karte--gratis[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--violett), 0 18px 32px -20px rgba(7, 9, 10, .9) }
+.dna .vm-karte-etikett { justify-self: start; height: 24px; padding: 0 10px; border-radius: 999px; font: 600 12px/24px var(--font-sans); letter-spacing: .02em; color: var(--schwarz); background: var(--koralle) }
+.dna .vm-karte-etikett--leise { color: var(--silbergrau); background: transparent; box-shadow: inset 0 0 0 1px rgba(168, 164, 169, .45) }
+.dna .vm-karte[aria-pressed="true"] .vm-karte-etikett--leise { color: var(--textgrau); box-shadow: inset 0 0 0 1px rgba(107, 103, 108, .45) }
+.dna .vm-karte-titel { font: 600 16px/1.25 var(--font-sans); letter-spacing: -.01em; padding-right: 26px }
+.dna .vm-preis { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 6px; margin-top: auto }
+.dna .vm-preis b { font: 200 48px/1 var(--font-sans); letter-spacing: -.04em; font-variant-numeric: tabular-nums }
+.dna .vm-preis small { font: 400 15px/1 var(--font-sans); color: var(--silbergrau) }
+.dna .vm-preis s { font: 400 15px/1 var(--font-sans); color: var(--silbergrau); text-decoration-thickness: 1.5px }
+.dna .vm-karte[aria-pressed="true"] .vm-preis :is(small, s) { color: var(--textgrau) }
+.dna .vm-karte .vm-mark { top: 14px; right: 14px; margin-top: 0 }
+.dna .vm-vertrauen { margin: 14px 2px 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna .vm-vertrauen b { font-weight: 500; color: var(--weiss) }
+.dna .vm-warum { margin-top: 10px }
+.dna .vm-warum b { font-weight: 500; color: var(--weiss) }
+.dna .ab-felder + .vm-vertrauen--tel { margin: 12px 4px 0 }
+.dna .vm-codewarum { margin-top: 2px }
+/* Auf den Folien zum Bezahlen: der Gratis-Weg noch einmal, als Fläche in der Folie (Regel des Inhabers: Hinweise in die Folie) */
+.dna .vm-gratis-hinweis { display: grid; gap: 10px; justify-items: start; margin: 18px 0 0; padding: 16px 18px; border-radius: 20px;
+  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1.5px var(--violett) }
+.dna .vm-gratis-hinweis p { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna .vm-gratis-hinweis b { font-weight: 600; color: var(--weiss) }
+.dna .lg-fuss.vm-fuss-zwei { flex-wrap: nowrap; gap: 10px }
+.dna .vm-fuss-zwei .dna-pille--leise { flex: 0 0 auto; min-width: 96px; min-height: 52px }
+.dna .vm-fuss-zwei .lg-weiter { flex: 1 1 auto; min-width: 0 }
+/* am Schreibtisch teilen sich sonst beide Pillen die Spalte zu gleichen Teilen (app.css: .dna.dt .dna-rechts .lg-fuss .dna-pille), dann ragt
+   der Pfeil von „Aufmaßblatt laden“ heraus; „Fertig“ bleibt so schmal wie sein Wort */
+.dna.dt .dna-rechts .lg-fuss.vm-fuss-zwei .dna-pille--leise { flex: 0 0 auto }
+.dna.dt .dna-rechts .lg-fuss.vm-fuss-zwei .lg-weiter { flex: 1 1 auto }
+@media (max-width: 359px) { .dna .vm-wege { grid-template-columns: 1fr } .dna .vm-karte { min-height: 0 } }
+
+/* Haken bzw. Nummer rechts: leer als Ring, gewählt schwarz gefüllt (auf Weiß) */
+.dna .vm-mark { position: absolute; right: 16px; top: 50%; display: grid; place-items: center; width: 28px; height: 28px; margin-top: -14px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--silbergrau); font: 600 13px/1 var(--font-sans); color: var(--weiss) }
+.dna .vm-mark svg { width: 14px; height: 14px; opacity: 0 }
+.dna .vm-mark svg path { stroke: var(--weiss) }
+.dna [aria-pressed="true"] > .vm-mark { background: var(--schwarz); box-shadow: none }
+.dna [aria-pressed="true"] > .vm-mark svg { opacity: 1 }
+
+/* ---------- Betriebe ---------- */
+.dna .vm-suche { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 12px; align-items: start; margin-top: 20px; padding: 16px 18px; border-radius: 20px;
+  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+.dna .vm-suche b { display: block; font: 500 15px/1.35 var(--font-sans); color: var(--weiss) }
+.dna .vm-suche small { display: block; margin-top: 2px; font: 400 14px/1.4 var(--font-sans); color: var(--silbergrau) }
+.dna .vm-suche-punkt { width: 10px; height: 10px; margin: 5px 0 0 5px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 4px var(--indigo); animation: vm-puls 1.6s var(--dna-weg, ease-in-out) infinite alternate }
+@keyframes vm-puls { from { transform: scale(.8) } to { transform: scale(1.15) } }
+.dna .vm-quelle { margin-top: 16px }
+.scr.dna.vm .qpanel.ab-panel { margin-top: 10px }
+.dna .vm-liste { display: grid; padding: 4px 0; border-radius: var(--rund-l, 28px); background: var(--weiss); color: var(--schwarz) }
+.dna .vm-liste.ist-bad { box-shadow: 0 0 0 2px var(--koralle) }
+.dna .vm-betrieb { position: relative; display: grid; width: 100%; min-height: 68px; padding: 12px 60px 12px 18px; border: 0; border-top: 1px solid color-mix(in srgb, var(--silbergrau) 26%, var(--weiss)); background: transparent; color: inherit; text-align: left; cursor: pointer; transition: background-color 220ms ease }
+.dna .vm-betrieb:first-child { border-top: 0 }
+.dna .vm-betrieb:active { background: color-mix(in srgb, var(--silbergrau) 12%, var(--weiss)) }
+.dna .vm-betrieb[aria-disabled="true"] { opacity: .45 }
+.dna .vm-betrieb .vm-mark { color: var(--weiss) }
+.dna .vm-betrieb[aria-pressed="true"] .vm-mark { background: var(--schwarz) }
+.dna .vm-tx { display: grid; gap: 2px; min-width: 0 }
+.dna .vm-tx b { font: 500 16px/1.3 var(--font-sans); letter-spacing: -.01em; overflow-wrap: anywhere }
+.dna .vm-tx small { font: 400 13px/1.35 var(--font-sans); color: var(--textgrau) }
+.dna .vm-tx small.vm-lei { color: var(--textgrau); opacity: .9 }
+/* „Sucht ihr für mich aus“ und Einwilligung auf Anthrazit; gewählt weiß */
+.dna .vm-selbst { position: relative; display: grid; width: 100%; min-height: 68px; margin-top: 10px; padding: 14px 60px 14px 18px; border: 0; border-radius: 20px; text-align: left; cursor: pointer; color: var(--weiss);
+  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045); transition: transform 160ms var(--dna-druck) }
+.dna .vm-selbst:active { transform: scale(.98); transition-duration: 0s }
+.dna .vm-selbst .vm-tx small { color: var(--silbergrau) }
+.dna .vm-selbst[aria-pressed="true"] { background: var(--weiss); color: var(--schwarz) }
+.dna .vm-selbst[aria-pressed="true"] .vm-tx small { color: var(--textgrau) }
+.dna .vm-einw { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 12px; align-items: start; width: 100%; margin-top: 16px; padding: 14px 16px; border: 0; border-radius: 20px; text-align: left; cursor: pointer;
+  font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau); background: transparent; box-shadow: inset 0 0 0 1px rgba(168, 164, 169, .35) }
+.dna .vm-einw[aria-checked="true"] { color: var(--weiss); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .5) }
+.dna .vm-einw.ist-bad { box-shadow: inset 0 0 0 1.5px var(--koralle) }
+.dna .vm-box { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; box-shadow: inset 0 0 0 1.5px var(--weiss) }
+.dna .vm-box svg { width: 14px; height: 14px; opacity: 0 }
+.dna .vm-box svg path { stroke: var(--schwarz) }
+.dna .vm-einw[aria-checked="true"] .vm-box { background: var(--weiss) }
+.dna .vm-einw[aria-checked="true"] .vm-box svg { opacity: 1 }
+.dna .vm-recht { margin-top: 8px }
+.dna .vm-recht .ulink { color: var(--weiss) }
+/* Grund über der Pille, wenn etwas fehlt (Koralle-Punkt) */
+.dna .vm-grund { position: relative; margin: 16px 2px 0; padding-left: 18px; font: 500 14px/1.45 var(--font-sans); color: var(--weiss) }
+.dna .vm-grund::before { content: ""; position: absolute; left: 0; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--koralle) }
+
+/* ---------- Code ---------- */
+.dna .vm-code { position: absolute; z-index: 3; left: 16px; right: 16px; top: 64px; display: grid; justify-items: center; gap: 18px; text-align: center }
+.dna .vm-ziffern { display: flex; gap: 8px }
+.dna .vm-z { display: grid; justify-items: center; gap: 10px; width: 40px }
+.dna .vm-z b { height: 52px; font: 200 48px/52px var(--font-sans); color: rgba(168, 164, 169, .45); font-variant-numeric: tabular-nums }
+.dna .vm-z.ist-da b { color: var(--weiss) }
+.dna .vm-z i { width: 100%; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--silbergrau) 30%, var(--anthrazit)) }
+.dna .vm-z.ist-da i { background: var(--weiss) }
+.dna .vm-z.ist-da + .vm-z:not(.ist-da) i, .dna .vm-ziffern:not(:has(.ist-da)) .vm-z:first-child i { background: var(--violett) } /* die nächste Ziffer */
+.dna .vm-codefeld { height: 60px }
+.dna .vm-codefeld input { width: 100%; height: 60px; padding-left: .4em; text-align: center; letter-spacing: .4em; font-size: 28px }
+.dna .vm-codefeld input::placeholder { letter-spacing: .4em; font-size: 28px }
+.dna .vm-codefeld.ist-bad { box-shadow: inset 0 0 0 2px var(--koralle) }
+.dna .vm-feldfehler { margin: 0 4px; font: 500 14px/1.4 var(--font-sans); color: var(--koralle) }
+.dna .vm-codewege { display: flex; flex-wrap: wrap; gap: 4px 20px; padding: 0 4px }
+.dna .vm-codewege .ulink { min-height: 44px; color: var(--weiss); font: 500 14px/44px var(--font-sans); text-decoration: underline }
+
+/* ---------- Angefragt: Stationen ---------- */
+.dna .vm-schritte { display: grid; gap: 0; margin: 22px 0 6px; padding: 0; list-style: none }
+.dna .vm-schritte li { position: relative; display: grid; gap: 2px; padding: 0 0 18px 30px }
+.dna .vm-schritte li::before { content: ""; position: absolute; left: 5.25px; top: 16px; bottom: -2px; width: 1.5px; background: rgba(168, 164, 169, .45) }
+.dna .vm-schritte li:last-child::before { display: none }
+.dna .vm-schritte i { position: absolute; left: 0; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--anthrazit); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .vm-schritte li.ist-dran i { background: var(--violett); box-shadow: 0 0 0 4px var(--indigo) }
+.dna .vm-schritte b { font: 500 16px/1.3 var(--font-sans); color: var(--weiss) }
+.dna .vm-schritte small { font: 400 14px/1.4 var(--font-sans); color: var(--silbergrau) }
+.dna .vm-blatt .ulink { color: var(--weiss); text-decoration: underline; min-height: 44px }
+.dna .vm-fuss-allein .lg-weiter { flex: 1 }
+
+@media (prefers-reduced-motion: reduce) { .vm-kegel, .dna .vm-suche-punkt { animation: none } .dna :is(.vm-karte, .vm-selbst) { transition: none } }
+@media (max-width: 374px) { .dna .vm-z { width: 34px } .dna .vm-z b { font-size: 40px } .dna .vm-preis b { font-size: 40px } }
+/* Laptop: der Umkreis füllt die Bühne, die Ziffern wachsen mit */
+@media (min-width: 1024px) {
+  .dna.dt .vm-umkreis-wrap { inset: 64px 32px 28px }
+  .dna.dt .vm-code { top: 50%; transform: translateY(-50%) }
+  .dna.dt .vm-z { width: 64px } .dna.dt .vm-z b { height: 84px; font-size: 80px; line-height: 84px } .dna.dt .vm-ziffern { gap: 14px }
+}

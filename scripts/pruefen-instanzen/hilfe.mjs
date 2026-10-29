@@ -1,4 +1,4 @@
-// eeziframes · Hilfsobjekt h für die Prüfabschnitte 23–30 (Konfigurator-Instanzen, docs/INSTANZEN.md), geladen von scripts/pruefen.mjs
+// eeziframes · Hilfsobjekt h für die Prüfabschnitte 23–31 (Konfigurator-Instanzen, docs/INSTANZEN.md; 31 Vermittlung, docs/VERMITTLUNG.md), geladen von scripts/pruefen.mjs
 //
 // Jeder Abschnitt ist ein Modul scripts/pruefen-instanzen/<n>.mjs (dazu beliebig viele <n>-<name>.mjs, die vorher laufen):
 //   export const titel = '…';                  optional, Zeile in der Ausgabe
@@ -30,7 +30,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 export const WURZEL = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const ORDNER = path.join(WURZEL, 'scripts/pruefen-instanzen');
 export const PASSWORT = 'pruef-zentrale-instanzen-23';
-export const TITEL = { 23: 'Mandant, Routing, Schutz (Instanzen)', 24: 'Eingang der Anfragen (Instanzen)', 25: 'App im Instanz-Modus', 26: 'Aufträge: Bestellung, Kundenbereich, Zentrale', 28: 'Signature-Dashboard', 29: 'Verkaufsseite, Recht, Doku' };
+export const TITEL = { 23: 'Mandant, Routing, Schutz (Instanzen)', 24: 'Eingang der Anfragen (Instanzen)', 25: 'App im Instanz-Modus', 26: 'Aufträge: Bestellung, Kundenbereich, Zentrale', 28: 'Signature-Dashboard', 29: 'Verkaufsseite, Recht, Doku', 31: 'Vermittlung: Suche, Code, Anfrage, Zentrale' };
 const GRUND = { KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', MAIL_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', INSTANZ_CACHE_MS: '0', ZENTRALE_PASSWORT: PASSWORT };
 
 /* Module eines Abschnitts: <n>-<name>.mjs (alphabetisch) vor <n>.mjs */

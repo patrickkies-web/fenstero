@@ -50,6 +50,8 @@
 // 23 Mandant, Routing, Schutz (vorneweg 23-fundament.mjs: Pakete, Regeln, Speicher, Sitzungen, Post, Bremsen, Testserver) · 24 Eingang ·
 // 25 App im Instanz-Modus · 26 Aufträge: Bestellung, Kundenbereich, Zentrale (docs/BESTELLUNG.md) · 28 Signature-Dashboard · 29 Verkaufsseite,
 // Recht. Die früheren Abschnitte 27 (Kundenkonto /partner/) und 30 (Ende zu Ende über die alte Bestellung) sind mit diesen Teilen entfallen.
+// Abschnitt 31 prüft auf demselben Testserver die Vermittlung (docs/VERMITTLUNG.md, Abschnitt 10): 31-app.mjs die Folien der App,
+// 31.mjs Server (Suche, Code, Senden, Tageslauf) und Zentrale.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:net';
@@ -159,10 +161,12 @@ if (teil(2)) {
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   /* Ansicht Hauseigentümer: die Startseite nach der Design-DNA im Schatten-DOM von #startseite (startseite.js), mit eigenem Kopf, eigener
      Leiste und eigener Fußzeile; das Pilotband steht dort nicht (der Satz zur Pilotphase steht im Fuß), in der Ansicht Fensterbauer schon */
+  /* erst prüfen, wenn die Startseite steht (beim ersten Aufruf eines frisch gestarteten Servers war das Band sonst kurz noch zu sehen) */
+  await page.waitForFunction(() => { const r = document.getElementById('startseite'); return !!(r && r.shadowRoot && r.shadowRoot.querySelector('h1')); }, null, { timeout: 8000 }).catch(() => null);
   ok(await page.locator('.fx-pilot').count() === 1 && !(await page.locator('.fx-pilot').isVisible()), 'Startseite (Hauseigentümer): Pilotband ausgeblendet');
   const sn2 = await page.evaluate(() => { const r = document.getElementById('startseite'), s = r && r.shadowRoot; return s ? { text: s.textContent.replace(/\s+/g, ' '), h1: s.querySelector('h1').textContent.replace(/\s+/g, ' ').trim(), einf: document.querySelectorAll('.einf-bar').length, top: !!document.querySelector('.top'), foot: !!document.querySelector('footer.foot'), fuss: !!s.querySelector('footer.ez-fuss .ez-fuss__pilot'), leiste: getComputedStyle(s.querySelector('.ez-leiste')).position, szenen: s.querySelectorAll('.dna-szene').length, schrift: getComputedStyle(s.querySelector('h1')).fontFamily } : null; });
-  ok(!!sn2 && sn2.h1 === 'Fensterplanung ganz eezi.' && sn2.einf === 0 && !sn2.top && !sn2.foot && sn2.fuss && sn2.leiste === 'fixed' && sn2.szenen === 5 && /^Outfit/.test(sn2.schrift), 'Startseite (Hauseigentümer): fünf Szenen in Outfit, h1 „Fensterplanung ganz eezi.“, eigene Leiste und Fußzeile mit Satz zur Pilotphase, kein Einführungsband, keine Kopf- oder Fußzeile des Portals');
-  ok(!!sn2 && /Einführungspreis/.test(sn2.text) && /bis 17\. November, danach 12,99 €/.test(sn2.text) && /7,99 ?€ ?einmal fürs Aufmaßblatt/.test(sn2.text) && /Das Aufmaßblatt kostet einmal 7,99 €/.test(sn2.text), 'Startseite: Preis aus modell.js (7,99 €), Einführungspreis im Abschnitt „Preis“ (danach 12,99 €)');
+  ok(!!sn2 && sn2.h1 === 'Plane deine Fenster in 3D, bevor du den ersten Handwerker anrufst.' && sn2.einf === 0 && !sn2.top && !sn2.foot && sn2.fuss && sn2.leiste === 'fixed' && sn2.szenen === 5 && /^Outfit/.test(sn2.schrift), 'Startseite (Hauseigentümer): fünf Szenen in Outfit, h1 „Plane deine Fenster in 3D, bevor du den ersten Handwerker anrufst.“, eigene Leiste und Fußzeile mit Satz zur Pilotphase, kein Einführungsband, keine Kopf- oder Fußzeile des Portals');
+  ok(!!sn2 && /Einführungspreis/.test(sn2.text) && /bis 17\. November, danach 12,99 €/.test(sn2.text) && /7,99 ?€ ?einmal fürs Aufmaßblatt/.test(sn2.text) && /Einmal 7,99 € für alle Fenster/.test(sn2.text), 'Startseite: Preis aus modell.js (7,99 €) im Abschnitt „Preis“ und im Schritt „Aufmaßblatt“, Einführungspreis im Abschnitt „Preis“ (danach 12,99 €)');
   await foto(page, 'portal-desktop');
   await page.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' });
   ok(await page.locator('.fx-pilot').count() === 1 && !(await page.locator('.fx-pilot').isVisible()), 'Startseite (Fensterbauer): Pilotband ausgeblendet, der Satz zur Pilotphase steht im Fuß der eingebetteten Seite');
@@ -187,8 +191,74 @@ if (teil(2)) {
   const einbettung = async () => { await pa.waitForSelector('.vk-einbettung .fb[data-fb-an="1"], .vk-einbettung.vk-rueckfall', { timeout: 8000 }).catch(() => null); await pa.waitForTimeout(300); };
   await pa.goto(BASE + '/', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   let z = await zustand();
-  ok(z.n === 2 && z.a === 'Hauseigentümer' && z.b2c && !z.b2b && !z.vk && z.h1.length === 1 && /Fensterplanung ganz eezi/.test(z.h1[0]) && z.top.includes('Jetzt konfigurieren') && !z.top.some((t) => /Anmelden|starten/i.test(t)), 'Ansicht Hauseigentümer (Standard): Ansicht oben im Baustein, nur Inhalte für Hauseigentümer, Knopf „Jetzt konfigurieren“, kein Anmelden oder Starten für Betriebe');
-  ok(await pa.locator('.ez-kopf a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.ez-hero a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.ez-fb a[href="/fensterbauer"]').count() === 1 && await pa.locator('.ez-ratgeber a[href="/ratgeber/fenster-ausmessen/"]').count() === 1, 'Hauseigentümer: „Jetzt konfigurieren“ führt in die App, gleich in den ersten Schritt (#ausmessen), Ratgeber verlinkt, am Ende der Weg zur Ansicht für Fensterbauer');
+  ok(z.n === 2 && z.a === 'Hauseigentümer' && z.b2c && !z.b2b && !z.vk && z.h1.length === 1 && /Plane deine Fenster in 3D/.test(z.h1[0]) && z.top.includes('Jetzt konfigurieren') && !z.top.some((t) => /Anmelden|starten/i.test(t)), 'Ansicht Hauseigentümer (Standard): Ansicht oben im Baustein, nur Inhalte für Hauseigentümer, Knopf „Jetzt konfigurieren“, kein Anmelden oder Starten für Betriebe');
+  ok(await pa.locator('.ez-kopf a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.ez-hero a.dna-pille[data-ez="los"][href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.ez-fb a[href="/fensterbauer"]').count() === 1 && await pa.locator('.ez-ratgeber a[href="/ratgeber/fenster-ausmessen/"]').count() === 1, 'Hauseigentümer: „Jetzt konfigurieren“ führt in die App, gleich in den ersten Schritt (#ausmessen), „Kostenlos losplanen“ im Hero ohne Farbvorgabe, solange keine gewählt ist, Ratgeber verlinkt, am Ende der Weg zur Ansicht für Fensterbauer');
+  /* Umbau 29.10.2026 (3-D-Einstieg und Gratis-Wahl, Protokoll docs/profis/2026-10-26-startseite-dna.md): Dreh-Betrachter mit der
+     Bildfolge des echten 3-D-Modells der App (scripts/hero-fenster.mjs, Angaben in web/bilder/start/fenster/fenster.json), Farbfelder
+     mit Link in die App (?farbe=<Schlüssel aus ral.js>), drei Schritte zum Aufmaß (Messen, In 3D planen mit dem Hausfoto, Aufmaßblatt);
+     Gewichtung des Inhabers vom selben Tag: ein Planungswerkzeug, kein Vergleichsportal; die Weitergabe an Fensterbetriebe steht nur als
+     leiser Zusatz beim Preis (?weg=gratis), ohne Etikett, ohne durchgestrichenen Preis, ohne Karte mit Pins */
+  {
+    const fs2 = await import('node:fs'), path2 = await import('node:path'), url2 = await import('node:url');
+    const W2 = path2.join(path2.dirname(url2.fileURLToPath(import.meta.url)), '..');
+    const HF = await import(new URL('./hero-fenster.mjs', import.meta.url).href);
+    const info = JSON.parse(fs2.readFileSync(path2.join(W2, 'web/bilder/start/fenster/fenster.json'), 'utf8'));
+    /* drei Fenster im Wechsel (Inhaber, 29.10.2026): je Modell und Farbe eine Bildfolge; das erste Modell in seiner Vorgabe steht zuerst */
+    const m0 = info.modelle[0], erste = m0.key + '-' + m0.farbe, bytes = (f) => fs2.statSync(path2.join(W2, 'web/bilder/start/fenster', f)).size;
+    ok(info.stand === HF.fingerabdruck() && info.farben.map((x) => x.key).join() === HF.FARBEN.join() && info.modelle.map((x) => x.key + ':' + x.farbe).join() === HF.MODELLE.map((x) => x.key + ':' + x.farbe).join() && info.winkel.join() === HF.WINKEL.join(), 'Bildfolgen der Hero-Fenster passen zu buehne.js, ral.js und den Einstellungen in scripts/hero-fenster.mjs (' + info.modelle.map((x) => x.name).join(', ') + '; sonst: PW_PFAD=/opt/node-tools node scripts/hero-fenster.mjs)');
+    const gewicht = bytes(erste + '.webp') + bytes(erste + '-ruhe.webp');
+    ok(gewicht <= 450 * 1024, 'Hero-Fenster: das erste Fenster (Ruhebild und Bildfolge) wiegt ' + Math.round(gewicht / 1024) + ' KB, höchstens etwa 450 KB; die übrigen laden erst, wenn sie dran sind');
+    await pa.waitForFunction(() => { const s = document.getElementById('startseite').shadowRoot, d = s && s.querySelector('[data-ez="dreh"]'); return d && d.classList.contains('ist-folge'); }, null, { timeout: 8000 }).catch(() => null);
+    const dr = await pa.evaluate(async (info) => {
+      const s = document.getElementById('startseite').shadowRoot, d = s.querySelector('[data-ez="dreh"]'), f = d.querySelector('.ez-dreh__fenster'), im = d.querySelector('img.ez-dreh__ruhe');
+      const masse = async (u) => { const i = new Image(); i.src = u; await i.decode(); return i.naturalWidth + '×' + i.naturalHeight; };
+      const raster = {};
+      for (const m of info.modelle) for (const x of info.farben) raster[m.key + '-' + x.key] = { folge: await masse('/bilder/start/fenster/' + m.key + '-' + x.key + '.webp'), ruhe: await masse('/bilder/start/fenster/' + m.key + '-' + x.key + '-ruhe.webp'), ral: !!(window.RAL && window.RAL.eintrag(x.key)) };
+      const knoepfe = [...s.querySelectorAll('.ez-hero .ez-farbe')].map((b) => { const r = b.getBoundingClientRect(); return { k: b.dataset.farbe, an: b.getAttribute('aria-pressed') === 'true', gross: r.width >= 44 && r.height >= 44 }; });
+      let modelle = []; try { modelle = JSON.parse(d.dataset.modelle); } catch (e) { /* bleibt leer */ }
+      return { daten: Object.assign({}, d.dataset), modelle, name: (d.querySelector('[data-ez="modellname"]') || {}).textContent, ruhe: im.getAttribute('src'), lazy: im.getAttribute('loading'), prio: im.getAttribute('fetchpriority'), wh: im.getAttribute('width') + '×' + im.getAttribute('height'), bg: d.querySelector('.ez-dreh__bild').style.backgroundImage, folge: d.classList.contains('ist-folge'), rolle: f.getAttribute('role'), tab: f.tabIndex, raster, knoepfe, alt: [...s.querySelectorAll('img')].some((i) => /konfigurator\/buehne\.webp|start\/hero\.webp/.test(i.getAttribute('src'))) };
+    }, info);
+    const soll = (info.spalten * info.breite) + '×' + (info.zeilen * info.hoehe);
+    ok(+dr.daten.bilder === info.winkel.length && +dr.daten.spalten === info.spalten && +dr.daten.ruhe === info.ruhe && +dr.daten.von === info.winkel[0] && +dr.daten.schritt === info.winkel[1] - info.winkel[0] && dr.daten.modell === m0.key && dr.daten.farbe === m0.farbe && dr.name === m0.name && dr.modelle.map((x) => x.k + ':' + x.f + ':' + x.n).join() === info.modelle.map((x) => x.key + ':' + x.farbe + ':' + x.name).join() && dr.ruhe === '/bilder/start/fenster/' + erste + '-ruhe.webp' && dr.wh === info.breite + '×' + info.hoehe && dr.lazy !== 'lazy' && dr.prio === 'high' && Object.keys(dr.raster).length === info.modelle.length * info.farben.length && Object.values(dr.raster).every((x) => x.folge === soll && x.ruhe === info.breite + '×' + info.hoehe && x.ral), 'Dreh-Betrachter: Markup passt zu fenster.json (' + info.modelle.length + ' Fenster im Wechsel, ' + info.winkel.length + ' Blickwinkel von ' + info.winkel[0] + '° in ' + (info.winkel[1] - info.winkel[0]) + '°-Schritten, Raster ' + soll + ' je Fenster und Farbe), erstes Bild sofort mit Maßen und hoher Priorität, Farben aus ral.js');
+    ok(dr.folge && dr.bg.indexOf('/bilder/start/fenster/' + erste + '.webp') >= 0 && dr.rolle === 'slider' && dr.tab === 0 && !dr.alt, 'Dreh-Betrachter: nach dem Laden die Bildfolge der ersten Farbe, als Regler mit der Tastatur erreichbar; weder das Bühnenfoto mit Lichtschatten noch das frühere Hero-Foto im Hero');
+    ok(dr.knoepfe.length >= 3 && dr.knoepfe.length <= 4 && dr.knoepfe.every((b) => b.gross) && dr.knoepfe.filter((b) => b.an).length === 1 && dr.knoepfe.find((b) => b.an).k === m0.farbe && dr.knoepfe.map((b) => b.k).join() === info.farben.map((x) => x.key).join(), 'Farbfelder: ' + dr.knoepfe.length + ' runde Knöpfe ab 44 px, genau einer an (die Vorgabe des ersten Fensters), dieselben Farben wie die Bildfolgen');
+    const wert = () => pa.evaluate(() => document.getElementById('startseite').shadowRoot.querySelector('.ez-dreh__fenster').getAttribute('aria-valuenow'));
+    await pa.evaluate(() => window.scrollTo(0, 0)); await pa.waitForTimeout(300);
+    const p1 = await wert(); await pa.waitForTimeout(1200); const p2 = await wert();
+    ok(p1 !== p2, 'Dreh-Betrachter: das Fenster pendelt von selbst (' + p1 + '° → ' + p2 + '°)');
+    await pa.click('.ez-hero .ez-farbe[data-farbe="goak"]'); await pa.waitForTimeout(200);
+    await pa.waitForFunction((k) => document.getElementById('startseite').shadowRoot.querySelector('.ez-dreh__bild').style.backgroundImage.indexOf('fenster/' + k + '-goak.webp') >= 0, m0.key, { timeout: 8000 }).catch(() => null);
+    const fw = await pa.evaluate(() => { const s = document.getElementById('startseite').shadowRoot; return { los: s.querySelector('.ez-hero a.dna-pille').getAttribute('href'), name: s.querySelector('[data-ez="farbname"]').textContent, an: s.querySelector('.ez-farbe[data-farbe="goak"]').getAttribute('aria-pressed'), bg: s.querySelector('.ez-dreh__bild').style.backgroundImage, label: s.querySelector('.ez-dreh__fenster').getAttribute('aria-label') }; });
+    ok(fw.los === '/app/?farbe=goak#ausmessen' && fw.name === 'Golden Oak' && fw.an === 'true' && fw.bg.indexOf('fenster/' + m0.key + '-goak.webp') >= 0 && /Golden Oak/.test(fw.label), 'Farbfeld Golden Oak: der Rahmen wechselt (Bildfolge ' + m0.key + '-goak), „Kostenlos losplanen“ führt mit /app/?farbe=goak#ausmessen in die App');
+    await pa.locator('.ez-dreh__fenster').focus(); await pa.keyboard.press('Home'); const k0 = await wert(); await pa.keyboard.press('ArrowRight'); const k1 = await wert(); await pa.keyboard.press('End'); const k2 = await wert(); await pa.waitForTimeout(900); const k3 = await wert();
+    ok(+k0 === info.winkel[0] && +k1 === info.winkel[1] && +k2 === info.winkel[info.winkel.length - 1] && k3 === k2, 'Dreh-Betrachter mit der Tastatur: Pos1, Pfeil, Ende (' + [k0, k1, k2].join('°, ') + '°), danach steht das Fenster');
+    await pa.keyboard.press('Home'); const box = await pa.locator('.ez-dreh__fenster').boundingBox();
+    await pa.mouse.move(box.x + box.width * .2, box.y + box.height / 2); await pa.mouse.down(); await pa.mouse.move(box.x + box.width * .5, box.y + box.height / 2, { steps: 5 }); await pa.mouse.move(box.x + box.width * .8, box.y + box.height / 2, { steps: 5 }); await pa.mouse.up(); await pa.waitForTimeout(300);
+    const z1 = await wert();
+    ok(+z1 > info.winkel[0], 'Dreh-Betrachter mit der Maus: Ziehen nach rechts dreht das Fenster (' + info.winkel[0] + '° → ' + z1 + '°)');
+    /* nach dem Loslassen kommt das nächste Fenster, in der gewählten Farbe (sie bleibt) */
+    await pa.waitForFunction((k) => { const d = document.getElementById('startseite').shadowRoot.querySelector('[data-ez="dreh"]'); return d.dataset.modell === k; }, info.modelle[1].key, { timeout: 4000 }).catch(() => null);
+    await pa.waitForTimeout(700);
+    const nw = await pa.evaluate(() => { const s = document.getElementById('startseite').shadowRoot, d = s.querySelector('[data-ez="dreh"]'); return { modell: d.dataset.modell, farbe: d.dataset.farbe, name: s.querySelector('[data-ez="modellname"]').textContent, ruhe: d.querySelector('img.ez-dreh__ruhe').getAttribute('src'), an: (s.querySelector('.ez-farbe[aria-pressed="true"]') || { dataset: {} }).dataset.farbe, los: s.querySelector('.ez-hero a.dna-pille').getAttribute('href') }; });
+    ok(nw.modell === info.modelle[1].key && nw.farbe === 'goak' && nw.name === info.modelle[1].name && nw.ruhe === '/bilder/start/fenster/' + info.modelle[1].key + '-goak-ruhe.webp' && nw.an === 'goak' && nw.los === '/app/?farbe=goak#ausmessen', 'Nach dem Loslassen wechselt das Fenster (' + m0.name + ' → ' + nw.name + '), die gewählte Farbe bleibt (Golden Oak) ' + JSON.stringify(nw));
+    /* von selbst: nach etwa 7 s das nächste Fenster, solange niemand dreht und die Maus nicht darüber steht */
+    await pa.mouse.move(5, 5); await pa.locator('.ez-dreh__fenster').evaluate((e) => e.blur());
+    const vor = await pa.evaluate(() => document.getElementById('startseite').shadowRoot.querySelector('[data-ez="dreh"]').dataset.modell);
+    await pa.waitForFunction((v) => document.getElementById('startseite').shadowRoot.querySelector('[data-ez="dreh"]').dataset.modell !== v, vor, { timeout: 9500 }).catch(() => null);
+    const nach = await pa.evaluate(() => document.getElementById('startseite').shadowRoot.querySelector('[data-ez="dreh"]').dataset.modell);
+    ok(vor !== nach && nach === info.modelle[2].key, 'Die Fenster wechseln sich von selbst ab (' + vor + ' → ' + nach + ')');
+    const wg = await pa.evaluate(() => {
+      const s = document.getElementById('startseite').shadowRoot, t = (e) => (e ? e.textContent.replace(/\s+/g, ' ').trim() : '');
+      const g = [...s.querySelectorAll('a[href*="weg="]')], z = s.querySelector('.ez-weitergabe'), main = s.querySelector('main'), ohneZusatz = main.cloneNode(true);
+      ohneZusatz.querySelectorAll('.ez-weitergabe').forEach((x) => x.remove());
+      return { versteckt: !!(z && z.hidden), status: !!(window.Server && Server.status && Server.status.vermittlung && Server.status.vermittlung.an), links: g.map((a) => a.getAttribute('href')), pille: g.some((a) => a.classList.contains('dna-pille')), imZusatz: g.every((a) => !!a.closest('.ez-weitergabe')), zusatz: t(z), beimPreis: !!(z && z.closest('#preis-szene') && z.parentElement.querySelector('.ez-preis')), rest: t(ohneZusatz), alles: t(main), durch: s.querySelectorAll('s, del').length, ohne: t(s.querySelector('.ez-hero .ez-ohne')), titel: t(s.querySelector('#weg-titel')), h2: [...s.querySelectorAll('h2')].map(t), schritte: [...s.querySelectorAll('.ez-weg__schritte > li')].map((li) => t(li.querySelector('h3'))), pins: s.querySelectorAll('.ez-weg [class*="pin"], .ez-weg [class*="karte__"]').length, fassade: s.querySelectorAll('.ez-weg .ez-fassade .ez-fassade__f').length, mess: !!s.querySelector('.ez-weg .ez-messbild img[src="/bilder/konfigurator/mess/fenster-front.webp"]'), blatt: !!s.querySelector('.ez-weg .ez-blattbild img[src="/bilder/start/blatt.webp"]') };
+    });
+    ok(wg.ohne === 'Ohne Konto, ohne Telefonnummer. Dein Ergebnis siehst du sofort.', 'Hero: unter „Kostenlos losplanen“ die Abgrenzung „Ohne Konto, ohne Telefonnummer. Dein Ergebnis siehst du sofort.“');
+    ok(wg.titel === 'Drei Schritte zu deinem Aufmaß.' && wg.schritte.join(' | ') === 'Messen | In 3D planen | Aufmaßblatt' && wg.mess && wg.fassade === 5 && wg.blatt && wg.pins === 0 && !/Angebot von Betrieb|Betriebe wählen/.test(wg.alles), 'Drei Schritte zum Aufmaß: Messen (Bild aus der Messfolie), In 3D planen (Hausfoto mit 5 Fenstern), Aufmaßblatt; keine Karte mit Pins, keine Angebots-Marken');
+    ok(wg.links.join() === '/app/?weg=gratis#ausmessen' && !wg.pille && wg.imZusatz && wg.beimPreis && /^Wenn du magst: Wir schicken dein Aufmaßblatt an Fensterbetriebe in deiner Nähe, dann ist es kostenlos\. Nur wenn du das willst\./.test(wg.zusatz), 'Weitergabe an Fensterbetriebe nur als leiser Zusatz beim Preis: ein Textlink (keine Pille) mit /app/?weg=gratis#ausmessen, „Wenn du magst: … Nur wenn du das willst.“');
+    ok(wg.versteckt === !wg.status, 'Weitergabe-Zusatz nur, wenn der Server die Vermittlung eingeschaltet hat (VERMITTLUNG=an; hier ' + (wg.status ? 'an, sichtbar' : 'aus, versteckt') + ')');
+    ok(!/Empfohlen|Beliebt/.test(wg.alles) && wg.durch === 0 && !/Angebote vergleichen|vergleichbare Angebote|Vergleich/i.test(wg.rest) && wg.h2.every((h) => !/Angebot/.test(h)) && !/zwei Betriebe|2 Betriebe|2 Fensterbauer|zwei Fensterbauer/i.test(wg.alles), 'Planungswerkzeug statt Vergleichsportal: kein Etikett „Empfohlen“, kein durchgestrichener Preis, keine Überschrift mit Angeboten, „vergleichbare Angebote“ nur im leisen Zusatz');
+  }
   await pa.click('.ez-kopf nav.ez-ansicht a[href="/fensterbauer"]'); await einbettung();
   z = await zustand();
   ok(z.a === 'Fensterbauer' && z.n === 2 && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Anfragen mit Aufmaß/.test(z.h1[0]) && z.pfad === '/fensterbauer' && !z.hash && z.top.includes('Paket anfragen') && !z.top.some((t) => /Anmelden|starten|ausmessen/i.test(t)) && !z.portalKopf && !z.portalFuss, 'Ansicht Fensterbauer: Adresse /fensterbauer ohne Anker, die Paket-Landingpage eingebettet mit ihrem eigenen Kopf (Umschalter, „Paket anfragen“), genau einem h1 und eigener Fußzeile; keine Kopf- oder Fußzeile des Portals, keine Startbilder der Ansichten');
@@ -243,10 +313,13 @@ if (teil(2)) {
   ok(await mp.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'Portal: kein seitliches Scrollen bei 390 px');
   const kopf = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot, t = sr.querySelector('.ez-kopf'), u = t.querySelector('nav.ez-ansicht'), m = t.querySelector('.ez-marke'), r = u.getBoundingClientRect(), k = [...u.querySelectorAll('a')]; return { zeile: r.top >= m.getBoundingClientRect().bottom - 2, voll: k.every((b) => b.scrollWidth <= b.clientWidth + 1 && b.getBoundingClientRect().height >= 44), passt: t.scrollWidth <= t.clientWidth + 1, hoehe: Math.round(r.bottom - t.getBoundingClientRect().top) }; });
   ok(kopf.zeile && kopf.voll && kopf.passt && kopf.hoehe <= 140, 'Telefon: Ansicht als eigene Zeile unter Marke und Pille, beide Wörter ganz lesbar, Ziele ab 44 px (Kopf ' + kopf.hoehe + ' px)');
-  /* „Mehr erfahren“ gleitet zu „So geht es“, ohne die Adresse zu ändern (Sprungmarken im Schatten-DOM, startseite.js) */
-  await mp.evaluate(() => document.getElementById('startseite').shadowRoot.querySelector('.ez-hero a[href="#so"]').click()); await mp.waitForTimeout(1500);
-  const so2 = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot, so = sr.getElementById('so'), r = so.getBoundingClientRect(); return { oben: Math.round(r.top), hash: location.hash, pfad: location.pathname, screen: S.screen }; });
-  ok(so2.oben > -40 && so2.oben < 120 && so2.hash === '' && so2.screen === 'landing', '„Mehr erfahren“ springt zu „So geht es“, Adresse und Ansicht bleiben (' + JSON.stringify(so2) + ')');
+  /* Hero am Telefon (Umbau 29.10.2026): das 3-D-Fenster oben, die eine volle Pille „Kostenlos losplanen“ im unteren Drittel des ersten Bildschirms */
+  const held = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot, p = sr.querySelector('.ez-hero .dna-pille').getBoundingClientRect(), f = sr.querySelector('.ez-dreh__fenster').getBoundingClientRect(); return { oben: Math.round(p.top), unten: Math.round(p.bottom), fenster: Math.round(f.bottom), volle: [...sr.querySelectorAll('.dna-pille:not(.dna-pille--leise)')].filter((x) => { const r = x.getBoundingClientRect(); return r.width && !x.closest('.ez-leiste') && r.top >= 0 && r.bottom <= innerHeight; }).length }; });
+  ok(held.oben >= 844 * 2 / 3 && held.unten <= 844 && held.fenster < held.oben && held.volle === 1, 'Telefon 390 × 844: 3-D-Fenster oben, genau eine volle Pille, „Kostenlos losplanen“ im unteren Drittel (' + held.oben + '–' + held.unten + ' px)');
+  /* Sprungmarke im Schatten-DOM: „Zum Inhalt springen“ gleitet zum Konfigurator, ohne die Adresse zu ändern (startseite.js) */
+  await mp.evaluate(() => document.getElementById('startseite').shadowRoot.querySelector('a.ez-skip[href="#konfigurator"]').click()); await mp.waitForTimeout(1500);
+  const so2 = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot, so = sr.getElementById('konfigurator'), r = so.getBoundingClientRect(); return { oben: Math.round(r.top), hash: location.hash, pfad: location.pathname, screen: S.screen }; });
+  ok(so2.oben > -40 && so2.oben < 120 && so2.hash === '' && so2.screen === 'landing', '„Zum Inhalt springen“ springt zum Konfigurator, Adresse und Ansicht bleiben (' + JSON.stringify(so2) + ')');
   /* Vorhang im Schatten-DOM: Szenen höher als der Bildschirm kleben erst mit ihrem Ende (--dna-szene-oben), sonst bliebe ihr unterer Teil
      unerreichbar (Fehler vom 26.10.2026: Schritt 3 und 4 von „So geht es“ und „Was im Aufmaß steckt“ waren am Telefon nie zu sehen) */
   const vorhang = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot; return [...sr.querySelectorAll('.dna-szene')].map((s) => ({ soll: Math.min(0, window.innerHeight - s.offsetHeight), ist: parseFloat(s.style.getPropertyValue('--dna-szene-oben')) })); });
@@ -254,6 +327,17 @@ if (teil(2)) {
   await foto(mp, 'portal-telefon');
   sauber(mp, 'Portal (Telefon) ohne Fehler');
   await mob.close();
+  /* Ruhige Fassung: kein Pendeln, die Fassade zeigt sofort das Endbild (alle Fenster geplant), kein Layoutsprung */
+  const ruhig = await browser.newContext(Object.assign({}, telefon, { reducedMotion: 'reduce' }));
+  const rp = await neueSeite(ruhig);
+  await rp.addInitScript(() => { window.__cls = 0; new PerformanceObserver((l) => l.getEntries().forEach((e) => { if (!e.hadRecentInput) window.__cls += e.value; })).observe({ type: 'layout-shift', buffered: true }); });
+  await rp.goto(BASE + '/', { waitUntil: 'networkidle' }); await rp.waitForTimeout(1500);
+  const r1 = await rp.evaluate(() => document.getElementById('startseite').shadowRoot.querySelector('.ez-dreh__fenster').getAttribute('aria-valuenow'));
+  await rp.waitForTimeout(1200);
+  const r2 = await rp.evaluate(() => { const s = document.getElementById('startseite').shadowRoot; return { modell: s.querySelector('[data-ez="dreh"]').dataset.modell, wert: s.querySelector('.ez-dreh__fenster').getAttribute('aria-valuenow'), fassade: [...s.querySelectorAll('.ez-fassade__f')].map((f) => f.getAttribute('data-zustand')), etikett: s.querySelector('[data-ez="fassade-n"]').textContent, cls: window.__cls }; });
+  ok(r1 === r2.wert && r2.modell === 'raff' && r2.fassade.length === 5 && r2.fassade.every((z) => z === 'geplant') && r2.etikett === 'Fenster 5 von 5' && r2.cls === 0, 'Ruhige Fassung: das Fenster steht und wechselt nicht von selbst (' + r1 + '°, ' + r2.modell + '), alle 5 Fenster der Fassade geplant, Layoutsprung ' + r2.cls);
+  sauber(rp, 'Startseite in ruhiger Fassung ohne Fehler');
+  await ruhig.close();
 }
 
 /* ---------- 3. App: eigener Ablauf bis zum Ergebnis, KI mit Einwilligung ---------- */
@@ -646,7 +730,7 @@ if (teil(6)) {
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
   const start = await page.evaluate(() => { const r = document.getElementById('startseite'); return (document.body.textContent + ' ' + (r && r.shadowRoot ? r.shadowRoot.textContent : '')).replace(/\s+/g, ' '); });
-  ok(/Fensterplanung ganz eezi\./.test(start) && !/Anfragen mit Aufmaß/.test(start) && await page.locator('.ez-hero a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await page.locator('.ez-fuss-satz a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: konfigurieren (gleich in den ersten Schritt der App, #ausmessen) oder Führung, nichts für Betriebe');
+  ok(/Plane deine Fenster in 3D, bevor du den ersten Handwerker anrufst\./.test(start) && !/Anfragen mit Aufmaß/.test(start) && await page.locator('.ez-hero a.dna-pille[data-ez="los"][href$="/app/#ausmessen"]').count() === 1 && await page.locator('.ez-fuss-satz a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: konfigurieren (gleich in den ersten Schritt der App, #ausmessen) oder Führung, nichts für Betriebe');
   await page.click('.ez-kopf nav.ez-ansicht a[href="/fensterbauer"]'); await page.waitForSelector('.vk-einbettung .fb[data-fb-an="1"]', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
   const startB = await page.evaluate(() => document.body.textContent);
   ok(/Anfragen mit Aufmaß\. Unter Ihrer Marke\./.test(startB.replace(/\s+/g, ' ')) && !/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c, .hero.b2b').count() === 0, 'Startseite, Ansicht Fensterbauer: die Paket-Landingpage eingebettet, nichts für Hauseigentümer, keine Werbung mehr für Aufmaß-Links');
@@ -941,8 +1025,8 @@ if (teil(6)) {
   await pF.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   const frageF = async (id, set) => { await pF.evaluate(([id, set]) => { const w = demoProject()[0]; Object.assign(w, set || {}); S.win = w; S.q = id; S.selSash = 0; S.screen = 'frage'; render(true); }, [id, set || {}]); await pF.waitForSelector('.qpanel .qcur', { timeout: 5000 }).catch(() => {}); await pF.waitForTimeout(500); };
   await frageF('fa');
-  const rf0 = await pF.evaluate(() => ({ ral: RAL.liste.filter((e) => e.art === 'ral').length, holz: RAL.liste.filter((e) => e.art === 'holz').map((e) => e.name), sonder: RAL.liste.filter((e) => e.art === 'sonder').map((e) => e.key), schnell: Array.from(document.querySelectorAll('.qpanel .fw-raster .qsw')).map((b) => b.getAttribute('data-v')).join(), quer: document.documentElement.scrollWidth > innerWidth + 1, klein: Array.from(document.querySelectorAll('.qpanel .qsw .c')).filter((c) => c.getBoundingClientRect().width < 44).length, cur: document.querySelector('.qpanel .qcur').textContent, hinweis: /Bildschirm/.test(document.querySelector('.qpanel').textContent) }));
-  ok(rf0.ral === 216 && ['Golden Oak', 'Nussbaum', 'Eiche hell', 'Eiche dunkel', 'Mooreiche', 'Winchester', 'Sheffield Oak', 'Douglasie', 'Oregon', 'Mahagoni', 'Macoré', 'Schwarzbraun'].every((n) => rf0.holz.includes(n)) && ['db703', 'sand7016', 'eloxal'].every((k) => rf0.sonder.includes(k)) && rf0.schnell === '9016,7016,9001,7035,7039,8022,9005,7012,6005,8019,7021,5011' && !rf0.quer && rf0.klein === 0 && /Anthrazitgrau.*RAL 7016/.test(rf0.cur) && rf0.hinweis, 'Farben: alle 216 RAL-Classic-Töne, gängige Holzdekore und Sonderfarben; in der Frage die zwölf beliebtesten als Raster (Tupfen ab 44 px), die gewählte mit Name und Nummer, Hinweis auf echte Muster (' + JSON.stringify({ schnell: rf0.schnell, quer: rf0.quer, klein: rf0.klein, cur: rf0.cur, hinweis: rf0.hinweis }) + ')');
+  const rf0 = await pF.evaluate(() => ({ ral: RAL.liste.filter((e) => e.art === 'ral').length, holz: RAL.liste.filter((e) => e.art === 'holz').map((e) => e.name), sonder: RAL.liste.filter((e) => e.art === 'sonder').map((e) => e.key), schnell: Array.from(document.querySelectorAll('.qpanel .fw-raster .qsw')).map((b) => b.getAttribute('data-v')).join(), quer: document.documentElement.scrollWidth > innerWidth + 1, klein: Array.from(document.querySelectorAll('.qpanel .qsw')).filter((b) => { const r = b.getBoundingClientRect(); return r.width < 44 || r.height < 44; }).length, tupfen: Math.round((document.querySelector('.qpanel .qsw .c') || { getBoundingClientRect: () => ({ width: 0 }) }).getBoundingClientRect().width), cur: document.querySelector('.qpanel .qcur').textContent, hinweis: /Bildschirm/.test(document.querySelector('.qpanel').textContent) }));
+  ok(rf0.ral === 216 && ['Golden Oak', 'Nussbaum', 'Eiche hell', 'Eiche dunkel', 'Mooreiche', 'Winchester', 'Sheffield Oak', 'Douglasie', 'Oregon', 'Mahagoni', 'Macoré', 'Schwarzbraun'].every((n) => rf0.holz.includes(n)) && ['db703', 'sand7016', 'eloxal'].every((k) => rf0.sonder.includes(k)) && rf0.schnell === '9016,7016,9001,7035,7039,8022,9005,7012,6005,8019,7021,5011' && !rf0.quer && rf0.klein === 0 && /Anthrazitgrau.*RAL 7016/.test(rf0.cur) && rf0.hinweis, 'Farben: alle 216 RAL-Classic-Töne, gängige Holzdekore und Sonderfarben; in der Frage die zwölf beliebtesten als Raster (Tippflächen ab 44 px; der Tupfen selbst seit den Proportionen vom 29.10.2026 kleiner), die gewählte mit Name und Nummer, Hinweis auf echte Muster (' + JSON.stringify({ schnell: rf0.schnell, quer: rf0.quer, klein: rf0.klein, cur: rf0.cur, hinweis: rf0.hinweis }) + ')');
   await pF.click('.qpanel [data-farbblatt="fa"]:not([data-familie])'); await pF.waitForTimeout(400);
   const rf1 = await pF.evaluate(() => { const b = document.querySelector('.fb-blatt').getBoundingClientRect(), st = document.getElementById('w3d').getBoundingClientRect(); return { n: document.querySelectorAll('.fb .fb-f').length, fam: document.querySelectorAll('.fb-fam .chip').length, modell: st.top < b.top - 80, gross: Array.from(document.querySelectorAll('.fb .fb-f .c')).slice(0, 5).every((c) => c.getBoundingClientRect().width >= 44), hinweis: /Bildschirm weichen/.test(document.querySelector('.fb').textContent), hilfe: !!document.querySelector('.fb .fb-hilfe'), offen: !!document.querySelector('.fb .qoffen'), dialog: document.querySelector('.fb').getAttribute('role') === 'dialog' }; });
   await pF.click('.fb .fb-f[data-v="1015"]'); await pF.waitForTimeout(300);
@@ -1627,12 +1711,12 @@ if (teil(10)) {
 
   /* b) Startseite und App: Textfassung für Leser ohne JavaScript, mit JavaScript übernimmt die App */
   const start = await roh('/'), app = await roh('/app/');
-  ok(/<div class="vorab">/.test(start.text) && /<h1>Fensterplanung ganz eezi\.<\/h1>/.test(start.text) && /Aufmaß-App für Fenster/.test(start.text) && /auf einen Blick/.test(start.text), 'Startseite ohne JavaScript: Textfassung mit h1, Erklärung und Fakten');
+  ok(/<div class="vorab">/.test(start.text) && /<h1>Plane deine Fenster in 3D, bevor du den ersten Handwerker anrufst\.<\/h1>/.test(start.text) && /Aufmaß-App für Fenster/.test(start.text) && /auf einen Blick/.test(start.text), 'Startseite ohne JavaScript: Textfassung mit h1, Erklärung und Fakten');
   ok(/<div class="vorab">/.test(app.text) && /<h1>Fenster ausmessen: kostenlose Aufmaß-App im Browser<\/h1>/.test(app.text), 'App ohne JavaScript: Textfassung mit h1');
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
-  ok(await page.locator('.vorab').count() === 0 && await page.locator('h1').count() === 1 && /Fensterplanung ganz eezi\./.test((await page.locator('h1').first().textContent()).replace(/\s+/g, ' ')), 'Startseite mit JavaScript: App statt Textfassung, genau ein h1 (im Hero des Bausteins)');
+  ok(await page.locator('.vorab').count() === 0 && await page.locator('h1').count() === 1 && /Plane deine Fenster in 3D, bevor du den ersten Handwerker anrufst\./.test((await page.locator('h1').first().textContent()).replace(/\s+/g, ' ')), 'Startseite mit JavaScript: App statt Textfassung, genau ein h1 (im Hero des Bausteins)');
   const fuss = await page.$$eval('footer a', (as) => as.map((a) => a.getAttribute('href')));
   ok(fuss.includes('/ratgeber/') && fuss.includes('/fuer-fensterbauer/'), 'Fußzeile der Startseite verlinkt Ratgeber und die Seite für Fensterbauer');
   /* Die Seite für Fensterbauer verkauft die Konfigurator-Pakete (Bauplan E28); Tour und Registrierung des Betriebsbereichs bleiben
@@ -4966,7 +5050,7 @@ if (teil(22)) {
    Je Abschnitt ein Modul scripts/pruefen-instanzen/<n>.mjs (dazu <n>-<name>.mjs, die vorher laufen): export default async (h) => {}.
    h (scripts/pruefen-instanzen/hilfe.mjs) bringt einen eigenen Testserver mit Attrappen und den Instanzen essential.localhost,
    plus.localhost, signature.localhost und signature2.localhost mit. Ein Fehler im Modul zählt als fehlgeschlagene Prüfung. */
-const INSTANZ_TEILE = [23, 24, 25, 26, 28, 29].filter((n) => teil(n));
+const INSTANZ_TEILE = [23, 24, 25, 26, 28, 29, 31].filter((n) => teil(n));
 if (INSTANZ_TEILE.length) {
   const inst = await import('./pruefen-instanzen/hilfe.mjs');
   let h = null;

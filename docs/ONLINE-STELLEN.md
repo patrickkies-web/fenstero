@@ -236,6 +236,7 @@ Erstattungen, Kündigungen und Rechnungen siehst und erledigst du im Stripe-Dash
 | Eigene Statistik | Supabase, Tabelle `statistik`: nur Tagessummen, keine IP-Adressen, keine Kennungen |
 | Vermerke der Zentrale an einem Konto (Sperre, interne Notiz) | im Dokument des Betriebs (`daten.verwaltung`), verlässt den Server nur im Datenexport |
 | Aufträge: Kunden (Fensterbauer), Anmeldecodes, Aufträge mit Angaben, Zahlung, Abo, Verlauf, Nachrichten | Supabase, Tabellen `kunden`, `anmeldecodes`, `auftraege`, `auftrag_nachrichten`; Logo, Porträt, Fotos im Bucket `auftraege` (privat). Die früheren Tabellen `partner`, `bestellungen`, `partner_nachrichten` und der Bucket `bestellungen` sind ungenutzt |
+| Vermittlung: Anfragen der Hauseigentümer an Fensterbetriebe (Kunde, Eckdaten, Aufmaß, Einwilligung, Betriebe mit Ergebnis der Anrufe, Verlauf), Zwischenspeicher der KI-Suche je PLZ | Supabase, Tabellen `vermittlungen` und `vermittlung_suche`; Aufmaßblätter im Bucket `vermittlung` (privat); gelöscht 180 Tage nach dem Eingang, Suchen nach 30 Tagen ([VERMITTLUNG.md](VERMITTLUNG.md)) |
 | Konfigurator-Instanzen: Einstellungen, Domains, Anfragen der Endkunden | Supabase, Tabellen `instanzen`, `instanz_hosts`, `anfragen`; Logo und Bilder im Bucket `marke`, Aufmaßblätter (Signature) im Bucket `blatt`, Fotos wie oben unter `link/<code>/…`; Fristen in [INSTANZEN.md](INSTANZEN.md) |
 
 ## Stufe 3: Konfigurator-Pakete für Fensteranbieter
@@ -275,6 +276,42 @@ Jeder Fensterbauer bestellt seine Landingpage mit Konfigurator unter `/bestellen
 ### Je Kunde
 
 Neue Bestellung in der Zentrale öffnen → **Seite beginnen** (Anruf zur Wunschzeit, Domain sichern) → **Prompt kopieren** und die Seite aus der Vorlage des Pakets mit Claude bauen → Link als **Vorschau** eintragen → der Kunde gibt im Kundenbereich frei → **Live schalten** mit der Adresse der fertigen Seite (das Monatsabo startet). Den Konfigurator der Instanz richtest du bis zum nächsten Umbau noch von Hand ein ([INSTANZEN.md](INSTANZEN.md), Teil 2).
+
+## Vermittlung „Angebote aus deiner Nähe“ (Stufe 1)
+
+Hauseigentümer wählen am Ende der App zwei bis fünf Fensterbetriebe aus ihrer Nähe, die eine KI sucht, bestätigen ihre Telefonnummer per
+Code und schicken ab; du rufst die Betriebe aus der Zentrale an und schickst das Aufmaßblatt nur an die, die zustimmen
+([VERMITTLUNG.md](VERMITTLUNG.md), Abschnitt 10; Bedienung in [ZENTRALE.md](ZENTRALE.md)). Die App und die Startseite zeigen den Weg, sobald `/api/status`
+`"vermittlung": { "an": true }` meldet: die Variable `VERMITTLUNG=an` ist gesetzt, Datenbank, Mailversand (`MAIL_API_KEY`, `MAIL_KONTAKT`) und
+`SITZUNG_GEHEIMNIS` sind da. **Seit dem 29.10.2026 ist der Code online, die Vermittlung aber aus**, bis du sie mit Schritt 5 einschaltest.
+
+1. **Supabase:** `supabase/schema.sql` noch einmal komplett ausführen (Abschnitt „Vermittlung“ legt `vermittlungen`, `vermittlung_suche`
+   und die Nummernfolge an; den Bucket `vermittlung` legt der Server beim ersten Aufmaßblatt selbst an).
+2. **KI-Suche:** braucht nur den vorhandenen `ANTHROPIC_API_KEY`. Kosten nach dem Skill `claude-api` (Stand Oktober 2026): Websuche
+   10 $ je 1.000 Suchen, dazu Tokens von Claude Opus 5.5 (4 $ je Million Eingabe, 20 $ je Million Ausgabe; Suchergebnisse zählen als
+   Eingabe). Eine Suche nach Betrieben (höchstens 6 Websuchen) kostet grob 0,15 bis 0,35 $; sie gilt 30 Tage für dieselbe Postleitzahl.
+   Deckel: Variable `VERMITTLUNG_SUCHE_TAG_MAX` (Vorgabe 300 neue Suchen am Tag, Mail an dich bei 80 %); darüber zeigt die App keine
+   Betriebe, die Anfrage geht als „Betrieb für mich suchen“ weiter. Ohne Schlüssel gibt es keine Liste, nur diesen Weg.
+3. **Code per SMS oder Anruf:** Konto bei **seven.io** (Kiel) anlegen, Guthaben aufladen, Vertrag zur Auftragsverarbeitung abschließen,
+   im Konto einen API-Schlüssel erzeugen und bei Cloudflare als Secret `SMS_API_KEY` eintragen. Optional
+   `SMS_ABSENDER` (Absender der SMS, bis 11 Zeichen, Vorgabe `eeziframes`) und `SMS_STIMME` (Stimme des Anrufs für Festnetz, Vorgabe
+   `de-de-female`). Vor dem Start einmal an dein Handy und an eine Festnetznummer probieren. Ohne `SMS_API_KEY` geht die Anfrage ohne Code
+   durch und steht in der Zentrale als „Nummer nicht bestätigt“.
+4. **Rechtstexte:** Entwurf und Fragen an den Anwalt in [VERMITTLUNG-RECHT.md](VERMITTLUNG-RECHT.md); nach der Prüfung Datenschutz
+   (Abschnitt 6a) und Nutzungsbedingungen (§ 4a) mit neuem Stand einbauen.
+5. **Einschalten:** bei Cloudflare die Variable `VERMITTLUNG` mit dem Wert `an` anlegen. Danach `/api/status` öffnen: `"vermittlung"`
+   zeigt `"an": true`. Ausschalten: Variable löschen. Ist sie an, sollte auch die Startseite in den festen Texten für Suchmaschinen die
+   Weitergabe nennen (in `web/index.html` am 29.10.2026 herausgenommen: Satz in der Beschreibung der App, dritte Offer im JSON-LD, Zeile
+   „Kosten“).
+
+| Name | Art | Wofür |
+|---|---|---|
+| `VERMITTLUNG` | Variable | `an` schaltet die Vermittlung ein (App, Startseite, Server); ohne bleibt sie aus |
+| `SMS_API_KEY` | Secret | Codes per SMS und Anruf über seven.io (`functions/api/vermittlung-sms.js`) |
+| `SMS_ABSENDER`, `SMS_STIMME` | Variablen | Absender der SMS, Stimme der Ansage |
+| `VERMITTLUNG_SUCHE_TAG_MAX` | Variable | neue KI-Suchen am Tag über alle (Vorgabe 300, Mail bei 80 %) |
+| `VERMITTLUNG_MODELL`, `VERMITTLUNG_SUCHE_MS` | Variablen | nur zum Abweichen: Modell der Suche (Vorgabe `claude-opus-5-5`), Zeitlimit in ms (Vorgabe 80000) |
+| `SMS_ATTRAPPE` | nur lokal | `1`: Code immer 123456, nichts wird verschickt (gilt mit `DATEN_ATTRAPPE=1` von selbst; `0` schaltet es dann ab) |
 
 ## Sicherheit
 

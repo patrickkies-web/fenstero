@@ -237,6 +237,40 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   `/app/?ausprobieren=signature&direkt`: gleich „Was planst du?“ in der Kundenansicht, ohne Beispielseite und Kästchen, Rückweg zur
   Seite für Fensterbauer. Vorschlag für seine DNA: „Eine Leiste darf einen zweiten Weg tragen, wenn der Inhaber ihn nennt; der Anreiz
   ist einmalig, nie Dauerbewegung.“
+- Das Foto mit dem Lichtschatten auf dem Boden nicht überall (Inhaber, 29.10.2026: „nutzt bitte nicht schon wieder dieses Foto … ich muss
+  das nicht überall haben“): web/bilder/konfigurator/buehne.webp bleibt auf den Folien, die es schon tragen (Start, Gespeichert,
+  Haus, Zeit, Kontakt), neue Folien und Abschnitte nehmen eine andere Bühne. In der Vermittlung: Anthrazit mit Licht von oben links,
+  feinem Punktraster (wie eine Karte) und Vignette. Vorschlag für seine DNA (Abschnitt 9): „Ein Foto als Bühne trägt höchstens ein
+  Ablauf; neue Folien bekommen ihr eigenes Material.“
+- Gratis-Weg als Wahl, nicht im Kleingedruckten (Inhaber, 29.10.2026, übernommen aus einem Vorschlag): zwei Karten nebeneinander,
+  „Aufmaßblatt für dich“ mit Preis und „Aufmaßblatt + an bis zu 5 Fensterbauer in deiner Nähe“ (zuerst 2, am selben Abend auf bis zu
+  fünf, mindestens zwei erweitert) für 0 € mit durchgestrichenem Preis als
+  Anker; die Gratis-Karte mit violettem Ring und Etikett (Koralle, schwarze Schrift). Etikett „Empfohlen“ statt des vorgeschlagenen
+  „Beliebt“, weil Beliebtheit ohne Nutzerzahlen eine erfundene Kennzahl wäre (DNA Abschnitt 4). Vertrauenssätze stehen dort, wo der
+  Zweifel entsteht (unter der Karte, am Telefonfeld), nicht gesammelt am Ende. Wo bezahlt wird, steht der Gratis-Weg noch einmal als
+  Fläche in der Folie. Was der Besucher auf der Startseite wählt (Farbe, Weg), übernimmt der Konfigurator. Das gilt für die App; auf
+  der Startseite ist die Weitergabe nur ein leiser Zusatz (nächster Punkt). Gefragt, ob die App leiser werden soll, entschied der
+  Inhaber am 29.10.2026: „App bleibt wie jetzt“.
+- Drei Fenster im Hero statt eines (Inhaber, 29.10.2026: „Du hast einfach das hässlichste Fenster genommen“): ein schickes graues mit
+  Raffstore, ein weißes mit Sprossen, ein weißes dreiteiliges mit Rollladen, aus dem 3-D-Modell der App, im Wechsel. Solange jemand
+  dreht, bleibt das Fenster; nach dem Loslassen kommt das nächste. Die Farbe wählt der Besucher frei, sie gilt dann für alle und bleibt.
+  Der Schein unter dem Fenster ist weiß, nicht violett („keinen lila, sondern weißen Schein“). Als Beispiel immer ein Fenster zeigen, das
+  man sich ans eigene Haus wünscht, nicht das schlichteste. Pendeln und Wechsel laufen weiter, solange der Hero zu sehen ist (Ausnahme
+  von „Bewegung endet nach 2,6 s“).
+- Startseite als Planungswerkzeug (Inhaber, 29.10.2026: „Der Konfigurator sollte selbst der Einstieg sein“; am selben Tag gewichtet:
+  „auf den ersten Blick ein Planungswerkzeug, kein Vergleichs- oder Lead-Portal“, Abgrenzung von Seiten, die erst alle Daten abfragen):
+  Der Hero zeigt das 3-D-Fenster als Bildfolge des echten App-Modells (scripts/hero-fenster.mjs: buehne.js in WebGL mit ?gl=voll und
+  SwiftShader, ohne raum-licht; im Browser läuft kein WebGL, weil app.js zu schwer für die Startseite ist), es pendelt bis zur ersten
+  Berührung, lässt sich ziehen und mit Pfeiltasten drehen; 3 bis 4 Farbfelder (Schlüssel aus ral.js) wechseln den Rahmen, „Kostenlos
+  losplanen“ führt mit /app/?farbe=<Schlüssel>#ausmessen in die App; darunter „Ohne Konto, ohne Telefonnummer. Dein Ergebnis siehst du
+  sofort.“ Danach „Drei Schritte zu deinem Aufmaß“ (Messen, In 3D planen, Aufmaßblatt). Die Weitergabe an Fensterbetriebe steht nur als
+  leiser Zusatz beim Preis (/app/?weg=gratis#ausmessen): kein Etikett „Empfohlen“ oder „Beliebt“, kein durchgestrichener Preis, keine
+  Karte mit Pins, keine Überschrift mit „Angebote vergleichen“; „vergleichbare Angebote“ höchstens in diesem Zusatz. Das Foto mit dem
+  Lichtschatten auf dem Boden (bilder/konfigurator/buehne.webp) gehört nicht überall hin („muss ich nicht überall haben“). Sein Hausfoto
+  ist Material (Ausschnitt bilder/start/fassade.webp im Schritt „In 3D planen“), bis er ein eigenes Foto für die Fenster-Animation schickt.
+  Text überall ab 13 px. Protokoll docs/profis/2026-10-26-startseite-dna.md, Abschnitt „Umbau 29.10.2026“. Vorschläge für seine DNA:
+  „Ein Objekt zum Anfassen darf von selbst pendeln, bis der Besucher es berührt“ (Abschnitt 2, Bewegungs-Gene) und „Werkzeug vor
+  Vermittlung: Was der Besucher selbst tun kann, steht vorn; Weitergabe an Dritte ist ein leiser Zusatz“ (Abschnitt 4).
 - Proportionen des Konfigurators (Wunsch des Inhabers, 29.10.2026, vom iPhone aus): Am Telefon ist die helle Bühne mit dem Element ein
   Fünftel höher (Wünsche 272 → 326 px, Fotos 250 → 300, Ergebnis 390 → 444; Messen füllt den Bildschirm schon); am Laptop bleibt die
   Bühne, dort „kein Platzproblem“. Knöpfe, Chips, Kacheln und Zeilen überall eine Spur kleiner (52 → 48, Schrift 15 → 14, Luft 10 → 8,

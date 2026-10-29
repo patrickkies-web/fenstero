@@ -7,6 +7,8 @@
    /api/kunde/…                     Konten der Hauseigentümer: Anmelden per Code, Aufmaße sichern und abgleichen (eigene.js)
    …/foto/:id                       Fotos der Fenster: Kunde legt ab (Link, eigenes Aufmaß), Betrieb und Besitzer lesen (fotos.js)
    /api/auftrag/…, /api/inhaber/…   Bestellung, Kundenbereich und Zentrale der Aufträge (functions/auftrag/)
+   /api/vermittlung/…, /api/inhaber/vermittlungen/…   Vermittlung an Fensterbetriebe: KI-Suche, Code ans Telefon, Anfrage, Zentrale
+                                    (vermittlung.js, docs/VERMITTLUNG.md Abschnitt 10)
    /api/zentrale/…                  Verwaltung der Betriebe der App (zentrale.js, ohne eigene Oberfläche), eigene Statistik (statistik.js)
    POST /api/widerruf               Widerrufsfunktion nach § 356a BGB mit Eingangsbestätigung per E-Mail (widerruf.js, post.js), als JSON
                                     oder ohne JavaScript als Formular (dann antwortet der Server mit einer Seite)
@@ -31,6 +33,7 @@ import { EINGANG, versandNachholen, anfragenAufraeumen } from './eingang.js';
 import { DASHBOARD, einladungenErinnern } from './dashboard.js';
 import { instanzenPruefen } from './cloudflare.js';
 import { AUFTRAG, GROSS, auftraegeLauf } from '../auftrag/index.js';
+import { VERMITTLUNG, GROSS_VERMITTLUNG, MAX_VERMITTLUNG, vermittlungStatus, vermittlungLauf } from './vermittlung.js';
 import { attrappePost, attrappeAus } from './post.js';
 import { zaehlen, mitWerbung, werbungAus } from './statistik.js';
 import '../../web/assets/ral.js'; // Farben (RAL, Holzdekore) für modell.js auch im Worker-Bundle, siehe ral.js
@@ -40,8 +43,9 @@ import '../../web/assets/instanzregeln.js'; // Zustände, Fristen, Grenzen der I
 import { indexnow } from '../seo.js';
 
 /* Die bestehenden Routen stehen zuletzt und haben damit Vorrang, falls ein neues Modul dieselbe Adresse nennt (Altbestand bleibt) */
-const ROUTEN = Object.assign({}, AUFTRAG, INSTANZ_API, EINGANG, DASHBOARD, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE, WIDERRUF, FOTOS);
+const ROUTEN = Object.assign({}, AUFTRAG, VERMITTLUNG, INSTANZ_API, EINGANG, DASHBOARD, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE, WIDERRUF, FOTOS);
 const MAX_BODY = 1500000, MAX_DATEI = 6000000; // Dateien der Aufträge (Fotos für die Landingpage) als Base64
+/* Anfrage der Vermittlung mit dem Aufmaßblatt (bis 10 MB) als Base64: eigener Grenzwert nur für diesen Pfad (vermittlung.js) */
 
 function finde(method, pfad) {
   const direkt = ROUTEN[method + ' ' + pfad]; if (direkt) return { fn: direkt, params: {} };
@@ -65,7 +69,7 @@ export async function api(request, env, ctx0, inst) {
   try {
     /* verkauf: was vor dem Verkauf mit echtem Geld fehlt (recht.js); recht: Stand der AGB und der Nutzungsbedingungen und der Wortlaut
        der Zustimmung an der Kasse, so wie die App sie zeigt und der Server sie annimmt */
-    if (pfad === '/api/status') { const konten = k.daten ? !!(await kontenDa(speicher(k))) : false; return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, konten: konten, betriebskonto: !!k.betriebskonto, preise: k.preise, einfuehrung: k.einfuehrung, zahlarten: k.zahlarten, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), post: !!k.post, verkauf: await verkaufStand(k, env, url.origin, konten), recht: { agb: AGB_STAND, nb: NB_STAND, zustimmung: ZUSTIMMUNG }, hinweise: k.hinweise.length ? k.hinweise : undefined }); }
+    if (pfad === '/api/status') { const konten = k.daten ? !!(await kontenDa(speicher(k))) : false; return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, konten: konten, betriebskonto: !!k.betriebskonto, preise: k.preise, einfuehrung: k.einfuehrung, zahlarten: k.zahlarten, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), post: !!k.post, verkauf: await verkaufStand(k, env, url.origin, konten), recht: { agb: AGB_STAND, nb: NB_STAND, zustimmung: ZUSTIMMUNG }, vermittlung: vermittlungStatus(k, env), hinweise: k.hinweise.length ? k.hinweise : undefined }); }
     /* nur lokal mit MAIL_ATTRAPPE=1: die zuletzt „verschickten“ Mails, damit die Prüfung sie lesen kann; ?stoerung=1 bzw. 0 stellt
        eine Störung des Mailversands nach bzw. beendet sie */
     if (pfad === '/api/test/post' && k.post && k.post.attrappe) { const st = url.searchParams.get('stoerung'); if (st !== null) attrappeAus.an = st === '1'; const mitAnhang = url.searchParams.get('anhaenge') === '1'; return json({ ok: true, post: mitAnhang ? attrappePost : attrappePost.map((m) => { const x = Object.assign({}, m); delete x.anhangDaten; return x; }), stoerung: attrappeAus.an }); } // ?anhaenge=1: mit den Anhängen (Base64)
@@ -89,7 +93,7 @@ export async function api(request, env, ctx0, inst) {
     /* Nur die Widerrufsfunktion und die Frage ohne Konto (Verkaufsseite) nehmen auch ein gewöhnliches Formular an (Browser ohne JavaScript) */
     const formular = (pfad === '/api/widerruf' || pfad === '/api/auftrag/frage') && /^application\/x-www-form-urlencoded/i.test(request.headers.get('content-type') || '');
     if (request.method === 'POST' || request.method === 'PATCH') {
-      const max = GROSS.test(pfad) ? MAX_DATEI : MAX_BODY;
+      const max = pfad === GROSS_VERMITTLUNG ? MAX_VERMITTLUNG : GROSS.test(pfad) ? MAX_DATEI : MAX_BODY;
       if (Number(request.headers.get('content-length') || 0) > max) return json({ ok: false, fehler: 'Zu groß.' }, 413);
       roh = await request.text(); if (roh.length > max) return json({ ok: false, fehler: 'Zu groß.' }, 413);
       if (roh && formular) body = Object.fromEntries(new URLSearchParams(roh));
@@ -112,7 +116,7 @@ export async function api(request, env, ctx0, inst) {
 /* Cron (wrangler.jsonc: triggers.crons), Weiche nach exakten Zeitplänen:
    - CRON_ABRECHNUNG (1. und 15.): Sammelrechnungen, dann Aufräumen
    - CRON_TAEGLICH (jeden Tag): Aufräumen (Protokoll nach Frist, liegengebliebene Kassen, Anmeldungen ohne Betrieb nach 30 Tagen,
-     Zwischenstände erledigter Kundenlinks) und Nachholen: nicht zugestellte Vertragsbestätigungen (bestaetigung.js), Eingangsbestätigungen
+     Zwischenstände erledigter Kundenlinks, Anfragen der Vermittlung nach 180 Tagen) und Nachholen: nicht zugestellte Vertragsbestätigungen (bestaetigung.js), Eingangsbestätigungen
      von Widerrufen (widerruf.js), Erinnerungen; dazu die Läufe der Konfigurator-Instanzen (Aufbewahrung der Anfragen, Bestellungen und
      Abos, Domains, Erinnerungen an Einladungen) und IndexNow
    - CRON_ZEHN (alle 10 Minuten): nur das Nachholen des Versands eingegangener Anfragen der Instanzen (eingang.js)
@@ -139,6 +143,8 @@ export async function geplant(env, cron) {
   /* Konfigurator-Instanzen: täglich Aufbewahrung, Bestellungen und Abos, Domains, Erinnerungen; Versand (sonst alle 10 Minuten) bei einem Aufruf ohne cron mit */
   let inst = null;
   if (taeglich) (nach = nach || {}).auftraege = await versucht(() => auftraegeLauf(k, sp, env));
+  /* Vermittlung: Anfragen und Aufmaßblätter 180 Tage nach dem Eingang löschen, abgelaufene Suchen weg (vermittlung.js) */
+  if (taeglich) nach.vermittlung = await versucht(() => vermittlungLauf(k));
   if (taeglich && sp) inst = { anfragen: await versucht(() => anfragenAufraeumen(k, sp)), domains: await versucht(() => instanzenPruefen(k, sp, env)), einladungen: await versucht(() => einladungenErinnern(k, sp, env)) };
   if (zehn && sp) (inst = inst || {}).versand = await versucht(() => versandNachholen(k, sp));
   /* täglicher Lauf: nach einer Veröffentlichung die geänderten Seiten per IndexNow melden (functions/seo.js, nur mit Freigabe) */
