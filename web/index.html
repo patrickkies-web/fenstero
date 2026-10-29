@@ -324,8 +324,9 @@
     </div>
   </section>
   <section class="dna-szene" data-theme="hell" id="preis-szene" aria-labelledby="preis-titel">
-    <!-- Preis wie vor dem Umbau; die Weitergabe an Fensterbetriebe steht nur als leiser Zusatz beim Preis (Gewichtung des Inhabers,
-         29.10.2026), mit Deep-Link /app/?weg=gratis#ausmessen; versteckt, bis /api/status die Vermittlung meldet (VERMITTLUNG=an) -->
+    <!-- Preis wie vor dem Umbau; darüber groß der Gratis-Weg (Inhaber, 29.10.2026, abends: „über den 7,99 €“, Etikett „Empfohlen“,
+         daneben „Kostenlos“, pulsiert beim Erscheinen), mit Deep-Link /app/?weg=gratis#ausmessen; versteckt, bis /api/status die
+         Vermittlung meldet (VERMITTLUNG=an) -->
     <div class="ez-huelle ez-abschnitt" id="preis">
       <div class="ez-zwei">
         <div class="ez-text">
@@ -337,17 +338,18 @@
           <a class="dna-pille" href="/app/#ausmessen">Jetzt ausmessen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
         </div>
         <div class="ez-preisspalte">
+        <article class="ez-gratis ez-karte-dunkel" data-theme="dunkel" data-ez="weitergabe" aria-labelledby="gratis-titel" hidden>
+          <header class="ez-gratis__kopf"><span class="ez-badge-koralle">Empfohlen</span><h3 class="ez-gratis__titel" id="gratis-titel">Kostenlos</h3></header>
+          <p>Am Ende des Konfigurators zeigen wir dir mehrere Betriebe in deiner Nähe. Erlaubst du uns, mindestens zwei Betrieben deiner Wahl dein Aufmaß zu schicken, erhältst du das Aufmaß kostenlos und on top das gesamte Aufmaß als PDF.</p>
+          <p class="ez-gratis__zusage">Keine versteckten Kosten, keine Datenweitergabe an weitere und keine Belästigung durch Sonstige. Garantiert.</p>
+          <a class="dna-pille dna-pille--leise ez-gratis__los" href="/app/?weg=gratis#ausmessen">Kostenlos weiter <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
+        </article>
         <article class="dna-leucht ez-preis">
           <span class="ez-raster" aria-hidden="true"></span>
           <header class="dna-leucht__kopf"><span class="dna-label">Aufmaßblatt als PDF</span><span class="ez-badge-koralle" data-ez="einf-badge" hidden>Einführungspreis</span></header>
           <div class="dna-zahl"><span class="dna-zahl__wert"><span data-ez="preiszahl"></span><span class="dna-zahl__einheit">€</span></span></div>
           <div class="ez-preis__fuss"><b>einmal fürs Aufmaßblatt, alle Fenster</b><span data-ez="einf" hidden></span></div>
         </article>
-        <aside class="ez-weitergabe" aria-label="Weitergabe an Fensterbetriebe" data-ez="weitergabe" hidden>
-          <p><b>Wenn du magst:</b> Wir schicken dein Aufmaßblatt an Fensterbetriebe in deiner Nähe, dann ist es kostenlos. Nur wenn du das willst.</p>
-          <p class="ez-weitergabe__klein">Du wählst die Betriebe selbst und bekommst vergleichbare Angebote auf denselben Maßen; die Betriebe bezahlen uns für die Vermittlung.</p>
-          <a class="ez-linkzeile" href="/app/?weg=gratis#ausmessen">Mit Weitergabe planen</a>
-        </aside>
         </div>
       </div>
     </div>

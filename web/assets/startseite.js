@@ -48,6 +48,12 @@
     if (t) t.textContent = (d && d.weiter ? d.appLabel : 'Kostenlos losplanen') + ' ';
   }
 
+  function pulsBeiSicht(el) {
+    if (reduziert || !('IntersectionObserver' in w)) return;
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); el.classList.add('ist-puls'); } }, { threshold: 0.5 });
+    io.observe(el);
+  }
+
   function daten(root, d) {
     letzteDaten = d;
     losPille(root, d);
@@ -58,8 +64,10 @@
       a.setAttribute('href', d.app);
       if (t) t.textContent = (d.weiter ? d.appLabel : a.getAttribute('data-ez-app')) + (/\s$/.test(t.textContent) ? ' ' : '');
     });
-    /* Weitergabe an Fensterbetriebe: nur, wenn der Server die Vermittlung eingeschaltet hat (VERMITTLUNG=an, /api/status) */
-    const wg = root.querySelector('[data-ez="weitergabe"]'); if (wg) wg.hidden = !d.vermittlung;
+    /* Gratis-Weg über dem Preis: nur, wenn der Server die Vermittlung eingeschaltet hat (VERMITTLUNG=an, /api/status); pulsiert einmal
+       je Seitenaufruf, sobald er zur Hälfte zu sehen ist */
+    const wg = root.querySelector('[data-ez="weitergabe"]');
+    if (wg) { wg.hidden = !d.vermittlung; if (d.vermittlung && !wg.dataset.puls) { wg.dataset.puls = '1'; pulsBeiSicht(wg); } }
     const weiter = root.querySelector('[data-ez="weiter"]');
     if (weiter) { weiter.hidden = !d.weiter; weiter.textContent = d.weiter ? 'Dein Aufmaß ist angefangen: ' + d.weiter + ' Fenster erfasst, gespeichert in diesem Browser.' : ''; }
     const zahl = root.querySelector('[data-ez="preiszahl"]');

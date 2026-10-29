@@ -62,3 +62,7 @@ möglich.
 6. Rückfrage per SMS nach zwei Werktagen: als Teil der Anfrage zulässig oder Werbung?
 7. Anzeige „0 €“ mit durchgestrichenem Preis: zulässig, wenn der Gratis-Weg eine Gegenleistung (Weitergabe an bis zu fünf Betriebe) hat und das
    klar daneben steht („Aufmaßblatt + an bis zu 5 Fensterbauer in deiner Nähe“)? Etikett „Empfohlen“ statt „Beliebt“ (keine Nutzerzahlen).
+8. Werbeaussagen auf der Startseite und den Bezahlfolien (29.10.2026): „Keine versteckten Kosten, keine Datenweitergabe an weitere
+   und keine Belästigung durch Sonstige. Garantiert.“ Trägt „Garantiert“ als Zusage (§ 443 BGB, § 5 UWG), wenn Anthropic (PLZ für die
+   Suche) und der SMS-Anbieter als Auftragsverarbeiter Daten erhalten und die gewählten Betriebe anrufen? Reicht „keine Datenweitergabe
+   an weitere“ als Formulierung, oder besser „nur an die Betriebe deiner Wahl“?

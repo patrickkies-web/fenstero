@@ -4486,12 +4486,20 @@ function abRahmen(view, buehne) {
   return Object.assign({}, view, { html: lgKopf(back ? ['back', zur] : false) + dnaTisch(buehne, '<div class="ab-inhalt">' + inhalt + '</div>' + fuss), dna: true, cls: 'dna ab ab2 dt' + (view.cls ? ' ' + view.cls : ''), voll: true, bar: null });
 }
 const AB_ALT = { blatt: SCREENS.blatt, teilen: SCREENS.teilen, konto: SCREENS.konto, kasse: SCREENS.kasse, gekauft: SCREENS.gekauft, gesendet: SCREENS.gesendet, sichern: SCREENS.sichern, meinkonto: SCREENS.meinkonto, linkanmelden: SCREENS.linkanmelden };
-/* Auf den Folien zum Bezahlen noch einmal der Gratis-Weg (Inhaber, 29.10.2026: „soll er dennoch die Möglichkeit haben kostenlos zu bleiben“) */
+/* Auf den Folien zum Bezahlen der Gratis-Weg ganz oben, über dem Preis (Inhaber, 29.10.2026: „soll er dennoch die Möglichkeit haben
+   kostenlos zu bleiben“; abends: „dass diese kostenlose Variante quasi noch darüber hängt und auch zum Klicken animiert“): Etikett
+   „Empfohlen“, daneben groß „Kostenlos“, sein Text, „Kostenlos weiter“. Beim ersten Zeigen je Folie läuft dreimal ein Ring nach außen und
+   der Pfeil stupst (VM_PULS), danach Ruhe; die ruhige Fassung ohne */
+const VM_PULS = new Set();
 function vmGratisKarte() {
   if (!vermAn() || FREI() || (S.verm && S.verm.gesendet)) return '';
-  return '<div class="vm-gratis-hinweis"><span class="vm-karte-etikett">Empfohlen</span><p><b>Lieber kostenlos?</b> Aufmaßblatt + an bis zu ' + VM_MAX + ' Fensterbauer in deiner Nähe für 0&nbsp;€ statt ' + esc(euro(PREIS())) + '. Deine Angebote beruhen auf denselben Maßen und sind direkt vergleichbar.</p><button type="button" class="dna-pille dna-pille--leise" data-act="vm-gratis">Kostenlos weiter</button></div>';
+  const puls = !VM_PULS.has(S.screen); VM_PULS.add(S.screen);
+  return '<div class="vm-gratis-hinweis vm-gratis-gross' + (puls ? ' ist-puls' : '') + '"><div class="vm-gratis-kopf"><span class="vm-karte-etikett">Empfohlen</span><b class="vm-gratis-titel">Kostenlos</b></div>' +
+    '<p>Statt zu bezahlen: Wir zeigen dir mehrere Betriebe in deiner Nähe. Erlaubst du uns, mindestens ' + VM_ZAHL[VM_MIN] + ' Betrieben deiner Wahl dein Aufmaß zu schicken, erhältst du das Aufmaß kostenlos und on top das gesamte Aufmaß als PDF, statt ' + esc(euro(PREIS())) + ' zu zahlen.</p>' +
+    '<p class="vm-gratis-zusage">Keine versteckten Kosten, keine Datenweitergabe an weitere und keine Belästigung durch Sonstige. Garantiert.</p>' +
+    '<button type="button" class="dna-pille dna-pille--leise vm-gratis-los" data-act="vm-gratis">Kostenlos weiter' + abPfeil + '</button></div>';
 }
-const vmMitGratis = (v) => (v && v.html ? Object.assign(v, { html: v.html + vmGratisKarte() }) : v);
+const vmMitGratis = (v) => (v && v.html ? Object.assign(v, { html: vmGratisKarte() + v.html }) : v);
 SCREENS.teilen = () => { const v = AB_ALT.teilen(), f = FREI(); if (!f && !INST) v.html = v.html.replace(blattVorschau(), ''); /* das Blatt steht auf der Bühne */ if (!f && !INST) vmMitGratis(v); return abRahmen(v, abBlattBuehne(f ? (KUNDE_FREI() ? 'Fertig gemessen' : 'Freigeschaltet') : 'Fertig gemessen', f, f ? '' : abBetrag())); };
 SCREENS.datei = () => SCREENS.teilen();
 SCREENS.konto = () => { const k = kauf(); return abRahmen(vmMitGratis(AB_ALT.konto()), abBlattBuehne('Schritt 1 von 2', false, abEtikett('Rechnung an', k.mail || 'deine E-Mail-Adresse'))); };

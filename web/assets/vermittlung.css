@@ -56,10 +56,23 @@ g.vm-pkt.ist-gewaehlt text { font: 600 12px var(--font-sans); fill: var(--schwar
 .dna .ab-felder + .vm-vertrauen--tel { margin: 12px 4px 0 }
 .dna .vm-codewarum { margin-top: 2px }
 /* Auf den Folien zum Bezahlen: der Gratis-Weg noch einmal, als Fläche in der Folie (Regel des Inhabers: Hinweise in die Folie) */
-.dna .vm-gratis-hinweis { display: grid; gap: 10px; justify-items: start; margin: 18px 0 0; padding: 16px 18px; border-radius: 20px;
+.dna .vm-gratis-hinweis { position: relative; isolation: isolate; display: grid; gap: 10px; justify-items: start; margin: 18px 0 0; padding: 16px 18px; border-radius: 20px;
   background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1.5px var(--violett) }
 .dna .vm-gratis-hinweis p { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
 .dna .vm-gratis-hinweis b { font-weight: 600; color: var(--weiss) }
+/* groß und oben auf den Bezahlfolien (Inhaber, 29.10.2026, abends): Etikett und „Kostenlos“ in einer Zeile, Ring-Puls beim ersten Zeigen */
+.dna .vm-gratis-gross { margin: 0 0 22px; padding: 18px 18px 20px; gap: 12px }
+.dna .vm-gratis-kopf { display: flex; align-items: center; gap: 12px; flex-wrap: wrap }
+.dna .vm-gratis-gross .vm-karte-etikett { position: static; margin: 0 }
+.dna .vm-gratis-titel { font: 600 28px/1 var(--font-sans) !important; letter-spacing: .04em; text-transform: uppercase; color: var(--weiss) }
+.dna .vm-gratis-gross .vm-gratis-zusage { color: var(--weiss); font-weight: 500 }
+.dna .vm-gratis-los { margin-top: 4px; gap: 10px }
+.dna .vm-gratis-hinweis::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; box-shadow: 0 0 0 2px var(--violett); opacity: 0; pointer-events: none }
+.dna .vm-gratis-hinweis.ist-puls::after { animation: vm-gratis-puls 1.4s cubic-bezier(.23, 1, .32, 1) .3s 3 }
+.dna .vm-gratis-hinweis.ist-puls .vm-gratis-los .dna-pille__pfeil svg { animation: vm-gratis-stups 1.4s cubic-bezier(.23, 1, .32, 1) .3s 3 }
+@keyframes vm-gratis-puls { 0% { opacity: .85; transform: scale(1) } 100% { opacity: 0; transform: scale(1.035, 1.08) } }
+@keyframes vm-gratis-stups { 0%, 55%, 100% { transform: none } 25% { transform: translateX(3px) } }
+@media (prefers-reduced-motion: reduce) { .dna .vm-gratis-hinweis.ist-puls::after, .dna .vm-gratis-hinweis.ist-puls .vm-gratis-los .dna-pille__pfeil svg { animation: none } }
 .dna .lg-fuss.vm-fuss-zwei { flex-wrap: nowrap; gap: 10px }
 .dna .vm-fuss-zwei .dna-pille--leise { flex: 0 0 auto; min-width: 96px; min-height: 52px }
 .dna .vm-fuss-zwei .lg-weiter { flex: 1 1 auto; min-width: 0 }
