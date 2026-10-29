@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400" role="img" aria-labelledby="t d">
+<title id="t">Alle Fenster auf einmal oder in drei Etappen</title>
+<desc id="d">Zwei Häuser mit je zwölf Fenstern nebeneinander. Links sind alle zwölf Fenster neu und violett gefüllt: ein Auftrag, eine Anfahrt, ein Förderantrag, ein Lüftungskonzept. Rechts sind nur vier Fenster neu, acht bleiben als grauer Umriss alt: drei Etappen, drei Anfahrten, drei Förderanträge, aber ebenfalls ein Lüftungskonzept für das ganze Haus.</desc>
+<rect width="480" height="400" rx="16" fill="#ffffff"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="17" fill="#07090a">
+<text x="120" y="34" text-anchor="middle" font-weight="700">Alle 12 auf einmal</text>
+<text x="360" y="34" text-anchor="middle" font-weight="700">3 Etappen à 4</text>
+<!-- Haus links -->
+<path d="M30 130 L120 58 L210 130 Z" fill="#e6e5e7" stroke="#202022" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="42" y="130" width="156" height="150" fill="#f3f3f4" stroke="#202022" stroke-width="2.5"/>
+<g fill="#897efc" stroke="#202022" stroke-width="2">
+<rect x="56" y="144" width="26" height="30"/><rect x="92" y="144" width="26" height="30"/><rect x="128" y="144" width="26" height="30"/><rect x="164" y="144" width="26" height="30"/>
+<rect x="56" y="190" width="26" height="30"/><rect x="92" y="190" width="26" height="30"/><rect x="128" y="190" width="26" height="30"/><rect x="164" y="190" width="26" height="30"/>
+<rect x="56" y="236" width="26" height="30"/><rect x="92" y="236" width="26" height="30"/><rect x="128" y="236" width="26" height="30"/><rect x="164" y="236" width="26" height="30"/>
+</g>
+<!-- Haus rechts -->
+<path d="M270 130 L360 58 L450 130 Z" fill="#e6e5e7" stroke="#202022" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="282" y="130" width="156" height="150" fill="#f3f3f4" stroke="#202022" stroke-width="2.5"/>
+<g fill="#897efc" stroke="#202022" stroke-width="2">
+<rect x="296" y="144" width="26" height="30"/><rect x="332" y="144" width="26" height="30"/><rect x="368" y="144" width="26" height="30"/><rect x="404" y="144" width="26" height="30"/>
+</g>
+<g fill="#ffffff" stroke="#a8a4a9" stroke-width="2">
+<rect x="296" y="190" width="26" height="30"/><rect x="332" y="190" width="26" height="30"/><rect x="368" y="190" width="26" height="30"/><rect x="404" y="190" width="26" height="30"/>
+<rect x="296" y="236" width="26" height="30"/><rect x="332" y="236" width="26" height="30"/><rect x="368" y="236" width="26" height="30"/><rect x="404" y="236" width="26" height="30"/>
+</g>
+<text x="360" y="300" text-anchor="middle" font-size="16" fill="#6b676c">Etappe 1 neu, 2 und 3 folgen</text>
+<text x="120" y="300" text-anchor="middle" font-size="16" fill="#6b676c">ein Auftrag</text>
+<!-- Zähler links -->
+<rect x="30" y="316" width="56" height="60" rx="10" fill="#ecebec"/>
+<rect x="92" y="316" width="56" height="60" rx="10" fill="#ecebec"/>
+<rect x="154" y="316" width="56" height="60" rx="10" fill="#ecebec"/>
+<text x="58" y="344" text-anchor="middle" font-weight="700" font-size="18">×1</text>
+<text x="120" y="344" text-anchor="middle" font-weight="700" font-size="18">×1</text>
+<text x="182" y="344" text-anchor="middle" font-weight="700" font-size="18">×1</text>
+<text x="58" y="366" text-anchor="middle" font-size="16" fill="#6b676c">Anfahrt</text>
+<text x="120" y="366" text-anchor="middle" font-size="16" fill="#6b676c">Antrag</text>
+<text x="182" y="366" text-anchor="middle" font-size="16" fill="#6b676c">Lüftung</text>
+<!-- Zähler rechts -->
+<rect x="270" y="316" width="56" height="60" rx="10" fill="#fde3d8"/>
+<rect x="332" y="316" width="56" height="60" rx="10" fill="#fde3d8"/>
+<rect x="394" y="316" width="56" height="60" rx="10" fill="#ecebec"/>
+<text x="298" y="344" text-anchor="middle" font-weight="700" font-size="18" fill="#b4502f">×3</text>
+<text x="360" y="344" text-anchor="middle" font-weight="700" font-size="18" fill="#b4502f">×3</text>
+<text x="422" y="344" text-anchor="middle" font-weight="700" font-size="18">×1</text>
+<text x="298" y="366" text-anchor="middle" font-size="16" fill="#6b676c">Anfahrt</text>
+<text x="360" y="366" text-anchor="middle" font-size="16" fill="#6b676c">Antrag</text>
+<text x="422" y="366" text-anchor="middle" font-size="16" fill="#6b676c">Lüftung</text>
+</g>
+</svg>
