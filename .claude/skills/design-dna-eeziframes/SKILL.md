@@ -237,6 +237,20 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   `/app/?ausprobieren=signature&direkt`: gleich „Was planst du?“ in der Kundenansicht, ohne Beispielseite und Kästchen, Rückweg zur
   Seite für Fensterbauer. Vorschlag für seine DNA: „Eine Leiste darf einen zweiten Weg tragen, wenn der Inhaber ihn nennt; der Anreiz
   ist einmalig, nie Dauerbewegung.“
+- Startseite als Planungswerkzeug (Inhaber, 29.10.2026: „Der Konfigurator sollte selbst der Einstieg sein“; am selben Tag gewichtet:
+  „auf den ersten Blick ein Planungswerkzeug, kein Vergleichs- oder Lead-Portal“, Abgrenzung von Seiten, die erst alle Daten abfragen):
+  Der Hero zeigt das 3-D-Fenster als Bildfolge des echten App-Modells (scripts/hero-fenster.mjs: buehne.js in WebGL mit ?gl=voll und
+  SwiftShader, ohne raum-licht; im Browser läuft kein WebGL, weil app.js zu schwer für die Startseite ist), es pendelt bis zur ersten
+  Berührung, lässt sich ziehen und mit Pfeiltasten drehen; 3 bis 4 Farbfelder (Schlüssel aus ral.js) wechseln den Rahmen, „Kostenlos
+  losplanen“ führt mit /app/?farbe=<Schlüssel>#ausmessen in die App; darunter „Ohne Konto, ohne Telefonnummer. Dein Ergebnis siehst du
+  sofort.“ Danach „Drei Schritte zu deinem Aufmaß“ (Messen, In 3D planen, Aufmaßblatt). Die Weitergabe an Fensterbetriebe steht nur als
+  leiser Zusatz beim Preis (/app/?weg=gratis#ausmessen): kein Etikett „Empfohlen“ oder „Beliebt“, kein durchgestrichener Preis, keine
+  Karte mit Pins, keine Überschrift mit „Angebote vergleichen“; „vergleichbare Angebote“ höchstens in diesem Zusatz. Das Foto mit dem
+  Lichtschatten auf dem Boden (bilder/konfigurator/buehne.webp) gehört nicht überall hin („muss ich nicht überall haben“). Sein Hausfoto
+  ist Material (Ausschnitt bilder/start/fassade.webp im Schritt „In 3D planen“), bis er ein eigenes Foto für die Fenster-Animation schickt.
+  Text überall ab 13 px. Protokoll docs/profis/2026-10-26-startseite-dna.md, Abschnitt „Umbau 29.10.2026“. Vorschläge für seine DNA:
+  „Ein Objekt zum Anfassen darf von selbst pendeln, bis der Besucher es berührt“ (Abschnitt 2, Bewegungs-Gene) und „Werkzeug vor
+  Vermittlung: Was der Besucher selbst tun kann, steht vorn; Weitergabe an Dritte ist ein leiser Zusatz“ (Abschnitt 4).
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

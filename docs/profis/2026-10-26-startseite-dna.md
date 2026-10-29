@@ -199,3 +199,130 @@ Umsetzung: Die Ansicht Hauseigentümer der echten Startseite ist jetzt diese Sei
 - Sprungmarken im Schatten-DOM per Skript; /#fensterbauer wechselt die Ansicht, /#wie öffnet „So funktioniert es“ für Betriebe.
 - Prüfsuite: Prüfungen der alten Startseite auf die neue umgeschrieben, keine abgeschaltet; 1089 bestanden. Drei Fehlschläge bestehen auch auf main ohne diese Änderung (Verglasungs-Lupe in der App, „Vertrag widerrufen“ und „nur für Unternehmer“ auf der Seite für Fensterbauer).
 - Bereitstellung: Der erste Bau bei Cloudflare blieb über 20 Minuten in „Initializing“ hängen und wurde abgebrochen; der Code baut mit `npx wrangler deploy --dry-run` sauber (282 Dateien). Dieser Eintrag löst den Bau erneut aus.
+
+## Umbau 29.10.2026: 3-D-Einstieg und Gratis-Wahl
+
+### Auftrag und zwei Korrekturen am selben Tag
+
+- Auftrag des Inhabers (sinngemäß): Der Konfigurator selbst ist der Einstieg, statt erklärt zu werden. Hero „zeigen statt erklären“: ein
+  echtes 3-D-Fenster, das sich langsam dreht und sich mit Finger, Maus und Tastatur drehen lässt, darunter 3 bis 4 Farbfelder, ein Tipp
+  wechselt den Rahmen; ergänzend ein kurzer Loop, in dem auf einer Hausfassade nacheinander die Fenster eingeplant werden. Überschrift
+  „Plane deine Fenster in 3D, bevor du den ersten Handwerker anrufst.“, Knopf „Kostenlos losplanen“. Dazu ursprünglich: der Gratis-Weg
+  als Wahl (zwei Karten, „Empfohlen“, durchgestrichener Preis), eine Drei-Schritte-Leiste mit Karte und Pins, Vertrauenssätze.
+- Korrektur 1 (Koordinator für den Inhaber): bis zu fünf Betriebe statt genau zwei, Texte entsprechend.
+- Korrektur 2, die neue Gewichtung (Koordinator für den Inhaber): **Die Seite ist auf den ersten Blick ein Planungswerkzeug, kein
+  Vergleichs- oder Lead-Portal.** Das Verschicken an Betriebe ist nur eine leise Zusatzmöglichkeit; Abgrenzung von Seiten, die erst alle
+  Daten abfragen. Umgesetzt: Hero bleibt, darunter „Ohne Konto, ohne Telefonnummer. Dein Ergebnis siehst du sofort.“; die drei Schritte
+  handeln vom Aufmaß (Messen, In 3D planen, Aufmaßblatt), die Karte mit Pins entfällt; statt der zwei Preiskarten steht der Preis wie
+  vorher („Messen kostet nichts.“, 7,99 € aus modell.js) und darunter ein leiser Zusatz zur Weitergabe; „vergleichbare Angebote“ nur dort.
+
+### Wahl zum Hero (drei Zeilen)
+
+1. Das 3-D-Fenster trägt den Hero allein: Es ist das, was der Besucher gleich selbst tut (G4, G7, G15), ein Foto dahinter wäre ein
+   zweites schweres Element und brächte am Telefon Fenster, Etiketten, Farbfelder und Pille nicht in einen Bildschirm.
+2. Das Hausfoto des Inhabers bleibt Material und trägt den Loop im Schritt „In 3D planen“ der Leiste direkt unter dem Hero: Dort erklärt
+   es genau diesen Schritt (Fenster 2 von 5 · geplant), und die kleinen Fenster des Hauses haben Platz für Umriss und Etikett.
+3. Das Foto mit dem Lichtschatten auf dem Boden (bilder/konfigurator/buehne.webp) ist nirgends verwendet; Handy und Maßlinien bleiben aus
+   dem Hero heraus.
+
+### Das 3-D-Fenster: Bildfolge des echten Modells, kein WebGL im Browser
+
+- Ehrlich gesagt: Im Hero läuft **kein WebGL**. Er zeigt eine **Bildfolge des echten App-Modells**: `scripts/hero-fenster.mjs` öffnet die App
+  mit `?gl=voll` in Chromium mit SwiftShader (`--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`), baut das Startfenster
+  der App (`HERO_WIN`, zweiflügelig, frei schwebend wie die Bühne in Schritt 1, `o.frei`, ohne `raum-licht`) mit `w3dHTML`/`w3dApply` und
+  lässt es von `Buehne3D` zeichnen, also mit demselben Programm, denselben Materialien und demselben Licht wie die Wünsche. Rahmenfarbe
+  außen je Farbfeld (w.fa), innen Verkehrsweiß; Kamera wie die Ansicht „außen“ der App (rx −8°, VIEWS.outside), Schwenk um 180° ± 36°.
+- Warum nicht live: Das Modell lebt in app.js (rund 1 MB) und buehne.js (127 KB); beides auf der Startseite zu laden, verzögert den ersten
+  Bildschirm deutlich, und Telefone ohne schnelle Grafik fielen auf das CSS-Modell zurück (kein Rendering im Sinne des Inhabers).
+- Daten: 25 Blickwinkel von −36° bis +36° in 3°-Schritten, je Farbe ein Raster 5 × 5 aus Feldern 516 × 600 px (WebP mit Transparenz,
+  Qualität 80), dazu der Ruhewinkel −21° als eigenes Bild (LCP, mit Maßen, `fetchpriority="high"`, vorab geladen). Farben aus ral.js:
+  9016 Verkehrsweiß (Start), 7016 Anthrazitgrau, 9005 Tiefschwarz, goak Golden Oak. Gewicht: 9016 12 KB + 285 KB = 298 KB (unter 400 KB),
+  7016 10 + 227 KB, 9005 9 + 202 KB, Golden Oak 16 + 383 KB. Angaben in web/bilder/start/fenster/fenster.json mit Fingerabdruck von
+  buehne.js und ral.js; die Prüfsuite meldet, wenn er nicht mehr passt (dann `PW_PFAD=/opt/node-tools node scripts/hero-fenster.mjs`).
+- Bedienung (startseite.js): Pendeln von selbst (Sinus, 10 s je Hin und Her, weich aus dem Stand), zwei Ebenen blenden zwischen
+  benachbarten Winkeln über; stoppt bei „weniger Bewegung“, außerhalb des Bildschirms, bei verstecktem Tab und für immer nach dem ersten
+  Ziehen, Tastendruck oder Tastaturfokus. Ziehen mit Finger oder Maus ab 6 px waagerecht (senkrecht scrollt die Seite), danach rastet der
+  nächste Winkel ein (160 ms). Tastatur: Pfeile, Bild auf/ab, Pos1, Ende, sofort, ohne Gleiten. Regler mit `role="slider"`, Wert in Grad,
+  Text „Blick von rechts, 21 Grad“. Strichskala darunter (G5), Licht und Kontaktschatten unter dem Fenster (G14), „Aus dem 3-D-Modell der
+  App“ als Marke. Farbfelder: runde Knöpfe 44 px, gewählt mit violettem Ring; der Tipp wechselt den Rahmen sofort (ist die Folge noch nicht
+  da, steht ihr Ruhebild), Name und RAL daneben, „Kostenlos losplanen“ führt mit `/app/?farbe=<Schlüssel>#ausmessen` in die App. Weitere
+  Farben: Ruhebilder 1,5 s nach dem Laden der Seite, Bildfolgen erst bei der ersten Berührung der Farbfelder (die angetippte zuerst).
+- Mit angefangenem Aufmaß heißt die Pille wie bisher „Aufmaß fortsetzen“ und führt ohne Farbe in die App (die Farbe überschriebe sonst
+  das erste Fenster des Aufmaßes).
+
+### Änderungstabelle
+
+| Bereich | Vorher (26.10.) | Nachher (29.10.) | Warum |
+| --- | --- | --- | --- |
+| Hero, Bühne | Hausfoto des Inhabers | 3-D-Fenster aus der Bildfolge des App-Modells, Lichtteich, violettes Licht und Kontaktschatten darunter, Strichskala | zeigen statt erklären (Auftrag) |
+| Hero, Bedienung | keine | Pendeln, Ziehen, Pfeiltasten; 4 Farbfelder mit Name und RAL | der Konfigurator ist der Einstieg |
+| Hero, Text | „Fensterplanung ganz eezi.“, Preis im Lead, „Mehr erfahren“, Chips der Wünsche | „Plane deine Fenster in 3D, *bevor du den ersten Handwerker anrufst.*“, „Farbe antippen, Fenster drehen.“, Pille „Kostenlos losplanen“ (?farbe=), darunter „Ohne Konto, ohne Telefonnummer. Dein Ergebnis siehst du sofort.“ | Auftrag und Gewichtung |
+| Neu unter dem Hero | – | „Drei Schritte zu deinem Aufmaß.“: Messen (Bild der Messfolie mit der Breite der Öffnung, 1.236 mm auf der Linie), In 3D planen (Hausfoto, fünf Fenster werden nacheinander eingeplant, Etikett „Fenster 2 von 5 · geplant“), Aufmaßblatt (das Blatt) | Leiste nach dem Hero (Auftrag, Gewichtung) |
+| Preis | „Messen kostet nichts.“ mit 7,99 € | unverändert, darunter leise: „Wenn du magst: Wir schicken dein Aufmaßblatt an Fensterbetriebe in deiner Nähe, dann ist es kostenlos. Nur wenn du das willst.“, ein Satz zur Wahl der Betriebe und zur Vermittlung, Textweg „Mit Weitergabe planen“ (/app/?weg=gratis#ausmessen) | Weitergabe nur als Möglichkeit (Gewichtung) |
+| Verworfen am selben Tag | – | zwei Preiskarten (0 € „Empfohlen“ gegen 7,99 €, durchgestrichener Preis), Karte mit Pins „Betriebe wählen“, Angebots-Marken am Blatt, Vertrauenszeilen zu Telefoncode und „Warum kostenlos?“ | Gewichtung des Inhabers |
+| So geht es, Schritt 4 | „Einmal 7,99 € für alle Fenster.“ | unverändert | – |
+| Schrift und Ziele | Labels und Bildunterschriften 12 px, Fußlinks schmaler als 44 px | Text überall ab 13 px, Ziele ab 44 px (auch Links im Fließtext und im Fuß), Bento-Bilder mit Maßen | Grenzen des Auftrags |
+| Suchmaschinen | Titel „Fenster selbst ausmessen, Aufmaß ohne Anfahrt“, h1 „Fensterplanung ganz eezi.“ | Titel „Fenster in 3D planen und selbst ausmessen“, h1 wie sichtbar, Text und JSON-LD mit Planen zuerst, drei Angebote (Planen 0 €, Aufmaßblatt 7,99 €, Aufmaßblatt mit Weitergabe auf Wunsch 0 €) | stimmig zum Sichtbaren |
+
+### Messwerte (Endfassung; Bilder docs/profis/bilder/2026-10-29-startseite-3d-tel.jpg und -desk.jpg)
+
+- Telefon 390 × 844: Pille „Kostenlos losplanen“ 708–760 px (unteres Drittel), genau eine volle Pille je Bildschirm, kein Querscrollen.
+  Schreibtisch 1280 × 800: Pille 468–520 px.
+- Layoutsprung 0 (Telefon, Schreibtisch, ruhige Fassung); LCP ist das Ruhebild des Fensters nach 0,21–0,27 s (lokal, ohne Drosselung);
+  keine Weichzeichner auf Flächen oder Pseudoelementen; keine lazy-Bilder; Text ab 13 px; Ziele ab 44 px; keine Konsolenfehler; CSP
+  eingehalten, keine fremden Server.
+- Ruhige Fassung: das Fenster steht (−21°), die Fassade zeigt sofort alle fünf Fenster geplant.
+
+Farbanteile je Bildschirm (`werkzeuge/farben.py`), Telefon 390 × 844:
+
+| Bildschirm | Neutral % | Violett | Koralle | Indigo | Foto | Farbe gesamt |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 Hero | 98,5 (S 72 · A 5 · G 13 · W 8) | 0,4 | 0,2 | 0,9 | 0,0 | 1,5 |
+| 2 Drei Schritte | 91,6 (S 25 · A 37 · G 18 · W 11) | 0,0 | 6,3 | 0,0 | 2,0 | 8,4 |
+| 3 Drei Schritte | 92,4 (S 24 · A 42 · G 9 · W 18) | 0,0 | 5,7 | 0,0 | 1,8 | 7,6 |
+| 4 Konfigurator | 87,7 (S 1 · A 12 · G 5 · W 70) | 1,6 | 0,2 | 3,9 | 6,7 | 12,3 |
+| 5 Konfigurator | 88,1 | 1,6 | 0,2 | 3,9 | 6,2 | 11,9 |
+| 6 So geht es | 93,5 | 0,9 | 0,1 | 0,8 | 4,7 | 6,5 |
+| 7 So geht es | 95,6 | 0,0 | 0,0 | 0,8 | 3,4 | 4,4 |
+| 8 Aufmaß | 100,0 | 0,0 | 0,0 | 0,0 | 0,0 | 0,0 |
+| 9 Aufmaß | 99,4 | 0,4 | 0,0 | 0,2 | 0,0 | 0,6 |
+| 10 Preis | 94,3 (S 3 · A 1 · G 6 · W 84) | 4,9 | 0,8 | 0,0 | 0,0 | 5,7 |
+| 11 Preis, Zusatz | 94,3 | 4,9 | 0,8 | 0,0 | 0,0 | 5,7 |
+| 12 Ratgeber | 99,3 | 0,0 | 0,0 | 0,7 | 0,0 | 0,7 |
+| 13 Fensterbauer | 100,0 | 0,0 | 0,0 | 0,0 | 0,0 | 0,0 |
+| 14 Fuß | 99,4 | 0,2 | 0,0 | 0,5 | 0,0 | 0,6 |
+| **Seite** | 95,3 (S 39 · A 16 · G 7 · W 33) | 1,1 | 1,0 | 0,8 | 1,8 | 4,7 |
+
+Schreibtisch 1280 × 800: Seite 97,3 (S 53 · A 11 · G 4 · W 29), Violett 0,6, Koralle 0,2, Indigo 0,7, Foto 1,2, Farbe gesamt 2,7;
+Hero 0,9 (Violett 0,2 vor Koralle 0,1), Drei Schritte 2,5 (Koralle 1,9 aus dem Hausfoto), Konfigurator je 8,7, Preis 3,2, Rest unter 2,7.
+
+Abweichungen: In den Bildschirmen der drei Schritte führt Koralle (6,3 und 5,7) ohne Violett; das ist das Ziegeldach und das Abendlicht
+im Hausfoto des Inhabers (Fotos zählen als Farbe; beim Hero-Foto galt am 26.10. der Eindruck). Das Foto ist dort mit einem Schleier aus
+Schwarz gedämpft (vorher 9,9 % Koralle und 13,1 % gesamt). Bildschirm 4 (Bento, unverändert) liegt mit 12,3 knapp über 12, wie schon am
+26.10. (12,6). Im Hero ist das Licht unter dem Fenster so violett, dass Violett vor Koralle (Golden-Oak-Feld) liegt; Violett bleibt Licht,
+Ring und Punkt, nie Fläche.
+
+### Gremium
+
+Nicht einberufen: In dieser Sitzung gab es kein Werkzeug für parallele Agenten, und der Inhaber hat die Entscheidungsfindung verkürzt.
+Statt der Runde: DNA-Prüfliste, Messwerkzeuge, Bildschirme ganz durchgesehen. Wenn der Inhaber es wünscht, eine Runde nachholen.
+
+### Prüfsuite
+
+Startseite in Abschnitt 2 (neu: Bildfolge gegen fenster.json und Fingerabdruck, Gewicht der ersten Farbe, Markup des Betrachters, Pendeln,
+Farbfelder mit ?farbe, Tastatur, Ziehen, Abgrenzung unter der Pille, drei Schritte, leiser Zusatz mit ?weg=gratis, keine Merkmale eines
+Vergleichsportals, Pille im unteren Drittel, ruhige Fassung mit Layoutsprung 0), Abschnitte 6 und 10 (h1 und Einstieg), 14 (Aufmaß
+fortsetzen). Ergebnisse siehe Bericht der Übergabe; alles grün, nichts abgeschaltet.
+
+### Offen
+
+- App (andere Sitzung): `/app/?farbe=<Schlüssel>#ausmessen` als Rahmenfarbe außen des ersten Fensters und `/app/?weg=gratis#ausmessen`
+  für die Weitergabe. Im Stand dieses Zweigs sagt die Weiche der App noch „bis zu drei Fensterbetriebe“ und „Dein Aufmaßblatt als PDF ist
+  dabei nicht enthalten“; der leise Zusatz der Startseite verspricht das Blatt kostenlos bei Weitergabe. Das muss die App angleichen.
+- Eigenes Hausfoto des Inhabers für die Fenster-Animation im Schritt „In 3D planen“ (der Koordinator baut sie danach); bis dahin das
+  Foto vom 26.10. als Ausschnitt (web/bilder/start/fassade.webp).
+- Bewegung von selbst: Pendeln und Fassaden-Loop laufen auf Wunsch des Inhabers länger als die 5 s der DNA (Pendeln bis zur ersten
+  Berührung, Loop höchstens drei Durchläufe je Sichtbarkeit). Vorschlag für die DNA: „Ein Objekt zum Anfassen darf von selbst pendeln, bis
+  der Besucher es berührt.“
+- Die Vorschau unter docs/profis/startseite-dna-vorschau/ ist nicht nachgezogen; Quelle der Startseite sind jetzt die Dateien unter web/.
+- Test auf einem echten Mittelklasse-Telefon (Speicher der Bildfolge: 2580 × 3000 px je Farbe, dekodiert etwa 31 MB).
