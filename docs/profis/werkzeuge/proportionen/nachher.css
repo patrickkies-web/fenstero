@@ -1,10 +1,8 @@
 /* Proportionen des Konfigurators (Vorschlag 29.10.2026): Bühne +20 %, Bedienelemente kompakter, gewählt = Weiß */
 
-/* 1. Bühne 20 % größer */
+/* 1. Bühne 20 % größer (nur Telefon) */
 .dna .wz-buehne { height: clamp(264px, calc(100svh - 430px), 326px) }
-@media (min-width: 1024px) {
-  .dna { --bx: clamp(16px, calc((100vw - 380px) * .05), 110px); --by: clamp(12px, calc((100svh - 60px) * .05), 60px) }
-}
+/* Laptop: Bühne unverändert (Inhaber, 29.10.2026: die Vergrößerung gilt nur fürs Telefon) */
 
 /* 2. Frage und Antworten kompakter */
 .dna .wz-frage h1 { font-size: 26px }
