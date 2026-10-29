@@ -1,5 +1,5 @@
 {
-  "stand": "97abf8cef418673c3c644f78318413f6",
+  "stand": "0074d144d01555d12912c772e67c49b7",
   "erzeugt": "2026-10-29",
   "modelle": [
     {
@@ -98,31 +98,31 @@
     ]
   },
   "bytes": {
-    "raff-9016": 497732,
-    "raff-7016": 387680,
-    "raff-9005": 338102,
-    "raff-goak": 457814,
-    "sprossen-9016": 328528,
-    "sprossen-7016": 257362,
-    "sprossen-9005": 239278,
-    "sprossen-goak": 429774,
-    "drei-9016": 431234,
-    "drei-7016": 367614,
-    "drei-9005": 330472,
-    "drei-goak": 454378
+    "raff-9016": 497930,
+    "raff-7016": 387638,
+    "raff-9005": 338250,
+    "raff-goak": 457934,
+    "sprossen-9016": 339498,
+    "sprossen-7016": 266034,
+    "sprossen-9005": 250808,
+    "sprossen-goak": 442416,
+    "drei-9016": 430746,
+    "drei-7016": 367542,
+    "drei-9005": 329724,
+    "drei-goak": 461796
   },
   "ruheBytes": {
     "raff-9016": 21416,
-    "raff-7016": 16848,
-    "raff-9005": 14636,
-    "raff-goak": 19748,
-    "sprossen-9016": 14450,
-    "sprossen-7016": 11266,
-    "sprossen-9005": 10516,
-    "sprossen-goak": 18380,
-    "drei-9016": 18552,
-    "drei-7016": 15686,
-    "drei-9005": 14366,
-    "drei-goak": 19412
+    "raff-7016": 16854,
+    "raff-9005": 14646,
+    "raff-goak": 19720,
+    "sprossen-9016": 14836,
+    "sprossen-7016": 11676,
+    "sprossen-9005": 11050,
+    "sprossen-goak": 19076,
+    "drei-9016": 18544,
+    "drei-7016": 15690,
+    "drei-9005": 14388,
+    "drei-goak": 19596
   }
 }
