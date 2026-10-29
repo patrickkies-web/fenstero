@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 372" width="480" height="372">
+
+
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#07090a"/></marker></defs>
+<rect width="480" height="372" rx="16" fill="#ffffff"/>
+<g stroke-width="6.6">
+<rect x="32" y="56" width="184" height="76" rx="10" fill="#ecebec" stroke="#f88962"/>
+<rect x="32" y="196" width="56" height="56" rx="10" fill="#ecebec" stroke="#f88962"/>
+<rect x="96" y="196" width="56" height="56" rx="10" fill="#ecebec" stroke="#f88962"/>
+<rect x="160" y="196" width="56" height="56" rx="10" fill="#eceef1" stroke="#897efc"/>
+<rect x="264" y="56" width="184" height="76" rx="10" fill="#eceef1" stroke="#897efc"/>
+<rect x="328" y="196" width="56" height="56" rx="10" fill="#eceef1" stroke="#897efc"/>
+</g>
+<line x1="240" y1="24" x2="240" y2="292" stroke="#d2d0d3" stroke-width="3.3"/>
+<g stroke="#07090a" stroke-width="4.4" fill="none">
+<line x1="124" y1="133" x2="62" y2="193"/>
+<line x1="124" y1="133" x2="124" y2="193"/>
+<line x1="124" y1="133" x2="186" y2="193"/>
+<line x1="356" y1="133" x2="356" y2="193"/>
+</g>
+<line x1="24" y1="306" x2="456" y2="306" stroke="#d2d0d3" stroke-width="3.3"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a" text-anchor="middle">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</g>
+</svg>

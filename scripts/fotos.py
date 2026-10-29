@@ -38,9 +38,18 @@ PLAETZE = [
     ('weg-einbauen', 1600, 1000),
     ('fehler', 1600, 1000),
     # Verkaufsseite für Fensterbauer (docs/BILDER.md, Plätze für die Fensterbauer-Seiten)
+    ('fb-anfrage', 1600, 1000),
     ('fb-kunden-planen', 1200, 1500),
     ('fb-kundenschutz', 1600, 1000),
+    ('fb-pakete', 1600, 1000),
+    ('fb-ablauf', 1600, 1000),
     ('fb-frage', 1600, 1000),
+    # Kundenkonto, Bestellformular und Essential-Bestätigung (docs/BILDER.md, Plätze 8–12)
+    ('partner-start', 1200, 1500),
+    ('partner-gestaltung', 1600, 1000),
+    ('partner-warten', 1600, 1000),
+    ('partner-live', 1600, 1000),
+    ('instanz-danke', 1600, 1000),
 ]
 GRUND, FLAECHE, LINIE, LINIE2, TEXT, NEBEN, SIGNAL = '#161616', '#1f1f1f', '#2b2b2b', '#3a3a3a', '#f3f2ee', '#93928d', '#8fd694'
 SCHRIFT = pathlib.Path('/usr/share/fonts/opentype/inter')
