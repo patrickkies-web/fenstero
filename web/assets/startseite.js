@@ -150,28 +150,41 @@
       const k = Math.round(p);
       if (k !== altK) { if (striche[altK]) striche[altK].classList.remove('ist-da'); if (striche[k]) striche[k].classList.add('ist-da'); altK = k; wert(k); }
     }
-    /* sofort aus dem Raster malen, dann in Einzelbilder zerlegen (kleine Texturen statt einer großen); die alten werden freigegeben */
-    function setzeFolge(k, im) {
-      const bw = Math.round(im.naturalWidth / SP), bh = Math.round(im.naturalHeight / ZE);
-      const neu = Array.from({ length: N }, (_, i) => ({ img: im, sx: (i % SP) * bw, sy: Math.floor(i / SP) * bh, w: bw, h: bh, bm: null }));
-      frei(); bilder = neu; altI = -1; altF = -1; folge = k; leinwand.dataset.folge = k; zeige(); el.classList.add('ist-folge'); weiter();
-      if (typeof w.createImageBitmap !== 'function') return;
-      Promise.all(neu.map((b) => w.createImageBitmap(im, b.sx, b.sy, b.w, b.h).then((bm) => { b.bm = bm; }, () => {}))).then(() => {
-        if (bilder !== neu) neu.forEach((b) => { if (b.bm && b.bm.close) b.bm.close(); });
-        else { altI = -1; zeige(); }
+    /* Die Folge kommt als Datei (fetch), wird im Hintergrund einmal dekodiert (createImageBitmap) und in Einzelbilder zerlegt; erst dann
+       löst die Leinwand das Ruhebild ab. Aus einem Bild-Element malen oder ausschneiden dekodiert das ganze Raster auf der Hauptspur neu
+       (gemessen: 8 s für 37 Ausschnitte, Hänger von 2 s beim Wechsel). Gehalten werden nur die Einzelbilder des gezeigten Fensters. */
+    let zerlegt = 0;
+    function zerlege(bl) {
+      if (typeof w.createImageBitmap !== 'function') {
+        return new Promise((ok, nein) => { const im = new Image(); im.onload = () => ok(im); im.onerror = nein; im.src = URL.createObjectURL(bl); }).then((im) => {
+          const bw = Math.round(im.naturalWidth / SP), bh = Math.round(im.naturalHeight / ZE);
+          return Array.from({ length: N }, (_, i) => ({ img: im, sx: (i % SP) * bw, sy: Math.floor(i / SP) * bh, w: bw, h: bh, bm: null }));
+        });
+      }
+      return w.createImageBitmap(bl).then((ganz) => {
+        const bw = Math.round(ganz.width / SP), bh = Math.round(ganz.height / ZE);
+        const neu = Array.from({ length: N }, (_, i) => ({ sx: (i % SP) * bw, sy: Math.floor(i / SP) * bh, w: bw, h: bh, bm: null }));
+        /* je vier Ausschnitte, dann die Hauptspur kurz freigeben: alle 37 auf einmal blockieren sie auf einem Telefon rund 0,3 s */
+        const portion = (i) => (i >= N ? Promise.resolve() : Promise.all(neu.slice(i, i + 4).map((b) => w.createImageBitmap(ganz, b.sx, b.sy, b.w, b.h).then((bm) => { b.bm = bm; })))
+          .then(() => new Promise((r) => w.setTimeout(r, 0))).then(() => portion(i + 4)));
+        return portion(0)
+          .then(() => { if (ganz.close) ganz.close(); return neu; }, (e) => { if (ganz.close) ganz.close(); neu.forEach((b) => { if (b.bm && b.bm.close) b.bm.close(); }); throw e; });
       });
+    }
+    function setzeFolge(k, bl) {
+      const nr = ++zerlegt;
+      return zerlege(bl).then((neu) => {
+        if (nr !== zerlegt || schluessel !== k || wechselt) { neu.forEach((b) => { if (b.bm && b.bm.close) b.bm.close(); }); return; }
+        frei(); bilder = neu; altI = -1; altF = -1; folge = k; leinwand.dataset.folge = k; zeige(); el.classList.add('ist-folge'); weiter();
+      }, () => { /* ohne Folge bleibt das Ruhebild */ });
     }
     function frei() { bilder.forEach((b) => { if (b.bm && b.bm.close) b.bm.close(); b.bm = null; }); bilder = []; }
     function lade(k) {
-      if (!laden[k]) laden[k] = new Promise((ok, nein) => {
-        const im = new Image(); im.decoding = 'async';
-        im.onload = () => { const fertig = () => { geladen[k] = im; ok(im); }; if (im.decode) im.decode().then(fertig, fertig); else fertig(); };
-        im.onerror = () => { delete laden[k]; nein(new Error('Bildfolge ' + k)); };
-        im.src = BILDER + k + '.webp';
-      });
+      if (!laden[k]) laden[k] = fetch(BILDER + k + '.webp').then((r) => { if (!r.ok) throw new Error('Bildfolge ' + k); return r.blob(); })
+        .then((bl) => { geladen[k] = bl; return bl; }, (e) => { delete laden[k]; throw e; });
       return laden[k];
     }
-    const nimm = (k) => lade(k).then((im) => { if (schluessel === k && folge !== k) setzeFolge(k, im); }, () => { /* ohne Folge bleibt das Ruhebild */ });
+    const nimm = (k) => lade(k).then((bl) => (schluessel === k && folge !== k ? setzeFolge(k, bl) : null), () => { /* ohne Folge bleibt das Ruhebild */ });
     /* das nächste Fenster vorab: erst sein Ruhebild, dann seine Folge (nicht bei „Daten sparen“) */
     function vorab() {
       if (MODELLE.length < 2) return;
