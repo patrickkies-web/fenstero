@@ -353,7 +353,8 @@
 .ez-dreh__modell { position: absolute; inset: 0; pointer-events: none; }
 .ez-dreh__modell > img, .ez-dreh__bild { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .ez-dreh__ruhe { display: block; object-fit: contain; -webkit-user-drag: none; }
-.ez-dreh__bild { display: block; background-repeat: no-repeat; background-size: 500% 500%; opacity: 0; }
+.ez-dreh__bild { display: block; opacity: 0; }
+.ez-dreh.ist-folge .ez-dreh__bild { opacity: 1; }
 .ez-dreh.ist-folge .ez-dreh__ruhe { visibility: hidden; }
 .ez-dreh__marke { position: absolute; left: 0; top: 4px; display: inline-flex; align-items: center; gap: 8px; font: 400 13px/1.2 var(--font-sans); letter-spacing: .02em; color: var(--tinte-2); }
 .ez-dreh__marke::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 26%, transparent); }

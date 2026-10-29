@@ -103,17 +103,22 @@
      Fenster. Solange jemand dreht (Finger, Maus, Tastatur) oder die Maus darüber steht, bleibt es; nach dem Loslassen kommt das nächste.
      Die Farbe wählt der Besucher frei, sie gilt dann für alle drei und bleibt; bis dahin zeigt jedes seine Vorgabe. Zwei Ebenen blenden
      zwischen benachbarten Winkeln über, damit das Drehen ohne Stufen läuft. Bei „weniger Bewegung“ weder Pendeln noch Wechsel von
-     selbst, nach dem Loslassen nur ein Überblenden. Außerhalb des Bildschirms und im Hintergrund-Tab steht alles. */
+     selbst, nach dem Loslassen nur ein Überblenden. Außerhalb des Bildschirms und im Hintergrund-Tab steht alles.
+     Gezeichnet wird auf eine Leinwand: die Folge wird in Einzelbilder zerlegt (createImageBitmap), zwischen zwei Winkeln wird echt
+     überblendet (1 − f und f, addiert), und gemalt wird nur, wenn sich Bild oder Anteil ändern. Ein großes Hintergrundbild mit
+     wechselnder Position ließ das Pendeln auf Telefonen stocken (Inhaber, 29.10.2026: „läuft überhaupt nicht smooth“). */
   const BILDER = '/bilder/start/fenster/';
   function dreh(root) {
     const el = root.querySelector('[data-ez="dreh"]'); if (!el) return;
-    const flaeche = el.querySelector('.ez-dreh__fenster'), modellEl = el.querySelector('.ez-dreh__modell'), ruhe = el.querySelector('.ez-dreh__ruhe'), lagen = Array.from(el.querySelectorAll('.ez-dreh__bild'));
+    const flaeche = el.querySelector('.ez-dreh__fenster'), modellEl = el.querySelector('.ez-dreh__modell'), ruhe = el.querySelector('.ez-dreh__ruhe'), leinwand = el.querySelector('canvas.ez-dreh__bild');
+    const ctx = leinwand && leinwand.getContext ? leinwand.getContext('2d') : null;
     const knoepfe = Array.from(root.querySelectorAll('.ez-farbe[data-farbe]')), gruppe = root.querySelector('.ez-farben'), nameEl = el.querySelector('[data-ez="modellname"]');
     const N = +el.dataset.bilder || 1, SP = +el.dataset.spalten || 1, ZE = Math.ceil(N / SP), RUHE = +el.dataset.ruhe || 0, VON = +el.dataset.von || 0, SCHRITT = +el.dataset.schritt || 1;
-    const MITTE = (N - 1) / 2, AMP = Math.max(0, MITTE - 0.6), DAUER = 10000, BLENDE = 1400, TAKT = 7000, NACH_LOS = 900;
+    /* Pendel: ±26° in 12 s, ruhig genug, dass zwei Winkel nie hart wechseln */
+    const MITTE = (N - 1) / 2, AMP = Math.max(0, Math.min(MITTE - 0.6, 26 / SCHRITT)), DAUER = 12000, BLENDE = 1400, TAKT = 7000, NACH_LOS = 900;
     const klemme = (v) => Math.min(N - 1, Math.max(0, v));
     let MODELLE = []; try { MODELLE = JSON.parse(el.dataset.modelle || '[]'); } catch (e) { MODELLE = []; }
-    if (!flaeche || !modellEl || !ruhe || lagen.length < 2 || N < 2 || !MODELLE.length) return;
+    if (!flaeche || !modellEl || !ruhe || !ctx || N < 2 || !MODELLE.length) return;
     let mi = Math.max(0, MODELLE.findIndex((m) => m.k === el.dataset.modell));
     const farbeVon = (m) => farbe || m.f, schl = (m) => m.k + '-' + farbeVon(m);
     let schluessel = schl(MODELLE[mi]);
@@ -122,37 +127,51 @@
     if (skala) striche.push(...skala.children);
 
     let pos = RUHE, folge = null, gestoppt = reduziert, sichtbar = true, raf = 0, ziehen = null, t0 = 0, phase = 0, blendeAb = 0, blendeVon = RUHE;
-    let altI = -1, altF = -1, altK = -1, uhr = 0, ueber = false, fokus = false, wechselt = false, zwingend = false;
-    const geladen = {}, laden = {}, sparen = !!(navigator.connection && navigator.connection.saveData);
-    const feld = (i) => (SP > 1 ? (i % SP) / (SP - 1) * 100 : 0) + '% ' + (ZE > 1 ? Math.floor(i / SP) / (ZE - 1) * 100 : 0) + '%';
+    let altI = -1, altF = -1, altK = -1, uhr = 0, ueber = false, fokus = false, wechselt = false, zwingend = false, bilder = [];
+    const geladen = {}, laden = {}, sparen = !!(navigator.connection && navigator.connection.saveData), BW = leinwand.width, BH = leinwand.height;
     function wert(k) {
       const g = Math.round(VON + k * SCHRITT);
       flaeche.setAttribute('aria-valuenow', String(g));
       flaeche.setAttribute('aria-valuetext', g === 0 ? 'Blick von vorn' : 'Blick von ' + (g < 0 ? 'rechts' : 'links') + ', ' + Math.abs(g) + ' Grad');
     }
+    const zeichne = (b) => { if (b.bm) ctx.drawImage(b.bm, 0, 0, BW, BH); else ctx.drawImage(b.img, b.sx, b.sy, b.w, b.h, 0, 0, BW, BH); };
+    function male(i, f) {
+      const a = bilder[i], b = f > 0 ? bilder[Math.min(N - 1, i + 1)] : null;
+      ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.clearRect(0, 0, BW, BH);
+      if (!a) return;
+      if (!b || b === a) { zeichne(a); return; }
+      ctx.globalAlpha = 1 - f; zeichne(a);
+      ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = f; zeichne(b);
+      ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    }
     function zeige() {
-      const p = klemme(pos), i = Math.floor(p), f = Math.round((p - i) * 24) / 24;
-      if (folge) {
-        if (i !== altI) { lagen[0].style.backgroundPosition = feld(i); lagen[1].style.backgroundPosition = feld(Math.min(N - 1, i + 1)); altI = i; }
-        if (f !== altF) { lagen[1].style.opacity = String(f); altF = f; }
-      }
+      const p = klemme(pos), i = Math.floor(p), f = Math.round((p - i) * 32) / 32;
+      if (folge && (i !== altI || f !== altF)) { male(i, f); altI = i; altF = f; }
       const k = Math.round(p);
       if (k !== altK) { if (striche[altK]) striche[altK].classList.remove('ist-da'); if (striche[k]) striche[k].classList.add('ist-da'); altK = k; wert(k); }
     }
-    function setzeFolge(k, url) {
-      lagen.forEach((l, i) => { l.style.backgroundImage = 'url("' + url + '")'; l.style.opacity = i ? '0' : '1'; });
-      altI = -1; altF = -1; folge = k; el.classList.add('ist-folge'); zeige(); weiter();
+    /* sofort aus dem Raster malen, dann in Einzelbilder zerlegen (kleine Texturen statt einer großen); die alten werden freigegeben */
+    function setzeFolge(k, im) {
+      const bw = Math.round(im.naturalWidth / SP), bh = Math.round(im.naturalHeight / ZE);
+      const neu = Array.from({ length: N }, (_, i) => ({ img: im, sx: (i % SP) * bw, sy: Math.floor(i / SP) * bh, w: bw, h: bh, bm: null }));
+      frei(); bilder = neu; altI = -1; altF = -1; folge = k; leinwand.dataset.folge = k; zeige(); el.classList.add('ist-folge'); weiter();
+      if (typeof w.createImageBitmap !== 'function') return;
+      Promise.all(neu.map((b) => w.createImageBitmap(im, b.sx, b.sy, b.w, b.h).then((bm) => { b.bm = bm; }, () => {}))).then(() => {
+        if (bilder !== neu) neu.forEach((b) => { if (b.bm && b.bm.close) b.bm.close(); });
+        else { altI = -1; zeige(); }
+      });
     }
+    function frei() { bilder.forEach((b) => { if (b.bm && b.bm.close) b.bm.close(); b.bm = null; }); bilder = []; }
     function lade(k) {
       if (!laden[k]) laden[k] = new Promise((ok, nein) => {
         const im = new Image(); im.decoding = 'async';
-        im.onload = () => { const fertig = () => { geladen[k] = im.src; ok(im.src); }; if (im.decode) im.decode().then(fertig, fertig); else fertig(); };
+        im.onload = () => { const fertig = () => { geladen[k] = im; ok(im); }; if (im.decode) im.decode().then(fertig, fertig); else fertig(); };
         im.onerror = () => { delete laden[k]; nein(new Error('Bildfolge ' + k)); };
         im.src = BILDER + k + '.webp';
       });
       return laden[k];
     }
-    const nimm = (k) => lade(k).then((url) => { if (schluessel === k && folge !== k) setzeFolge(k, url); }, () => { /* ohne Folge bleibt das Ruhebild */ });
+    const nimm = (k) => lade(k).then((im) => { if (schluessel === k && folge !== k) setzeFolge(k, im); }, () => { /* ohne Folge bleibt das Ruhebild */ });
     /* das nächste Fenster vorab: erst sein Ruhebild, dann seine Folge (nicht bei „Daten sparen“) */
     function vorab() {
       if (MODELLE.length < 2) return;
@@ -210,7 +229,7 @@
       const aus = reduziert || !kann ? null : modellEl.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(8px) scale(.965)' }], { duration: 220, easing: 'cubic-bezier(.55,0,1,.45)', fill: 'forwards' });
       Promise.all([aus ? aus.finished.catch(() => {}) : null, bereit]).then(() => {
         mi = ni; schluessel = k; pos = RUHE; gestoppt = reduziert;
-        folge = null; el.classList.remove('ist-folge'); lagen.forEach((l) => { l.style.opacity = '0'; });
+        folge = null; el.classList.remove('ist-folge'); frei();
         ruhe.src = BILDER + k + '-ruhe.webp'; altI = -1; altF = -1; altK = -1; beschrifte(); zeige();
         if (kann) modellEl.getAnimations().forEach((a) => a.cancel());
         const ein = kann ? modellEl.animate(reduziert ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: 'translateY(-6px) scale(1.035)' }, { opacity: 1, transform: 'none' }], { duration: reduziert ? 200 : 460, easing: 'cubic-bezier(.22,1,.36,1)' }) : null;
@@ -238,7 +257,8 @@
         ziehen.an = true; ziehen.x = e.clientX; halt(); flaeche.classList.add('ist-gezogen');
         try { flaeche.setPointerCapture(e.pointerId); } catch (x) { /* schon losgelassen */ }
       }
-      pos = klemme(ziehen.p + (e.clientX - ziehen.x) / Math.max(6, flaeche.clientWidth / 16)); zeige();
+      /* gleiche Drehung je Pixel, egal wie fein die Winkel liegen: eine Breite des Bildes sind 48° */
+      pos = klemme(ziehen.p + (e.clientX - ziehen.x) / Math.max(3, flaeche.clientWidth / 48 * SCHRITT)); zeige();
     });
     const loslassen = (e) => {
       if (!ziehen || e.pointerId !== ziehen.id) return;
@@ -273,7 +293,7 @@
       const k = schl(MODELLE[mi]); schluessel = k;
       if (!wechselt) {
         if (geladen[k]) setzeFolge(k, geladen[k]);
-        else { folge = null; el.classList.remove('ist-folge'); if (raf) { w.cancelAnimationFrame(raf); raf = 0; } ruhe.src = BILDER + k + '-ruhe.webp'; pos = RUHE; zeige(); nimm(k); }
+        else { folge = null; el.classList.remove('ist-folge'); frei(); if (raf) { w.cancelAnimationFrame(raf); raf = 0; } ruhe.src = BILDER + k + '-ruhe.webp'; pos = RUHE; zeige(); nimm(k); }
       }
       planen();
     }

@@ -125,14 +125,14 @@
       <div class="ez-hero">
         <div class="ez-hero__buehne">
           <!-- Dreh-Betrachter: drei Fenster aus dem echten 3-D-Modell der App (buehne.js in WebGL) wechseln sich ab, je Modell und Farbe ein
-               Raster aus 25 Blickwinkeln von −36° bis +36° (scripts/hero-fenster.mjs, Angaben in /bilder/start/fenster/fenster.json);
-               startseite.js blättert darin und wechselt die Fenster (Inhaber, 29.10.2026) -->
-          <div class="ez-dreh" data-ez="dreh" data-bilder="25" data-spalten="5" data-ruhe="5" data-von="-36" data-schritt="3" data-modell="raff" data-farbe="7016" data-modelle='[{"k":"raff","f":"7016","n":"Mit Raffstore"},{"k":"sprossen","f":"9016","n":"Mit Sprossen"},{"k":"drei","f":"9016","n":"Dreiteilig mit Rollladen"}]'>
+               Raster aus 37 Blickwinkeln von −36° bis +36° in 2°-Schritten (scripts/hero-fenster.mjs, Angaben in /bilder/start/fenster/fenster.json);
+               startseite.js zeichnet daraus auf die Leinwand und wechselt die Fenster (Inhaber, 29.10.2026) -->
+          <div class="ez-dreh" data-ez="dreh" data-bilder="37" data-spalten="5" data-ruhe="8" data-von="-36" data-schritt="2" data-modell="raff" data-farbe="7016" data-modelle='[{"k":"raff","f":"7016","n":"Mit Raffstore"},{"k":"sprossen","f":"9016","n":"Mit Sprossen"},{"k":"drei","f":"9016","n":"Dreiteilig mit Rollladen"}]'>
             <span class="ez-dreh__marke">Aus dem 3-D-Modell der App<span class="ez-dreh__modellname" data-ez="modellname">Mit Raffstore</span></span>
-            <div class="ez-dreh__fenster" role="slider" tabindex="0" aria-label="Fenster drehen: Mit Raffstore, Rahmen außen Anthrazitgrau" aria-valuemin="-36" aria-valuemax="36" aria-valuenow="-21" aria-valuetext="Blick von rechts, 21 Grad" aria-describedby="dreh-hilfe">
+            <div class="ez-dreh__fenster" role="slider" tabindex="0" aria-label="Fenster drehen: Mit Raffstore, Rahmen außen Anthrazitgrau" aria-valuemin="-36" aria-valuemax="36" aria-valuenow="-20" aria-valuetext="Blick von rechts, 20 Grad" aria-describedby="dreh-hilfe">
               <span class="ez-dreh__modell">
                 <img class="ez-dreh__ruhe" src="/bilder/start/fenster/raff-7016-ruhe.webp" width="600" height="560" alt="" fetchpriority="high" decoding="async" draggable="false">
-                <span class="ez-dreh__bild" aria-hidden="true"></span><span class="ez-dreh__bild" aria-hidden="true"></span>
+                <canvas class="ez-dreh__bild" width="600" height="560" aria-hidden="true"></canvas>
               </span>
             </div>
             <div class="ez-dreh__skala" aria-hidden="true"></div>
