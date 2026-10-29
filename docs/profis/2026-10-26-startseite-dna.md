@@ -326,3 +326,24 @@ fortsetzen). Ergebnisse siehe Bericht der Übergabe; alles grün, nichts abgesch
   der Besucher es berührt.“
 - Die Vorschau unter docs/profis/startseite-dna-vorschau/ ist nicht nachgezogen; Quelle der Startseite sind jetzt die Dateien unter web/.
 - Test auf einem echten Mittelklasse-Telefon (Speicher der Bildfolge: 2580 × 3000 px je Farbe, dekodiert etwa 31 MB).
+
+### Nachtrag 29.10.2026, abends: drei Fenster im Wechsel, weißer Schein
+
+Auftrag des Inhabers: „Du hast einfach das hässlichste Fenster genommen. Ich will, dass du da ein schickes graues mit Raffstore nimmst,
+keinen lila, sondern weißen Schein, und dann noch ein Fenster in Weiß mit Sprossen und ein Dreierfenster in Weiß ohne Sprossen, aber mit
+Rollläden, und die switchen so abwechselnd und sind, wenn sie da sind, drehbar. Solange der Benutzer dreht, bleibt das jeweilige Fenster;
+wenn er loslässt, switcht ein anderes an die Stelle, und die Farbe ist dort frei wählbar und bleibt dann so.“
+
+| Wo | Was | Warum |
+|---|---|---|
+| scripts/hero-fenster.mjs | drei Modelle (`MODELLE`): `raff` zweiflügelig 1480 × 1420 mit Raffstore (Vorbau, Lamellen gekippt, zu 42 % herunter, Vorgabe Anthrazitgrau 7016), `sprossen` zweiflügelig 1230 × 1410 mit Wiener Sprossen „6 Felder“ (Vorgabe Verkehrsweiß), `drei` dreiteilig 2100 × 1400 mit Vorbaurollladen zu 28 % herunter (Vorgabe Verkehrsweiß); je Modell vier Farben, Kasten und Behang passend (z. B. Raffstore bei Weiß silber, bei Grau anthrazit); Bedienung innen ausgeblendet (Taster und Gurt hingen ohne Wand in der Luft); alle im selben Feld 600 × 560, unten bündig | Wunsch des Inhabers; ein gemeinsames Feld, damit der Schein unter jedem Fenster passt |
+| startseite.js | Wechsel alle 7 s mit kurzem Aus- und Einblenden (220 ms aus, 460 ms ein, nur opacity und transform); während Ziehen, Tastatur-Fokus oder Maus über dem Fenster wartet er; nach dem Loslassen kommt nach 0,9 s das nächste; die gewählte Farbe gilt dann für alle Fenster und bleibt, bis dahin hat jedes seine Vorgabe; das nächste Fenster lädt vorab (nicht bei „Daten sparen“); „Kostenlos losplanen“ nimmt nur eine gewählte Farbe mit | Wunsch des Inhabers; Pause unter der Maus, damit niemand ein Fenster verliert, das er gerade ansieht |
+| startseite-dna.css | Schein unter dem Fenster weiß statt violett; Name des Fensters neben „Aus dem 3-D-Modell der App“ | „keinen lila, sondern weißen Schein“ |
+| Ruhige Fassung | kein Pendeln, kein Wechsel von selbst; nach dem Loslassen nur ein Überblenden | „weniger Bewegung“ |
+
+Abweichung von der DNA (Bewegung endet nach 2,6 s): Pendeln und Wechsel laufen weiter, solange der Hero zu sehen ist; ausdrücklicher
+Wunsch des Inhabers, steht im Begleit-Skill, Abschnitt 4.
+
+Bilder: docs/profis/bilder/2026-10-29-startseite-hero-drei-tel.jpg (die drei Fenster, Farbe gewählt, Farbe bleibt beim Wechsel) und
+-desk.jpg. Gewicht: das erste Fenster (Raffstore, Anthrazitgrau) 395 KB mit Ruhebild; jede weitere Bildfolge 230 bis 490 KB, sie lädt
+erst, wenn das Fenster als Nächstes dran ist oder die Farbe gewählt wird. Prüfsuite Abschnitt 2 (50 Prüfungen) und 6 grün.

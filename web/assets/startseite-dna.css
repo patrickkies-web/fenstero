@@ -340,20 +340,26 @@
 
 .ez-dreh { position: relative; isolation: isolate; height: clamp(300px, 84vw, 360px); display: grid; place-items: center; touch-action: pan-y; }
 @media (min-width: 900px) { .ez-dreh { height: 486px; } }
-/* Lichtteich hinter dem Fenster, Licht und Kontaktschatten darunter: reine radiale Verläufe, kein Weichzeichner */
+/* Lichtteich hinter dem Fenster, weißer Schein und Kontaktschatten darunter (Inhaber, 29.10.2026: „keinen lila, sondern weißen
+   Schein“): reine radiale Verläufe, kein Weichzeichner */
 .ez-dreh::before { content: ""; position: absolute; inset: -6% -14%; z-index: -2; pointer-events: none; background: radial-gradient(48% 46% at 50% 44%, #1c1d20, #101113 52%, transparent 74%); }
 .ez-dreh::after { content: ""; position: absolute; left: 8%; right: 8%; bottom: 7%; height: 15%; z-index: -1; pointer-events: none;
   background: radial-gradient(closest-side, rgba(7,9,10,.9), rgba(7,9,10,.55) 46%, transparent 74%) 50% 38% / 64% 42% no-repeat,
-    radial-gradient(closest-side, color-mix(in srgb, var(--violett) 86%, transparent), color-mix(in srgb, var(--violett) 72%, transparent) 26%, color-mix(in srgb, var(--violett) 40%, var(--indigo)) 44%, color-mix(in srgb, var(--indigo) 36%, transparent) 60%, transparent 78%); }
-.ez-dreh__fenster { position: relative; height: 81%; aspect-ratio: 516 / 600; margin-bottom: 9%; cursor: grab; touch-action: pan-y; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; border-radius: 14px; }
+    radial-gradient(closest-side, rgba(255,255,255,.62), rgba(255,255,255,.36) 26%, rgba(255,255,255,.14) 48%, rgba(255,255,255,.04) 64%, transparent 78%); }
+.ez-dreh__fenster { position: relative; height: 81%; aspect-ratio: 600 / 560; max-width: 100%; margin-bottom: 9%; cursor: grab; touch-action: pan-y; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; border-radius: 14px; }
 .ez-dreh__fenster.ist-gezogen { cursor: grabbing; }
 .ez-dreh__fenster:focus-visible { outline: 2px solid var(--fokus); outline-offset: 6px; }
-.ez-dreh__fenster > img, .ez-dreh__bild { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* .ez-dreh__modell trägt das Fenster; startseite.js blendet es beim Wechsel aus und das nächste ein (nur opacity und transform) */
+.ez-dreh__modell { position: absolute; inset: 0; pointer-events: none; }
+.ez-dreh__modell > img, .ez-dreh__bild { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .ez-dreh__ruhe { display: block; object-fit: contain; -webkit-user-drag: none; }
 .ez-dreh__bild { display: block; background-repeat: no-repeat; background-size: 500% 500%; opacity: 0; }
 .ez-dreh.ist-folge .ez-dreh__ruhe { visibility: hidden; }
 .ez-dreh__marke { position: absolute; left: 0; top: 4px; display: inline-flex; align-items: center; gap: 8px; font: 400 13px/1.2 var(--font-sans); letter-spacing: .02em; color: var(--tinte-2); }
 .ez-dreh__marke::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 26%, transparent); }
+/* Name des Fensters, das gerade steht, hinter der Marke: hell, mit Punkt abgesetzt */
+.ez-dreh__modellname { color: var(--weiss); }
+.ez-dreh__modellname:not(:empty)::before { content: "·"; margin: 0 7px 0 1px; color: var(--tinte-2); }
 /* Strichskala: ein Strich je Blickwinkel, der aktuelle weiß und lang, die Mitte etwas länger */
 .ez-dreh__skala { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; align-items: flex-end; gap: 5px; height: 14px; pointer-events: none; }
 /* nur Transform und Deckkraft ändern sich, so verschiebt der wandernde Strich nichts (Layoutsprung 0) */

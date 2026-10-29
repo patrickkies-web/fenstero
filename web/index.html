@@ -21,7 +21,7 @@
 <link rel="preload" href="/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/startseite-dna.css" as="fetch" crossorigin>
-<link rel="preload" href="/bilder/start/fenster/9016-ruhe.webp" as="image" fetchpriority="high">
+<link rel="preload" href="/bilder/start/fenster/raff-7016-ruhe.webp" as="image" fetchpriority="high">
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="/fonts/dna.css">
 <link rel="stylesheet" href="/assets/gemeinsam.css">
@@ -55,7 +55,7 @@
   <div class="rg-kurz">
     <p><strong>eeziframes</strong> ist eine Aufmaß-App für Fenster, die im Browser läuft. Hauseigentümer planen ihre Fenster am 3-D-Modell und messen mit Zollstock und Handy selbst, Schritt für Schritt erklärt, ohne Konto und ohne Telefonnummer, und bekommen ein Aufmaßblatt als PDF, das jeder Fensterbauer lesen kann. Fensterbauer und Fensterhändler bekommen denselben Konfigurator als ihren eigenen, unter ihrer Domain und ihrer Marke.</p>
   </div>
-  <div class="rg-cta"><a class="btn primary" href="/app/?farbe=9016#ausmessen">Kostenlos losplanen</a><a class="btn ghost" href="/app/#fuehrung">Führung starten</a></div>
+  <div class="rg-cta"><a class="btn primary" href="/app/#ausmessen">Kostenlos losplanen</a><a class="btn ghost" href="/app/#fuehrung">Führung starten</a></div>
 
   <h2>Für Hauseigentümer</h2>
   <ul>
@@ -124,25 +124,28 @@
 
       <div class="ez-hero">
         <div class="ez-hero__buehne">
-          <!-- Dreh-Betrachter: Bildfolge des echten 3-D-Modells der App (buehne.js in WebGL), je Farbe ein Raster aus 25 Blickwinkeln
-               von −36° bis +36° (scripts/hero-fenster.mjs, Angaben in /bilder/start/fenster/fenster.json); startseite.js blättert darin -->
-          <div class="ez-dreh" data-ez="dreh" data-bilder="25" data-spalten="5" data-ruhe="5" data-von="-36" data-schritt="3" data-farbe="9016">
-            <span class="ez-dreh__marke">Aus dem 3-D-Modell der App</span>
-            <div class="ez-dreh__fenster" role="slider" tabindex="0" aria-label="Fenster drehen, Rahmen außen Verkehrsweiß" aria-valuemin="-36" aria-valuemax="36" aria-valuenow="-21" aria-valuetext="21 Grad nach links gedreht" aria-describedby="dreh-hilfe">
-              <img class="ez-dreh__ruhe" src="/bilder/start/fenster/9016-ruhe.webp" width="516" height="600" alt="" fetchpriority="high" decoding="async" draggable="false">
-              <span class="ez-dreh__bild" aria-hidden="true"></span><span class="ez-dreh__bild" aria-hidden="true"></span>
+          <!-- Dreh-Betrachter: drei Fenster aus dem echten 3-D-Modell der App (buehne.js in WebGL) wechseln sich ab, je Modell und Farbe ein
+               Raster aus 25 Blickwinkeln von −36° bis +36° (scripts/hero-fenster.mjs, Angaben in /bilder/start/fenster/fenster.json);
+               startseite.js blättert darin und wechselt die Fenster (Inhaber, 29.10.2026) -->
+          <div class="ez-dreh" data-ez="dreh" data-bilder="25" data-spalten="5" data-ruhe="5" data-von="-36" data-schritt="3" data-modell="raff" data-farbe="7016" data-modelle='[{"k":"raff","f":"7016","n":"Mit Raffstore"},{"k":"sprossen","f":"9016","n":"Mit Sprossen"},{"k":"drei","f":"9016","n":"Dreiteilig mit Rollladen"}]'>
+            <span class="ez-dreh__marke">Aus dem 3-D-Modell der App<span class="ez-dreh__modellname" data-ez="modellname">Mit Raffstore</span></span>
+            <div class="ez-dreh__fenster" role="slider" tabindex="0" aria-label="Fenster drehen: Mit Raffstore, Rahmen außen Anthrazitgrau" aria-valuemin="-36" aria-valuemax="36" aria-valuenow="-21" aria-valuetext="Blick von rechts, 21 Grad" aria-describedby="dreh-hilfe">
+              <span class="ez-dreh__modell">
+                <img class="ez-dreh__ruhe" src="/bilder/start/fenster/raff-7016-ruhe.webp" width="600" height="560" alt="" fetchpriority="high" decoding="async" draggable="false">
+                <span class="ez-dreh__bild" aria-hidden="true"></span><span class="ez-dreh__bild" aria-hidden="true"></span>
+              </span>
             </div>
             <div class="ez-dreh__skala" aria-hidden="true"></div>
             <span class="ez-dreh__hilfe" id="dreh-hilfe">Ziehen zum Drehen</span>
           </div>
           <div class="ez-farben" role="group" aria-label="Rahmenfarbe außen" data-dna-auftritt="still" style="--i:1">
             <div class="ez-farben__felder">
-              <button type="button" class="ez-farbe" data-farbe="9016" aria-pressed="true" style="--farbe:#f1f0ea"><span class="ez-sr">Verkehrsweiß, RAL 9016</span></button>
-              <button type="button" class="ez-farbe" data-farbe="7016" aria-pressed="false" style="--farbe:#383e42"><span class="ez-sr">Anthrazitgrau, RAL 7016</span></button>
+              <button type="button" class="ez-farbe" data-farbe="9016" aria-pressed="false" style="--farbe:#f1f0ea"><span class="ez-sr">Verkehrsweiß, RAL 9016</span></button>
+              <button type="button" class="ez-farbe" data-farbe="7016" aria-pressed="true" style="--farbe:#383e42"><span class="ez-sr">Anthrazitgrau, RAL 7016</span></button>
               <button type="button" class="ez-farbe" data-farbe="9005" aria-pressed="false" style="--farbe:#0e0e10"><span class="ez-sr">Tiefschwarz, RAL 9005</span></button>
               <button type="button" class="ez-farbe ez-farbe--holz" data-farbe="goak" aria-pressed="false" style="--farbe:#b5732f"><span class="ez-sr">Golden Oak, Holzdekor</span></button>
             </div>
-            <p class="ez-farben__name"><span class="dna-label">Rahmen außen</span><b data-ez="farbname">Verkehrsweiß</b><span data-ez="farbcode">RAL 9016</span></p>
+            <p class="ez-farben__name"><span class="dna-label">Rahmen außen</span><b data-ez="farbname">Anthrazitgrau</b><span data-ez="farbcode">RAL 7016</span></p>
           </div>
         </div>
 
@@ -150,7 +153,7 @@
           <h1 class="dna-titel-xl ez-hero__titel" data-dna-woerter="1">Plane deine Fenster in 3D, <em class="ez-ak">bevor du den ersten Handwerker anrufst.</em></h1>
           <p class="dna-text" data-dna-auftritt="still" style="--i:7">Farbe antippen, Fenster drehen.</p>
           <div class="ez-aktionen" data-dna-auftritt="still" style="--i:8">
-            <a class="dna-pille" data-ez="los" href="/app/?farbe=9016#ausmessen">Kostenlos losplanen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
+            <a class="dna-pille" data-ez="los" href="/app/#ausmessen">Kostenlos losplanen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
           </div>
           <p class="ez-ohne" data-dna-auftritt="still" style="--i:8">Ohne Konto, ohne Telefonnummer. Dein Ergebnis siehst du sofort.</p>
           <p class="ez-weiter" data-ez="weiter" hidden></p>

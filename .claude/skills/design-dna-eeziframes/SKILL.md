@@ -251,6 +251,12 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Fläche in der Folie. Was der Besucher auf der Startseite wählt (Farbe, Weg), übernimmt der Konfigurator. Das gilt für die App; auf
   der Startseite ist die Weitergabe nur ein leiser Zusatz (nächster Punkt). Gefragt, ob die App leiser werden soll, entschied der
   Inhaber am 29.10.2026: „App bleibt wie jetzt“.
+- Drei Fenster im Hero statt eines (Inhaber, 29.10.2026: „Du hast einfach das hässlichste Fenster genommen“): ein schickes graues mit
+  Raffstore, ein weißes mit Sprossen, ein weißes dreiteiliges mit Rollladen, aus dem 3-D-Modell der App, im Wechsel. Solange jemand
+  dreht, bleibt das Fenster; nach dem Loslassen kommt das nächste. Die Farbe wählt der Besucher frei, sie gilt dann für alle und bleibt.
+  Der Schein unter dem Fenster ist weiß, nicht violett („keinen lila, sondern weißen Schein“). Als Beispiel immer ein Fenster zeigen, das
+  man sich ans eigene Haus wünscht, nicht das schlichteste. Pendeln und Wechsel laufen weiter, solange der Hero zu sehen ist (Ausnahme
+  von „Bewegung endet nach 2,6 s“).
 - Startseite als Planungswerkzeug (Inhaber, 29.10.2026: „Der Konfigurator sollte selbst der Einstieg sein“; am selben Tag gewichtet:
   „auf den ersten Blick ein Planungswerkzeug, kein Vergleichs- oder Lead-Portal“, Abgrenzung von Seiten, die erst alle Daten abfragen):
   Der Hero zeigt das 3-D-Fenster als Bildfolge des echten App-Modells (scripts/hero-fenster.mjs: buehne.js in WebGL mit ?gl=voll und

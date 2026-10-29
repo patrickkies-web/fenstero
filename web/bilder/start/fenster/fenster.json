@@ -1,6 +1,23 @@
 {
-  "stand": "146821871b040846bcb73d660c52fb8a",
+  "stand": "97abf8cef418673c3c644f78318413f6",
   "erzeugt": "2026-10-29",
+  "modelle": [
+    {
+      "key": "raff",
+      "name": "Mit Raffstore",
+      "farbe": "7016"
+    },
+    {
+      "key": "sprossen",
+      "name": "Mit Sprossen",
+      "farbe": "9016"
+    },
+    {
+      "key": "drei",
+      "name": "Dreiteilig mit Rollladen",
+      "farbe": "9016"
+    }
+  ],
   "farben": [
     {
       "key": "9016",
@@ -58,18 +75,54 @@
   "rx": -8,
   "spalten": 5,
   "zeilen": 5,
-  "breite": 516,
-  "hoehe": 600,
+  "breite": 600,
+  "hoehe": 560,
+  "masse": {
+    "raff": [
+      25,
+      19,
+      549,
+      521
+    ],
+    "sprossen": [
+      78,
+      19,
+      444,
+      521
+    ],
+    "drei": [
+      21,
+      125,
+      558,
+      415
+    ]
+  },
   "bytes": {
-    "7016": 231996,
-    "9005": 206550,
-    "9016": 292096,
-    "goak": 391942
+    "raff-9016": 497732,
+    "raff-7016": 387680,
+    "raff-9005": 338102,
+    "raff-goak": 457814,
+    "sprossen-9016": 328528,
+    "sprossen-7016": 257362,
+    "sprossen-9005": 239278,
+    "sprossen-goak": 429774,
+    "drei-9016": 431234,
+    "drei-7016": 367614,
+    "drei-9005": 330472,
+    "drei-goak": 454378
   },
   "ruheBytes": {
-    "7016": 10016,
-    "9005": 9060,
-    "9016": 12776,
-    "goak": 16510
+    "raff-9016": 21416,
+    "raff-7016": 16848,
+    "raff-9005": 14636,
+    "raff-goak": 19748,
+    "sprossen-9016": 14450,
+    "sprossen-7016": 11266,
+    "sprossen-9005": 10516,
+    "sprossen-goak": 18380,
+    "drei-9016": 18552,
+    "drei-7016": 15686,
+    "drei-9005": 14366,
+    "drei-goak": 19412
   }
 }
