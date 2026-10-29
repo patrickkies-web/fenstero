@@ -53,6 +53,21 @@ austauschen).
 Seiten 1 bis 3 gehören zu Schritt 2 „Entscheiden“, Seiten 4 und 5 zu Schritt 3 „Auswählen“ (`WEG` in scripts/ratgeber-bausteine.mjs).
 Die ersten Seiten der Schritte bleiben, damit die Ziele der Wegleiste gleich bleiben.
 
+## Nachtrag am selben Tag: drei Seiten zur Förderung
+
+Der Inhaber: Die Förderung beim Ersatz von Fenstern soll für Eigentümer ganz einfach erklärt werden (Uw-Werte, Förderfähigkeit,
+Prozente), mit besonderer Sorgfalt bei den Feinheiten der Programme und mit den aktuellsten Quellen, weil viele Quellen im Netz noch
+auf alten Regeln beruhen (Neufassung der BEG-EM-Richtlinie vom 17. Juli 2026, in Kraft seit 21. Juli 2026; Gebäudeenergiegesetz seit
+29. Juli 2026 Gebäudemodernisierungsgesetz). Grundlage ist ein Faktenblatt aus Primärquellen (docs/profis/2026-10-29-foerderung-fakten.md).
+
+| Thema | Suchbegriffe | Was im Ratgeber schon da war | Neue Seite |
+| --- | --- | --- | --- |
+| Welche Förderung, wie viel Prozent | „Fenster Förderung 2026“, „Förderung neue Fenster BAFA“, „Fenster Zuschuss 15 Prozent“, „BEG Einzelmaßnahmen Fenster“, „Fenster Förderung Uw-Wert 0,95“, „KfW Fenster Förderung“ | Uw-Wert und Förderung (Werte), Fenster austauschen (Abschnitt Förderung) | `/ratgeber/fenster-foerderung-2026/` |
+| Antrag Schritt für Schritt | „Fenster Förderung beantragen“, „BAFA Antrag Fenster Ablauf“, „Energieeffizienz-Experte Fenster Pflicht“, „BAFA Verwendungsnachweis Fenster“, „Förderung Fenster Antrag vor Auftrag“ | nichts zum Ablauf | `/ratgeber/fenster-foerderung-beantragen/` |
+| Steuerbonus oder Zuschuss | „Fenster steuerlich absetzen“, „Steuerbonus Fenster 35c“, „Fenster Förderung oder Steuer“, „Fachunternehmererklärung Fenster“, „Handwerkerleistung Fenster absetzen“ | Uw-Wert und Förderung nennt § 35c in einem Satz | `/ratgeber/fenster-steuerlich-absetzen/` |
+
+Alle drei gehören zu Schritt 2 „Entscheiden“.
+
 ## Ergebnis
 
 (wird nach dem Bau ergänzt)
