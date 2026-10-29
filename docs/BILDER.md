@@ -229,5 +229,8 @@ Negativ (wo der Generator das Feld hat): luxury villa, modern cube house, swimmi
 converging verticals, perspective from below, windows covered by plants or people, closed shutters, visible faces,
 dramatic sky, HDR look, oversaturated, text, watermark.
 
+Fassung ohne Menschen (Inhaber, 29.10.2026): den Absatz mit der Familie weglassen, im Garten statt dessen „a child's bike lying on
+the grass and a watering can by the path“, am Ende „no people, no animals“ ergänzen; im Negativ „people, person, family, faces“.
+
 Prüfen vor dem Einsetzen: senkrechte Kanten gerade; jedes Fenster ganz sichtbar und frei; Hände und Finger der Familie
 plausibel; kein Schriftsalat (Hausnummer, Schilder); Haus wirkt normal, nicht teuer.
