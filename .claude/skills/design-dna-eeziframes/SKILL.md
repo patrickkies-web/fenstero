@@ -243,7 +243,8 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   feinem Punktraster (wie eine Karte) und Vignette. Vorschlag für seine DNA (Abschnitt 9): „Ein Foto als Bühne trägt höchstens ein
   Ablauf; neue Folien bekommen ihr eigenes Material.“
 - Gratis-Weg als Wahl, nicht im Kleingedruckten (Inhaber, 29.10.2026, übernommen aus einem Vorschlag): zwei Karten nebeneinander,
-  „Aufmaßblatt für dich“ mit Preis und „Aufmaßblatt + an 2 Fensterbauer in deiner Nähe“ für 0 € mit durchgestrichenem Preis als
+  „Aufmaßblatt für dich“ mit Preis und „Aufmaßblatt + an bis zu 5 Fensterbauer in deiner Nähe“ (zuerst 2, am selben Abend auf bis zu
+  fünf, mindestens zwei erweitert) für 0 € mit durchgestrichenem Preis als
   Anker; die Gratis-Karte mit violettem Ring und Etikett (Koralle, schwarze Schrift). Etikett „Empfohlen“ statt des vorgeschlagenen
   „Beliebt“, weil Beliebtheit ohne Nutzerzahlen eine erfundene Kennzahl wäre (DNA Abschnitt 4). Vertrauenssätze stehen dort, wo der
   Zweifel entsteht (unter der Karte, am Telefonfeld), nicht gesammelt am Ende. Wo bezahlt wird, steht der Gratis-Weg noch einmal als

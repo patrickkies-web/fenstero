@@ -1,7 +1,7 @@
 // eeziframes · Prüfabschnitt 31, Teil App: Vermittlung „Angebote aus deiner Nähe“ (docs/VERMITTLUNG.md, Abschnitt 10) im Browser
 //   31.A1 Weiche nach „Zeit und Budget“: zwei Karten nebeneinander (0 € mit durchgestrichenem Preis, „Empfohlen“), Gratis vorgewählt, eine volle Pille, Ziele ab 44 px, kein Querscrollen; Weg B führt
 //         wie bisher über den Kontakt zum Freischalten · 31.A2 Kontakt auf Weg A: Name, PLZ und Ort, Telefon Pflicht, Fehler am Feld
-//   · 31.A3 Betriebe: Suche zur PLZ (Attrappe), nur öffentliche Felder in der App, genau zwei, „Sucht ihr zwei für mich aus“, ohne Wahl
+//   · 31.A3 Betriebe: Suche zur PLZ (Attrappe), nur öffentliche Felder in der App, zwei bis fünf, „Sucht ihr passende für mich aus“, ohne Wahl
 //         und ohne Einwilligung kein Abschicken · 31.A4 Code: falscher Code bleibt auf der Folie, richtiger schickt ab, Angefragt mit
 //         Nummer, Mail an den Inhaber mit dem Aufmaßblatt aus der App (PDF) · 31.A5 Schreibtisch · 31.A6 ohne Vermittlung (Pilot) der
 //         bisherige Weg Zeit → Kontakt
@@ -38,7 +38,7 @@ export default async function (h) {
       text: document.querySelector('.scr').textContent, umkreis: !!document.querySelector('.vm-buehne .vm-umkreis'), foto: /buehne\.webp/.test(bg), chip: (document.querySelector('.ab-chip') || {}).textContent || '' }; });
   ok(weg.karten === 2 && weg.a === 'true' && weg.nebeneinander && weg.etikett === 'Empfohlen' && weg.null === '0' && /7,99/.test(weg.alt) && /7,99/.test(weg.preisB) && weg.umkreis && !weg.foto && /3\svon\s5/.test(weg.chip),
     '31.A1 Weiche: zwei Karten nebeneinander, Gratis vorgewählt mit „Empfohlen“, 0 € und durchgestrichenem Preis, Umkreis auf der Bühne ohne das Foto mit dem Lichtschatten, Schritt 3 von 5 (' + JSON.stringify(Object.assign({}, weg, { text: undefined })) + ')');
-  ok(/denselben Maßen und sind direkt vergleichbar/.test(weg.text) && /Nur die zwei Betriebe, die du auswählst/.test(weg.text) && /Sonst niemand/.test(weg.text) && /Warum kostenlos\?/.test(weg.text), '31.A1 Weiche: vergleichbar, nur die zwei gewählten Betriebe, offen gesagt, warum kostenlos');
+  ok(/denselben Maßen und sind direkt vergleichbar/.test(weg.text) && /Nur die Betriebe, die du auswählst/.test(weg.text) && !/zwei Betriebe/.test(weg.text) && /bis zu 5 Fensterbauer/.test(weg.text) && /Sonst niemand/.test(weg.text) && /Warum kostenlos\?/.test(weg.text), '31.A1 Weiche: bis zu 5 Fensterbauer, vergleichbar, nur die gewählten Betriebe, offen gesagt, warum kostenlos');
   ok(await pillen(s) === 1, '31.A1 Weiche: genau eine volle Pille');
   const z1 = await ziele(s); ok(!z1.length, '31.A1 Weiche: Ziele ab 44 px' + (z1.length ? ' ' + JSON.stringify(z1) : ''));
   ok(!(await quer(s)), '31.A1 Weiche: kein Querscrollen');
@@ -70,24 +70,25 @@ export default async function (h) {
   ok(!l.felder.some((k) => /tel|web|strasse|mail/i.test(k)), '31.A3 In der App nur öffentliche Felder: ' + l.felder.join(', '));
   await klick(s, '.scr .lg-weiter');
   const f2 = await s.evaluate(() => ({ sc: S.screen, grund: (document.querySelector('.vm-grund') || {}).textContent || '', bad: !!document.querySelector('.vm-liste.ist-bad') }));
-  ok(f2.sc === 'betriebe' && /zwei Betriebe/.test(f2.grund) && f2.bad, '31.A3 Ohne Wahl kein Abschicken, Grund über der Pille');
+  ok(f2.sc === 'betriebe' && /mindestens zwei Betriebe/.test(f2.grund) && f2.bad, '31.A3 Ohne Wahl kein Abschicken, Grund über der Pille (' + f2.grund + ')');
   const ids = await s.evaluate(() => S.verm.liste.map((x) => x.id));
   await klick(s, '.vm-betrieb[data-v="' + ids[0] + '"]'); await klick(s, '.scr .lg-weiter');
   const f2b = await s.evaluate(() => (document.querySelector('.vm-grund') || {}).textContent || '');
-  ok(/zweiten Betrieb/.test(f2b), '31.A3 Mit einem Betrieb kein Abschicken: „noch einen zweiten Betrieb“');
-  await klick(s, '.vm-betrieb[data-v="' + ids[1] + '"]');
-  /* der dritte ist gesperrt (aria-disabled): Playwright klickt ihn nicht, also das Klick-Ereignis direkt; die Sperre selbst wird geprüft */
-  await s.$eval('.vm-betrieb[data-v="' + ids[2] + '"]', (e) => e.click()); await s.waitForTimeout(250);
-  const w = await s.evaluate(() => ({ wahl: S.verm.wahl.length, aus: document.querySelectorAll('.vm-betrieb[aria-disabled="true"]').length, nr: Array.from(document.querySelectorAll('.vm-betrieb[aria-pressed="true"] .vm-mark')).map((e) => e.textContent).join(','), etiketten: document.querySelectorAll('.vm-etikett').length }));
-  ok(w.wahl === 2 && w.nr === '1,2' && w.aus === ids.length - 2 && w.etiketten === 2, '31.A3 Genau zwei, nummeriert, mit Etikett im Umkreis, die übrigen gesperrt (' + JSON.stringify(w) + ')');
+  ok(/noch mindestens einen Betrieb/.test(f2b), '31.A3 Mit einem Betrieb kein Abschicken: „noch mindestens einen Betrieb“ (' + f2b + ')');
+  for (const id of ids.slice(1, 5)) await klick(s, '.vm-betrieb[data-v="' + id + '"]');
+  /* der sechste ist gesperrt (aria-disabled): Playwright klickt ihn nicht, also das Klick-Ereignis direkt; die Sperre selbst wird geprüft */
+  ok(ids.length >= 6, '31.A3 Die Attrappe liefert mehr als fünf Betriebe (' + ids.length + ')');
+  await s.$eval('.vm-betrieb[data-v="' + ids[5] + '"]', (e) => e.click()); await s.waitForTimeout(250);
+  const w = await s.evaluate(() => ({ wahl: S.verm.wahl.length, aus: document.querySelectorAll('.vm-betrieb[aria-disabled="true"]').length, nr: Array.from(document.querySelectorAll('.vm-betrieb[aria-pressed="true"] .vm-mark')).map((e) => e.textContent).join(','), gewaehlt: document.querySelectorAll('.vm-umkreis .vm-pkt.ist-gewaehlt').length, zahl: (document.querySelector('.vm-zahl') || {}).textContent || '' }));
+  ok(w.wahl === 5 && w.nr === '1,2,3,4,5' && w.aus === ids.length - 5 && w.gewaehlt === 5 && /5 von höchstens 5/.test(w.zahl), '31.A3 Höchstens fünf, nummeriert, im Umkreis markiert, die übrigen gesperrt (' + JSON.stringify(w) + ')');
   await klick(s, '.vm-selbst');
-  ok(await s.evaluate(() => S.verm.suchen && !S.verm.wahl.length), '31.A3 „Sucht ihr zwei für mich aus“ ersetzt die Wahl');
+  ok(await s.evaluate(() => S.verm.suchen && !S.verm.wahl.length), '31.A3 „Sucht ihr passende für mich aus“ ersetzt die Wahl');
   await klick(s, '.vm-selbst');
-  await klick(s, '.vm-betrieb[data-v="' + ids[0] + '"]'); await klick(s, '.vm-betrieb[data-v="' + ids[1] + '"]');
+  for (const id of ids.slice(0, 3)) await klick(s, '.vm-betrieb[data-v="' + id + '"]');
   await klick(s, '.scr .lg-weiter');
   const f3 = await s.evaluate(() => ({ sc: S.screen, einw: !!document.querySelector('.vm-einw.ist-bad'), text: document.querySelector('.vm-einw').textContent }));
   ok(f3.sc === 'betriebe' && f3.einw, '31.A3 Ohne Einwilligung kein Abschicken');
-  const namen = await s.evaluate((x) => x.map((id) => S.verm.liste.find((b) => b.id === id).name), ids.slice(0, 2));
+  const namen = await s.evaluate((x) => x.map((id) => S.verm.liste.find((b) => b.id === id).name), ids.slice(0, 3));
   ok(namen.every((n) => f3.text.includes(n)) && /Sonst bekommt niemand meine Daten/.test(f3.text) && /jederzeit widerrufen/.test(f3.text), '31.A3 Einwilligung aktiv, nennt die gewählten Betriebe (' + namen.join(', ') + '), „sonst niemand“, widerrufbar');
   ok(await pillen(s) === 1, '31.A3 Betriebe: genau eine volle Pille');
   const z3 = await ziele(s); ok(!z3.length, '31.A3 Betriebe: Ziele ab 44 px' + (z3.length ? ' ' + JSON.stringify(z3) : ''));
@@ -153,6 +154,10 @@ export default async function (h) {
     ok(r.links && r.rechts, '31.A5 Schreibtisch ' + sc + ': Bühne links, Spalte rechts');
     ok(await pillen(d) === 1 && !(await quer(d)), '31.A5 Schreibtisch ' + sc + ': eine Pille, kein Querscrollen');
   }
+  /* Angefragt: „Fertig“ und „Aufmaßblatt laden“ nebeneinander, der Pfeil bleibt in seiner Pille (am Schreibtisch teilten sich beide die Spalte) */
+  await d.evaluate(() => { const z = vm(); z.gesendet = { nr: 'V-2026-0099', when: Date.now(), namen: [], wahl: [], suchen: true, plz: '33442' }; const k = kauf(); k.paid = true; k.token = k.token || 'pruef'; k.frei = 'vermittlung'; go('angefragt'); }); await d.waitForTimeout(300);
+  const fz = await d.evaluate(() => Array.from(document.querySelectorAll('.vm-fuss-zwei > .dna-pille')).map((e) => ({ w: e.clientWidth, sw: e.scrollWidth })));
+  ok(fz.length === 2 && fz.every((x) => x.sw <= x.w + 1), '31.A5 Schreibtisch angefragt: beide Pillen nebeneinander, nichts ragt heraus (' + JSON.stringify(fz) + ')');
   h.sauber(d, '31.A5 Schreibtisch ohne Fehler');
   await ctxD.close();
 

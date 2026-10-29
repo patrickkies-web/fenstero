@@ -63,6 +63,10 @@ g.vm-pkt.ist-gewaehlt text { font: 600 12px var(--font-sans); fill: var(--schwar
 .dna .lg-fuss.vm-fuss-zwei { flex-wrap: nowrap; gap: 10px }
 .dna .vm-fuss-zwei .dna-pille--leise { flex: 0 0 auto; min-width: 96px; min-height: 52px }
 .dna .vm-fuss-zwei .lg-weiter { flex: 1 1 auto; min-width: 0 }
+/* am Schreibtisch teilen sich sonst beide Pillen die Spalte zu gleichen Teilen (app.css: .dna.dt .dna-rechts .lg-fuss .dna-pille), dann ragt
+   der Pfeil von „Aufmaßblatt laden“ heraus; „Fertig“ bleibt so schmal wie sein Wort */
+.dna.dt .dna-rechts .lg-fuss.vm-fuss-zwei .dna-pille--leise { flex: 0 0 auto }
+.dna.dt .dna-rechts .lg-fuss.vm-fuss-zwei .lg-weiter { flex: 1 1 auto }
 @media (max-width: 359px) { .dna .vm-wege { grid-template-columns: 1fr } .dna .vm-karte { min-height: 0 } }
 
 /* Haken bzw. Nummer rechts: leer als Ring, gewählt schwarz gefüllt (auf Weiß) */

@@ -141,7 +141,7 @@ Eigentümer ✓ · Start in 3 Monaten · 4 Fenster · 8 Fotos · ging an 2 Betri
 | 4 | **Gebietspartner** (Monatsbetrag mit Anfragen inklusive und gekennzeichnetem ersten Platz in seinem Gebiet) | Partnerbetrieb | Preis nach drei Monaten aus den echten Zahlen | Stufe 3 |
 | 5 | **Hersteller und Händler** (Lizenzen, siehe Gremium) | Industrie | offen | später |
 
-Bewusst nicht: dieselbe Anfrage an mehr als drei Betriebe, Weitergabe ohne Einwilligung, Gebühr für reklamierte Anfragen, versteckte
+Bewusst nicht: dieselbe Anfrage an mehr als fünf Betriebe (zuerst drei, siehe Abschnitt 11), Weitergabe ohne Einwilligung, Gebühr für reklamierte Anfragen, versteckte
 Platzierung. Jede davon bringt kurz Geld und kostet die Partner.
 
 Warum ein fester Preis je Betrieb und nicht je Empfängerzahl: einfacher zu verkaufen. Ob eine Anfrage an einen oder drei ging, steht
@@ -272,7 +272,7 @@ Text in der App sagt genau das („Wir fragen bei den Betrieben an …“), nich
 
 Haus → Zeit und Budget → **Weiche** (Folie `weg`): „Angebote aus deiner Nähe, kostenlos“ oder „Aufmaßblatt für dich, Preis wie
 `PREIS()`“ → Kontakt (`anfrage3`; auf Weg A Pflicht: Name, PLZ und Ort, Telefon; E-Mail freiwillig) → A: **Betriebe** (Folie
-`betriebe`: KI-Suche zur PLZ, Auswahl bis drei, Einwilligung, „Abschicken“) → **Code** (Folie `vcode`: Code per SMS bzw. Anruf,
+`betriebe`: KI-Suche zur PLZ, Auswahl von zwei bis fünf (Abschnitt 11), Einwilligung, „Abschicken“) → **Code** (Folie `vcode`: Code per SMS bzw. Anruf,
 Zifferntasten) → **Angefragt** (Folie `angefragt`) · B: wie bisher Freischalten (`teilen`, Kasse). Ohne Server (Pilot) gibt es nur B.
 
 ### Schnittstelle
@@ -289,7 +289,7 @@ und Mailversand.
 Zentrale (`/zentrale/`, Sitzung des Inhabers): `GET /api/inhaber/vermittlungen`, `GET …/:id`, `GET …/:id/pdf`,
 `POST …/:id/betrieb { bid, status, notiz }` (offen, nicht erreicht, will, will nicht), `POST …/:id/betrieb-neu { name, ort, tel, web }`,
 `POST …/:id/senden { bid, mail, zustimmung: true, kunde: true }` (Mail mit PDF an den Betrieb nur mit Zustimmung im Gespräch, die mit
-Zeit im Verlauf steht; höchstens drei; auf Wunsch eine Mail an den Kunden, welcher Betrieb sein Aufmaß hat), `POST …/:id/stand`,
+Zeit im Verlauf steht; höchstens fünf (Abschnitt 11); auf Wunsch eine Mail an den Kunden, welcher Betrieb sein Aufmaß hat), `POST …/:id/stand`,
 `POST …/:id/notiz`. Aufbewahrung 180 Tage, dann löscht der Tageslauf Anfrage und PDF.
 
 ### Stand der Umsetzung (29.10.2026)
@@ -328,19 +328,22 @@ Tippfehler und Wegwerf-Domains (Prüfung 3), Einladungslink für Partner, Tür B
 ## 11. Gratis-Wahl (Entscheidung des Inhabers, 29.10.2026, abends)
 
 Der Inhaber übernimmt einen Vorschlag aus einem anderen Gespräch: Das Gratis-Aufmaß wird nicht als „Daten gegen Rabatt“ verkauft,
-sondern als das, was es für den Kunden ist, **zwei vergleichbare Angebote, ohne selbst herumzutelefonieren**. Das ändert Abschnitt 1
-(dort: „auf dem kostenlosen Weg kein Aufmaßblatt“) und Abschnitt 10:
+sondern als das, was es für den Kunden ist, **vergleichbare Angebote, ohne selbst herumzutelefonieren**. Das ändert Abschnitt 1
+(dort: „auf dem kostenlosen Weg kein Aufmaßblatt“) und Abschnitt 10. Nachtrag desselben Abends: statt genau zwei Betrieben **bis zu
+fünf, mindestens zwei** (Inhaber: „nicht beschränken, anfangen mit fünf“); die Tabelle zeigt den Stand danach.
 
 | Punkt | Jetzt |
 |---|---|
-| Weiche | zwei Karten nebeneinander: „Aufmaßblatt für dich“ mit Preis und „Aufmaßblatt + an 2 Fensterbauer in deiner Nähe“ für 0 € mit durchgestrichenem Preis, vorgewählt, mit Ring und dem Etikett „Empfohlen“ (nicht „Beliebt“: ohne Nutzerzahlen unbelegt) |
-| Betriebe | genau zwei (oder „Sucht ihr zwei für mich aus“); der Server nimmt höchstens zwei, die Zentrale schickt nur an die gewählten |
+| Weiche | zwei Karten nebeneinander: „Aufmaßblatt für dich“ mit Preis und „Aufmaßblatt + an bis zu 5 Fensterbauer in deiner Nähe“ für 0 € mit durchgestrichenem Preis, vorgewählt, mit Ring und dem Etikett „Empfohlen“ (nicht „Beliebt“: ohne Nutzerzahlen unbelegt) |
+| Betriebe | zwei bis fünf (oder „Sucht ihr passende für mich aus“, dann sucht der Inhaber bis zu fünf aus); mindestens zwei, damit es etwas zu vergleichen gibt (findet die Suche nur einen, reicht einer); der Server nimmt zwei bis fünf (`MAX_WAHL`, `MIN_WAHL` in `functions/api/vermittlung.js`, `VM_MAX`, `VM_MIN` in der App), die Zentrale schickt an höchstens fünf und, wenn der Kunde gewählt hat, nur an die gewählten. Im Umkreis tragen bis zwei Gewählte ein Namensschild, ab drei nur die Nummer wie in der Liste |
 | Aufmaßblatt | gehört auf dem Gratis-Weg dazu: nach dem Abschicken frei (Nachweis vom Server wie beim Kauf, Sitzung `vermittlung:<Nr>`) und als PDF in der Bestätigungsmail; vor dem Abschicken bleibt es gesperrt, die Nummer ist da schon per Code bestätigt |
-| Vertrauen | „Nur die zwei Betriebe, die du auswählst. Sonst niemand.“ unter der Karte; Telefon: „Damit die Betriebe wissen, dass ein echter Mensch anfragt. So bekommst du ernsthafte Rückmeldungen.“; „Warum kostenlos? Die Fensterbetriebe bezahlen uns für die Vermittlung.“ |
-| Einwilligung | eigener Haken im Auswahlschritt, nennt die zwei Betriebe, „Sonst bekommt niemand meine Daten“, jederzeit widerrufbar (Fassung `2026-10-29b`) |
+| Vertrauen | „Nur die Betriebe, die du auswählst, bekommen dein Aufmaß. Sonst niemand.“ unter der Karte; Telefon: „Damit die Betriebe wissen, dass ein echter Mensch anfragt. So bekommst du ernsthafte Rückmeldungen.“; „Warum kostenlos? Die Fensterbetriebe bezahlen uns für die Vermittlung.“ |
+| Einwilligung | eigener Haken im Auswahlschritt, nennt die gewählten Betriebe (bei „Sucht ihr …“: „bis zu fünf passende Fensterbetriebe, die eeziframes für mich aussucht“), „Sonst bekommt niemand meine Daten“, jederzeit widerrufbar (Fassung `2026-10-29c`) |
 | Bezahlen | auf Freischalten, Rechnungsadresse und Kasse noch einmal die Gratis-Karte („Lieber kostenlos?“, „Kostenlos weiter“) |
 | Startseite | Konfigurator als Einstieg (3-D-Fenster mit Farbfeldern, Fassade, Drei-Schritte-Leiste, die zwei Karten); die Wahl dort steuert die App: `/app/?farbe=<RAL>#ausmessen` setzt die Rahmenfarbe außen des ersten Fensters, `?weg=gratis` bzw. `?weg=blatt` die Weiche |
 | Bühnen | ohne das Foto mit dem Lichtschatten (Inhaber: „muss ich nicht überall haben“): Anthrazit mit Punktraster wie eine Karte |
 
-Rechnung (Abschnitt 4) mit zwei Betrieben je Anfrage: Erlös je bestätigter Anfrage = Gebühr × 2 × (1 − Reklamationsquote), bei 39 € und
-10 % rund 70 €. Ein Kunde, der vorher 7,99 € gezahlt hätte, bringt auf dem Gratis-Weg mehr.
+Rechnung (Abschnitt 4) je Anfrage: Erlös = Gebühr × Zahl der Betriebe, die zusagen × (1 − Reklamationsquote). Bei 39 € und 10 % sind das
+rund 70 € bei zwei Betrieben und rund 175 € bei fünf. Ein Kunde, der vorher 7,99 € gezahlt hätte, bringt auf dem Gratis-Weg mehr.
+Gegengewicht: Je mehr Betriebe anrufen, desto eher fühlt sich der Kunde bedrängt und desto seltener gewinnt der einzelne Betrieb den
+Auftrag; Portale nennen meist drei. Daher erst fünf und an der Zahl der Reklamationen und Zusagen ablesen, ob die Grenze passt.

@@ -7,7 +7,7 @@
 //   pause_turn, Zeitlimit, Ablehnung, Unsinn verwerfen) · 31.3 Code (Attrappe, falsche Nummern, Festnetz per Anruf, Grenze je Nummer, Bremse
 //   je Anschluss, ohne Anbieter „ohneCode“) · 31.4 Senden (alle Ablehnungen, Code, abgelaufenes Token, Fehlversuche, Mails an den Inhaber mit
 //   PDF und an den Kunden mit, Freischaltung, Doppelklick, zwei Anfragen in 90 Tagen, ohne Code „nicht bestätigt“) · 31.5 Zentrale (nur angemeldet, Liste,
-//   Detail mit Telefon und Website, PDF, Ergebnis der Anrufe, Betrieb neu, Senden nur mit Zustimmung, höchstens zwei und nur die gewählten, Mails) · 31.6 Tageslauf
+//   Detail mit Telefon und Website, PDF, Ergebnis der Anrufe, Betrieb neu, Senden nur mit Zustimmung, höchstens fünf und nur die gewählten, Mails) · 31.6 Tageslauf
 //   (nach 180 Tagen weg, mit dem Aufmaßblatt).
 // Teil B im Browser (Telefon 390 px und Schreibtisch): Zentrale mit Umschalter, Liste, Anfrage, Anruf-Knopf, „Will“, Senden nur mit Häkchen;
 //   genau eine volle Pille, Ziele ab 44 px, Schrift ab 13 px, kein Querscrollen, keine Konsolenfehler.
@@ -128,10 +128,10 @@ export default async function (h) {
     aufmass: AUFMASS, eckdaten: { fenster: 4, elemente: 5, gebaeude: 'efh', baujahr: '1978', zeit: '3m', budget: 'b2', foerdweg: 'bafa' }, pdf: PDF.toString('base64'), kennung: 'pPruef' + stempel }, o || {});
   const mit = (k, v) => { const a = anfrage(); a.kontakt = Object.assign({}, a.kontakt, { [k]: v }); return a; };
   const faelle = [['kontakt.name', mit('name', 'A')], ['plz', anfrage({ plz: '1234' })], ['kontakt.tel', mit('tel', 'kaputt')], ['kontakt.mail', mit('mail', 'kaputt')], ['einwilligung', anfrage({ einwilligung: { fassung: '2026-10-29' } })],
-    ['aufmass', anfrage({ aufmass: '' })], ['betriebe', anfrage({ betriebe: bid.slice(0, 4) })], ['pdf', anfrage({ pdf: Buffer.from('Hallo, kein PDF').toString('base64') })], ['pdf', anfrage({ pdf: '' })]];
+    ['aufmass', anfrage({ aufmass: '' })], ['betriebe', anfrage({ betriebe: bid.slice(0, 6) })], ['betriebe', anfrage({ betriebe: bid.slice(0, 1) })], ['pdf', anfrage({ pdf: Buffer.from('Hallo, kein PDF').toString('base64') })], ['pdf', anfrage({ pdf: '' })]];
   const abl = [];
   for (const [feld, body] of faelle) { const r = await post('/api/vermittlung/senden', body); abl.push(r.status === 400 && !!(r.json.felder || {})[feld] && r.json.feld === feld.replace(/^kontakt\./, '') ? 'ok' : feld + ':' + r.status); }
-  ok(abl.every((x) => x === 'ok'), '31.4 Senden: Name ab 2 Zeichen, PLZ, Telefon, E-Mail (falls angegeben), Einwilligung mit Fassung und Text, Aufmaß, höchstens zwei Betriebe, PDF mit %PDF-Kopf; je Fehler das Feld in felder und feld (wie die App es liest: tel, name, mail …) (' + abl.filter((x) => x !== 'ok').join(' ') + ')');
+  ok(abl.every((x) => x === 'ok'), '31.4 Senden: Name ab 2 Zeichen, PLZ, Telefon, E-Mail (falls angegeben), Einwilligung mit Fassung und Text, Aufmaß, zwei bis fünf Betriebe, PDF mit %PDF-Kopf; je Fehler das Feld in felder und feld (wie die App es liest: tel, name, mail …) (' + abl.filter((x) => x !== 'ok').join(' ') + ')');
   const gross = Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(10200000, 0x20)]), zuGross = Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(11200000, 0x20)]);
   const g1 = await post('/api/vermittlung/senden', anfrage({ pdf: gross.toString('base64') })), g2 = await post('/api/vermittlung/senden', anfrage({ pdf: zuGross.toString('base64') }));
   ok(g1.status === 400 && !!(g1.json.felder || {}).pdf && /10 MB/.test(g1.json.fehler) && g2.status === 413, '31.4 Aufmaßblatt über 10 MB: 400 am Feld pdf; über dem Grenzwert des Pfads 413 (' + g1.status + ', ' + g2.status + ')');
@@ -164,7 +164,7 @@ export default async function (h) {
   const nwFalsch = await h.api('localhost', '/api/zahlung/nachweis?kennung=' + encodeURIComponent('pAnders' + stempel) + '&session=' + encodeURIComponent(fs1.session || '') + '&token=' + encodeURIComponent(fs1.token || ''));
   ok(fs1.session === 'vermittlung:' + nr1 && !!fs1.token && (nw.json || {}).ok === true && (nwFalsch.json || {}).ok === false, '31.4 Freischaltung des Aufmaßblatts in der App: Nachweis wie beim Kauf, die Anfrage als Sitzung, nur für diese Kennung');
   const doppelt = await post('/api/vermittlung/senden', anfrage());
-  const zweite = await post('/api/vermittlung/senden', anfrage({ token: await code(TEL), betriebe: bid.slice(2, 3) }));
+  const zweite = await post('/api/vermittlung/senden', anfrage({ token: await code(TEL), betriebe: bid.slice(2, 7) }));
   const dritte = await post('/api/vermittlung/senden', anfrage({ token: await code(TEL) }));
   ok(doppelt.status === 200 && doppelt.json.nr === nr1 && doppelt.json.schon === true && zweite.status === 200 && zweite.json.nr !== nr1 && dritte.status === 429 && /90 Tagen/.test(dritte.json.fehler) && dritte.json.grenze === '90tage',
     '31.4 Doppelklick mit demselben Token liefert dieselbe Anfrage; höchstens zwei Anfragen je Nummer in 90 Tagen (dritte: 429 „' + ((dritte.json || {}).fehler || '').slice(0, 60) + ' …“)');
@@ -176,7 +176,7 @@ export default async function (h) {
   /* ohne SMS-Anbieter (dritter Server): Code { ohneCode }, Anfrage ohne Token gilt als „Nummer nicht bestätigt“ */
   const sb3 = (await post('/api/vermittlung/suche', { plz: PLZ, ort: 'Clarholz' }, null, s3)).json || {};
   const oc = (await post('/api/vermittlung/code', { tel: TEL }, null, s3)).json || {};
-  const os = await post('/api/vermittlung/senden', anfrage({ token: '', code: '', betriebe: (sb3.betriebe || []).slice(0, 1).map((b) => b.id) }), null, s3);
+  const os = await post('/api/vermittlung/senden', anfrage({ token: '', code: '', betriebe: (sb3.betriebe || []).slice(0, 2).map((b) => b.id) }), null, s3);
   const z3 = keks(await post('/api/inhaber/anmelden', { passwort: h.PASSWORT }, null, s3));
   const l3 = ((await s3.api('localhost', '/api/inhaber/vermittlungen', { cookie: z3 })).json || {}).vermittlungen || [];
   ok(oc.ohneCode === true && !oc.token && os.status === 200 && l3.some((v) => v.nr === os.json.nr && v.bestaetigt === false), '31.4 Ohne SMS-Anbieter: ohneCode, Anfrage ohne Code angenommen und in der Zentrale als „Nummer nicht bestätigt“');
@@ -200,7 +200,7 @@ export default async function (h) {
   const lind2 = ((st1.vermittlung || {}).betriebe || [])[1] || {};
   ok(st1.ok && st1.vermittlung.stand === 'in_arbeit' && lind2.status === 'will_nicht' && lind2.notiz === 'Keine Kapazität bis März' && st1.vermittlung.verlauf.some((x) => /Tischlerei Lindholz: Will nicht/.test(x.text)) && stFalsch.status === 400 && stFremd.status === 404,
     '31.5 Ergebnis des Anrufs je Betrieb (will nicht) mit Notiz und Verlauf; der erste Anruf setzt „neu“ auf „in Arbeit“; unbekannter Status 400, fremder Betrieb 404');
-  /* Weitere Betriebe nur, wenn der Kunde „Sucht ihr für mich aus“ gewählt hat; hat er gewählt, geht sein Aufmaß nur an seine zwei */
+  /* Weitere Betriebe nur, wenn der Kunde „Sucht ihr für mich aus“ gewählt hat; hat er gewählt, geht sein Aufmaß nur an seine */
   const neuGewaehlt = await zapi(P + '/betrieb-neu', { name: 'Tischlerei Prüfnachbar', ort: 'Oelde', tel: '02522 938271' });
   const zeile2 = (liste.vermittlungen || []).find((v) => v.nr === (ohneMail.json || {}).nr) || {}, P2 = '/api/inhaber/vermittlungen/' + zeile2.id;
   const neuFalsch = await zapi(P2 + '/betrieb-neu', { name: 'X' }), neu1 = (await zapi(P2 + '/betrieb-neu', { name: 'Tischlerei Prüfnachbar', ort: 'Oelde', tel: '02522 938271', web: 'www.pruefnachbar.de' })).json || {}, neuDoppelt = await zapi(P2 + '/betrieb-neu', { name: 'Tischlerei Prüfnachbar', ort: 'Oelde', tel: '02522 938271' });
@@ -220,10 +220,13 @@ export default async function (h) {
     '31.5 Mail an den Betrieb in Sie-Form mit Aufmaßblatt, Kontakt und Eckdaten, „Vermittelt von eeziframes“ und Impressum; kurze Mail an den Kunden, wer sein Aufmaß hat');
   const s12 = await zapi(P + '/senden', { bid: lind.id, mail: 'info@tischlerei-lindholz.example', zustimmung: true });
   const nochmal = await zapi(P + '/senden', { bid: brandt.id, mail: 'angebot@fensterbau-brandt.example', zustimmung: true });
-  const nb2 = (await zapi(P2 + '/betrieb-neu', { name: 'Fensterbau Zweiter', ort: 'Ennigerloh', tel: '02524 837261' })).json || {}, nb3 = (await zapi(P2 + '/betrieb-neu', { name: 'Fensterbau Dritter', ort: 'Beckum', tel: '02521 837262' })).json || {};
-  const s21 = await zapi(P2 + '/senden', { bid: nb.id, mail: 'info@pruefnachbar.example', zustimmung: true }), s22 = await zapi(P2 + '/senden', { bid: nb2.bid, mail: 'info@zweiter.example', zustimmung: true });
-  const zuViele = await zapi(P2 + '/senden', { bid: nb3.bid, mail: 'info@dritter.example', zustimmung: true });
-  ok(s12.status === 200 && nochmal.status === 200 && s21.status === 200 && s22.status === 200 && zuViele.status === 409 && /zwei Betriebe/.test(zuViele.json.fehler), '31.5 Höchstens zwei Betriebe bekommen das Aufmaß (der dritte: 409), bei eigener Wahl nur die zwei gewählten; an einen schon belieferten geht es noch einmal');
+  /* „Sucht ihr für mich aus“: der Inhaber trägt fünf weitere ein; fünf bekommen das Aufmaß, der sechste nicht */
+  const weitere = [];
+  for (const [i, wort] of ['Zweiter', 'Dritter', 'Vierter', 'Fünfter', 'Sechster'].entries()) weitere.push((await zapi(P2 + '/betrieb-neu', { name: 'Fensterbau ' + wort, ort: 'Ennigerloh', tel: '02524 83726' + i })).json || {});
+  const sAus = [await zapi(P2 + '/senden', { bid: nb.id, mail: 'info@pruefnachbar.example', zustimmung: true })];
+  for (const x of weitere.slice(0, 4)) sAus.push(await zapi(P2 + '/senden', { bid: x.bid, mail: 'info@' + x.bid + '.example', zustimmung: true }));
+  const zuViele = await zapi(P2 + '/senden', { bid: weitere[4].bid, mail: 'info@sechster.example', zustimmung: true });
+  ok(s12.status === 200 && nochmal.status === 200 && sAus.every((r) => r.status === 200) && zuViele.status === 409 && /fünf Betriebe/.test(zuViele.json.fehler), '31.5 Höchstens fünf Betriebe bekommen das Aufmaß (der sechste: 409), bei eigener Wahl nur die gewählten; an einen schon belieferten geht es noch einmal (' + sAus.map((r) => r.status).join(' ') + ')');
   const stand = (await zapi(P + '/stand', { stand: 'erledigt' })).json || {}, standFalsch = await zapi(P + '/stand', { stand: 'weg' }), notiz = await zapi(P + '/notiz', { text: 'Kundin ruft Freitag zurück' });
   const det2 = ((await zapi(P)).json || {}).vermittlung || {};
   ok(stand.ok && stand.vermittlung.stand === 'erledigt' && standFalsch.status === 400 && notiz.status === 200 && det2.notiz === 'Kundin ruft Freitag zurück', '31.5 Stand der Vermittlung (erledigt; unbekannt 400) und interne Notiz');
@@ -294,5 +297,5 @@ export default async function (h) {
 
   /* ---------- Teil C: App (Folien weg, betriebe, vcode, angefragt) ----------
      Platz für die Prüfungen der App: Die Sitzung, die die Folien in web/assets/app.js baut, ergänzt sie hier (Weg A bis „Angefragt“ mit
-     Suche, Auswahl von zwei, Einwilligung, Code 123456, senden; Weg B unverändert; ohne Server nur B). */
+     Suche, Auswahl von zwei bis fünf, Einwilligung, Code 123456, senden; Weg B unverändert; ohne Server nur B). */
 }

@@ -1,6 +1,6 @@
 # Vermittlung: Ergänzungen der Rechtstexte (Entwurf zur anwaltlichen Prüfung)
 
-Stand 29.10.2026, abends (zwei Betriebe, Aufmaßblatt auf dem Gratis-Weg dabei, Abschnitt 11 in docs/VERMITTLUNG.md). Noch nicht in `web/datenschutz/` und `web/agb/` eingebaut: Die Texte dort sind freigegeben, Änderungen brauchen eine
+Stand 29.10.2026, abends (zwei bis fünf Betriebe, Aufmaßblatt auf dem Gratis-Weg dabei, Abschnitt 11 in docs/VERMITTLUNG.md). Noch nicht in `web/datenschutz/` und `web/agb/` eingebaut: Die Texte dort sind freigegeben, Änderungen brauchen eine
 neue Fassung mit Stand und gehen erst mit der Freigabe online. Grundlage: docs/VERMITTLUNG.md, Abschnitte 6 und 10. Keine
 Rechtsberatung; die Fragen am Ende gehören zum Anwalt.
 
@@ -19,7 +19,7 @@ lit. a DSGVO.
   Ergebnisse speichern wir je Postleitzahl 30 Tage.
 - **Bestätigung Ihrer Nummer:** Den Code schicken wir per SMS bzw. als Anruf über [SMS-Anbieter, Sitz], der dafür in unserem Auftrag
   Ihre Telefonnummer verarbeitet (Art. 28 DSGVO). Den Code selbst speichern wir nicht.
-- **Weitergabe:** Wir rufen die zwei Betriebe an, die Sie gewählt haben (bzw. die zwei, die wir für Sie aussuchen). Sonst niemand. Nur wer zusagt,
+- **Weitergabe:** Wir rufen die Betriebe an, die Sie gewählt haben (zwei bis fünf, bzw. bis zu fünf, die wir für Sie aussuchen). Sonst niemand. Nur wer zusagt,
   bekommt per E-Mail Ihr Aufmaßblatt mit Name, Ort, Telefonnummer und, falls angegeben, E-Mail-Adresse. Ab dem Erhalt ist der Betrieb
   für die weitere Verarbeitung selbst verantwortlich.
 - **Rückfrage:** Etwa zwei Werktage nach Ihrer Anfrage fragen wir per SMS bzw. E-Mail nach, ob sich ein Betrieb gemeldet hat.
@@ -33,8 +33,8 @@ lit. a DSGVO.
 
 **§ 4a Anfrage an Fensterbetriebe (Vermittlung)**
 
-(1) Auf Wunsch fragt eeziframes für Sie kostenlos zwei Fensterbetriebe in Ihrer Nähe an, die Sie auswählen oder die wir für Sie
-aussuchen, und schickt Ihr Aufmaß an die Betriebe, die ein Angebot machen möchten. An andere Betriebe geben wir es nicht. Einen Anspruch auf ein Angebot gibt es nicht. Einen
+(1) Auf Wunsch fragt eeziframes für Sie kostenlos zwei bis fünf Fensterbetriebe in Ihrer Nähe an, die Sie auswählen, oder bis zu fünf,
+die wir für Sie aussuchen, und schickt Ihr Aufmaß an die Betriebe, die ein Angebot machen möchten. An andere Betriebe geben wir es nicht. Einen Anspruch auf ein Angebot gibt es nicht. Einen
 Vertrag über Fenster schließen Sie direkt mit dem Betrieb; eeziframes wird nicht Vertragspartei.
 
 (2) Die Liste der Betriebe stellt eine KI aus öffentlich zugänglichen Angaben zusammen. Wir prüfen und empfehlen die Betriebe nicht;
@@ -51,8 +51,8 @@ möglich.
 
 ## Fragen an den Anwalt
 
-1. Reicht die Einwilligung mit Namen der gewählten Betriebe bzw. „zwei passende Fensterbetriebe in meiner Nähe, die eeziframes für mich
-   aussucht“, wenn wir aussuchen (Kategorie von Empfängern, Art. 13 Abs. 1 lit. e DSGVO)?
+1. Reicht die Einwilligung mit Namen der gewählten Betriebe bzw. „bis zu fünf passende Fensterbetriebe in meiner Nähe, die eeziframes für
+   mich aussucht“, wenn wir aussuchen (Kategorie von Empfängern, Art. 13 Abs. 1 lit. e DSGVO)?
 2. Kostenlos gegen Weitergabe der Daten ist ein Verbrauchervertrag (§ 312 Abs. 1a BGB): Brauchen wir für die Vermittlung eine eigene
    Widerrufsbelehrung, und wie verhält sie sich zur Belehrung beim Kauf des Aufmaßblatts?
 3. Nachweis der Einwilligung: Reicht die Löschung nach 180 Tagen, oder sollen Text, Zeitpunkt und Nummer länger aufbewahrt werden?
@@ -60,5 +60,5 @@ möglich.
    den Betrieb erst nach Zustimmung im Gespräch (so gebaut).
 5. Hinweis „von einer KI aus öffentlichen Angaben zusammengestellt“ und Reihenfolge nach Entfernung: genügt das für § 5b Abs. 2 UWG?
 6. Rückfrage per SMS nach zwei Werktagen: als Teil der Anfrage zulässig oder Werbung?
-7. Anzeige „0 €“ mit durchgestrichenem Preis: zulässig, wenn der Gratis-Weg eine Gegenleistung (Weitergabe an zwei Betriebe) hat und das
-   klar daneben steht („Aufmaßblatt + an 2 Fensterbauer in deiner Nähe“)? Etikett „Empfohlen“ statt „Beliebt“ (keine Nutzerzahlen).
+7. Anzeige „0 €“ mit durchgestrichenem Preis: zulässig, wenn der Gratis-Weg eine Gegenleistung (Weitergabe an bis zu fünf Betriebe) hat und das
+   klar daneben steht („Aufmaßblatt + an bis zu 5 Fensterbauer in deiner Nähe“)? Etikett „Empfohlen“ statt „Beliebt“ (keine Nutzerzahlen).
