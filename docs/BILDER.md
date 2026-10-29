@@ -100,8 +100,8 @@ ohne Bildschirm wählen oder den Bildschirm leer lassen).
 ## Plätze für die Fensterbauer-Seiten (Konfigurator-Pakete, Wunsch des Inhabers vom 23.10.2026)
 
 Die Seiten für Fensterbauer (Verkaufsseite, Bestellformular, Kundenkonto) sind textlastig. Damit die Aufmerksamkeit hält, bekommt
-jeder längere Abschnitt eine Bildkarte in derselben Bildsprache wie oben (ein Tier tut etwas Menschliches rund ums Fenster oder
-um den Betrieb). Die Bilder liefert der Inhaber nach den Prompts unten; bis dahin stehen Platzhalter. Einbau danach in drei
+jeder längere Abschnitt eine Bildkarte: ein Bild, eine Pointe, mit dem wiederkehrenden Meister (siehe unten). Die Bilder sind
+seit dem 23.10.2026 alle erzeugt (Abschnitt „Erzeugt am 23.10.2026“); `scripts/fotos.py` legt Platzhalter nur noch an, wenn ein Original fehlt. Einbau danach in drei
 Schritten: Platz in `scripts/fotos.py` (PLAETZE) eintragen, `python3 scripts/fotos.py` laufen lassen, `<figure class="foto-karte">`
 an der genannten Stelle (Verkaufsseite in `web/fuer-fensterbauer/index.html`). Bestellung, Kundenbereich und Zentrale (seit 27.10.2026,
 `web/assets/auftrag-ui.js`) zeigen die Seiten von Fensterbau Brandt und die Vorschau der eigenen Seite, keine weiteren Bilder. Auf den Instanzen der Betriebe (Plus, Signature) stehen nur die eigenen
@@ -159,3 +159,36 @@ Zweite Idee je Platz, falls das erste Motiv nicht gefällt (Wunsch des Inhabers 
 | `fb-kundenschutz` | Unter Ihrer Glasglocke: Niemand fischt Ihre Kunden ab. | The master window maker gently placing a large glass bell jar over a miniature family standing at a tiny kitchen table with a tiny window frame, on a wooden workbench; around the jar a crowd of anonymous hands in grey suit sleeves holding clipboards and business cards press against the glass and cannot reach in, warm workshop light, the family inside relaxed |
 | `fb-frage` | Ein Knopf, ein Rückruf. | A single oversized round red call button set into the brick wall of a tidy workshop, softly glowing; the master window maker's hand resting on it, inviting, the rest of the frame calm and empty, evening light through a window |
 
+### Erzeugt am 23.10.2026 über die API von Black Forest Labs
+
+Alle Plätze der Fensterbauer-Seiten (außer `fuer-fensterbauer` und `fb-kunden-planen`, Bilder vom Inhaber) sind mit FLUX.2 [pro]
+(`https://api.bfl.ai/v1/flux-2-pro`) erzeugt, 16:10 als 1792 × 1120, 4:5 als 1280 × 1600 (etwa 2 Megapixel, 7 Credits je Bild), ohne
+automatische Prompt-Erweiterung (`disable_pup`). Die Figur entstand zuerst (Seed 2042522027, Prompt unten) und ging jeder Szene als
+`input_image` mit; eine verkleinerte Kopie liegt unter `docs/bilder/meister-referenz.jpg`, damit spätere Bilder dasselbe Gesicht bekommen.
+Skript: `python3 scripts/bilder-erzeugen.py flux-2-pro <ziel.jpg> <breite> <hoehe> <prompt-datei> [referenz.jpg]`; den Schlüssel hängt der
+Proxy der Cloud-Umgebung als Header `x-key` an (Secret „Black Forest Labs“ für `*.bfl.ai`), im Repo steht keiner. Danach wie gehabt:
+Original nach `fotos-roh/<name>.jpg`, `python3 scripts/fotos.py`.
+
+Figur: *Full-body studio photograph of a German master window maker in his early fifties: short grey beard, friendly tired eyes, short grey hair, dark blue work jacket with rolled-up sleeves over a light grey t-shirt, dark work trousers, sturdy boots, a yellow folding rule in the chest pocket. Neutral relaxed stance, slight warm smile, looking at the camera, plain light grey seamless studio background, soft even lighting, photorealistic, sharp, 35 mm lens look, no text, no logos, no watermark.*
+
+Gemeinsamer Vorspann [Figur]: *The man in the reference image is the master window maker: keep his face, grey hair and beard, dark blue work jacket and the yellow folding rule in the chest pocket exactly as in the reference.*
+Gemeinsamer Anhang [Stil]: *Photorealistic editorial photograph, cinematic, shallow depth of field, 35 mm lens look, subtle film grain, natural colour grading, one clear idea in the centre of the frame, calm composition with some empty space at the bottom of the frame, no text, no letters, no numbers, no signs, no logos, no watermark.*
+
+| Platz | Seed | Prompt (so verwendet) |
+|---|---|---|
+| `fb-anfrage` | 3650227175 | [Figur] A fortune teller's table set up in a craftsman's workshop: a glowing crystal ball on a dark velvet cloth shows a sharp miniature of a window opening with a brick wall, a roller shutter box and glowing measurement lines inside it; the master window maker leans in and looks at it with raised eyebrows, candles, warm light. [Stil] |
+| `fb-kunden-planen` | – | Bild vom Inhaber (winziger Meister auf der Fensterbank), nicht hier erzeugt |
+| `fb-kundenschutz` | 2329446189 | [Figur] Inside a small window showroom in warm evening light, the master window maker shakes hands with a young couple holding a small child, a white window sample standing between them. Outside the glass shop door, in the rain, three wolves in grey business suits with briefcases wait and cannot get in; the glass door is locked with a large old-fashioned key. Warm golden light inside, cool blue rain outside. [Stil] |
+| `fb-pakete` | 432385364 | [Figur] A dark showroom with three white window frames presented like sports cars at a launch, each standing on its own round podium under a spotlight: the first plain white, the second with its frame painted in soft green (#8fd694), the third in the same green with a small golden crest and a velvet rope in front of it; the master window maker stands proudly beside the third podium; silhouettes of visitors in the foreground. [Stil] |
+| `fb-ablauf` | 249623372 | [Figur] The master window maker drawing a window with white chalk on a bare plastered wall; the chalk lines are turning into a real white window with glass and a sunny garden view behind it, halfway finished, dust floating in the light, hopeful. [Stil] |
+| `fb-frage` | 1072991259 | [Figur] Exactly one old red rotary telephone, caught mid-air above a wooden workbench as it rings so hard it has jumped up, its coiled cord still attached to the bench, sawdust and a yellow folding rule flying up around it; the master window maker lunges toward it from the side with both hands open and a surprised grin, bright workshop daylight, playful. There is only this single telephone in the picture. [Stil] |
+| `partner-start` | 639319999 | [Figur] The master window maker holding up an oversized golden key whose bow is shaped like a window frame, standing in front of a glowing small shop front at dusk, proud, warm light spilling onto the wet pavement. [Stil] |
+| `partner-gestaltung` | 1007369228 | [Figur] Close-up in front of a white rendered house wall: the master window maker holds up a large fanned-out paint colour swatch deck, and the one swatch he points at with his thumb is soft green (#8fd694); directly behind it the window frame has already been painted in exactly that green with crisp clean edges while the wall around it stays perfectly white; afternoon light, the man slightly to one side so the window is clearly visible. [Stil] |
+| `partner-warten` | ? | [Figur] The master window maker asleep in a hammock in his workshop at night; a dozen tiny elves in work clothes assemble a white window frame on the workbench by lamplight, carrying screws and a tiny spirit level, cosy and funny. [Stil] |
+| `partner-live` | 1731996385 | [Figur] The master window maker cutting a red ribbon stretched across a giant freestanding white window frame on a small town square, confetti in the air, a small crowd clapping, morning sun, celebratory. [Stil] |
+| `instanz-danke` | 1795372267 | A white paper airplane leaving a cosy living room through the open window toward a city at sunset, a relaxed homeowner on the sofa behind it with the phone lying face-down, the plane already far over the rooftops, warm light. [Stil] |
+
+Verworfene Fassungen (Seeds, falls man sie nachrechnen will): `fb-frage` erste Fassung 552766989 (zwei Telefone), `fb-anfrage` zweite
+Fassung 2775640972 (Maßpfeil außerhalb der Kugel), `fb-pakete` zweite Fassung 2957272450 (Schrift auf den Podesten),
+`partner-gestaltung` Eimer über der Fassade 2841679373 (Meister doppelt) und 1084975889 (Farbe auf der Wand);
+Glasglocke 3000205972 und roter Knopf 2409175626 als Alternativen zu Wölfen und Telefon.
