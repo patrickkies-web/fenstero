@@ -237,6 +237,21 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   `/app/?ausprobieren=signature&direkt`: gleich „Was planst du?“ in der Kundenansicht, ohne Beispielseite und Kästchen, Rückweg zur
   Seite für Fensterbauer. Vorschlag für seine DNA: „Eine Leiste darf einen zweiten Weg tragen, wenn der Inhaber ihn nennt; der Anreiz
   ist einmalig, nie Dauerbewegung.“
+- Das Foto mit dem Lichtschatten auf dem Boden nicht überall (Inhaber, 29.10.2026: „nutzt bitte nicht schon wieder dieses Foto … ich muss
+  das nicht überall haben“): web/bilder/konfigurator/buehne.webp bleibt auf den Folien, die es schon tragen (Start, Gespeichert,
+  Haus, Zeit, Kontakt), neue Folien und Abschnitte nehmen eine andere Bühne. In der Vermittlung: Anthrazit mit Licht von oben links,
+  feinem Punktraster (wie eine Karte) und Vignette. Vorschlag für seine DNA (Abschnitt 9): „Ein Foto als Bühne trägt höchstens ein
+  Ablauf; neue Folien bekommen ihr eigenes Material.“
+- Gratis-Weg als Wahl, nicht im Kleingedruckten (Inhaber, 29.10.2026, übernommen aus einem Vorschlag): zwei Karten nebeneinander,
+  „Aufmaßblatt für dich“ mit Preis und „Aufmaßblatt + an 2 Fensterbauer in deiner Nähe“ für 0 € mit durchgestrichenem Preis als
+  Anker; die Gratis-Karte mit violettem Ring und Etikett (Koralle, schwarze Schrift). Etikett „Empfohlen“ statt des vorgeschlagenen
+  „Beliebt“, weil Beliebtheit ohne Nutzerzahlen eine erfundene Kennzahl wäre (DNA Abschnitt 4). Vertrauenssätze stehen dort, wo der
+  Zweifel entsteht (unter der Karte, am Telefonfeld), nicht gesammelt am Ende. Wo bezahlt wird, steht der Gratis-Weg noch einmal als
+  Fläche in der Folie. Was der Besucher auf der Startseite wählt (Farbe, Weg), übernimmt der Konfigurator.
+- Konfigurator als Einstieg der Startseite (Inhaber, 29.10.2026: „Der Konfigurator sollte selbst der Einstieg sein, statt dass er erst
+  erklärt wird“): im Hero ein drehbares Fenster aus dem Modell der App mit 3–4 Farbfeldern, dazu die Fassade, auf der nacheinander
+  Fenster eingeplant werden; Überschrift „Plane deine Fenster in 3D, bevor du den ersten Handwerker anrufst.“, Knopf „Kostenlos
+  losplanen“ (ersetzt im Hero „Jetzt konfigurieren“; die Leiste behält ihren Knopf). Protokoll docs/profis/2026-10-26-startseite-dna.md.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
