@@ -291,3 +291,36 @@ Zentrale (`/zentrale/`, Sitzung des Inhabers): `GET /api/inhaber/vermittlungen`,
 `POST …/:id/senden { bid, mail, zustimmung: true, kunde: true }` (Mail mit PDF an den Betrieb nur mit Zustimmung im Gespräch, die mit
 Zeit im Verlauf steht; höchstens drei; auf Wunsch eine Mail an den Kunden, welcher Betrieb sein Aufmaß hat), `POST …/:id/stand`,
 `POST …/:id/notiz`. Aufbewahrung 180 Tage, dann löscht der Tageslauf Anfrage und PDF.
+
+### Stand der Umsetzung (29.10.2026)
+
+Gebaut sind Server, Zentrale, Datenbank und Prüfung (Abschnitt 31 der Prüfsuite); die Folien der App sind ein eigener Teil
+(`web/assets/app.js`, `web/assets/vermittlung.css`, Prüfung `scripts/pruefen-instanzen/31-app.mjs`).
+
+| Teil | Stelle | Was es tut |
+|---|---|---|
+| Routen | `functions/api/vermittlung.js` | Suche, Code, Senden, Zentrale, Tageslauf; `vermittlung` in `/api/status` (`an` = Datenbank, Mailversand, `SITZUNG_GEHEIMNIS` und Ablage da) |
+| KI-Suche | `functions/api/vermittlung-suche.js` | Messages-API mit Websuche `web_search_20260209`, Modell `claude-opus-5-5` (Variable `VERMITTLUNG_MODELL`), Aufwand `medium`, höchstens 6 Suchen, Ort als `user_location` (DE), Portale und Baumärkte gesperrt, `fallbacks: "default"`; `pause_turn` wird fortgesetzt; Zeitlimit 80 s (`VERMITTLUNG_SUCHE_MS`), danach `quelle: 'keine'`. Die Antwort wird geprüft: ohne Name, Ort, Telefon und Website, Portale, über 60 km und Doppelte fallen weg; Leistungen nur aus der festen Liste; Kennung `b` + 12 Hex-Zeichen aus Name und Ort |
+| Zwischenspeicher | Tabelle `vermittlung_suche` | je PLZ 30 Tage (eine leere Suche einen Tag), mit Telefon, Website und Straße für die Zentrale; die App bekommt nur `id, name, ort, km, leistungen` |
+| Code | `functions/api/vermittlung-sms.js` | seven.io: SMS an Handys (015x, 016x, 017x), Anruf mit Ansage an Festnetz; 6 Ziffern, 10 Minuten, Token mit HMAC über Nummer und Code (`SITZUNG_GEHEIMNIS`, Zweck `vcode`), nichts gespeichert; 3 Codes je Nummer und Tag, Bremse je Anschluss, 5 Fehlversuche je Token |
+| Anfragen | Tabelle `vermittlungen`, Ablage `vermittlung` | Nummer `V-JJJJ-NNNN`; Kunde, Eckdaten, Aufmaß (`AM1.…`), Einwilligung mit Fassung, Wortlaut, Zeit und gekürztem Netz, gewählte Betriebe mit allen Angaben und Ergebnis der Anrufe, Verlauf, Notiz; Aufmaßblatt als PDF (bis 10 MB); höchstens 2 Anfragen je Nummer in 90 Tagen; nach 180 Tagen löscht der Tageslauf Anfrage und PDF |
+| Mails | `functions/api/vermittlung-mails.js` | an `MAIL_KONTAKT` mit PDF, Kunde, Eckdaten, Betrieben samt Telefon (tel:-Link), Website, km und Link zur Zentrale; an den Kunden (Du-Form, ohne PDF): „Wir fragen bei … an und schicken dein Aufmaß an die, die ein Angebot machen möchten; sie melden sich dann bei dir.“; an den Betrieb nur über die Zentrale mit Häkchen (Sie-Form, PDF, „Vermittelt von eeziframes“, Impressum im Fuß); auf Wunsch an den Kunden, welcher Betrieb sein Aufmaß hat |
+| Zentrale | `web/zentrale/`, `web/assets/inhaber.js`, `auftrag.css` | Umschalter „Aufträge \| Vermittlung“ mit der Zahl der neuen, Liste, Anfrage mit Anruf-Knöpfen, Ergebnis je Anruf, Notiz, „Aufmaß schicken“ nur mit dem Häkchen, weiterer Betrieb, Stand, interne Notiz ([ZENTRALE.md](ZENTRALE.md)) |
+
+Antworten, auf die sich die App verlässt: Fehler kommen als `{ ok: false, fehler, feld }` (bei Senden zusätzlich `felder` mit allen
+Feldern). `feld` ist `tel` (Nummer falsch, auch beim Code), `code` (401: fehlt, falsch, abgelaufen, andere Nummer, zu viele Versuche; mit
+`neu: true`, wenn ein neuer Code nötig ist), `betriebe` (400 mehr als drei, 409 `neuSuchen` wenn die Auswahl nicht mehr im Zwischenspeicher
+dieser PLZ steht), `name`, `mail`, `plz`, `einwilligung`, `aufmass` oder `pdf`. Die Grenze „zwei in 90 Tagen“ antwortet 429 mit
+`grenze: '90tage'` und `feld: 'tel'`. Derselbe Code mit demselben Token zweimal (Doppelklick) liefert dieselbe Nummer mit `schon: true`.
+`kontakt.ort` darf das ganze Feld „PLZ und Ort“ sein; der Server trennt die PLZ ab. Telefonnummern prüft der Server mit derselben Regel wie
+die App (`vmTel`), dazu Länge, Sonder- und Servicenummern und einen Anschluss aus lauter gleichen Ziffern.
+
+Attrappen und Prüfung: `KI_ATTRAPPE=1` liefert feste, erfundene Betriebe um Köln (Fensterbau Brandt vorn); `SMS_ATTRAPPE=1` oder
+`DATEN_ATTRAPPE=1` nimmt den Code 123456 und verschickt nichts (`SMS_ATTRAPPE=0` schaltet das ab, dann gilt der Weg ohne Code);
+`MAIL_ATTRAPPE=1` merkt sich die Mails. Ohne Anthropic-Schlüssel und ohne Attrappe antwortet die Suche `{ betriebe: [], quelle: 'keine' }`,
+ohne SMS-Anbieter und ohne Attrappe der Code `{ ohneCode: true }`; die Anfrage geht dann ohne Code durch und steht in der Zentrale als
+„Nummer nicht bestätigt“. Prüfung: `node scripts/mit-server.mjs 8971 env NUR=31 PW_PFAD=/opt/node-tools node scripts/pruefen.mjs`.
+
+Offen: Rückfrage per SMS nach zwei Werktagen, Turnstile und KI-Grenze ohne bestätigte Nummer (Prüfung 1), Prüfung der E-Mail auf
+Tippfehler und Wegwerf-Domains (Prüfung 3), Einladungslink für Partner, Tür B mit 9,99 € und Erstattung, Rechtstexte
+([VERMITTLUNG-RECHT.md](VERMITTLUNG-RECHT.md)), Vertrag zur Auftragsverarbeitung mit seven.io.

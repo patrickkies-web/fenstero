@@ -50,6 +50,8 @@
 // 23 Mandant, Routing, Schutz (vorneweg 23-fundament.mjs: Pakete, Regeln, Speicher, Sitzungen, Post, Bremsen, Testserver) · 24 Eingang ·
 // 25 App im Instanz-Modus · 26 Aufträge: Bestellung, Kundenbereich, Zentrale (docs/BESTELLUNG.md) · 28 Signature-Dashboard · 29 Verkaufsseite,
 // Recht. Die früheren Abschnitte 27 (Kundenkonto /partner/) und 30 (Ende zu Ende über die alte Bestellung) sind mit diesen Teilen entfallen.
+// Abschnitt 31 prüft auf demselben Testserver die Vermittlung (docs/VERMITTLUNG.md, Abschnitt 10): 31-app.mjs die Folien der App,
+// 31.mjs Server (Suche, Code, Senden, Tageslauf) und Zentrale.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:net';

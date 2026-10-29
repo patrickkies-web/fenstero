@@ -21,6 +21,7 @@ export default async function (h) {
   const pillen = (s) => s.evaluate(() => Array.from(document.querySelectorAll('.scr .dna-pille.lg-weiter')).filter((b) => !b.classList.contains('dna-pille--leise') && b.offsetParent).length);
   const ziele = (s) => s.evaluate(() => Array.from(document.querySelectorAll('.scr button, .scr a, .scr input')).filter((e) => e.offsetParent && !e.closest('.foot-links') && !e.closest('.ab-pflicht') && !e.closest('.vm-recht') && !e.closest('.ab-note') && !e.classList.contains('ulink')).map((e) => { const r = e.getBoundingClientRect(); return { t: (e.getAttribute('aria-label') || e.textContent || e.id || '').trim().slice(0, 30), h: r.height, w: r.width }; }).filter((x) => x.h < 44 || x.w < 44));
   const quer = (s) => s.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+  /* Das Etikett der Schritte hat geschützte Leerzeichen („3 von 5“), daher \s in den Mustern */
   const klick = async (s, sel) => { await s.click(sel); await s.waitForTimeout(250); };
   const screen = (s) => s.evaluate(() => S.screen);
 
@@ -33,14 +34,14 @@ export default async function (h) {
   await klick(s, '.scr .lg-weiter');
   ok(await screen(s) === 'weg', '31.A1 „Zeit und Budget“ führt zur Weiche');
   const weg = await s.evaluate(() => ({ kacheln: document.querySelectorAll('.vm-kachel').length, a: document.querySelector('.vm-kachel[data-v="A"]').getAttribute('aria-pressed'), umkreis: !!document.querySelector('.vm-buehne .vm-umkreis'), chip: (document.querySelector('.ab-chip') || {}).textContent || '' }));
-  ok(weg.kacheln === 2 && weg.a === 'true' && weg.umkreis && /3 von 5/.test(weg.chip), '31.A1 Weiche: zwei Wege, „Angebote aus deiner Nähe“ vorgewählt, Umkreis auf der Bühne, Schritt 3 von 5 (' + JSON.stringify(weg) + ')');
+  ok(weg.kacheln === 2 && weg.a === 'true' && weg.umkreis && /3\svon\s5/.test(weg.chip), '31.A1 Weiche: zwei Wege, „Angebote aus deiner Nähe“ vorgewählt, Umkreis auf der Bühne, Schritt 3 von 5 (' + JSON.stringify(weg) + ')');
   ok(await pillen(s) === 1, '31.A1 Weiche: genau eine volle Pille');
   const z1 = await ziele(s); ok(!z1.length, '31.A1 Weiche: Ziele ab 44 px' + (z1.length ? ' ' + JSON.stringify(z1) : ''));
   ok(!(await quer(s)), '31.A1 Weiche: kein Querscrollen');
   /* Weg B: Blatt auf der Bühne, Kontakt freiwillig, dann Freischalten wie bisher */
   await klick(s, '.vm-kachel[data-v="B"]');
   const b = await s.evaluate(() => ({ blatt: !!document.querySelector('.ab-papier'), pille: (document.querySelector('.scr .lg-weiter') || {}).textContent || '', chip: (document.querySelector('.ab-chip') || {}).textContent || '' }));
-  ok(b.blatt && /Aufmaßblatt/.test(b.pille) && /3 von 4/.test(b.chip), '31.A1 Weg B: Blatt auf der Bühne, „Weiter zum Aufmaßblatt“, Schritt 3 von 4');
+  ok(b.blatt && /Aufmaßblatt/.test(b.pille) && /3\svon\s4/.test(b.chip), '31.A1 Weg B: Blatt auf der Bühne, „Weiter zum Aufmaßblatt“, Schritt 3 von 4');
   await klick(s, '.scr .lg-weiter');
   const bk = await s.evaluate(() => ({ sc: S.screen, t: (document.querySelector('.lg-frage h1') || {}).textContent || '', pille: (document.querySelector('.scr .lg-weiter') || {}).textContent || '' }));
   ok(bk.sc === 'anfrage3' && /dein Fensterbauer/.test(bk.t) && /Zum Aufmaßblatt/.test(bk.pille), '31.A1 Weg B: Kontakt wie bisher, weiter zum Aufmaßblatt');
@@ -66,7 +67,9 @@ export default async function (h) {
   const f2 = await s.evaluate(() => ({ sc: S.screen, grund: (document.querySelector('.vm-grund') || {}).textContent || '', bad: !!document.querySelector('.vm-liste.ist-bad') }));
   ok(f2.sc === 'betriebe' && /mindestens einen Betrieb/.test(f2.grund) && f2.bad, '31.A3 Ohne Wahl kein Abschicken, Grund über der Pille');
   const ids = await s.evaluate(() => S.verm.liste.map((x) => x.id));
-  for (const id of ids.slice(0, 4)) await klick(s, '.vm-betrieb[data-v="' + id + '"]');
+  for (const id of ids.slice(0, 3)) await klick(s, '.vm-betrieb[data-v="' + id + '"]');
+  /* der vierte ist gesperrt (aria-disabled): Playwright klickt ihn nicht, also das Klick-Ereignis direkt; die Sperre selbst wird geprüft */
+  await s.$eval('.vm-betrieb[data-v="' + ids[3] + '"]', (e) => e.click()); await s.waitForTimeout(250);
   const w = await s.evaluate(() => ({ wahl: S.verm.wahl.length, aus: document.querySelectorAll('.vm-betrieb[aria-disabled="true"]').length, nr: Array.from(document.querySelectorAll('.vm-betrieb[aria-pressed="true"] .vm-mark')).map((e) => e.textContent).join(','), etiketten: document.querySelectorAll('.vm-etikett').length }));
   ok(w.wahl === 3 && w.nr === '1,2,3' && w.aus === ids.length - 3 && w.etiketten === 3, '31.A3 Höchstens drei, nummeriert, mit Etikett im Umkreis, die übrigen gesperrt (' + JSON.stringify(w) + ')');
   await klick(s, '.vm-selbst');
@@ -85,21 +88,27 @@ export default async function (h) {
   await klick(s, '.scr .lg-weiter'); await s.waitForTimeout(400);
   const c = await s.evaluate(() => ({ sc: S.screen, kanal: S.verm.kanal, an: S.verm.an, test: /123456/.test(document.querySelector('.scr').textContent) }));
   ok(c.sc === 'vcode' && c.kanal === 'sms' && /••• 5678$/.test(c.an) && c.test, '31.A4 Code per SMS an die maskierte Nummer, Hinweis auf den Testbetrieb (' + JSON.stringify(c) + ')');
-  const vorher = (await h.post({ anhaenge: true })).length;
+  /* Mails über ihre Kennung finden, nicht über die Position: die Mail-Attrappe behält nur die letzten 50 (functions/api/post.js) */
+  const vorher = new Set((await h.post()).map((m) => m.id));
   await s.fill('#vm-code', '000000'); await s.waitForTimeout(1500);
   const c2 = await s.evaluate(() => ({ sc: S.screen, fehler: (document.querySelector('.vm-feldfehler') || {}).textContent || '', gesendet: !!(S.verm && S.verm.gesendet) }));
   ok(c2.sc === 'vcode' && c2.fehler && !c2.gesendet, '31.A4 Falscher Code: bleibt auf der Folie mit Fehler am Feld (' + c2.fehler + ')');
+  /* der falsche Code ist gewollt: der Server antwortet 401 (feld code); diese eine Antwort ist kein Fehler der Seite */
+  s.probleme = s.probleme.filter((p) => !/\/api\/vermittlung\/senden/.test(p) && !/status of 401/.test(p));
   await s.fill('#vm-code', '123456');
   await s.waitForFunction(() => S.screen === 'angefragt', null, { timeout: 20000 }).catch(() => null);
   const g = await s.evaluate(() => ({ sc: S.screen, nr: S.verm.gesendet && S.verm.gesendet.nr, text: document.querySelector('.scr').textContent }));
   ok(g.sc === 'angefragt' && /^V-\d{4}-\d{4}$/.test(g.nr || '') && g.text.includes(namen[0]) && /Wir fragen/.test(g.text), '31.A4 Angefragt mit Nummer ' + g.nr + ', nennt die Betriebe, sagt „Wir fragen an“');
   ok(!/gesendet an|ist bei (?!uns)/i.test(g.text.replace(/Anfrage .{0,40} ist bei uns/, '')), '31.A4 Kein „gesendet an Betrieb“ in der Bestätigung');
-  const post = (await h.post({ anhaenge: true })).slice(vorher);
-  const anInhaber = post.find((m) => (m.anhaenge || m.anhangDaten || []).length && /Vermittlung|V-\d{4}/.test(String(m.betreff || m.subject || '')));
-  const pdf = anInhaber ? (anInhaber.anhangDaten || []).find((x) => x && /pdf/i.test(String(x.name || x.filename || x.typ || ''))) : null;
+  await s.waitForTimeout(400);
+  const post = (await h.post({ anhaenge: true })).filter((m) => !vorher.has(m.id));
+  /* Format der Mail-Attrappe: anhaenge [{ name, typ, bytes, cid }] und anhangDaten [Base64] in derselben Reihenfolge */
+  const anInhaber = post.find((m) => (m.anhaenge || []).length && /Vermittlung/.test(String(m.betreff || '')) && String(m.betreff || '').includes(g.nr || '-'));
+  const iPdf = anInhaber ? (anInhaber.anhaenge || []).findIndex((x) => x.typ === 'application/pdf' && /\.pdf$/.test(x.name || '')) : -1;
+  const pdf = iPdf >= 0 ? (anInhaber.anhangDaten || [])[iPdf] : '';
   ok(!!anInhaber, '31.A4 Mail an den Inhaber zur Anfrage ist raus');
-  ok(!!pdf && Buffer.from(String(pdf.inhalt || pdf.content || pdf.daten || ''), 'base64').slice(0, 4).toString() === '%PDF', '31.A4 Das Aufmaßblatt aus der App hängt als PDF an');
-  ok(!post.some((m) => String(m.an || m.to || '').includes('pruefer@beispiel.de') && (m.anhaenge || m.anhangDaten || []).length), '31.A4 Der Kunde bekommt kein Aufmaßblatt (Weg A)');
+  ok(!!pdf && Buffer.from(String(pdf), 'base64').slice(0, 4).toString() === '%PDF', '31.A4 Das Aufmaßblatt aus der App hängt als PDF an');
+  ok(post.some((m) => m.an === 'pruefer@beispiel.de') && !post.some((m) => String(m.an || '').includes('pruefer@beispiel.de') && (m.anhaenge || []).length), '31.A4 Der Kunde bekommt eine Bestätigung, aber kein Aufmaßblatt (Weg A)');
   await klick(s, '.scr .lg-weiter');
   ok(await screen(s) === 'home', '31.A4 „Fertig“ führt zur Liste');
   await s.evaluate(() => go('weg')); await s.waitForTimeout(200);
@@ -127,7 +136,7 @@ export default async function (h) {
   await p.goto(h.BASE + '/app/', { waitUntil: 'networkidle' }); await p.waitForTimeout(400);
   await p.evaluate((x) => { S.windows = demoProject(); S.proj = Object.assign({}, PROJ0, x); go('anfrage2'); }, PROJ); await p.waitForTimeout(200);
   await klick(p, '.scr .lg-weiter');
-  ok(await screen(p) === 'anfrage3' && await p.evaluate(() => /3 von 3/.test(document.querySelector('.ab-chip').textContent)), '31.A6 Ohne Vermittlung: Zeit → Kontakt (3 von 3) wie bisher');
+  ok(await screen(p) === 'anfrage3' && await p.evaluate(() => /3\svon\s3/.test(document.querySelector('.ab-chip').textContent)), '31.A6 Ohne Vermittlung: Zeit → Kontakt (3 von 3) wie bisher');
   h.sauber(p, '31.A6 Pilot ohne Fehler');
   await ctxP.close();
 }

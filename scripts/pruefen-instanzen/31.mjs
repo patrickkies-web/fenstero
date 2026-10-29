@@ -33,7 +33,7 @@ export default async function (h) {
   const keks = (r) => (r.cookies || []).map((c) => c.split(';')[0]).find((c) => /^__Host-inhaber=./.test(c)) || '';
   const S = await import(path.join(h.WURZEL, 'functions/api/vermittlung-suche.js'));
   const { ANBIETER } = await import(path.join(h.WURZEL, 'functions/api/anbieter.js'));
-  const PLZ = '33442', PLZ2 = '33378';
+  const PLZ = '33449', PLZ2 = '33378'; // 33442 nimmt der App-Teil (31-app.mjs), der vorher läuft
 
   /* ---------- 31.1 Stand ---------- */
   const st = await h.api('localhost', '/api/status'), vs = (st.json || {}).vermittlung || {};
@@ -111,7 +111,7 @@ export default async function (h) {
   /* ---------- 31.3 Code ---------- */
   const TEL = '0171 2894563', TEL2 = '0160 9182736', FEST = '05241 739821';
   const falsch = [];
-  for (const t of ['0123456789', '1111111', '01712345678', '+44 20 7946 0958', '0800 7364521', '0171 111 1111', 'abc', '']) falsch.push((await post('/api/vermittlung/code', { tel: t })).json || {});
+  for (const t of ['0123456789', '1111111', '0234567890', '0987654321', '+44 20 7946 0958', '0800 7364521', '0171 111 1111', 'abc', '']) falsch.push((await post('/api/vermittlung/code', { tel: t })).json || {});
   const c1 = (await post('/api/vermittlung/code', { tel: TEL })).json || {}, c2 = (await post('/api/vermittlung/code', { tel: '+49 (0)172 395 8461' })).json || {}, cf = (await post('/api/vermittlung/code', { tel: FEST })).json || {};
   ok(falsch.every((r) => r.ok === false && r.feld === 'tel') && c1.ok && c1.kanal === 'sms' && c1.an === '0171 ••• 4563' && c1.attrappe === true && typeof c1.token === 'string' && c1.token.length > 40 && c2.an === '0172 ••• 8461' && c2.kanal === 'sms' && cf.kanal === 'anruf' && cf.an === '0524 ••• 9821',
     '31.3 Code: Unsinn, Ausland und Sondernummern abgelehnt (feld tel); Handy per SMS, Festnetz per Anruf, +49 und (0) normalisiert, Nummer maskiert („0171 ••• 4563“), Attrappe');
@@ -123,15 +123,15 @@ export default async function (h) {
   /* ---------- 31.4 Senden ---------- */
   const bid = b1.map((b) => b.id), MAIL = 'erika-' + stempel + '@pruef-kunde.de';
   const code = async (tel) => ((await post('/api/vermittlung/code', { tel: tel })).json || {}).token;
-  const anfrage = (o) => Object.assign({ kontakt: { name: 'Erika Prüfmann', ort: 'Herzebrock-Clarholz', tel: TEL, mail: MAIL, erreich: ['vm', 'ab'] }, plz: PLZ, betriebe: bid.slice(0, 2), token: c1.token, code: '123456',
+  const anfrage = (o) => Object.assign({ kontakt: { name: 'Erika Prüfmann', ort: PLZ + ' Herzebrock-Clarholz', tel: TEL, mail: MAIL, erreich: ['vm', 'ab'] }, plz: PLZ, betriebe: bid.slice(0, 2), token: c1.token, code: '123456',
     einwilligung: { fassung: '2026-10-29', text: 'Ich möchte, dass Fensterbau Brandt und Tischlerei Lindholz mein Aufmaß und meine Kontaktdaten bekommen und mich für ein Angebot kontaktieren.' },
     aufmass: AUFMASS, eckdaten: { fenster: 4, elemente: 5, gebaeude: 'efh', baujahr: '1978', zeit: '3m', budget: 'b2', foerdweg: 'bafa' }, pdf: PDF.toString('base64') }, o || {});
   const mit = (k, v) => { const a = anfrage(); a.kontakt = Object.assign({}, a.kontakt, { [k]: v }); return a; };
-  const faelle = [['kontakt.name', mit('name', 'A')], ['plz', anfrage({ plz: '1234' })], ['kontakt.ort', mit('ort', '')], ['kontakt.tel', mit('tel', 'kaputt')], ['kontakt.mail', mit('mail', 'kaputt')], ['einwilligung', anfrage({ einwilligung: { fassung: '2026-10-29' } })],
+  const faelle = [['kontakt.name', mit('name', 'A')], ['plz', anfrage({ plz: '1234' })], ['kontakt.tel', mit('tel', 'kaputt')], ['kontakt.mail', mit('mail', 'kaputt')], ['einwilligung', anfrage({ einwilligung: { fassung: '2026-10-29' } })],
     ['aufmass', anfrage({ aufmass: '' })], ['betriebe', anfrage({ betriebe: bid.slice(0, 4) })], ['pdf', anfrage({ pdf: Buffer.from('Hallo, kein PDF').toString('base64') })], ['pdf', anfrage({ pdf: '' })]];
   const abl = [];
-  for (const [feld, body] of faelle) { const r = await post('/api/vermittlung/senden', body); abl.push(r.status === 400 && !!(r.json.felder || {})[feld] ? 'ok' : feld + ':' + r.status); }
-  ok(abl.every((x) => x === 'ok'), '31.4 Senden: Name ab 2 Zeichen, PLZ, Ort, Telefon, E-Mail (falls angegeben), Einwilligung mit Fassung und Text, Aufmaß, höchstens drei Betriebe, PDF mit %PDF-Kopf; je Fehler das Feld (' + abl.filter((x) => x !== 'ok').join(' ') + ')');
+  for (const [feld, body] of faelle) { const r = await post('/api/vermittlung/senden', body); abl.push(r.status === 400 && !!(r.json.felder || {})[feld] && r.json.feld === feld.replace(/^kontakt\./, '') ? 'ok' : feld + ':' + r.status); }
+  ok(abl.every((x) => x === 'ok'), '31.4 Senden: Name ab 2 Zeichen, PLZ, Telefon, E-Mail (falls angegeben), Einwilligung mit Fassung und Text, Aufmaß, höchstens drei Betriebe, PDF mit %PDF-Kopf; je Fehler das Feld in felder und feld (wie die App es liest: tel, name, mail …) (' + abl.filter((x) => x !== 'ok').join(' ') + ')');
   const gross = Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(10200000, 0x20)]), zuGross = Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(11200000, 0x20)]);
   const g1 = await post('/api/vermittlung/senden', anfrage({ pdf: gross.toString('base64') })), g2 = await post('/api/vermittlung/senden', anfrage({ pdf: zuGross.toString('base64') }));
   ok(g1.status === 400 && !!(g1.json.felder || {}).pdf && /10 MB/.test(g1.json.fehler) && g2.status === 413, '31.4 Aufmaßblatt über 10 MB: 400 am Feld pdf; über dem Grenzwert des Pfads 413 (' + g1.status + ', ' + g2.status + ')');
@@ -184,7 +184,7 @@ export default async function (h) {
   const zapi = (pfad, body) => h.api('localhost', pfad, body === undefined ? { cookie: Z } : { cookie: Z, body: body, origin: true });
   const liste = (await zapi('/api/inhaber/vermittlungen')).json || {}, zeile = (liste.vermittlungen || []).find((v) => v.nr === nr1) || {};
   ok(ohneSitzung.status === 401 && ohneSitzungPost.status === 401 && !!Z && zeile.bestaetigt === true && zeile.gewaehlt === 2 && zeile.offen === 2 && zeile.stand === 'neu' && zeile.name === 'Erika Prüfmann' && zeile.ort === 'Herzebrock-Clarholz' && liste.neu >= 3 && !/AM1\./.test(JSON.stringify(liste)),
-    '31.5 Zentrale nur angemeldet (401); Liste mit Nr., Name, Ort, Nummer bestätigt, zwei gewählten Betrieben, zwei offenen Anrufen, Stand „neu“, Zahl der neuen (' + liste.neu + ')');
+    '31.5 Zentrale nur angemeldet (401); Liste mit Nr., Name, Ort (die PLZ aus dem Feld „PLZ und Ort“ abgetrennt), Nummer bestätigt, zwei gewählten Betrieben, zwei offenen Anrufen, Stand „neu“, Zahl der neuen (' + liste.neu + ')');
   const det = (await zapi('/api/inhaber/vermittlungen/' + zeile.id)).json || {}, v1 = det.vermittlung || {}, brandt = (v1.betriebe || [])[0] || {};
   ok(brandt.name === 'Fensterbau Brandt' && brandt.tel === '0221 5550101' && brandt.web === 'https://fensterbau-brandt.example/' && brandt.strasse === 'Werkstattweg 7' && brandt.status === 'offen' && v1.kunde.tel === '+491712894563' && v1.kunde.anzeige === '0171 2894563' && v1.kunde.erreich === 'Vormittags, Abends' &&
     (v1.eckZeilen || []).some((z) => z[0] === 'Gebäude' && z[1] === 'Einfamilienhaus') && v1.einwilligung.fassung === '2026-10-29' && /^10\.31\.\d+\.0\/24$/.test(v1.einwilligung.netz) && !!v1.einwilligung.zeit && v1.pdf === true && v1.aufmassZeichen === AUFMASS.length,

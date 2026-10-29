@@ -66,6 +66,12 @@
      CF_API_TOKEN             Secret, Schlüssel für die Domains der Instanzen (eigene Vorlage ohne Zugriff auf eeziframes.com, siehe
                               functions/api/cloudflare.js); ohne: die Zentrale zeigt eine Klick-Anleitung
      CF_ACCOUNT_ID            Kontokennung bei Cloudflare (32 Zeichen, rechts auf der Kontoübersicht), nur zusammen mit CF_API_TOKEN
+     Vermittlung (functions/api/vermittlung.js, docs/VERMITTLUNG.md Abschnitt 10; gelesen dort, nicht in konfig):
+     SMS_API_KEY              Secret, Schlüssel von seven.io für den Code per SMS bzw. Anruf (ohne: Anfragen ohne Code, „nicht bestätigt“)
+     SMS_ABSENDER, SMS_STIMME Absender der SMS (Vorgabe eeziframes), Stimme der Ansage (Vorgabe de-de-female)
+     VERMITTLUNG_SUCHE_TAG_MAX neue KI-Suchen nach Fensterbetrieben am Tag (Vorgabe 300, Mail an MAIL_KONTAKT bei 80 %)
+     VERMITTLUNG_MODELL, VERMITTLUNG_SUCHE_MS   Modell (Vorgabe claude-opus-5-5) und Zeitlimit der Suche in ms (Vorgabe 80000)
+     SMS_ATTRAPPE=1           nur lokal: Code 123456, nichts verschickt (mit DATEN_ATTRAPPE=1 von selbst; 0 schaltet es dann ab)
      ZAHLUNG_ATTRAPPE=1 / DATEN_ATTRAPPE=1 / MAIL_ATTRAPPE=1   nur lokal zum Testen: Stripe, Datenbank bzw. Mailversand werden nachgestellt */
 import { ANBIETER } from './anbieter.js';
 

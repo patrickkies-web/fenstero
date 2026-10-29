@@ -518,6 +518,7 @@ a.a-platz-wahl { text-decoration: none; color: inherit; }
 @media (hover: hover) and (pointer: fine) { .a-anruf:hover { background: rgba(7,9,10,.05); } }
 @media (min-width: 560px) { .a-anruf { display: inline-flex; width: auto; min-width: 300px; } }
 /* Ergebnis des Anrufs (Segment auf Weiß): längere Wörter brechen in der Kapsel um, nichts läuft seitlich hinaus */
+.a-betrieb .a-segment { max-width: 520px; }
 .a-betrieb .a-segment button { padding: 0 8px; font-size: 14px; line-height: 1.15; }
 .a-notiz-betrieb textarea { min-height: 72px; }
 .a-senden-teil { border-top: 1px solid rgba(7,9,10,.08); }

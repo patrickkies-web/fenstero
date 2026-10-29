@@ -47,16 +47,10 @@ const jetztVon = (ctx) => ctx.k.jetzt || Date.now();
 
 /* ---------- Telefonnummer: nur deutsche Nummern, auf +49… normalisiert ----------
    Handy (015x, 016x, 017x) bekommt den Code per SMS, alles andere per Anruf. Abgelehnt: Ausland, Sonder- und Servicenummern
-   (0137, 0180, 0700, 0800, 0900 …), falsche Länge und offensichtlicher Unsinn (lauter gleiche Ziffern, Folgen wie 1234567). */
-function folge(z) {
-  let lang = 1, auf = 1, ab = 1;
-  for (let i = 1; i < z.length; i++) {
-    const a = Number(z[i - 1]), b = Number(z[i]);
-    auf = (a + 1) % 10 === b ? auf + 1 : 1; ab = (b + 1) % 10 === a ? ab + 1 : 1;
-    lang = Math.max(lang, auf, ab);
-  }
-  return lang;
-}
+   (0137, 0180, 0700, 0800, 0900 …), falsche Länge und offensichtlicher Unsinn: die ganze Nummer nach der 0 als Folge (0123456789,
+   0987654321) oder lauter gleiche Ziffern, dazu ein Anschluss aus einer einzigen Ziffer (0171 1111111). Dieselbe Regel wie vmTel in der
+   App (web/assets/app.js), damit die App nur in Ausnahmen eine Nummer zurückbekommt (Antwort mit feld: 'tel'). */
+const folge = (rest) => /^(\d)\1+$/.test(rest) || '1234567890123456'.includes(rest) || '9876543210987654'.includes(rest);
 export function telefon(roh) {
   let s = String(roh == null ? '' : roh).trim();
   if (!s || s.length > 32 || /[^\d\s+()/.\-]/.test(s)) return null;
@@ -72,8 +66,7 @@ export function telefon(roh) {
   const mobil = /^01[567]\d/.test(nat);
   if (mobil ? nat.length < 11 || nat.length > 12 : nat.length < 7 || nat.length > 12) return null;
   if (!mobil && /^0(1|700|800|900|137|138|180|190)/.test(nat)) return null;
-  const rest = nat.slice(-7);
-  if (new Set(rest.split('')).size <= 2 || folge(nat) >= 7) return null;
+  if (folge(nat.slice(1)) || /^(\d)\1{6}$/.test(nat.slice(-7))) return null;
   /* Anzeige: die Gruppen, wie der Kunde sie getippt hat (mit 0 statt +49), sonst Vorwahl grob abgetrennt */
   let anzeige = s.replace(/\(0\)/g, ' ').replace(/[()/.\-]/g, ' ').replace(/^\s*(\+49|0049)\s*/, '0').replace(/\s+/g, ' ').trim();
   if (anzeige.replace(/\D/g, '') !== nat || !/\s/.test(anzeige)) anzeige = nat.slice(0, mobil ? 4 : 5) + ' ' + nat.slice(mobil ? 4 : 5);
@@ -174,10 +167,10 @@ async function senden(ctx) {
   if (!(await bremse(ctx, 'FORM', 'vsenden:' + q)) || !erlaubt('vsenden:' + q, 20, 60 * MIN)) throw new ApiFehler('Zu viele Anfragen. Bitte in ein paar Minuten noch einmal.', 429);
   if (!vermittlungAn(ctx.k)) throw new ApiFehler('Die Vermittlung ist hier noch nicht eingerichtet.', 503);
   const d = vermittlungDaten(ctx.k), jetzt = jetztVon(ctx), ko = b.kontakt && typeof b.kontakt === 'object' ? b.kontakt : {}, f = {};
-  const name = kurz(ko.name, 80), ort = kurz(ko.ort, 60), mail = kurz(ko.mail, 120).toLowerCase(), plz = String(b.plz == null ? '' : b.plz).trim(), t = telefon(ko.tel);
+  /* Ort: die App schickt das Feld „PLZ und Ort“ ganz; die PLZ steht schon in plz und wird hier abgetrennt (Ort darf dann fehlen) */
+  const name = kurz(ko.name, 80), ort = kurz(ko.ort, 80).replace(/^\d{5}[\s,·-]*/, '').replace(/[\s,·-]*\d{5}$/, '').slice(0, 60), mail = kurz(ko.mail, 120).toLowerCase(), plz = String(b.plz == null ? '' : b.plz).trim(), t = telefon(ko.tel);
   if (name.length < 2) f['kontakt.name'] = 'Bitte gib deinen Namen ein.';
   if (!plzOk(plz)) f.plz = 'Bitte prüfe deine Postleitzahl.';
-  if (ort.length < 2) f['kontakt.ort'] = 'Bitte gib deinen Ort ein.';
   if (!t) f['kontakt.tel'] = TEL_FEHLER;
   if (mail && !mailOk(mail)) f['kontakt.mail'] = 'Bitte prüfe deine E-Mail-Adresse.';
   const ew = b.einwilligung && typeof b.einwilligung === 'object' ? b.einwilligung : {}, fassung = kurz(ew.fassung, 40), ewText = String(ew.text == null ? '' : ew.text).replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, ' ').trim().slice(0, 3000);
@@ -185,10 +178,12 @@ async function senden(ctx) {
   const aufmass = String(b.aufmass == null ? '' : b.aufmass).trim();
   if (!AUFMASS.test(aufmass) || aufmass.length > MAX_AUFMASS) f.aufmass = 'Das Aufmaß fehlt. Bitte miss mindestens ein Fenster.';
   const ids = b.betriebe == null ? [] : Array.isArray(b.betriebe) ? b.betriebe : null;
-  if (!ids || ids.length > 3 || ids.some((x) => typeof x !== 'string' || !/^b[0-9a-f]{12}$/.test(x)) || new Set(ids).size !== ids.length) f.betriebe = 'Bitte wähle höchstens drei Betriebe.';
+  if (ids && ids.length > 3) f.betriebe = 'Bitte wähle höchstens drei Betriebe.';
+  else if (!ids || ids.some((x) => typeof x !== 'string' || !/^b[0-9a-f]{12}$/.test(x)) || new Set(ids).size !== ids.length) f.betriebe = 'Die Auswahl der Betriebe stimmt so nicht. Bitte wähle sie noch einmal.';
   const pdf = pdfAus(b.pdf); if (!pdf) f.pdf = 'Das Aufmaßblatt fehlt oder ist zu groß (höchstens 10 MB).';
   const fk = Object.keys(f);
-  if (fk.length) throw new ApiFehler(fk.length === 1 ? f[fk[0]] : 'Bitte prüfe die markierten Angaben.', 400, { felder: f });
+  /* feld: das erste Feld mit Fehler, wie die App es kennt (tel, name, mail, plz, einwilligung, aufmass, betriebe, pdf) */
+  if (fk.length) throw new ApiFehler(fk.length === 1 ? f[fk[0]] : 'Bitte prüfe die markierten Angaben.', 400, { felder: f, feld: fk[0].replace(/^kontakt\./, '') });
   /* gewählte Betriebe aus dem Zwischenspeicher dieser PLZ (mit Telefon und Website für die Zentrale) */
   let gewaehlt = [], suchQuelle = '';
   if (ids.length) {
