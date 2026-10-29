@@ -60,7 +60,11 @@ export const SEITEN_INFO = {
   '/fuer-fensterbauer/falsches-aufmass-haftung/': ['Falsches Aufmaß: Haftung', 'Wer haftet, wenn Fenster nicht passen, und wie Sie vorbeugen.'],
   '/fuer-fensterbauer/aufmass-kostenpflichtig/': ['Aufmaß kostenpflichtig?', 'Kostenloses Aufmaß, Anfahrtspauschale und was vorher vereinbart sein muss.'],
   '/fuer-fensterbauer/geplatzter-aufmasstermin/': ['Geplatzter Aufmaßtermin', 'Was eine Fahrt ohne Kunden kostet, mit Beispielrechnung.'],
-  '/fuer-fensterbauer/fensterbau-software/': ['Fensterbau-Software', 'Aufmaß-Apps, Handwerkersoftware und ERP im fairen Überblick.']
+  '/fuer-fensterbauer/fensterbau-software/': ['Fensterbau-Software', 'Aufmaß-Apps, Handwerkersoftware und ERP im fairen Überblick.'],
+  '/fuer-fensterbauer/fenster-konfigurator-website/': ['Konfigurator für die Website', 'Widget, Hersteller, Agentur oder fertig gemietet: vier Wege im Vergleich.'],
+  '/fuer-fensterbauer/digitales-aufmass/': ['Digitales Aufmaß', 'Wie genau Laser, LiDAR und Foto messen, und wann der Kunde misst.'],
+  '/fuer-fensterbauer/leads-fensterbau/': ['Leads im Fensterbau', 'Was Portale verlangen und wie Sie Anfragen selbst gewinnen.'],
+  '/fuer-fensterbauer/ki-im-fensterbau/': ['KI im Fensterbau', 'Wo KI hilft, warum sie nicht misst und was das Recht verlangt.']
 };
 
 /* Der Weg zu neuen Fenstern; die erste Seite eines Schritts ist sein Ziel in der Wegleiste und im „Nächster Schritt“ */
@@ -72,7 +76,8 @@ export const WEG = [
   { name: 'Vergleichen', text: 'Angebote richtig lesen', seiten: ['/ratgeber/fenster-angebot-vergleichen/'] },
   { name: 'Einbauen', text: 'RAL-Montage, Lüftung', seiten: ['/ratgeber/ral-montage-fenster/', '/ratgeber/lueftungskonzept-fenstertausch/'] }
 ];
-export const FENSTERBAUER = ['/fuer-fensterbauer/', '/fuer-fensterbauer/erstaufmass-feinaufmass/', '/fuer-fensterbauer/falsches-aufmass-haftung/', '/fuer-fensterbauer/aufmass-kostenpflichtig/', '/fuer-fensterbauer/geplatzter-aufmasstermin/', '/fuer-fensterbauer/fensterbau-software/'];
+export const FENSTERBAUER = ['/fuer-fensterbauer/', '/fuer-fensterbauer/erstaufmass-feinaufmass/', '/fuer-fensterbauer/falsches-aufmass-haftung/', '/fuer-fensterbauer/aufmass-kostenpflichtig/', '/fuer-fensterbauer/geplatzter-aufmasstermin/', '/fuer-fensterbauer/fensterbau-software/',
+  '/fuer-fensterbauer/fenster-konfigurator-website/', '/fuer-fensterbauer/digitales-aufmass/', '/fuer-fensterbauer/leads-fensterbau/', '/fuer-fensterbauer/ki-im-fensterbau/'];
 
 /* Das Zeichen (eine Quelle: scripts/logo-setzen.py), hier für die Marke in der Fußzeile */
 const ZEICHEN = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect class="fi-kachel" width="64" height="64" rx="10" fill="#000"/><g class="fi-licht" fill="#fff"><path class="fi-decke" d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path class="fi-fenster" d="M45 22 57 17.6V41.9L45 39.8Z"/><path class="fi-strahl" d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect class="fi-rand" x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#000" stroke-opacity=".1"/></svg>';
