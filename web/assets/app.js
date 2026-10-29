@@ -534,7 +534,7 @@ const GLOSS = {
   zeitraum: { s: 'Zeitraum', t: 'Wann soll es losgehen?', x: ['Fenster werden nach dem Feinaufmaß einzeln gefertigt. Bis zum Einbau vergehen meist einige Wochen, in der Saison auch mehr.', 'Mit deinem Zeitraum plant der Fensterbauer Termin und Lieferung. Willst du erst Angebote vergleichen, wähle „Später, erst Angebote“.'], tipp: 'Für den Zuschuss vom BAFA muss der Antrag vor Beginn gestellt sein. Plane dafür ein paar Wochen ein.', ico: kalenderIco, see: ['foerderung', 'feinaufmass'] },
   budget: { s: 'Budget', t: 'Warum fragt die App nach dem Budget?', x: ['Mit deinem Budget kann der Fensterbauer gezielt anbieten: wo es sich lohnt, mehr auszugeben, und wo die einfache Lösung reicht.', 'Die Angabe ist freiwillig und bindet dich nicht. „Weiß ich noch nicht“ ist eine gute Antwort, wenn du erst Preise kennenlernen willst.'], tipp: 'Denk an das Drumherum: Fensterbänke, Rollläden, Putz und Entsorgung machen einen spürbaren Teil des Preises aus.', ico: muenzIco, see: ['foerderung', 'montage'] },
   kontakt: { s: 'Kontakt', t: 'Wozu die Kontaktdaten?', x: ['Sie stehen oben auf deinem Aufmaßblatt, damit sich der Fensterbauer mit dem Angebot bei dir melden kann. Das Blatt bekommt nur, wem du es gibst.', 'Alles ist freiwillig. Ohne Kontaktdaten gibst du sie dem Fensterbauer eben selbst mit.'], tipp: 'Eine Handynummer und die Zeit, zu der du gut erreichbar bist, sparen viel Hin und Her.', ico: telefonIco, see: ['aufmassblatt'] },
-  vermittlung: { s: 'Angebote aus deiner Nähe', t: 'Wie funktioniert die Anfrage?', x: ['Du wählst bis zu drei Fensterbetriebe aus deiner Nähe oder lässt uns aussuchen. Wir rufen sie an und fragen, ob sie dir ein Angebot machen möchten.', 'Nur wer zusagt, bekommt dein Aufmaß mit Namen, Ort und Telefonnummer und meldet sich dann bei dir. Für dich ist das kostenlos; dein Aufmaßblatt als PDF für dich selbst ist dabei nicht enthalten.', 'Die Betriebe stellt eine KI aus öffentlichen Angaben zusammen. Die Entfernung ist Luftlinie und ungefähr.'], tipp: 'Mit dem Code bestätigst du deine Nummer. So wissen die Betriebe, dass die Anfrage echt ist.', ico: telefonIco, see: ['aufmassblatt', 'kontakt'] },
+  vermittlung: { s: 'Angebote aus deiner Nähe', t: 'Wie funktioniert die Anfrage?', x: ['Du wählst zwei Fensterbetriebe aus deiner Nähe oder lässt uns zwei aussuchen. Wir rufen sie an und fragen, ob sie dir ein Angebot machen möchten. Beide Angebote beruhen auf denselben Maßen und sind direkt vergleichbar.', 'Nur wer zusagt, bekommt dein Aufmaß mit Namen, Ort und Telefonnummer und meldet sich dann bei dir. Sonst bekommt niemand deine Daten. Für dich ist das kostenlos, dein Aufmaßblatt als PDF bekommst du dazu. Die Fensterbetriebe bezahlen uns für die Vermittlung.', 'Die Betriebe stellt eine KI aus öffentlichen Angaben zusammen. Die Entfernung ist Luftlinie und ungefähr.'], tipp: 'Mit dem Code bestätigst du deine Nummer. So wissen die Betriebe, dass die Anfrage echt ist.', ico: telefonIco, see: ['aufmassblatt', 'kontakt'] },
   aufmassblatt: { s: 'Aufmaßblatt', t: 'Was steht im Aufmaßblatt?', x: ['Dein Fensterbauer bekommt das Aufmaß als PDF: je Fenster eine Zeichnung mit allen Maßen, deine Wünsche, die Auswertung der Fotos und deine Notizen an der passenden Stelle.', 'Oben steht, was noch zu klären ist, etwa eine Absturzsicherung oder offene Wünsche. So weiß er vor dem Termin, worüber ihr sprechen müsst.'], tipp: 'Je vollständiger deine Angaben, desto weniger Rückfragen und desto genauer das Angebot.', ico: () => ICO.ref('a4'), see: ['notizen', 'offen', 'feinaufmass'] },
   design: { s: 'Gestaltung übernehmen', t: 'Was heißt Gestaltung übernehmen?', x: ['Hast du schon ein Fenster gespeichert, übernimmst du dessen Gestaltung mit einem Tipp: Material, Farben, Glas, Sprossen, Griff, Einbruchschutz, Sonnenschutz, Fensterbänke und Montage. Maße, Lage und Flügel bleiben die des neuen Fensters.', 'Danach speicherst du gleich oder gehst die Fragen einzeln durch und passt an.'], tipp: 'Ideal, wenn im ganzen Haus dieselben Fenster kommen: einmal gestalten, den Rest nur noch messen.', ico: zweiIco, see: ['offen'] },
   offen: { s: 'Weiß ich noch nicht', t: 'Was passiert bei „Weiß ich noch nicht“?', x: ['Du musst nicht alles selbst entscheiden. Tippst du „Weiß ich noch nicht“, bleibt die Frage offen; im Modell steht dann ein neutrales Weiß.', 'Dein Fensterbauer sieht im Aufmaß, was offen ist, und berät dich dazu im Angebot. Tippst du später eine Option an, ist die Frage entschieden.'], tipp: 'Lieber offen lassen als raten. Eine falsch gewählte Option fällt vielleicht erst beim Einbau auf.', ico: frageIco, see: ['aufmassblatt', 'notizen'] },
@@ -3976,7 +3976,7 @@ SCREENS.anfrage = anfrageDna; SCREENS.anfrage2 = anfrage2Dna; SCREENS.anfrage3 =
    Pflichtfeldern → Betriebe (KI-Suche zur Postleitzahl, Auswahl bis drei oder „Sucht für mich aus“, Einwilligung) → Code an die Nummer
    (SMS, Festnetz per Anruf) → Angefragt. Der Inhaber ruft die gewählten Betriebe an und schickt das Aufmaßblatt aus der Zentrale nur an
    die, die zustimmen; deshalb sagen die Texte „Wir fragen an“, nie „gesendet“. Auf Weg A bekommt der Kunde kein Blatt (Abschnitt 1). */
-const VM_MAX = 3, VM_FASSUNG = '2026-10-29';
+const VM_MAX = 2, VM_FASSUNG = '2026-10-29b'; // zwei Betriebe je Anfrage (Inhaber, 29.10.2026, abends)
 const vermAn = () => !S.betrieb && !INST && !PROBE && !!(SERVER.vermittlung && SERVER.vermittlung.an);
 const vm = () => S.verm || (S.verm = { weg: 'A', wahl: [], suchen: false, einw: false, gesendet: null });
 const vmWegA = () => vermAn() && vm().weg === 'A';
@@ -4005,7 +4005,7 @@ const vmNamen = () => { const v = vm(), l = v.liste || []; return v.wahl.map((id
 const vmUnd = (a) => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' und ' + a[a.length - 1]);
 function vmEinwText() {
   const v = vm(), n = vmNamen();
-  return 'Ich bin einverstanden, dass eeziframes ' + (v.suchen || !n.length ? 'passende Fensterbetriebe in meiner Nähe (höchstens drei)' : vmUnd(n)) + ' für mich anfragt und ' + (n.length === 1 && !v.suchen ? 'ihm' : 'ihnen') + ' mein Aufmaß mit Namen, Ort und Telefonnummer schickt, damit ich ein Angebot bekomme. eeziframes fragt nach zwei Tagen kurz nach, ob sich jemand gemeldet hat.';
+  return 'Ich bin einverstanden, dass eeziframes ' + (v.suchen || !n.length ? 'zwei passende Fensterbetriebe in meiner Nähe, die eeziframes für mich aussucht,' : vmUnd(n)) + ' für mich anfragt und ' + (n.length === 1 && !v.suchen ? 'ihm' : 'ihnen') + ' mein Aufmaß mit Namen, Ort und Telefonnummer schickt, damit ich ein Angebot bekomme. Sonst bekommt niemand meine Daten. eeziframes fragt nach zwei Tagen kurz nach, ob sich jemand gemeldet hat. Ich kann diese Einwilligung jederzeit widerrufen.';
 }
 const vmStr = (s, n) => { s = String(s || ''); return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s; };
 const vmHash = (s) => String(s || '').split('').reduce((x, c) => (x * 31 + c.charCodeAt(0)) >>> 0, 7);
@@ -4027,35 +4027,47 @@ function vmUmkreis(o) {
   return '<svg class="vm-umkreis' + (o.laedt ? ' ist-suchend' : '') + '" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true" focusable="false"><defs><radialGradient id="vm-kegel-v" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(' + cx + ' ' + cy + ') scale(' + R + ')"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset=".6" stop-color="#fff" stop-opacity=".07"/><stop offset="1" stop-color="#fff" stop-opacity=".16"/></radialGradient></defs>' +
     '<g class="vm-ringe">' + ringe + '</g><g class="vm-ticks">' + tick.join('') + '</g><g class="vm-km">' + kmTxt + '</g>' + kegel + linien + beispiel + punkte + mitte + etiketten + '</svg>';
 }
+/* Bühnen der Vermittlung ohne das Foto mit dem Lichtschatten (Inhaber, 29.10.2026: „muss ich nicht überall haben“): Anthrazit mit Licht
+   von oben links und einem feinen Punktraster wie eine Karte; darauf der Umkreis oder das Aufmaßblatt */
 function vmBuehne(chip, o, extra) { return abBuehne('vm-buehne', chip, '<div class="vm-umkreis-wrap">' + vmUmkreis(o) + '</div>' + (extra || '')); }
+function vmBlattBuehne(chip, offen, extra, live) { return abBuehne('vm-buehne vm-blattbuehne', chip, abPapier(offen, !offen && !live) + (extra || '')); }
 /* Schritte auf der Weiche: Haus 1, Zeit 2, Weg 3, Kontakt 4, auf Weg A Betriebe 5 */
 const vmSchritt = (n) => 'Fürs Angebot · ' + n + ' von ' + (vm().weg === 'A' ? 5 : 4);
 
 /* Weiche: zwei Wege als Kacheln auf Anthrazit, die gewählte weiß; die Bühne zeigt, was der Weg bringt (Umkreis oder das Blatt) */
 function vmWeg() {
-  const v = vm(), a = v.weg !== 'B', g = v.gesendet, frei = FREI();
-  const kachel = (k, label, titel, zeile, an) => '<button type="button" class="vm-kachel" data-act="vm-weg" data-v="' + k + '" aria-pressed="' + an + '"><span class="vm-kachel-label">' + label + '</span><span class="vm-kachel-titel">' + titel + '</span><span class="vm-kachel-zeile">' + zeile + '</span><span class="vm-mark" aria-hidden="true">' + CHECK_S + '</span></button>';
-  const preis = frei ? 'Freigeschaltet' : euro(PREIS()) + ' einmalig';
-  const karte = '<div class="vm-wege" role="group" aria-label="Wie geht es weiter?">' +
-    kachel('A', g ? 'Angefragt am ' + esc(new Date(g.when).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })) : 'Kostenlos', 'Angebote aus deiner Nähe', g ? 'Anfrage ' + esc(g.nr || '') + ' ist bei uns. Wir melden uns.' : 'Du wählst bis zu drei Fensterbetriebe, wir fragen sie für dich an.', a) +
-    kachel('B', esc(preis), 'Aufmaßblatt für dich', 'Als PDF, du gibst es weiter, an wen du willst.', !a) + '</div>' +
-    (a ? '<p class="ab-klein vm-warum">Für dich kostenlos: Wir geben dein Aufmaß an Betriebe weiter, die dir ein Angebot machen. Dein Aufmaßblatt als PDF ist dabei nicht enthalten.</p>' : (EINF() && !frei ? '<p class="ab-klein vm-warum">' + esc(EINF()) + '</p>' : ''));
-  const frage = lgFrage('Wie geht es <em>weiter?</em>', 'angebot', 'Zwei Wege, du entscheidest.');
-  const buehne = a ? vmBuehne(vmSchritt(3), { beispiel: true, du: vmOrt().plz ? 'Du · ' + vmOrt().plz : 'Du', plz: vmOrt().plz }) : abBlattBuehne(vmSchritt(3), frei, frei ? '' : abBetrag());
-  const weiter = a ? (g ? ['go', 'angefragt', 'Zur Anfrage'] : ['vm-weiter', '', 'Weiter']) : ['vm-weiter', '', 'Weiter zum Aufmaßblatt'];
+  const v = vm(), a = v.weg !== 'B', g = v.gesendet, frei = FREI(), preis = euro(PREIS());
+  /* Zwei Karten nebeneinander (Inhaber, 29.10.2026): das Aufmaßblatt allein mit Preis, daneben Aufmaßblatt + zwei Fensterbauer für 0 € mit dem
+     durchgestrichenen Preis als Anker und dem Etikett „Empfohlen“ (nicht „Beliebt“: ohne Nutzerzahlen wäre das unbelegt). Die gewählte
+     Karte wird weiß, die Gratis-Karte trägt dazu einen Ring */
+  const karteA = '<button type="button" class="vm-karte vm-karte--gratis" data-act="vm-weg" data-v="A" aria-pressed="' + a + '"><span class="vm-karte-etikett">' + (g ? 'Angefragt' : 'Empfohlen') + '</span>' +
+    '<span class="vm-karte-titel">Aufmaßblatt + an 2 Fensterbauer in deiner Nähe</span><span class="vm-preis"><b>0</b><small>€</small>' + (frei ? '' : '<s>' + esc(preis) + '</s>') + '</span>' +
+    '<span class="vm-mark" aria-hidden="true">' + CHECK_S + '</span></button>';
+  const karteB = '<button type="button" class="vm-karte" data-act="vm-weg" data-v="B" aria-pressed="' + !a + '"><span class="vm-karte-etikett vm-karte-etikett--leise">' + (frei ? 'Freigeschaltet' : 'Nur für dich') + '</span>' +
+    '<span class="vm-karte-titel">Aufmaßblatt für dich</span><span class="vm-preis">' + (frei ? '<b>✓</b>' : '<b>' + esc(preis.replace(/\s*€$/, '')) + '</b><small>€</small>') + '</span>' +
+    '<span class="vm-mark" aria-hidden="true">' + CHECK_S + '</span></button>';
+  const unten = a ? (g ? '<p class="vm-vertrauen">Anfrage ' + esc(g.nr || '') + ' vom ' + esc(new Date(g.when).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })) + ' ist bei uns. Wir melden uns.</p>'
+    : '<p class="vm-vertrauen"><b>Deine Angebote beruhen auf denselben Maßen und sind direkt vergleichbar.</b> Nur die zwei Betriebe, die du auswählst, bekommen dein Aufmaß. Sonst niemand.</p>' +
+      '<p class="ab-klein vm-warum"><b>Warum kostenlos?</b> Die Fensterbetriebe bezahlen uns für die Vermittlung. Für dich bleibt es kostenlos, das Aufmaßblatt bekommst du dazu.</p>')
+    : '<p class="ab-klein vm-warum">Als PDF, du gibst es weiter, an wen du willst.' + (EINF() && !frei ? ' ' + esc(EINF()) : '') + '</p>';
+  const karte = '<div class="vm-wege" role="group" aria-label="Wie geht es weiter?">' + karteA + karteB + '</div>' + unten;
+  const frage = lgFrage('Wie geht es <em>weiter?</em>', 'vermittlung', 'Zwei vergleichbare Angebote, ohne selbst herumzutelefonieren. Oder nur das Blatt für dich.');
+  const o = vmOrt(), buehne = a ? vmBuehne(vmSchritt(3), { beispiel: true, du: o.plz ? 'Du · ' + o.plz : 'Du', plz: o.plz }) : vmBlattBuehne(vmSchritt(3), frei, frei ? '' : abBetrag());
+  const weiter = a ? (g ? ['go', 'angefragt', 'Zur Anfrage'] : ['vm-weiter', '', 'Kostenlos weiter']) : ['vm-weiter', '', frei ? 'Zum Aufmaßblatt' : 'Weiter zum Aufmaßblatt'];
   return { html: lgKopf(['back', 'Zurück: Zeit und Budget']) + dnaTisch(buehne, frage + karte + abFuss('Zurück: Zeit und Budget', weiter[0], weiter[1], weiter[2])), back: ['Zeit und Budget', 'anfrage2'], dna: true, cls: 'dna ab dt vm', voll: true };
 }
 /* Kontakt auf Weg A: Name, PLZ und Ort, Telefon sind Pflicht (Fehler am Feld wie auf den Instanzen), E-Mail freiwillig */
 function vmKontakt() {
   const pr = S.proj, f = S.vmFehler || {}, C = window.KONFIG || {};
-  const frage = lgFrage('Wie erreichen dich <em>die Betriebe?</em>', 'kontakt', 'Name, Ort und Telefon brauchen wir für die Anfrage. Deine Nummer bestätigst du gleich mit einem Code.');
+  const frage = lgFrage('Wie erreichen dich <em>die Betriebe?</em>', 'vermittlung', 'Name, Ort und Telefon brauchen wir für die Anfrage.');
   const karte = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Kontakt') + '<div class="rows ab-felder kontakt-felder">' +
     kontaktFeld('Name', 'name', 'Vor- und Nachname', 'text', 'name', f.name, true) + kontaktFeld('PLZ und Ort', 'ort', 'z. B. 33442 Herzebrock-Clarholz', 'text', 'postal-code address-level2', f.ort, true) +
-    kontaktFeld('Telefon, am besten Handy', 'tel', 'z. B. 0171 2345678', 'tel', 'tel', f.tel, true) + kontaktFeld('E-Mail', 'mail', 'Freiwillig, für die Bestätigung', 'email', 'email', f.mail, false) +
-    '</div><p class="ab-pflicht">* Pflicht. Die Betriebe bekommen deine Angaben erst, wenn sie zugesagt haben. Mehr im <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>.</p></div>' +
+    kontaktFeld('Telefon, am besten Handy', 'tel', 'z. B. 0171 2345678', 'tel', 'tel', f.tel, true) + kontaktFeld('E-Mail', 'mail', 'Freiwillig, dann kommt das Aufmaßblatt auch per Mail', 'email', 'email', f.mail, false) +
+    '</div><p class="vm-vertrauen vm-vertrauen--tel"><b>Deine Nummer bestätigst du gleich mit einem Code.</b> Damit die Betriebe wissen, dass ein echter Mensch anfragt. So bekommst du ernsthafte Rückmeldungen.</p>' +
+    '<p class="ab-pflicht">* Pflicht. Deine Angaben bekommen nur die zwei Betriebe, die du gleich auswählst, und erst, wenn sie zugesagt haben. Mehr im <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>.</p></div>' +
     '<div class="ab-teil">' + abKopf('Am besten erreichbar · freiwillig') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div></div>';
   const grund = f.fehlt ? '<p class="vm-grund" role="status">Bitte noch die markierten Felder ausfüllen.</p>' : '';
-  return { html: lgKopf(['back', 'Zurück: Wie geht es weiter?']) + dnaTisch(abBuehne('ab-blatt', vmSchritt(4), abPapier()), frage + karte + grund + abFuss('Zurück: Wie geht es weiter?', 'vm-kontakt', '', 'Betriebe finden')), back: ['Zurück', 'weg'], dna: true, cls: 'dna ab dt vm', voll: true };
+  return { html: lgKopf(['back', 'Zurück: Wie geht es weiter?']) + dnaTisch(vmBlattBuehne(vmSchritt(4), false, '', true), frage + karte + grund + abFuss('Zurück: Wie geht es weiter?', 'vm-kontakt', '', 'Betriebe finden')), back: ['Zurück', 'weg'], dna: true, cls: 'dna ab dt vm', voll: true };
 }
 /* KI-Suche zur Postleitzahl; die Liste bleibt, bis sich die Postleitzahl ändert */
 async function vmSuchen(neu) {
@@ -4076,19 +4088,19 @@ function vmBetriebe() {
   if (!v.laedt && (!v.liste || v.listePlz !== o.plz) && !v.suchFehler) setTimeout(() => vmSuchen(), 0);
   const laedt = v.laedt || (!v.suchFehler && (!v.liste || v.listePlz !== o.plz));
   const ortText = o.plz + (o.ort ? ' ' + o.ort : '');
-  const frage = lgFrage('Betriebe in deiner <em>Nähe.</em>', 'vermittlung', 'Wähle bis zu drei. Wir fragen sie für dich an und schicken dein Aufmaß an alle, die ein Angebot machen möchten.');
+  const frage = lgFrage('Wähle zwei Betriebe in deiner <em>Nähe.</em>', 'vermittlung', 'Wir fragen sie für dich an und schicken dein Aufmaß an beide, wenn sie ein Angebot machen möchten. Nur diese zwei, sonst niemand.');
   let karte = '';
   if (laedt) karte = '<div class="vm-suche" role="status"><span class="vm-suche-punkt" aria-hidden="true"></span><span><b>Wir suchen Fensterbetriebe rund um ' + esc(ortText) + ' …</b><small>Das dauert meist ein paar Sekunden.</small></span></div>';
   else {
     if (v.suchFehler) karte += '<p class="ab-note warn">' + esc(v.suchFehler) + ' <button type="button" class="ulink" data-act="vm-nochmal">Noch einmal suchen</button></p>';
     if (l.length) {
       karte += '<p class="ab-klein vm-quelle">' + l.length + (l.length === 1 ? ' Betrieb' : ' Betriebe') + ' rund um ' + esc(ortText) + ', von einer KI aus öffentlichen Angaben zusammengestellt. Entfernung Luftlinie, ungefähr.</p>' +
-        '<div class="qpanel ab-panel"><div class="vm-liste' + (f.wahl ? ' ist-bad' : '') + '" role="group" aria-label="Betriebe, höchstens drei">' + l.map((b) => {
+        '<div class="qpanel ab-panel"><div class="vm-liste' + (f.wahl ? ' ist-bad' : '') + '" role="group" aria-label="Betriebe, zwei wählen">' + l.map((b) => {
           const i = v.wahl.indexOf(b.id), an = i >= 0, aus = !an && (voll || v.suchen), lei = (b.leistungen || []).slice(0, 4).join(' · ');
           return '<button type="button" class="vm-betrieb" data-act="vm-wahl" data-v="' + esc(b.id) + '" aria-pressed="' + an + '"' + (aus ? ' aria-disabled="true"' : '') + '><span class="vm-tx"><b>' + esc(b.name) + '</b><small>' + esc(b.ort || '') + (b.km != null ? ' · ca. ' + Math.round(b.km) + ' km' : '') + '</small>' + (lei ? '<small class="vm-lei">' + esc(lei) + '</small>' : '') + '</span><span class="vm-mark" aria-hidden="true">' + (an ? i + 1 : '') + '</span></button>';
-        }).join('') + '</div></div>' + (voll && !v.suchen ? '<p class="ab-klein">Drei gewählt, mehr geht nicht. Tipp einen an, um ihn abzuwählen.</p>' : '');
+        }).join('') + '</div></div>' + (voll && !v.suchen ? '<p class="ab-klein">Zwei gewählt. Tipp einen an, um ihn abzuwählen.</p>' : '');
     } else if (!v.suchFehler) karte += '<p class="ab-note">Hier haben wir gerade keine Betriebe gefunden. Kein Problem: Wir suchen für dich passende Betriebe aus.</p>';
-    karte += '<button type="button" class="vm-selbst" data-act="vm-suchen" aria-pressed="' + !!v.suchen + '"><span class="vm-tx"><b>Sucht ihr für mich aus</b><small>Wir wählen bis zu drei passende Betriebe in deiner Nähe.</small></span><span class="vm-mark" aria-hidden="true">' + CHECK_S + '</span></button>';
+    karte += '<button type="button" class="vm-selbst" data-act="vm-suchen" aria-pressed="' + !!v.suchen + '"><span class="vm-tx"><b>Sucht ihr zwei für mich aus</b><small>Wir wählen zwei passende Betriebe in deiner Nähe.</small></span><span class="vm-mark" aria-hidden="true">' + CHECK_S + '</span></button>';
     karte += '<button type="button" class="vm-einw' + (f.einw ? ' ist-bad' : '') + '" data-act="vm-einw" role="checkbox" aria-checked="' + !!v.einw + '"><span class="vm-box" aria-hidden="true">' + CHECK_S + '</span><span>' + esc(vmEinwText()) + '</span></button>' +
       '<p class="ab-klein vm-recht">Mehr im <a class="ulink" href="' + esc((window.KONFIG || {}).datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>. Deine Angaben gehen nur an Betriebe, die zugesagt haben.</p>';
   }
@@ -4105,6 +4117,7 @@ function vmCode() {
   const frage = lgFrage('Code <em>eingeben.</em>', 'vermittlung', v.kanal === 'anruf' ? 'Wir rufen dich unter ' + an + ' an und sagen dir einen Code mit sechs Ziffern.' : 'Wir haben dir eine SMS mit einem Code an ' + an + ' geschickt.');
   const karte = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Code aus der ' + (v.kanal === 'anruf' ? 'Ansage' : 'SMS')) + '<label class="ab-eingabe vm-codefeld' + (f.code ? ' ist-bad' : '') + '"><input type="text" id="vm-code" data-in="vm-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" value="' + esc(v.code || '') + '" placeholder="000000" aria-label="Code mit sechs Ziffern"' + (f.code ? ' aria-invalid="true" aria-describedby="vm-code-f"' : '') + '></label>' +
     (f.code ? '<p class="vm-feldfehler" id="vm-code-f">' + esc(f.code) + '</p>' : '') +
+    '<p class="ab-klein vm-codewarum">Damit die Betriebe wissen, dass ein echter Mensch anfragt.</p>' +
     (v.attrappe ? '<p class="ab-klein">Testbetrieb: Es geht keine SMS raus, der Code ist 123456.</p>' : '') +
     '<div class="vm-codewege"><button type="button" class="ulink" data-act="vm-code-neu">Neuen Code schicken</button><button type="button" class="ulink" data-act="go" data-v="anfrage3">Nummer ändern</button></div></div></div>' +
     (f.grenze ? '<p class="ab-note warn vm-grenze">' + esc(f.grenze) + ' <button type="button" class="ulink" data-act="vm-blatt">Aufmaßblatt für dich</button></p>' : '');
@@ -4115,14 +4128,16 @@ function vmCode() {
 function vmCodeLive() { const z = document.querySelector('.vm-ziffern'); if (z) z.innerHTML = vmCodeZiffern(); }
 /* Angefragt: Umkreis mit den gewählten Betrieben, was jetzt passiert, das Blatt für sich als leiser Weg */
 function vmAngefragt() {
-  const v = vm(), g = v.gesendet || {}, n = g.namen || [];
-  const wer = g.suchen || !n.length ? 'passende Fensterbetriebe in deiner Nähe' : vmUnd(n);
-  const frage = lgFrage('Angefragt. <em>Wir melden uns.</em>', 'vermittlung', 'Wir fragen ' + wer + ' für dich an und schicken dein Aufmaß an alle, die ein Angebot machen möchten. Sie melden sich dann bei dir' + (g.an ? ' unter ' + g.an : '') + '.');
-  const schritte = [['Wir fragen an', 'meist noch am selben Werktag'], ['Ein Betrieb meldet sich', 'mit Fragen oder gleich mit dem Angebot'], ['Feinaufmaß vor Ort', 'erst danach wird bestellt'], ['Einbau', 'Termin nach Absprache']];
+  const v = vm(), g = v.gesendet || {}, n = g.namen || [], frei = FREI();
+  const wer = g.suchen || !n.length ? 'zwei passende Fensterbetriebe in deiner Nähe' : vmUnd(n);
+  const frage = lgFrage('Angefragt. <em>Dein Blatt ist da.</em>', 'vermittlung', 'Wir fragen ' + wer + ' für dich an und schicken dein Aufmaß an beide, wenn sie ein Angebot machen möchten. Sie melden sich dann bei dir' + (g.an ? ' unter ' + g.an : '') + '.');
+  const schritte = [['Wir fragen an', 'meist noch am selben Werktag'], ['Die Betriebe melden sich', 'mit Fragen oder gleich mit dem Angebot'], ['Angebote vergleichen', 'beide beruhen auf denselben Maßen'], ['Feinaufmaß und Einbau', 'erst danach wird bestellt']];
   const karte = '<ol class="vm-schritte">' + schritte.map((s, i) => '<li' + (i === 0 ? ' class="ist-dran"' : '') + '><i aria-hidden="true"></i><b>' + s[0] + '</b><small>' + s[1] + '</small></li>').join('') + '</ol>' +
-    (g.nr ? '<p class="ab-klein">Deine Anfrage hat die Nummer <b>' + esc(g.nr) + '</b>' + (g.mail ? '; die Bestätigung ist an ' + esc(g.mail) + ' unterwegs.' : '.') + '</p>' : '') +
-    '<p class="ab-klein vm-blatt">Dein Aufmaßblatt als PDF für dich selbst: <button type="button" class="ulink" data-act="vm-blatt">' + (FREI() ? 'ansehen' : 'freischalten, ' + esc(euro(PREIS()))) + '</button></p>';
-  const fuss = rechtLinks() + '<div class="lg-fuss vm-fuss-allein"><button type="button" class="dna-pille lg-weiter btn primary" data-act="go" data-v="home">Fertig' + abPfeil + '</button></div>';
+    (g.nr ? '<p class="ab-klein">Deine Anfrage hat die Nummer <b>' + esc(g.nr) + '</b>.' + (g.mail ? ' Das Aufmaßblatt ist auch per E-Mail an ' + esc(g.mail) + ' unterwegs.' : '') + '</p>' : '') +
+    (frei ? '' : '<p class="ab-note">Dein Aufmaßblatt ist auf diesem Gerät noch nicht freigeschaltet. Schreib uns mit deiner Anfragenummer, dann schicken wir es dir.</p>');
+  /* eine volle Pille: das Blatt, das jetzt dazugehört; zur Übersicht leise daneben */
+  const fuss = rechtLinks() + '<div class="lg-fuss vm-fuss-zwei"><button type="button" class="dna-pille dna-pille--leise lg-zurueck-pille" data-act="vm-heim">Fertig</button>' +
+    (frei ? '<button type="button" class="dna-pille lg-weiter btn primary" data-act="k-dl">Aufmaßblatt laden' + abPfeil + '</button>' : '') + '</div>';
   const bl = (v.liste || []).filter((b) => (g.wahl || []).includes(b.id));
   return { html: lgKopf(['liste', 'Zur Übersicht']) + dnaTisch(vmBuehne('Angefragt', { betriebe: bl, wahl: g.wahl || [], umkreis: v.umkreis, plz: g.plz, du: 'Du · ' + (g.plz || '') }), frage + karte + fuss), back: ['Übersicht', 'home'], dna: true, cls: 'dna ab dt vm', voll: true };
 }
@@ -4157,7 +4172,7 @@ async function vmSenden() {
     const pdf = blob && blob.size ? await vmBase64(blob) : '';
     v.sendetText = 'Wird abgeschickt …'; if (S.screen === 'vcode') render();
     const eck = { fenster: S.windows.length, elemente: S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), gebaeude: pr.gebaeude || '', baujahr: pr.baujahr || '', zeit: pr.zeit || '', budget: pr.budget || '', foerdweg: AW.foerdWeg(pr) || '' };
-    const body = { kontakt: { name: String(pr.name || '').trim(), ort: String(pr.ort || '').trim(), tel: String(pr.tel || '').trim(), mail: String(pr.mail || '').trim(), erreich: pr.erreich || '' }, plz: o.plz, betriebe: v.suchen ? [] : v.wahl.slice(0, VM_MAX), token: v.token || '', code: v.ohneCode ? '' : String(v.code || ''), einwilligung: { fassung: VM_FASSUNG, text: vmEinwText() }, aufmass: packProject(S.windows, S.proj, null), eckdaten: eck, pdf: pdf };
+    const body = { kennung: kennung(), kontakt: { name: String(pr.name || '').trim(), ort: String(pr.ort || '').trim(), tel: String(pr.tel || '').trim(), mail: String(pr.mail || '').trim(), erreich: pr.erreich || '' }, plz: o.plz, betriebe: v.suchen ? [] : v.wahl.slice(0, VM_MAX), token: v.token || '', code: v.ohneCode ? '' : String(v.code || ''), einwilligung: { fassung: VM_FASSUNG, text: vmEinwText() }, aufmass: packProject(S.windows, S.proj, null), eckdaten: eck, pdf: pdf };
     const r = await fetch('/api/vermittlung/senden', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(body) }), j = await r.json().catch(() => null);
     v.sendet = false;
     if (!j || !j.ok) {
@@ -4168,8 +4183,22 @@ async function vmSenden() {
       if (S.screen === 'vcode') render(); return toast(t);
     }
     v.gesendet = { nr: String(j.nr || ''), when: Date.now(), namen: vmNamen(), wahl: v.suchen ? [] : v.wahl.slice(), suchen: !!v.suchen || !v.wahl.length, plz: o.plz, an: v.an || maskTel(pr.tel), mail: String(pr.mail || '').trim() };
+    /* Gratis-Weg: das Aufmaßblatt gehört dazu; der Server schickt den Nachweis wie beim Kauf (Anfrage statt Stripe-Sitzung) */
+    const fs = j.freischaltung; if (fs && fs.token) { const k = kauf(); k.paid = true; k.when = Number(fs.at) || Date.now(); k.session = String(fs.session || ''); k.token = String(fs.token); k.wartet = ''; k.frei = 'vermittlung'; }
     v.code = ''; v.token = ''; persist(); S._feier = 'gesendet'; go('angefragt');
   } catch (e) { v.sendet = false; if (S.screen === 'vcode') render(); toast('Keine Verbindung. Bitte gleich noch einmal.'); }
+}
+/* Wahl von der Startseite: ?weg=gratis|blatt legt den Weg an der Weiche fest, ?farbe=<Schlüssel aus ral.js> die Rahmenfarbe außen des ersten
+   neuen Fensters (Inhaber: „sollte der Benutzer entsprechende Möglichkeiten wählen, dann soll der Konfigurator angepasst werden“). Die
+   Angaben verschwinden danach aus der Adresse */
+function vmVorgaben() {
+  let q; try { q = new URLSearchParams(location.search); } catch (e) { return; }
+  const weg = q.get('weg'), farbe = q.get('farbe');
+  if (!weg && !farbe) return;
+  if (weg === 'gratis' || weg === 'blatt') { const z = vm(); if (!z.gesendet) z.weg = weg === 'blatt' ? 'B' : 'A'; }
+  if (farbe && /^[A-Za-z0-9_-]{2,24}$/.test(farbe) && ralFarbe(farbe)) S.vorgabeFarbe = farbe;
+  q.delete('weg'); q.delete('farbe');
+  try { const rest = q.toString(); history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash); } catch (e) { /* ok */ }
 }
 /* Auf dem Gerät: Weg, Wahl, Liste und die abgeschickte Anfrage; nie Code, Token oder die Einwilligung (die gibt es nur je Abschicken) */
 function vmSicher() { const v = S.verm; if (!v) return null; return { weg: v.weg, wahl: v.wahl, suchen: !!v.suchen, liste: v.liste || null, listePlz: v.listePlz || '', umkreis: v.umkreis || 30, gesendet: v.gesendet || null }; }
@@ -4185,7 +4214,7 @@ function vmAct(name, el, v) {
       if (!v) return;
       const i = z.wahl.indexOf(v);
       if (i >= 0) z.wahl.splice(i, 1);
-      else { if (z.wahl.length >= VM_MAX) return toast('Höchstens drei. Wähl erst einen ab.'); z.wahl.push(v); z.suchen = false; }
+      else { if (z.wahl.length >= VM_MAX) return toast('Zwei sind gewählt. Wähl erst einen ab.'); z.wahl.push(v); z.suchen = false; }
       if (S.vmFehler) S.vmFehler.wahl = ''; persist(); return render();
     }
     case 'vm-suchen': { z.suchen = !z.suchen; if (z.suchen) z.wahl = []; if (S.vmFehler) S.vmFehler.wahl = ''; persist(); return render(); }
@@ -4193,7 +4222,8 @@ function vmAct(name, el, v) {
     case 'vm-nochmal': { z.suchFehler = ''; return vmSuchen(true); }
     case 'vm-abschicken': {
       const f = {};
-      if (!z.wahl.length && !z.suchen) f.wahl = 'Bitte wähle mindestens einen Betrieb oder „Sucht ihr für mich aus“.';
+      const n = Math.min(VM_MAX, (z.listePlz === vmOrt().plz && z.liste ? z.liste.length : VM_MAX) || VM_MAX);
+      if (!z.suchen && z.wahl.length < n) f.wahl = n === 1 ? 'Bitte wähle den Betrieb oder „Sucht ihr zwei für mich aus“.' : z.wahl.length ? 'Bitte wähle noch einen zweiten Betrieb oder „Sucht ihr zwei für mich aus“.' : 'Bitte wähle zwei Betriebe oder „Sucht ihr zwei für mich aus“.';
       if (!z.einw) f.einw = 'Bitte bestätige, dass wir die Betriebe für dich anfragen dürfen.';
       if (f.wahl || f.einw) { S.vmFehler = f; return render(); }
       const k = vmKontaktPruefen(); if (k.fehlt) { S.vmFehler = k; return go('anfrage3'); }
@@ -4202,6 +4232,9 @@ function vmAct(name, el, v) {
     case 'vm-code-neu': { if (z.codeZeit && Date.now() - z.codeZeit < 30000) return toast('Einen Moment noch, der Code kann ein paar Sekunden brauchen.'); return vmCodeHolen(true); }
     case 'vm-bestaetigen': return vmSenden();
     case 'vm-blatt': return go('teilen');
+    /* Auf den Folien zum Bezahlen: doch kostenlos (Inhaber: „soll die Möglichkeit trotzdem noch mal angezeigt werden“) */
+    case 'vm-gratis': { z.weg = 'A'; S.vmFehler = null; persist(); return go(z.gesendet ? 'angefragt' : 'anfrage3'); }
+    case 'vm-heim': return go('home');
     default: return;
   }
 }
@@ -4430,10 +4463,16 @@ function abRahmen(view, buehne) {
   return Object.assign({}, view, { html: lgKopf(back ? ['back', zur] : false) + dnaTisch(buehne, '<div class="ab-inhalt">' + inhalt + '</div>' + fuss), dna: true, cls: 'dna ab ab2 dt' + (view.cls ? ' ' + view.cls : ''), voll: true, bar: null });
 }
 const AB_ALT = { blatt: SCREENS.blatt, teilen: SCREENS.teilen, konto: SCREENS.konto, kasse: SCREENS.kasse, gekauft: SCREENS.gekauft, gesendet: SCREENS.gesendet, sichern: SCREENS.sichern, meinkonto: SCREENS.meinkonto, linkanmelden: SCREENS.linkanmelden };
-SCREENS.teilen = () => { const v = AB_ALT.teilen(), f = FREI(); if (!f && !INST) v.html = v.html.replace(blattVorschau(), ''); /* das Blatt steht auf der Bühne */ return abRahmen(v, abBlattBuehne(f ? (KUNDE_FREI() ? 'Fertig gemessen' : 'Freigeschaltet') : 'Fertig gemessen', f, f ? '' : abBetrag())); };
+/* Auf den Folien zum Bezahlen noch einmal der Gratis-Weg (Inhaber, 29.10.2026: „soll er dennoch die Möglichkeit haben kostenlos zu bleiben“) */
+function vmGratisKarte() {
+  if (!vermAn() || FREI() || (S.verm && S.verm.gesendet)) return '';
+  return '<div class="vm-gratis-hinweis"><span class="vm-karte-etikett">Empfohlen</span><p><b>Lieber kostenlos?</b> Aufmaßblatt + an 2 Fensterbauer in deiner Nähe für 0&nbsp;€ statt ' + esc(euro(PREIS())) + '. Deine Angebote beruhen auf denselben Maßen und sind direkt vergleichbar.</p><button type="button" class="dna-pille dna-pille--leise" data-act="vm-gratis">Kostenlos weiter</button></div>';
+}
+const vmMitGratis = (v) => (v && v.html ? Object.assign(v, { html: v.html + vmGratisKarte() }) : v);
+SCREENS.teilen = () => { const v = AB_ALT.teilen(), f = FREI(); if (!f && !INST) v.html = v.html.replace(blattVorschau(), ''); /* das Blatt steht auf der Bühne */ if (!f && !INST) vmMitGratis(v); return abRahmen(v, abBlattBuehne(f ? (KUNDE_FREI() ? 'Fertig gemessen' : 'Freigeschaltet') : 'Fertig gemessen', f, f ? '' : abBetrag())); };
 SCREENS.datei = () => SCREENS.teilen();
-SCREENS.konto = () => { const k = kauf(); return abRahmen(AB_ALT.konto(), abBlattBuehne('Schritt 1 von 2', false, abEtikett('Rechnung an', k.mail || 'deine E-Mail-Adresse'))); };
-SCREENS.kasse = () => { const k = kauf(); if (!k.mail) return SCREENS.konto(); return abRahmen(AB_ALT.kasse(), abBlattBuehne('Schritt 2 von 2', false, abBetrag())); };
+SCREENS.konto = () => { const k = kauf(); return abRahmen(vmMitGratis(AB_ALT.konto()), abBlattBuehne('Schritt 1 von 2', false, abEtikett('Rechnung an', k.mail || 'deine E-Mail-Adresse'))); };
+SCREENS.kasse = () => { const k = kauf(); if (!k.mail) return SCREENS.konto(); return abRahmen(vmMitGratis(AB_ALT.kasse()), abBlattBuehne('Schritt 2 von 2', false, abBetrag())); };
 SCREENS.gekauft = () => abRahmen(AB_ALT.gekauft(), abBlattBuehne('Freigeschaltet', true));
 SCREENS.gesendet = () => abRahmen(AB_ALT.gesendet(), abBlattBuehne('Gesendet', false));
 SCREENS.sichern = () => { const z = S.sichern || {}, v = AB_ALT.sichern(); return abRahmen(v, abSymBuehne(z.zweck === 'anmelden' ? 'Anmelden' : z.zweck === 'kauf' ? 'Schritt 1 von 2' : 'Aufmaß sichern', z.mail && z.schritt === 2 ? abEtikett('Code an', z.mail) : '')); };
@@ -7182,6 +7221,8 @@ function newWin() {
   S.win = baseWin(); S.editIdx = -1; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; S.nameFehler = false; S.lgGrund = null;
   /* Keine Vorauswahl, wo eine Vorgabe Geld kostet: Farbe außen und Fensterbank außen starten offen, bis der Kunde wählt */
   S.win.offen = { fa: true, fba: true };
+  /* Farbe, die der Besucher auf der Startseite gewählt hat: gilt für das erste neue Fenster als gewählt */
+  if (S.vorgabeFarbe && ralFarbe(S.vorgabeFarbe)) { S.win.fa = S.vorgabeFarbe; S.win.offen = { fba: true }; S.vorgabeFarbe = ''; }
   S.mess = { step: 0, cur: '', msg: null, ack: false }; S.rest = { i: 0, cur: '', msg: null }; S.openSash = -1;
   S.selSash = 0; S.selBar = null; S.side = 'aussen'; S.designVorher = null;
   go('start');
@@ -7870,6 +7911,7 @@ function boot() {
   const ausmessen = location.hash === '#ausmessen';
   if (ausmessen) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } }
   restore();
+  vmVorgaben();
   S.betrieb = readHash();
   /* Instanz: ohne #k-… die laufende Planung dieses Geräts (oder noch keine, dann kommt der Code beim ersten Fenster) */
   if (INST && S.betrieb && !S.betrieb.name) S.betrieb.name = INST.name || '';

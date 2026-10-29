@@ -1,7 +1,7 @@
 // eeziframes · Prüfabschnitt 31, Teil App: Vermittlung „Angebote aus deiner Nähe“ (docs/VERMITTLUNG.md, Abschnitt 10) im Browser
-//   31.A1 Weiche nach „Zeit und Budget“: zwei Wege, Weg A vorgewählt, eine volle Pille, Ziele ab 44 px, kein Querscrollen; Weg B führt
+//   31.A1 Weiche nach „Zeit und Budget“: zwei Karten nebeneinander (0 € mit durchgestrichenem Preis, „Empfohlen“), Gratis vorgewählt, eine volle Pille, Ziele ab 44 px, kein Querscrollen; Weg B führt
 //         wie bisher über den Kontakt zum Freischalten · 31.A2 Kontakt auf Weg A: Name, PLZ und Ort, Telefon Pflicht, Fehler am Feld
-//   · 31.A3 Betriebe: Suche zur PLZ (Attrappe), nur öffentliche Felder in der App, höchstens drei, „Sucht ihr für mich aus“, ohne Wahl
+//   · 31.A3 Betriebe: Suche zur PLZ (Attrappe), nur öffentliche Felder in der App, genau zwei, „Sucht ihr zwei für mich aus“, ohne Wahl
 //         und ohne Einwilligung kein Abschicken · 31.A4 Code: falscher Code bleibt auf der Folie, richtiger schickt ab, Angefragt mit
 //         Nummer, Mail an den Inhaber mit dem Aufmaßblatt aus der App (PDF) · 31.A5 Schreibtisch · 31.A6 ohne Vermittlung (Pilot) der
 //         bisherige Weg Zeit → Kontakt
@@ -33,13 +33,17 @@ export default async function (h) {
   await vorbereiten(s);
   await klick(s, '.scr .lg-weiter');
   ok(await screen(s) === 'weg', '31.A1 „Zeit und Budget“ führt zur Weiche');
-  const weg = await s.evaluate(() => ({ kacheln: document.querySelectorAll('.vm-kachel').length, a: document.querySelector('.vm-kachel[data-v="A"]').getAttribute('aria-pressed'), umkreis: !!document.querySelector('.vm-buehne .vm-umkreis'), chip: (document.querySelector('.ab-chip') || {}).textContent || '' }));
-  ok(weg.kacheln === 2 && weg.a === 'true' && weg.umkreis && /3\svon\s5/.test(weg.chip), '31.A1 Weiche: zwei Wege, „Angebote aus deiner Nähe“ vorgewählt, Umkreis auf der Bühne, Schritt 3 von 5 (' + JSON.stringify(weg) + ')');
+  const weg = await s.evaluate(() => { const A = document.querySelector('.vm-karte[data-v="A"]'), B = document.querySelector('.vm-karte[data-v="B"]'), ra = A.getBoundingClientRect(), rb = B.getBoundingClientRect(), bg = getComputedStyle(document.querySelector('.vm-buehne')).backgroundImage;
+    return { karten: document.querySelectorAll('.vm-karte').length, a: A.getAttribute('aria-pressed'), nebeneinander: Math.abs(ra.top - rb.top) < 2 && ra.right <= rb.left, etikett: (A.querySelector('.vm-karte-etikett') || {}).textContent || '', null: (A.querySelector('.vm-preis b') || {}).textContent, alt: (A.querySelector('.vm-preis s') || {}).textContent || '', preisB: (B.querySelector('.vm-preis') || {}).textContent || '',
+      text: document.querySelector('.scr').textContent, umkreis: !!document.querySelector('.vm-buehne .vm-umkreis'), foto: /buehne\.webp/.test(bg), chip: (document.querySelector('.ab-chip') || {}).textContent || '' }; });
+  ok(weg.karten === 2 && weg.a === 'true' && weg.nebeneinander && weg.etikett === 'Empfohlen' && weg.null === '0' && /7,99/.test(weg.alt) && /7,99/.test(weg.preisB) && weg.umkreis && !weg.foto && /3\svon\s5/.test(weg.chip),
+    '31.A1 Weiche: zwei Karten nebeneinander, Gratis vorgewählt mit „Empfohlen“, 0 € und durchgestrichenem Preis, Umkreis auf der Bühne ohne das Foto mit dem Lichtschatten, Schritt 3 von 5 (' + JSON.stringify(Object.assign({}, weg, { text: undefined })) + ')');
+  ok(/denselben Maßen und sind direkt vergleichbar/.test(weg.text) && /Nur die zwei Betriebe, die du auswählst/.test(weg.text) && /Sonst niemand/.test(weg.text) && /Warum kostenlos\?/.test(weg.text), '31.A1 Weiche: vergleichbar, nur die zwei gewählten Betriebe, offen gesagt, warum kostenlos');
   ok(await pillen(s) === 1, '31.A1 Weiche: genau eine volle Pille');
   const z1 = await ziele(s); ok(!z1.length, '31.A1 Weiche: Ziele ab 44 px' + (z1.length ? ' ' + JSON.stringify(z1) : ''));
   ok(!(await quer(s)), '31.A1 Weiche: kein Querscrollen');
   /* Weg B: Blatt auf der Bühne, Kontakt freiwillig, dann Freischalten wie bisher */
-  await klick(s, '.vm-kachel[data-v="B"]');
+  await klick(s, '.vm-karte[data-v="B"]');
   const b = await s.evaluate(() => ({ blatt: !!document.querySelector('.ab-papier'), pille: (document.querySelector('.scr .lg-weiter') || {}).textContent || '', chip: (document.querySelector('.ab-chip') || {}).textContent || '' }));
   ok(b.blatt && /Aufmaßblatt/.test(b.pille) && /3\svon\s4/.test(b.chip), '31.A1 Weg B: Blatt auf der Bühne, „Weiter zum Aufmaßblatt“, Schritt 3 von 4');
   await klick(s, '.scr .lg-weiter');
@@ -48,9 +52,10 @@ export default async function (h) {
   await klick(s, '.scr .lg-zurueck');
   ok(await screen(s) === 'weg', '31.A1 Zurück vom Kontakt führt zur Weiche');
   /* Weg A: Kontakt mit Pflicht */
-  await klick(s, '.vm-kachel[data-v="A"]');
+  await klick(s, '.vm-karte[data-v="A"]');
   await klick(s, '.scr .lg-weiter');
   ok(await screen(s) === 'anfrage3' && /die Betriebe/.test(await s.evaluate(() => document.querySelector('.lg-frage h1').textContent)), '31.A2 Weg A: Kontakt „Wie erreichen dich die Betriebe?“');
+  ok(await s.evaluate(() => /echter Mensch anfragt/.test(document.querySelector('.scr').textContent) && /ernsthafte Rückmeldungen/.test(document.querySelector('.scr').textContent)), '31.A2 Telefonbestätigung positiv begründet (echter Mensch, ernsthafte Rückmeldungen)');
   await klick(s, '.scr .lg-weiter');
   const f1 = await s.evaluate(() => ({ sc: S.screen, tel: document.getElementById('t-tel').getAttribute('aria-invalid'), grund: !!document.querySelector('.vm-grund'), fokus: document.activeElement && document.activeElement.id }));
   ok(f1.sc === 'anfrage3' && f1.tel === 'true' && f1.grund && f1.fokus === 't-tel', '31.A2 Ohne Telefon kein Weiter: Feld markiert und im Fokus, Grund über der Pille (' + JSON.stringify(f1) + ')');
@@ -65,22 +70,25 @@ export default async function (h) {
   ok(!l.felder.some((k) => /tel|web|strasse|mail/i.test(k)), '31.A3 In der App nur öffentliche Felder: ' + l.felder.join(', '));
   await klick(s, '.scr .lg-weiter');
   const f2 = await s.evaluate(() => ({ sc: S.screen, grund: (document.querySelector('.vm-grund') || {}).textContent || '', bad: !!document.querySelector('.vm-liste.ist-bad') }));
-  ok(f2.sc === 'betriebe' && /mindestens einen Betrieb/.test(f2.grund) && f2.bad, '31.A3 Ohne Wahl kein Abschicken, Grund über der Pille');
+  ok(f2.sc === 'betriebe' && /zwei Betriebe/.test(f2.grund) && f2.bad, '31.A3 Ohne Wahl kein Abschicken, Grund über der Pille');
   const ids = await s.evaluate(() => S.verm.liste.map((x) => x.id));
-  for (const id of ids.slice(0, 3)) await klick(s, '.vm-betrieb[data-v="' + id + '"]');
-  /* der vierte ist gesperrt (aria-disabled): Playwright klickt ihn nicht, also das Klick-Ereignis direkt; die Sperre selbst wird geprüft */
-  await s.$eval('.vm-betrieb[data-v="' + ids[3] + '"]', (e) => e.click()); await s.waitForTimeout(250);
+  await klick(s, '.vm-betrieb[data-v="' + ids[0] + '"]'); await klick(s, '.scr .lg-weiter');
+  const f2b = await s.evaluate(() => (document.querySelector('.vm-grund') || {}).textContent || '');
+  ok(/zweiten Betrieb/.test(f2b), '31.A3 Mit einem Betrieb kein Abschicken: „noch einen zweiten Betrieb“');
+  await klick(s, '.vm-betrieb[data-v="' + ids[1] + '"]');
+  /* der dritte ist gesperrt (aria-disabled): Playwright klickt ihn nicht, also das Klick-Ereignis direkt; die Sperre selbst wird geprüft */
+  await s.$eval('.vm-betrieb[data-v="' + ids[2] + '"]', (e) => e.click()); await s.waitForTimeout(250);
   const w = await s.evaluate(() => ({ wahl: S.verm.wahl.length, aus: document.querySelectorAll('.vm-betrieb[aria-disabled="true"]').length, nr: Array.from(document.querySelectorAll('.vm-betrieb[aria-pressed="true"] .vm-mark')).map((e) => e.textContent).join(','), etiketten: document.querySelectorAll('.vm-etikett').length }));
-  ok(w.wahl === 3 && w.nr === '1,2,3' && w.aus === ids.length - 3 && w.etiketten === 3, '31.A3 Höchstens drei, nummeriert, mit Etikett im Umkreis, die übrigen gesperrt (' + JSON.stringify(w) + ')');
+  ok(w.wahl === 2 && w.nr === '1,2' && w.aus === ids.length - 2 && w.etiketten === 2, '31.A3 Genau zwei, nummeriert, mit Etikett im Umkreis, die übrigen gesperrt (' + JSON.stringify(w) + ')');
   await klick(s, '.vm-selbst');
-  ok(await s.evaluate(() => S.verm.suchen && !S.verm.wahl.length), '31.A3 „Sucht ihr für mich aus“ ersetzt die Wahl');
+  ok(await s.evaluate(() => S.verm.suchen && !S.verm.wahl.length), '31.A3 „Sucht ihr zwei für mich aus“ ersetzt die Wahl');
   await klick(s, '.vm-selbst');
   await klick(s, '.vm-betrieb[data-v="' + ids[0] + '"]'); await klick(s, '.vm-betrieb[data-v="' + ids[1] + '"]');
   await klick(s, '.scr .lg-weiter');
   const f3 = await s.evaluate(() => ({ sc: S.screen, einw: !!document.querySelector('.vm-einw.ist-bad'), text: document.querySelector('.vm-einw').textContent }));
   ok(f3.sc === 'betriebe' && f3.einw, '31.A3 Ohne Einwilligung kein Abschicken');
   const namen = await s.evaluate((x) => x.map((id) => S.verm.liste.find((b) => b.id === id).name), ids.slice(0, 2));
-  ok(namen.every((n) => f3.text.includes(n)), '31.A3 Einwilligung nennt die gewählten Betriebe: ' + namen.join(', '));
+  ok(namen.every((n) => f3.text.includes(n)) && /Sonst bekommt niemand meine Daten/.test(f3.text) && /jederzeit widerrufen/.test(f3.text), '31.A3 Einwilligung aktiv, nennt die gewählten Betriebe (' + namen.join(', ') + '), „sonst niemand“, widerrufbar');
   ok(await pillen(s) === 1, '31.A3 Betriebe: genau eine volle Pille');
   const z3 = await ziele(s); ok(!z3.length, '31.A3 Betriebe: Ziele ab 44 px' + (z3.length ? ' ' + JSON.stringify(z3) : ''));
   ok(!(await quer(s)), '31.A3 Betriebe: kein Querscrollen');
@@ -97,8 +105,9 @@ export default async function (h) {
   s.probleme = s.probleme.filter((p) => !/\/api\/vermittlung\/senden/.test(p) && !/status of 401/.test(p));
   await s.fill('#vm-code', '123456');
   await s.waitForFunction(() => S.screen === 'angefragt', null, { timeout: 20000 }).catch(() => null);
-  const g = await s.evaluate(() => ({ sc: S.screen, nr: S.verm.gesendet && S.verm.gesendet.nr, text: document.querySelector('.scr').textContent }));
+  const g = await s.evaluate(() => ({ sc: S.screen, nr: S.verm.gesendet && S.verm.gesendet.nr, text: document.querySelector('.scr').textContent, frei: FREI(), k: Object.assign({}, S.kauf || {}), pille: (document.querySelector('.scr .lg-weiter') || {}).textContent || '' }));
   ok(g.sc === 'angefragt' && /^V-\d{4}-\d{4}$/.test(g.nr || '') && g.text.includes(namen[0]) && /Wir fragen/.test(g.text), '31.A4 Angefragt mit Nummer ' + g.nr + ', nennt die Betriebe, sagt „Wir fragen an“');
+  ok(g.frei && g.k.paid && g.k.frei === 'vermittlung' && g.k.session === 'vermittlung:' + g.nr && !!g.k.token && /Aufmaßblatt laden/.test(g.pille), '31.A4 Gratis-Weg: das Aufmaßblatt ist freigeschaltet (Nachweis vom Server), die Pille lädt es');
   ok(!/gesendet an|ist bei (?!uns)/i.test(g.text.replace(/Anfrage .{0,40} ist bei uns/, '')), '31.A4 Kein „gesendet an Betrieb“ in der Bestätigung');
   await s.waitForTimeout(400);
   const post = (await h.post({ anhaenge: true })).filter((m) => !vorher.has(m.id));
@@ -108,15 +117,31 @@ export default async function (h) {
   const pdf = iPdf >= 0 ? (anInhaber.anhangDaten || [])[iPdf] : '';
   ok(!!anInhaber, '31.A4 Mail an den Inhaber zur Anfrage ist raus');
   ok(!!pdf && Buffer.from(String(pdf), 'base64').slice(0, 4).toString() === '%PDF', '31.A4 Das Aufmaßblatt aus der App hängt als PDF an');
-  ok(post.some((m) => m.an === 'pruefer@beispiel.de') && !post.some((m) => String(m.an || '').includes('pruefer@beispiel.de') && (m.anhaenge || []).length), '31.A4 Der Kunde bekommt eine Bestätigung, aber kein Aufmaßblatt (Weg A)');
-  await klick(s, '.scr .lg-weiter');
+  ok(post.some((m) => m.an === 'pruefer@beispiel.de' && (m.anhaenge || []).some((x) => x.typ === 'application/pdf')), '31.A4 Der Kunde bekommt die Bestätigung mit seinem Aufmaßblatt (Gratis-Weg)');
+  await klick(s, '.vm-fuss-zwei .dna-pille--leise');
   ok(await screen(s) === 'home', '31.A4 „Fertig“ führt zur Liste');
   await s.evaluate(() => go('weg')); await s.waitForTimeout(200);
-  ok(await s.evaluate(() => /Angefragt am/.test(document.querySelector('.vm-kachel[data-v="A"]').textContent)), '31.A4 Weiche zeigt danach „Angefragt am …“');
+  ok(await s.evaluate(() => /Angefragt/.test(document.querySelector('.vm-karte[data-v="A"]').textContent) && /ist bei uns/.test(document.querySelector('.scr').textContent)), '31.A4 Weiche zeigt danach „Angefragt“');
   await s.reload({ waitUntil: 'networkidle' }); await s.waitForTimeout(500);
   ok(await s.evaluate(() => !!(S.verm && S.verm.gesendet && S.verm.gesendet.nr) && !S.verm.code && !S.verm.token), '31.A4 Nach dem Neuladen: Anfrage gemerkt, kein Code und kein Token auf dem Gerät');
   h.sauber(s, '31.A Telefon: Ablauf ohne Fehler');
   await ctx.close();
+
+  /* ---------- Beim Bezahlen noch einmal der Gratis-Weg; Wahl von der Startseite ---------- */
+  const ctxG = await telefon(), gz = await h.neueSeite(ctxG, h.base());
+  await gz.goto(h.base() + '/app/?weg=blatt&farbe=9016#ausmessen', { waitUntil: 'networkidle' }); await gz.waitForTimeout(800);
+  const dl = await gz.evaluate(() => ({ weg: S.verm && S.verm.weg, fa: S.win && S.win.fa, offen: !!(S.win && S.win.offen && S.win.offen.fa), url: location.search }));
+  ok(dl.weg === 'B' && dl.fa === '9016' && !dl.offen && !/weg=|farbe=/.test(dl.url), '31.A7 Wahl von der Startseite: ?weg=blatt legt den Weg fest, ?farbe=9016 die Rahmenfarbe außen des ersten Fensters (gewählt, nicht offen); die Angaben verschwinden aus der Adresse (' + JSON.stringify(dl) + ')');
+  await vorbereiten(gz); await gz.evaluate(() => { vm().weg = 'B'; go('teilen'); }); await gz.waitForTimeout(300);
+  const tz = await gz.evaluate(() => ({ karte: !!document.querySelector('.vm-gratis-hinweis'), text: (document.querySelector('.vm-gratis-hinweis') || {}).textContent || '' }));
+  ok(tz.karte && /Lieber kostenlos/.test(tz.text) && /0\s€/.test(tz.text) && /vergleichbar/.test(tz.text), '31.A7 Folie zum Bezahlen zeigt noch einmal den Gratis-Weg');
+  ok(await pillen(gz) === 1, '31.A7 Folie zum Bezahlen: weiter genau eine volle Pille');
+  await klick(gz, '.vm-gratis-hinweis .dna-pille');
+  ok(await gz.evaluate(() => S.screen === 'anfrage3' && S.verm.weg === 'A' && /die Betriebe/.test(document.querySelector('.lg-frage h1').textContent)), '31.A7 „Kostenlos weiter“ wechselt auf den Gratis-Weg (Kontakt mit Pflichtfeldern)');
+  await gz.evaluate(() => { const k = kauf(); k.mail = 'pruefer@beispiel.de'; go('kasse'); }); await gz.waitForTimeout(200);
+  ok(await gz.evaluate(() => !!document.querySelector('.vm-gratis-hinweis')), '31.A7 Auch die Kasse zeigt den Gratis-Weg');
+  h.sauber(gz, '31.A7 ohne Fehler');
+  await ctxG.close();
 
   /* ---------- Schreibtisch ---------- */
   const ctxD = await kontext({ viewport: { width: 1280, height: 800 } }), d = await h.neueSeite(ctxD, h.base());

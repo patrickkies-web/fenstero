@@ -6,8 +6,8 @@
 //   Tagesbudget mit Alarm, ohne Schlüssel „keine“), KI-Suche im Prozess gegen ein nachgestelltes fetch (Anfrage nach Skill claude-api,
 //   pause_turn, Zeitlimit, Ablehnung, Unsinn verwerfen) · 31.3 Code (Attrappe, falsche Nummern, Festnetz per Anruf, Grenze je Nummer, Bremse
 //   je Anschluss, ohne Anbieter „ohneCode“) · 31.4 Senden (alle Ablehnungen, Code, abgelaufenes Token, Fehlversuche, Mails an den Inhaber mit
-//   PDF und an den Kunden ohne, Doppelklick, zwei Anfragen in 90 Tagen, ohne Code „nicht bestätigt“) · 31.5 Zentrale (nur angemeldet, Liste,
-//   Detail mit Telefon und Website, PDF, Ergebnis der Anrufe, Betrieb neu, Senden nur mit Zustimmung, höchstens drei, Mails) · 31.6 Tageslauf
+//   PDF und an den Kunden mit, Freischaltung, Doppelklick, zwei Anfragen in 90 Tagen, ohne Code „nicht bestätigt“) · 31.5 Zentrale (nur angemeldet, Liste,
+//   Detail mit Telefon und Website, PDF, Ergebnis der Anrufe, Betrieb neu, Senden nur mit Zustimmung, höchstens zwei und nur die gewählten, Mails) · 31.6 Tageslauf
 //   (nach 180 Tagen weg, mit dem Aufmaßblatt).
 // Teil B im Browser (Telefon 390 px und Schreibtisch): Zentrale mit Umschalter, Liste, Anfrage, Anruf-Knopf, „Will“, Senden nur mit Häkchen;
 //   genau eine volle Pille, Ziele ab 44 px, Schrift ab 13 px, kein Querscrollen, keine Konsolenfehler.
@@ -125,13 +125,13 @@ export default async function (h) {
   const code = async (tel) => ((await post('/api/vermittlung/code', { tel: tel })).json || {}).token;
   const anfrage = (o) => Object.assign({ kontakt: { name: 'Erika Prüfmann', ort: PLZ + ' Herzebrock-Clarholz', tel: TEL, mail: MAIL, erreich: ['vm', 'ab'] }, plz: PLZ, betriebe: bid.slice(0, 2), token: c1.token, code: '123456',
     einwilligung: { fassung: '2026-10-29', text: 'Ich möchte, dass Fensterbau Brandt und Tischlerei Lindholz mein Aufmaß und meine Kontaktdaten bekommen und mich für ein Angebot kontaktieren.' },
-    aufmass: AUFMASS, eckdaten: { fenster: 4, elemente: 5, gebaeude: 'efh', baujahr: '1978', zeit: '3m', budget: 'b2', foerdweg: 'bafa' }, pdf: PDF.toString('base64') }, o || {});
+    aufmass: AUFMASS, eckdaten: { fenster: 4, elemente: 5, gebaeude: 'efh', baujahr: '1978', zeit: '3m', budget: 'b2', foerdweg: 'bafa' }, pdf: PDF.toString('base64'), kennung: 'pPruef' + stempel }, o || {});
   const mit = (k, v) => { const a = anfrage(); a.kontakt = Object.assign({}, a.kontakt, { [k]: v }); return a; };
   const faelle = [['kontakt.name', mit('name', 'A')], ['plz', anfrage({ plz: '1234' })], ['kontakt.tel', mit('tel', 'kaputt')], ['kontakt.mail', mit('mail', 'kaputt')], ['einwilligung', anfrage({ einwilligung: { fassung: '2026-10-29' } })],
     ['aufmass', anfrage({ aufmass: '' })], ['betriebe', anfrage({ betriebe: bid.slice(0, 4) })], ['pdf', anfrage({ pdf: Buffer.from('Hallo, kein PDF').toString('base64') })], ['pdf', anfrage({ pdf: '' })]];
   const abl = [];
   for (const [feld, body] of faelle) { const r = await post('/api/vermittlung/senden', body); abl.push(r.status === 400 && !!(r.json.felder || {})[feld] && r.json.feld === feld.replace(/^kontakt\./, '') ? 'ok' : feld + ':' + r.status); }
-  ok(abl.every((x) => x === 'ok'), '31.4 Senden: Name ab 2 Zeichen, PLZ, Telefon, E-Mail (falls angegeben), Einwilligung mit Fassung und Text, Aufmaß, höchstens drei Betriebe, PDF mit %PDF-Kopf; je Fehler das Feld in felder und feld (wie die App es liest: tel, name, mail …) (' + abl.filter((x) => x !== 'ok').join(' ') + ')');
+  ok(abl.every((x) => x === 'ok'), '31.4 Senden: Name ab 2 Zeichen, PLZ, Telefon, E-Mail (falls angegeben), Einwilligung mit Fassung und Text, Aufmaß, höchstens zwei Betriebe, PDF mit %PDF-Kopf; je Fehler das Feld in felder und feld (wie die App es liest: tel, name, mail …) (' + abl.filter((x) => x !== 'ok').join(' ') + ')');
   const gross = Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(10200000, 0x20)]), zuGross = Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(11200000, 0x20)]);
   const g1 = await post('/api/vermittlung/senden', anfrage({ pdf: gross.toString('base64') })), g2 = await post('/api/vermittlung/senden', anfrage({ pdf: zuGross.toString('base64') }));
   ok(g1.status === 400 && !!(g1.json.felder || {}).pdf && /10 MB/.test(g1.json.fehler) && g2.status === 413, '31.4 Aufmaßblatt über 10 MB: 400 am Feld pdf; über dem Grenzwert des Pfads 413 (' + g1.status + ', ' + g2.status + ')');
@@ -158,8 +158,11 @@ export default async function (h) {
   ok(ok1.status === 200 && /^V-\d{4}-\d{4}$/.test(nr1) && !!anInhaber && (anInhaber.anhaenge || []).length === 1 && anInhaber.anhaenge[0].typ === 'application/pdf' && anInhaber.anhaenge[0].bytes === PDF.length && /\.pdf$/.test(anInhaber.anhaenge[0].name) &&
     anInhaber.html.includes('tel:05245555010') && anInhaber.html.includes('fensterbau-brandt.example') && /\b3 km/.test(anInhaber.html) && anInhaber.html.includes('/zentrale/#vermittlung/') && anInhaber.html.includes('tel:+491712894563') && /per Code bestätigt/.test(anInhaber.html) && /Einfamilienhaus/.test(anInhaber.html),
     '31.4 Anfrage ' + nr1 + ' angenommen; Mail an den Inhaber mit Aufmaßblatt im Anhang, Kunde (tel:-Link, bestätigt), Eckdaten und den gewählten Betrieben samt Telefon, Website, km und Link zur Zentrale');
-  ok(!!anKunde && (anKunde.anhaenge || []).length === 0 && anKunde.html.includes('Wir fragen bei Fensterbau Brandt und Tischlerei Lindholz an und schicken dein Aufmaß an die, die ein Angebot machen möchten; sie melden sich dann bei dir.') && !/5550101|fensterbau-brandt\.example/.test(anKunde.html),
-    '31.4 Bestätigung an den Kunden in Du-Form, ohne Aufmaßblatt und ohne Telefon oder Website der Betriebe');
+  ok(!!anKunde && (anKunde.anhaenge || []).length === 1 && anKunde.anhaenge[0].typ === 'application/pdf' && anKunde.anhaenge[0].bytes === PDF.length && /Dein Aufmaßblatt hängt als PDF an/.test(anKunde.html) && anKunde.html.includes('Wir fragen bei Fensterbau Brandt und Tischlerei Lindholz an und schicken dein Aufmaß an die, die ein Angebot machen möchten; sie melden sich dann bei dir.') && !/555010|fensterbau-brandt\.example/.test(anKunde.html),
+    '31.4 Bestätigung an den Kunden in Du-Form mit seinem Aufmaßblatt (Gratis-Weg), ohne Telefon oder Website der Betriebe');
+  const fs1 = (ok1.json || {}).freischaltung || {}, nw = await h.api('localhost', '/api/zahlung/nachweis?kennung=' + encodeURIComponent('pPruef' + stempel) + '&session=' + encodeURIComponent(fs1.session || '') + '&token=' + encodeURIComponent(fs1.token || ''));
+  const nwFalsch = await h.api('localhost', '/api/zahlung/nachweis?kennung=' + encodeURIComponent('pAnders' + stempel) + '&session=' + encodeURIComponent(fs1.session || '') + '&token=' + encodeURIComponent(fs1.token || ''));
+  ok(fs1.session === 'vermittlung:' + nr1 && !!fs1.token && (nw.json || {}).ok === true && (nwFalsch.json || {}).ok === false, '31.4 Freischaltung des Aufmaßblatts in der App: Nachweis wie beim Kauf, die Anfrage als Sitzung, nur für diese Kennung');
   const doppelt = await post('/api/vermittlung/senden', anfrage());
   const zweite = await post('/api/vermittlung/senden', anfrage({ token: await code(TEL), betriebe: bid.slice(2, 3) }));
   const dritte = await post('/api/vermittlung/senden', anfrage({ token: await code(TEL) }));
@@ -197,9 +200,12 @@ export default async function (h) {
   const lind2 = ((st1.vermittlung || {}).betriebe || [])[1] || {};
   ok(st1.ok && st1.vermittlung.stand === 'in_arbeit' && lind2.status === 'will_nicht' && lind2.notiz === 'Keine Kapazität bis März' && st1.vermittlung.verlauf.some((x) => /Tischlerei Lindholz: Will nicht/.test(x.text)) && stFalsch.status === 400 && stFremd.status === 404,
     '31.5 Ergebnis des Anrufs je Betrieb (will nicht) mit Notiz und Verlauf; der erste Anruf setzt „neu“ auf „in Arbeit“; unbekannter Status 400, fremder Betrieb 404');
-  const neuFalsch = await zapi(P + '/betrieb-neu', { name: 'X' }), neu1 = (await zapi(P + '/betrieb-neu', { name: 'Tischlerei Prüfnachbar', ort: 'Oelde', tel: '02522 938271', web: 'www.pruefnachbar.de' })).json || {}, neuDoppelt = await zapi(P + '/betrieb-neu', { name: 'Tischlerei Prüfnachbar', ort: 'Oelde', tel: '02522 938271' });
+  /* Weitere Betriebe nur, wenn der Kunde „Sucht ihr für mich aus“ gewählt hat; hat er gewählt, geht sein Aufmaß nur an seine zwei */
+  const neuGewaehlt = await zapi(P + '/betrieb-neu', { name: 'Tischlerei Prüfnachbar', ort: 'Oelde', tel: '02522 938271' });
+  const zeile2 = (liste.vermittlungen || []).find((v) => v.nr === (ohneMail.json || {}).nr) || {}, P2 = '/api/inhaber/vermittlungen/' + zeile2.id;
+  const neuFalsch = await zapi(P2 + '/betrieb-neu', { name: 'X' }), neu1 = (await zapi(P2 + '/betrieb-neu', { name: 'Tischlerei Prüfnachbar', ort: 'Oelde', tel: '02522 938271', web: 'www.pruefnachbar.de' })).json || {}, neuDoppelt = await zapi(P2 + '/betrieb-neu', { name: 'Tischlerei Prüfnachbar', ort: 'Oelde', tel: '02522 938271' });
   const nb = ((neu1.vermittlung || {}).betriebe || []).find((x) => x.id === neu1.bid) || {};
-  ok(neuFalsch.status === 400 && neu1.ok && nb.quelle === 'inhaber' && nb.tel === '02522 938271' && nb.web === 'https://www.pruefnachbar.de/' && nb.status === 'offen' && neuDoppelt.status === 409, '31.5 Weiteren Betrieb eintragen (Name Pflicht, Telefon und Website geprüft, doppelt 409)');
+  ok(neuFalsch.status === 400 && neu1.ok && nb.quelle === 'inhaber' && nb.tel === '02522 938271' && nb.web === 'https://www.pruefnachbar.de/' && nb.status === 'offen' && neuDoppelt.status === 409 && neuGewaehlt.status === 409 && /selbst gewählt/.test((neuGewaehlt.json || {}).fehler || ''), '31.5 Weiteren Betrieb nur bei „Sucht ihr für mich aus“ (hat der Kunde gewählt: 409); Name Pflicht, Telefon und Website geprüft, doppelt 409');
   const ohneZu = await zapi(P + '/senden', { bid: brandt.id, mail: 'info@fensterbau-brandt.example' }), zuFalsch = await zapi(P + '/senden', { bid: brandt.id, mail: 'kaputt', zustimmung: true }), zuString = await zapi(P + '/senden', { bid: brandt.id, mail: 'info@fensterbau-brandt.example', zustimmung: 'ja' });
   ok(ohneZu.status === 400 && !!ohneZu.json.felder.zustimmung && zuFalsch.status === 400 && !!zuFalsch.json.felder.mail && zuString.status === 400, '31.5 Aufmaß an einen Betrieb nur mit zustimmung: true (Zustimmung im Gespräch) und gültiger E-Mail');
   const vorS = await ids();
@@ -212,12 +218,12 @@ export default async function (h) {
   ok(!!anBetrieb && (anBetrieb.anhaenge || []).length === 1 && anBetrieb.anhaenge[0].bytes === PDF.length && /Anfrage aus Herzebrock-Clarholz/.test(anBetrieb.betreff) && /Erika Prüfmann/.test(anBetrieb.html) && /tel:\+491712894563/.test(anBetrieb.html) && /Vermittelt von eeziframes/.test(anBetrieb.html) && anBetrieb.html.includes(ANBIETER.name) && /Sie /.test(anBetrieb.html) && !/\b(dein|dir|du)\b/i.test(anBetrieb.html.replace(/<[^>]+>/g, ' ')) && /Einfamilienhaus/.test(anBetrieb.html) &&
     !!anKunde2 && /Fensterbau Brandt hat dein Aufmaß/.test(anKunde2.betreff) && (anKunde2.anhaenge || []).length === 0,
     '31.5 Mail an den Betrieb in Sie-Form mit Aufmaßblatt, Kontakt und Eckdaten, „Vermittelt von eeziframes“ und Impressum; kurze Mail an den Kunden, wer sein Aufmaß hat');
-  await zapi(P + '/senden', { bid: lind.id, mail: 'info@tischlerei-lindholz.example', zustimmung: true });
-  await zapi(P + '/senden', { bid: nb.id, mail: 'info@pruefnachbar.example', zustimmung: true });
-  const vierter = (await zapi(P + '/betrieb-neu', { name: 'Fensterbau Vierter', ort: 'Ennigerloh', tel: '02524 837261' })).json || {};
-  const zuViele = await zapi(P + '/senden', { bid: vierter.bid, mail: 'info@vierter.example', zustimmung: true });
+  const s12 = await zapi(P + '/senden', { bid: lind.id, mail: 'info@tischlerei-lindholz.example', zustimmung: true });
   const nochmal = await zapi(P + '/senden', { bid: brandt.id, mail: 'angebot@fensterbau-brandt.example', zustimmung: true });
-  ok(zuViele.status === 409 && /drei Betriebe/.test(zuViele.json.fehler) && nochmal.status === 200, '31.5 Höchstens drei Betriebe bekommen das Aufmaß (der vierte: 409); an einen schon belieferten geht es noch einmal');
+  const nb2 = (await zapi(P2 + '/betrieb-neu', { name: 'Fensterbau Zweiter', ort: 'Ennigerloh', tel: '02524 837261' })).json || {}, nb3 = (await zapi(P2 + '/betrieb-neu', { name: 'Fensterbau Dritter', ort: 'Beckum', tel: '02521 837262' })).json || {};
+  const s21 = await zapi(P2 + '/senden', { bid: nb.id, mail: 'info@pruefnachbar.example', zustimmung: true }), s22 = await zapi(P2 + '/senden', { bid: nb2.bid, mail: 'info@zweiter.example', zustimmung: true });
+  const zuViele = await zapi(P2 + '/senden', { bid: nb3.bid, mail: 'info@dritter.example', zustimmung: true });
+  ok(s12.status === 200 && nochmal.status === 200 && s21.status === 200 && s22.status === 200 && zuViele.status === 409 && /zwei Betriebe/.test(zuViele.json.fehler), '31.5 Höchstens zwei Betriebe bekommen das Aufmaß (der dritte: 409), bei eigener Wahl nur die zwei gewählten; an einen schon belieferten geht es noch einmal');
   const stand = (await zapi(P + '/stand', { stand: 'erledigt' })).json || {}, standFalsch = await zapi(P + '/stand', { stand: 'weg' }), notiz = await zapi(P + '/notiz', { text: 'Kundin ruft Freitag zurück' });
   const det2 = ((await zapi(P)).json || {}).vermittlung || {};
   ok(stand.ok && stand.vermittlung.stand === 'erledigt' && standFalsch.status === 400 && notiz.status === 200 && det2.notiz === 'Kundin ruft Freitag zurück', '31.5 Stand der Vermittlung (erledigt; unbekannt 400) und interne Notiz');
@@ -288,5 +294,5 @@ export default async function (h) {
 
   /* ---------- Teil C: App (Folien weg, betriebe, vcode, angefragt) ----------
      Platz für die Prüfungen der App: Die Sitzung, die die Folien in web/assets/app.js baut, ergänzt sie hier (Weg A bis „Angefragt“ mit
-     Suche, Auswahl bis drei, Einwilligung, Code 123456, senden; Weg B unverändert; ohne Server nur B). */
+     Suche, Auswahl von zwei, Einwilligung, Code 123456, senden; Weg B unverändert; ohne Server nur B). */
 }

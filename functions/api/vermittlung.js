@@ -1,5 +1,5 @@
 /* eeziframes · Vermittlung „Angebote aus deiner Nähe“, Stufe 1 (docs/VERMITTLUNG.md, Abschnitt 10)
-   Der Hauseigentümer plant in der App, wählt am Ende bis zu drei Fensterbetriebe aus seiner Nähe (von einer KI gesucht), bestätigt seine
+   Der Hauseigentümer plant in der App, wählt am Ende zwei Fensterbetriebe aus seiner Nähe (von einer KI gesucht), bestätigt seine
    Telefonnummer per Code und schickt ab. Der Inhaber sieht die Anfrage in der Zentrale, ruft die Betriebe an und schickt das Aufmaßblatt
    per Mail nur an die, die im Gespräch zugestimmt haben (§ 7 UWG: keine Mail an einen Betrieb ohne Zustimmung).
    Öffentliche Routen (nur auf der Hauptdomain):
@@ -26,10 +26,17 @@ import { vermittlungDaten } from './vermittlung-daten.js';
 import { sucheArt, kiSuche, attrappeBetriebe, oeffentlich, ortText, betriebId, webText, UMKREIS, MODELL, ZEIT_MS } from './vermittlung-suche.js';
 import { smsArt, smsDienst } from './vermittlung-sms.js';
 import { inhaberMail, eingangMail, betriebMail, weitergabeMail, eckZeilen, erreichText } from './vermittlung-mails.js';
+import { kaufNachweis } from './eigene.js';
 
 const MIN = 60000, TAG = 864e5;
 export const AUFBEWAHRUNG_TAGE = 180;
 const SUCHE_TAGE = 30, LEER_TAGE = 1, GRENZE_90 = 2, MAX_BETRIEBE_ZENTRALE = 12;
+/* Zwei Betriebe je Anfrage (Inhaber, 29.10.2026: „Aufmaßblatt + an 2 Fensterbauer in deiner Nähe“, „Nur die zwei Betriebe, die du
+   auswählst. Sonst niemand.“): höchstens zwei gewählte, das Aufmaß geht höchstens an zwei und nur an die gewählten */
+export const MAX_WAHL = 2;
+const KENNUNG = /^[A-Za-z0-9_-]{6,40}$/;
+/* Freischaltung des Aufmaßblatts in der App: derselbe Nachweis wie beim Kauf (eigene.js), mit der Anfrage statt der Stripe-Sitzung */
+const freischaltung = async (k, kennung, nr, at) => (KENNUNG.test(kennung || '') ? { session: 'vermittlung:' + nr, token: await kaufNachweis(k, kennung, 'vermittlung:' + nr), at: at } : null);
 export const MAX_PDF = 10000000;
 /* Größte Anfrage: das Aufmaßblatt als Base64 (bis 10 MB, also etwa 13,4 Mio. Zeichen) und das Aufmaß; der Verteiler (router.js) lässt
    für /api/vermittlung/senden so viel zu */
@@ -178,7 +185,7 @@ async function senden(ctx) {
   const aufmass = String(b.aufmass == null ? '' : b.aufmass).trim();
   if (!AUFMASS.test(aufmass) || aufmass.length > MAX_AUFMASS) f.aufmass = 'Das Aufmaß fehlt. Bitte miss mindestens ein Fenster.';
   const ids = b.betriebe == null ? [] : Array.isArray(b.betriebe) ? b.betriebe : null;
-  if (ids && ids.length > 3) f.betriebe = 'Bitte wähle höchstens drei Betriebe.';
+  if (ids && ids.length > MAX_WAHL) f.betriebe = 'Bitte wähle höchstens zwei Betriebe.';
   else if (!ids || ids.some((x) => typeof x !== 'string' || !/^b[0-9a-f]{12}$/.test(x)) || new Set(ids).size !== ids.length) f.betriebe = 'Die Auswahl der Betriebe stimmt so nicht. Bitte wähle sie noch einmal.';
   const pdf = pdfAus(b.pdf); if (!pdf) f.pdf = 'Das Aufmaßblatt fehlt oder ist zu groß (höchstens 10 MB).';
   const fk = Object.keys(f);
@@ -196,7 +203,8 @@ async function senden(ctx) {
   /* höchstens zwei Anfragen je Nummer in 90 Tagen; dasselbe Token zweimal (Doppelklick) liefert die erste Anfrage */
   const frueher = await d.vonTel(t.e164, new Date(jetzt - 90 * TAG).toISOString());
   const schon = c.tk ? frueher.find((x) => (x.meta || {}).token === c.tk) : null;
-  if (schon) return { ok: true, nr: schon.nr, schon: true };
+  const kennung = String(b.kennung == null ? '' : b.kennung).trim();
+  if (schon) return { ok: true, nr: schon.nr, schon: true, freischaltung: await freischaltung(ctx.k, kennung, schon.nr, Date.parse(schon.created_at) || Date.now()) };
   if (frueher.length >= GRENZE_90) throw new ApiFehler('Mit dieser Nummer sind in den letzten 90 Tagen schon zwei Anfragen eingegangen. Mehr geht kostenlos nicht; schreib uns gern, wenn du noch Hilfe brauchst.', 429, { grenze: '90tage', feld: 'tel' });
   const id = uuid(), pfad = 'v/' + id + '.pdf', ab = ablage(ctx.k, 'vermittlung');
   if (!(await ab.ablegen(pfad, pdf.bytes, 'application/pdf'))) throw new ApiFehler('Das Aufmaßblatt ließ sich gerade nicht speichern. Bitte gleich noch einmal.', 502);
@@ -206,14 +214,15 @@ async function senden(ctx) {
       eckdaten: eckdatenAus(b.eckdaten), aufmass: aufmass, einwilligung: { fassung: fassung, text: ewText, zeit: ZEIT(), netz: netzKurz(ip(ctx.request)) },
       betriebe: gewaehlt.map((x) => ({ id: x.id, name: x.name, ort: x.ort, strasse: x.strasse || '', tel: x.tel || '', web: x.web || '', km: x.km, leistungen: x.leistungen || [], quelle: suchQuelle || 'ki', gewaehlt: true, status: 'offen', notiz: '', mail: '', zustimmung: '', gesendet: null })),
       bestaetigt: c.bestaetigt, pdf: { pfad: pfad, bytes: pdf.bytes.length }, verlauf: [{ zeit: ZEIT(), von: 'kunde', text: 'Anfrage eingegangen' + (gewaehlt.length ? ' für ' + gewaehlt.map((x) => x.name).join(', ') : ', Betrieb für mich suchen') + (c.bestaetigt ? '; Nummer per Code bestätigt' : '; Nummer nicht bestätigt (ohne Code)') }],
-      notiz: '', meta: { token: c.tk } });
+      notiz: '', meta: { token: c.tk, kennung: KENNUNG.test(kennung) ? kennung : '' } });
   } catch (e) { await ab.loeschen([pfad]).catch(() => false); throw e; }
   const post = postDienst(ctx.k), zentrale = ctx.url.origin + '/zentrale/#vermittlung/' + v.id;
   const m = inhaberMail(v, { zentrale: zentrale });
   ctx.waitUntil(post.senden({ an: post.kontakt, betreff: m.betreff, html: m.html, antwortAn: mail || undefined, anhaenge: [{ filename: 'Aufmassblatt-' + v.nr + '.pdf', content: pdf.b64, content_type: 'application/pdf' }], idempotenz: 'vermittlung-neu-' + v.id }).catch(() => false));
-  if (mail) { const e = eingangMail(v); ctx.waitUntil(post.senden({ an: mail, betreff: e.betreff, html: e.html, antwortAn: post.kontakt, idempotenz: 'vermittlung-eingang-' + v.id }).catch(() => false)); }
+  /* Bestätigung an den Kunden mit seinem Aufmaßblatt: auf dem Gratis-Weg gehört es dazu (Nummer bestätigt, Anfrage an zwei Betriebe) */
+  if (mail) { const e = eingangMail(v); ctx.waitUntil(post.senden({ an: mail, betreff: e.betreff, html: e.html, antwortAn: post.kontakt, anhaenge: [{ filename: 'Aufmassblatt-' + v.nr + '.pdf', content: pdf.b64, content_type: 'application/pdf' }], idempotenz: 'vermittlung-eingang-' + v.id }).catch(() => false)); }
   if (ctx.zaehlen) ctx.zaehlen('ereignis:vermittlung');
-  return { ok: true, nr: v.nr };
+  return { ok: true, nr: v.nr, freischaltung: await freischaltung(ctx.k, kennung, v.nr, Date.now()) };
 }
 
 /* ---------- Zentrale ---------- */
@@ -284,6 +293,7 @@ const INHABER = {
     if (webRoh && !web) f.web = 'Bitte eine Website wie https://… eintragen.';
     if (!telRoh && !webRoh) f.tel = 'Bitte Telefon oder Website eintragen.';
     if (Object.keys(f).length) throw new ApiFehler(Object.values(f)[0], 400, { felder: f });
+    if ((v.betriebe || []).some((x) => x.gewaehlt)) throw new ApiFehler('Der Kunde hat seine Betriebe selbst gewählt. Sein Aufmaß geht nur an diese, weitere Betriebe gibt es hier nicht.', 409);
     if ((v.betriebe || []).length >= MAX_BETRIEBE_ZENTRALE) throw new ApiFehler('Mehr als ' + MAX_BETRIEBE_ZENTRALE + ' Betriebe je Anfrage gehen nicht.', 409);
     const id = await betriebId(name, ort || '-');
     if ((v.betriebe || []).some((x) => x.id === id)) throw new ApiFehler('Diesen Betrieb gibt es in der Liste schon.', 409, { felder: { name: 'Gibt es schon.' } });
@@ -293,7 +303,8 @@ const INHABER = {
     });
     return { ok: true, vermittlung: sicht(z), bid: id };
   },
-  /* Aufmaß an einen Betrieb: nur mit Zustimmung im Gespräch (Zeit steht im Verlauf), höchstens drei Betriebe; auf Wunsch eine Mail an den
+  /* Aufmaß an einen Betrieb: nur mit Zustimmung im Gespräch (Zeit steht im Verlauf), höchstens zwei Betriebe und, wenn der Kunde gewählt
+     hat, nur an die gewählten; auf Wunsch eine Mail an den
      Kunden, welcher Betrieb sein Aufmaß hat */
   'POST /api/inhaber/vermittlungen/:id/senden': async (ctx) => {
     const d = await inhaberDaten(ctx), v = await eine(ctx, d), b = ctx.body || {}, x = betriebVon(v, b.bid), f = {};
@@ -301,7 +312,8 @@ const INHABER = {
     if (b.zustimmung !== true) f.zustimmung = 'Bitte bestätigen Sie, dass der Betrieb im Gespräch zugestimmt hat.';
     if (!mailOk(mail)) f.mail = 'Bitte die E-Mail-Adresse des Betriebs eintragen.';
     if (Object.keys(f).length) throw new ApiFehler(Object.values(f)[0], 400, { felder: f });
-    if ((v.betriebe || []).filter((y) => y.gesendet && y.id !== x.id).length >= 3) throw new ApiFehler('Das Aufmaß ging schon an drei Betriebe. Mehr sind nicht erlaubt.', 409);
+    if ((v.betriebe || []).some((y) => y.gewaehlt) && !x.gewaehlt) throw new ApiFehler('Der Kunde hat andere Betriebe gewählt. Sein Aufmaß geht nur an diese.', 409);
+    if ((v.betriebe || []).filter((y) => y.gesendet && y.id !== x.id).length >= MAX_WAHL) throw new ApiFehler('Das Aufmaß ging schon an zwei Betriebe. Mehr sind nicht erlaubt.', 409);
     const post = postDienst(ctx.k), ab = ablage(ctx.k, 'vermittlung');
     if (!post) throw new ApiFehler('Der Mailversand ist hier noch nicht eingerichtet (MAIL_API_KEY).', 503);
     const bytes = v.pdf && v.pdf.pfad && ab ? await ab.holen(v.pdf.pfad) : null;

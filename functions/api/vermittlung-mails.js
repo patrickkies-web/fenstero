@@ -54,8 +54,9 @@ export function inhaberMail(v, o) {
 export function eingangMail(v) {
   const k = v.kunde || {}, namen = (v.betriebe || []).map((b) => b.name);
   const satz = namen.length ? 'Wir fragen bei ' + namenListe(namen) + ' an und schicken dein Aufmaß an die, die ein Angebot machen möchten; sie melden sich dann bei dir.'
-    : 'Wir suchen einen Fensterfachbetrieb in deiner Nähe und schicken dein Aufmaß an ihn, sobald er ein Angebot machen möchte; er meldet sich dann bei dir.';
+    : 'Wir suchen zwei passende Fensterbetriebe in deiner Nähe und schicken dein Aufmaß an die, die ein Angebot machen möchten; sie melden sich dann bei dir.';
   return { betreff: 'Deine Anfrage ist da (' + v.nr + ')', html: rahmen('Danke, deine Anfrage ist da', absatz(esc('Hallo ' + (k.name || '') + ',')) + absatz(esc(satz)) +
+    absatz(esc('Dein Aufmaßblatt hängt als PDF an, für deine Unterlagen. Die Angebote der Betriebe beruhen auf denselben Maßen und sind direkt vergleichbar.')) +
     absatz(esc('Wir melden uns bei dir unter ' + (k.anzeige || 'deiner Nummer') + ', falls wir noch etwas wissen müssen. Fragen? Antworte einfach auf diese E-Mail.')) +
     zeilen([['Anfrage', esc(v.nr)], ['Ort', esc(v.plz + ' ' + (k.ort || ''))], namen.length ? ['Betriebe', esc(namen.join(', '))] : null])) };
 }
