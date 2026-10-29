@@ -192,3 +192,42 @@ Verworfene Fassungen (Seeds, falls man sie nachrechnen will): `fb-frage` erste F
 Fassung 2775640972 (Maßpfeil außerhalb der Kugel), `fb-pakete` zweite Fassung 2957272450 (Schrift auf den Podesten),
 `partner-gestaltung` Eimer über der Fassade 2841679373 (Meister doppelt) und 1084975889 (Farbe auf der Wand);
 Glasglocke 3000205972 und roter Knopf 2409175626 als Alternativen zu Wölfen und Telefon.
+
+## Hausfoto für die Fenster-Animation der Startseite (Wunsch des Inhabers vom 29.10.2026)
+
+Platz: Startseite, Schritt „In 3D planen“. Auf dieses Foto setzt die Seite die 3-D-Fenster aus der App passgenau in die Öffnungen
+und lässt sie nacheinander einschweben (alt raus, neu rein). Der Inhaber wählt je Öffnung Art, Farbe und Sprossen. Deshalb muss
+das Foto streng von vorn sein, mit senkrechten Kanten, und kein Fenster darf verdeckt sein. Stimmung: sympathisch, Mittelschicht,
+nicht hochnäsig; eine Familie von hinten, die aufs Haus zeigt. Bei der Familie gilt: Köpfe unterhalb der Fensterbänke im
+Erdgeschoss, sonst verdeckt sie Öffnungen. Größe: 3:2, mindestens 3000 px breit. Am besten zusätzlich dasselbe Bild ohne Familie
+(„remove the family, keep everything else identical“) als Rückfall.
+
+Prompt (englisch, für Nano Banana, Flux oder Midjourney):
+
+> Photorealistic photograph of an ordinary, well-kept German detached family house from the 1980s, shot perfectly straight-on
+> from the front: frontal elevation, camera centred and slightly elevated at about the height of the ground-floor ceiling,
+> level horizon, all vertical lines perfectly parallel like a shift-lens architectural photo, no wide-angle distortion. The
+> house fills about 70 percent of the frame width, with some sky above the roof and some lawn below.
+> The house is modest and friendly, not luxurious: light beige rendered facade, dark red-brown concrete roof tiles, simple
+> gable roof with the eaves facing the camera, one and a half storeys. Ground floor: front door with a small canopy slightly
+> right of centre, two double-casement windows to the left, one wide three-part window and one small single window to the
+> right. Upper floor: three windows of different widths. All windows are older white PVC windows from the 1990s with roller
+> shutter boxes above them, shutters fully open, plain light curtains, glass softly reflecting the sky. Every window and the
+> door are completely visible: no trees, plants, ladders or people in front of any window.
+> Front garden: short lawn, low hedge along the edge, a paved path to the door, a few flower pots, a child's bike lying on
+> the grass. Quiet residential street, neighbouring houses only hinted at the edges, no cars.
+> In the lower foreground, slightly left of centre, a young family seen from behind: a father in jeans and a hoodie, a mother
+> in a light rain jacket, and a girl of about six holding her mother's hand and pointing at the house with her other arm
+> outstretched. Natural, relaxed everyday poses, no faces visible. They stand on the lawn in the lower third of the frame;
+> their heads stay below the ground-floor window sills and they do not overlap any window or the door.
+> Soft late-afternoon daylight in early summer, gentle and even, no hard shadows across the facade, no long cast shadows on
+> the ground, natural colours, calm sky with a few light clouds. Sharp from front to back (f/8), fine detail on the window
+> frames. Feels like a warm, honest photo a neighbour would take, not a glossy real-estate ad.
+> No text, no logos, no watermark, no house number, no licence plates. Landscape 3:2, highest resolution.
+
+Negativ (wo der Generator das Feld hat): luxury villa, modern cube house, swimming pool, sports car, fisheye, tilted or
+converging verticals, perspective from below, windows covered by plants or people, closed shutters, visible faces,
+dramatic sky, HDR look, oversaturated, text, watermark.
+
+Prüfen vor dem Einsetzen: senkrechte Kanten gerade; jedes Fenster ganz sichtbar und frei; Hände und Finger der Familie
+plausibel; kein Schriftsalat (Hausnummer, Schilder); Haus wirkt normal, nicht teuer.
