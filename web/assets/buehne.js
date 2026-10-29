@@ -6,7 +6,8 @@
    Seiten, weicher Verschattung in den Ecken und Spiegelung auf Glas und Metall. Die Elemente bleiben als Beschreibung im DOM
    (unsichtbar), Maßlinien, Hinweis, Lupe und Regler bleiben HTML über der Leinwand.
    Daten aus app.js: el._f (Fläche: W, H, x, y, z, Drehung r, Ursprung o, Umriss c, n = ohne Übergang), el._s (Flügel),
-   el._h (Griff), el._g (Griff außen), el._b (Sprosse), el._bg/_bgc/_bgi (Hintergrund wie geschrieben), stage._orn (Ornament);
+   el._h (Griff), el._g (Griff außen), el._b (Sprosse), el._bg/_bgc/_bgi (Hintergrund wie geschrieben), stage._orn (Ornament),
+   stage._spross (Art der Sprossen: Profil auf dem Glas oder flach im Zwischenraum), el._tief (Körper bis aufs Profil: Bänder, Rosette);
    Kinder mit Fläche in Griff und Griff außen (Druckknopf, Schließzylinder), el._rund (Rundung), el._bieg (gewölbte Lamelle),
    el._artVers (Muster der Nachbarfläche fortsetzen). Farben stehen inline (_bg), nicht nur in einer Klasse.
    Kamera (Drehung und die Verschiebung beim Zoom) und Schwingen rechnet die Bühne selbst und schreibt sie in .w3d-cam/.w3d-sway,
@@ -228,7 +229,7 @@ window.Buehne3D = (function () {
     'float rnd(float d,float w,float aa){return (1.0-smoothstep(w-aa,w+aa,d))*clamp(w/(2.0*aa),0.0,1.0);}' +
     'float schlag(float di,vec2 o,vec3 L,float s,float aa){vec2 l=vec2(dot(L,uTx),dot(L,uTy));float q=-dot(o,normalize(l+1e-5))*length(l);if(q<=0.0)return 0.0;float w=8.0*s*q/max(abs(dot(L,cross(uTx,uTy))),0.25);return 0.32*(1.0-smoothstep(0.0,max(w,aa),di))*clamp(w/aa,0.0,1.0);}' +
     'vec4 profil(vec2 P,vec4 c){int m=int(uPr.x+0.5);if(m<=0)return c;float s=uPr.y;float aa=max(length(gFw)*0.7,1e-4);' +
-    'if(m==5){float d=min(min(P.x,P.y),min(uWH.x-P.x,uWH.y-P.y));float w=11.0*s;float k=1.0-smoothstep(w-aa,w+aa,d);float kd=rnd(d,2.8*s,aa);float lk=bnd(d,w-1.4*s,w,aa);vec3 f=mix(uPrC*(1.0+0.6*lk),vec3(0.085,0.09,0.095),kd);vec4 a=vec4(f,1.0)*k*uPr.z;gPG=k;return a+c*(1.0-a.a);}' +
+    'if(m==5){float d=min(min(P.x,P.y),min(uWH.x-P.x,uWH.y-P.y));float w=11.0*s;float k=1.0-smoothstep(w-aa,w+aa,d);float kd=rnd(d,2.8*s,aa);float lk=bnd(d,w-1.4*s,w,aa);vec3 f=mix(mix(uPrC*(1.0+0.6*lk),vec3(0.62,0.68,0.74),0.14),vec3(0.085,0.09,0.095),kd);vec4 a=vec4(f,1.0)*k*uPr.z;gPG=k;return a+c*(1.0-a.a);}' +
     'if(m==6){float dl=P.x,dr=uWH.x-P.x;float di=min(dl,dr);vec2 o=dl<dr?vec2(1.0,0.0):vec2(-1.0,0.0);float f=1.0-0.5*rnd(di,1.2*s,aa);f*=1.0-schlag(di,o,uL1,s,aa);c.rgb*=f;return c;}' +
     'vec4 r=uBevI;if(r.z<=r.x)return c;float dx=max(r.x-P.x,P.x-r.z),dy=max(r.y-P.y,P.y-r.w);float di=max(dx,dy);if(di<0.0)return c;' +
     'float da=min(min(P.x,P.y),min(uWH.x-P.x,uWH.y-P.y));vec2 e=dx>dy?vec2(P.x<r.x?1.0:-1.0,0.0):vec2(0.0,P.y<r.y?1.0:-1.0);vec3 E=e.x*uTx+e.y*uTy;vec3 rgb=c.rgb;' +
@@ -277,7 +278,8 @@ window.Buehne3D = (function () {
        sich die Scheibe als Klarglas, nicht als Grau- oder Sonnenschutzglas */
     'if(fs<0.0){float da=max(c.a,0.94);float yv=clamp(vP.y/max(uWH.y,1.0),0.0,1.0),xv=clamp(vP.x/max(uWH.x,1.0),0.0,1.0);float hi=1.0-smoothstep(0.05,0.62,yv);' +
     'rgb=mix(rgb,vec3(0.1,0.11,0.12)*da,0.74);c.a=da;F=max(F,0.18)+0.36*hi;env=mix(env,vec3(0.8,0.86,0.93),0.55*hi);float hw=max(uPr.w,1.0);rgb+=vec3(0.92,0.95,0.98)*0.15*exp(-pow((vW.x*0.7+vW.y)/hw/0.1,2.0))*da;}' +
-    'else{rgb=mix(rgb,c.rgb*0.99,0.75*(1.0-gPG));}rgb=rgb*(1.0-F)+env*F*c.a;}' +
+    /* von innen: die helle Durchsicht, dazu ein breiter, weicher Glanz schräg über alle Scheiben (Spiegelung des Raums, kaum sichtbar) */
+    'else{rgb=mix(rgb,c.rgb*0.99,0.75*(1.0-gPG));float hw=max(uPr.w,1.0);rgb+=vec3(0.97,0.98,1.0)*0.09*exp(-pow((vW.x*0.6+vW.y)/hw/0.2+0.9,2.0))*c.a*(1.0-gPG);}rgb=rgb*(1.0-F)+env*F*c.a;}' +
     'if(c.a>0.0)rgb=tm(rgb/c.a)*c.a;' +
     'c.rgb=rgb;}else c.rgb*=ao;' +
     'o=c;}';
@@ -739,7 +741,7 @@ window.Buehne3D = (function () {
     'w3d-rev': PUTZ, 'w3d-rs': PUTZ,
     'w3d-fuge': 'linear-gradient(180deg, #8e8578, #7f7669)',
     /* Durchsicht wie in echt: oben Himmel, zur Mitte der Horizont, unten Boden; der Glanz kommt aus dem Shader (keine aufgemalten Streifen) */
-    'w3d-glass': 'linear-gradient(180deg, rgba(230, 240, 250, .62) 0%, rgba(214, 228, 242, .56) 52%, rgba(194, 205, 212, .6) 100%)',
+    'w3d-glass': 'linear-gradient(180deg, rgba(238, 244, 251, .64) 0%, rgba(218, 231, 244, .56) 42%, rgba(199, 211, 222, .58) 60%, rgba(174, 185, 192, .64) 100%)',
     /* Türen: hinter dem Glas liegt die Terrasse; leichter getönt, damit man sie durch die Scheibe sieht */
     'glas-tuer': 'linear-gradient(104deg, transparent 18%, rgba(255, 255, 255, .34) 34%, transparent 50%), linear-gradient(135deg, rgba(205, 225, 245, .32) 0%, rgba(160, 196, 230, .24) 48%, rgba(226, 238, 250, .38) 100%)',
     'glas-sonne': 'linear-gradient(104deg, transparent 18%, rgba(255, 255, 255, .42) 33%, transparent 48%), linear-gradient(135deg, rgba(118, 146, 170, .78) 0%, rgba(84, 112, 140, .72) 48%, rgba(146, 170, 192, .78) 100%)',
@@ -932,7 +934,8 @@ window.Buehne3D = (function () {
       const terrasse = role === 'floor-out';
       const vor = stufe(role);
       const tri = role === 'fuge' ? abgerueckt(f.c, f.W, f.H).tri : vor ? dreiecke(aufgeweitet(f.c), f.W, f.H, HAUCH) : dreiecke(wand ? enger(f.c, stage._v && stage._v.bank) : f.c, f.W, f.H, wand ? WEIT : terrasse ? { x: WEIT, o: 0, u: f.H * 14 } : boden ? { x: WEIT, o: 0, u: WEIT } : ecke);
-      if (c.contains('w3d-band') && el._tief > 0.3) { koerper(el, Mf, f.W, f.H, flaecheStoff(el, stage), o, Math.min(f.W, f.H) * 0.3, -el._tief, 0); return; }
+      /* Bänder und die Rosette des Griffs als Körper bis auf das Profil (vorher schwebte die Rosette schräg gesehen als Platte darüber) */
+      if ((c.contains('w3d-band') || c.contains('w3d-ros')) && el._tief > 0.3) { koerper(el, Mf, f.W, f.H, flaecheStoff(el, stage), o, c.contains('w3d-ros') ? Math.min(el._rund || 0, f.W / 2, f.H / 2) : Math.min(f.W, f.H) * 0.3, -el._tief, 0); return; }
       const ao = aoFuer(role, f, stage);
       const glas = c.contains('w3d-glass') && !c.contains('w3d-paneel'), glasGel = c.contains('w3d-gel-glas'), luecke = !glasGel && (c.contains('w3d-gitter') || (c.contains('w3d-gel') && !c.contains('w3d-gel-h')));
       const lage = role === 'floor-out' || role === 'wall-out' || role.indexOf('sa-') === 0 ? 2 : role === 'floor-in' || role.indexOf('sill-') === 0 ? 1 : 0;
@@ -993,8 +996,20 @@ window.Buehne3D = (function () {
       if (demo) { const cs = getComputedStyle(el); A = cssM(cs.transform); if (A) { const oo = cssO(cs.transformOrigin); A = mul(T(oo[0], oo[1], oo[2]), mul(A, T(-oo[0], -oo[1], -oo[2]))); B.laeuft = true; } }
       let Mh = mul(M, mul(T(z.tx, z.ty, z.tz), mul(T(z.ox, z.oy, 0), mul(S(k), T(-z.ox, -z.oy, 0)))));
       if (A) Mh = mul(Mh, A);
-      /* der Hebel steht vom Flügel ab: Körper vom Flügelrahmen (z = -tz) bis gut einen Millimeter vor die Griffebene */
-      koerper(el, Mh, z.w, z.h, stoff(el._bg || '#f4f4f2', 'w3d-handle', 'w3d-handle'), o, Math.min(3, z.w / 2, z.h / 2), -z.tz + 0.4, 1);
+      /* der Hebel steht vom Flügel ab: vorn die Griffstange, an der Achse der Hals bis auf den Flügel (29.10.2026; vorher ein Block vom
+         Flügel bis zur Griffebene, schräg gesehen ein Klotz). Hinter der Stange bleibt Luft, dort liegt ihr Schatten */
+      const stG = stoff(el._bg || '#f4f4f2', 'w3d-handle', 'w3d-handle'), rG = Math.min(3, z.w / 2, z.h / 2), q0 = Math.min(z.w, z.h), gT = Math.max(2.2, Math.min(z.tz * 0.45, q0 * 0.9));
+      koerper(el, Mh, z.w, z.h, stG, o, rG, 1 - gT, 1);
+      const nx = Math.max(0, Math.min(z.w - q0, z.ox - q0 / 2)), ny = Math.max(0, Math.min(z.h - q0, z.oy - q0 / 2));
+      koerper(el, mul(Mh, T(nx, ny, 0)), q0, q0, stG, o, Math.min(rG, q0 / 2), -z.tz + 0.4, 1 - gT);
+      /* weicher Schatten des Hebels auf dem Flügelprofil, gegen das Licht versetzt (29.10.2026): Weiß auf Weiß liest sich so als Griff,
+         der vom Flügel absteht; nur von innen zu sehen */
+      /* Er bleibt auf dem Profil: quer zum Hebel nur so weit, wie der Hebel von der nächsten Flügelkante entfernt ist (sonst läge er
+         als Fleck auf dem Glas) */
+      const hz = (z.tz + 1) * 0.6, bl = Math.max(1.5, Math.min(z.w, z.h) * 0.6), qx = -0.61 * hz - bl, qy = 0.68 * hz - bl, sw = z.w + 2 * bl, sh = z.h + 2 * bl;
+      const fs = sash && sash._s, senk = z.h >= z.w, halb = fs ? (senk ? Math.min(z.tx + z.w / 2, fs.w - z.tx - z.w / 2) : Math.min(z.ty + z.h / 2, fs.h - z.ty - z.h / 2)) : 1e4;
+      const a0 = (senk ? z.w : z.h) / 2 - halb - (senk ? qx : qy), a1 = a0 + 2 * halb, K = senk ? [[a0, -1e4], [a1, -1e4], [a1, 1e4], [a0, 1e4]] : [[-1e4, a0], [1e4, a0], [1e4, a1], [-1e4, a1]];
+      items.push({ el: el, role: 'griffschatten', M: mul(Mh, T(qx, qy, -z.tz + 0.3)), W: sw, H: sh, tri: klippDreiecke(dreiecke(null, sw, sh, 0), K), st: stoff('radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, .17) 0%, rgba(0, 0, 0, .11) 42%, rgba(0, 0, 0, 0) 71%)', '', '', 'griffschatten'), op: o, rund: 0, art: 'oben', unbeleuchtet: true, seite: 1 });
       /* Druckknopf und Schließzylinder: eigene Flächen im Griff (app.js, an der Achse), dicht vor dem Hebel; drehen mit ihm */
       teile(el, Mh, o, 1.6);
     };
@@ -1030,17 +1045,49 @@ window.Buehne3D = (function () {
     const glasKinder = (glas, Mg, f, op, sash) => {
       /* geformtes Glas: Sprossen und Symbole enden am Umriss (im CSS-Modell schneidet clip-path die Kinder ab) */
       const K = f.c && f.c.t === 'poly' ? sauber(f.c.p) : null;
-      /* Sprossen: innen und außen je eine Seite, mit ihrer Farbe (aufgesetzt nur auf einer Seite) */
+      /* Sprossen nach Art (stage._spross aus app.js, 29.10.2026): Wiener und aufgesetzte Sprossen sind ein Profil von etwa 9 mm Höhe auf
+         der inneren und der äußeren Scheibe (Körper mit Seiten, im Licht gerundet, ein weicher Schatten aufs Glas in Lichtrichtung); die
+         Wiener Sprosse hat dazu in jedem Scheibenzwischenraum einen Steg in der Farbe des Abstandhalters, die glasteilende in der Farbe des
+         Rahmens. Innenliegende Sprossen liegen flach im Zwischenraum hinter dem Glas. Aufgesetzt nur auf einer Seite: die andere ist leer */
+      const spArt = stage._spross || 'wiener', sMm = (stage._v && stage._v.s) || 0.2, hb = spArt === 'szr' ? 0 : Math.max(0.8, Math.min(10, 9 * sMm));
+      const sashEl = glas.parentNode, nr = (glas.getAttribute('data-r') || '').slice(6), zwei = stage.getAttribute('data-scheiben') === '2';
+      const zVon = (r) => { const e = sashEl && sashEl.querySelector('[data-r="' + r + '-' + nr + '"]'); return e && e._f ? e._f.z - f.z : null; };
+      const zA = zVon('pane-a'), zB = zwei ? null : zVon('pane-b'), zAus = zB != null ? zB : zA != null ? zA : -4;
+      const raeume = zA == null ? [] : zB == null ? [[0, zA]] : [[0, zA], [zA, zB]];
+      const SCHATTEN = { innen: [-0.61, 0.68], aussen: [0.57, 0.7] };
       glas.querySelectorAll('.w3d-bar').forEach((be) => {
         const b = be._b; if (!b) return;
-        const p = wert(be, 'p', b.p, now, 250, E_EASE, B), bw = wert(be, 'bw', b.bw, now, 300, E_EASE, B);
-        const r = b.d === 'v' ? [p * f.W - bw / 2, 0, bw, f.H] : [0, p * f.H - bw / 2, f.W, bw];
+        const p = wert(be, 'p', b.p, now, 250, E_EASE, B), bw = wert(be, 'bw', b.bw, now, 300, E_EASE, B), senk = b.d === 'v';
+        const r = senk ? [p * f.W - bw / 2, 0, bw, f.H] : [0, p * f.H - bw / 2, f.W, bw];
         const Mb = mul(Mg, T(r[0], r[1], 0)), sel = be.classList.contains('is-sel');
-        [[be._bi, 1, 0.7, be._art], [be._bo, -1, -0.7, be._arto]].forEach((s) => {
-          const bg = s[0] || '#ffffff'; if (/^transparent$/.test(bg.trim())) return;
-          items.push({ el: be, M: Mb, W: r[2], H: r[3], tri: K ? klippDreiecke(dreiecke(null, r[2], r[3], 0), K.map((q) => [q[0] - r[0], q[1] - r[1]])) : dreiecke(null, r[2], r[3], 0), st: stoff(bg, 'w3d-frame', 'w3d-frame', s[3] || ''), op: op, rund: 0, art: 'teil', seite: s[1], dz: s[2], senk: b.d === 'v' });
-        });
-        if (sel) { const tri = []; band(tri, [[-1.2, -1.2], [r[2] + 1.2, -1.2], [r[2] + 1.2, r[3] + 1.2], [-1.2, r[3] + 1.2]], 2.5, true, null); items.push({ el: be, M: Mb, W: r[2], H: r[3], tri: tri, st: stoff('#8fd694', '', '', 'ring'), op: op, rund: 0, art: 'oben', unbeleuchtet: true, dz: 1 }); }
+        const triK = (x0, y0, w0, h0) => (K ? klippDreiecke(dreiecke(null, w0, h0, 0), K.map((q) => [q[0] - r[0] - x0, q[1] - r[1] - y0])) : dreiecke(null, w0, h0, 0));
+        const leer = (bg) => !bg || /^transparent$/.test(String(bg).trim());
+        if (spArt === 'szr') {
+          /* innenliegend: flach in der Mitte des ersten Zwischenraums, durchs Glas gesehen */
+          const bg = be._bi || be._bo || '#d9d9d6'; if (leer(bg)) return;
+          items.push({ el: be, M: Mb, W: r[2], H: r[3], tri: triK(0, 0, r[2], r[3]), st: stoff(bg, 'w3d-frame', 'w3d-frame', ''), op: op, rund: 0, art: 'teil', dz: raeume.length ? raeume[0][1] / 2 : -1, senk: senk, wirftNicht: true });
+        } else {
+          [[be._bi, 1, 0, hb, be._art, SCHATTEN.innen], [be._bo, -1, zAus, -hb, be._arto, SCHATTEN.aussen]].forEach((s) => {
+            if (leer(s[0])) return;
+            const st = stoff(s[0], 'w3d-frame', 'w3d-frame', s[4] || ''), z0 = s[2] + s[1] * 0.12, z1 = s[2] + s[3];
+            /* weicher Schatten auf der Scheibe, versetzt gegen das Licht; nur von dieser Seite zu sehen */
+            const bl = Math.max(1, hb * 0.9), ox = s[5][0] * hb - bl, oy = s[5][1] * hb - bl, w2 = r[2] + 2 * bl, h2 = r[3] + 2 * bl, q = (100 * bl / (senk ? w2 : h2)).toFixed(1);
+            const sbg = 'linear-gradient(' + (senk ? 90 : 180) + 'deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .17) ' + q + '%, rgba(0, 0, 0, .17) ' + (100 - q) + '%, rgba(0, 0, 0, 0) 100%)';
+            items.push({ el: be, M: mul(Mb, T(ox, oy, 0)), W: w2, H: h2, tri: triK(ox, oy, w2, h2), st: stoff(sbg, '', '', 'sprschatten'), op: op, rund: 0, art: 'oben', unbeleuchtet: true, seite: s[1], dz: s[2] + s[1] * 0.08 });
+            /* Profil: oben die Fläche im Licht, an den Längsseiten die Flanken bis aufs Glas (geformtes Glas: nur die Fläche, am Umriss geschnitten) */
+            const pr = (M, W, H, tri) => items.push({ el: be, role: 'sprosse', M: M, W: W, H: H, tri: tri || dreiecke(null, W, H, 0), st: st, op: op, rund: 0, art: 'teil', senk: senk, wirftNicht: true });
+            pr(mul(Mb, T(0, 0, z1)), r[2], r[3], triK(0, 0, r[2], r[3]));
+            /* nur die Längsseiten: die Enden stoßen unter dem Flügelrahmen an (ein Körper mit vier Seiten wären zwei Flächen mehr je Sprosse) */
+            if (!K) { const t = Math.abs(z1 - z0), za = Math.max(z0, z1); if (senk) { pr(mul(Mb, mul(T(0, 0, za), RY(90))), t, r[3]); pr(mul(Mb, mul(T(r[2], 0, za), RY(90))), t, r[3]); } else { pr(mul(Mb, mul(T(0, 0, za), RX(-90))), r[2], t); pr(mul(Mb, mul(T(0, r[3], za), RX(-90))), r[2], t); } }
+          });
+          /* Steg im Scheibenzwischenraum: schmaler als die Sprosse, man sieht ihn nur schräg durchs Glas */
+          const steg = spArt === 'wiener' ? stage._ah || '#4b4f55' : spArt === 'echt' ? be._bi : '';
+          if (!leer(steg)) {
+            const sw = senk ? [r[2] * 0.2, 0, r[2] * 0.6, r[3]] : [0, r[3] * 0.2, r[2], r[3] * 0.6];
+            raeume.forEach((z) => { items.push({ el: be, M: mul(Mb, T(sw[0], sw[1], 0)), W: sw[2], H: sw[3], tri: triK(sw[0], sw[1], sw[2], sw[3]), st: stoff(steg, '', 'w3d-side', ''), op: op, rund: 0, art: 'teil', dz: (z[0] + z[1]) / 2, senk: senk, wirftNicht: true }); });
+          }
+        }
+        if (sel) { const tri = []; band(tri, [[-1.2, -1.2], [r[2] + 1.2, -1.2], [r[2] + 1.2, r[3] + 1.2], [-1.2, r[3] + 1.2]], 2.5, true, null); items.push({ el: be, M: Mb, W: r[2], H: r[3], tri: tri, st: stoff('#8fd694', '', '', 'ring'), op: op, rund: 0, art: 'oben', unbeleuchtet: true, dz: hb + 0.6 }); }
       });
       /* Öffnungssymbole */
       const sv = glas.querySelector('.w3d-sym');

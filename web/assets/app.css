@@ -391,7 +391,10 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 @keyframes w3d-glanz { 0% { opacity: 0; background-position: 130% 0 } 12%, 82% { opacity: .95 } 100% { opacity: 0; background-position: -30% 0 } }
 .w3d-griffa { position: absolute; left: 0; top: 0; border-radius: 4px; box-shadow: 0 1px 2px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(0, 0, 0, .2); transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s, height .7s, opacity .3s, background .5s }
 .w3d-handle { position: absolute; left: 0; top: 0; border-radius: 999px; box-shadow: 0 1px 2px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(0, 0, 0, .28); transition: transform .7s cubic-bezier(.3, .7, .2, 1), translate .7s cubic-bezier(.3, .7, .2, 1), width .7s, height .7s, opacity .3s, background .5s }
-.w3d-bar { position: absolute; box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 1px 3px rgba(0, 0, 0, .2); z-index: 2; touch-action: none; transition: left .25s, top .25s, width .3s, height .3s, background .5s }
+.w3d-bar { position: absolute; box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), -1px 2px 3px rgba(0, 0, 0, .2); z-index: 2; touch-action: none; transition: left .25s, top .25s, width .3s, height .3s, background .5s }
+/* Sprosse als Profil (29.10.2026, wie in der WebGL-Bühne): Licht auf der oberen bzw. rechten Kante, die andere im Schatten */
+.w3d-bar::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, .12)) }
+.w3d-bar[data-dir="v"]::after { background: linear-gradient(270deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, .12)) }
 .w3d-bar.is-sel { box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 0 0 2.5px var(--accent) }
 .w3d-roll { background: linear-gradient(180deg, #ededeb, #d2d2cf); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2) } .w3d-roll-b { background: #c9c9c6 } .w3d-roll-t { background: #f1f1ef } .w3d-roll-s { background: #d9d9d6 }
 /* Sonnenschutz: Behang außen mit Endleiste, Sichtschutz innen mit Kassette und Endleiste (Farben inline, Muster aus behangBg/innenBg) */

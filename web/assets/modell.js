@@ -102,6 +102,8 @@
       fbaUeber: { '30': '30 mm', '40': '40 mm', '50': '50 mm', '60': '60 mm' },
       fbaKappe: { kunststoff: 'Kunststoff', alu: 'Aluminium', gleit: 'Gleitabschluss (gedämmte Fassade)' },
       leiste: { ohne: 'ohne', innen: 'innen', aussen: 'außen', beide: 'innen und außen' },
+      /* Feste Felder neben Öffnungsflügeln: ohne Wahl im Flügel (gleiche Ansicht wie die Flügel), sonst im Blendrahmen (29.10.2026) */
+      festFl: { fluegel: 'im Flügel', rahmen: 'im Blendrahmen' },
       /* Wie genau der Kunde geplant hat (Projekt): was er nicht gefragt wurde, macht der Fensterbauer nach Standard */
       tiefe: { kurz: 'das Wichtigste, Details nach Standard des Fensterbauers', normal: 'die üblichen Wünsche, feine Details nach Standard', genau: 'alles im Detail' }
     };
@@ -213,12 +215,15 @@
        design: geht mit „Gestaltung übernehmen“ mit */
     const fenOderTuer = (w) => !w.art || w.art === 'fenster' || w.art === 'balkon';
     const mitDreh = (w) => (w.sashes || []).some((x) => x.t === 'D' || x.t === 'DK');
+    /* Feste Felder (auch Seitenteile) neben Flügeln, die aufgehen: nur dann gibt es die Wahl im Flügel oder im Blendrahmen */
+    const festMitFluegel = (w) => (w.sashes || []).some((x) => x.t === 'F') && (w.sashes || []).some((x) => x.t !== 'F');
     const mitGriff = (w) => w.art !== 'fest' && w.griff !== 'ohne' && w.griff !== 'motor' && !istOffen(w, 'griff');
     const sonneDa = (w) => kastenAktiv(w) && !istOffen(w, 'sart');
     const insektDa = (w) => w.art !== 'fest' && !!w.insekt && w.insekt !== 'keiner' && !istOffen(w, 'insekt');
     const bankAussen = (w) => offenGilt(w, 'fba') && w.fba !== 'behalten' && !istOffen(w, 'fba');
     const DETAIL = [
       { k: 'seiten', s: 2, kap: 'aufbau', n: 'Seitenteile', gilt: (w) => fenOderTuer(w) && (w.form || 'rechteck') === 'rechteck', text: (w) => lab('seiten', w.seiten) + (num(w.seitenB) ? ', ' + th(w.seitenB) + ' mm breit, fest verglast' : ', fest verglast') },
+      { k: 'festFl', s: 2, kap: 'aufbau', n: 'Festverglasung', zeile: false, gilt: (w) => fenOderTuer(w) && w.form !== 'rund' && w.form !== 'dreieck' && festMitFluegel(w), design: true },
       { k: 'kvd', s: 2, kap: 'aufbau', n: 'Beschlag', zeile: false, gilt: (w) => fenOderTuer(w) && (w.sashes || []).some((x) => x.t === 'DK') },
       { k: 'paneel', s: 2, kap: 'aufbau', n: 'Paneel unten', zeile: false, gilt: (w) => w.art === 'balkon' },
       { k: 'hstEck', s: 2, kap: 'aufbau', n: 'Ecklösung', zeile: false, gilt: (w) => w.art === 'hst' },
@@ -329,6 +334,10 @@
     const fluegelText = (S) => S.map((x) => (x.st ? 'Seitenteil' : TYP[x.t]) + (!x.st && (x.t === 'D' || x.t === 'DK') ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '') + (x.steh ? ' (Standflügel)' : '')).join(' · ');
     /* Zusätze zur Öffnung, nur wenn gewählt (die Texte bei Standardwerten bleiben gleich) */
     const kvdText = (w) => (w.kvd === 'kvd' && detailGilt(w, 'kvd') ? ', Kipp vor Dreh' : '');
+    /* Feste Felder neben Öffnungsflügeln: im Flügel (ohne Wahl, so zeigen es Modell und Zeichnung) oder im Blendrahmen. Steht immer
+       dabei, weil beides anders aussieht und anders gebaut wird */
+    const festImFluegel = (w) => detailGilt(w, 'festFl') && w.festFl !== 'rahmen';
+    const festText = (w) => { if (!detailGilt(w, 'festFl')) return ''; const n = (w.sashes || []).filter((x) => x.t === 'F').length; return ', ' + (n > 1 ? 'feste Felder ' : 'festes Feld ') + (w.festFl === 'rahmen' ? 'im Blendrahmen' : 'im Flügel'); };
     function opening(w) {
       const S = w.sashes || [];
       if (w.art === 'fest') return S.length + (S.length === 1 ? ' Feld' : ' Felder') + ', fest verglast, ohne Griff';
@@ -337,8 +346,8 @@
       if (w.art === 'hst') { const h = w.hst || {}; return ol + lab('hstSchema', h.schema) + (h.schema === 'A' || h.schema === 'A3' ? ', ' + lab('hstRichtung', h.richtung) : '') + (w.hstEck === 'eck' ? ', über Eck ohne Eckpfosten' : '') + ', ' + ov(w, 'schwelle', lab('schwelle', h.schwelle)); }
       if (w.art === 'fsw') { const f = w.fsw || {}; return ol + S.length + ' Flügel, ' + lab('fswSchema', f.schema) + (f.geh ? ', mit Gehflügel' : ', ohne Gehflügel') + (w.fswAuf ? ', ' + lab('fswAuf', w.fswAuf) : '') + ', ' + ov(w, 'schwelle', lab('schwelle', f.schwelle)); }
       if (w.art === 'psk') { const p = w.psk || {}; return lab('pskSchema', p.schema) + (p.schema === 'C' ? '' : ', ' + lab('hstRichtung', p.richtung)) + ', kippbar, mit Schwelle'; }
-      if (w.art === 'balkon') { const b = w.bt || {}; return ol + fluegelText(S) + kvdText(w) + (w.paneel === 'paneel' ? ' · unten Paneel ' + th(w.paneelH || 400) + ' mm' : '') + ', ' + ov(w, 'schwelle', lab('schwelle', b.schwelle)); }
-      return ol + fluegelText(S) + kvdText(w) + (w.ul ? ' · ' + lab('ul', w.ulA) + ' ' + th(w.ulH) + ' mm' : '');
+      if (w.art === 'balkon') { const b = w.bt || {}; return ol + fluegelText(S) + festText(w) + kvdText(w) + (w.paneel === 'paneel' ? ' · unten Paneel ' + th(w.paneelH || 400) + ' mm' : '') + ', ' + ov(w, 'schwelle', lab('schwelle', b.schwelle)); }
+      return ol + fluegelText(S) + festText(w) + kvdText(w) + (w.ul ? ' · ' + lab('ul', w.ulA) + ' ' + th(w.ulH) + ' mm' : '');
     }
     /* Aufteilung mehrteiliger Elemente (w.anteile, in der App am Regler): Prozent je Flügel bzw. Feld ohne Seitenteile, Summe 100 */
     const anteileGueltig = (w, n) => { const a = w && w.anteile; return Array.isArray(a) && a.length === n && n >= 2 && a.every((x) => typeof x === 'number' && x > 0) && Math.abs(a.reduce((s, x) => s + x, 0) - 100) < 0.6; };
@@ -900,9 +909,12 @@
           line([cx - dir * al, cy], [cx + dir * al, cy], ZF.ink, symW * 1.4, { o: 0.8 }); line([cx + dir * al, cy], [cx + dir * (al - sp), cy - sp * 0.8], ZF.ink, symW * 1.4, { o: 0.8 }); line([cx + dir * al, cy], [cx + dir * (al - sp), cy + sp * 0.8], ZF.ink, symW * 1.4, { o: 0.8 });
         }
       };
+      /* Waagerechte Sprossen fluchten über alle Felder der Reihe: p gilt fürs Glas der Öffnungsflügel (bez, oben und Höhe), feste Felder
+         im Blendrahmen mit größerem Glas legen sie auf dieselbe Höhe (wie w3dBarLokal in app.js) */
+      let bez = null;
       const sprossen = (i, x, y, b, h, gg) => (w.bars || []).filter((bar) => bar.s === i).forEach((bar) => {
         const bw = Math.max(fs * (nurEl ? 0.06 : 0.14), (num(w.breite) || 26) * s);
-        if (bar.d === 'v') { const xx = x + b * bar.p; line([xx, Math.max(y, gg.eckig ? y : gg.top(xx))], [xx, y + h], sprossFarbe, bw); } else { const yy = y + h * bar.p; line([x, yy], [x + b, yy], sprossFarbe, bw); }
+        if (bar.d === 'v') { const xx = x + b * bar.p; line([xx, Math.max(y, gg.eckig ? y : gg.top(xx))], [xx, y + h], sprossFarbe, bw); } else { const yy = bez ? bez[0] + bez[1] * bar.p : y + h * bar.p; if (yy > y && yy < y + h) line([x, yy], [x + b, yy], sprossFarbe, bw); }
       });
       const griff = (x, y, b, h, horiz) => poly(horiz ? R4(x - b / 2, y - h / 2, b, h) : R4(x - b / 2, y - h / 2, b, h), ZF.griff, null, 0, { r: Math.min(b, h) / 2 });
       /* Oberlicht */
@@ -932,13 +944,19 @@
       const panH = art === 'balkon' && w.paneel === 'paneel' && detailGilt(w, 'paneel') ? Math.min(h0 * 0.6, Math.max(fs * 1.2, (num(w.paneelH) || 400) * s)) : 0;
       const gPos = detailGilt(w, 'griffPos') ? w.griffPos : '', griff2 = detailGilt(w, 'stulpBed') && w.stulpBed === 'griff' && mitGriff(w); // Stulp: zweiter Griff am Standflügel
       const gY = y0 + h0 * (gPos === 'tief' ? 0.64 : gPos === 'hoch' ? 0.3 : 0.5);
+      /* Feste Felder: im Blendrahmen nur Glas (Festverglasung, Seitenteile), im Flügel (Detailangabe festFl, ohne Wahl) mit Flügelrahmen
+         wie die Öffnungsflügel; Hebe-Schiebe und PSK zeichnen ihre Festteile immer mit Profil. Das Paneel der Balkontür liegt nur in den
+         Flügeln, die aufgehen */
+      const imFl = festImFluegel(w), festFeldVon = (sa) => art === 'fest' || ((sa.t === 'F' || !!sa.st) && !schiebe && !imFl), panVon = (sa) => (sa.t === 'F' ? 0 : panH);
+      const fl = S.findIndex((sa) => !festFeldVon(sa));
+      if (fl >= 0) bez = [y0 + sf, h0 - 2 * sf - panVon(S[fl])];
       S.forEach((sa, i) => {
-        const sw = SW[i], sx = SX[i], festFeld = (sa.t === 'F' && !schiebe) || art === 'fest' || !!sa.st;
+        const sw = SW[i], sx = SX[i], festFeld = festFeldVon(sa), pH = panVon(sa);
         if (festFeld) { glas(schnitt(gIn, sx, y0, sw, h0)); sprossen(i, sx, y0, sw, h0, gIn); fest(sx + sw / 2, y0 + h0 / 2); return; }
         poly(schnitt(gIn, sx, y0, sw, h0), fc, ZF.ink, lw * 0.8);
-        const gx = sx + sf, gy = y0 + sf, gw = sw - 2 * sf, gh = h0 - 2 * sf - (panH ? panH : 0), gG = olH ? { eckig: true } : formFn(form, ix + sf, iy + sf, iw - 2 * sf, ih - 2 * sf);
+        const gx = sx + sf, gy = y0 + sf, gw = sw - 2 * sf, gh = h0 - 2 * sf - pH, gG = olH ? { eckig: true } : formFn(form, ix + sf, iy + sf, iw - 2 * sf, ih - 2 * sf);
         glas(schnitt(gG.eckig ? { eckig: true } : gG, gx, gy, gw, gh));
-        if (panH) poly(R4(gx, gy + gh, gw, panH), ZF.paneel, ZF.ink, lw * 0.7);
+        if (pH) poly(R4(gx, gy + gh, gw, pH), ZF.paneel, ZF.ink, lw * 0.7);
         sprossen(i, gx, gy, gw, gh, gG);
         if (sa.t === 'F') fest(gx + gw / 2, gy + gh / 2); else symbol(gG, gx, gy, gw, gh, sa.t, sa.din);
         if (nurEl) return;
@@ -1059,7 +1077,7 @@
       return '<svg viewBox="0 0 64 64" width="' + (size || 44) + '" height="' + (size || 44) + '" aria-hidden="true">' + o + '</svg>';
     }
     return { OPT: OPT, TYP: TYP, lab: lab, etageText: etageText, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor,
-      DETAIL: DETAIL, detailGilt: detailGilt, detailText: detailText, detailRows: detailRows, RC_RANG: RC_RANG, rcAb: rcAb,
+      DETAIL: DETAIL, detailGilt: detailGilt, festImFluegel: festImFluegel, festText: festText, detailText: detailText, detailRows: detailRows, RC_RANG: RC_RANG, rcAb: rcAb,
       OFFEN_TEXT: OFFEN_TEXT, OFFEN_NAME: OFFEN_NAME, offenName: offenName, istOffen: istOffen, offenGilt: offenGilt, offenListe: offenListe, griffText: griffText, montageText: montageText, fassadeText: fassadeText, teilungText: teilungText, teilFrei: teilFrei, anteileGueltig: anteileGueltig, rcText: rcText,
       nachTiefe: nachTiefe, tiefeVon: tiefeVon, tiefeKopf: tiefeKopf, FRAGE: FRAGE, FRAGE_STUFE: FRAGE_STUFE, STD_TEXT: STD_TEXT, istStd: istStd, TIEFE_NAME: TIEFE_NAME, tiefeText: tiefeText, fluegelZahl: fluegelZahl, oeffnungKurz: oeffnungKurz, absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz,
       /* Strang S5: Aufmaß beim Betrieb und im PDF */

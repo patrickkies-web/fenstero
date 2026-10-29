@@ -359,6 +359,7 @@ const OPT = {
   /* Detailangaben (Register AW.DETAIL in modell.js); k '' = nicht gewählt, der Standard des Fensterbauers */
   kvd: [{ k: '', label: 'Dreh-Kipp' }, { k: 'kvd', label: 'Kipp vor Dreh' }],
   seiten: [{ k: '', label: 'Ohne' }, { k: 'links', label: 'Links' }, { k: 'rechts', label: 'Rechts' }, { k: 'beide', label: 'Beide' }],
+  festFl: [{ k: '', label: 'Im Flügel', sub: 'Sieht aus wie die anderen' }, { k: 'rahmen', label: 'Im Rahmen', sub: 'Etwas mehr Glas' }],
   paneel: [{ k: '', label: 'Ganz Glas' }, { k: 'paneel', label: 'Unten Paneel' }],
   hstEck: [{ k: '', label: 'Gerade' }, { k: 'eck', label: 'Über Eck' }],
   fswAuf: [{ k: 'innen', label: 'Nach innen' }, { k: 'aussen', label: 'Nach außen' }],
@@ -456,7 +457,7 @@ const GLOSS = {
   dk: { s: 'Dreh-Kipp', t: 'Was ist ein Dreh-Kipp-Fenster?', x: ['Der Standard in Deutschland. Griff nach oben: Das Fenster kippt und du lüftest. Griff zur Seite: Der Flügel dreht sich ganz auf, zum Putzen oder Stoßlüften.', 'Griff nach unten heißt geschlossen. Die Beschläge rundum ziehen den Flügel dabei fest an die Dichtung.'], tipp: 'Lieber kurz stoßlüften als lange kippen: Ein gekipptes Fenster kühlt im Winter die Laibung aus, und dort bildet sich leicht Schimmel.', ico: () => ICO.typ('DK'), see: ['symbol', 'kipp', 'dinlr'] },
   dreh: { s: 'Drehfenster', t: 'Was ist ein Drehfenster?', x: ['Ein Drehflügel geht nur zur Seite auf, wie eine kleine Tür. Kippen lässt er sich nicht.', 'Das ist üblich beim zweiten Flügel eines Stulpfensters und bei Flügeln, die nur selten geöffnet werden. Der Beschlag ist einfacher und etwas günstiger als Dreh-Kipp.'], tipp: 'Möchtest du an diesem Flügel auch lüften, ohne ihn ganz zu öffnen, nimm lieber Dreh-Kipp.', ico: () => ICO.typ('D'), see: ['dk', 'stulp', 'oeffnungsart'] },
   kipp: { s: 'Kippfenster', t: 'Was ist ein Kippfenster?', x: ['Ein Flügel, der nur oben kippt und sich nicht ganz aufdrehen lässt. Typisch für Oberlichter und kleine Fenster in Bad, Keller oder Treppenhaus.', 'Geputzt wird ein Kippfenster außen von draußen oder mit einer Putzhilfe durch den Spalt. Bei hoch liegenden Flügeln gibt es eine Stange oder einen Hebel zum Öffnen.'], tipp: 'Liegt der Flügel hoch, frag nach einem Oberlichtöffner. Dann kippst du ihn bequem von unten.', ico: () => ICO.typ('K'), see: ['oberlicht', 'dk'] },
-  fest: { s: 'Festes Feld', t: 'Was ist ein festes Feld?', x: ['Ein festes Feld hat keinen Flügel: Das Glas sitzt direkt im Rahmen. Es lässt sich nicht öffnen, ist dafür schlanker, dichter und günstiger.', 'In einem Fenster mit mehreren Feldern ist oft das mittlere fest und die äußeren gehen auf. Geputzt wird es von außen.'], tipp: 'Im Obergeschoss ohne Balkon kommst du an ein festes Feld außen nur schwer heran. Plane dort lieber einen Flügel, der aufgeht.', ico: () => ICO.typ('F'), see: ['festverglasung', 'oeffnungsart'] },
+  fest: { s: 'Festes Feld', t: 'Was ist ein festes Feld?', x: ['Ein festes Feld lässt sich nicht öffnen. Im Flügel sitzt das Glas in einem Flügelrahmen, der nicht aufgeht: Dann sieht es aus wie die Flügel daneben. Im Rahmen sitzt das Glas direkt im Blendrahmen: schlanker, mit etwas mehr Glas und meist günstiger.', 'In einem Fenster mit mehreren Feldern ist oft das mittlere fest und die äußeren gehen auf. Geputzt wird es von außen.'], tipp: 'Im Obergeschoss ohne Balkon kommst du an ein festes Feld außen nur schwer heran. Plane dort lieber einen Flügel, der aufgeht.', ico: () => ICO.typ('F'), see: ['festverglasung', 'oeffnungsart'] },
   symbol: { s: 'Öffnungssymbole', t: 'Wie lese ich die Linien im Fenster?', x: ['In Fensterzeichnungen zeigen dünne Linien, wie ein Flügel aufgeht. Die Linien starten an den Ecken der Scharnierseite, die Spitze zeigt zum Griff.', 'Ein Dreieck mit der Spitze nach oben steht fürs Kippen. Durchgezogene Linien bedeuten: öffnet nach innen. Gestrichelte: öffnet nach außen.'], tipp: 'Die Spitze zeigt immer zum Griff. So liest du auch fremde Zeichnungen sofort und weißt, wo die Scharniere sitzen.', ico: () => ICO.typ('DK'), see: ['dinlr', 'dk', 'aussen'] },
   dinlr: { s: 'DIN links/rechts', t: 'Was bedeutet DIN links und DIN rechts?', x: ['Die Angabe sagt, auf welcher Seite die Scharniere sitzen. Man schaut dafür immer von innen, also von der Seite, zu der das Fenster aufgeht.', 'Scharniere links heißt DIN links. Der Griff sitzt dann rechts. Merkhilfe: Stell dich innen vor das offene Fenster und leg die Hand auf die Scharniere. Linke Hand bedeutet DIN links.'], tipp: 'Denk an die Möbel: Der Flügel sollte zu der Seite aufgehen, auf der kein Schrank und kein Vorhang im Weg ist.', ico: () => [...ICO.typ('DK'), P(R(10.5, 14, 3, 9, 1), INK), P(R(10.5, 41, 3, 9, 1), INK)], see: ['symbol', 'dk'] },
   aussen: { s: 'Nach außen öffnend', t: 'Was heißt nach außen öffnend?', x: ['In Deutschland gehen Fenster fast immer nach innen auf. Nach außen öffnende Flügel kennt man aus Skandinavien, von manchen Holzfenstern und von Fenstern, vor denen innen kein Platz ist.', 'In Zeichnungen sind sie gestrichelt. Sie brauchen besondere Beschläge, lassen sich schwerer putzen und vertragen sich nicht mit einem Rollladen außen.'], tipp: 'Wähle das nur, wenn es einen Grund gibt. Im Zweifel bleibt es beim Standard nach innen.', ico: () => winIco({ teilung: '1', richtung: 'aussen', sashes: [{ t: 'D', din: 'L' }] }, 14, 8, 36, 48), see: ['symbol', 'oeffnungsart'] },
@@ -748,8 +749,8 @@ function openingText(w) {
   if (w.art === 'fsw') { const f = w.fsw || {}; return ol + 'Faltschiebewand, ' + w.sashes.length + ' Flügel, ' + lab('fswSchema', f.schema) + (f.geh ? ', mit Gehflügel' : ', ohne Gehflügel') + (w.fswAuf ? ', ' + AW.lab('fswAuf', w.fswAuf) : '') + ', ' + ov(w, 'schwelle', schwelleText(f.schwelle)); }
   if (w.art === 'psk') { const p = w.psk || {}; return 'PSK-Tür ' + lab('pskSchema', p.schema) + (p.schema === 'C' ? ', 2 Schiebeflügel mittig' : ', Schiebeflügel ' + (p.richtung === 'L' ? 'links' : 'rechts')) + ', kippbar, mit Schwelle'; }
   const s = w.sashes.map((x) => (x.st ? 'Seitenteil' : TYPNAME[x.t]) + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ');
-  if (w.art === 'balkon') return 'Balkontür, ' + ol + s + kvd + (w.paneel === 'paneel' ? ' · unten Paneel ' + thousand(num(w.paneelH) || 400) + ' mm' : '') + ', ' + ov(w, 'schwelle', schwelleText((w.bt || {}).schwelle));
-  return ol + s + kvd + (w.ul ? ' · ' + lab('ul', w.ulA) + ' ' + thousand(w.ulH) + ' mm' : '');
+  if (w.art === 'balkon') return 'Balkontür, ' + ol + s + AW.festText(w) + kvd + (w.paneel === 'paneel' ? ' · unten Paneel ' + thousand(num(w.paneelH) || 400) + ' mm' : '') + ', ' + ov(w, 'schwelle', schwelleText((w.bt || {}).schwelle));
+  return ol + s + AW.festText(w) + kvd + (w.ul ? ' · ' + lab('ul', w.ulA) + ' ' + thousand(w.ulH) + ' mm' : '');
 }
 /* Sonnenschutz außen in Worten */
 function sonneText(w) {
@@ -1447,7 +1448,9 @@ function w3dPaint(stage, w) {
   /* Werkstoff der Bühne (buehne.js): Profilform, Oberfläche, Dichtungs- und Abstandhalterfarbe; das Attribut löst das Neuzeichnen aus */
   stage._profil = dg(w, 'profil') ? w.profil : ''; stage._oberfl = dg(w, 'oberfl') ? w.oberfl : '';
   stage._dicht = dg(w, 'dicht') ? (OPT.dicht.find((o) => o.k === w.dicht) || {}).bg || '' : ''; stage._ah = dg(w, 'ahFarbe') ? AH_SOL[w.ahFarbe] || '' : '';
-  const mat = [stage._profil, stage._oberfl, w.dicht || '', w.ahFarbe || ''].join('|'); if (stage.getAttribute('data-mat') !== mat) stage.setAttribute('data-mat', mat);
+  /* Art der Sprossen: die Bühne zeichnet Wiener und aufgesetzte als Profil auf dem Glas, innenliegende flach im Zwischenraum */
+  const spr = (w.bars || []).length ? w.spross || 'wiener' : ''; if (stage._spross !== spr) { stage._spross = spr; if (window.Buehne3D) window.Buehne3D.anstoss(stage); }
+  const mat = [stage._profil, stage._oberfl, w.dicht || '', w.ahFarbe || '', stage._spross].join('|'); if (stage.getAttribute('data-mat') !== mat) stage.setAttribute('data-mat', mat);
   stage._orn = (ORN.find((o) => o.k === w.orn) || ORN[0]).bg; stage.style.setProperty('--orn', stage._orn); stage.setAttribute('data-scheiben', w.glas === '2' ? '2' : '3');
   stage.classList.toggle('mit-schloss', AW.rcAb(w, 'rc2n') || w.griff === 'abschliessbar' || (dg(w, 'kinder') && w.kinder === 'schloss')); stage.classList.toggle('mit-knopf', w.griff === 'druckknopf');
   stage.classList.toggle('ohne-griff', w.griff === 'ohne' || (w.griff === 'motor' && w.art === 'hst'));
@@ -1706,10 +1709,11 @@ function w3dLayout(stage, w, o, gr) {
     face(q('mul-' + i), mul, sashH, mx, sashTop, z0, '', '0 0', c ? polyClip(c, mx, sashTop, mul, sashH) : null);
     face(q('mulb-' + i), mul, sashH, mx, sashTop, z0 - fd, 'rotateY(180deg)', '50% 50%', c ? polyClip(c, mx, sashTop, mul, sashH, mul) : null);
   }
-  const griffe = [];
+  const griffe = [], rand = barBezug(w, V, sf);
+  stage._bez = { rand: rand, sashH: sashH }; // fürs Ziehen der Sprossen (bindRails)
   w.sashes.forEach((x, i) => {
     /* Hebe-Schiebe-Tür: das Festteil sitzt in der äußeren Laufebene mit eigenem Profil, der Schiebeflügel innen davor */
-    const sashW = V.sw[i] * s, sash = q('sash-' + i), fixed = x.t === 'F', hstFest = fixed && V.art === 'hst', ssf = hstFest ? sf * 0.75 : fixed ? 3 : sf, left = ix + V.sx[i] * s, zS = hstFest ? -(fd - sd) : 0;
+    const sashW = V.sw[i] * s, sash = q('sash-' + i), fixed = x.t === 'F', hstFest = fixed && V.art === 'hst', ssf = rand.r[i], left = ix + V.sx[i] * s, zS = hstFest ? -(fd - sd) : 0;
     if (!sash) return;
     sash.style.width = px(sashW); sash.style.height = px(sashH);
     sash.style.transformOrigin = x.t === 'K' ? '50% 100%' : (x.din === 'L' ? '0 50%' : '100% 50%');
@@ -1771,16 +1775,19 @@ function w3dLayout(stage, w, o, gr) {
        immer im geraden Profil, nie im Bogen oder in der Schräge. Stulp: nur der Gehflügel hat einen Griff. */
     const hd = q('handle-' + i), ro = q('hros-' + i), gl = w3dGriffLage(V, w, x, i, s, { G: G, gI: gI, left: left, sashTop: sashTop, sashW: sashW, sashH: sashH, sf: sf });
     if (sash) { sash.classList.toggle('is-steh', gl.steh && !gl.sichtbar); sash.classList.toggle('mit-griff', gl.bedien); }
+    /* Abstand vom Flügel nach dem Maßstab (29.10.2026): der Hebel steht etwa 28 mm ab, die Rosette 10 mm; vorher fest 6 und 3,5 px,
+       herangezoomt wirkte der Griff dann flach wie ein Schalter */
+    const gz = Math.max(6, Math.min(22, 28 * s)), rz = Math.max(3.5, Math.min(gz - 2, 10 * s));
     if (hd) {
       hd.style.width = px(gl.lw); hd.style.height = px(gl.lh); hd.style.transformOrigin = gl.origin; hd.style.setProperty('--hw', px(Math.min(gl.lw, gl.lh)));
-      hd.style.translate = px(gl.lx) + ' ' + px(gl.ly) + ' 6px';
+      hd.style.translate = px(gl.lx) + ' ' + px(gl.ly) + ' ' + px(gz);
       /* WebGL-Bühne: Maße und Drehpunkt des Hebels; ein Griff, den es nicht gibt (Standflügel, festes Feld, ohne Griff), fällt weg */
-      w3dWerte(hd, '_h', { w: gl.lw, h: gl.lh, tx: gl.lx, ty: gl.ly, tz: 6, ox: gl.ox, oy: gl.oy });
+      w3dWerte(hd, '_h', { w: gl.lw, h: gl.lh, tx: gl.lx, ty: gl.ly, tz: gz, ox: gl.ox, oy: gl.oy });
       hd._aus = !gl.sichtbar;
       hd.style.transform = 'none';
     }
-    face(ro, gl.rw, gl.rh, gl.ax - gl.rw / 2, gl.ay - gl.rh / 2, 3.5, '', '50% 50%');
-    if (ro) { ro._rund = Math.min(gl.rw, gl.rh) * 0.3; ro.style.borderRadius = px(ro._rund); ro.style.opacity = gl.sichtbar ? '' : '0'; } // Deckkraft und Rundung inline: die WebGL-Bühne liest keine Klassen
+    face(ro, gl.rw, gl.rh, gl.ax - gl.rw / 2, gl.ay - gl.rh / 2, rz, '', '50% 50%');
+    if (ro) { ro._tief = rz; ro._rund = Math.min(gl.rw, gl.rh) * 0.3; ro.style.borderRadius = px(ro._rund); ro.style.opacity = gl.sichtbar ? '' : '0'; } // Deckkraft und Rundung inline: die WebGL-Bühne liest keine Klassen
     /* Druckknopf an der Hebelwurzel, Schließzylinder in der Nabe (an der Achse ox, oy, auch beim Kipp- und Hebegriff) */
     const hk = q('hk-' + i), hs = q('hs-' + i);
     if (hk && hs) {
@@ -1789,7 +1796,7 @@ function w3dLayout(stage, w, o, gr) {
       face(hs, ds, ds, gl.ox - ds / 2, gl.oy - ds / 2, 0, '', '50% 50%'); hs._rund = ds / 2;
       hk.style.opacity = stage.classList.contains('mit-knopf') ? '' : '0'; hs.style.opacity = stage.classList.contains('mit-schloss') ? '' : '0';
     }
-    griffe[i] = gl.sichtbar ? [left + gl.ax, sashTop + gl.ay, z0 + 6] : null;
+    griffe[i] = gl.sichtbar ? [left + gl.ax, sashTop + gl.ay, z0 + gz] : null;
     /* Griff außen: Balkontür nach Wahl (Ziehgriff mit Schnäpper oder abschließbar), bei Hebe-Schiebe-, PSK- und Faltschiebetür nur
        abschließbar (Schließzylinder auf der Außenseite des bedienten Flügels); auf derselben Höhe wie der Griff innen */
     const ga = q('ga-' + i);
@@ -1805,7 +1812,7 @@ function w3dLayout(stage, w, o, gr) {
       /* Schließzylinder außen: eigene Fläche oben im Griff */
       const gas = q('gas-' + i); if (gas) { const dz2 = gw2 * 0.64; face(gas, dz2, dz2, gw2 / 2 - dz2 / 2, gh2 * 0.14, 0, '', '50% 50%'); gas._rund = dz2 / 2; gas.style.opacity = !zg && !muschel ? '' : '0'; }
     }
-    w.bars.filter((b) => b.s === i).forEach((b) => { w3dBarPos(q('bar-' + b.id), b, Math.max(2, w.breite * s)); });
+    w.bars.filter((b) => b.s === i).forEach((b) => { w3dBarPos(q('bar-' + b.id), barLokal(b, rand, sashH), Math.max(2, w.breite * s)); });
   });
   stage._griffe = griffe;
   if (q('mesh')) face(q('mesh'), iw, ih, ix, iy, z0 - fd - 6 * s, '', '0 0', G ? polyClip(gI.pts, ix, iy, iw, ih) : null);
@@ -2073,6 +2080,18 @@ function w3dGriffLage(V, w, x, i, s, g) {
   const ay = lage === 'tief' ? clamp(Math.max(ay0, k[0] + (k[1] - k[0]) * 0.64), lo, hi) : lage === 'hoch' ? clamp(Math.min(ay0, k[0] + (k[1] - k[0]) * 0.3), lo, hi) : ay0;
   return Object.assign(r, { ax: ax, ay: ay, lw: hw, lh: hl, lx: ax - hw / 2, ly: ay - hw / 2, origin: '50% ' + px(hw / 2), ox: hw / 2, oy: hw / 2, rw: rw, rh: rh });
 }
+/* Glasrand je Feld in Bildpunkten: Flügel mit Flügelrahmen (sf), das Festteil der Hebe-Schiebe-Tür im eigenen Profil (drei Viertel), ein
+   festes Feld im Blendrahmen nur mit Glasleiste (3 px); im Flügel (Detailangabe festFl, ohne Wahl) mit Flügelrahmen wie die Flügel daneben */
+function glasRand(w, V, x, sf) { return x.t !== 'F' ? sf : V.art === 'hst' ? sf * 0.75 : AW.festImFluegel(w) ? sf : 3; }
+/* Waagerechte Sprossen fluchten über alle Felder einer Reihe (Inhaber, 29.10.2026): p gilt fürs Glas des Bezugsfelds (der erste Flügel mit
+   Flügelrahmen, sonst Feld 0; daran stehen auch die Regler links), ein Feld mit anderem Glasrand bekommt dieselbe Höhe umgerechnet.
+   Gespeichert bleibt p; senkrechte Sprossen teilen weiter das eigene Glas. barLokal gibt die Sprosse mit der Lage im eigenen Glas zurück */
+function barBezug(w, V, sf) { const r = w.sashes.map((x) => glasRand(w, V, x, sf)), k = r.indexOf(sf); return { r: r, b: k < 0 ? 0 : k }; }
+function barLokal(b, rand, sashH) {
+  const a = rand && rand.r[rand.b], e = rand && rand.r[b.s];
+  if (b.d !== 'h' || a == null || e == null || a === e || !(sashH > 2 * e)) return b;
+  return Object.assign({}, b, { p: (a + b.p * (sashH - 2 * a) - e) / (sashH - 2 * e) });
+}
 function w3dBarPos(be, b, bw) {
   if (!be) return;
   be._b = { d: b.d, p: b.p, bw: bw };
@@ -2087,7 +2106,7 @@ function w3dGlassRects(stage, w, o, gr) {
   const d = V.laib * s, fd = W3D.FD * s, z = -d - fd / 2, f = W3D_PERSP / (W3D_PERSP - z);
   const x0 = V.x0 * s, y0 = V.y0 * s, pf = V.pf * s, sf = V.sf * s, mul = V.mul * s, olH = V.olH * s, sashTop = y0 + pf + (olH ? olH + V.km * s : 0), sashW = V.sashW * s, sashH = V.sashH * s;
   const proj = (x, y) => [cx + x * f, oy + (cy + y - oy) * f];
-  return { s: s, sashes: w.sashes.map((x, i) => { const ssf = x.t === 'F' ? 3 : sf, sw = V.sw[i] * s, left = x0 + pf + V.sx[i] * s + ssf, top = sashTop + ssf, a = proj(left, top), b = proj(left + sw - 2 * ssf, top + sashH - 2 * ssf); return { x: a[0], y: a[1], w: b[0] - a[0], h: b[1] - a[1] }; }) };
+  return { s: s, bez: barBezug(w, V, sf).b, sashes: w.sashes.map((x, i) => { const ssf = glasRand(w, V, x, sf), sw = V.sw[i] * s, left = x0 + pf + V.sx[i] * s + ssf, top = sashTop + ssf, a = proj(left, top), b = proj(left + sw - 2 * ssf, top + sashH - 2 * ssf); return { x: a[0], y: a[1], w: b[0] - a[0], h: b[1] - a[1] }; }) };
 }
 /* Schieberegler neben dem Modell: waagerechte Leiste für senkrechte Sprossen, senkrechte Leiste für waagerechte */
 function layoutRails(stage, w, o, gr) {
@@ -2096,7 +2115,7 @@ function layoutRails(stage, w, o, gr) {
   if (!o.rails) { rh.hidden = true; rv.hidden = true; return; }
   rh.hidden = false; rv.hidden = false;
   const G = w3dGlassRects(stage, w, o, gr), gs = G.sashes;
-  const left = Math.min.apply(null, gs.map((g) => g.x)), right = Math.max.apply(null, gs.map((g) => g.x + g.w)), top = gs[0].y, bottom = gs[0].y + gs[0].h;
+  const left = Math.min.apply(null, gs.map((g) => g.x)), right = Math.max.apply(null, gs.map((g) => g.x + g.w)), gb = gs[G.bez] || gs[0], top = gb.y, bottom = gb.y + gb.h;
   rh.style.left = px(left); rh.style.width = px(right - left); rh.style.top = px(bottom + 40);
   rv.style.top = px(top); rv.style.height = px(bottom - top); rv.style.left = px(left - 42);
   rh.setAttribute('data-span', JSON.stringify(gs.map((g) => [Math.round((g.x - left) * 10) / 10, Math.round(g.w * 10) / 10])));
@@ -4333,6 +4352,7 @@ const MEHR = new WeakMap();
    Einstellungen in FW), mm (nur der Regler) */
 const DETAIL_UI = {
   seiten: { t: 'Seitenteile dazu?', sub: 'Feste Glasfelder neben den Flügeln, im selben Rahmen.', nach: ['teilung'], g: 'seitenteil', kurz: 'Seitenteile', mass: { f: 'seitenB', t: 'Breite je Seitenteil', st: 'fest verglast', min: 250, max: 1200, schritt: 50, std: 400 } },
+  festFl: { t: 'Festes Feld im Flügel oder im Rahmen?', sub: 'Im Flügel sieht es aus wie die Flügel daneben. Im Rahmen hat es etwas mehr Glas.', nach: ['din-*', 'typ-*', 'seiten'], g: 'fest', kurz: 'Festes Feld', view: 'front' },
   kvd: { t: 'Erst kippen oder erst drehen?', sub: 'Bei Kipp vor Dreh kippt die erste Griffstellung. Das schützt Kinder.', nach: ['din-*', 'typ-*'], g: 'kvd', kurz: 'Kipp vor Dreh' },
   paneel: { t: 'Unten Glas oder Paneel?', sub: 'Ein gedämmtes Paneel unten schützt vor Blicken und Stößen.', nach: ['ol'], g: 'paneel', kurz: 'Paneel unten', mass: { f: 'paneelH', t: 'Höhe des Paneels', st: 'ab Unterkante Flügel', min: 200, max: 900, schritt: 50, std: 400 } },
   hstEck: { t: 'Gerade oder über Eck?', sub: 'Über Eck treffen zwei Türen ohne Pfosten zusammen. Das Modell zeigt eine Seite.', nach: ['hstr', 'hsts'], g: 'eckhst', kurz: 'Ecklösung' },
@@ -5625,7 +5645,8 @@ function bindRails(stage) {
         out = raw < -0.12 || raw > 1.12; p = snapP(raw);
         h.classList.toggle('is-out', out);
         moveBar(w, id, p);
-        w.bars.filter((b) => barBase(b.id) === b0).forEach((b) => w3dBarPos(stage.querySelector('[data-r="bar-' + b.id + '"]'), b, bw));
+        const bz = stage._bez || {};
+        w.bars.filter((b) => barBase(b.id) === b0).forEach((b) => w3dBarPos(stage.querySelector('[data-r="bar-' + b.id + '"]'), barLokal(b, bz.rand, bz.sashH), bw));
         rail.querySelectorAll('.rh').forEach((x) => { if (barBase(x.getAttribute('data-rb')) !== b0) return; const xs = +x.getAttribute('data-rs') || 0; if (horizontal) x.style.left = (spans[xs] ? spans[xs][0] + p * spans[xs][1] : p * r.width) + 'px'; else x.style.top = (p * r.height) + 'px'; });
       };
       const up = () => {
