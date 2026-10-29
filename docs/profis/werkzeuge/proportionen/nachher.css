@@ -1,0 +1,77 @@
+/* Proportionen des Konfigurators (Vorschlag 29.10.2026): Bühne +20 %, Bedienelemente kompakter, gewählt = Weiß */
+
+/* 1. Bühne 20 % größer */
+.dna .wz-buehne { height: clamp(264px, calc(100svh - 430px), 326px) }
+@media (min-width: 1024px) {
+  .dna { --bx: clamp(16px, calc((100vw - 380px) * .05), 110px); --by: clamp(12px, calc((100svh - 60px) * .05), 60px) }
+}
+
+/* 2. Frage und Antworten kompakter */
+.dna .wz-frage h1 { font-size: 26px }
+.dna .wz-sub { font-size: 13px; margin-top: 4px }
+.dna .wz-frage .qtiefe span { height: 26px; font-size: 11px }
+.dna .wz-frage .nz-knopf { width: 34px; height: 34px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel { gap: 8px; margin-top: 14px }
+
+/* Kacheln */
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qcards, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen { gap: 8px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf { min-height: 62px; padding: 10px 10px 10px 12px; border-radius: 16px; gap: 2px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt > svg, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf > svg { width: 30px !important; height: 30px !important; margin: 0 0 2px -1px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt .lbl, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf::after { font-size: 14px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt .sb { font-size: 12px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt .pr { font-size: 11px; right: 10px; bottom: 9px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qinfo, .scr.dna:is(.wz, .ab, .tr) .qpanel .qci-i, .scr.dna:is(.wz, .ab, .tr) .qpanel .ibtn { right: 4px; top: 4px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qinfo::before, .scr.dna:is(.wz, .ab, .tr) .qpanel .qci-i::before, .scr.dna:is(.wz, .ab, .tr) .qpanel .ibtn::before { width: 20px; height: 20px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qcards .qo:has(.qinfo) .qopt { padding-right: 34px }
+
+/* Chips und Segmente auf Weiß */
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qseg, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips { gap: 3px; padding: 3px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qchips { border-radius: 22px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qseg > button, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips .chip { min-height: 40px; padding: 6px 10px; font-size: 14px; gap: 7px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qseg > button[aria-pressed="true"]::before, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips .chip[aria-pressed="true"]::before { width: 7px; height: 7px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qchips.mit-i .chip, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips .qci .chip { padding: 6px 38px 6px 10px }
+
+/* Listen und Zeilen auf Weiß */
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qlist, .scr.dna:is(.wz, .ab, .tr) .qpanel .qsteps, .scr.dna:is(.wz, .ab, .tr) .qpanel .rows { padding: 3px 14px; border-radius: 24px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qlist > button, .scr.dna:is(.wz, .ab, .tr) .qpanel .qlist .qli > button:first-child, .scr.dna:is(.wz, .ab, .tr) .qpanel .qstep, .scr.dna:is(.wz, .ab, .tr) .qpanel .sw-row { min-height: 46px; font-size: 14px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qstep .t, .scr.dna:is(.wz, .ab, .tr) .qpanel .sw-row .t, .scr.dna:is(.wz, .ab, .tr) .qpanel .qstep .t b, .scr.dna:is(.wz, .ab, .tr) .qpanel .sw-row .t b { font-size: 14px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qstep .t small, .scr.dna:is(.wz, .ab, .tr) .qpanel .sw-row .t small { font-size: 12px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qlist .mark, .scr.dna:is(.wz, .ab, .tr) .qpanel .qoffen .mark, .scr.dna:is(.wz, .ab, .tr) .qpanel .qmehr .plus { width: 22px; height: 22px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .stepper > button:not(.st-wert) { width: 40px; height: 40px; font-size: 20px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .stepper > b { font-size: 24px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .switch { width: 46px; height: 28px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .switch > span { width: 22px; height: 22px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .switch[aria-checked="true"] > span { transform: translateX(18px); box-shadow: 0 1px 3px rgba(7, 9, 10, .3), inset 0 0 0 7px var(--weiss), inset 0 0 0 11px var(--violett) }
+
+/* Farben */
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qswatches { gap: 6px 4px; padding: 12px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qsw { min-height: 58px; gap: 4px; font-size: 11px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qsw .c { width: 34px; height: 34px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .fw-zeile { padding: 12px 12px 4px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .fw-cur .tx b { font-size: 14px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .fw-cur .tx small { font-size: 12px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .fw-tupf { width: 32px; height: 32px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .fw-mehr .chip { min-height: 40px; padding: 0 14px; font-size: 13px }
+
+/* Leise Zeilen („Weiß ich noch nicht“, „Mehr zu …“) */
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qoffen, .scr.dna:is(.wz, .ab, .tr) .qpanel .qmehr { min-height: 48px; padding: 6px 12px 6px 14px; border-radius: 16px; gap: 10px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qoffen .tx b, .scr.dna:is(.wz, .ab, .tr) .qpanel .qmehr .tx b { font-size: 14px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qoffen .tx small, .scr.dna:is(.wz, .ab, .tr) .qpanel .qmehr .tx small { font-size: 12px }
+
+/* Fuß: Pille und Zurück 48 statt 52 */
+.dna .dna-pille { height: 48px; padding: 0 22px; font-size: 14px }
+.dna .dna-pille:has(.dna-pille__pfeil) { padding: 0 6px 0 22px }
+.dna .dna-pille__pfeil { width: 36px; height: 36px }
+.dna .lg-zurueck { width: 48px; height: 48px }
+.dna .lg-fuss { padding-top: 12px; gap: 8px }
+
+/* 3. Gewählt heißt Weiß: Kachel weiß mit schwarzer Schrift, kein Leuchten, kein violetter Ring, kein Punkt */
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"], .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf[aria-pressed="true"] { background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss))); color: var(--schwarz); box-shadow: inset 0 -1px 0 rgba(7, 9, 10, .06) }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"]::before, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf[aria-pressed="true"]::before { display: none }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"] > svg, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf[aria-pressed="true"] > svg { color: var(--schwarz) }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"] > svg [fill-opacity=".12"], .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf[aria-pressed="true"] > svg [fill-opacity=".12"] { fill: color-mix(in srgb, var(--silbergrau) 30%, var(--weiss)); fill-opacity: 1 }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"] .lbl, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf[aria-pressed="true"]::after { color: var(--schwarz) }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"] .sb, .scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"] .pr { color: var(--textgrau) }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt .lbl::after { display: none }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qcards .qo:has(.qopt[aria-pressed="true"]) .qinfo { color: var(--textgrau) }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qsw[aria-pressed="true"] .c { box-shadow: 0 0 0 2px var(--anthrazit), 0 0 0 3.8px var(--weiss), inset 0 2px 4px rgba(255, 255, 255, .18), inset 0 -3px 6px rgba(7, 9, 10, .35) }
