@@ -35,7 +35,21 @@
     });
   })();
 
+  /* Gewählte Rahmenfarbe im Hero (Schlüssel aus ral.js); die Pille „Kostenlos losplanen“ nimmt sie mit in die App, die sie als
+     Rahmenfarbe außen des ersten Fensters setzt (Vertrag mit app.js: /app/?farbe=<schlüssel>#ausmessen) */
+  let farbe = null, letzteDaten = null;
+  const losZiel = (f) => '/app/?farbe=' + encodeURIComponent(f) + '#ausmessen';
+  function losPille(root, d) {
+    const a = root.querySelector('a[data-ez="los"]'); if (!a) return;
+    const t = Array.from(a.childNodes).find((n) => n.nodeType === 3 && n.textContent.trim());
+    /* angefangenes Aufmaß: fortsetzen statt neu beginnen (die Farbe überschriebe sonst das erste Fenster des Aufmaßes) */
+    a.setAttribute('href', d && d.weiter ? d.app : losZiel(farbe || (root.querySelector('[data-ez="dreh"]') || { dataset: {} }).dataset.farbe || '9016'));
+    if (t) t.textContent = (d && d.weiter ? d.appLabel : 'Kostenlos losplanen') + ' ';
+  }
+
   function daten(root, d) {
+    letzteDaten = d;
+    losPille(root, d);
     /* Einstieg in die App: Ziel aus portal.js; mit angefangenem Aufmaß heißen alle Einstiege „Aufmaß fortsetzen“, sonst wie gestaltet */
     root.querySelectorAll('a[href="/app/#ausmessen"], a[data-ez-app]').forEach((a) => {
       const t = Array.from(a.childNodes).find((n) => n.nodeType === 3 && n.textContent.trim());
@@ -70,9 +84,201 @@
     if ('ResizeObserver' in w) { const ro = new ResizeObserver(ordneSzenen); szenen.forEach((s) => ro.observe(s)); }
   }
 
+  /* ---------- Dreh-Betrachter im Hero ----------
+     Bildfolge des echten 3-D-Modells der App je Farbe (scripts/hero-fenster.mjs): ein Raster aus data-bilder Blickwinkeln
+     (data-spalten Spalten), von data-von Grad in Schritten von data-schritt Grad. Zuerst steht der Ruhewinkel als eigenes Bild (LCP);
+     nach dem Laden der Seite kommt die Folge der gewählten Farbe dazu, dann pendelt das Fenster langsam (nicht bei „weniger Bewegung“,
+     nicht außerhalb des Bildschirms, nie mehr nach dem ersten Ziehen, Tippen oder Fokus). Zwei Ebenen blenden zwischen benachbarten
+     Winkeln über, damit das Drehen ohne Stufen läuft. Ziehen mit Finger oder Maus (waagerecht; senkrecht scrollt die Seite), Pfeiltasten,
+     Bild auf/ab, Pos1 und Ende. Weitere Farben laden erst beim ersten Tipp auf die Farbfelder (die Ruhebilder nach dem Laden der Seite). */
+  const BILDER = '/bilder/start/fenster/';
+  function dreh(root) {
+    const el = root.querySelector('[data-ez="dreh"]'); if (!el) return;
+    const flaeche = el.querySelector('.ez-dreh__fenster'), ruhe = el.querySelector('.ez-dreh__ruhe'), lagen = Array.from(el.querySelectorAll('.ez-dreh__bild'));
+    const knoepfe = Array.from(root.querySelectorAll('.ez-farbe[data-farbe]')), gruppe = root.querySelector('.ez-farben');
+    const N = +el.dataset.bilder || 1, SP = +el.dataset.spalten || 1, ZE = Math.ceil(N / SP), RUHE = +el.dataset.ruhe || 0, VON = +el.dataset.von || 0, SCHRITT = +el.dataset.schritt || 1;
+    const MITTE = (N - 1) / 2, AMP = Math.max(0, MITTE - 0.6), DAUER = 10000, BLENDE = 1400;
+    const klemme = (v) => Math.min(N - 1, Math.max(0, v));
+    if (!flaeche || !ruhe || lagen.length < 2 || N < 2) return;
+    farbe = farbe || el.dataset.farbe;
+    const skala = el.querySelector('.ez-dreh__skala'), striche = [];
+    if (skala && !skala.children.length) for (let i = 0; i < N; i++) { const s = doc.createElement('span'); if (Math.abs(VON + i * SCHRITT) < SCHRITT / 2) s.className = 'ist-mitte'; skala.appendChild(s); }
+    if (skala) striche.push(...skala.children);
+
+    let pos = RUHE, folge = null, gestoppt = reduziert, sichtbar = true, raf = 0, ziehen = null, t0 = 0, phase = 0, blendeAb = 0, blendeVon = RUHE;
+    let altI = -1, altF = -1, altK = -1;
+    const geladen = {}, laden = {};
+    const feld = (i) => (SP > 1 ? (i % SP) / (SP - 1) * 100 : 0) + '% ' + (ZE > 1 ? Math.floor(i / SP) / (ZE - 1) * 100 : 0) + '%';
+    function wert(k) {
+      const g = Math.round(VON + k * SCHRITT);
+      flaeche.setAttribute('aria-valuenow', String(g));
+      flaeche.setAttribute('aria-valuetext', g === 0 ? 'Blick von vorn' : 'Blick von ' + (g < 0 ? 'rechts' : 'links') + ', ' + Math.abs(g) + ' Grad');
+    }
+    function zeige() {
+      const p = klemme(pos), i = Math.floor(p), f = Math.round((p - i) * 24) / 24;
+      if (folge) {
+        if (i !== altI) { lagen[0].style.backgroundPosition = feld(i); lagen[1].style.backgroundPosition = feld(Math.min(N - 1, i + 1)); altI = i; }
+        if (f !== altF) { lagen[1].style.opacity = String(f); altF = f; }
+      }
+      const k = Math.round(p);
+      if (k !== altK) { if (striche[altK]) striche[altK].classList.remove('ist-da'); if (striche[k]) striche[k].classList.add('ist-da'); altK = k; wert(k); }
+    }
+    function setzeFolge(f, url) {
+      lagen.forEach((l, i) => { l.style.backgroundImage = 'url("' + url + '")'; l.style.opacity = i ? '0' : '1'; });
+      altI = -1; altF = -1; folge = f; el.classList.add('ist-folge'); zeige(); weiter();
+    }
+    function lade(f) {
+      if (!laden[f]) laden[f] = new Promise((ok, nein) => {
+        const im = new Image(); im.decoding = 'async';
+        im.onload = () => { const fertig = () => { geladen[f] = im.src; ok(im.src); }; if (im.decode) im.decode().then(fertig, fertig); else fertig(); };
+        im.onerror = () => { delete laden[f]; nein(new Error('Bildfolge ' + f)); };
+        im.src = BILDER + f + '.webp';
+      });
+      return laden[f];
+    }
+    const nimm = (f) => lade(f).then((url) => { if (farbe === f && folge !== f) setzeFolge(f, url); }, () => { /* ohne Folge bleibt das Ruhebild */ });
+
+    /* Pendeln: Sinus um die Mitte; beim Start und nach einer Pause blendet die Bewegung aus dem Stand weich ein */
+    const laeuft = () => !!folge && !gestoppt && sichtbar && !doc.hidden && !ziehen && !!(halterFest && halterFest.isConnected);
+    function weiter() {
+      if (raf || !laeuft()) return;
+      const s = AMP ? Math.max(-1, Math.min(1, (pos - MITTE) / AMP)) : 0;
+      phase = Math.asin(s); t0 = performance.now(); blendeAb = t0; blendeVon = pos;
+      raf = w.requestAnimationFrame(schritt);
+    }
+    function schritt(t) {
+      raf = 0; if (!laeuft()) return;
+      const ziel = MITTE + AMP * Math.sin(phase + (t - t0) / DAUER * 2 * Math.PI), b = Math.min(1, (t - blendeAb) / BLENDE), e = b * b * (3 - 2 * b);
+      pos = blendeVon + (ziel - blendeVon) * e; zeige();
+      raf = w.requestAnimationFrame(schritt);
+    }
+    function halt() { gestoppt = true; el.classList.add('ist-bedient'); if (raf) { w.cancelAnimationFrame(raf); raf = 0; } }
+    if ('IntersectionObserver' in w) new IntersectionObserver((es) => { es.forEach((e) => { sichtbar = e.isIntersecting; }); weiter(); }, { threshold: 0.15 }).observe(el);
+    doc.addEventListener('visibilitychange', weiter);
+
+    /* Ziehen: erst ab 6 px waagerecht, sonst gehört die Geste dem Scrollen; nur der erste Finger zählt */
+    flaeche.addEventListener('pointerdown', (e) => {
+      if (ziehen || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      ziehen = { id: e.pointerId, x: e.clientX, y: e.clientY, p: pos, an: false };
+      if (!folge) nimm(farbe);
+    });
+    flaeche.addEventListener('pointermove', (e) => {
+      if (!ziehen || e.pointerId !== ziehen.id) return;
+      const dx = e.clientX - ziehen.x, dy = e.clientY - ziehen.y;
+      if (!ziehen.an) {
+        if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { ziehen = null; weiter(); return; }
+        if (Math.abs(dx) < 6) return;
+        ziehen.an = true; ziehen.x = e.clientX; halt(); flaeche.classList.add('ist-gezogen');
+        try { flaeche.setPointerCapture(e.pointerId); } catch (x) { /* schon losgelassen */ }
+      }
+      pos = klemme(ziehen.p + (e.clientX - ziehen.x) / Math.max(6, flaeche.clientWidth / 16)); zeige();
+    });
+    const loslassen = (e) => {
+      if (!ziehen || e.pointerId !== ziehen.id) return;
+      const war = ziehen.an; ziehen = null; flaeche.classList.remove('ist-gezogen');
+      if (!war) { weiter(); return; }
+      /* auf den nächsten Blickwinkel einrasten (160 ms), damit kein Zwischenbild aus zwei Winkeln stehen bleibt */
+      const von = pos, nach = Math.round(pos), a = performance.now();
+      if (reduziert || von === nach) { pos = nach; zeige(); return; }
+      const rast = (t) => { const b = Math.min(1, (t - a) / 160); pos = von + (nach - von) * (1 - Math.pow(1 - b, 3)); zeige(); if (b < 1 && !ziehen) w.requestAnimationFrame(rast); };
+      w.requestAnimationFrame(rast);
+    };
+    flaeche.addEventListener('pointerup', loslassen); flaeche.addEventListener('pointercancel', loslassen);
+    flaeche.addEventListener('lostpointercapture', loslassen);
+    flaeche.addEventListener('dragstart', (e) => e.preventDefault());
+    /* Tastatur: sofort, ohne Gleiten; Fokus hält das Pendeln an */
+    flaeche.addEventListener('focus', () => { if (flaeche.matches(':focus-visible')) halt(); });
+    flaeche.addEventListener('keydown', (e) => {
+      const k = Math.round(pos), z = { ArrowRight: k + 1, ArrowUp: k + 1, ArrowLeft: k - 1, ArrowDown: k - 1, PageUp: k + 4, PageDown: k - 4, Home: 0, End: N - 1 }[e.key];
+      if (z == null) return;
+      e.preventDefault(); halt(); if (!folge) nimm(farbe);
+      pos = klemme(z); zeige();
+    });
+
+    /* Farbfelder: ein Tipp, und der Rahmen wechselt; ist die Folge der Farbe noch nicht da, steht ihr Ruhebild, bis sie geladen ist */
+    function waehle(f) {
+      if (!f || f === farbe) return;
+      farbe = f;
+      const b = knoepfe.find((x) => x.dataset.farbe === f), name = b ? b.textContent.split(',')[0].trim() : f, code = b ? (b.textContent.split(',')[1] || '').trim() : '';
+      knoepfe.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      const nm = root.querySelector('[data-ez="farbname"]'), cd = root.querySelector('[data-ez="farbcode"]');
+      if (nm) nm.textContent = name; if (cd) cd.textContent = code;
+      flaeche.setAttribute('aria-label', 'Fenster drehen, Rahmen außen ' + name);
+      el.dataset.farbe = f;
+      losPille(root, letzteDaten);
+      if (geladen[f]) { setzeFolge(f, geladen[f]); return; }
+      folge = null; el.classList.remove('ist-folge');
+      if (raf) { w.cancelAnimationFrame(raf); raf = 0; }
+      ruhe.src = BILDER + f + '-ruhe.webp'; pos = RUHE; zeige();
+      nimm(f);
+    }
+    /* erste Berührung der Farbfelder: die angetippte Farbe zuerst, die übrigen danach nacheinander */
+    let vorab = false;
+    const vorladen = (e) => {
+      if (vorab) return; vorab = true;
+      const b = e && e.target && e.target.closest ? e.target.closest('.ez-farbe') : null, zuerst = b ? b.dataset.farbe : farbe;
+      knoepfe.map((x) => x.dataset.farbe).filter((f) => f !== zuerst).reduce((p, f) => p.then(() => lade(f)).catch(() => {}), lade(zuerst).catch(() => {}));
+    };
+    knoepfe.forEach((x) => x.addEventListener('click', () => waehle(x.dataset.farbe)));
+    if (gruppe) { gruppe.addEventListener('pointerdown', vorladen, { passive: true }); gruppe.addEventListener('focusin', vorladen); }
+
+    /* erstes Bild sofort (im Markup, mit Maßen), die Folge der gewählten Farbe nach dem Laden der Seite, dann die Ruhebilder der übrigen */
+    zeige();
+    const nachLaden = () => {
+      nimm(farbe);
+      const sparen = !!(navigator.connection && navigator.connection.saveData);
+      if (!sparen) w.setTimeout(() => knoepfe.forEach((x) => { if (x.dataset.farbe !== farbe) { const im = new Image(); im.decoding = 'async'; im.src = BILDER + x.dataset.farbe + '-ruhe.webp'; } }), 1500);
+    };
+    if (doc.readyState === 'complete') nachLaden(); else w.addEventListener('load', nachLaden, { once: true });
+  }
+
+  /* ---------- Schritt 1: Fenster für Fenster einplanen (Hausfoto des Inhabers) ----------
+     Die Fenster des Hauses werden nacheinander als geplant markiert, das Etikett steht am aktuellen Fenster („Fenster 2 von 5 · geplant“).
+     Ein Durchlauf dauert gut 7 s; er läuft nur, solange das Bild zu sehen ist, und höchstens dreimal, danach bleibt das Endbild stehen.
+     Bei „weniger Bewegung“ steht sofort das Endbild: alle Fenster geplant. */
+  function fassade(root) {
+    const el = root.querySelector('[data-ez="fassade"]'); if (!el) return;
+    const fenster = Array.from(el.querySelectorAll('.ez-fassade__f')), etikett = el.querySelector('.ez-fassade__etikett'), nr = el.querySelector('[data-ez="fassade-n"]'), n = fenster.length;
+    if (!n || !etikett) return;
+    let k = n, runde = 0, uhr = 0, sichtbar = false;
+    function platziere() {
+      const f = fenster[Math.max(0, k - 1)], b = el.getBoundingClientRect(), r = f.getBoundingClientRect(), e = (etikett.firstElementChild || etikett).getBoundingClientRect();
+      if (!b.width || !e.width) return;
+      const halb = e.width / 2 + 8, x = Math.min(b.width - halb, Math.max(halb, r.left - b.left + r.width / 2)), oben = r.top - b.top - e.height - 12 >= 6;
+      etikett.style.left = x + 'px'; etikett.style.top = (oben ? r.top - b.top : r.bottom - b.top + e.height + 24) + 'px';
+    }
+    function setze(neu, sanft) {
+      k = neu;
+      fenster.forEach((f, i) => f.setAttribute('data-zustand', i < k - 1 ? 'geplant' : i === k - 1 ? 'aktiv' : 'offen'));
+      if (k === n && !sanft) fenster[n - 1].setAttribute('data-zustand', 'geplant');
+      if (!k) { etikett.classList.add('ist-weg'); return; }
+      const text = 'Fenster ' + k + ' von ' + n;
+      if (!sanft || reduziert) { if (nr) nr.textContent = text; platziere(); etikett.classList.remove('ist-weg'); return; }
+      etikett.classList.add('ist-weg');
+      w.setTimeout(() => { if (nr) nr.textContent = text; platziere(); etikett.classList.remove('ist-weg'); }, 130);
+    }
+    function takt() {
+      uhr = 0; if (!sichtbar || !(halterFest && halterFest.isConnected)) return;
+      if (k >= n) { runde++; if (runde > 3) { setze(n, false); return; } setze(0, true); uhr = w.setTimeout(takt, 700); return; }
+      setze(k + 1, true);
+      uhr = w.setTimeout(takt, k >= n ? 2600 : 1000);
+    }
+    setze(n, false);
+    w.addEventListener('resize', () => platziere());
+    if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(() => platziere());
+    if (reduziert) return;
+    if ('IntersectionObserver' in w) new IntersectionObserver((es) => es.forEach((e) => {
+      sichtbar = e.isIntersecting;
+      if (sichtbar && !uhr && runde <= 3) uhr = w.setTimeout(takt, 500);
+      if (!sichtbar && uhr) { w.clearTimeout(uhr); uhr = 0; }
+    }), { threshold: 0.5 }).observe(el);
+  }
+
   function beleben(root, d) {
     if (w.DNA && w.DNA.start) w.DNA.start(root);
     vorhang(root);
+    dreh(root);
+    fassade(root);
 
     /* Leiste: verschwindet beim Lesen, kommt nach 24 px Hochscrollen zurück, nie über dem Kopf der Seite */
     const leiste = root.querySelector('.ez-leiste'), kopf = root.querySelector('.ez-kopf');
