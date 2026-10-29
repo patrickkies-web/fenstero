@@ -13,7 +13,7 @@ import { konfig, einfuehrungLaeuft, jetztAus, EINFUEHRUNG } from './api/umgebung
 /* Haken für die Konfigurator-Pakete (Verkaufsseite, llms.txt, Seiten der Paketbedingungen): functions/pakete-seite.js */
 import { paketeSeite, paketeLlms, PAKETE_SEITEN } from './pakete-seite.js';
 
-export const STAND = '2026-10-21';
+export const STAND = '2026-10-29';
 
 /* Alle Seiten für die Sitemap, wichtigste zuerst. stand = letzte inhaltliche Änderung (lastmod in der Sitemap, IndexNow); bei
    Ratgeberseiten gleich dem dateModified im JSON-LD und dem „Stand“ auf der Seite (prüft die Suite) */
