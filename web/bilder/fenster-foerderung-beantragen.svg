@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400" role="img" aria-labelledby="t d">
+<title id="t">Förderantrag für Fenster: der Weg zum BAFA-Zuschuss</title>
+<desc id="d">Acht Stationen auf einem Weg: 1 messen, 2 Experte mit TPB-ID, 3 Vertrag mit Bedingung, 4 Antrag im BAFA-Portal (hervorgehoben), 5 Zuwendungsbescheid, 6 Einbau mit Rechnung, 7 Nachweis mit TPN-ID, 8 Auszahlung. Von Bescheid bis Nachweis läuft der Bewilligungszeitraum von 36 Monaten.</desc>
+<rect width="480" height="400" rx="16" fill="#ffffff"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="16" fill="#07090a">
+<text x="24" y="40" font-size="18" font-weight="700">Förderantrag für Fenster</text>
+<text x="24" y="62" fill="#6b676c">Reihenfolge beim BAFA-Zuschuss</text>
+<path d="M60 136H380a80 80 0 0 1 0 160H60" fill="none" stroke="#a8a4a9" stroke-width="3" stroke-linecap="round"/>
+<path d="M380 274V264H167V274" fill="none" stroke="#6b676c" stroke-width="2"/>
+<text x="273" y="254" text-anchor="middle" fill="#6b676c">Bewilligungszeitraum 36 Monate</text>
+<rect x="207" y="80" width="132" height="30" rx="15" fill="#fde3d8" stroke="#f88962" stroke-width="2"/>
+<text x="273" y="100" text-anchor="middle" font-weight="700" fill="#b4502f">mit Bedingung</text>
+<path d="M273 110V120" stroke="#f88962" stroke-width="2"/>
+<g stroke-width="2.5">
+<circle cx="60" cy="136" r="15" fill="#ffffff" stroke="#202022"/>
+<circle cx="167" cy="136" r="15" fill="#ffffff" stroke="#202022"/>
+<circle cx="273" cy="136" r="15" fill="#ffffff" stroke="#f88962"/>
+<circle cx="380" cy="136" r="19" fill="#897efc" stroke="#3c3a66"/>
+<circle cx="380" cy="296" r="15" fill="#ffffff" stroke="#202022"/>
+<circle cx="273" cy="296" r="15" fill="#ffffff" stroke="#202022"/>
+<circle cx="167" cy="296" r="15" fill="#ffffff" stroke="#202022"/>
+<circle cx="60" cy="296" r="15" fill="#202022" stroke="#202022"/>
+</g>
+<g font-weight="700" text-anchor="middle">
+<text x="60" y="142">1</text><text x="167" y="142">2</text><text x="273" y="142">3</text><text x="380" y="142">4</text>
+<text x="380" y="302">5</text><text x="273" y="302">6</text><text x="167" y="302">7</text><text x="60" y="302" fill="#ffffff">8</text>
+</g>
+<g text-anchor="middle">
+<text x="60" y="176" font-weight="700">Messen</text><text x="60" y="196" fill="#6b676c">Maß, Foto</text>
+<text x="167" y="176" font-weight="700">Experte</text><text x="167" y="196" fill="#6b676c">TPB-ID</text>
+<text x="273" y="176" font-weight="700">Vertrag</text><text x="273" y="196" fill="#6b676c">Auftrag</text>
+<text x="380" y="180" font-weight="700" fill="#3c3a66">Antrag</text><text x="380" y="200" fill="#3c3a66">BAFA-Portal</text>
+<text x="380" y="336" font-weight="700">Bescheid</text><text x="380" y="356" fill="#6b676c">Zuwendung</text>
+<text x="273" y="336" font-weight="700">Einbau</text><text x="273" y="356" fill="#6b676c">mit Rechnung</text>
+<text x="167" y="336" font-weight="700">Nachweis</text><text x="167" y="356" fill="#6b676c">TPN-ID</text>
+<text x="60" y="336" font-weight="700">Auszahlung</text><text x="60" y="356" fill="#6b676c">Zuschuss</text>
+</g>
+</g>
+</svg>
