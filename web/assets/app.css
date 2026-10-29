@@ -3221,7 +3221,8 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 /* ---------- Proportionen des Konfigurators (29.10.2026, Wunsch des Inhabers; Vorschau docs/profis/bilder/2026-10-29-konfigurator-proportionen-*.jpg) ----------
    Drei Dinge, am Design sonst nichts: 1. Am Telefon ist die Bühne mit dem Element ein Fünftel höher (Wünsche, Fotos, Ergebnis; Messen und
    Ränder füllen den Bildschirm schon, Start und Lage sind keine Element-Bühne); am Laptop bleibt die Bühne, wie sie ist. 2. Knöpfe, Chips,
-   Kacheln und Zeilen sind eine Spur kleiner (Höhen 52 → 48, 44 → 40, Schrift 15 → 14, Luft 10 → 8), damit nichts klobig wirkt. 3. Gewählt
+   Kacheln und Zeilen sind eine Spur kleiner (Höhen 52 → 48, Schrift 15 → 14, Luft 10 → 8, Innenränder enger; Ziele bleiben 44 px, Regel
+   der DNA und Prüfsuite), damit nichts klobig wirkt. 3. Gewählt
    heißt Weiß: die gewählte Kachel ist weiß mit schwarzer Schrift, ohne violettes Licht, Ring und Punkt; gewählte Farbtupfen tragen einen
    weißen Ring. Die Regeln stehen gesammelt hier, damit sie sich zurücknehmen lassen, ohne die Folien anzufassen. */
 /* 1. Bühne am Telefon (unter 1024 px; am Laptop gelten die Regeln der Folien weiter) */
@@ -3246,7 +3247,7 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qcards .qo:has(.qinfo) .qopt { padding-right: 34px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qseg, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips { gap: 3px; padding: 3px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips { border-radius: 22px }
-.scr.dna:is(.wz, .ab, .tr) .qpanel .qseg > button, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips .chip { min-height: 40px; padding: 6px 10px; font-size: 14px; gap: 7px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qseg > button, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips .chip { min-height: 44px; padding: 6px 10px; font-size: 14px; gap: 7px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qseg > button[aria-pressed="true"]::before, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips .chip[aria-pressed="true"]::before { width: 7px; height: 7px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips.mit-i .chip, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips .qci .chip { padding: 6px 38px 6px 10px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qlist, .scr.dna:is(.wz, .ab, .tr) .qpanel .qsteps, .scr.dna:is(.wz, .ab, .tr) .qpanel .rows { padding: 3px 14px; border-radius: 24px }
@@ -3254,11 +3255,8 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qstep .t, .scr.dna:is(.wz, .ab, .tr) .qpanel .sw-row .t, .scr.dna:is(.wz, .ab, .tr) .qpanel .qstep .t b, .scr.dna:is(.wz, .ab, .tr) .qpanel .sw-row .t b { font-size: 14px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qstep .t small, .scr.dna:is(.wz, .ab, .tr) .qpanel .sw-row .t small { font-size: 12px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qlist .mark, .scr.dna:is(.wz, .ab, .tr) .qpanel .qoffen .mark, .scr.dna:is(.wz, .ab, .tr) .qpanel .qmehr .plus { width: 22px; height: 22px }
-.scr.dna:is(.wz, .ab, .tr) .qpanel .stepper > button:not(.st-wert) { width: 40px; height: 40px; font-size: 20px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .stepper > button:not(.st-wert) { font-size: 20px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .stepper > b { font-size: 24px }
-.scr.dna:is(.wz, .ab, .tr) .qpanel .switch { width: 46px; height: 28px }
-.scr.dna:is(.wz, .ab, .tr) .qpanel .switch > span { width: 22px; height: 22px }
-.scr.dna:is(.wz, .ab, .tr) .qpanel .switch[aria-checked="true"] > span { transform: translateX(18px); box-shadow: 0 1px 3px rgba(7, 9, 10, .3), inset 0 0 0 7px var(--weiss), inset 0 0 0 11px var(--violett) }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qswatches { gap: 6px 4px; padding: 12px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qsw { min-height: 58px; gap: 4px; font-size: 11px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qsw .c { width: 34px; height: 34px }
@@ -3266,7 +3264,7 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna:is(.wz, .ab, .tr) .qpanel .fw-cur .tx b { font-size: 14px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .fw-cur .tx small { font-size: 12px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .fw-tupf { width: 32px; height: 32px }
-.scr.dna:is(.wz, .ab, .tr) .qpanel .fw-mehr .chip { min-height: 40px; padding: 0 14px; font-size: 13px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .fw-mehr .chip { padding: 0 14px; font-size: 13px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qoffen, .scr.dna:is(.wz, .ab, .tr) .qpanel .qmehr { min-height: 48px; padding: 6px 12px 6px 14px; border-radius: 16px; gap: 10px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qoffen .tx b, .scr.dna:is(.wz, .ab, .tr) .qpanel .qmehr .tx b { font-size: 14px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qoffen .tx small, .scr.dna:is(.wz, .ab, .tr) .qpanel .qmehr .tx small { font-size: 12px }
@@ -3278,45 +3276,43 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .dna .dna-pille { height: 48px; padding: 0 22px; font-size: 14px }
 .dna .dna-pille:has(.dna-pille__pfeil) { padding: 0 6px 0 22px }
 .dna .dna-pille__pfeil { width: 36px; height: 36px }
-.dna .dna-pille--klein { height: 34px; padding: 0 14px; font-size: 13px }
 .dna .lg-zurueck { width: 48px; height: 48px }
 .dna .lg-fuss { padding-top: 12px; gap: 8px }
 .dna .ab-fuss-zwei .ab-zweit { height: 48px; font-size: 14px }
 
 /* Lage, Tiefe, Start, Fotos, Ergebnis */
 .dna .lg-frage h1 { font-size: 28px }
-.dna .lg-notiz-knopf { height: 40px; padding: 0 12px; font-size: 14px }
+.dna .lg-notiz-knopf { padding: 0 12px; font-size: 14px }
 .dna .lg-frage--i-daneben .lg-notiz-knopf { height: 48px }
-.dna .lg-vorschlaege button, .dna .lg-ogwahl button, .dna .lg-boden { height: 40px; padding: 0 14px; font-size: 14px }
-.dna .lg-stockwahl button { height: 40px; font-size: 14px }
+.dna .lg-vorschlaege button, .dna .lg-ogwahl button, .dna .lg-boden { padding: 0 14px; font-size: 14px }
+.dna .lg-stockwahl button { font-size: 14px }
 .dna .lg-stocktext, .dna .lg-hilfe { font-size: 14px }
 .dna .lg-knoepfe button { width: 44px; height: 44px }
-.dna .lg-mm input { height: 40px }
 .dna .st-kachel { height: 58px; gap: 4px }
-.dna .st-stelle button { min-height: 40px; font-size: 13px }
+.dna .st-stelle button { font-size: 13px }
 .dna .ft-leer b { font-size: 14px }
 .dna .ft-leer small { font-size: 12px }
-.dna .er-knopf { height: 40px; padding: 0 16px; font-size: 14px }
+.dna .er-knopf { padding: 0 16px; font-size: 14px }
 .dna .er-falls .row > label { min-height: 46px }
-.dna .er-falls .row input { height: 40px; font-size: 16px }
+.dna .er-falls .row input { font-size: 16px }
 
-/* Abschluss, Liste, Gespeichert, Führung, Blätter: Chips und Knöpfe 40 bzw. 48, Schrift 14 */
-.dna .fg-chip-t, .dna.li .card .pill, .dna.li .card .btn.ghost, .dna.li .card .btn.primary, .dna.ab2 .pill, .dna.ab2 .btn.ghost:not(.lg-weiter), .dna .zn-werkzeuge .chip, .dna .tr-inhalt .qrow .chip, .dna .tr-inhalt .pill-row .pill, .dna .entwurf-karte .btn.ghost, html.dna-voll .fb .btn, html.dna-voll .fb .chip { min-height: 40px; font-size: 14px }
-.dna .fg-rund, .dna .ab-rund, .dna .pm-karte .row .rnd { width: 40px; height: 40px; font-size: 20px }
-.dna .fg-loeschen { min-height: 40px; font-size: 14px }
-.dna .li-kopf .hd-neu { height: 40px; font-size: 14px }
+/* Abschluss, Liste, Gespeichert, Führung, Blätter: Knöpfe 48 statt 52, Schrift 14 */
+.dna .fg-chip-t, .dna.li .card .pill, .dna.li .card .btn.ghost, .dna.li .card .btn.primary, .dna.ab2 .pill, .dna.ab2 .btn.ghost:not(.lg-weiter), .dna .zn-werkzeuge .chip, .dna .tr-inhalt .qrow .chip, .dna .tr-inhalt .pill-row .pill, .dna .entwurf-karte .btn.ghost, html.dna-voll .fb .btn, html.dna-voll .fb .chip { font-size: 14px }
+.dna .fg-rund, .dna .ab-rund, .dna .pm-karte .row .rnd { font-size: 20px }
+.dna .fg-loeschen { font-size: 14px }
+.dna .li-kopf .hd-neu { font-size: 14px }
 .dna.li .dashed, .dna.ab2 .dashed { min-height: 48px; font-size: 14px }
 .dna.ab2 .ab-inhalt .btn.primary { min-height: 44px; padding: 0 20px; font-size: 15px }
 .dna.ab2 .pay .chip { min-height: 44px; font-size: 14px }
 .dna.ab2 .kf input { min-height: 48px; font-size: 16px; line-height: 48px }
 .dna .ab-eingabe, .dna .ab-eingabe input { height: 48px; line-height: 48px }
-.dna .ab-felder .trow input { height: 40px; line-height: 40px; font-size: 15px }
+.dna .ab-felder .trow input { font-size: 15px }
 .dna .pm-karte .row .val, .dna .pm-karte .row input { height: 44px; line-height: 44px }
 .dna .wl-tour, .dna .wl-neu { min-height: 44px; font-size: 14px }
 .dna .wl-links .link, .dna.li .li-links .link { font-size: 14px }
 .dna .tr-inhalt .ts-ziele li { min-height: 46px }
 html.dna-voll .sheet:not(.ofoto-dna) .btn { min-height: 48px; font-size: 15px }
-html.dna-voll .sheet:not(.ofoto-dna) .btn.ghost { min-height: 44px; font-size: 14px }
+html.dna-voll .sheet:not(.ofoto-dna) .btn.ghost { font-size: 14px }
 
 /* 3. Gewählt heißt Weiß */
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"], .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf[aria-pressed="true"] { background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss))); color: var(--schwarz); box-shadow: inset 0 -1px 0 rgba(7, 9, 10, .06) }

@@ -25,25 +25,34 @@ Platzproblem, dort bleibt die Bühne, und nur die Bedienelemente werden kompakte
 | Bühne Messen, Ränder, Start, Lage | | unverändert: Messen und Ränder füllen den Bildschirm schon (Regel „Bildfläche vor Dichte“), Start und Lage sind keine Element-Bühne |
 | Bühne am Laptop | | unverändert (Container mit 12,5 % Rand bleibt) |
 | Kacheln der Wünsche | 76 px hoch, Symbol 40, Name 15, Zeile 13, Rundung 20, Fuge 10 | 62 px, Symbol 30, Name 14, Zeile 12, Rundung 16, Fuge 8 |
-| Chips und Segmente auf Weiß | 44 px, Schrift 15, Innenrand 4 | 40 px, Schrift 14, Innenrand 3 |
-| Listen, Zähler, Schalter | Zeilen 52, Schrift 15, Rundknöpfe 44, Schalter 52 × 32 | Zeilen 46, Schrift 14, Rundknöpfe 40, Schalter 46 × 28 |
+| Chips und Segmente auf Weiß | 44 px, Schrift 15, Innenrand 4 | 44 px (Ziel bleibt), Schrift 14, Innenrand 3 |
+| Listen, Zähler, Schalter | Zeilen 52, Schrift 15, Rundknöpfe 44 | Zeilen 46, Schrift 14, Rundknöpfe 44 mit kleinerer Zahl; Schalter unverändert |
 | Farbtupfen | 38 px, Namen 12 | 34 px, Namen 11 |
 | „Weiß ich noch nicht“, „Mehr zu …“ | 56 px, Schrift 15/13 | 48 px, Schrift 14/12 |
 | Frage der Wünsche | Titel 28, Unterzeile 14 | Titel 26, Unterzeile 13 |
 | Fuß (alle Folien) | Pille 52, Pfeilkreis 40, Zurück 52, Schrift 15 | Pille 48, Pfeilkreis 36, Zurück 48, Schrift 14 |
-| Lage | Titel 30, Chips und Stockwerk 44, Plus/Minus 48 | Titel 28, Chips und Stockwerk 40 mit Schrift 14, Plus/Minus 44 |
-| Start | Kacheln 64, Stelle 44 | Kacheln 58, Stelle 40 |
-| Ergebnis, Abschluss, Liste, Gespeichert, Führung, Blätter | Chips 44, Knöpfe 48–52, Schrift 15 | Chips 40, Knöpfe 44–48, Schrift 14 |
+| Lage | Titel 30, Chips und Stockwerk 44 mit Schrift 15, Plus/Minus 48 | Titel 28, Chips und Stockwerk 44 mit Schrift 14, Plus/Minus 44 |
+| Start | Kacheln 64, Stelle 44 mit Schrift 14 | Kacheln 58, Stelle 44 mit Schrift 13 |
+| Ergebnis, Abschluss, Liste, Gespeichert, Führung, Blätter | Knöpfe 48–52, Schrift 15 | Knöpfe 44–48, Schrift 14; Chips bleiben 44 |
 | Gewählte Kachel | Anthrazit mit violettem Ring, Punkt hinter dem Namen und violettem Licht unten | Weiß mit schwarzer Schrift, ohne Ring, Punkt und Licht |
 | Gewählter Farbtupfen (Wünsche, Farbblatt) | violetter Ring | weißer Ring |
 
 Nicht geändert: Zustand der Chips auf Weiß (gewählt schwarz mit violettem Punkt), Segmente auf der Lage-Karte (gewählt Violett mit
 schwarzer Schrift, Regel der DNA), Werkzeugknöpfe am Modell, Kopfzeile, Stationen-Band, Messen-Folie, 3-D-Modell und Kamera.
 
+## Prüfung
+
+- Prüfsuite Abschnitte 16 (Erstaufmaß, Gestaltung der neuen Schritte) und 22 (Konfigurator ohne Hürden) gegen einen Testserver mit
+  KI-Attrappe: 145 Prüfungen bestanden, keine Fehlschläge. Gegen den Server mit Daten-Attrappe (Port 8789) schlagen zwei Kundenlink-
+  Prüfungen fehl (404 auf /api/link/k2m8q), unabhängig von dieser Änderung.
+- Bilder aller Folien nach der Übernahme: docs/profis/bilder/2026-10-29-konfigurator-proportionen-ueberblick-*.jpg (Telefon 390 × 844,
+  Laptop 1440 × 900).
+
 ## Offene Punkte
 
-- Chips und Segmente sind jetzt 40 px hoch, die DNA nennt 44 px als Zielgröße. Dem Inhaber so gezeigt und angenommen („Passt“). Wenn
-  es Beschwerden zur Treffsicherheit gibt: Höhe zurück auf 44 px, Schrift und Luft bleiben.
+- Ziele bleiben 44 px: Das gezeigte Nachher hatte Chips, Segmente und Rundknöpfe mit 40 px. Die Prüfsuite (Abschnitt 16, „Ziele ab
+  44 px“) und die DNA verlangen 44 px; übernommen wurden deshalb 44 px mit Schrift 14 und engeren Innenrändern. Der sichtbare
+  Unterschied zum Bild sind 4 px je Chip. Will der Inhaber die 40 px trotzdem, muss die Prüfung mitgeändert werden.
 - Ergebnis am Telefon: unter der Karte mit den Maßen steht der Hinweis „Am Modell die Mitte …“ jetzt hinter dem Fuß und erst nach dem
   Scrollen sichtbar (vorher auf dem ersten Bildschirm). Gewollt zugunsten der größeren Bühne; ist es zu viel, `--bh` der Folie
   `.dna.er` auf `calc(100svh - 420px)` setzen.
