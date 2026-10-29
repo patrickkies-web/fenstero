@@ -9,9 +9,22 @@ Testen, keine Marktdaten.
 Jede Planung endet entweder als **bestätigte Anfrage an bis zu drei Partnerbetriebe** (für den Hauseigentümer kostenlos, der Betrieb
 zahlt je Anfrage) oder als **bezahltes Aufmaßblatt** (9,99 €). Anonym und kostenlos gibt es nichts zum Mitnehmen.
 
-Warum das gegen Fake-Daten hilft: Der Hauseigentümer will keinen Plan, er will einen Preis. Den gibt ihm nur ein Betrieb. Wer falsche
-Daten eintippt, bekommt kein Angebot und kein Blatt; er war nie eine Anfrage, sondern ein Neugieriger. Er kostet einen Klick und ein
-paar KI-Auswertungen, und genau die werden begrenzt (Abschnitt 2).
+**Auf dem kostenlosen Weg bekommt der Kunde kein Aufmaßblatt.** Das Blatt geht nur an die Betriebe; der Kunde bekommt, was er
+eigentlich will: Angebote. Wer das Blatt selbst haben will, zahlt (Nachtrag 29.10.2026 auf den Einwand des Inhabers: „Der Kunde gibt
+Fake-Daten ein, klickt die Einwilligung, kriegt sein Aufmaß, und ich kann nichts vermarkten.“).
+
+Warum Fake-Daten damit nichts mehr bringen:
+
+| Der Kunde … | bekommt |
+|---|---|
+| gibt falsche E-Mail oder Telefonnummer ein | nichts: ohne Code per E-Mail und per SMS geht keine Anfrage raus |
+| gibt echte Daten ein, will aber nur das Blatt | kein Blatt (das geht an die Betriebe); er wird angerufen, wie er eingewilligt hat. Wer 20 bis 30 Minuten seine Fenster ausmisst, plant ein Fensterprojekt; für den Betrieb ist das ein echter Kontakt |
+| zahlt 9,99 € | sein Blatt; er ist kein Lead, aber Umsatz |
+| schließt die App | nur die Zahlen, die er selbst gemessen hat („keine Gesamtübersicht“) |
+
+Der Hauseigentümer will keinen Plan, er will einen Preis. Den gibt ihm nur ein Betrieb. Wer schummelt, bekommt kein Angebot und kein
+Blatt; er war nie eine Anfrage, sondern ein Neugieriger. Er kostet einen Klick und ein paar KI-Auswertungen, und genau die werden
+begrenzt (Abschnitt 2).
 
 ## 1. Der Weg des Hauseigentümers
 
@@ -26,8 +39,8 @@ uns keine KI mehr. Nach dem Speichern bleibt es bei „keine Gesamtübersicht“
 ```
 ┌───────────────────────────────────────────────────────────────┐
 │  Angebote von Fachbetrieben aus deiner Nähe      kostenlos     │
-│  Wähle bis zu 3 Betriebe. Sie bekommen dein Aufmaß,            │
-│  du bekommst dein Aufmaßblatt per Mail.                        │
+│  Wähle bis zu 3 Betriebe. Sie bekommen dein Aufmaß             │
+│  und melden sich mit ihrem Angebot bei dir.                    │
 │  [ Betriebe wählen ]                                           │
 │                                                                │
 │  Kostenlos für dich, weil die Betriebe uns für die             │
@@ -50,11 +63,13 @@ Die kostenlose Tür steht groß, die bezahlte klein: Eine vermittelte Anfrage br
 3. **Einwilligung.** Ein leerer Haken mit den Namen der gewählten Betriebe: „Ich möchte, dass [Betrieb 1], [Betrieb 2] mein Aufmaß
    und meine Kontaktdaten bekommen und mich für ein Angebot kontaktieren. eeziframes fragt nach zwei Tagen kurz nach, ob sich jemand
    gemeldet hat.“
-4. **E-Mail-Code.** Die vorhandene Anmeldung per Code (`functions/api/auth.js`); dabei entsteht das Konto, das Aufmaß ist gesichert.
+4. **Zwei Codes.** E-Mail per Code über die vorhandene Anmeldung (`functions/api/auth.js`; dabei entsteht das Konto, das Aufmaß ist
+   gesichert) und Telefon per SMS-Code. Beide Wege zum Kunden sind damit echt.
 5. **Prüfung** (automatisch, Abschnitt 2). Besteht die Anfrage nicht, sagt die App, was fehlt (zum Beispiel „Bitte prüfe deine
-   Telefonnummer“); ein Lead ohne Prüfung geht nie raus.
-6. **Versand in einem Schritt.** Mail mit Aufmaßblatt-PDF und Link an jeden gewählten Betrieb; im selben Moment das Blatt an die
-   bestätigte Adresse des Kunden und zum Herunterladen in der App. Erst verschicken, dann das Blatt, nie umgekehrt.
+   Postleitzahl“); ein Lead ohne Prüfung geht nie raus.
+6. **Versand an die Betriebe.** Mail mit Aufmaßblatt-PDF und Link an jeden gewählten Betrieb. Der Kunde sieht in seinem Konto, welche
+   Betriebe seine Anfrage haben und wann, aber kein Blatt und keine Gesamtübersicht. Darunter klein: „Dein Aufmaßblatt für dich selbst:
+   9,99 €“.
 7. **Nach zwei Werktagen** eine Mail an den Kunden: „Hat sich ein Betrieb gemeldet?“ mit drei Knöpfen (Ja, Termin vereinbart; Ja,
    noch kein Termin; Nein). **Nach 14 Tagen:** „Wie war es?“ (Bewertung je Betrieb, später sichtbar).
 
@@ -63,26 +78,27 @@ Die kostenlose Tür steht groß, die bezahlte klein: Eine vermittelte Anfrage br
 - Die vorhandene Kasse (`functions/api/zahlung.js`) mit neuem Betrag: bis 17.11.2026 bleibt es bei 7,99 € (so steht es auf der
   Seite), ab 18.11.2026 **9,99 €** statt der bisher geplanten 12,99 €.
 - Danach in der App und in der Mail: „Doch Angebote? Schick dein Aufmaß innerhalb von 30 Tagen an Partnerbetriebe, dann bekommst du
-  die 9,99 € automatisch zurück.“ Auslöser der Erstattung ist der Versand über Tür A, den das System selbst sieht; kein Betrieb muss
-  dafür etwas bestätigen. Stripe behält bei einer Erstattung seine Gebühr (bei 9,99 € etwa 0,40 €, Stand prüfen).
+  die 9,99 € zurück.“ Die Anfrage läuft durch Tür A (beide Codes, alle Prüfungen). Erstattet wird automatisch, wenn **7 Tage nach dem
+  Versand kein Betrieb wegen falscher Kontaktdaten reklamiert** hat; kein Betrieb muss dafür etwas bestätigen. Stripe behält bei einer
+  Erstattung seine Gebühr (bei 9,99 € etwa 0,40 €, Stand prüfen).
 - Wer bezahlt hat, schickt das Blatt weiter, an wen er will (wie heute per WhatsApp oder E-Mail).
 
 ### Wenn es noch keinen Partner gibt
 
 Am Anfang der Normalfall. Tür A heißt dann **„Betrieb für mich suchen: kostenlos“**: gleicher Ablauf, die Einwilligung nennt „einen
-geprüften Fensterfachbetrieb im Umkreis von 50 km“, den Namen bekommt der Kunde per Mail, sobald er feststeht. Das Blatt kommt sofort.
-Die Anfrage landet in der Zentrale auf der Liste „Betrieb gesucht“: Mit ihr in der Hand rufst du einen Betrieb aus der Gegend an
-(„Ich habe eine konkrete Anfrage in Ihrer Nähe, die ersten drei sind gratis“). Findet sich in 5 Werktagen keiner, bekommt der Kunde
-eine ehrliche Mail; sein Blatt behält er.
+geprüften Fensterfachbetrieb im Umkreis von 50 km“, den Namen bekommt der Kunde per Mail, sobald er feststeht. Ein Blatt bekommt er
+auch hier nicht. Die Anfrage landet in der Zentrale auf der Liste „Betrieb gesucht“: Mit ihr in der Hand rufst du einen Betrieb aus
+der Gegend an („Ich habe eine konkrete Anfrage in Ihrer Nähe, die ersten drei sind gratis“). Findet sich in 5 Werktagen keiner, bekommt
+der Kunde eine ehrliche Mail und sein Aufmaßblatt kostenlos; E-Mail und Telefon sind dann ja bestätigt.
 
 ## 2. Echtheit: sieben Prüfungen
 
 | # | Prüfung | Wann | Kosten | Wirkung |
 |---|---|---|---|---|
 | 1 | **Bot-Schutz:** Cloudflare Turnstile vor der ersten KI-Auswertung; die vorhandene Bremse `RL_KI` (20 je Minute) plus das Tagesbudget je Gerät ohne bestätigte E-Mail (`budget()` in `bremse.js`) | beim Planen | keine | keine Skripte, keine Sammler auf unsere KI-Kosten |
-| 2 | **E-Mail-Code** (vorhanden, Supabase); das Blatt geht nur an diese Adresse | vor dem Versand | keine | wer flunkert, bekommt nichts |
+| 2 | **E-Mail-Code** (vorhanden, Supabase) | vor dem Versand | keine | jede Anfrage hat eine echte E-Mail-Adresse |
 | 3 | **Wegwerf-Adressen** sperren (offene Liste von Wegwerf-Domains, Lizenz prüfen) | Eingabe | keine | keine 10-Minuten-Mails |
-| 4 | **Telefon plausibel:** deutsches Format, Länge, Vorwahl; keine Folgen wie 0123456789 oder 1111111; dieselbe Nummer nicht mit anderer E-Mail in 90 Tagen. Ein SMS-Code kommt erst, wenn „Nummer falsch“ mehr als 10 % der Reklamationen ausmacht (Preis je SMS beim Anbieter prüfen) | Eingabe | keine | weniger falsche Nummern |
+| 4 | **Telefon per SMS-Code**, vorher plausibel: deutsches Format, Länge, Vorwahl; keine Folgen wie 0123456789 oder 1111111; dieselbe Nummer nicht mit anderer E-Mail in 90 Tagen; höchstens 3 Codes je Nummer und Tag (`budget()` in `bremse.js`) | vor dem Versand | wenige Cent je SMS (Anbieterpreis prüfen), gegen rund 77 € je Anfrage | jede Anfrage hat eine echte Telefonnummer |
 | 5 | **Inhalt vollständig:** mindestens ein Fenster mit allen drei Breiten und Höhen und Fotos innen und außen; Postleitzahl existiert und liegt im Gebiet; Maße plausibel (die App prüft schon gegen das Seitenverhältnis aus der KI) | vor dem Versand | keine | jede Anfrage ist ein brauchbares Erstaufmaß |
 | 6 | **Dubletten und Sammler:** gleiche E-Mail, Telefonnummer oder Adresse innerhalb von 90 Tagen an denselben Betrieb wird nicht berechnet, sondern als Ergänzung geschickt; höchstens **2 kostenlose Anfragen je Person in 90 Tagen**, danach nur Tür B | vor dem Versand | keine | kein Betrieb nutzt die freie App als Gratis-Werkzeug für seine eigenen Kunden |
 | 7 | **Rückmeldung von beiden Seiten:** die Mail an den Kunden nach zwei Werktagen und die Reklamation des Betriebs (Abschnitt 5) | danach | keine | Fakes werden gutgeschrieben, falsche Reklamationen abgelehnt |
@@ -95,7 +111,7 @@ Eigentümer ✓ · Start in 3 Monaten · 4 Fenster · 8 Fotos · ging an 2 Betri
 | # | Quelle | Wer zahlt | Startwert | Wann |
 |---|---|---|---|---|
 | 1 | **Gebühr je Anfrage und Betrieb** | Partnerbetrieb | **39 €** **[Annahme]**, die ersten 3 Anfragen gratis, nur nicht reklamierte Anfragen | Stufe 1 |
-| 2 | **Aufmaßblatt ohne Weitergabe** | Hauseigentümer | 9,99 € ab 18.11.2026, Erstattung bei Versand an Partner innerhalb 30 Tagen | Stufe 1 |
+| 2 | **Aufmaßblatt ohne Weitergabe** | Hauseigentümer | 9,99 € ab 18.11.2026, Erstattung bei Versand an Partner innerhalb 30 Tagen, wenn keiner wegen falscher Daten reklamiert | Stufe 1 |
 | 3 | **Pakete** (eigener Konfigurator) | Partnerbetrieb | wie `pakete.js`; Paketkunden zahlen 25 % weniger je vermittelter Anfrage **[Annahme]**; Anfragen aus dem eigenen Konfigurator bleiben ohne Gebühr | Stufe 2 |
 | 4 | **Gebietspartner** (Monatsbetrag mit Anfragen inklusive und gekennzeichnetem ersten Platz in seinem Gebiet) | Partnerbetrieb | Preis nach drei Monaten aus den echten Zahlen | Stufe 3 |
 | 5 | **Hersteller und Händler** (Lizenzen, siehe Gremium) | Industrie | offen | später |
@@ -121,7 +137,7 @@ Kosten je bestätigter Anfrage = Kosten je Klick ÷ Quote (Klick → bestätigte
 | Quote Klick → bestätigte Anfrage | 4 % (25 Klicks je Anfrage) | [Annahme] |
 | Werbung je Anfrage | 25 × 1,50 = 37,50 € | |
 | KI je Anfrage | etwa 3 € (25 Besucher, 40 % mit Fotos, je 6 Auswertungen zu 0,044 €) | Kosten aus `docs/KI-KOSTEN.md`, Rest [Annahme] |
-| Zahlungsgebühren, Mail | unter 1 € | |
+| SMS-Code, Zahlungsgebühren, Mail | unter 1 € | |
 | **Deckungsbeitrag je bestätigter Anfrage** | **rund 36 €** | |
 | Höchstgebot je Klick, bei dem es sich gerade noch trägt | 77 € × 4 % = **3,08 €** | |
 
@@ -157,12 +173,12 @@ dort, wo es Partner gibt (Standort-Ausrichtung = Partnergebiete), am Anfang 50 k
 - **Reihenfolge der Betriebe:** die Hauptkriterien offenlegen (§ 5b Abs. 2 UWG); bezahlte Plätze eindeutig kennzeichnen (Anhang
   Nr. 11a UWG).
 - **Anpassen:** Nutzungsbedingungen (9,99 €, Erstattung, zwei kostenlose Anfragen in 90 Tagen), Datenschutzerklärung (Empfänger,
-  Turnstile, Rückmelde-Mails), neue Partnerbedingungen, Hinweis auf der Verkaufsseite. Die Content-Security-Policy muss Turnstile
+  Turnstile, SMS-Anbieter, Rückmelde-Mails), neue Partnerbedingungen, Hinweis auf der Verkaufsseite. Die Content-Security-Policy muss Turnstile
   erlauben.
 
 ## 7. Kennzahlen (Wochenblick in der Zentrale)
 
-Besucher → Planung begonnen → Ende erreicht → Tür A begonnen → E-Mail bestätigt → versendet; Tür-B-Käufe und Erstattungen;
+Besucher → Planung begonnen → Ende erreicht → Tür A begonnen → E-Mail und Telefon bestätigt → versendet; Tür-B-Käufe und Erstattungen;
 Ø Betriebe je Anfrage; Reklamationsquote und Gründe; „Betrieb hat sich gemeldet“ in %; Erlös, Werbekosten und KI-Kosten je
 bestätigter Anfrage; Anfragen auf der Liste „Betrieb gesucht“ je Region.
 
@@ -173,10 +189,11 @@ Wiederverwendet wird: Anmeldung per Code (`auth.js`, Konten der Hauseigentümer 
 Budgets (`bremse.js`), Kundenkonto `/partner/` und Zentrale (`zentrale.js`).
 
 **Stufe 1, Pilot (ohne Partnerliste, du vermittelst von Hand)**
-- Zwei Türen am Ende der App, Tür A als „Betrieb für mich suchen“, Einwilligung, E-Mail-Code, Prüfungen 1 bis 6.
+- Zwei Türen am Ende der App, Tür A als „Betrieb für mich suchen“, Einwilligung, E-Mail- und SMS-Code, Prüfungen 1 bis 6; auf Tür A
+  kein Blatt für den Kunden.
 - Zentrale: Liste der Anfragen mit Echtheitsprofil und Status (geprüft, Betrieb gesucht, weitergeleitet, reklamiert, gutgeschrieben)
   und dem Knopf „An Betrieb schicken“ (Betrieb eintragen, Mail mit PDF geht raus).
-- Tür B mit 9,99 € ab 18.11.2026 und automatischer Erstattung bei Versand innerhalb von 30 Tagen.
+- Tür B mit 9,99 € ab 18.11.2026 und automatischer Erstattung bei Versand innerhalb von 30 Tagen (7 Tage ohne Reklamation).
 - KI-Grenze ohne bestätigte E-Mail; Turnstile.
 - Rückmelde-Mail an den Kunden nach zwei Werktagen.
 - Entwürfe der Rechtstexte; Prüfsuite (neuer Abschnitt), Altbestand bleibt grün.
@@ -188,7 +205,7 @@ Budgets (`bremse.js`), Kundenkonto `/partner/` und Zentrale (`zentrale.js`).
 - Google-Ads-Conversion „Anfrage bestätigt“ mit Wert.
 
 **Stufe 3, ab etwa 100 Anfragen im Monat**
-- Gebietspartner (Monatsbetrag), Bewertungen sichtbar, SMS-Code, falls die Reklamationen es verlangen.
+- Gebietspartner (Monatsbetrag), Bewertungen sichtbar.
 
 ## 9. Entscheidungen (Vorschlag, bis der Inhaber anders entscheidet)
 
@@ -197,7 +214,9 @@ Budgets (`bremse.js`), Kundenkonto `/partner/` und Zentrale (`zentrale.js`).
 | Gebühr je Anfrage und Betrieb | 39 €, die ersten 3 gratis, nach 50 Anfragen prüfen |
 | Höchstzahl Betriebe je Anfrage | 3 |
 | Preis Tür B | 7,99 € bis 17.11.2026, danach 9,99 € |
-| Erstattung Tür B | automatisch bei Versand über Tür A innerhalb von 30 Tagen |
+| Blatt auf Tür A | nein, nur die Betriebe bekommen es (Ausnahme: kein Betrieb gefunden) |
+| Telefon | per SMS-Code bestätigt |
+| Erstattung Tür B | automatisch bei Versand über Tür A innerhalb von 30 Tagen, wenn 7 Tage lang kein Betrieb wegen falscher Daten reklamiert |
 | Kostenlose Anfragen je Person | 2 in 90 Tagen |
 | Startregion | 50 km um Herzebrock-Clarholz |
 | Straße | freiwillig |
