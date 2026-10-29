@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360">
+
+
+<rect width="480" height="360" rx="16" fill="#ffffff"/>
+<rect x="20" y="24" width="250" height="312" fill="#ecebec"/>
+<rect x="50" y="60" width="190" height="244" fill="#ffffff" stroke="#f88962" stroke-width="6.6"/>
+<rect x="50" y="60" width="190" height="38" fill="#e6e5e7" stroke="#07090a" stroke-width="3.3"/>
+<rect x="196" y="94" width="16" height="8" fill="#07090a"/>
+<rect x="58" y="104" width="174" height="194" fill="#eceef1" stroke="#897efc" stroke-width="6.6"/>
+<rect x="72" y="118" width="146" height="166" fill="#eceef1" stroke="#897efc" stroke-width="6.6"/>
+<rect x="86" y="132" width="118" height="138" fill="#f5f6f8" stroke="#897efc" stroke-width="3.3"/>
+<rect x="207" y="192" width="6" height="26" rx="2" fill="#07090a"/>
+<rect x="30" y="178" width="48" height="34" fill="#ffffff" stroke="#07090a" stroke-width="3.3" transform="rotate(-8 54 195)"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="700" fill="#07090a" text-anchor="middle">
+<circle cx="145" cy="118" r="13" fill="#f88962"/>
+<circle cx="232" cy="244" r="13" fill="#f88962"/>
+<circle cx="204" cy="80" r="13" fill="#f88962"/>
+</g><g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+<circle cx="294" cy="90" r="12" fill="#f88962"/>
+
+<circle cx="294" cy="190" r="12" fill="#f88962"/>
+
+<circle cx="294" cy="270" r="12" fill="#f88962"/>
+
+
+</g></svg>

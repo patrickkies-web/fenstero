@@ -42,7 +42,8 @@ const text = (html) => entities(String(html).replace(/<br\s*\/?>/gi, '\n').repla
 /* Blöcke in Reihenfolge: { art: 'h1'|'h2'|'h3'|'p'|'klein'|'li'|'tabelle', text | zeilen } */
 export function bloecke(html) {
   const main = (/<main[^>]*>([\s\S]*?)<\/main>/.exec(html) || [])[1] || '';
-  const ohne = main.replace(/<!--[\s\S]*?-->/g, '');
+  /* Navigation („Auf dieser Seite“, scripts/recht-bausteine.mjs) gehört nicht zum Vertragstext */
+  const ohne = main.replace(/<!--[\s\S]*?-->/g, '').replace(/<nav\b[\s\S]*?<\/nav>/g, '');
   const out = [];
   const re = /<table[^>]*>([\s\S]*?)<\/table>|<ul[^>]*>([\s\S]*?)<\/ul>|<ol[^>]*>([\s\S]*?)<\/ol>|<h([123])([^>]*)>([\s\S]*?)<\/h\4>|<p([^>]*)>([\s\S]*?)<\/p>/g;
   let m;

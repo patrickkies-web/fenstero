@@ -212,6 +212,22 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   auf Wunsch mitgestalten, erklärt „Fenster planen“ auf der Seite und bietet „Fenster konfigurieren“ gleich im Kästchen (Inhaber, später
   am selben Tag). Vorschlag für seine DNA (Abschnitt 9):
   „Ein Ablauf ist erst fertig, wenn jeder erreichbare Bildschirm darin im neuen Look steht.“
+- Bestandsaufnahmen gründlich (Inhaber, 28.10.2026: „diese ganzen Ratgeber Seiten die hast du ja noch gar nicht überprüft … vernünftig
+  vorgehen“; „Wo kommen denn diese ganzen komischen Firmen her“): Jede Seite in voller Länge fotografieren (vorher durchscrollen), am
+  Telefon und am Schreibtisch, und selbst ansehen, nicht nur messen; der erste Bildschirm allein reicht nie. Bilder für den Inhaber nie
+  mit den Testbetrieben der Prüfsuite (Amsel, Fink, Specht, Meise); wo ein Betrieb gezeigt werden muss, den es online noch nicht gibt,
+  Fensterbau Brandt aus der Paket-Vorschau, lokal nachgestellt, und das in der Lieferung sagen. Bilder in einer Liste laden sofort
+  (kein `loading="lazy"`). Werkzeug: `docs/profis/werkzeuge/altes-design.mjs`. Vorschlag für seine DNA (Abschnitt 7):
+  „Geprüft heißt: jede Seite ganz gesehen, mit Beispielen, die der Inhaber kennt.“
+- Ratgeber einheitlich, Inhalte bleiben, Konfigurator bleibt (Inhaber, 28.10.2026: „die Inhalte so zu lassen wie sie sind aber das
+  Design zu verändern … so dass der Ratgeber einheitlich aussieht“; „den Konfigurator der Seite sowie die Seiten, die bereits dem neuen
+  Design entsprechen, lässt du, wie sie sind“; „die Links zu überprüfen, ob die Wege auch passend sind“): Alle 24 Ratgeber, die 5 Seiten
+  Wissen für Fensterbauer, die Rechtstexte und die Fehlerseite stehen in einer Vorlage (Generatoren `scripts/ratgeber-bausteine.mjs` und
+  `scripts/recht-bausteine.mjs`); ihr Text bleibt Wort für Wort, nur Auszeichnung (Etikett, geschütztes Leerzeichen, kräftiger erster
+  Satz eines Fehlers) und Navigation kommen dazu. Konfigurator beim Fensterbauer (Start, Signature-Dashboard) und Seiten im neuen Look
+  werden nicht angefasst, auch wenn die Bestandsaufnahme sie als alt führt; das steht in der Lieferung als offen. Jede Lieferung prüft
+  die Links der berührten Seiten (intern alle, extern mit Status). Protokoll docs/profis/2026-10-28-ratgeber-dna.md. Vorschlag für seine
+  DNA (Abschnitt 7): „Überarbeiten heißt: Gestalt neu, Wortlaut gleich, Wege geprüft.“
 - Knopf „Zum Konfigurator“ in der Leiste der Seite für Fensterbauer (Wunsch des Inhabers, 29.10.2026: „wenn ich … über die Seite
   scrolle, so ein Button, wo drin steht zum Konfigurator … direkt in die erste Seite … soll auch zum Drücken animieren … nicht … die
   Pakete … sondern direkt in den Konfigurator“): Oben im Kopf bleibt „Paket anfragen“; unterhalb des Kopfs zieht sich die Leiste wie

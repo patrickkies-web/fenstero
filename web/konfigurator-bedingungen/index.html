@@ -6,9 +6,13 @@
 <title>Paketbedingungen der Konfigurator-Pakete · eeziframes</title>
 <meta name="description" content="Paketbedingungen für den eigenen Fenster-Konfigurator von eeziframes (Essential, Plus, Signature) mit Vertrag zur Auftragsverarbeitung. Nur für Unternehmer.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/assets/recht.css"><meta name="stand" content="2026-10-28">
+<meta name="theme-color" content="#07090a">
+<style>html,body{background:#07090a}</style>
+<link rel="preload" href="/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/inter-marke.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/recht.css">
+<script src="/assets/druck.js" defer></script>
+<meta name="stand" content="2026-10-28">
 </head>
 <body>
 <!-- Paketbedingungen mit Anlage (Vertrag zur Auftragsverarbeitung). Stehen Platzhalter (mark mit Klasse ph) im Text,
@@ -17,16 +21,18 @@
      schreibt die PDFs paketbedingungen-STAND.pdf und av-vertrag-STAND.pdf neu (gehen mit der Eingangsbestätigung an den Besteller).
      Tabellen, Fristen und Stand kommen aus web/assets/pakete.js, web/assets/instanzregeln.js und recht.js (Bausteine aus
      functions/pakete-seite.js). -->
+<a class="skip" href="#inhalt">Zum Inhalt springen</a>
 <header class="kopf"><div>
   <a class="marke" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect class="fi-kachel" width="64" height="64" rx="10" fill="#000"/><g class="fi-licht" fill="#fff"><path class="fi-decke" d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path class="fi-fenster" d="M45 22 57 17.6V41.9L45 39.8Z"/><path class="fi-strahl" d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect class="fi-rand" x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#000" stroke-opacity=".1"/></svg><span class="wm" translate="no"><b>eezi</b>frames</span></a>
   <nav><a href="/fuer-fensterbauer/">Pakete</a><a href="/konto/">Kundenbereich</a></nav>
 </div></header>
-<main>
+<main id="inhalt">
   <p class="klein">Für Unternehmer · Stand: <!--pakete:stand-->28. Oktober 2026<!--/pakete:stand--></p>
   <h1>Paketbedingungen der Konfigurator-Pakete</h1>
   <div class="karte">
     <p><strong>Kurz gesagt:</strong> Sie bekommen Ihren eigenen Fenster-Konfigurator unter Ihrer Domain (Essential: unter einer Adresse bei eeziframes), wir richten ihn ein und betreiben ihn. Die Einrichtung zahlen Sie vorab, das Monatsabo beginnt mit dem Livegang, behält den Preis Ihrer Bestellung und ist monatlich kündbar. Jede Anfrage Ihrer Kunden geht nur an Sie; wir verarbeiten sie in Ihrem Auftrag nach dem Vertrag zur Auftragsverarbeitung (Anlage, <a href="#avv">unten</a>). Wir sind Ihr technischer Dienstleister: Anbieter der Seite gegenüber Ihren Kunden sind Sie, mit Ihrem Impressum, und für die Inhalte und Angebote auf Ihrer Seite sind Sie verantwortlich (§ 14).</p>
   </div>
+  <nav class="recht-inhalt" aria-label="Auf dieser Seite"><p>Auf dieser Seite</p><ol><li><a href="#geltung">§ 1 Geltungsbereich, Vertragspartner</a></li><li><a href="#leistungen">§ 2 Leistungen</a></li><li><a href="#vertragsschluss">§ 3 Bestellung und Vertragsschluss</a></li><li><a href="#preise">§ 4 Preise und Zahlung</a></li><li><a href="#einrichtung">§ 5 Einrichtung, Mitwirkung und Freigabe</a></li><li><a href="#domain">§ 6 Domain</a></li><li><a href="#laufzeit">§ 7 Laufzeit, Kündigung und Paketwechsel</a></li><li><a href="#zahlungsausfall">§ 8 Zahlungsausfall, Pause und Ende</a></li><li><a href="#hinweis">§ 9 Hinweis auf eeziframes</a></li><li><a href="#kundenschutz">§ 10 Kundenschutz</a></li><li><a href="#verfuegbarkeit">§ 11 Verfügbarkeit und Störungen</a></li><li><a href="#haftung">§ 12 Haftung</a></li><li><a href="#datenschutz">§ 13 Datenschutz</a></li><li><a href="#verantwortung">§ 14 Ihre Verantwortung für Inhalte und Rechtspflichten</a></li><li><a href="#rechte">§ 15 Rechte an Konfigurator, Gestaltung und Inhalten</a></li><li><a href="#uebertragung">§ 16 Vertragsübertragung und Erklärungen</a></li><li><a href="#aenderungen">§ 17 Änderungen dieser Bedingungen</a></li><li><a href="#schluss">§ 18 Schlussbestimmungen</a></li><li><a href="#avv">Anlage: Vertrag zur Auftragsverarbeitung</a></li></ol></nav>
 
   <h2 id="geltung">§ 1 Geltungsbereich, Vertragspartner</h2>
   <p>(1) Diese Paketbedingungen gelten für Verträge über die Konfigurator-Pakete EEZI Essential, EEZI Essential Plus und EEZI Signature („Paket“) zwischen Patrick Kies, Postweg 35, 33442 Herzebrock-Clarholz, Telefon: <a href="tel:+4915256950998">0152 56950998</a>, E-Mail: <a href="mailto:ask@eeziframes.com">ask@eeziframes.com</a> („eeziframes“, „wir“) und dem Unternehmen, das ein Paket bestellt („Sie“).</p>
@@ -213,6 +219,6 @@
 
   <p class="klein">Stand: <!--pakete:stand-->28. Oktober 2026<!--/pakete:stand--> · Als PDF: <!--pakete:pdfs--><a href="/konfigurator-bedingungen/paketbedingungen-2026-10-28.pdf">Paketbedingungen</a> · <a href="/konfigurator-bedingungen/av-vertrag-2026-10-28.pdf">Vertrag zur Auftragsverarbeitung</a><!--/pakete:pdfs--></p>
 </main>
-<footer class="fuss"><a href="/">Startseite</a><a href="/fuer-fensterbauer/">Für Fensterbauer</a><a href="/konto/">Kundenbereich</a><a href="/agb/">AGB</a><a href="/konfigurator-bedingungen/">Paketbedingungen</a><a href="/datenschutz/">Datenschutz</a><a href="/impressum/">Impressum</a><a class="widerruf-knopf" href="/widerruf/">Vertrag widerrufen</a></footer>
+<footer class="fuss"><a href="/">Startseite</a><a href="/fuer-fensterbauer/">Für Fensterbauer</a><a href="/konto/">Kundenbereich</a><a href="/agb/">AGB</a><a href="/konfigurator-bedingungen/" aria-current="page">Paketbedingungen</a><a href="/datenschutz/">Datenschutz</a><a href="/impressum/">Impressum</a><a class="widerruf-knopf" href="/widerruf/">Vertrag widerrufen</a></footer>
 </body>
 </html>

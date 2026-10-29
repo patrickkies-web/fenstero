@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 392" width="480" height="392">
+
+
+<rect width="480" height="392" rx="16" fill="#ffffff"/>
+<line x1="200" y1="24" x2="200" y2="306" stroke="#07090a" stroke-width="3.3"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+<path d="M200 30H259a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H200Z" fill="#897efc"/>
+
+
+
+<path d="M200 102H396a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H200Z" fill="#897efc"/>
+
+
+
+<path d="M200 174H238a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H200Z" fill="#897efc"/>
+
+
+
+
+
+
+
+<line x1="24" y1="316" x2="456" y2="316" stroke="#d2d0d3" stroke-width="3.3"/>
+
+
+</g>
+</svg>

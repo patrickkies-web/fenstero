@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 370" width="480" height="370">
+
+
+<defs><pattern id="h" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#ffffff"/><path d="M0 0V8" stroke="#f88962" stroke-width="4.4"/></pattern></defs>
+<rect width="480" height="370" rx="16" fill="#ffffff"/>
+<rect x="24" y="96" width="146" height="150" fill="#ecebec"/>
+<rect x="310" y="96" width="146" height="150" fill="#ecebec"/>
+<rect x="170" y="160" width="140" height="22" fill="#eceef1" stroke="#897efc" stroke-width="6.6"/>
+<rect x="170" y="152" width="16" height="38" fill="#ffffff" stroke="#897efc" stroke-width="6.6"/>
+<rect x="294" y="152" width="16" height="38" fill="#ffffff" stroke="#897efc" stroke-width="6.6"/>
+<rect x="292" y="191" width="18" height="55" fill="url(#h)" stroke="#f88962" stroke-width="3.3"/>
+<circle cx="170" cy="216" r="20" fill="none" stroke="#f88962" stroke-width="6.6"/>
+<g stroke="#07090a" stroke-width="3.3" fill="none"><path d="M156 230L110 282"/><path d="M301 246L360 282"/></g>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="20" fill="#07090a">
+
+
+
+
+
+
+
+
+</g>
+</svg>

@@ -169,7 +169,7 @@ export function banner(pfad, env) {
   const text = '<b>Einführungspreis bis ' + bis + ':</b> Aufmaßblatt ' + geld(v.aufmass) + ' <span class="spaeter">· danach ' + geld(d.aufmass) + '</span>';
   return '<a class="einf-bar" href="/app/"><span><span class="txt">' + text + '</span><span class="rest">' + rest + '</span><span class="los">Jetzt ausmessen →</span></span></a>';
 }
-const mitBanner = (html, pfad, env) => { const b = BANNER_SEITEN.test(pfad) && konfig(env).einfuehrung ? banner(pfad, env) : ''; return b ? html.replace(/<body[^>]*>/, (m) => m + '\n' + b) : html; };
+const mitBanner = (html, pfad, env) => { const b = BANNER_SEITEN.test(pfad) && konfig(env).einfuehrung ? banner(pfad, env) : ''; return b ? html.replace(/<body[^>]*>(?:\n<a class="rg-skip"[^>]*>[^<]*<\/a>)?/, (m) => m + '\n' + b) : html; };
 
 /* Canonical und og:url zusätzlich im HTML: Bing und KI-Crawler lesen die Seite selbst, nicht immer die Kopfzeilen */
 export function kopf(html, kan) {

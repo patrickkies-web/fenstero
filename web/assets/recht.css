@@ -1,91 +1,208 @@
-/* eeziframes · Rechtsseiten (Impressum, Datenschutz, AGB, Nutzungsbedingungen, Cookies, Vertrag widerrufen, 404) */
-/* Dieselbe Bühne wie überall (docs/GESTALTUNG.md): dunkler Grund, Flächen mit Rand, Grün als Signal; nur eine Stimmung */
+/* eeziframes · Rechtsseiten (Impressum, Datenschutz, AGB, Nutzungsbedingungen, Cookies, Vertrag widerrufen, Paketbedingungen) und
+   Fehlerseite (404) in der Design-DNA, Palette „Task-App dunkel“ (28.10.2026). Aufbau wie die Lese-Szene der Ratgeber: dunkler Kopf,
+   der Text als helles Blatt mit Vorhang-Kante, dunkler Fuß. Die Fehlerseite bleibt ganz dunkel, mit einem Fenster ohne Haus.
+   Nach dem Gremium vom 28.10.2026: Spalte 580 px (etwa 76 Zeichen), Lesetext dunkler und 17 px, Haarlinie statt Punkt über den
+   Abschnitten, „Kurz gesagt“ als dunkle Kachel mit Licht von unten, am Schreibtisch liegt das Blatt auf der Bühne, lange Texte mit
+   „Auf dieser Seite“ (scripts/recht-bausteine.mjs). Schriften hier: Outfit, die Wortmarke als Teilmenge von Inter, eine Ersatzschrift
+   mit den Maßen von Outfit. Nur die acht Farben der DNA und ihre Töne. */
+@font-face { font-family: "Outfit"; font-style: normal; font-display: swap; font-weight: 200 700; src: url(/fonts/outfit.woff2) format("woff2"); }
+@font-face { font-family: "Inter Marke"; font-style: normal; font-display: swap; font-weight: 500 900; src: url(/fonts/inter-marke.woff2) format("woff2"); }
+@font-face { font-family: "Outfit Ersatz"; src: local("Roboto"), local("Roboto-Regular"); font-weight: 100 549; size-adjust: 98.1%; ascent-override: 101.9%; descent-override: 26.5%; line-gap-override: 0%; }
+@font-face { font-family: "Outfit Ersatz"; src: local("Roboto Bold"), local("Roboto-Bold"); font-weight: 550 900; size-adjust: 98.4%; ascent-override: 101.6%; descent-override: 26.4%; line-gap-override: 0%; }
+@font-face { font-family: "Outfit Ersatz Arial"; src: local("Arial"), local("ArialMT"); font-weight: 100 549; size-adjust: 97.3%; ascent-override: 102.8%; descent-override: 26.7%; line-gap-override: 0%; }
+@font-face { font-family: "Outfit Ersatz Arial"; src: local("Arial Bold"), local("Arial-BoldMT"); font-weight: 550 900; size-adjust: 92.9%; ascent-override: 107.6%; descent-override: 28%; line-gap-override: 0%; }
+:root { --schwarz: #07090a; --anthrazit: #202022; --weiss: #ffffff; --silbergrau: #a8a4a9; --textgrau: #6b676c; --violett: #897efc; --koralle: #f88962; --indigo: #3c3a66;
+  --font-sans: "Outfit", "Outfit Ersatz", "Outfit Ersatz Arial", system-ui, sans-serif; --rand: 16px; --rund-m: 20px; --rund-l: 28px; --rund-xl: 40px;
+  --haar-hell: color-mix(in srgb, var(--silbergrau) 45%, transparent); --druck: cubic-bezier(.2, .7, .2, 1);
+  --pfeil-schwarz: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 7h10M8 3l4 4-4 4' fill='none' stroke='%2307090a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --pfeil-weiss: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 7h10M8 3l4 4-4 4' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  color-scheme: dark; }
+@media (min-width: 760px) { :root { --rand: 48px; } }
 /* hidden gilt immer, auch gegen display von .formular (sonst blieb das Widerrufsformular nach dem Senden mit „Wird gesendet …“ stehen) */
-[hidden] { display: none !important }
-:root {
-  --bg: #161616; --surface: #1f1f1f; --fg: #f3f2ee; --fg2: #c9c8c3; --muted: #93928d; --line: #2b2b2b;
-  --accent: #8fd694; --ph-bg: rgba(240, 179, 90, .14); --ph-fg: #f0b35a; --bad: #ff7b72; --ok-bg: rgba(143, 214, 148, .14);
-  --body: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
-  color-scheme: dark;
+[hidden] { display: none !important; }
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--schwarz); -webkit-text-size-adjust: 100%; overflow-x: clip; }
+body { margin: 0; background: var(--schwarz); color: var(--weiss); font: 400 16px/1.65 var(--font-sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; overflow-x: clip; }
+a { -webkit-tap-highlight-color: transparent; }
+:where(a, button, input, textarea, summary, [tabindex]):focus-visible { outline: 2px solid var(--weiss); outline-offset: 3px; }
+.kopf nav a[aria-current] { color: var(--weiss); }
+::selection { background: var(--violett); color: var(--schwarz); }
+
+/* Sprunglink zum Inhalt: erst beim Fokus sichtbar */
+.skip { position: fixed; top: 12px; left: 12px; z-index: 60; display: inline-flex; align-items: center; height: 44px; padding: 0 18px; border-radius: 999px; background: var(--weiss); color: var(--schwarz); font: 500 14px/1 var(--font-sans); text-decoration: none; transform: translateY(-200%); opacity: 0; }
+.skip:focus-visible { transform: none; opacity: 1; }
+
+/* ---------- Kopf (dunkel) ---------- */
+.kopf { position: relative; z-index: 2; background: var(--schwarz); }
+.kopf > div { max-width: 1200px; margin: 0 auto; padding: 14px var(--rand) 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.marke { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--weiss); text-decoration: none; }
+.marke svg { display: block; flex: none; width: 26px; height: 26px; }
+/* Haarstrich des Zeichens: auf Schwarz hell, damit sich die schwarze Kachel vom Grund abhebt */
+.fi-rand { stroke: #fff; stroke-opacity: .2; }
+/* Wortmarke wie überall: Inter, „eezi“ 900, „frames“ 500, immer klein */
+.wm { font: 500 18px/1 "Inter Marke", "Inter", var(--font-sans); letter-spacing: -.02em; text-transform: none; white-space: nowrap; }
+.wm b { font-weight: 900; }
+.kopf nav { display: flex; align-items: center; gap: 4px; }
+.kopf nav a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 0 12px; color: var(--silbergrau); font: 400 14px/1 var(--font-sans); text-decoration: none; transition: color 220ms ease; }
+
+/* ---------- Der Text als helles Blatt ---------- */
+main { --tinte: var(--schwarz); --tinte-2: var(--textgrau); --lese: color-mix(in srgb, var(--textgrau) 60%, var(--schwarz)); --haar: var(--haar-hell); position: relative; z-index: 1; margin-top: 12px; padding: 48px max(var(--rand), calc((100% - 580px) / 2)) calc(80px + var(--rund-xl)); border-radius: var(--rund-xl) var(--rund-xl) 0 0; background: var(--weiss); color: var(--schwarz); box-shadow: 0 -24px 60px -30px rgba(0,0,0,.35); }
+@media (min-width: 960px) { main { padding-top: 88px; padding-bottom: calc(112px + var(--rund-xl)); } }
+/* Schreibtisch: das weiße Blatt liegt auf der Bühne (Schwarz links und rechts, tiefer Schatten), wie das Aufmaßblatt der Startseite */
+@media (min-width: 960px) {
+  body:has(> main:not(.mitte)) { background: radial-gradient(900px 520px at 50% 40px, #151618, transparent 72%) no-repeat, var(--schwarz); }
+  main:not(.mitte) { width: min(100% - 96px, 960px); margin: 12px auto 0; padding-inline: max(var(--rand), calc((min(100vw - 96px, 960px) - 580px) / 2)); box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 80px 140px -40px rgba(0,0,0,.9); }
 }
-* { box-sizing: border-box }
-html { -webkit-text-size-adjust: 100% }
-body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.6; font-weight: 500; -webkit-font-smoothing: antialiased }
-/* Links in Schriftfarbe mit Unterstreichung (S6): Grün gehört Kicker, Haken und dem einen Wort der Überschrift */
-a { color: var(--fg); text-decoration: underline; text-decoration-color: #3a3a3a; text-decoration-thickness: 1.5px; text-underline-offset: 3px }
-a:hover { text-decoration-color: var(--fg) }
-.kopf { position: sticky; top: 0; z-index: 2; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(16px); -webkit-backdrop-filter: saturate(180%) blur(16px); border-bottom: 1px solid var(--line) }
-.kopf div { max-width: 760px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px }
-.marke { display: inline-flex; align-items: center; gap: 9px; color: var(--fg); text-decoration: none; font-weight: 800; font-size: 19px; letter-spacing: -.02em }
-.marke svg { width: 30px; height: 30px; flex: 0 0 auto }
-/* Haarstrich des Zeichens: im dunklen Modus hell, damit sich die schwarze Kachel vom Hintergrund abhebt */
-.fi-rand { stroke: #fff; stroke-opacity: .2 }
+main :where(a, button, input, textarea, summary):focus-visible { outline-color: var(--schwarz); }
+/* Etikett über dem Titel (z. B. „Angaben nach § 5 DDG“): Punkt in Violett, keine Versalien, 14 px, 6 px über dem Titel */
+main > p.klein:first-child { display: block; margin: 0 0 6px; font: 400 14px/1.4 var(--font-sans); letter-spacing: .02em; color: var(--tinte-2); }
+main > p.klein:first-child::before { content: ""; display: inline-block; vertical-align: 1px; width: 8px; height: 8px; margin: 0 9px 0 3px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 35%, transparent); }
+h1 { margin: 0 0 24px; font: 600 clamp(36px, 9vw, 56px)/.98 var(--font-sans); letter-spacing: -.035em; color: var(--tinte); text-wrap: balance; overflow-wrap: break-word; hyphens: auto; -webkit-hyphens: auto; hyphenate-limit-chars: 12 5 5; }
+.ak { color: var(--tinte-2); }
+/* Abschnitte: Haarlinie über jeder Überschrift (ein Punkt ohne Etikett hatte keine Bedeutung) */
+h2 { margin: 48px 0 12px; font: 600 22px/1.2 var(--font-sans); letter-spacing: -.02em; color: var(--tinte); text-wrap: balance; hyphens: auto; -webkit-hyphens: auto; }
+main > h2 { padding-top: 28px; border-top: 1px solid var(--haar); }
+h3 { margin: 28px 0 8px; font: 600 18px/1.3 var(--font-sans); letter-spacing: -.01em; color: var(--tinte); }
+p, li { color: var(--tinte-2); }
+main p, main li { color: var(--lese); font-size: 17px; line-height: 1.6; }
+p { margin: 0 0 14px; text-wrap: pretty; }
+strong, b { font-weight: 500; color: var(--tinte); }
+main a { color: var(--tinte); text-decoration: underline; text-decoration-color: var(--silbergrau); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) { main a:hover { text-decoration-color: currentColor; } .kopf nav a:hover { color: var(--weiss); } }
+ul { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 8px; }
+ul > li { position: relative; padding-left: 20px; }
+ul > li::before { content: ""; position: absolute; left: 2px; top: .72em; width: 6px; height: 6px; border-radius: 50%; background: var(--silbergrau); }
+ol { margin: 0 0 16px; padding-left: 24px; display: grid; gap: 8px; }
+ol > li::marker { color: var(--tinte); font-weight: 500; }
+.klein { font-size: 14px; line-height: 1.5; color: var(--tinte-2); }
+main p.klein { font-size: 14px; color: var(--tinte-2); }
+address { font-style: normal; }
+code { font-size: 14px; overflow-wrap: anywhere; }
+/* Platzhalter in Rechtstexten (noch nicht ausgefüllte Angaben): Hinweis im Ton der Koralle, schwarze Schrift */
+mark.ph { padding: 1px 6px; border-radius: 6px; background: color-mix(in srgb, var(--koralle) 26%, var(--weiss)); color: var(--schwarz); font-weight: 500; }
+/* Sprungziele (z. B. /agb/#widerrufsbelehrung) mit etwas Luft */
+[id] { scroll-margin-top: 24px; }
 
-/* Wortmarke wie in App und Betriebsbereich: „eezi“ Black, „frames“ Medium, immer klein */
-.wm { font-weight: 500; text-transform: none; white-space: nowrap } .wm b { font-weight: 800 }
-.kopf nav { display: flex; gap: 16px; font-size: 15px; font-weight: 600 }
-.kopf nav a { display: inline-flex; align-items: center; min-height: 44px; color: var(--fg2); text-decoration: none } .kopf nav a:hover { color: var(--fg) }
-main { max-width: 760px; margin: 0 auto; padding: 28px 16px 64px }
-h1 { margin: 6px 0 18px; font-size: clamp(32px, 7vw, 44px); line-height: 1.04; font-weight: 800; letter-spacing: -.04em }
-/* Kicker über dem h1: die Zeile davor (z. B. „Angaben nach § 5 DDG“) in Grün und Versalien, wie auf allen Seiten */
-main > p.klein:first-child { margin: 0 0 4px; font-size: 13px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--accent) }
-.ak { color: var(--accent) }
-h2 { margin: 34px 0 8px; font-size: 22px; line-height: 1.2; font-weight: 800; letter-spacing: -.015em }
-h3 { margin: 22px 0 6px; font-size: 18px; font-weight: 800 }
-p, li { color: var(--fg2) }
-p { margin: 0 0 12px }
-ul { margin: 0 0 12px; padding-left: 22px }
-li { margin-bottom: 4px }
-.karte { background: var(--surface); border-radius: 20px; padding: 18px 20px; margin: 0 0 16px; box-shadow: 0 0 0 2px var(--line) }
-.karte p:last-child { margin-bottom: 0 }
-.klein { font-size: 15px; color: var(--muted) }
-mark.ph { background: var(--ph-bg); color: var(--ph-fg); padding: 1px 6px; border-radius: 6px; font-weight: 700 }
-address { font-style: normal }
-/* Sprungziele (z. B. /agb/#widerrufsbelehrung) nicht unter der festen Kopfzeile */
-[id] { scroll-margin-top: 76px }
-.fuss { max-width: 760px; margin: 0 auto; padding: 0 16px 40px; font-size: 14px; color: var(--muted); display: flex; gap: 0 18px; flex-wrap: wrap; align-items: center }
-.fuss a { color: var(--muted); text-decoration: none } .fuss a:hover { color: var(--fg) }
-.mitte { padding-top: 8vh }
-/* Hauptaktion in Cream, Nebenaktion mit Rand (wie .btn.primary und .btn.ghost in gemeinsam.css) */
-.knopf { display: inline-flex; align-items: center; min-height: 52px; padding: 0 22px; border-radius: 999px; background: #f1f0ea; color: #161616; font-weight: 700; text-decoration: none; margin: 6px 12px 6px 0 }
-.knopf.leise { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 2px #3a3a3a }
+/* Karte: weiße Karte auf Weiß nur mit Rand und Schwebeschatten (DNA, G14) */
+.karte { margin: 0 0 20px; padding: 22px 24px; border-radius: var(--rund-l); background: var(--weiss); box-shadow: inset 0 0 0 1px var(--haar), 0 24px 48px -28px rgba(7,9,10,.3); }
+.karte > :last-child { margin-bottom: 0; }
+.karte > h2:first-child, .karte > h3:first-child { margin-top: 4px; }
+/* „Kurz gesagt“ (AGB, Cookies, Nutzungs- und Paketbedingungen): dunkle Kachel mit Lichtkante, Licht von unter der Kachel, das Etikett
+   mit violettem Punkt */
+main > h1 + .karte:has(> p > strong:first-child) { --tinte: var(--weiss); --tinte-2: var(--silbergrau); --lese: color-mix(in srgb, var(--silbergrau) 55%, var(--weiss)); position: relative; isolation: isolate; overflow: hidden; padding: 24px 24px 40px; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); color: var(--weiss);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1px rgba(255,255,255,.05), 0 2px 3px -1px rgba(7,9,10,.35), 0 30px 44px -26px rgba(7,9,10,.6); }
+main > h1 + .karte:has(> p > strong:first-child)::before { content: ""; position: absolute; z-index: -1; right: -14%; bottom: -95%; width: 80%; height: 130%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, var(--violett), color-mix(in srgb, var(--violett) 42%, transparent) 34%, color-mix(in srgb, var(--indigo) 55%, transparent) 56%, transparent 74%); }
+main > h1 + .karte:has(> p > strong:first-child) > p > strong:first-child::before { content: ""; display: inline-block; vertical-align: 1px; width: 8px; height: 8px; margin: 0 9px 0 3px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 35%, transparent); }
+main > h1 + .karte:has(> p > strong:first-child) a { color: var(--weiss); }
+main > h1 + .karte:has(> p > strong:first-child) :where(a):focus-visible { outline-color: var(--weiss); }
+main > h1 + .karte:has(> p > strong:first-child) mark.ph { color: var(--schwarz); }
+/* Auf dieser Seite (lange Texte): Stationen auf gepunkteter Linie, wie in den Ratgebern */
+.recht-inhalt { margin: 8px 0 40px; }
+.recht-inhalt > p { margin: 0 0 6px; font: 400 14px/1.35 var(--font-sans); letter-spacing: .02em; color: var(--tinte-2); }
+.recht-inhalt ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.recht-inhalt li { position: relative; padding: 0; }
+.recht-inhalt li:not(:last-child)::after { content: ""; position: absolute; left: 11px; top: 22px; height: 100%; border-left: 2px dotted var(--haar); }
+.recht-inhalt a { display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 10px; align-items: start; min-height: 44px; padding-block: 11px; color: var(--lese); font-size: 16px; line-height: 1.35; text-decoration: none; transition: color 220ms ease; }
+.recht-inhalt a::before { content: ""; position: relative; z-index: 1; justify-self: center; width: 9px; height: 9px; margin-top: 6px; border-radius: 50%; background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau); }
+@media (hover: hover) and (pointer: fine) { .recht-inhalt a:hover { color: var(--tinte); } }
+@media (min-width: 760px) { .recht-inhalt ol { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; } .recht-inhalt li::after { display: none; } }
+/* Zustand „eingegangen“: Ring in Violett */
+.karte.ok { box-shadow: inset 0 0 0 1.5px var(--violett), 0 24px 48px -28px rgba(7,9,10,.3); }
+.karte.ok h2, .karte.ok h1 { margin-top: 0; }
 
-/* Fußzeile: „Vertrag widerrufen“ hervorgehoben (Widerrufsfunktion, § 356a BGB), als Knopf mit Rand, Ziel ab 44 px */
-.fuss a { display: inline-flex; align-items: center; min-height: 44px }
-.fuss a.widerruf-knopf { padding: 0 16px; border-radius: 999px; color: var(--fg); font-weight: 700; text-decoration: none; box-shadow: inset 0 0 0 2px var(--fg) }
-/* Tabellen (Cookies): waagerecht scrollbar statt die Seite zu verbreitern */
-.tabelle { overflow-x: auto; margin: 0 0 16px; background: var(--surface); border-radius: 16px; box-shadow: 0 0 0 2px var(--line) }
-.tabelle table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 560px }
-.tabelle th, .tabelle td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); color: var(--fg2) }
-.tabelle tr:last-child td { border-bottom: 0 }
-.tabelle th { font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
-/* Telefon: jede Zeile als Block, Spaltentitel aus data-k (wie im Ratgeber), kein waagerechtes Scrollen */
+/* Tabellen (Cookies, Paketbedingungen): helle Karte, am Telefon jede Zeile als Block mit den Spaltentiteln aus data-k */
+.tabelle { margin: 0 0 20px; overflow-x: auto; border-radius: var(--rund-m); box-shadow: inset 0 0 0 1px var(--haar), 0 18px 40px -28px rgba(7,9,10,.3); }
+.tabelle table { width: 100%; min-width: 560px; border-collapse: collapse; font: 400 15px/1.45 var(--font-sans); }
+.tabelle th, .tabelle td { padding: 12px 16px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--haar); color: var(--tinte-2); }
+.tabelle tr:last-child td { border-bottom: 0; }
+.tabelle th { padding-block: 14px 10px; font: 400 13px/1.35 var(--font-sans); letter-spacing: .03em; }
+.tabelle td:first-child { color: var(--tinte); font-weight: 500; }
 @media (max-width: 600px) {
-  .tabelle table { min-width: 0 }
-  .tabelle table, .tabelle tbody, .tabelle tr, .tabelle td { display: block }
-  .tabelle thead { display: none }
-  .tabelle tr { padding: 12px 14px; border-bottom: 1px solid var(--line) }
-  .tabelle tr:last-child { border-bottom: 0 }
-  .tabelle td { padding: 0; border: 0 }
-  .tabelle td + td { margin-top: 4px }
-  .tabelle td[data-k]::before { content: attr(data-k); display: block; margin-top: 4px; font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+  .tabelle table { min-width: 0; }
+  .tabelle table, .tabelle tbody, .tabelle tr, .tabelle td { display: block; }
+  .tabelle thead { display: none; }
+  .tabelle tr { padding: 14px 16px; border-bottom: 1px solid var(--haar); }
+  .tabelle tr:last-child { border-bottom: 0; }
+  .tabelle td { padding: 0; border: 0; }
+  .tabelle td + td { margin-top: 6px; }
+  .tabelle td[data-k]::before { content: attr(data-k); display: block; margin-top: 6px; font: 400 13px/1.35 var(--font-sans); letter-spacing: .03em; color: var(--tinte-2); }
 }
-code { font-size: 15px; overflow-wrap: anywhere }
-/* Formular (Vertrag widerrufen): Felder 48 px, 17 px Schrift */
-.formular { display: flex; flex-direction: column; gap: 16px }
-.feld { display: flex; flex-direction: column; gap: 6px }
-.feld label { font-size: 15px; font-weight: 700; color: var(--fg) }
-.feld input, .feld textarea { width: 100%; min-height: 48px; padding: 10px 12px; border: 0; border-radius: 12px; background: var(--bg); color: var(--fg); font: inherit; font-size: 17px; box-shadow: inset 0 0 0 2px #3a3a3a }
-.feld textarea { resize: vertical; min-height: 96px }
-.feld input:focus-visible, .feld textarea:focus-visible, .knopf:focus-visible, .fuss a:focus-visible, a:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px }
-.feld input[aria-invalid="true"], .feld textarea[aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--bad) }
-.feld small { font-size: 15px; color: var(--muted) }
-.fehler { color: var(--bad) !important; font-size: 15px; margin: 0 }
-.formular .knopf { align-self: flex-start; margin: 0; border: 0; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer }
-.formular .knopf:disabled { opacity: .6; cursor: default }
-.karte.ok { background: var(--surface); box-shadow: 0 0 0 2px var(--fg) }
-/* Fehlerseite: Fotokarte (gemeinsam.css gibt es hier nicht, deshalb die Karte selbst) unter den Knöpfen, linksbündig wie alle Seiten */
-.mitte .foto-karte { position: relative; max-width: 560px; margin: 28px 0 0; border-radius: 24px; overflow: hidden; background: var(--surface); box-shadow: 0 0 0 2px var(--line) }
-.mitte .foto-karte img { display: block; width: 100%; height: auto }
-.mitte .foto-karte figcaption { padding: 10px 14px 12px; font-size: 13px; color: var(--muted); text-align: left }
-.karte.ok h2 { margin-top: 0 }
+
+/* ---------- Pillen: die eine volle Pille (Schwarz auf Hell, Weiß auf Dunkel) mit Pfeilkreis, Nebenweg als Umriss ---------- */
+.knopf { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 52px; margin: 6px 10px 6px 0; padding: 6px 6px 6px 24px; border: 0; border-radius: 999px; background: var(--schwarz); color: var(--weiss); font: 500 15px/1.2 var(--font-sans); text-decoration: none; cursor: pointer; transition: transform 220ms var(--druck), background-color 220ms ease, box-shadow 220ms ease; }
+main a.knopf { color: var(--weiss); text-decoration: none; }
+.knopf::after { content: ""; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--weiss) var(--pfeil-schwarz) center / 14px no-repeat; transition: transform 220ms var(--druck); }
+.knopf:active { transform: scale(.97); transition-duration: 0s; }
+.knopf.leise, main a.knopf.leise { padding: 6px 24px; background: transparent; color: var(--tinte); box-shadow: inset 0 0 0 1px var(--silbergrau); }
+.knopf.leise::after { content: none; }
+@media (hover: hover) and (pointer: fine) { .knopf:not(.leise):hover::after { transform: translateX(2px); } .knopf.leise:hover, main a.knopf.leise:hover { background: var(--indigo); color: var(--weiss); box-shadow: none; } }
+
+/* ---------- Formular (Vertrag widerrufen): Eingaben auf weißer Karte, Felder mit 1,5-px-Ring ---------- */
+.formular { display: flex; flex-direction: column; gap: 18px; }
+.feld { display: flex; flex-direction: column; gap: 8px; }
+.feld label { font: 500 15px/1.3 var(--font-sans); color: var(--tinte); }
+.feld input, .feld textarea { width: 100%; min-height: 52px; padding: 12px 20px; border: 0; border-radius: 999px; background: var(--weiss); color: var(--schwarz); font: 400 17px/1.4 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--textgrau); transition: box-shadow 220ms ease; }
+.feld textarea { min-height: 112px; border-radius: var(--rund-m); resize: vertical; }
+.feld input:focus-visible, .feld textarea:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 3px; box-shadow: inset 0 0 0 1.5px var(--schwarz); }
+.feld input[aria-invalid="true"], .feld textarea[aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--koralle); }
+.feld small { font-size: 14px; line-height: 1.45; color: var(--tinte-2); }
+/* Fehler: dunkler Ton der Koralle (5:1 auf Weiß, wie im Aufmaßblatt), dazu ein Punkt in Koralle, nie nur Farbe */
+.fehler { margin: 0; font-size: 15px; color: #b4502f !important; }
+.fehler::before { content: ""; display: inline-block; vertical-align: 1px; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--koralle); }
+.formular .knopf { align-self: flex-start; margin: 0; font-size: 15px; }
+.formular .knopf:disabled { opacity: .6; cursor: default; }
+
+/* ---------- Fuß (dunkel, mit Vorhang-Kante über dem Blatt) ---------- */
+.fuss { position: relative; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 0 20px; margin-top: calc(-1 * var(--rund-xl)); padding: 44px max(var(--rand), calc((100% - 1104px) / 2)) 48px; border-radius: var(--rund-xl) var(--rund-xl) 0 0; background: var(--schwarz); font: 400 14px/1.3 var(--font-sans); }
+.fuss a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; color: var(--silbergrau); text-decoration: none; transition: color 220ms ease; }
+/* „Vertrag widerrufen“ hervorgehoben (Widerrufsfunktion, § 356a BGB): Umriss-Pille, Ziel ab 44 px */
+.fuss a.widerruf-knopf { padding: 0 18px; border-radius: 999px; color: var(--weiss); box-shadow: inset 0 0 0 1px var(--silbergrau); transition: color 220ms ease, background-color 220ms ease, box-shadow 220ms ease, transform 220ms var(--druck); }
+.fuss a.widerruf-knopf:active { transform: scale(.97); transition-duration: 0s; }
+.fuss a[aria-current] { color: var(--weiss); }
+@media (hover: hover) and (pointer: fine) { .fuss a:hover { color: var(--weiss); } .fuss a.widerruf-knopf:hover { background: var(--indigo); box-shadow: none; } }
+
+/* ---------- Fehlerseite: ganz dunkel, das Fenster ohne Haus auf der Bühne (G4, G12, G14) ---------- */
+main.mitte { --tinte: var(--weiss); --tinte-2: var(--silbergrau); --lese: var(--silbergrau); display: grid; gap: 0; align-content: center; min-height: calc(100vh - 160px); margin: 0; padding: 24px var(--rand) 96px; border-radius: 0; background: var(--schwarz); color: var(--weiss); box-shadow: none; }
+main.mitte > * { max-width: 560px; }
+main.mitte > p.klein:first-child::before { background: var(--koralle); box-shadow: 0 0 0 3px color-mix(in srgb, var(--koralle) 35%, transparent); }
+main.mitte h1 { margin-bottom: 12px; }
+main.mitte p { margin: 0; font-size: 17px; }
+main.mitte p:has(.knopf) { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+main.mitte .knopf, main.mitte a.knopf { margin: 0; background: var(--weiss); color: var(--schwarz); }
+main.mitte .knopf::after { background: var(--schwarz) var(--pfeil-weiss) center / 14px no-repeat; }
+main.mitte .knopf.leise, main.mitte a.knopf.leise { background: transparent; color: var(--weiss); }
+main.mitte :where(a, button):focus-visible { outline-color: var(--weiss); }
+.mitte .foto-karte { position: relative; display: grid; justify-items: center; gap: 22px; margin: 8px 0 0; padding: 44px 24px 24px; border-radius: var(--rund-xl); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); isolation: isolate; }
+/* Kontaktschatten unter dem Fenster und Lichtteich dahinter */
+.mitte .foto-karte::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: radial-gradient(50% 42% at 50% 40%, #3a3a3d, transparent 72%); pointer-events: none; }
+.mitte .foto-karte::after { content: ""; position: absolute; left: 30%; right: 30%; top: 254px; height: 28px; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.6), transparent); pointer-events: none; }
+.mitte .foto-karte img { display: block; width: auto; height: 220px; max-width: 100%; object-fit: contain; }
+.mitte .foto-karte figcaption { text-wrap: pretty; }
+.mitte .foto-karte figcaption { justify-self: start; font-size: 14px; line-height: 1.45; color: var(--silbergrau); text-align: left; }
+/* Telefon: erst der Satz (Etikett und Titel), dann das Fenster, dann Text und Pillen im unteren Drittel; das Bild kleiner, damit die
+   Handlung auch auf kleinen Telefonen im ersten Bildschirm bleibt */
+@media (max-width: 959px) {
+  main.mitte { align-content: start; padding-top: 16px; }
+  main.mitte > .foto-karte { order: 0; margin: 24px 0 28px; padding: 28px 24px 18px; }
+  main.mitte > p.klein, main.mitte > h1 { order: -1; }
+  main.mitte > p:not(.klein) { order: 1; }
+  main.mitte .foto-karte img { height: 168px; }
+  main.mitte .foto-karte::after { top: 186px; }
+}
+@media (min-width: 960px) {
+  main.mitte { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 72px; align-items: center; padding: 48px max(var(--rand), calc((100% - 1104px) / 2)) 120px; }
+  main.mitte > :not(.foto-karte) { grid-column: 1; }
+  main.mitte > .foto-karte { grid-column: 2; grid-row: 1 / span 4; }
+}
+@media (prefers-reduced-motion: reduce) { .knopf, .knopf::after, .fuss a, .kopf nav a { transition-property: background-color, color, box-shadow !important; } }
+@media print {
+  html, body, main { background: #fff !important; color: #000 !important; }
+  main { width: auto !important; margin: 0 !important; --lese: #222; }
+  .recht-inhalt { display: none; }
+  main > h1 + .karte:has(> p > strong:first-child) { background: #fff !important; color: #000 !important; --tinte: #000; --lese: #222; }
+  main > h1 + .karte:has(> p > strong:first-child)::before { display: none; }
+  .kopf, .fuss { display: none; }
+  main { padding: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
+  .karte, .tabelle { box-shadow: 0 0 0 1px #999 !important; }
+}
