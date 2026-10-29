@@ -212,6 +212,15 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   auf Wunsch mitgestalten, erklärt „Fenster planen“ auf der Seite und bietet „Fenster konfigurieren“ gleich im Kästchen (Inhaber, später
   am selben Tag). Vorschlag für seine DNA (Abschnitt 9):
   „Ein Ablauf ist erst fertig, wenn jeder erreichbare Bildschirm darin im neuen Look steht.“
+- Knopf „Zum Konfigurator“ in der Leiste der Seite für Fensterbauer (Wunsch des Inhabers, 29.10.2026: „wenn ich … über die Seite
+  scrolle, so ein Button, wo drin steht zum Konfigurator … direkt in die erste Seite … soll auch zum Drücken animieren … nicht … die
+  Pakete … sondern direkt in den Konfigurator“): Oben im Kopf bleibt „Paket anfragen“; unterhalb des Kopfs zieht sich die Leiste wie
+  in den Paket-Vorlagen genau auf den Knopf zusammen (Umriss-Pille auf dunklem Glas mit weißem Pfeilkreis), beim Hochscrollen kommt sie
+  ganz (am Telefon Zeichen und Knopf, der Umschalter steht im Kopf der Seite). Beim ersten Erscheinen je Seitenaufruf leuchtet der Rand
+  zweimal violett auf und der Pfeil stupst zweimal im Kreis (1,4 s, nie in Schleife; ruhige Fassung ohne). Ziel
+  `/app/?ausprobieren=signature&direkt`: gleich „Was planst du?“ in der Kundenansicht, ohne Beispielseite und Kästchen, Rückweg zur
+  Seite für Fensterbauer. Vorschlag für seine DNA: „Eine Leiste darf einen zweiten Weg tragen, wenn der Inhaber ihn nennt; der Anreiz
+  ist einmalig, nie Dauerbewegung.“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

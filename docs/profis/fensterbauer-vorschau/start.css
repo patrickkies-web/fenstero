@@ -116,8 +116,30 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-leiste.ist-da { transform: none; transition-duration: 320ms; }
 .ez-leiste .ez-huelle { display: flex; align-items: center; justify-content: space-between; gap: var(--raum-3); padding-block: 8px; }
 .ez-leiste .ez-ansicht { display: inline-flex; }
-.ez-leiste .ez-wm, .ez-leiste > .ez-huelle > .dna-pille { display: none; }
-@media (min-width: 900px) { .ez-leiste .ez-wm { display: inline; } .ez-leiste > .ez-huelle > .dna-pille { display: inline-flex; } }
+.ez-leiste .ez-wm, .ez-leiste .ez-leiste__paket { display: none; }
+.ez-leiste__rechts { display: flex; align-items: center; gap: var(--raum-3); flex: none; }
+/* Telefon: Umschalter und Knopf passen nicht nebeneinander; der Umschalter steht oben im Kopf der Seite, die Leiste trägt Zeichen und Knopf */
+@media (max-width: 599px) { .ez-leiste .ez-ansicht { display: none; } }
+@media (min-width: 900px) { .ez-leiste .ez-wm { display: inline; } .ez-leiste .ez-leiste__paket { display: inline-flex; } }
+/* Knopf „Zum Konfigurator“ (Wunsch des Inhabers, 29.10.2026): Umriss-Pille mit weißem Pfeilkreis (G13), auf Glas über der Seite. Beim
+   Herunterscrollen zieht sich die Leiste auf ihn zusammen (Zuschnitt --schmal, gemessen in start.js), beim Hochscrollen kommt sie ganz.
+   Damit man ihn drückt: beim ersten Erscheinen leuchtet der Rand zweimal violett auf und der Pfeil stupst zweimal nach rechts
+   (ein Mal je Seitenaufruf, danach nur bei Hover); nie in Schleife */
+.ez-leiste .ez-zumkonfig { position: relative; padding: 0 4px 0 18px; gap: 10px; white-space: nowrap; background: rgba(7,9,10,.55); box-shadow: inset 0 0 0 1px rgba(255,255,255,.32), inset 0 1px 0 rgba(255,255,255,.14); }
+.ez-zumkonfig .dna-pille__pfeil { width: 36px; height: 36px; background: var(--weiss); color: var(--schwarz); }
+.ez-zumkonfig .dna-pille__pfeil svg { transition: transform 220ms cubic-bezier(.23, 1, .32, 1); }
+.ez-zumkonfig::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 2px var(--violett); opacity: 0; pointer-events: none; }
+@media (hover: hover) and (pointer: fine) { .ez-zumkonfig:hover .dna-pille__pfeil svg { transform: translateX(3px); } }
+.ez-leiste.ist-neu .ez-zumkonfig::after { animation: ez-ring 1200ms ease 200ms both; }
+.ez-leiste.ist-neu .ez-zumkonfig .dna-pille__pfeil svg { animation: ez-stups 1100ms cubic-bezier(.77, 0, .175, 1) 260ms both; }
+@keyframes ez-ring { 0%, 100% { opacity: 0; } 20%, 60% { opacity: 1; } 40% { opacity: .25; } }
+@keyframes ez-stups { 0%, 50%, 100% { transform: none; } 25%, 75% { transform: translateX(4px); } }
+.ez-leiste { clip-path: var(--schmal, inset(0 round 0)); transition: transform 220ms var(--dna-druck), clip-path 280ms cubic-bezier(.77, 0, .175, 1); }
+.ez-leiste.ist-schmal { transform: none; transition: transform 320ms var(--dna-druck), clip-path 280ms cubic-bezier(.77, 0, .175, 1); }
+.ez-leiste.ist-da { clip-path: inset(0 round 0); transition: transform 320ms var(--dna-druck), clip-path 280ms cubic-bezier(.77, 0, .175, 1); }
+.ez-leiste .ez-huelle > :not(.ez-leiste__rechts), .ez-leiste .ez-leiste__paket { transition: opacity 160ms ease; }
+.ez-leiste:not(.ist-da) .ez-huelle > :not(.ez-leiste__rechts), .ez-leiste:not(.ist-da) .ez-leiste__paket { opacity: 0; }
+.ez-leiste.ist-da .ez-huelle > :not(.ez-leiste__rechts), .ez-leiste.ist-da .ez-leiste__paket { transition: opacity 220ms ease 60ms; }
 
 /* ---------- Szene 1: Hero mit dem Konfigurator als Gerät auf der Bühne ---------- */
 .ez-hero { display: grid; gap: var(--raum-4); padding-block: var(--raum-1) var(--raum-7); }
@@ -405,7 +427,13 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-fuss__pilot .ez-badge-indigo { margin-right: 6px; height: 20px; vertical-align: -5px; }
 
 /* Eingebettet in die Startseite (portal.js, .fb.eingebettet): Kopf, Leiste, Vorhang und Fuß wie auf der eigenen Seite, das Portal zeichnet dort keinen Kopf */
-@media (prefers-reduced-motion: reduce) { .ez-leiste { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .ez-leiste, .ez-leiste.ist-da, .ez-leiste.ist-schmal { transform: none; opacity: 0; visibility: hidden; transition: opacity 160ms ease, visibility 0s linear 160ms; }
+  .ez-leiste.ist-da, .ez-leiste.ist-schmal { opacity: 1; visibility: visible; transition: opacity 220ms ease, visibility 0s; }
+  .ez-leiste .ez-huelle > *, .ez-leiste .ez-leiste__paket { transition: none; }
+  .ez-leiste.ist-neu .ez-zumkonfig::after, .ez-leiste.ist-neu .ez-zumkonfig .dna-pille__pfeil svg { animation: none; }
+  .ez-zumkonfig .dna-pille__pfeil svg { transition: none; }
+}
 
 /* Paketkarten: das Bild führt ins Beispiel (Fensterbau Brandt, web/vorschau/paket-beispiel/); Etikett als Glas über dem Bild (G10) */
 a.ez-paket__bild { position: relative; text-decoration: none; -webkit-tap-highlight-color: transparent; }

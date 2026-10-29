@@ -2457,8 +2457,11 @@ if (PROBE) {
   /* Firmenfarbe wie auf der Seite einer Instanz (der Server setzt dort --accent im Kopf, functions/instanz/seiten.js) */
   if (farbe) { try { document.documentElement.style.setProperty('--accent', farbe); document.documentElement.style.setProperty('--accent-soft', 'rgba(42, 180, 189, .14)'); } catch (e) { /* ok */ } }
 }
+/* Direkt in den Konfigurator (…?ausprobieren=<paket>&direkt, Knopf „Zum Konfigurator“ in der Leiste der Seite für Fensterbauer, Wunsch
+   des Inhabers 29.10.2026): ohne den Umweg über die Beispielseite; der Rückweg führt zur Seite für Fensterbauer */
+const PROBE_DIREKT = PROBE && (() => { try { return new URLSearchParams(location.search).has('direkt'); } catch (e) { return false; } })();
 /* Rückweg: Kam der Fensterbauer über die Beispielseite (Paket in der Adresse), führt „Zurück“ dorthin, sonst zur Seite für Fensterbauer */
-const PROBE_LANDING = (() => { if (!PROBE) return ''; let p = ''; try { p = String(new URLSearchParams(location.search).get('ausprobieren') || '').toLowerCase(); } catch (e) { p = ''; } return window.Pakete && window.Pakete.gueltig(p) ? '/vorschau/paket-beispiel/' + p + '.html?ausprobieren' : ''; })();
+const PROBE_LANDING = (() => { if (!PROBE) return ''; if (PROBE_DIREKT) return '/fuer-fensterbauer/'; let p = ''; try { p = String(new URLSearchParams(location.search).get('ausprobieren') || '').toLowerCase(); } catch (e) { p = ''; } return window.Pakete && window.Pakete.gueltig(p) ? '/vorschau/paket-beispiel/' + p + '.html?ausprobieren' : ''; })();
 let PROBE_DA = false; // nach dem Einstieg: eine leere Startseite führt zurück zur Beispielseite
 /* Testansicht mit dem Beispiel (…?ausprobieren&beispiel): das Projekt Familie Mustermann aus web/beispiele/mustermann/projekt.json, aus
    dem auch das Beispiel-PDF der Website entsteht (scripts/blatt-beispiel.mjs); der Fensterbauer ändert es im Konfigurator und sieht im
@@ -3163,7 +3166,7 @@ function startDna() {
   const stelle = '<div class="lg-karte lg-hell st-stelle-karte"><div class="lg-feld"><span class="dna-label" id="st-stelle-l">Die Stelle</span><div class="st-stelle" role="radiogroup" aria-labelledby="st-stelle-l">' +
     OPT.situation.map((x) => { const an = (x.k === 'neu') === neu; return '<button type="button" role="radio" data-act="situation" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '">' + esc(x.label) + '</button>'; }).join('') + '</div>' +
     '<p class="st-stelle-text" aria-live="polite">' + ST_STELLE[neu ? 'neu' : 'ersatz'] + (neu ? ' <button type="button" class="ulink" data-act="gloss" data-k="neuoeffnung">Mehr erfahren</button>' : '') + '</p></div></div>';
-  const zurLanding = PROBE && PROBE_LANDING && !S.windows.length, zur = zurLanding ? ['probe-landing', 'Zurück zur Website von Fensterbau Brandt'] : ['back', 'Zurück: Aufmaß']; // Testansicht: die Beispielseite ist die Website des Betriebs
+  const zurLanding = PROBE && PROBE_LANDING && !S.windows.length, zur = zurLanding ? ['probe-landing', PROBE_DIREKT ? 'Zurück zur Seite für Fensterbauer' : 'Zurück zur Website von Fensterbau Brandt'] : ['back', 'Zurück: Aufmaß']; // Testansicht: die Beispielseite ist die Website des Betriebs
   const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="' + zur[0] + '" aria-label="' + zur[1] + '">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="fotos">Weiter zu den Fotos' + pfeil + '</button></div>';
   return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(zur) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + probeInfo() + bento + stelle + rechtLinks() + fuss + '</div></div>', back: ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
 }

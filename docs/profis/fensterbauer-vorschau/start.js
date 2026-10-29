@@ -67,11 +67,28 @@
         grenze = r.top + (w.scrollY || 0) + (k.bottom - s.top);
       };
       messeGrenze(); w.addEventListener('resize', messeGrenze, sig); w.addEventListener('load', messeGrenze, sig);
+      /* Schmale Leiste (wie in den Paket-Vorlagen, Wunsch des Inhabers 29.10.2026): unterhalb des Kopfs bleibt der Knopf „Zum
+         Konfigurator“ stehen, die Leiste ist genau auf ihn zugeschnitten (runde Enden); beim Hochscrollen kommt sie ganz. Beim ersten
+         Erscheinen des Knopfs je Seitenaufruf einmal Ring und Stupser (ist-neu, 1,6 s) */
+      var konfigKnopf = leiste.querySelector('.ez-zumkonfig'), neuGezeigt = false, neuZeit = 0;
+      var messeKnopf = function () {
+        if (!konfigKnopf) return;
+        var l = leiste.getBoundingClientRect(), k = konfigKnopf.getBoundingClientRect(), r = 0;
+        leiste.style.setProperty('--schmal', 'inset(' + Math.max(0, Math.round(k.top - l.top - r)) + 'px ' + Math.max(0, Math.round(l.right - k.right - r)) + 'px ' +
+          Math.max(0, Math.round(l.bottom - k.bottom - r)) + 'px ' + Math.max(0, Math.round(k.left - l.left - r)) + 'px round 999px)');
+      };
+      messeKnopf(); w.addEventListener('resize', messeKnopf, sig); w.addEventListener('load', messeKnopf, sig);
+      if (d.fonts && d.fonts.ready) d.fonts.ready.then(messeKnopf);
       var pruefe = function () {
         geplant = false; if (!lebt()) return;
         var y = w.scrollY || 0;
         if (y < letzte) { hoch += letzte - y; runter = 0; } else if (y > letzte) { runter += y - letzte; if (runter > 24) hoch = 0; }
-        leiste.classList.toggle('ist-da', y > grenze && hoch > 24);
+        var unten = y > grenze, ganz = unten && hoch > 24;
+        var schmal = !!konfigKnopf && unten && !ganz;
+        if (schmal && !leiste.classList.contains('ist-schmal')) messeKnopf(); // vor dem Zuschnitt neu messen (Schrift, Breite, Auftritt)
+        leiste.classList.toggle('ist-da', ganz);
+        leiste.classList.toggle('ist-schmal', schmal);
+        if (unten && konfigKnopf && !neuGezeigt) { neuGezeigt = true; leiste.classList.add('ist-neu'); clearTimeout(neuZeit); neuZeit = setTimeout(function () { leiste.classList.remove('ist-neu'); }, 1600); }
         letzte = y;
       };
       w.addEventListener('scroll', function () { if (!geplant) { geplant = true; w.requestAnimationFrame(pruefe); } }, sigPassiv);
