@@ -249,6 +249,16 @@ window.Buehne3D = (function () {
     'if(rep&&A.w>0.0){float f0=uSP[s0];float per=A.w;if(per<aa*2.0)return uLM[i];t=f0+mod(t-f0,per);vec4 c=verlauf(s0,n,t,aa);float dw=min(t-f0,f0+per-t);' +
     'c=mix(mix(uSC[s0],uSC[s0+n-1],0.5),c,smoothstep(0.0,aa,dw));return mix(uLM[i],c,smoothstep(aa*2.0,aa*4.0,per));}' +
     'return verlauf(s0,n,t,aa);}' +
+    /* Blick durchs Glas von innen (uLi.w 2: Klarglas am Fenster, 3: Sonnenschutzglas): Himmel, eine Baumreihe in der Ferne und Rasen,
+       unscharf wie bei einem Foto, das aufs Fenster scharf stellt. Höhe und Seite aus der Lage in der Öffnung (über alle Scheiben
+       durchgehend, als stünde das Auge gut zwei Öffnungshöhen davor) und aus der Blickrichtung der Kamera: beim Drehen wandert die
+       Aussicht hinter dem Rahmen, so liest sich die Scheibe als Glas statt als graue Fläche (Inhaber, 30.10.2026: „ausgegraut“) */
+    'vec3 aussicht(float el,float az){float hz=-0.17;float hs=clamp((el-hz)/0.32,0.0,1.0);vec3 sky=mix(vec3(0.85,0.88,0.9),vec3(0.6,0.71,0.84),smoothstep(0.0,1.0,hs));' +
+    'sky=mix(sky,vec3(0.92,0.93,0.94),0.3*smoothstep(0.5,0.85,rausch(vec2(az*3.0,el*8.0)+4.0))*smoothstep(0.03,0.14,el-hz));' +
+    'float tf=hz+0.035+0.055*rausch(vec2(az*7.0,1.0))+0.02*rausch(vec2(az*26.0,5.0));float baum=1.0-smoothstep(tf-0.014,tf+0.014,el);' +
+    'vec3 gr=mix(vec3(0.36,0.41,0.34),vec3(0.48,0.52,0.45),rausch(vec2(az*18.0,el*24.0)));gr=mix(gr,sky,0.3*(1.0-smoothstep(0.0,0.08,tf-el)));vec3 c=mix(sky,gr,baum);' +
+    'float hk=hz-0.012+0.008*rausch(vec2(az*12.0,9.0));float bo=1.0-smoothstep(hk-0.008,hk+0.008,el);vec3 ra=mix(vec3(0.6,0.63,0.53),vec3(0.5,0.54,0.44),clamp((hk-el)/0.22,0.0,1.0));c=mix(c,ra,bo);' +
+    'float l=dot(c,vec3(0.3,0.59,0.11));return mix(vec3(l),c,0.6);}' +
     'void main(){gFw=fwidth(vP);vec3 N=normalize(mix(uN,uN2,clamp(uNA>0.5?vP.y/max(uWH.y,1e-3):vP.x/max(uWH.x,1e-3),0.0,1.0)));vec3 V=normalize(uEye-vW);float fs=dot(N,V);' +
     '\n#ifdef SCHNITT\nif(uSide>0.5&&fs<0.0)discard;if(uSide<-0.5&&fs>0.0)discard;\n#endif\n' +
     'vec2 P=vP;vec4 c=uBase;for(int i=4;i>=0;i--){if(i>=uNL)continue;vec4 l=lage(i,P);c=l+c*(1.0-l.a);}' +
@@ -279,7 +289,8 @@ window.Buehne3D = (function () {
     'if(fs<0.0){float da=max(c.a,0.94);float yv=clamp(vP.y/max(uWH.y,1.0),0.0,1.0),xv=clamp(vP.x/max(uWH.x,1.0),0.0,1.0);float hi=1.0-smoothstep(0.05,0.62,yv);' +
     'rgb=mix(rgb,vec3(0.1,0.11,0.12)*da,0.74);c.a=da;F=max(F,0.18)+0.36*hi;env=mix(env,vec3(0.8,0.86,0.93),0.55*hi);float hw=max(uPr.w,1.0);rgb+=vec3(0.92,0.95,0.98)*0.15*exp(-pow((vW.x*0.7+vW.y)/hw/0.1,2.0))*da;}' +
     /* von innen: die helle Durchsicht, dazu ein breiter, weicher Glanz schräg über alle Scheiben (Spiegelung des Raums, kaum sichtbar) */
-    'else{rgb=mix(rgb,c.rgb*0.99,0.75*(1.0-gPG));float hw=max(uPr.w,1.0);rgb+=vec3(0.97,0.98,1.0)*0.09*exp(-pow((vW.x*0.6+vW.y)/hw/0.2+0.9,2.0))*c.a*(1.0-gPG);}rgb=rgb*(1.0-F)+env*F*c.a;}' +
+    'else{if(uLi.w>1.5){float hw=max(uPr.w,1.0);vec3 d=-V;float el=-vW.y/(2.2*hw)-d.y,az=vW.x/(2.2*hw)+d.x/max(length(d.xz),1e-3);' +
+    'vec3 au=aussicht(el,az)*(uLi.w>2.5?vec3(0.52,0.58,0.64):vec3(0.95,0.985,0.975));rgb=mix(rgb/max(c.a,1e-3),au,1.0-gPG)*uOp;c.a=uOp;}else rgb=mix(rgb,c.rgb*0.99,0.75*(1.0-gPG));float hw=max(uPr.w,1.0);rgb+=vec3(0.97,0.98,1.0)*0.09*exp(-pow((vW.x*0.6+vW.y)/hw/0.2+0.9,2.0))*c.a*(1.0-gPG);}rgb=rgb*(1.0-F)+env*F*c.a;}' +
     'if(c.a>0.0)rgb=tm(rgb/c.a)*c.a;' +
     'c.rgb=rgb;}else c.rgb*=ao;' +
     'o=c;}';
@@ -824,6 +835,13 @@ window.Buehne3D = (function () {
     if (ac && v.art) { const f = farbe(ac); if (f) v.artFarbe = f.slice(0, 3); }
     m.set(key, v); return v;
   }
+  /* Art des Glases für den Shader (uLi.w): 2 Klarglas mit Aussicht, 3 Sonnenschutzglas mit getönter Aussicht, 1 wie gemalt (Ornament- und
+     Vogelschutzglas, Türen mit Terrasse dahinter, Messen im dunklen Raum) */
+  function glasArt(stage) {
+    const sc = stage.classList;
+    if (sc.contains('raum-licht') || sc.contains('glas-sicht') || sc.contains('glas-vogel') || stage.querySelector('[data-r="floor-out"]')) return 1;
+    return sc.contains('glas-sonne') ? 3 : 2;
+  }
   /* Hintergrund einer Fläche: was app.js geschrieben hat (roh), sonst der Klassenwert */
   function flaecheStoff(el, stage) {
     const ist = (k) => el.classList.contains(k), raum = stage.classList.contains('raum-licht'), putz = raum ? RAUM.putz : PUTZ;
@@ -937,7 +955,7 @@ window.Buehne3D = (function () {
       /* Bänder und die Rosette des Griffs als Körper bis auf das Profil (vorher schwebte die Rosette schräg gesehen als Platte darüber) */
       if ((c.contains('w3d-band') || c.contains('w3d-ros')) && el._tief > 0.3) { koerper(el, Mf, f.W, f.H, flaecheStoff(el, stage), o, c.contains('w3d-ros') ? Math.min(el._rund || 0, f.W / 2, f.H / 2) : Math.min(f.W, f.H) * 0.3, -el._tief, 0); return; }
       const ao = aoFuer(role, f, stage);
-      const glas = c.contains('w3d-glass') && !c.contains('w3d-paneel'), glasGel = c.contains('w3d-gel-glas'), luecke = !glasGel && (c.contains('w3d-gitter') || (c.contains('w3d-gel') && !c.contains('w3d-gel-h')));
+      const glas = c.contains('w3d-glass') && !c.contains('w3d-paneel') ? glasArt(stage) : 0, glasGel = c.contains('w3d-gel-glas'), luecke = !glasGel && (c.contains('w3d-gitter') || (c.contains('w3d-gel') && !c.contains('w3d-gel-h')));
       const lage = role === 'floor-out' || role === 'wall-out' || role.indexOf('sa-') === 0 ? 2 : role === 'floor-in' || role.indexOf('sill-') === 0 ? 1 : 0;
       /* seite: nur von vorn sichtbar wie backface-visibility: hidden (Blende des Aufsatzkastens nur von außen) */
       const vorn = role === 'floor-in' || el.style.backfaceVisibility === 'hidden';
@@ -1390,7 +1408,7 @@ window.Buehne3D = (function () {
     /* uFx.w: Laibungen nach unten (Sturz) bekommen Licht vom Boden und der Fensterbank zurück, wie in echt; sonst wirkt der Sturz wie ein graues Brett */
     gl.uniform4f(u.uFx, kt ? kt[0] : 0, it.rund || 0, schnitt, it.hinten === 2 ? 1 : 0);
     gl.uniform1f(u.uOp, it.op);
-    gl.uniform4f(u.uLi, it.unbeleuchtet ? 0 : 1, st.glanz[0], st.glanz[1], it.glas ? 1 : 0);
+    gl.uniform4f(u.uLi, it.unbeleuchtet ? 0 : 1, st.glanz[0], st.glanz[1], it.glas ? +it.glas : 0);
     gl.uniform1f(u.uSide, it.seite || 0);
     /* die Fuge liegt schmal und tief zwischen Laibung und Rahmen immer im Schatten: ohne Schattenkarte, sonst stufte deren Kante
        sie zu einer gestrichelten Linie */
@@ -1464,6 +1482,8 @@ window.Buehne3D = (function () {
       const pk = B.picks.find((x) => x.i === i); return pk ? bildschirm(B, pk.M, pk.w / 2, pk.h / 2) : null;
     },
     rollen(stage) { const B = stage && stage._b3; return B && B.items ? B.items.map((x) => x.role || '') : []; },
+    /* Scheiben: Art des Glases (2 Klarglas mit Aussicht, 3 Sonnenschutz, 1 gemalt) und zwei Punkte auf dem Schirm, oben und unten in der Scheibe */
+    glas(stage) { const B = stage && stage._b3; return B && B.items ? B.items.filter((x) => x.glas).map((x) => ({ role: x.role, art: +x.glas, oben: bildschirm(B, x.M, x.W / 2, x.H * 0.12), unten: bildschirm(B, x.M, x.W / 2, x.H * 0.9) })) : []; },
     /* gezeichnete Griffe (innen handle-i, außen ga-i, Kleinteile hk-i, hs-i): Rolle → Mitte auf dem Schirm */
     griffe(stage) {
       const B = stage && stage._b3, o = {}; if (!B || !B.items) return o;
