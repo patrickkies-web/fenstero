@@ -84,7 +84,10 @@ export async function api(request, env, ctx0, inst) {
     if (!treffer) return json({ ok: false, fehler: 'not_found' }, 404);
     /* Das frühere Konto für Betriebe gibt es seit 28.10.2026 nicht mehr: auf der Hauptdomain keine Konten, Links und Eingänge für Betriebe
        (Fensterbauer nutzen eeziframes nur mit einem Paket). Instanzen (Signature-Dashboard) sind nicht betroffen; BETRIEBSKONTO=1 nur zum Prüfen */
-    if (!inst && !k.betriebskonto && (pfad.startsWith('/api/konto') || pfad.startsWith('/api/link/') || pfad === '/api/aufmass')) return json({ ok: false, fehler: 'Das Konto für Fensterbauer gibt es nicht mehr. Ihren eigenen Fenster-Konfigurator bekommen Sie als Paket: eeziframes.com/fuer-fensterbauer/' }, 410);
+    /* Ausgenommen: der Bereich für Fensterbauer der Vermittlung (/api/konto/anfragen, /api/konto/partner, /api/konto/betrieb; seit 30.10.2026,
+       functions/api/vermittlung-partner.js), der mit dem Kundenkonto per Code arbeitet, nicht mit dem alten Betriebskonto */
+    const kontoVermittlung = /^\/api\/konto\/(anfragen|partner|betrieb)(\/|$)/.test(pfad);
+    if (!inst && !k.betriebskonto && !kontoVermittlung && (pfad.startsWith('/api/konto') || pfad.startsWith('/api/link/') || pfad === '/api/aufmass')) return json({ ok: false, fehler: 'Das Konto für Fensterbauer gibt es nicht mehr. Ihren eigenen Fenster-Konfigurator bekommen Sie als Paket: eeziframes.com/fuer-fensterbauer/' }, 410);
     const sp = speicher(k), zd = zahlungsdienst(k);
     const brauchtDaten = pfad.startsWith('/api/konto') || pfad.startsWith('/api/link') || pfad.startsWith('/api/kunde') || pfad === '/api/aufmass' || pfad.startsWith('/api/instanz');
     if (brauchtDaten && !sp) return json({ ok: false, fehler: 'Noch nicht eingerichtet: Die Datenbank fehlt (SUPABASE_URL, SUPABASE_SECRET_KEY).' }, 503);
