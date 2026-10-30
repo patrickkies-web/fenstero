@@ -207,7 +207,7 @@ export default async (h) => {
   /* ---------- 29.6 Datenschutz und Cookies auf eeziframes.com ---------- */
   const dsE = (await h.api('localhost', '/datenschutz/')).text, ckE = (await h.api('localhost', '/cookies/')).text;
   const p6 = (/<h2 id="pakete">[\s\S]*?(?=<h2)/.exec(dsE) || [''])[0];
-  ok(/<h2 id="pakete">9\. Konfigurator-Pakete für Fensteranbieter<\/h2>/.test(dsE) && /__Host-kunde/.test(p6) && !/__Host-partner|\/partner\//.test(p6) && /Art\. 6 Abs\. 1 lit\. b DSGVO/.test(p6) && /Stripe/.test(p6) && /Resend/.test(p6) && /Supabase/.test(p6) && /Art\. 28 DSGVO/.test(p6) && /Auftragsverarbeiter/.test(p6) &&
+  ok(/<h2 id="pakete">9\. Konfigurator-Pakete und Bereich für Fensterbetriebe<\/h2>/.test(dsE) && /__Host-kunde/.test(p6) && !/__Host-partner|\/partner\//.test(p6) && /Art\. 6 Abs\. 1 lit\. b DSGVO/.test(p6) && /Stripe/.test(p6) && /Resend/.test(p6) && /Supabase/.test(p6) && /Art\. 28 DSGVO/.test(p6) && /Auftragsverarbeiter/.test(p6) &&
     p6.includes('<!--pakete:f-bestellEntwurfTage-->' + F.bestellEntwurfTage + '<') && p6.includes('<!--pakete:f-loeschenNachEndeTage-->' + F.loeschenNachEndeTage + '<') && p6.includes('<!--pakete:f-sitzungTage-->' + F.sitzungTage + '<') &&
     /<h2 id="widerruf">11\. Widerruf/.test(dsE) && /<h2[^>]*>12\. Ihre Rechte<\/h2>/.test(dsE) && /__Host-kunde/.test(ckE) && /__Host-inhaber/.test(ckE) && !/__Host-partner/.test(ckE) && /href="\/datenschutz\/#pakete"/.test(ckE),
     '29.6 Datenschutz eeziframes.com: Abschnitt 9 zu den Konfigurator-Paketen (Frage, Kundenkonto mit Cookie, Bestellung, Stripe, Resend, Supabase, Fristen aus instanzregeln.js, eeziframes als Auftragsverarbeiter der Instanzen), Nummern danach verschoben; Cookies nennt __Host-kunde und __Host-inhaber');
