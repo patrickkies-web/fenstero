@@ -1700,6 +1700,10 @@ if (teil(10)) {
   const ldjson = (html) => [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => { try { return JSON.parse(m[1]); } catch (e) { return null; } });
   const eur = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2).replace('.', ',')) + ' €';
 
+  /* Vorschaubild zum Teilen: Ratgeber und Unterseiten für Fensterbauer mit eigener Datei web/bilder/og/<slug>.png (scripts/og-bilder.mjs,
+     seit 30.10.2026), alle übrigen Seiten /og.png */
+  const ogSlug = (pfad) => (pfad.match(/^\/(?:ratgeber|fuer-fensterbauer)\/([^/]+)\/$/) || [])[1];
+  const ogBild = (pfad) => (ogSlug(pfad) && fs10.existsSync(path10.join(WURZEL, 'web/bilder/og', ogSlug(pfad) + '.png')) ? '/bilder/og/' + ogSlug(pfad) + '.png' : '/og.png');
   /* a) Jede Seite der Sitemap ohne JavaScript: ein h1, Titel, Beschreibung, strukturierte Daten; Pilotphase per Kopfzeile */
   const intern = new Set();
   for (const s of seo.SEITEN) {
@@ -1708,7 +1712,7 @@ if (teil(10)) {
     const rechts = ['/impressum/', '/datenschutz/', '/agb/', '/nutzungsbedingungen/', '/cookies/', '/widerruf/', '/konfigurator-bedingungen/'].includes(s.pfad), ld = ldjson(r.text);
     ok(r.status === 200 && (r.text.replace(/<template[\s\S]*?<\/template>/g, '').match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titel) && titel.length <= 75 && (rechts || (beschr.length >= 70 && beschr.length <= 170)), s.pfad + ': ohne JavaScript genau ein h1, Titel mit Marke (' + titel.length + ' Zeichen)' + (rechts ? '' : ', Beschreibung (' + beschr.length + ' Zeichen)'));
     ok(!/<meta name="robots"/.test(r.text) && r.h.get('x-robots-tag') === seo.SPERRE && !!r.h.get('content-security-policy') && r.h.get('link') === '<' + BASE + s.pfad + '>; rel="canonical"', s.pfad + ': Pilotphase per Kopfzeile noindex (kein Meta-Tag), CSP und Canonical vom Worker');
-    if (!rechts) ok(ld.length > 0 && ld.every((x) => x && x['@context'] === 'https://schema.org') && !/"(url|@id|item|mainEntityOfPage|logo)":"\//.test(r.text) && (r.text.match(/<meta property="og:image" content="([^"]*)"/) || [])[1] === BASE + '/og.png', s.pfad + ': strukturierte Daten (JSON-LD) lesbar, Adressen darin und im Vorschaubild absolut');
+    if (!rechts) ok(ld.length > 0 && ld.every((x) => x && x['@context'] === 'https://schema.org') && !/"(url|@id|item|mainEntityOfPage|logo)":"\//.test(r.text) && (r.text.match(/<meta property="og:image" content="([^"]*)"/) || [])[1] === BASE + ogBild(s.pfad), s.pfad + ': strukturierte Daten (JSON-LD) lesbar, Adressen darin und im Vorschaubild absolut (' + ogBild(s.pfad) + ')');
     for (const m of r.text.matchAll(/href="(\/[^"#]*)/g)) intern.add(m[1]);
   }
   const tot = [];
@@ -1844,6 +1848,12 @@ if (teil(10)) {
   ok(!!zoho10 && zoho10.status === 200 && zohoText10 === '41302434' && zohoText10 === fs10.readFileSync(path10.join(WURZEL, 'web/verifyforzoho.html'), 'utf8') && /text\/html/.test(zoho10.headers.get('content-type') || '') && routen.includes('/verifyforzoho.html'), 'Bestätigung der Domain für Zoho Mail: /verifyforzoho.html liefert genau den Code wie die Datei in web/, über den Worker und ohne Weiterleitung');
   const og = fs10.readFileSync(path10.join(WURZEL, 'web/og.png'));
   ok(og.readUInt32BE(16) === 1200 && og.readUInt32BE(20) === 630 && og.length < 200000, 'Vorschaubild zum Teilen: 1200 × 630, ' + Math.round(og.length / 1024) + ' KB');
+  /* je Seite mit Zeichnung ein eigenes Vorschaubild (scripts/og-bilder.mjs): 1200 × 630, unter 200 KB, jede Datei gehört zu einer Seite */
+  const ogDateien = fs10.readdirSync(path10.join(WURZEL, 'web/bilder/og')).filter((f) => f.endsWith('.png')), ogFehler = [];
+  const ogSeiten = new Map(seo.SEITEN.filter((x) => ogSlug(x.pfad)).map((x) => [ogSlug(x.pfad) + '.png', x.pfad]));
+  for (const f of ogDateien) { const b = fs10.readFileSync(path10.join(WURZEL, 'web/bilder/og', f)); if (b.readUInt32BE(16) !== 1200 || b.readUInt32BE(20) !== 630 || b.length >= 200000 || !ogSeiten.has(f)) ogFehler.push(f); }
+  for (const [f, pf] of ogSeiten) if (/<figure class="rg-bild"><img /.test(fs10.readFileSync(path10.join(WURZEL, 'web', pf, 'index.html'), 'utf8')) && !ogDateien.includes(f)) ogFehler.push(pf + ' ohne Bild');
+  ok(!ogFehler.length && ogDateien.length >= 40, 'Vorschaubilder je Seite (' + ogDateien.length + ', web/bilder/og/): 1200 × 630, unter 200 KB, jede Datei zu einer Seite, jede Seite mit Zeichnung mit Bild' + (ogFehler.length ? ' (' + ogFehler.join(', ') + ')' : ''));
   /* Das Zeichen überall gleich (eine Quelle: scripts/logo-setzen.py): alle Seitenköpfe (die Zentrale zeichnet es per Skript), Favicon,
      Zentrale, Logo.svg in App und Betriebsbereich; das PDF mit denselben Punkten; das Bild für die E-Mails (scripts/marke-bilder.mjs) */
   const gem10 = fs10.readFileSync(path10.join(WURZEL, 'web/assets/gemeinsam.js'), 'utf8'), innen10 = (gem10.match(/var LOGO_INNEN = '([^']*)';/) || [])[1] || '';
