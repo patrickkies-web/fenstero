@@ -298,6 +298,13 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   „Wir zeigen dir mehrere Betriebe … erhältst du es kostenlos statt für 7,99 € und obendrein …“). Beim Erscheinen läuft dreimal ein violetter Ring nach außen und der Pfeil stupst
   (1,4 s je Takt, einmal je Seitenaufruf bzw. Folie, ruhige Fassung ohne), nie in Schleife. Sichtbar nur bei eingeschalteter
   Vermittlung. Vorschlag für seine DNA: „Ein Angebot, das Geld spart, darf über dem Preis stehen und einmal auf sich aufmerksam machen.“
+- Weiche und Betriebe (Inhaber, 30.10.2026): Untertitel „Wähle, wie du fortfahren möchtest.“, im weißen Feld sein Satz („Gestatte uns,
+  das Aufmaßblatt an von dir ausgewählte Betriebe zu schicken (und nur an diese).“), die zwei Karten deshalb untereinander; darunter die
+  Daten-Garantie als Feld nach G14 mit Chip in Indigo und Schild (sein Wortlaut, so gefasst, dass er stimmt), dann „Warum kostenlos?“ zum
+  Aufklappen. Auf Weg A kommen die Betriebe vor dem Kontakt: Die Folie hat nur das Feld Postleitzahl, mit der fünften Ziffer steht die
+  Liste da (kein Ladebild, wo gespeicherte Suchen der Umgebung reichen); Name, Telefon und Einwilligung erst danach. Protokoll
+  docs/profis/2026-10-30-vermittlung-sofort.md. Vorschlag für seine DNA: „Was der Kunde zuerst sehen will (die Betriebe), kommt vor dem,
+  was wir von ihm wollen (seine Nummer).“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

@@ -3,9 +3,14 @@
    Telefonnummer per Code und schickt ab. Der Inhaber sieht die Anfrage in der Zentrale, ruft die Betriebe an und schickt das Aufmaßblatt
    per Mail nur an die, die im Gespräch zugestimmt haben (§ 7 UWG: keine Mail an einen Betrieb ohne Zustimmung).
    Öffentliche Routen (nur auf der Hauptdomain):
-     POST /api/vermittlung/suche  { plz, ort }   → { ok, betriebe: [{ id, name, ort, km, leistungen }], umkreis, quelle }
-                                                 quelle: 'ki' | 'zwischenspeicher' | 'attrappe' | 'keine'; Telefon, Website und Straße der
-                                                 Betriebe bleiben auf dem Server (Zwischenspeicher je PLZ, 30 Tage)
+     POST /api/vermittlung/suche  { plz }        → { ok, betriebe: [{ id, name, ort, km, leistungen }], umkreis, quelle, plz, ort }
+                                                 quelle: 'zwischenspeicher' | 'umgebung' | 'ki' | 'attrappe' | 'keine'; Telefon, Website
+                                                 und Straße der Betriebe bleiben auf dem Server (Zwischenspeicher je PLZ, 30 Tage;
+                                                 Vorrat 180 Tage); ort kommt aus der Tabelle der Postleitzahlen
+   Sofort statt warten (Inhaber, 30.10.2026): Die Suche nimmt zuerst die gespeicherten Suchen aller PLZ im Umkreis von 25 km (eigene,
+   die der Nachbarn und den Vorrat) und rechnet die Entfernung jedes Betriebs zum Kunden neu (vermittlung-ort.js); erst wenn das
+   weniger als drei Betriebe ergibt, sucht die KI neu, knapp und schneller. Der Vorrat (vorratLauf, alle 10 Minuten) füllt ohne Kunden
+   Suchen für Stützpunkte über ganz Deutschland, nur mit VERMITTLUNG_VORRAT (Suchen je Tag, Vorgabe 0 = aus).
      POST /api/vermittlung/code   { tel }        → { ok, kanal: 'sms'|'anruf', an: '0171 ••• 4567', token, attrappe? }
                                                  ohne Anbieter und ohne Attrappe { ok, ohneCode: true }
      POST /api/vermittlung/senden { kontakt, plz, betriebe, token, code, einwilligung, aufmass, eckdaten, pdf } → { ok, nr }
@@ -23,14 +28,15 @@ import { postDienst, mailOk } from './post.js';
 import { ablage } from './fotos.js';
 import { alarmMail } from './ki.js';
 import { vermittlungDaten } from './vermittlung-daten.js';
-import { sucheArt, kiSuche, attrappeBetriebe, oeffentlich, ortText, betriebId, webText, UMKREIS, MODELL, ZEIT_MS } from './vermittlung-suche.js';
+import { sucheArt, kiSuche, attrappeBetriebe, oeffentlich, betriebId, webText, UMKREIS, MAX_BETRIEBE, MODELL, ZEIT_MS } from './vermittlung-suche.js';
+import { plzInfo, km as kmZwischen, umkreisPlz, betriebLage, vorratPlz } from './vermittlung-ort.js';
 import { smsArt, smsDienst } from './vermittlung-sms.js';
 import { inhaberMail, eingangMail, betriebMail, weitergabeMail, eckZeilen, erreichText } from './vermittlung-mails.js';
 import { kaufNachweis } from './eigene.js';
 
 const MIN = 60000, TAG = 864e5;
 export const AUFBEWAHRUNG_TAGE = 180;
-const SUCHE_TAGE = 30, LEER_TAGE = 1, GRENZE_90 = 2, MAX_BETRIEBE_ZENTRALE = 12;
+const SUCHE_TAGE = 30, LEER_TAGE = 1, VORRAT_TAGE = 180, NAH_KM = 25, SOFORT_AB = 3, GRENZE_90 = 2, MAX_BETRIEBE_ZENTRALE = 12;
 /* Bis zu fünf Betriebe je Anfrage (Inhaber, 29.10.2026: „nicht beschränken, anfangen mit fünf“), mindestens zwei, wenn die Suche so
    viele gefunden hat (sonst gibt es nichts zu vergleichen); das Aufmaß geht höchstens an fünf und, wenn der Kunde gewählt hat, nur an die
    gewählten („Nur die Betriebe, die du auswählst. Sonst niemand.“) */
@@ -95,35 +101,67 @@ export const vermittlungStatus = (k, env) => ({ an: vermittlungAn(k, env), suche
 const tagMax = (env) => { const n = Number(env && env.VERMITTLUNG_SUCHE_TAG_MAX); return env && env.VERMITTLUNG_SUCHE_TAG_MAX !== undefined && env.VERMITTLUNG_SUCHE_TAG_MAX !== '' && Number.isFinite(n) ? Math.max(1, n) : 300; };
 const kurzHash = async (k, s) => hex(await hmac(geheimnis(k) || 'ohne', s)).slice(0, 20);
 const codeHash = async (k, tel, code) => hex(await hmac(geheimnis(k) || 'ohne', 'vcode|' + tel + '|' + code));
-/* Zwischenspeicher: 30 Tage, eine leere Suche nur einen Tag */
+/* Zwischenspeicher: Suchen der Kunden 30 Tage, Vorrat 180 Tage; eine leere Suche einen Tag (im Vorrat 30, nach einem Fehler einen) */
 function gueltig(s, jetzt) {
-  const alter = jetzt - (Date.parse(s.created_at) || 0);
-  return alter < ((s.betriebe || []).length ? SUCHE_TAGE : LEER_TAGE) * TAG;
+  const alter = jetzt - (Date.parse(s.created_at) || 0), i = s.info || {}, voll = (s.betriebe || []).length > 0;
+  return alter < (voll ? (i.vorrat ? VORRAT_TAGE : SUCHE_TAGE) : i.vorrat && !i.fehler ? SUCHE_TAGE : LEER_TAGE) * TAG;
 }
-const keine = (extra) => Object.assign({ ok: true, betriebe: [], umkreis: UMKREIS, quelle: 'keine' }, extra || {});
 
-/* ---------- Suche ---------- */
+/* ---------- Suche ----------
+   Betriebe für eine PLZ aus allen gültigen Suchen im Umkreis von NAH_KM: Entfernung jedes Betriebs zum Kunden neu aus seiner PLZ oder
+   seinem Ort; ohne beides gilt in der eigenen Suche die Schätzung der KI, in einer Nachbarsuche höchstens Abstand der beiden PLZ plus
+   die Schätzung. Nur bis UMKREIS km; ein Betrieb, der in mehreren Suchen steht (gleiche Kennung, Telefonnummer oder Website), zählt
+   einmal mit der kürzesten Entfernung. neu: eine eben gelaufene Suche dieser PLZ (statt der gespeicherten).
+   → { betriebe (alle, die nächsten zuerst, mit quelle), eigene (die gültige Suche dieser PLZ) } */
+async function umgebung(d, plz, jetzt, neu) {
+  const lage = plzInfo(plz), liste = lage ? umkreisPlz(plz, NAH_KM) : [plz];
+  const zeilen = (d ? await d.suchenFuer(liste).catch(() => []) : []).filter((s) => gueltig(s, jetzt) && !(neu && s.plz === plz)).concat(neu ? [neu] : []);
+  const eigene = zeilen.find((s) => s.plz === plz && !(s.info && s.info.fehler)) || null, roh = [];
+  for (const s of zeilen) {
+    const eigen = s.plz === plz, von = eigen ? null : plzInfo(s.plz);
+    for (const b of s.betriebe || []) {
+      const p = lage && (plzInfo(b.plz) || (!eigen && betriebLage(b, lage)));
+      const e = p ? kmZwischen(lage, p) : eigen || !lage ? Number(b.km) : von ? kmZwischen(lage, von) + Number(b.km) : NaN;
+      if (Number.isFinite(e) && e <= UMKREIS) roh.push(Object.assign({}, b, { km: Math.round(e), quelle: s.quelle || 'ki' }));
+    }
+  }
+  roh.sort((a, b) => a.km - b.km || a.name.localeCompare(b.name, 'de'));
+  const schon = new Set(), betriebe = [];
+  for (const b of roh) {
+    const host = String(b.web || '').replace(/^https?:\/\/(www\.)?/, '').split('/')[0], tel = String(b.tel || '').replace(/\D/g, '');
+    const schluessel = [b.id, tel.length >= 6 ? 't' + tel : '', host ? 'w' + host : ''].filter(Boolean);
+    if (schluessel.some((x) => schon.has(x))) continue;
+    schluessel.forEach((x) => schon.add(x)); betriebe.push(b);
+  }
+  return { betriebe: betriebe, eigene: eigene };
+}
+/* Eine neue Suche: KI (schnell, wenn ein Kunde wartet) oder Attrappe */
+const neueSuche = (env, art, plz, ort, schnell) => (art === 'attrappe' ? attrappeBetriebe().then((l) => ({ ok: true, quelle: 'attrappe', betriebe: l, info: {} }))
+  : kiSuche({ key: env.ANTHROPIC_API_KEY, modell: env.VERMITTLUNG_MODELL || MODELL, ms: Number(env.VERMITTLUNG_SUCHE_MS) || ZEIT_MS, schnell: schnell }, plz, ort));
+
 async function suche(ctx) {
-  const b = ctx.body || {}, plz = String(b.plz == null ? '' : b.plz).trim(), ort = ortText(b.ort), q = quelle(ctx.request);
+  const b = ctx.body || {}, plz = String(b.plz == null ? '' : b.plz).trim(), q = quelle(ctx.request);
   if (!plzOk(plz)) throw new ApiFehler('Bitte prüfe deine Postleitzahl.', 400, { feld: 'plz' });
   if (!erlaubt('vsuche:' + q, 20, 10 * MIN) || !(await bremse(ctx, 'START', 'vsuche:' + q))) throw new ApiFehler('Zu viele Anfragen. Bitte gleich noch einmal.', 429);
-  const d = vermittlungDaten(ctx.k), jetzt = jetztVon(ctx);
-  const alt = d ? await d.sucheHolen(plz).catch(() => null) : null;
-  if (alt && gueltig(alt, jetzt)) return { ok: true, betriebe: (alt.betriebe || []).map(oeffentlich), umkreis: UMKREIS, quelle: 'zwischenspeicher' };
+  /* Ort aus der Tabelle (die App schickt nur die PLZ); eine PLZ, die es nicht gibt, sucht nicht (kein Geld für Tippfehler) */
+  const lage = plzInfo(plz); if (!lage) throw new ApiFehler('Diese Postleitzahl kennen wir nicht. Bitte prüfe sie.', 400, { feld: 'plz' });
+  const ort = lage.ort, d = vermittlungDaten(ctx.k), jetzt = jetztVon(ctx);
+  const antwort = (l, woher, extra) => Object.assign({ ok: true, betriebe: l.slice(0, MAX_BETRIEBE).map(oeffentlich), umkreis: UMKREIS, quelle: l.length ? woher : 'keine', plz: plz, ort: ort }, extra || {});
+  const u = await umgebung(d, plz, jetzt);
+  if (u.eigene || u.betriebe.length >= SOFORT_AB) return antwort(u.betriebe, u.eigene ? 'zwischenspeicher' : 'umgebung');
   const art = sucheArt(ctx.env);
-  if (!art) return keine();
+  if (!art) return antwort(u.betriebe, 'umgebung');
   /* neue Suchen kosten Geld: je Anschluss höchstens sechs in der Stunde, dazu das Tagesbudget über alle */
   if (!erlaubt('vsuche-neu:' + q, 6, 60 * MIN)) throw new ApiFehler('Zu viele Suchen. Bitte in einer Stunde noch einmal.', 429);
   const max = tagMax(ctx.env), bu = await budget(ctx, 'vsuche:tag', max, { alarm: Math.max(1, Math.floor(max * 0.8)) });
-  if (bu.alarm) { const p = alarmMail(ctx.k, 'Vermittlung: 80 % der KI-Suchen des Tages', 'Heute sind schon ' + bu.stand + ' von höchstens ' + max + ' KI-Suchen nach Fensterbetrieben gelaufen (Variable VERMITTLUNG_SUCHE_TAG_MAX). Darüber zeigt die App bis Mitternacht keine Betriebe; Anfragen gehen als „Betrieb für mich suchen“ weiter.').catch(() => false); if (ctx.waitUntil) ctx.waitUntil(p); else await p; }
-  if (!bu.ok) return keine({ grenze: 'tag' });
-  const env = ctx.env || {};
-  const r = art === 'attrappe' ? { ok: true, quelle: 'attrappe', betriebe: await attrappeBetriebe(), info: {} }
-    : await kiSuche({ key: env.ANTHROPIC_API_KEY, modell: env.VERMITTLUNG_MODELL || MODELL, ms: Number(env.VERMITTLUNG_SUCHE_MS) || ZEIT_MS }, plz, ort);
-  if (!r.ok) return keine();
-  if (d) await d.sucheSetzen(plz, { ort: ort, quelle: r.quelle, betriebe: r.betriebe, info: r.info || {} }).catch(() => false);
+  if (bu.alarm) { const p = alarmMail(ctx.k, 'Vermittlung: 80 % der KI-Suchen des Tages', 'Heute sind schon ' + bu.stand + ' von höchstens ' + max + ' KI-Suchen nach Fensterbetrieben gelaufen (Variable VERMITTLUNG_SUCHE_TAG_MAX). Darüber zeigt die App bis Mitternacht nur Betriebe aus gespeicherten Suchen der Umgebung; ohne solche gehen Anfragen als „Betrieb für mich suchen“ weiter.').catch(() => false); if (ctx.waitUntil) ctx.waitUntil(p); else await p; }
+  if (!bu.ok) return antwort(u.betriebe, 'umgebung', { grenze: 'tag' });
+  const r = await neueSuche(ctx.env || {}, art, plz, ort, true);
+  if (!r.ok) return antwort(u.betriebe, 'umgebung');
+  const neu = { plz: plz, ort: ort, quelle: r.quelle, betriebe: r.betriebe, info: r.info || {} };
+  if (d) await d.sucheSetzen(plz, neu).catch(() => false);
   if (ctx.zaehlen) ctx.zaehlen('ereignis:vermittlung_suche');
-  return { ok: true, betriebe: r.betriebe.map(oeffentlich), umkreis: UMKREIS, quelle: r.quelle };
+  return antwort((await umgebung(d, plz, jetzt, neu)).betriebe, r.quelle);
 }
 
 /* ---------- Code ----------
@@ -197,14 +235,13 @@ async function senden(ctx) {
   const fk = Object.keys(f);
   /* feld: das erste Feld mit Fehler, wie die App es kennt (tel, name, mail, plz, einwilligung, aufmass, betriebe, pdf) */
   if (fk.length) throw new ApiFehler(fk.length === 1 ? f[fk[0]] : 'Bitte prüfe die markierten Angaben.', 400, { felder: f, feld: fk[0].replace(/^kontakt\./, '') });
-  /* gewählte Betriebe aus dem Zwischenspeicher dieser PLZ (mit Telefon und Website für die Zentrale) */
-  let gewaehlt = [], suchQuelle = '';
+  /* gewählte Betriebe aus den gültigen Suchen im Umkreis dieser PLZ, wie die Suche sie gezeigt hat (mit Telefon und Website für die Zentrale) */
+  let gewaehlt = [];
   if (ids.length) {
-    const s = await d.sucheHolen(plz);
-    gewaehlt = s && gueltig(s, jetzt) ? ids.map((id) => (s.betriebe || []).find((x) => x.id === id)) : [null];
+    const l = (await umgebung(d, plz, jetzt)).betriebe;
+    gewaehlt = ids.map((id) => l.find((x) => x.id === id));
     if (gewaehlt.some((x) => !x)) throw new ApiFehler('Die Auswahl der Betriebe ist nicht mehr aktuell. Bitte such sie noch einmal.', 409, { neuSuchen: true, feld: 'betriebe' });
-    if (ids.length < Math.min(MIN_WAHL, (s.betriebe || []).length)) { const t = 'Bitte wähle mindestens ' + ZAHL[MIN_WAHL] + ' Betriebe, damit du vergleichen kannst.'; throw new ApiFehler(t, 400, { feld: 'betriebe', felder: { betriebe: t } }); }
-    suchQuelle = s.quelle || '';
+    if (ids.length < Math.min(MIN_WAHL, l.length)) { const t = 'Bitte wähle mindestens ' + ZAHL[MIN_WAHL] + ' Betriebe, damit du vergleichen kannst.'; throw new ApiFehler(t, 400, { feld: 'betriebe', felder: { betriebe: t } }); }
   }
   const c = await codePruefen(ctx, t, b);
   /* höchstens zwei Anfragen je Nummer in 90 Tagen; dasselbe Token zweimal (Doppelklick) liefert die erste Anfrage */
@@ -219,7 +256,7 @@ async function senden(ctx) {
   try {
     v = await d.anlegen({ id: id, tel: t.e164, plz: plz, stand: 'neu', kunde: { name: name, ort: ort, tel: t.e164, anzeige: t.anzeige, kanal: t.kanal, mail: mail, erreich: erreichAus(ko.erreich) },
       eckdaten: eckdatenAus(b.eckdaten), aufmass: aufmass, einwilligung: { fassung: fassung, text: ewText, zeit: ZEIT(), netz: netzKurz(ip(ctx.request)) },
-      betriebe: gewaehlt.map((x) => ({ id: x.id, name: x.name, ort: x.ort, strasse: x.strasse || '', tel: x.tel || '', web: x.web || '', km: x.km, leistungen: x.leistungen || [], quelle: suchQuelle || 'ki', gewaehlt: true, status: 'offen', notiz: '', mail: '', zustimmung: '', gesendet: null })),
+      betriebe: gewaehlt.map((x) => ({ id: x.id, name: x.name, ort: x.ort, strasse: x.strasse || '', tel: x.tel || '', web: x.web || '', km: x.km, leistungen: x.leistungen || [], quelle: x.quelle || 'ki', gewaehlt: true, status: 'offen', notiz: '', mail: '', zustimmung: '', gesendet: null })),
       bestaetigt: c.bestaetigt, pdf: { pfad: pfad, bytes: pdf.bytes.length }, verlauf: [{ zeit: ZEIT(), von: 'kunde', text: 'Anfrage eingegangen' + (gewaehlt.length ? ' für ' + gewaehlt.map((x) => x.name).join(', ') : ', Betrieb für mich suchen') + (c.bestaetigt ? '; Nummer per Code bestätigt' : '; Nummer nicht bestätigt (ohne Code)') }],
       notiz: '', meta: { token: c.tk, kennung: KENNUNG.test(kennung) ? kennung : '' } });
   } catch (e) { await ab.loeschen([pfad]).catch(() => false); throw e; }
@@ -365,6 +402,26 @@ export async function vermittlungLauf(k) {
     if (ab) await ab.loeschen([(v.pdf && v.pdf.pfad) || 'v/' + v.id + '.pdf']).catch(() => false);
     await d.loeschen(v.id); out.geloescht++;
   }
-  out.suchen = await d.suchenAufraeumen(new Date(jetzt - SUCHE_TAGE * TAG).toISOString()).catch(() => 0);
+  out.suchen = await d.suchenAufraeumen(new Date(jetzt - SUCHE_TAGE * TAG).toISOString(), new Date(jetzt - VORRAT_TAGE * TAG).toISOString()).catch(() => 0);
   return out;
+}
+
+/* ---------- Vorrat (router.js geplant, alle 10 Minuten) ----------
+   Damit schon der erste Kunde einer Gegend sofort Betriebe sieht, sucht der Server ohne Kunden für die Stützpunkte (vermittlung-ort.js:
+   jede PLZ höchstens 20 km von einem, dicht besiedelte zuerst) und speichert die Suche mit info.vorrat für 180 Tage. Je Lauf höchstens
+   eine Suche (gründlich), am Tag höchstens VERMITTLUNG_VORRAT (Vorgabe 0 = aus; jede kostet wie eine Suche der Kunden). Ein Stützpunkt
+   mit gültiger Suche (Vorrat oder Kunde) wird übersprungen; misslingt eine Suche, kommt der Stützpunkt nach einem Tag wieder dran. */
+const vorratJeTag = (env) => { const n = Math.floor(Number(env && env.VERMITTLUNG_VORRAT)); return Number.isFinite(n) && n > 0 ? Math.min(n, 144) : 0; };
+export async function vorratLauf(k, env, sp) {
+  const n = vorratJeTag(env), art = sucheArt(env), d = vermittlungDaten(k);
+  if (!n || !art || !d || !vermittlungFrei(k, env)) return { ok: true, aus: true };
+  const jetzt = k.jetzt || Date.now(), stuetz = vorratPlz();
+  const da = new Set((await d.suchenStand(stuetz)).filter((s) => gueltig(s, jetzt)).map((s) => s.plz));
+  const plz = stuetz.find((p) => !da.has(p));
+  if (!plz) return { ok: true, voll: stuetz.length };
+  const bu = await budget({ env: env, sp: sp }, 'vvorrat:tag', n);
+  if (!bu.ok) return { ok: true, grenze: n, offen: stuetz.length - da.size };
+  const ort = plzInfo(plz).ort, r = await neueSuche(env, art, plz, ort, false);
+  await d.sucheSetzen(plz, { ort: ort, quelle: r.ok ? r.quelle : 'keine', betriebe: r.ok ? r.betriebe : [], info: Object.assign({}, r.info || {}, { vorrat: true }, r.ok ? {} : { fehler: r.grund || 'fehler' }) });
+  return { ok: r.ok, plz: plz, betriebe: r.ok ? r.betriebe.length : 0, offen: stuetz.length - da.size - 1 };
 }

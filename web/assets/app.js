@@ -3991,19 +3991,21 @@ SCREENS.anfrageAlt = SCREENS.anfrage; SCREENS.anfrage2Alt = SCREENS.anfrage2; SC
 SCREENS.anfrage = anfrageDna; SCREENS.anfrage2 = anfrage2Dna; SCREENS.anfrage3 = anfrage3Dna;
 /* ---------- Vermittlung „Angebote aus deiner Nähe“ (29.10.2026, Auftrag des Inhabers; docs/VERMITTLUNG.md, Abschnitt 10) ----------
    Nur auf eeziframes.com ohne Betriebslink und mit Server (SERVER.vermittlung.an). Nach „Zeit und Budget“ die Weiche (weg): Angebote aus
-   der Nähe (kostenlos) oder das Aufmaßblatt für sich (PREIS(), weiter wie bisher über Kontakt und Freischalten). Weg A: Kontakt mit
-   Pflichtfeldern → Betriebe (KI-Suche zur Postleitzahl, Auswahl von zwei bis fünf oder „Sucht für mich aus“, Einwilligung) → Code an die Nummer
-   (SMS, Festnetz per Anruf) → Angefragt. Der Inhaber ruft die gewählten Betriebe an und schickt das Aufmaßblatt aus der Zentrale nur an
+   der Nähe (kostenlos) oder das Aufmaßblatt für sich (PREIS(), weiter wie bisher über Kontakt und Freischalten). Weg A (Reihenfolge des
+   Inhabers, 30.10.2026): Betriebe (nur die Postleitzahl, sofort Betriebe aus den gespeicherten Suchen der Umgebung, Auswahl von zwei bis
+   fünf oder „Sucht für mich aus“) → Kontakt mit Pflichtfeldern und Einwilligung → Code an die Nummer (SMS, Festnetz per Anruf) → Angefragt. Der Inhaber ruft die gewählten Betriebe an und schickt das Aufmaßblatt aus der Zentrale nur an
    die, die zustimmen; deshalb sagen die Texte „Wir fragen an“, nie „gesendet“. Auf Weg A ist das Blatt nach dem Abschicken freigeschaltet. */
 /* Bis zu fünf Betriebe je Anfrage, mindestens zwei, damit es etwas zu vergleichen gibt (Inhaber, 29.10.2026: „nicht beschränken,
    anfangen mit fünf“) */
-const VM_MAX = 5, VM_MIN = 2, VM_FASSUNG = '2026-10-29c';
+const VM_MAX = 5, VM_MIN = 2, VM_FASSUNG = '2026-10-30';
 const VM_ZAHL = ['keinen', 'einen', 'zwei', 'drei', 'vier', 'fünf'];
 const vermAn = () => !S.betrieb && !INST && !PROBE && !!(SERVER.vermittlung && SERVER.vermittlung.an);
 const vm = () => S.verm || (S.verm = { weg: 'A', wahl: [], suchen: false, einw: false, gesendet: null });
 const vmWegA = () => vermAn() && vm().weg === 'A';
 /* PLZ und Ort aus dem einen Feld „PLZ und Ort“ */
 function vmOrt() { const t = String(S.proj.ort || '').replace(/\s+/g, ' ').trim(), m = /(^|\D)(\d{5})(?!\d)/.exec(t); return { plz: m ? m[2] : '', ort: m ? t.replace(m[2], '').replace(/^[\s,·-]+|[\s,·-]+$/g, '') : t }; }
+/* Postleitzahl der Suche: was auf der Folie Betriebe steht, anfangs die aus „PLZ und Ort“ */
+function vmPlz() { const v = vm(); if (v.plz == null) v.plz = vmOrt().plz; return v.plz; }
 /* Deutsche Nummer: Mobil (015x, 016x, 017x) oder Festnetz; offensichtlicher Unsinn zählt nicht (dieselbe Regel prüft der Server) */
 function vmTel(t) {
   let d = String(t || '').replace(/[\s()./-]/g, '');
@@ -4014,12 +4016,11 @@ function vmTel(t) {
   return { nr: d, mobil: /^01[5-7]/.test(d) };
 }
 function vmKontaktPruefen() {
-  const p = S.proj || {}, f = {}, o = vmOrt(), mail = String(p.mail || '').trim();
+  const p = S.proj || {}, f = {}, mail = String(p.mail || '').trim();
   if (String(p.name || '').replace(/\s+/g, ' ').trim().length < 2) f.name = 'Bitte deinen Namen angeben.';
-  if (!o.plz) f.ort = 'Bitte Postleitzahl und Ort angeben, zum Beispiel 33442 Herzebrock-Clarholz.';
   if (!vmTel(p.tel)) f.tel = String(p.tel || '').trim() ? 'Diese Nummer stimmt so nicht. Bitte eine deutsche Telefonnummer, am besten deine Handynummer.' : 'Bitte deine Telefonnummer angeben, am besten die Handynummer.';
   if (mail && !mailOkI(mail)) f.mail = 'Bitte eine gültige E-Mail-Adresse eingeben oder das Feld leer lassen.';
-  f.fehlt = !!(f.name || f.ort || f.tel || f.mail);
+  f.fehlt = !!(f.name || f.tel || f.mail);
   return f;
 }
 /* Gewählte Betriebe als Namen, für Einwilligung und Bestätigung */
@@ -4027,7 +4028,7 @@ const vmNamen = () => { const v = vm(), l = v.liste || []; return v.wahl.map((id
 const vmUnd = (a) => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' und ' + a[a.length - 1]);
 function vmEinwText() {
   const v = vm(), n = vmNamen();
-  return 'Ich bin einverstanden, dass eeziframes ' + (v.suchen || !n.length ? 'bis zu ' + VM_ZAHL[VM_MAX] + ' passende Fensterbetriebe in meiner Nähe, die eeziframes für mich aussucht,' : vmUnd(n)) + ' für mich anfragt und ' + (n.length === 1 && !v.suchen ? 'ihm' : 'ihnen') + ' mein Aufmaß mit Namen, Ort und Telefonnummer schickt, damit ich ein Angebot bekomme. Sonst bekommt niemand meine Daten. eeziframes fragt nach zwei Tagen kurz nach, ob sich jemand gemeldet hat. Ich kann diese Einwilligung jederzeit widerrufen.';
+  return 'Ich bin einverstanden, dass eeziframes ' + (v.suchen || !n.length ? 'bis zu ' + VM_ZAHL[VM_MAX] + ' passende Fensterbetriebe in meiner Nähe, die eeziframes für mich aussucht,' : vmUnd(n)) + ' für mich anfragt und ' + (n.length === 1 && !v.suchen ? 'ihm' : 'ihnen') + ' mein Aufmaß mit Namen, Ort, Telefonnummer und, falls angegeben, E-Mail-Adresse schickt, damit ich ein Angebot bekomme. Sonst bekommt niemand meine Daten. Ich kann diese Einwilligung jederzeit widerrufen.';
 }
 const vmStr = (s, n) => { s = String(s || ''); return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s; };
 const vmHash = (s) => String(s || '').split('').reduce((x, c) => (x * 31 + c.charCodeAt(0)) >>> 0, 7);
@@ -4054,83 +4055,98 @@ function vmUmkreis(o) {
    von oben links und einem feinen Punktraster wie eine Karte; darauf der Umkreis oder das Aufmaßblatt */
 function vmBuehne(chip, o, extra) { return abBuehne('vm-buehne', chip, '<div class="vm-umkreis-wrap">' + vmUmkreis(o) + '</div>' + (extra || '')); }
 function vmBlattBuehne(chip, offen, extra, live) { return abBuehne('vm-buehne vm-blattbuehne', chip, abPapier(offen, !offen && !live) + (extra || '')); }
-/* Schritte auf der Weiche: Haus 1, Zeit 2, Weg 3, Kontakt 4, auf Weg A Betriebe 5 */
+/* Schritte: Haus 1, Zeit 2, Weg 3, dann auf Weg A Betriebe 4 und Kontakt 5 (der Code bestätigt 5), auf Weg B Kontakt 4 */
 const vmSchritt = (n) => 'Fürs Angebot · ' + n + ' von ' + (vm().weg === 'A' ? 5 : 4);
 
-/* Weiche: zwei Wege als Kacheln auf Anthrazit, die gewählte weiß; die Bühne zeigt, was der Weg bringt (Umkreis oder das Blatt) */
+/* Weiche: zwei Wege als Karten auf Anthrazit, die gewählte weiß; die Bühne zeigt, was der Weg bringt (Umkreis oder das Blatt) */
+const VM_SCHILD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5.2c0 4.3-2.9 8.1-7 9.8-4.1-1.7-7-5.5-7-9.8V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.6 12.2l2.3 2.3 4.5-4.9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function vmWeg() {
   const v = vm(), a = v.weg !== 'B', g = v.gesendet, frei = FREI(), preis = euro(PREIS());
-  /* Zwei Karten nebeneinander (Inhaber, 29.10.2026): das Aufmaßblatt allein mit Preis, daneben Aufmaßblatt + Fensterbauer für 0 € mit dem
-     durchgestrichenen Preis als Anker und dem Etikett „Empfohlen“ (nicht „Beliebt“: ohne Nutzerzahlen wäre das unbelegt). Die gewählte
-     Karte wird weiß, die Gratis-Karte trägt dazu einen Ring */
+  /* Zwei Karten untereinander (bis 29.10.2026 nebeneinander; der Satz des Inhabers im weißen Feld, 30.10.2026, braucht die ganze Breite):
+     das Aufmaßblatt an Betriebe der Wahl für 0 € mit dem durchgestrichenen Preis als Anker und dem Etikett „Empfohlen“, darunter das Blatt
+     allein mit Preis. Die gewählte Karte wird weiß, die Gratis-Karte trägt dazu einen Ring */
   const karteA = '<button type="button" class="vm-karte vm-karte--gratis" data-act="vm-weg" data-v="A" aria-pressed="' + a + '"><span class="vm-karte-etikett">' + (g ? 'Angefragt' : 'Empfohlen') + '</span>' +
-    '<span class="vm-karte-titel">Aufmaßblatt + an bis zu ' + VM_MAX + ' Fensterbauer in deiner Nähe</span><span class="vm-preis"><b>0</b><small>€</small>' + (frei ? '' : '<s>' + esc(preis) + '</s>') + '</span>' +
+    '<span class="vm-karte-titel">Gestatte uns, das Aufmaßblatt an von dir ausgewählte Betriebe zu schicken (und nur an diese).</span><span class="vm-preis"><b>0</b><small>€</small>' + (frei ? '' : '<s>' + esc(preis) + '</s>') + '</span>' +
     '<span class="vm-mark" aria-hidden="true">' + CHECK_S + '</span></button>';
   const karteB = '<button type="button" class="vm-karte" data-act="vm-weg" data-v="B" aria-pressed="' + !a + '"><span class="vm-karte-etikett vm-karte-etikett--leise">' + (frei ? 'Freigeschaltet' : 'Nur für dich') + '</span>' +
     '<span class="vm-karte-titel">Aufmaßblatt für dich</span><span class="vm-preis">' + (frei ? '<b>✓</b>' : '<b>' + esc(preis.replace(/\s*€$/, '')) + '</b><small>€</small>') + '</span>' +
     '<span class="vm-mark" aria-hidden="true">' + CHECK_S + '</span></button>';
-  const unten = a ? (g ? '<p class="vm-vertrauen">Anfrage ' + esc(g.nr || '') + ' vom ' + esc(new Date(g.when).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })) + ' ist bei uns. Wir melden uns.</p>'
-    : '<p class="vm-vertrauen"><b>Deine Angebote beruhen auf denselben Maßen und sind direkt vergleichbar.</b> Nur die Betriebe, die du auswählst, bekommen dein Aufmaß. Sonst niemand.</p>' +
-      '<p class="ab-klein vm-warum"><b>Warum kostenlos?</b> Die Fensterbetriebe bezahlen uns für die Vermittlung. Für dich bleibt es kostenlos, das Aufmaßblatt bekommst du dazu.</p>')
+  /* Daten-Garantie (Wortlaut des Inhabers, so gefasst, dass er stimmt: Die gewählten Betriebe melden sich, von uns kommen Code und
+     Nachrichten zur Anfrage; gespeichert wird nur, was im Datenschutz steht) und „Warum kostenlos?“ zum Aufklappen */
+  const garantie = '<div class="vm-garantie"><span class="vm-garantie-chip">' + VM_SCHILD + 'Daten-Garantie</span>' +
+    '<p><b>Außer den Fensterbauern, die dein Aufmaß bekommen, meldet sich niemand bei dir,</b> weder per E-Mail noch per Telefon noch auf anderen Wegen. Von uns bekommst du nur den Code und Nachrichten zu deiner Anfrage.</p>' +
+    '<p>Deine Daten geben wir nur an die Fensterbauer weiter, die du auswählst (oder uns für dich aussuchen lässt), so wie du es vermutlich auch selbst tun würdest. <b>Kein versteckter Verkauf und keine versteckte Speicherung deiner Daten.</b></p></div>';
+  const warum = '<details class="er-falls vm-falls"><summary><span><b>Warum kostenlos?</b></span></summary><div class="fold-body"><p>Die Fensterbetriebe bezahlen uns für die Vermittlung. Für dich bleibt es kostenlos, das Aufmaßblatt bekommst du dazu.</p></div></details>';
+  const unten = a ? (g ? '<p class="vm-vertrauen">Anfrage ' + esc(g.nr || '') + ' vom ' + esc(new Date(g.when).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })) + ' ist bei uns. Wir melden uns.</p>' : garantie + warum)
     : '<p class="ab-klein vm-warum">Als PDF, du gibst es weiter, an wen du willst.' + (EINF() && !frei ? ' ' + esc(EINF()) : '') + '</p>';
   const karte = '<div class="vm-wege" role="group" aria-label="Wie geht es weiter?">' + karteA + karteB + '</div>' + unten;
-  const frage = lgFrage('Wie geht es <em>weiter?</em>', 'vermittlung', 'Vergleichbare Angebote aus deiner Nähe, ohne selbst herumzutelefonieren. Oder nur das Blatt für dich.');
-  const o = vmOrt(), buehne = a ? vmBuehne(vmSchritt(3), { beispiel: true, du: o.plz ? 'Du · ' + o.plz : 'Du', plz: o.plz }) : vmBlattBuehne(vmSchritt(3), frei, frei ? '' : abBetrag());
-  const weiter = a ? (g ? ['go', 'angefragt', 'Zur Anfrage'] : ['vm-weiter', '', 'Kostenlos weiter']) : ['vm-weiter', '', frei ? 'Zum Aufmaßblatt' : 'Weiter zum Aufmaßblatt'];
+  const frage = lgFrage('Wie geht es <em>weiter?</em>', 'vermittlung', 'Wähle, wie du fortfahren möchtest.');
+  const plz = vm().plz != null ? vm().plz : vmOrt().plz, buehne = a ? vmBuehne(vmSchritt(3), { beispiel: true, du: plz ? 'Du · ' + plz : 'Du', plz: plz }) : vmBlattBuehne(vmSchritt(3), frei, frei ? '' : abBetrag());
+  const weiter = a ? (g ? ['go', 'angefragt', 'Zur Anfrage'] : ['vm-weiter', '', 'Betriebe finden']) : ['vm-weiter', '', frei ? 'Zum Aufmaßblatt' : 'Weiter zum Aufmaßblatt'];
   return { html: lgKopf(['back', 'Zurück: Zeit und Budget']) + dnaTisch(buehne, frage + karte + abFuss('Zurück: Zeit und Budget', weiter[0], weiter[1], weiter[2])), back: ['Zeit und Budget', 'anfrage2'], dna: true, cls: 'dna ab dt vm', voll: true };
 }
-/* Kontakt auf Weg A: Name, PLZ und Ort, Telefon sind Pflicht (Fehler am Feld wie auf den Instanzen), E-Mail freiwillig */
+/* Kontakt auf Weg A, nach der Wahl der Betriebe: Name und Telefon sind Pflicht (Fehler am Feld wie auf den Instanzen), E-Mail freiwillig;
+   der Ort kommt aus der Postleitzahl der Folie Betriebe. Hier steht auch die Einwilligung, weil sie die gewählten Betriebe nennt */
 function vmKontakt() {
-  const pr = S.proj, f = S.vmFehler || {}, C = window.KONFIG || {};
-  const frage = lgFrage('Wie erreichen dich <em>die Betriebe?</em>', 'vermittlung', 'Name, Ort und Telefon brauchen wir für die Anfrage.');
+  const pr = S.proj, f = S.vmFehler || {}, v = vm(), C = window.KONFIG || {};
+  const frage = lgFrage('Wie erreichen dich <em>die Betriebe?</em>', 'vermittlung', 'Name und Telefon brauchen wir für die Anfrage.');
   const karte = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Kontakt') + '<div class="rows ab-felder kontakt-felder">' +
-    kontaktFeld('Name', 'name', 'Vor- und Nachname', 'text', 'name', f.name, true) + kontaktFeld('PLZ und Ort', 'ort', 'z. B. 33442 Herzebrock-Clarholz', 'text', 'postal-code address-level2', f.ort, true) +
+    kontaktFeld('Name', 'name', 'Vor- und Nachname', 'text', 'name', f.name, true) +
     kontaktFeld('Telefon, am besten Handy', 'tel', 'z. B. 0171 2345678', 'tel', 'tel', f.tel, true) + kontaktFeld('E-Mail', 'mail', 'Freiwillig, dann kommt das Aufmaßblatt auch per Mail', 'email', 'email', f.mail, false) +
     '</div><p class="vm-vertrauen vm-vertrauen--tel"><b>Deine Nummer bestätigst du gleich mit einem Code.</b> Damit die Betriebe wissen, dass ein echter Mensch anfragt. So bekommst du ernsthafte Rückmeldungen.</p>' +
-    '<p class="ab-pflicht">* Pflicht. Deine Angaben bekommen nur die Betriebe, die du gleich auswählst, und erst, wenn sie zugesagt haben. Mehr im <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>.</p></div>' +
-    '<div class="ab-teil">' + abKopf('Am besten erreichbar · freiwillig') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div></div>';
-  const grund = f.fehlt ? '<p class="vm-grund" role="status">Bitte noch die markierten Felder ausfüllen.</p>' : '';
-  return { html: lgKopf(['back', 'Zurück: Wie geht es weiter?']) + dnaTisch(vmBlattBuehne(vmSchritt(4), false, '', true), frage + karte + grund + abFuss('Zurück: Wie geht es weiter?', 'vm-kontakt', '', 'Betriebe finden')), back: ['Zurück', 'weg'], dna: true, cls: 'dna ab dt vm', voll: true };
+    '<p class="ab-pflicht">* Pflicht. Deine Angaben bekommen nur die Betriebe, die du ausgewählt hast, und erst, wenn sie zugesagt haben. Mehr im <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>.</p></div>' +
+    '<div class="ab-teil">' + abKopf('Am besten erreichbar · freiwillig') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div></div>' +
+    '<button type="button" class="vm-einw' + (f.einw ? ' ist-bad' : '') + '" data-act="vm-einw" role="checkbox" aria-checked="' + !!v.einw + '"><span class="vm-box" aria-hidden="true">' + CHECK_S + '</span><span>' + esc(vmEinwText()) + '</span></button>';
+  const grund = f.fehlt || f.einw ? '<p class="vm-grund" role="status">' + esc(f.fehlt ? 'Bitte noch die markierten Felder ausfüllen.' : f.einw) + '</p>' : '';
+  const busy = v.codeLaeuft, fuss = busy ? rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Betriebe" disabled>' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter btn primary" disabled aria-busy="true">Einen Moment …</button></div>' : abFuss('Zurück: Betriebe', 'vm-kontakt', '', 'Abschicken');
+  return { html: lgKopf(['back', 'Zurück: Betriebe']) + dnaTisch(vmBlattBuehne(vmSchritt(5), false, '', true), frage + karte + grund + fuss), back: ['Betriebe', 'betriebe'], dna: true, cls: 'dna ab dt vm', voll: true };
 }
-/* KI-Suche zur Postleitzahl; die Liste bleibt, bis sich die Postleitzahl ändert */
+/* Suche zur Postleitzahl: meist sofort aus den gespeicherten Suchen der Umgebung, sonst sucht die KI neu (dann ein Hinweis nach 2,5 s);
+   die Liste bleibt, bis sich die Postleitzahl ändert. Den Ort nennt der Server; er kommt ins Feld „PLZ und Ort“ (Aufmaßblatt) */
 async function vmSuchen(neu) {
-  const v = vm(), o = vmOrt();
-  if (!o.plz || v.laedt) return;
-  if (!neu && v.liste && v.listePlz === o.plz) return;
-  v.laedt = true; v.suchFehler = ''; render();
+  const v = vm(), plz = vmPlz();
+  if (!/^\d{5}$/.test(plz) || v.laedt) return;
+  if (!neu && v.liste && v.listePlz === plz) return;
+  v.laedt = true; v.suchFehler = ''; if (S.screen === 'betriebe') render();
+  const langsam = setTimeout(() => { const e = document.querySelector('.vm-suche small'); if (e && vm().laedt) e.textContent = 'Für diese Gegend sucht die KI gerade neu. Das kann bis zu einer Minute dauern.'; }, 2500);
   try {
-    const r = await fetch('/api/vermittlung/suche', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ plz: o.plz, ort: o.ort }) }), j = await r.json().catch(() => null);
-    if (!j || !j.ok) { v.suchFehler = (j && j.fehler) || 'Die Suche hat gerade nicht geklappt.'; v.liste = v.liste && v.listePlz === o.plz ? v.liste : null; }
-    else { v.liste = (j.betriebe || []).slice(0, 8); v.listePlz = o.plz; v.umkreis = Number(j.umkreis) || 30; v.quelle = j.quelle || ''; v.wahl = v.wahl.filter((id) => v.liste.some((b) => b.id === id)); if (!v.liste.length) v.suchen = true; }
+    const r = await fetch('/api/vermittlung/suche', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ plz: plz }) }), j = await r.json().catch(() => null);
+    if (!j || !j.ok) { v.suchFehler = (j && j.fehler) || 'Die Suche hat gerade nicht geklappt.'; v.suchFehlerPlz = j && j.feld === 'plz'; v.liste = v.liste && v.listePlz === plz ? v.liste : null; }
+    else {
+      v.liste = (j.betriebe || []).slice(0, 8); v.listePlz = plz; v.ortName = String(j.ort || ''); v.umkreis = Number(j.umkreis) || 30; v.quelle = j.quelle || ''; v.suchFehlerPlz = false;
+      v.wahl = v.wahl.filter((id) => v.liste.some((b) => b.id === id)); if (!v.liste.length) v.suchen = true;
+      if (v.ortName && vmOrt().plz !== plz) S.proj.ort = plz + ' ' + v.ortName;
+    }
   } catch (e) { v.suchFehler = 'Keine Verbindung. Bitte gleich noch einmal versuchen.'; }
-  v.laedt = false; persist(); if (S.screen === 'betriebe') render();
+  clearTimeout(langsam); v.laedt = false; persist(); if (S.screen === 'betriebe') render();
+  if (vmPlz() !== plz && /^\d{5}$/.test(vmPlz())) vmSuchen(); // während der Suche geändert
 }
-/* Betriebe: Umkreis auf der Bühne, rechts die Liste (weiß, Haken wie in den Wunsch-Fragen), „Sucht für mich aus“, Einwilligung, Abschicken */
+/* Betriebe (erster Schritt auf Weg A): nur die Postleitzahl; mit der fünften Ziffer kommt die Liste. Umkreis auf der Bühne, die Liste weiß
+   mit Haken wie in den Wunsch-Fragen, „Sucht für mich aus“; weiter zum Kontakt */
 function vmBetriebe() {
-  const v = vm(), o = vmOrt(), l = v.listePlz === o.plz ? v.liste || [] : [], voll = v.wahl.length >= VM_MAX, f = S.vmFehler || {};
-  if (!v.laedt && (!v.liste || v.listePlz !== o.plz) && !v.suchFehler) setTimeout(() => vmSuchen(), 0);
-  const laedt = v.laedt || (!v.suchFehler && (!v.liste || v.listePlz !== o.plz));
-  const ortText = o.plz + (o.ort ? ' ' + o.ort : '');
-  const frage = lgFrage('Wähle bis zu ' + VM_ZAHL[VM_MAX] + ' Betriebe in deiner <em>Nähe.</em>', 'vermittlung', 'Mindestens ' + VM_ZAHL[VM_MIN] + ', damit du vergleichen kannst. Wir fragen sie für dich an und schicken dein Aufmaß an jeden, der ein Angebot machen möchte. Sonst bekommt es niemand.');
-  let karte = '';
-  if (laedt) karte = '<div class="vm-suche" role="status"><span class="vm-suche-punkt" aria-hidden="true"></span><span><b>Wir suchen Fensterbetriebe rund um ' + esc(ortText) + ' …</b><small>Das dauert meist ein paar Sekunden.</small></span></div>';
-  else {
-    if (v.suchFehler) karte += '<p class="ab-note warn">' + esc(v.suchFehler) + ' <button type="button" class="ulink" data-act="vm-nochmal">Noch einmal suchen</button></p>';
+  const v = vm(), plz = vmPlz(), f = S.vmFehler || {}, gilt = !!(v.liste && v.listePlz === plz), l = gilt ? v.liste : [], voll = v.wahl.length >= VM_MAX, laedt = !!v.laedt;
+  if (/^\d{5}$/.test(plz) && !laedt && !gilt && !v.suchFehler) setTimeout(() => vmSuchen(), 0);
+  const ortText = plz + (gilt && v.ortName ? ' ' + v.ortName : '');
+  const frage = lgFrage('Betriebe in deiner <em>Nähe.</em>', 'vermittlung', 'Nur deine Postleitzahl, dann siehst du Fensterbetriebe rund um dein Haus. Wähle ' + VM_ZAHL[VM_MIN] + ' bis ' + VM_ZAHL[VM_MAX] + '; nur sie bekommen dein Aufmaß.');
+  const pf = f.plz || (v.suchFehlerPlz && v.suchFehler) || '';
+  const feld = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Postleitzahl') + '<label class="ab-eingabe vm-plzfeld' + (pf ? ' ist-bad' : '') + '"><input type="text" id="vm-plz" data-in="vm-plz" inputmode="numeric" autocomplete="postal-code" maxlength="5" pattern="[0-9]*" value="' + esc(plz) + '" placeholder="z. B. 33442" aria-label="Postleitzahl"' + (pf ? ' aria-invalid="true" aria-describedby="vm-plz-f"' : '') + '></label>' +
+    (pf ? '<p class="vm-feldfehler" id="vm-plz-f">' + esc(pf) + '</p>' : '') + '</div></div>';
+  let erg = '';
+  if (laedt) erg = '<div class="vm-suche" role="status"><span class="vm-suche-punkt" aria-hidden="true"></span><span><b>Wir suchen Fensterbetriebe rund um ' + esc(plz) + ' …</b><small>Meist geht das sofort.</small></span></div>';
+  else if (gilt || (v.suchFehler && !v.suchFehlerPlz)) {
+    if (v.suchFehler && !v.suchFehlerPlz) erg += '<p class="ab-note warn">' + esc(v.suchFehler) + ' <button type="button" class="ulink" data-act="vm-nochmal">Noch einmal suchen</button></p>';
     if (l.length) {
-      karte += '<p class="ab-klein vm-quelle">' + l.length + (l.length === 1 ? ' Betrieb' : ' Betriebe') + ' rund um ' + esc(ortText) + ', von einer KI aus öffentlichen Angaben zusammengestellt. Entfernung Luftlinie, ungefähr.</p>' +
+      erg += '<p class="ab-klein vm-quelle">' + l.length + (l.length === 1 ? ' Betrieb' : ' Betriebe') + ' rund um ' + esc(ortText) + ', von einer KI aus öffentlichen Angaben zusammengestellt. Entfernung Luftlinie, ungefähr; Orte nach <a class="ulink" href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0).</p>' +
         '<div class="qpanel ab-panel"><div class="vm-liste' + (f.wahl ? ' ist-bad' : '') + '" role="group" aria-label="Betriebe, ' + VM_ZAHL[VM_MIN] + ' bis ' + VM_ZAHL[VM_MAX] + ' wählen">' + l.map((b) => {
           const i = v.wahl.indexOf(b.id), an = i >= 0, aus = !an && (voll || v.suchen), lei = (b.leistungen || []).slice(0, 4).join(' · ');
           return '<button type="button" class="vm-betrieb" data-act="vm-wahl" data-v="' + esc(b.id) + '" aria-pressed="' + an + '"' + (aus ? ' aria-disabled="true"' : '') + '><span class="vm-tx"><b>' + esc(b.name) + '</b><small>' + esc(b.ort || '') + (b.km != null ? ' · ca. ' + Math.round(b.km) + ' km' : '') + '</small>' + (lei ? '<small class="vm-lei">' + esc(lei) + '</small>' : '') + '</span><span class="vm-mark" aria-hidden="true">' + (an ? i + 1 : '') + '</span></button>';
         }).join('') + '</div></div>' + (v.wahl.length && !v.suchen ? '<p class="ab-klein vm-zahl" role="status">' + v.wahl.length + ' von höchstens ' + VM_MAX + ' gewählt.' + (voll ? ' Tipp einen an, um ihn abzuwählen.' : '') + '</p>' : '');
-    } else if (!v.suchFehler) karte += '<p class="ab-note">Hier haben wir gerade keine Betriebe gefunden. Kein Problem: Wir suchen für dich passende Betriebe aus.</p>';
-    karte += '<button type="button" class="vm-selbst" data-act="vm-suchen" aria-pressed="' + !!v.suchen + '"><span class="vm-tx"><b>Sucht ihr passende für mich aus</b><small>Wir wählen bis zu ' + VM_ZAHL[VM_MAX] + ' passende Betriebe in deiner Nähe.</small></span><span class="vm-mark" aria-hidden="true">' + CHECK_S + '</span></button>';
-    karte += '<button type="button" class="vm-einw' + (f.einw ? ' ist-bad' : '') + '" data-act="vm-einw" role="checkbox" aria-checked="' + !!v.einw + '"><span class="vm-box" aria-hidden="true">' + CHECK_S + '</span><span>' + esc(vmEinwText()) + '</span></button>' +
-      '<p class="ab-klein vm-recht">Mehr im <a class="ulink" href="' + esc((window.KONFIG || {}).datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>. Deine Angaben gehen nur an Betriebe, die zugesagt haben.</p>';
+    } else if (!v.suchFehler) erg += '<p class="ab-note">Hier haben wir gerade keine Betriebe gefunden. Kein Problem: Wir suchen für dich passende Betriebe aus.</p>';
+    erg += '<button type="button" class="vm-selbst" data-act="vm-suchen" aria-pressed="' + !!v.suchen + '"><span class="vm-tx"><b>Sucht ihr passende für mich aus</b><small>Wir wählen bis zu ' + VM_ZAHL[VM_MAX] + ' passende Betriebe in deiner Nähe.</small></span><span class="vm-mark" aria-hidden="true">' + CHECK_S + '</span></button>';
   }
-  const grund = f.wahl || f.einw ? '<p class="vm-grund" role="status">' + esc(f.wahl || f.einw) + '</p>' : '';
-  const busy = v.codeLaeuft, pille = busy ? '<button type="button" class="dna-pille lg-weiter btn primary" disabled aria-busy="true">Einen Moment …</button>' : null;
-  const fuss = pille ? rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Kontakt">' + LG_PFEIL_L + '</button>' + pille + '</div>' : abFuss('Zurück: Kontakt', 'vm-abschicken', '', 'Abschicken');
-  return { html: lgKopf(['back', 'Zurück: Kontakt']) + dnaTisch(vmBuehne(vmSchritt(5), { betriebe: laedt ? [] : l, wahl: v.wahl, laedt: laedt, umkreis: v.umkreis, plz: o.plz, du: 'Du · ' + o.plz }), frage + karte + grund + fuss), back: ['Kontakt', 'anfrage3'], dna: true, cls: 'dna ab dt vm', voll: true };
+  const karte = feld + '<div class="vm-ergebnis">' + erg + '</div>';
+  const grund = f.wahl ? '<p class="vm-grund" role="status">' + esc(f.wahl) + '</p>' : '';
+  return { html: lgKopf(['back', 'Zurück: Wie geht es weiter?']) + dnaTisch(vmBuehne(vmSchritt(4), { betriebe: laedt ? [] : l, wahl: v.wahl, laedt: laedt, umkreis: v.umkreis, plz: plz, du: plz ? 'Du · ' + plz : 'Du', beispiel: !laedt && !l.length }), frage + karte + grund + abFuss('Zurück: Wie geht es weiter?', 'vm-betriebe', '', 'Weiter')), back: ['Zurück', 'weg'], dna: true, cls: 'dna ab dt vm', voll: true };
 }
 /* Code: sechs Ziffern als Kapseln auf der Bühne, das Feld darunter nimmt den Code aus der SMS (one-time-code) */
 function vmCodeZiffern() { const c = String(vm().code || ''); return Array.from({ length: 6 }, (_, i) => '<span class="vm-z' + (c[i] ? ' ist-da' : '') + '"><b>' + (c[i] || '·') + '</b><i></i></span>').join(''); }
@@ -4145,8 +4161,8 @@ function vmCode() {
     '<div class="vm-codewege"><button type="button" class="ulink" data-act="vm-code-neu">Neuen Code schicken</button><button type="button" class="ulink" data-act="go" data-v="anfrage3">Nummer ändern</button></div></div></div>' +
     (f.grenze ? '<p class="ab-note warn vm-grenze">' + esc(f.grenze) + ' <button type="button" class="ulink" data-act="vm-blatt">Aufmaßblatt für dich</button></p>' : '');
   const busy = v.sendet;
-  const fuss = busy ? rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Betriebe" disabled>' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter btn primary" disabled aria-busy="true">' + esc(v.sendetText || 'Wird abgeschickt …') + '</button></div>' : abFuss('Zurück: Betriebe', 'vm-bestaetigen', '', 'Bestätigen und abschicken');
-  return { html: lgKopf(['back', 'Zurück: Betriebe']) + dnaTisch(buehne, frage + karte + fuss), back: ['Betriebe', 'betriebe'], dna: true, cls: 'dna ab dt vm', voll: true };
+  const fuss = busy ? rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Kontakt" disabled>' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter btn primary" disabled aria-busy="true">' + esc(v.sendetText || 'Wird abgeschickt …') + '</button></div>' : abFuss('Zurück: Kontakt', 'vm-bestaetigen', '', 'Bestätigen und abschicken');
+  return { html: lgKopf(['back', 'Zurück: Kontakt']) + dnaTisch(buehne, frage + karte + fuss), back: ['Kontakt', 'anfrage3'], dna: true, cls: 'dna ab dt vm', voll: true };
 }
 function vmCodeLive() { const z = document.querySelector('.vm-ziffern'); if (z) z.innerHTML = vmCodeZiffern(); }
 /* Angefragt: Umkreis mit den gewählten Betrieben, was jetzt passiert, das Blatt für sich als leiser Weg */
@@ -4183,7 +4199,7 @@ async function vmCodeHolen(neu) {
 /* Abschicken: Aufmaßblatt als PDF im Browser (wie zum Herunterladen, mit Fotos), dazu das Aufmaß als Code und die Eckdaten */
 const vmBase64 = (blob) => new Promise((fertig, fehler) => { const r = new FileReader(); r.onload = () => fertig(String(r.result).replace(/^data:[^,]*,/, '')); r.onerror = fehler; r.readAsDataURL(blob); });
 async function vmSenden() {
-  const v = vm(), o = vmOrt(), pr = S.proj;
+  const v = vm(), plz = (v.listePlz && v.listePlz === vmPlz() ? v.listePlz : vmPlz()) || vmOrt().plz, pr = S.proj;
   if (v.sendet) return;
   if (!v.ohneCode && !/^\d{6}$/.test(String(v.code || ''))) { S.vmFehler = { code: 'Bitte die sechs Ziffern aus der ' + (v.kanal === 'anruf' ? 'Ansage' : 'SMS') + ' eingeben.' }; render(); const i = document.getElementById('vm-code'); if (i) i.focus(); return; }
   v.sendet = true; v.sendetText = 'Aufmaßblatt wird erstellt …'; S.vmFehler = null; if (S.screen === 'vcode') render();
@@ -4195,7 +4211,7 @@ async function vmSenden() {
     const pdf = blob && blob.size ? await vmBase64(blob) : '';
     v.sendetText = 'Wird abgeschickt …'; if (S.screen === 'vcode') render();
     const eck = { fenster: S.windows.length, elemente: S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), gebaeude: pr.gebaeude || '', baujahr: pr.baujahr || '', zeit: pr.zeit || '', budget: pr.budget || '', foerdweg: AW.foerdWeg(pr) || '' };
-    const body = { kennung: kennung(), kontakt: { name: String(pr.name || '').trim(), ort: String(pr.ort || '').trim(), tel: String(pr.tel || '').trim(), mail: String(pr.mail || '').trim(), erreich: pr.erreich || '' }, plz: o.plz, betriebe: v.suchen ? [] : v.wahl.slice(0, VM_MAX), token: v.token || '', code: v.ohneCode ? '' : String(v.code || ''), einwilligung: { fassung: VM_FASSUNG, text: vmEinwText() }, aufmass: packProject(S.windows, S.proj, null), eckdaten: eck, pdf: pdf };
+    const body = { kennung: kennung(), kontakt: { name: String(pr.name || '').trim(), ort: String(pr.ort || '').trim(), tel: String(pr.tel || '').trim(), mail: String(pr.mail || '').trim(), erreich: pr.erreich || '' }, plz: plz, betriebe: v.suchen ? [] : v.wahl.slice(0, VM_MAX), token: v.token || '', code: v.ohneCode ? '' : String(v.code || ''), einwilligung: { fassung: VM_FASSUNG, text: vmEinwText() }, aufmass: packProject(S.windows, S.proj, null), eckdaten: eck, pdf: pdf };
     const r = await fetch('/api/vermittlung/senden', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(body) }), j = await r.json().catch(() => null);
     v.sendet = false;
     if (!j || !j.ok) {
@@ -4205,7 +4221,7 @@ async function vmSenden() {
       if (j && j.feld === 'betriebe') { v.liste = null; S.vmFehler = { wahl: t }; return go('betriebe'); }
       if (S.screen === 'vcode') render(); return toast(t);
     }
-    v.gesendet = { nr: String(j.nr || ''), when: Date.now(), namen: vmNamen(), wahl: v.suchen ? [] : v.wahl.slice(), suchen: !!v.suchen || !v.wahl.length, plz: o.plz, an: v.an || maskTel(pr.tel), mail: String(pr.mail || '').trim() };
+    v.gesendet = { nr: String(j.nr || ''), when: Date.now(), namen: vmNamen(), wahl: v.suchen ? [] : v.wahl.slice(), suchen: !!v.suchen || !v.wahl.length, plz: plz, an: v.an || maskTel(pr.tel), mail: String(pr.mail || '').trim() };
     /* Gratis-Weg: das Aufmaßblatt gehört dazu; der Server schickt den Nachweis wie beim Kauf (Anfrage statt Stripe-Sitzung) */
     const fs = j.freischaltung; if (fs && fs.token) { const k = kauf(); k.paid = true; k.when = Number(fs.at) || Date.now(); k.session = String(fs.session || ''); k.token = String(fs.token); k.wartet = ''; k.frei = 'vermittlung'; }
     v.code = ''; v.token = ''; persist(); S._feier = 'gesendet'; go('angefragt');
@@ -4224,15 +4240,35 @@ function vmVorgaben() {
   try { const rest = q.toString(); history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash); } catch (e) { /* ok */ }
 }
 /* Auf dem Gerät: Weg, Wahl, Liste und die abgeschickte Anfrage; nie Code, Token oder die Einwilligung (die gibt es nur je Abschicken) */
-function vmSicher() { const v = S.verm; if (!v) return null; return { weg: v.weg, wahl: v.wahl, suchen: !!v.suchen, liste: v.liste || null, listePlz: v.listePlz || '', umkreis: v.umkreis || 30, gesendet: v.gesendet || null }; }
+function vmSicher() { const v = S.verm; if (!v) return null; return { weg: v.weg, wahl: v.wahl, suchen: !!v.suchen, plz: v.plz == null ? null : v.plz, liste: v.liste || null, listePlz: v.listePlz || '', ortName: v.ortName || '', umkreis: v.umkreis || 30, gesendet: v.gesendet || null }; }
 const maskTel = (t) => { const d = String(t || '').replace(/\D/g, ''); return d.length > 7 ? d.slice(0, 4) + ' ••• ' + d.slice(-4) : ''; };
 /* Aktionen der Vermittlung (act: Namen mit vm-) */
 function vmAct(name, el, v) {
   const z = vm();
   switch (name) {
     case 'vm-weg': { if (v === z.weg) return; z.weg = v === 'B' ? 'B' : 'A'; persist(); return render(); }
-    case 'vm-weiter': { if (z.weg === 'B') { S.vmFehler = null; return go('anfrage3'); } S.vmFehler = null; return go('anfrage3'); }
-    case 'vm-kontakt': { const f = vmKontaktPruefen(); if (f.fehlt) { S.vmFehler = f; render(); const k = ['name', 'ort', 'tel', 'mail'].find((x) => f[x]), i = k && document.getElementById('t-' + k); if (i) i.focus(); return; } S.vmFehler = null; persist(); return go('betriebe'); }
+    case 'vm-weiter': { S.vmFehler = null; return go(z.weg === 'B' ? 'anfrage3' : 'betriebe'); }
+    /* Betriebe → Kontakt: Postleitzahl und Wahl (mindestens zwei, findet die Suche weniger, alle; oder „Sucht für mich aus“) */
+    case 'vm-betriebe': {
+      const plz = vmPlz(), l = z.liste && z.listePlz === plz ? z.liste : [], f = {};
+      if (!/^\d{5}$/.test(plz)) f.plz = 'Bitte gib deine Postleitzahl mit fünf Ziffern ein.';
+      else if (z.laedt) return toast('Einen Moment, wir suchen noch.');
+      else if (!z.suchen) {
+        const n = Math.min(VM_MIN, l.length);
+        if (!l.length) f.wahl = 'Bitte wähle „Sucht ihr passende für mich aus“.';
+        else if (z.wahl.length < n) f.wahl = n === 1 ? 'Bitte wähle den Betrieb oder „Sucht ihr passende für mich aus“.' : z.wahl.length ? 'Bitte wähle noch mindestens einen Betrieb, damit du vergleichen kannst, oder „Sucht ihr passende für mich aus“.' : 'Bitte wähle mindestens ' + VM_ZAHL[n] + ' Betriebe oder „Sucht ihr passende für mich aus“.';
+      }
+      if (f.plz || f.wahl) { S.vmFehler = f; render(); if (f.plz) { const i = document.getElementById('vm-plz'); if (i) i.focus(); } return; }
+      S.vmFehler = null; persist(); return go('anfrage3');
+    }
+    /* Kontakt → Code: Pflichtfelder und Einwilligung; fehlt die Wahl (etwa nach einem Neuladen), zurück zu den Betrieben */
+    case 'vm-kontakt': {
+      const f = vmKontaktPruefen();
+      if (!z.einw) f.einw = 'Bitte bestätige, dass wir die Betriebe für dich anfragen dürfen.';
+      if (f.fehlt || f.einw) { S.vmFehler = f; render(); const k = ['name', 'tel', 'mail'].find((x) => f[x]), i = k && document.getElementById('t-' + k); if (i) i.focus(); return; }
+      if (!/^\d{5}$/.test(vmPlz()) || (!z.suchen && !z.wahl.length)) { S.vmFehler = { wahl: 'Bitte wähle zuerst die Betriebe.' }; return go('betriebe'); }
+      S.vmFehler = null; persist(); return vmCodeHolen();
+    }
     case 'vm-wahl': {
       if (!v) return;
       const i = z.wahl.indexOf(v);
@@ -4243,20 +4279,11 @@ function vmAct(name, el, v) {
     case 'vm-suchen': { z.suchen = !z.suchen; if (z.suchen) z.wahl = []; if (S.vmFehler) S.vmFehler.wahl = ''; persist(); return render(); }
     case 'vm-einw': { z.einw = !z.einw; if (S.vmFehler) S.vmFehler.einw = ''; return render(); }
     case 'vm-nochmal': { z.suchFehler = ''; return vmSuchen(true); }
-    case 'vm-abschicken': {
-      const f = {};
-      const n = Math.min(VM_MIN, (z.listePlz === vmOrt().plz && z.liste ? z.liste.length : VM_MIN) || VM_MIN);
-      if (!z.suchen && z.wahl.length < n) f.wahl = n === 1 ? 'Bitte wähle den Betrieb oder „Sucht ihr passende für mich aus“.' : z.wahl.length ? 'Bitte wähle noch mindestens einen Betrieb, damit du vergleichen kannst, oder „Sucht ihr passende für mich aus“.' : 'Bitte wähle mindestens ' + VM_ZAHL[n] + ' Betriebe oder „Sucht ihr passende für mich aus“.';
-      if (!z.einw) f.einw = 'Bitte bestätige, dass wir die Betriebe für dich anfragen dürfen.';
-      if (f.wahl || f.einw) { S.vmFehler = f; return render(); }
-      const k = vmKontaktPruefen(); if (k.fehlt) { S.vmFehler = k; return go('anfrage3'); }
-      S.vmFehler = null; return vmCodeHolen();
-    }
     case 'vm-code-neu': { if (z.codeZeit && Date.now() - z.codeZeit < 30000) return toast('Einen Moment noch, der Code kann ein paar Sekunden brauchen.'); return vmCodeHolen(true); }
     case 'vm-bestaetigen': return vmSenden();
     case 'vm-blatt': return go('teilen');
     /* Auf den Folien zum Bezahlen: doch kostenlos (Inhaber: „soll die Möglichkeit trotzdem noch mal angezeigt werden“) */
-    case 'vm-gratis': { z.weg = 'A'; S.vmFehler = null; persist(); return go(z.gesendet ? 'angefragt' : 'anfrage3'); }
+    case 'vm-gratis': { z.weg = 'A'; S.vmFehler = null; persist(); return go(z.gesendet ? 'angefragt' : 'betriebe'); }
     case 'vm-heim': return go('home');
     default: return;
   }
@@ -7644,6 +7671,15 @@ function onInput(el, ev) {
   if (kind === 'sc') { const z = S.sichern; if (!z) return; z[f] = el.checked; if (z.err && z.err[f]) { delete z.err[f]; render(); } return; }
   if (kind === 'teil') { teilPfosten(S.win, +f, parseFloat(el.value)); teilLive(el); if (ev.type === 'change') render(); return; } // Aufteilung: Regler
   if (kind === 'rest') return restInput(el.value);
+  if (kind === 'vm-plz') { // Betriebe: nur Ziffern; mit der fünften sucht die App (Tastatur zu, damit die Liste zu sehen ist)
+    const z = vm(), c = String(el.value).replace(/\D/g, '').slice(0, 5); if (el.value !== c) el.value = c; z.plz = c;
+    if (S.vmFehler && S.vmFehler.plz) S.vmFehler.plz = '';
+    if (z.suchFehlerPlz) { z.suchFehler = ''; z.suchFehlerPlz = false; }
+    const b = el.closest('.vm-plzfeld'); if (b) b.classList.remove('ist-bad'); const m = document.getElementById('vm-plz-f'); if (m) m.remove(); el.removeAttribute('aria-invalid');
+    const erg = document.querySelector('.vm-ergebnis'); if (erg) erg.hidden = c !== z.listePlz;
+    if (c.length === 5) { el.blur(); if (c !== z.listePlz || !z.liste) { z.suchFehler = ''; vmSuchen(); } else render(); } // dieselbe PLZ wie die Liste: die Liste wieder zeigen
+    return;
+  }
   if (kind === 'vm-code') { const z = vm(), c = String(el.value).replace(/\D/g, '').slice(0, 6); z.code = c; if (el.value !== c) el.value = c; vmCodeLive(); if (S.vmFehler && S.vmFehler.code) { S.vmFehler = null; const b = el.closest('.vm-codefeld'); if (b) b.classList.remove('ist-bad'); const m = document.getElementById('vm-code-f'); if (m) m.remove(); el.removeAttribute('aria-invalid'); } if (c.length === 6 && !z.sendet) vmSenden(); return; }
   if (kind === 'lg-bru') return lgBruInput(el);
   if (kind === 'farbe') { S.win[f] = String(el.value).slice(0, 60); if (f === 'wunschI' && S.win.wunschI.trim()) S.win.gleich = false; if (S.win[f].trim()) { offenMerken(S.win, f); entschieden(S.win, f); } else offenZurueck(S.win, f); farbeLive(el, f); if (ev.type === 'change') nachAenderung(); return; }

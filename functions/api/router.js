@@ -33,7 +33,7 @@ import { EINGANG, versandNachholen, anfragenAufraeumen } from './eingang.js';
 import { DASHBOARD, einladungenErinnern } from './dashboard.js';
 import { instanzenPruefen } from './cloudflare.js';
 import { AUFTRAG, GROSS, auftraegeLauf } from '../auftrag/index.js';
-import { VERMITTLUNG, GROSS_VERMITTLUNG, MAX_VERMITTLUNG, vermittlungStatus, vermittlungLauf } from './vermittlung.js';
+import { VERMITTLUNG, GROSS_VERMITTLUNG, MAX_VERMITTLUNG, vermittlungStatus, vermittlungLauf, vorratLauf } from './vermittlung.js';
 import { attrappePost, attrappeAus } from './post.js';
 import { zaehlen, mitWerbung, werbungAus } from './statistik.js';
 import '../../web/assets/ral.js'; // Farben (RAL, Holzdekore) für modell.js auch im Worker-Bundle, siehe ral.js
@@ -119,7 +119,8 @@ export async function api(request, env, ctx0, inst) {
      Zwischenstände erledigter Kundenlinks, Anfragen der Vermittlung nach 180 Tagen) und Nachholen: nicht zugestellte Vertragsbestätigungen (bestaetigung.js), Eingangsbestätigungen
      von Widerrufen (widerruf.js), Erinnerungen; dazu die Läufe der Konfigurator-Instanzen (Aufbewahrung der Anfragen, Bestellungen und
      Abos, Domains, Erinnerungen an Einladungen) und IndexNow
-   - CRON_ZEHN (alle 10 Minuten): nur das Nachholen des Versands eingegangener Anfragen der Instanzen (eingang.js)
+   - CRON_ZEHN (alle 10 Minuten): das Nachholen des Versands eingegangener Anfragen der Instanzen (eingang.js) und der Vorrat der
+     Vermittlung (eine Suche nach Fensterbetrieben je Lauf, nur mit VERMITTLUNG_VORRAT, vermittlung.js)
    Ein anderer Zeitplan (etwa nach einer Änderung in wrangler.jsonc) gilt als täglicher Lauf; ohne cron (Aufruf von Hand) läuft alles. */
 export const CRON_ABRECHNUNG = '0 3 1,15 * *';
 export const CRON_TAEGLICH = '17 4 * * *';
@@ -131,7 +132,9 @@ export async function geplant(env, cron) {
   const zehn = !cron || cron === CRON_ZEHN;
   if (cron === CRON_ZEHN) {
     const versand = sp ? await versucht(() => versandNachholen(k, sp)) : { ok: true, ohneDaten: true };
-    return { ok: true, zehn: true, versand: versand };
+    const vorrat = await versucht(() => vorratLauf(k, env, sp));
+    if (vorrat && !vorrat.aus) console.log('Vorrat der Vermittlung', JSON.stringify(vorrat));
+    return { ok: true, zehn: true, versand: versand, vorrat: vorrat };
   }
   if (cron && cron !== CRON_ABRECHNUNG && cron !== CRON_TAEGLICH) console.log('Unbekannter Zeitplan, läuft als täglicher Lauf:', cron);
   const abrechnen = !cron || cron === CRON_ABRECHNUNG, taeglich = !cron || cron !== CRON_ABRECHNUNG;

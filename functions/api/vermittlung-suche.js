@@ -3,11 +3,14 @@
    Fensterbau, Fenster- und Türenbetriebe); keine Portale, Shops, Baumärkte, Hersteller ohne Montage.
    Weg: Messages-API von Anthropic mit dem serverseitigen Werkzeug Websuche (web_search_20260209, dynamische Filterung; Stand Skill
    claude-api 2026-10, geprüft gegen platform.claude.com am 29.10.2026). Modell claude-opus-5-5 (Vorgabe des Skills, Variable
-   VERMITTLUNG_MODELL zum Abweichen), Aufwand medium, höchstens 6 Suchen je Anfrage, Ort als user_location (DE, Europe/Berlin), Rückfall
+   VERMITTLUNG_MODELL zum Abweichen), Ort als user_location (DE, Europe/Berlin). Zwei Gangarten: Wartet ein Kunde (keine gespeicherte Suche
+   im Umkreis, vermittlung.js), sucht sie knapp (Aufwand low, höchstens 4 Suchen, schneller); für den Vorrat ohne Kunden gründlich (Aufwand
+   medium, höchstens 6 Suchen). Rückfall
    bei einer Ablehnung über fallbacks "default" (Beta server-side-fallback-2026-07-01). Kosten: 10 $ je 1.000 Suchen plus Tokens
    (Opus 5.5: 4 $ je Million Eingabe, 20 $ je Million Ausgabe; Suchergebnisse zählen als Eingabe), grob 0,15 bis 0,35 $ je Suche.
    Die Antwort ist JSON im Text; sie wird robust gelesen, Unsinn verworfen (ohne Namen, Ort, Telefon und Website, Portale, mehr als 60 km),
-   nach km sortiert, und jeder Betrieb bekommt eine stabile Kennung aus Name und Ort.
+   nach km sortiert, und jeder Betrieb bekommt eine stabile Kennung aus Name und Ort. Die PLZ des Betriebs (falls in der Quelle) dient dazu,
+   seine Entfernung für Kunden in Nachbarorten neu zu rechnen (vermittlung-ort.js).
    pause_turn (die Suche läuft länger als die Schleife des Servers): die bisherige Antwort unverändert zurückschicken, höchstens zweimal,
    alles innerhalb von ZEIT_MS. Zeitüberschreitung, Ablehnung oder Fehler: { ok: false } (die Route antwortet dann mit quelle 'keine').
    Attrappe (KI_ATTRAPPE=1, lokaler Testserver): feste Liste erfundener Betriebe, darunter Fensterbau Brandt (Beispiel des Inhabers).
@@ -17,7 +20,7 @@ export const MODELL = 'claude-opus-5-5';
 export const WERKZEUG = 'web_search_20260209';
 export const UMKREIS = 30;
 export const MAX_BETRIEBE = 8;
-export const SUCHEN_JE_ANFRAGE = 6;
+export const SUCHEN_JE_ANFRAGE = 6, SUCHEN_SCHNELL = 4;
 export const ZEIT_MS = 80000;
 export const LEISTUNGEN = ['Kunststoff', 'Holz', 'Holz-Alu', 'Alu', 'Haustüren', 'Rollläden', 'Insektenschutz'];
 const API = 'https://api.anthropic.com/v1/messages';
@@ -71,7 +74,8 @@ export async function pruefen(liste) {
     const tel = telText(e.tel), web = webText(e.web || e.website);
     if (!tel && !web) continue;
     const id = await betriebId(name, ort); if (ids.has(id)) continue; ids.add(id);
-    out.push({ id: id, name: name, ort: ort, strasse: text(e.strasse, 80), tel: tel, web: web, km: km, leistungen: leistungenAus(e.leistungen) });
+    const plz = text(e.plz, 10);
+    out.push({ id: id, name: name, ort: ort, plz: /^\d{5}$/.test(plz) ? plz : '', strasse: text(e.strasse, 80), tel: tel, web: web, km: km, leistungen: leistungenAus(e.leistungen) });
   }
   return out.sort((a, b) => a.km - b.km || a.name.localeCompare(b.name, 'de')).slice(0, MAX_BETRIEBE);
 }
@@ -94,27 +98,28 @@ const SYSTEM = [
   'Du recherchierst für eeziframes, eine Vermittlung zwischen Hauseigentümern und Fensterfachbetrieben in Deutschland.',
   'Gesucht sind Handwerksbetriebe, die neue Fenster liefern UND selbst einbauen: Fensterbauer, Tischlereien oder Schreinereien mit Fensterbau, Fenster- und Türenbetriebe, Glasereien mit Fenstermontage.',
   'Nicht gesucht: Vermittlungsportale und Branchenverzeichnisse (zum Beispiel MyHammer, Check24, Aroundhome, Gelbe Seiten, Das Örtliche, 11880), Online-Shops, Baumärkte, Hersteller ohne eigene Montage, reine Händler, Rollladen- oder Glasbetriebe ohne Fenstereinbau.',
-  'Arbeitsweise: Suche mit der Websuche nach Betrieben im Umkreis von etwa ' + UMKREIS + ' km um den Ort des Kunden. Übernimm nur Angaben, die in den Suchergebnissen stehen (Name, Ort, Straße, Telefon, Website). Erfinde nichts; fehlt eine Angabe, lass das Feld leer. "km" ist die geschätzte Luftlinie vom Ort des Kunden in ganzen Kilometern.',
+  'Arbeitsweise: Suche mit der Websuche nach Betrieben im Umkreis von etwa ' + UMKREIS + ' km um den Ort des Kunden. Übernimm nur Angaben, die in den Suchergebnissen stehen (Name, Postleitzahl, Ort, Straße, Telefon, Website). Erfinde nichts; fehlt eine Angabe, lass das Feld leer. "km" ist die geschätzte Luftlinie vom Ort des Kunden in ganzen Kilometern.',
   '"leistungen" nur aus dieser Liste und nur, was der Betrieb laut Quelle anbietet: ' + LEISTUNGEN.join(', ') + '.',
   'Höchstens ' + MAX_BETRIEBE + ' Betriebe, die nächsten zuerst.',
   'Antworte am Ende ausschließlich mit JSON in dieser Form, ohne Text davor oder danach:',
-  '{"betriebe":[{"name":"Tischlerei Beispiel","ort":"Rheda-Wiedenbrück","strasse":"Hauptstraße 1","tel":"05242 12345","web":"https://www.beispiel.de","km":12,"leistungen":["Kunststoff","Holz"]}]}',
+  '{"betriebe":[{"name":"Tischlerei Beispiel","plz":"33378","ort":"Rheda-Wiedenbrück","strasse":"Hauptstraße 1","tel":"05242 12345","web":"https://www.beispiel.de","km":12,"leistungen":["Kunststoff","Holz"]}]}',
   'Findest du keinen passenden Betrieb: {"betriebe":[]}'
 ].join('\n');
 
-/* Anfrage an die Messages-API (Felder nach Skill claude-api); o: { key, modell, ms, fetch } (fetch nur für die Prüfung austauschbar) */
-export function anfrage(plz, ort, modell) {
+/* Anfrage an die Messages-API (Felder nach Skill claude-api); schnell: Kunde wartet (Aufwand low, 4 Suchen), sonst gründlich (Vorrat) */
+export function anfrage(plz, ort, modell, schnell) {
   const lage = Object.assign({ type: 'approximate', country: 'DE', timezone: 'Europe/Berlin' }, ort ? { city: ort } : {});
   return {
     model: modell || MODELL, max_tokens: 16000, system: SYSTEM,
     messages: [{ role: 'user', content: 'Postleitzahl ' + plz + (ort ? ', Ort ' + ort : '') + ' (Deutschland). Suche Fensterbetriebe im Umkreis von etwa ' + UMKREIS + ' km.' }],
-    tools: [{ type: WERKZEUG, name: 'web_search', max_uses: SUCHEN_JE_ANFRAGE, blocked_domains: GESPERRT, user_location: lage }],
-    output_config: { effort: 'medium' },
+    tools: [{ type: WERKZEUG, name: 'web_search', max_uses: schnell ? SUCHEN_SCHNELL : SUCHEN_JE_ANFRAGE, blocked_domains: GESPERRT, user_location: lage }],
+    output_config: { effort: schnell ? 'low' : 'medium' },
     fallbacks: 'default'
   };
 }
+/* o: { key, modell, ms, schnell, fetch } (fetch nur für die Prüfung austauschbar) */
 export async function kiSuche(o, plz, ort) {
-  const holen = o.fetch || fetch, ende = Date.now() + (o.ms || ZEIT_MS), body = anfrage(plz, ort, o.modell);
+  const holen = o.fetch || fetch, ende = Date.now() + (o.ms || ZEIT_MS), body = anfrage(plz, ort, o.modell, !!o.schnell);
   const info = { suchen: 0, eingabe: 0, ausgabe: 0, runden: 0 };
   let bloecke = [], letzte = null;
   for (let runde = 0; runde < 3; runde++) {
