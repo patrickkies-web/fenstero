@@ -20,12 +20,8 @@
      schicken“: Mail mit Link in den Bereich für Fensterbauer, kein Aufmaßblatt und keine Kontaktdaten mehr in der Mail) · POST …/:id/stand
      { stand } · POST …/:id/notiz { text } · POST …/:id/kunde-mail { betreff, text } (Nachricht an den Kunden)
      Register der Betriebe (Lexikon, vermittlung-register.js): GET /api/inhaber/betriebe · GET …/:id · POST …/:id { stand, notiz, mail, plz,
-<<<<<<< HEAD
      bereit } · POST /api/inhaber/betriebe/neu-aufbauen · POST /api/inhaber/vermittlung/alles-loeschen { bestaetigung: 'ALLES LÖSCHEN' }
      (Gefahrenbereich: Anfragen samt Aufmaßblättern, Register, Code-Zähler je Nummer; Suchen bleiben)
-=======
-     bereit } · POST /api/inhaber/betriebe/neu-aufbauen
->>>>>>> origin/main
    Bereich für Fensterbauer (vermittlung-partner.js): GET /api/anfrage/:token, POST …/annehmen, GET /api/konto/anfragen[/:id[/pdf|/kasse]],
    POST /api/konto/anfragen/:id/freischalten, POST /api/konto/partner, POST /api/konto/betrieb. Partner stehen in der Suche vorn.
    /api/status: vermittlungStatus(k, env) → { an, suche, sms }. Tageslauf: vermittlungLauf(k) löscht Anfragen und Aufmaßblätter 180 Tage
@@ -456,7 +452,6 @@ const INHABER = {
     });
     return { ok: true, betrieb: registerZeile(z) };
   },
-<<<<<<< HEAD
   'POST /api/inhaber/betriebe/neu-aufbauen': async (ctx) => { const d = await inhaberDaten(ctx); return Object.assign({ ok: true }, await registerNeuAufbauen(d)); },
   /* Gefahrenbereich der Zentrale: alle Daten der Vermittlung löschen (Testdaten des Inhabers): Anfragen samt Aufmaßblättern, Register der
      Betriebe und die Zähler „drei Codes je Nummer und Tag“; damit fällt auch die Grenze „zwei Anfragen je Nummer in 90 Tagen“, die aus den
@@ -471,9 +466,6 @@ const INHABER = {
     if (ctx.sp && ctx.sp.zaehlerAltLoeschen) zaehler = await ctx.sp.zaehlerAltLoeschen('9999-12-31', 'budget:vcode:').catch(() => 0);
     return { ok: true, anfragen: r.anfragen, betriebe: r.betriebe, blaetter: r.pfade.length, zaehler: zaehler };
   }
-=======
-  'POST /api/inhaber/betriebe/neu-aufbauen': async (ctx) => { const d = await inhaberDaten(ctx); return Object.assign({ ok: true }, await registerNeuAufbauen(d)); }
->>>>>>> origin/main
 };
 /* Zeile des Registers für die Zentrale */
 function registerZeile(r) {
