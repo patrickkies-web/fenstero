@@ -185,6 +185,12 @@ body.rg-seite { margin: 0; background: var(--schwarz); color: var(--weiss); font
   .rg-faelle > a:hover b { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
   .rg-faelle > a:hover::after { background-color: var(--tinte); transform: translateY(2px) rotate(90deg); }
 }
+.rg-geschwister { max-width: 840px; margin-top: 48px; }
+.rg-geschwister > .eyebrow { display: block; margin: 0 0 12px; }
+.rg-geschwister .rg-faelle { max-width: none; margin-top: 0; }
+.rg-geschwister .rg-faelle > a::after { transform: rotate(-45deg); }
+.rg-geschwister .rg-faelle > a:active::after { transform: translate(2px, -2px) rotate(-45deg); }
+@media (hover: hover) and (pointer: fine) { .rg-geschwister .rg-faelle > a:hover::after { transform: translate(2px, -2px) rotate(-45deg); } }
 .rg-bild { position: relative; isolation: isolate; display: grid; justify-items: center; gap: 22px; margin: 32px 0 0; min-width: 0; padding: 18px 8px 18px; border-radius: var(--rund-xl);
   background: linear-gradient(to top, rgba(7,9,10,.9), rgba(7,9,10,0) 38%), linear-gradient(to left, rgba(7,9,10,.55), rgba(7,9,10,0) 26%), radial-gradient(130% 100% at 50% 32%, rgba(7,9,10,0) 48%, rgba(7,9,10,.6) 100%), linear-gradient(rgba(7,9,10,.2), rgba(7,9,10,.2)), url(/bilder/ratgeber/buehne.webp) 88% 24% / cover no-repeat, var(--rg-flaeche);
   box-shadow: var(--rg-lichtkante); }
