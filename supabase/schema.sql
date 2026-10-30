@@ -517,6 +517,7 @@ create table if not exists public.vermittlung_betriebe (
   stand text not null default 'neu',
   partner jsonb not null default '{}'::jsonb,
   konto uuid references public.kunden(id) on delete set null,
+  konten uuid[] not null default '{}',
   zaehler jsonb not null default '{}'::jsonb,
   anfragen jsonb not null default '[]'::jsonb,
   aliase text[] not null default '{}',
@@ -531,6 +532,9 @@ create index if not exists vermittlung_betriebe_stand on public.vermittlung_betr
 create index if not exists vermittlung_betriebe_tel on public.vermittlung_betriebe (tel_norm);
 create index if not exists vermittlung_betriebe_web on public.vermittlung_betriebe (web_host);
 create index if not exists vermittlung_betriebe_aliase on public.vermittlung_betriebe using gin (aliase);
+-- weitere Konten desselben Betriebs (mehrere Mitarbeiter), nachgerüstet am 30.10.2026
+alter table public.vermittlung_betriebe add column if not exists konten uuid[] not null default '{}';
+create index if not exists vermittlung_betriebe_konten on public.vermittlung_betriebe using gin (konten);
 alter table public.vermittlung_betriebe enable row level security;
 revoke all on public.vermittlung_betriebe from anon, authenticated;
 grant select, insert, update, delete on public.vermittlung_betriebe to service_role;

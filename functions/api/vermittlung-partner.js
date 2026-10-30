@@ -27,7 +27,7 @@ import { stripe } from './stripe.js';
 import { steuersatz, stripeKundeFuer, kassePruefen, mwst, attrappe as zahlungAttrappe, pruefe as zahlungPruefen, mitStripe } from '../auftrag/zahlung.js';
 import { daten as kundenDaten } from '../auftrag/daten.js';
 import { vermittlungDaten } from './vermittlung-daten.js';
-import { registerFuer, registerMerken, zeileAus, STAENDE_BETRIEB, telNorm, webHost } from './vermittlung-register.js';
+import { registerFuer, registerMerken, zeileAus, STAENDE_BETRIEB, telNorm, webHost, mailHost } from './vermittlung-register.js';
 import { eckZeilen, erreichText, freigeschaltetMail } from './vermittlung-mails.js';
 import { betriebId, LEISTUNGEN } from './vermittlung-suche.js';
 import { PARTNER_STAND } from './recht.js';
@@ -60,7 +60,7 @@ export function vorschau(v, x, o) {
   return out;
 }
 /* Register-Eintrag, wie der Betrieb ihn sieht */
-export const registerSicht = (r) => ({ id: r.id, name: r.name, ort: r.ort, plz: r.plz || '', strasse: r.strasse || '', tel: r.tel || '', web: r.web || '', leistungen: r.leistungen || [], stand: r.stand, standText: STAENDE_BETRIEB[r.stand] || r.stand,
+export const registerSicht = (r) => ({ id: r.id, name: r.name, ort: r.ort, konten: (r.konto ? 1 : 0) + (r.konten || []).length, plz: r.plz || '', strasse: r.strasse || '', tel: r.tel || '', web: r.web || '', leistungen: r.leistungen || [], stand: r.stand, standText: STAENDE_BETRIEB[r.stand] || r.stand,
   partner: { bereit: !!(r.partner && r.partner.bereit), seit: (r.partner || {}).seit || '', fassung: (r.partner || {}).fassung || '' }, zaehler: r.zaehler || {}, quelle: r.quelle || '' });
 
 /* ---------- Helfer ---------- */
@@ -88,11 +88,24 @@ async function eigeneAnfrage(ctx, d, kunde) {
   return { v: v, x: x, rows: rows };
 }
 /* Das erste Aufmaß ist kostenlos: solange kein Betrieb des Kontos eines freigeschaltet hat */
+/* Das erste Aufmaß ist je Betrieb kostenlos, nicht je E-Mail-Adresse oder Konto (Wunsch des Inhabers, 30.10.2026: Mitarbeiter desselben
+   Betriebs nennen verschiedene Adressen). Geprüft wird deshalb auf mehreren Ebenen, und jede Ebene zählt: (1) der Betrieb der Anfrage
+   (Register-Eintrag samt Aliasen), (2) alle Betriebe, die mit dem Konto verbunden sind (konto und konten), (3) Betriebe mit derselben
+   Telefonnummer oder Website wie einer davon, (4) der Betrieb, dessen Website zur Domain der E-Mail-Adresse passt (nicht bei Freemail),
+   (5) Betriebe, an deren Adresse schon ein Zugang ging. Hat einer dieser Einträge ein freigeschaltetes Aufmaß, kostet das nächste. */
 const erstesFrei = (rows) => !rows.some((r) => ((r.zaehler || {}).frei || 0) + ((r.zaehler || {}).bezahlt || 0) > 0);
-export async function erstesFreiFuer(d, mail, bid) {
-  const rows = (await d.betriebeNachMail(String(mail || '').toLowerCase())).concat(bid ? [await d.betriebHolen(bid)].filter(Boolean) : []);
-  return erstesFrei(rows);
+async function rundum(d, o) {
+  const rows = [], da = new Set();
+  const nimm = (r) => { if (r && !da.has(r.id)) { da.add(r.id); rows.push(r); } };
+  (o.rows || []).forEach(nimm);
+  if (o.bid) nimm(await d.betriebHolen(o.bid));
+  const mail = String(o.mail || '').toLowerCase();
+  if (mail) (await d.betriebeNachMail(mail)).forEach(nimm);
+  const host = mailHost(mail); if (host) nimm(await d.betriebNachKontakt('', host));
+  for (const r of rows.slice()) { if (r.tel_norm || r.web_host) nimm(await d.betriebNachKontakt(r.tel_norm || '', r.web_host || '')); }
+  return rows;
 }
+export async function erstesFreiFuer(d, mail, bid) { return erstesFrei(await rundum(d, { mail: mail, bid: bid })); }
 
 /* Freischalten festhalten (kostenlos oder bezahlt), Register nachführen, Kunden auf Wunsch per Mail sagen, wer sein Aufmaß hat */
 async function freischalten(ctx, d, v, x, art, zahlung) {
@@ -146,11 +159,11 @@ export async function zugangBezahlt(ctx, obj) {
 /* ---------- Routen ---------- */
 const kassenStand = (ctx) => !!(mitStripe(ctx.k) || zahlungAttrappe(ctx.k));
 const antwortListe = async (ctx, d, kunde) => {
-  const rows = await betriebeDesKontos(d, kunde), ids = new Set(); const liste = [];
+  const rows = await betriebeDesKontos(d, kunde), ids = new Set(); const liste = [], ebenen = await rundum(d, { rows: rows, mail: kunde.mail });
   rows.forEach((r) => (r.anfragen || []).forEach((a) => { if (a.zugang) ids.add(a.id); }));
   for (const id of ids) { const v = await d.holen(id); if (!v) continue; const x = eigenerBetrieb(v, kunde, rows); if (x) liste.push(vorschau(v, x)); }
   liste.sort((a, b) => (a.eingang < b.eingang ? 1 : -1));
-  return { ok: true, betriebe: rows.map(registerSicht), anfragen: liste, preis: preisInfo(ctx), fassung: PARTNER_STAND, kasse: kassenStand(ctx), erstesFrei: erstesFrei(rows) };
+  return { ok: true, betriebe: rows.map(registerSicht), anfragen: liste, preis: preisInfo(ctx), fassung: PARTNER_STAND, kasse: kassenStand(ctx), erstesFrei: erstesFrei(ebenen) };
 };
 export const PARTNER = {
   'GET /api/anfrage/:token': async (ctx) => {
@@ -162,8 +175,10 @@ export const PARTNER = {
     const { d, v, x, mail } = await tokenDaten(ctx), kunde = await kundeVon(ctx);
     if (String(kunde.mail || '').toLowerCase() !== mail) throw new ApiFehler('Bitte melden Sie sich mit der E-Mail-Adresse an, an die wir den Zugang geschickt haben (' + maskMail(mail) + ').', 403, { mail: maskMail(mail) });
     const r = await registerFuer(d, x, x.quelle);
-    if (r.konto && r.konto !== kunde.id) throw new ApiFehler('Dieser Betrieb ist schon mit einem anderen Konto verbunden. Bitte wenden Sie sich an eeziframes.', 409);
-    if (!r.konto || !r.mail) await d.betriebAendern(r.id, (z) => { z.konto = kunde.id; if (!z.mail) z.mail = mail; if (z.stand === 'neu') z.stand = 'kontakt'; verlauf(z, 'betrieb', 'Konto verbunden (' + mail + ')'); });
+    /* Der Zugang ging von der Zentrale an genau diese Adresse (am Telefon geklärt): ein weiteres Konto desselben Betriebs wird hinzugefügt,
+       etwa ein zweiter Mitarbeiter; alle Konten teilen sich das eine kostenlose Aufmaß des Betriebs */
+    if (!r.konto) await d.betriebAendern(r.id, (z) => { z.konto = kunde.id; if (!z.mail) z.mail = mail; if (z.stand === 'neu') z.stand = 'kontakt'; verlauf(z, 'betrieb', 'Konto verbunden (' + mail + ')'); });
+    else if (r.konto !== kunde.id && !(r.konten || []).includes(kunde.id)) await d.betriebAendern(r.id, (z) => { z.konten = (z.konten || []).concat([kunde.id]).slice(0, 20); if (z.stand === 'neu') z.stand = 'kontakt'; verlauf(z, 'betrieb', 'Weiteres Konto verbunden (' + mail + ')'); });
     const z = await d.aendern(v.id, (z) => { const y = (z.betriebe || []).find((w) => w.id === x.id); if (!y) return false; y.zugang = Object.assign({ zeit: (y.gesendet || {}).zeit || ZEIT(), mail: mail }, y.zugang || {}, { konto: kunde.id, geoeffnet: (y.zugang || {}).geoeffnet || ZEIT() }); if (!(y.zugang || {}).geoeffnet_gemerkt) { verlauf(z, 'betrieb', y.name + ' hat den Zugang geöffnet'); y.zugang.geoeffnet_gemerkt = true; } });
     const y = (z.betriebe || []).find((w) => w.id === x.id);
     await registerMerken(d, z, y, 'Zugang geöffnet');
@@ -172,7 +187,7 @@ export const PARTNER = {
   'GET /api/konto/anfragen': async (ctx) => { const kunde = await kundeVon(ctx); return antwortListe(ctx, vd(ctx), kunde); },
   'GET /api/konto/anfragen/:id': async (ctx) => {
     const kunde = await kundeVon(ctx), d = vd(ctx), { v, x, rows } = await eigeneAnfrage(ctx, d, kunde);
-    return { ok: true, anfrage: vorschau(v, x), preis: preisInfo(ctx), fassung: PARTNER_STAND, kasse: kassenStand(ctx), erstesFrei: erstesFrei(rows) };
+    return { ok: true, anfrage: vorschau(v, x), preis: preisInfo(ctx), fassung: PARTNER_STAND, kasse: kassenStand(ctx), erstesFrei: erstesFrei(await rundum(d, { rows: rows, bid: x.id, mail: kunde.mail })) };
   },
   'GET /api/konto/anfragen/:id/pdf': async (ctx) => {
     const kunde = await kundeVon(ctx), d = vd(ctx), { v, x } = await eigeneAnfrage(ctx, d, kunde);
@@ -187,7 +202,7 @@ export const PARTNER = {
     if (b.zustimmung !== true) throw new ApiFehler('Bitte bestätigen Sie die Partnerbedingungen.', 400, { feld: 'zustimmung' });
     if (!(v.pdf && v.pdf.pfad)) throw new ApiFehler('Das Aufmaßblatt dieser Anfrage gibt es nicht mehr.', 410);
     const row = rows.find((r) => r.id === x.id || (r.aliase || []).includes(x.id)) || rows[0] || (await registerFuer(d, x, x.quelle));
-    if (erstesFrei(rows)) { const r = await freischalten(ctx, d, v, x, 'frei', { fassung: PARTNER_STAND }); return { ok: true, frei: true, anfrage: vorschau(r.v, r.x) }; }
+    if (erstesFrei(await rundum(d, { rows: rows, bid: x.id, mail: kunde.mail }))) { const r = await freischalten(ctx, d, v, x, 'frei', { fassung: PARTNER_STAND }); return { ok: true, frei: true, anfrage: vorschau(r.v, r.x) }; }
     const k = await kasse(ctx, kunde, v, x, row);
     await d.aendern(v.id, (z) => { const y = (z.betriebe || []).find((w) => w.id === x.id); if (!y) return false; y.kasse = { session: k.id, zeit: ZEIT(), fassung: PARTNER_STAND }; });
     return { ok: true, kasse: k.url, session: k.id };
@@ -233,7 +248,7 @@ export const PARTNER = {
     else {
       /* gibt es den Betrieb schon (aus Anfragen, Kennung, Nummer oder Website), wird der Eintrag mit dem Konto verbunden statt doppelt angelegt */
       const id = await betriebId(name, ort || plz), da = (await d.betriebHolen(id)) || (await d.betriebNachKontakt(telNorm(tel), webHost(web)));
-      if (da && da.konto && da.konto !== kunde.id) throw new ApiFehler('Dieser Betrieb ist schon mit einem anderen Konto verbunden. Bitte wenden Sie sich an eeziframes.', 409);
+      if (da && da.konto && da.konto !== kunde.id && !(da.konten || []).includes(kunde.id)) throw new ApiFehler('Dieser Betrieb ist schon mit einem anderen Konto verbunden. Lassen Sie sich von eeziframes einen Zugang an Ihre Adresse schicken; damit wird Ihr Konto dem Betrieb hinzugefügt.', 409);
       if (da) z = await d.betriebAendern(da.id, (z) => { Object.assign(z, felder, { konto: kunde.id, mail: kunde.mail }); if (z.stand === 'neu') z.stand = 'kontakt'; verlauf(z, 'betrieb', 'Konto verbunden und Angaben ergänzt (' + kunde.mail + ')'); });
       else z = await d.betriebSetzen(Object.assign(zeileAus(Object.assign({ id: id }, felder), { quelle: 'register', stand: 'kontakt', konto: kunde.id, mail: kunde.mail }), { verlauf: [{ zeit: ZEIT(), von: 'betrieb', text: 'Eingetragen im Bereich für Fensterbauer (' + kunde.mail + ')' }] }));
     }

@@ -364,6 +364,25 @@ export default async function (h) {
   ok(z8.ok && zb8.zugang && zb8.zugang.konto === true && li8.anfragen.length === li7.anfragen.length + 1 && li8.anfragen[0].nr === nr8 && li8.erstesFrei === false && kasse8.ok && !kasse8.frei && /^http.*\/konto\/\?kasse=test_[A-Za-z0-9_-]+#anfrage\//.test(kasse8.kasse || '') && falscheKasse.status === 400 && bez8.ok && bez8.bezahlt === true && bez8.anfrage.frei.art === 'bezahlt' && bez8.anfrage.frei.cent === 2900 && bez8.anfrage.kunde.name === 'Gerd Zweiter' && nochmal8.schon === true,
     '31.7 Zweites Aufmaß: Zugang landet sofort im verbundenen Konto, Freischalten führt zur Kasse (29 € netto), nach der Rückkehr bezahlt und offen; fremde Kasse 400, noch einmal freischalten ist unschädlich' +
     ' (' + JSON.stringify({ konto: (zb8.zugang || {}).konto, anfragen: li8.anfragen.length, kasse: kasse8.kasse, falsch: falscheKasse.status, bezahlt: bez8.bezahlt, frei: (bez8.anfrage || {}).frei, nochmal: nochmal8.schon }) + ')');
+  /* Erstes Aufmaß je Betrieb, nicht je Adresse: ein zweiter Mitarbeiter von Brandt bekommt den Zugang an eine andere Adresse, darf annehmen
+     (weiteres Konto des Betriebs statt 409) und zahlt, weil Brandt sein kostenloses Aufmaß schon hatte; Domain-Ebene: eine Adresse mit der
+     Website-Domain von Brandt gilt auch für einen anderen Betrieb der Anfrage als „schon genutzt“ */
+  const MAIL2 = 'meister-' + stempel + '@pruef-betrieb.de', nr9 = await anfrageNeu('0178 6677889', 'Zweiter Mitarbeiter'), v9 = await vonNr(nr9), b9 = v9.betriebe.find((x) => x.name === 'Fensterbau Brandt'), l9 = v9.betriebe.find((x) => x.name === 'Tischlerei Lindholz');
+  const vor9 = await ids();
+  await zapi('/api/inhaber/vermittlungen/' + v9.id + '/senden', { bid: b9.id, mail: MAIL2, zustimmung: true });
+  await zapi('/api/inhaber/vermittlungen/' + v9.id + '/senden', { bid: l9.id, mail: 'buero@fensterbau-brandt.example', zustimmung: true }); await warte(200);
+  const m9 = await neueMails(vor9), tok9 = (m) => (/\/konto\/#zugang\/([A-Za-z0-9_.-]+)/.exec((m || {}).html || '') || [])[1] || '';
+  const token9 = tok9(m9.find((m) => m.an === MAIL2)), tokenD = tok9(m9.find((m) => m.an === 'buero@fensterbau-brandt.example'));
+  const KC = await kk(MAIL2), kc = kapi(KC);
+  const an9 = (await kc('/api/anfrage/' + token9 + '/annehmen', {})).json || {}, li9 = (await kc('/api/konto/anfragen')).json || {};
+  const frei9 = (await kc('/api/konto/anfragen/' + v9.id + '/freischalten', { zustimmung: true })).json || {};
+  const regB = ((await zapi('/api/inhaber/betriebe/' + b9.id)).json || {}).betrieb || {};
+  const vsD = (await h.api('localhost', '/api/anfrage/' + tokenD)).json || {}, vsL = (await h.api('localhost', '/api/anfrage/' + token9)).json || {};
+  ok(an9.ok && li9.betriebe.length === 1 && li9.betriebe[0].name === 'Fensterbau Brandt' && li9.betriebe[0].konten === 2 && li9.erstesFrei === false && frei9.ok && !frei9.frei && /\/konto\/\?kasse=/.test(frei9.kasse || '') && regB.konten === 2 &&
+    vsD.ok && vsD.erstesFrei === false && vsL.ok && vsL.erstesFrei === false,
+    '31.7 Erstes Aufmaß je Betrieb, auf mehreren Ebenen: zweiter Mitarbeiter mit anderer Adresse wird als weiteres Konto verbunden (kein 409), sieht denselben Betrieb und zahlt; eine Adresse mit der Website-Domain des Betriebs gilt auch bei einem anderen Betrieb als genutzt' +
+    ' (' + JSON.stringify({ an: an9.ok, betriebe: li9.betriebe.map((b) => b.name + ':' + b.konten), erstesFrei: li9.erstesFrei, kasse: !!frei9.kasse, konten: regB.konten, domain: vsD.erstesFrei, zweiter: vsL.erstesFrei }) + ')');
+
   /* Partner: Bereitschaft erklären (mit Zustimmung), danach in der Suche vorn und gekennzeichnet; Register-Eintrag ohne Anfrage; eigene Angaben */
   const ohneBetrieb = await ka('/api/konto/partner', { bereit: true, zustimmung: true }), ohneZuP = await kb('/api/konto/partner', { betrieb: li8.betriebe[0].id, bereit: true });
   const partner7 = (await kb('/api/konto/partner', { betrieb: li8.betriebe[0].id, bereit: true, zustimmung: true })).json || {};

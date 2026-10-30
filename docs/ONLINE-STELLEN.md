@@ -287,6 +287,8 @@ Code und schicken ab; du rufst die Betriebe aus der Zentrale an und schickst das
 
 1. **Supabase:** `supabase/schema.sql` noch einmal komplett ausführen (Abschnitt „Vermittlung“ legt `vermittlungen`, `vermittlung_suche`
    und seit 30.10.2026 `vermittlung_betriebe` an, das Register der Betriebe für den Bereich für Fensterbauer, VERMITTLUNG.md Abschnitt 13;
+   nachgerüstet am 30.10.2026 abends die Spalte `konten` (weitere Konten desselben Betriebs): `alter table … add column if not exists konten uuid[]`
+   steht in schema.sql und ist wiederholbar;
    und die Nummernfolge an; den Bucket `vermittlung` legt der Server beim ersten Aufmaßblatt selbst an).
 2. **KI-Suche:** braucht nur den vorhandenen `ANTHROPIC_API_KEY`. Kosten nach dem Skill `claude-api` (Stand Oktober 2026): Websuche
    10 $ je 1.000 Suchen, dazu Tokens von Claude Opus 5.5 (4 $ je Million Eingabe, 20 $ je Million Ausgabe; Suchergebnisse zählen als

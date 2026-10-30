@@ -60,7 +60,7 @@ function attrappe() {
     betriebHolen: async (id) => kopie(A.betriebe.get(id) || Array.from(A.betriebe.values()).find((r) => (r.aliase || []).includes(id)) || null),
     betriebeHolen: async (ids) => Array.from(A.betriebe.values()).filter((r) => ids.includes(r.id) || (r.aliase || []).some((a) => ids.includes(a))).map(kopie),
     betriebNachKontakt: async (tel, host) => kopie(Array.from(A.betriebe.values()).find((r) => (tel && r.tel_norm === tel) || (host && r.web_host === host)) || null),
-    betriebeNachKonto: async (konto) => Array.from(A.betriebe.values()).filter((r) => r.konto === konto).map(kopie),
+    betriebeNachKonto: async (konto) => Array.from(A.betriebe.values()).filter((r) => r.konto === konto || (r.konten || []).includes(konto)).map(kopie),
     betriebeNachMail: async (mail) => Array.from(A.betriebe.values()).filter((r) => r.mail === mail).map(kopie),
     betriebePartner: async () => Array.from(A.betriebe.values()).filter((r) => r.stand === 'partner').map(kopie),
     betriebeAlle: async () => Array.from(A.betriebe.values()).sort((a, b) => (a.updated_at < b.updated_at ? 1 : -1)).slice(0, 1000).map(kopie),
@@ -145,7 +145,7 @@ function supabase(k) {
       const t = []; if (tel) t.push('tel_norm.eq.' + q(tel)); if (host) t.push('web_host.eq.' + q(host));
       return t.length ? eins(await sb('vermittlung_betriebe?or=(' + t.join(',') + ')&select=*&limit=1')) : null;
     },
-    betriebeNachKonto: async (konto) => (await sb('vermittlung_betriebe?konto=eq.' + q(konto) + '&select=*')) || [],
+    betriebeNachKonto: async (konto) => (await sb('vermittlung_betriebe?or=(konto.eq.' + q(konto) + ',konten.cs.{' + q(konto) + '})&select=*')) || [],
     betriebeNachMail: async (mail) => (await sb('vermittlung_betriebe?mail=eq.' + q(mail) + '&select=*')) || [],
     betriebePartner: async () => (await sb('vermittlung_betriebe?stand=eq.partner&select=*')) || [],
     betriebeAlle: async () => (await sb('vermittlung_betriebe?select=*&order=updated_at.desc&limit=1000')) || [],

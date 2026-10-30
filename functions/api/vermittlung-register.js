@@ -16,6 +16,10 @@
 import { plzInfo, km, betriebLage } from './vermittlung-ort.js';
 
 export const STAENDE_BETRIEB = { neu: 'Neu', kontakt: 'Kontakt', partner: 'Partner', abgelehnt: 'Abgelehnt', pausiert: 'Pausiert' };
+/* Freemail-Anbieter: die Domain einer solchen Adresse sagt nichts über den Betrieb (mehr-Ebenen-Prüfung des kostenlosen Aufmaßes) */
+export const FREIMAIL = new Set(['gmail.com', 'googlemail.com', 'web.de', 'gmx.de', 'gmx.net', 'gmx.at', 'gmx.ch', 't-online.de', 'outlook.de', 'outlook.com', 'hotmail.de', 'hotmail.com', 'live.de', 'live.com', 'msn.com', 'yahoo.de', 'yahoo.com', 'icloud.com', 'me.com', 'mac.com', 'aol.com', 'aol.de', 'freenet.de', 'posteo.de', 'posteo.net', 'mail.de', 'online.de', 'arcor.de', 'protonmail.com', 'proton.me', 'mailbox.org', 'vodafone.de', 'unitybox.de', 'kabelmail.de', 'o2online.de', 'magenta.de', 'bluewin.ch', 'example.com']);
+/* Domain einer E-Mail-Adresse als Website-Host des Betriebs (ohne www.), leer bei Freemail */
+export function mailHost(mail) { const h = String(mail || '').toLowerCase().split('@')[1] || ''; return h && !FREIMAIL.has(h) ? h.replace(/^www\./, '') : ''; }
 export const PARTNER_VORN = 2;
 export const PARTNER_KM = 30;
 
@@ -29,7 +33,7 @@ export function webHost(w) { const m = /^(?:https?:\/\/)?(?:www\.)?([a-z0-9.-]+\
 export function zeileAus(b, extra) {
   return Object.assign({
     id: b.id, name: kurz(b.name, 80), ort: kurz(b.ort, 60), plz: /^\d{5}$/.test(String(b.plz || '')) ? String(b.plz) : '', strasse: kurz(b.strasse, 80), tel: kurz(b.tel, 40), web: kurz(b.web, 200), mail: kurz(b.mail, 120).toLowerCase(),
-    tel_norm: telNorm(b.tel), web_host: webHost(b.web), leistungen: Array.isArray(b.leistungen) ? b.leistungen.slice(0, 10) : [], quelle: b.quelle || 'ki', stand: 'neu', partner: {}, konto: null,
+    tel_norm: telNorm(b.tel), web_host: webHost(b.web), leistungen: Array.isArray(b.leistungen) ? b.leistungen.slice(0, 10) : [], quelle: b.quelle || 'ki', stand: 'neu', partner: {}, konto: null, konten: [],
     zaehler: {}, anfragen: [], aliase: [], notiz: '', verlauf: []
   }, extra || {});
 }
