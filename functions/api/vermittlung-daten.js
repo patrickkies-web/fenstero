@@ -5,7 +5,7 @@
    erneutes Ausführen schadet nicht. Eine Anfrage ist ein Dokument (kunde, eckdaten, aufmass, einwilligung, betriebe, verlauf, notiz);
    Änderungen laufen über aendern(id, fn) mit Versionszähler wie bei den Aufträgen (functions/auftrag/daten.js).
    API: vermittlungDaten(k) → { art, anlegen(row), holen(id), alle(), vonTel(tel, seitIso), aendern(id, fn), loeschen(id),
-        aelterAls(iso), sucheHolen(plz), sucheSetzen(plz, row), suchenFuer(plzListe), suchenStand(plzListe), suchenAufraeumen(iso, isoVorrat),
+        aelterAls(iso), allesLoeschen(), sucheHolen(plz), sucheSetzen(plz, row), suchenFuer(plzListe), suchenStand(plzListe), suchenAufraeumen(iso, isoVorrat),
         betriebHolen(id), betriebeHolen(ids), betriebNachKontakt(telNorm, webHost), betriebeNachKonto(kontoId), betriebeNachMail(mail),
         betriebePartner(), betriebeAlle(), betriebSetzen(row), betriebAendern(id, fn) } | null
    Register der Betriebe (seit 30.10.2026, Tabelle vermittlung_betriebe, docs/VERMITTLUNG.md Abschnitt 13): je Betrieb eine Zeile mit
@@ -49,6 +49,8 @@ function attrappe() {
     },
     loeschen: async (id) => { V.delete(id); return true; },
     aelterAls: async (iso) => Array.from(V.values()).filter((r) => r.created_at < iso).slice(0, 200).map((r) => ({ id: r.id, nr: r.nr, pdf: kopie(r.pdf), created_at: r.created_at })),
+    /* Alles der Vermittlung weg (Zentrale, Gefahrenbereich): liefert die Pfade der Aufmaßblätter, damit der Aufrufer die Ablage leert */
+    allesLoeschen: async () => { const pfade = Array.from(V.values()).map((r) => (r.pdf && r.pdf.pfad) || 'v/' + r.id + '.pdf'); const n = V.size, b = A.betriebe.size; V.clear(); A.betriebe.clear(); return { anfragen: n, betriebe: b, pfade: pfade }; },
     sucheHolen: async (plz) => kopie(A.suche.get(plz) || null),
     sucheSetzen: async (plz, row) => { A.suche.set(plz, Object.assign({ plz: plz, created_at: jetzt() }, kopie(row))); return true; },
     suchenFuer: async (liste) => liste.map((p) => A.suche.get(p)).filter(Boolean).map(kopie),
@@ -114,6 +116,11 @@ function supabase(k) {
     },
     loeschen: async (id) => { await sb('vermittlungen?id=eq.' + q(id), { method: 'DELETE' }); return true; },
     aelterAls: async (iso) => (await sb('vermittlungen?created_at=lt.' + q(iso) + '&select=id,nr,pdf,created_at&order=created_at.asc&limit=200')) || [],
+    allesLoeschen: async () => {
+      const l = (await sb('vermittlungen?select=id,pdf&limit=5000')) || [], b = (await sb('vermittlung_betriebe?select=id&limit=5000')) || [];
+      await sb('vermittlungen?id=not.is.null', { method: 'DELETE' }); await sb('vermittlung_betriebe?id=not.is.null', { method: 'DELETE' });
+      return { anfragen: l.length, betriebe: b.length, pfade: l.map((r) => (r.pdf && r.pdf.pfad) || 'v/' + r.id + '.pdf') };
+    },
     sucheHolen: async (plz) => eins(await sb('vermittlung_suche?plz=eq.' + q(plz) + '&select=*')),
     sucheSetzen: async (plz, row) => { await sb('vermittlung_suche?on_conflict=plz', { method: 'POST', body: Object.assign({ plz: plz, created_at: jetzt() }, row), headers: { prefer: 'resolution=merge-duplicates,return=minimal' } }); return true; },
     /* Suchen mehrerer Postleitzahlen (Umkreis, Stützpunkte); in Teilen zu 120, damit die Adresse kurz bleibt, die Teile gleichzeitig */
