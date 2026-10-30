@@ -1,7 +1,7 @@
 # Vermittlung: Ergänzungen der Rechtstexte (Entwurf zur anwaltlichen Prüfung)
 
-Stand 30.10.2026 (zwei bis fünf Betriebe, Aufmaßblatt auf dem Gratis-Weg dabei, Abschnitt 11 in docs/VERMITTLUNG.md; am 30.10. mit dem gebauten Stand abgeglichen, Änderungen am Ende). Noch nicht in `web/datenschutz/` und `web/agb/` eingebaut: Die Texte dort sind freigegeben, Änderungen brauchen eine
-neue Fassung mit Stand und gehen erst mit der Freigabe online. Grundlage: docs/VERMITTLUNG.md, Abschnitte 6 und 10. Keine
+Stand 30.10.2026 (zwei bis fünf Betriebe, Aufmaßblatt auf dem Gratis-Weg dabei, Abschnitt 11 in docs/VERMITTLUNG.md; am 30.10. mit dem gebauten Stand abgeglichen, Änderungen am Ende). **Eingebaut am 30.10.2026**, nachdem der Anwalt des Inhabers den Entwurf durchgesehen und für gut befunden hat: Datenschutz Abschnitt 6a
+und Ergänzung in Abschnitt 10, AGB § 4a und § 2 Abs. 3 (Stand der AGB 30.10.2026). Grundlage: docs/VERMITTLUNG.md, Abschnitte 6 und 10. Keine
 Rechtsberatung; die Fragen am Ende gehören zum Anwalt.
 
 ## Datenschutzerklärung: neuer Abschnitt nach „6. Versand an Ihren Fensterbauer“

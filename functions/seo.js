@@ -64,8 +64,8 @@ export const SEITEN = [
   { pfad: '/fuer-fensterbauer/ki-im-fensterbau/', prio: '0.7', stand: '2026-10-29' },
   { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-29' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-28' },
-  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-28' },
-  { pfad: '/agb/', prio: '0.2', stand: '2026-10-28' },
+  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-30' },
+  { pfad: '/agb/', prio: '0.2', stand: '2026-10-30' },
   { pfad: '/cookies/', prio: '0.1', stand: '2026-10-28' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
 ].concat(PAKETE_SEITEN);
