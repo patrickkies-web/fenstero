@@ -80,7 +80,7 @@ export async function pruefen(liste) {
   return out.sort((a, b) => a.km - b.km || a.name.localeCompare(b.name, 'de')).slice(0, MAX_BETRIEBE);
 }
 /* Was die App sieht: ohne Telefon, Website, Straße */
-export const oeffentlich = (b) => ({ id: b.id, name: b.name, ort: b.ort, km: b.km, leistungen: (b.leistungen || []).slice() });
+export const oeffentlich = (b) => Object.assign({ id: b.id, name: b.name, ort: b.ort, km: b.km, leistungen: (b.leistungen || []).slice() }, b.partner ? { partner: true } : {});
 
 /* JSON aus dem Antworttext: zuerst ein Codeblock, dann das größte Objekt bzw. die größte Liste; { betriebe: [...] } oder [...] */
 export function jsonAus(t) {

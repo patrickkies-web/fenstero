@@ -5,7 +5,12 @@
    erneutes Ausführen schadet nicht. Eine Anfrage ist ein Dokument (kunde, eckdaten, aufmass, einwilligung, betriebe, verlauf, notiz);
    Änderungen laufen über aendern(id, fn) mit Versionszähler wie bei den Aufträgen (functions/auftrag/daten.js).
    API: vermittlungDaten(k) → { art, anlegen(row), holen(id), alle(), vonTel(tel, seitIso), aendern(id, fn), loeschen(id),
-        aelterAls(iso), sucheHolen(plz), sucheSetzen(plz, row), suchenFuer(plzListe), suchenStand(plzListe), suchenAufraeumen(iso, isoVorrat) } | null
+        aelterAls(iso), sucheHolen(plz), sucheSetzen(plz, row), suchenFuer(plzListe), suchenStand(plzListe), suchenAufraeumen(iso, isoVorrat),
+        betriebHolen(id), betriebeHolen(ids), betriebNachKontakt(telNorm, webHost), betriebeNachKonto(kontoId), betriebeNachMail(mail),
+        betriebePartner(), betriebeAlle(), betriebSetzen(row), betriebAendern(id, fn) } | null
+   Register der Betriebe (seit 30.10.2026, Tabelle vermittlung_betriebe, docs/VERMITTLUNG.md Abschnitt 13): je Betrieb eine Zeile mit
+   Kennung (betriebId aus Name und Ort), Kontakt, Stand (neu, kontakt, partner, abgelehnt, pausiert), Partner-Erklärung, Konto im
+   Kundenbereich, Zähler und der Liste seiner Anfragen; aliase sind Kennungen doppelt gefundener Einträge (gleiche Nummer oder Website).
    suchenStand: wie suchenFuer, aber nur plz, created_at, info und der erste Betrieb (reicht für gueltig; der Vorrat liest alle 10 Minuten)
    Vorrat (seit 30.10.2026): Suchen, die der Server ohne Kunden für Stützpunkte über ganz Deutschland füllt, tragen info.vorrat = true;
    sie gelten länger (isoVorrat) als die Suchen der Kunden (iso). */
@@ -26,7 +31,7 @@ export function vermittlungDaten(k) {
 }
 
 /* ---------- Attrappe ---------- */
-const A = { v: new Map(), suche: new Map(), nr: 0 };
+const A = { v: new Map(), suche: new Map(), betriebe: new Map(), nr: 0 };
 function attrappe() {
   const V = A.v;
   const ohneAufmass = (r) => { const x = kopie(r); delete x.aufmass; delete x.einwilligung; delete x.verlauf; delete x.pdf; delete x.meta; delete x.notiz; return x; };
@@ -48,7 +53,21 @@ function attrappe() {
     sucheSetzen: async (plz, row) => { A.suche.set(plz, Object.assign({ plz: plz, created_at: jetzt() }, kopie(row))); return true; },
     suchenFuer: async (liste) => liste.map((p) => A.suche.get(p)).filter(Boolean).map(kopie),
     suchenStand: async (liste) => liste.map((p) => A.suche.get(p)).filter(Boolean).map((r) => ({ plz: r.plz, created_at: r.created_at, info: kopie(r.info), betriebe: kopie((r.betriebe || []).slice(0, 1)) })),
-    suchenAufraeumen: async (iso, isoVorrat) => { let n = 0; for (const [p, r] of A.suche) if (r.created_at < (r.info && r.info.vorrat ? isoVorrat || iso : iso)) { A.suche.delete(p); n++; } return n; }
+    suchenAufraeumen: async (iso, isoVorrat) => { let n = 0; for (const [p, r] of A.suche) if (r.created_at < (r.info && r.info.vorrat ? isoVorrat || iso : iso)) { A.suche.delete(p); n++; } return n; },
+    /* Register der Betriebe */
+    betriebHolen: async (id) => kopie(A.betriebe.get(id) || Array.from(A.betriebe.values()).find((r) => (r.aliase || []).includes(id)) || null),
+    betriebeHolen: async (ids) => Array.from(A.betriebe.values()).filter((r) => ids.includes(r.id) || (r.aliase || []).some((a) => ids.includes(a))).map(kopie),
+    betriebNachKontakt: async (tel, host) => kopie(Array.from(A.betriebe.values()).find((r) => (tel && r.tel_norm === tel) || (host && r.web_host === host)) || null),
+    betriebeNachKonto: async (konto) => Array.from(A.betriebe.values()).filter((r) => r.konto === konto).map(kopie),
+    betriebeNachMail: async (mail) => Array.from(A.betriebe.values()).filter((r) => r.mail === mail).map(kopie),
+    betriebePartner: async () => Array.from(A.betriebe.values()).filter((r) => r.stand === 'partner').map(kopie),
+    betriebeAlle: async () => Array.from(A.betriebe.values()).sort((a, b) => (a.updated_at < b.updated_at ? 1 : -1)).slice(0, 1000).map(kopie),
+    betriebSetzen: async (row) => { const alt = A.betriebe.get(row.id); const r = Object.assign({ version: 0, created_at: jetzt() }, alt || {}, kopie(row), { updated_at: jetzt() }); A.betriebe.set(r.id, r); return kopie(r); },
+    betriebAendern: async (id, fn) => {
+      const r = A.betriebe.get(id); if (!r) throw new ApiFehler('Diesen Betrieb gibt es im Register nicht.', 404);
+      const z = kopie(r), out = await fn(z); if (out === false) return false;
+      z.version = (r.version || 0) + 1; z.updated_at = jetzt(); A.betriebe.set(id, z); return kopie(z);
+    }
   };
 }
 
@@ -111,6 +130,29 @@ function supabase(k) {
       const l = ((await sb(kunden + '&select=plz')) || []).concat((await sb(vorrat + '&select=plz')) || []);
       if (l.length) { await sb(kunden, { method: 'DELETE' }); await sb(vorrat, { method: 'DELETE' }); }
       return l.length;
+    },
+    /* Register der Betriebe (aliase ist text[]: ov = überschneidet sich) */
+    betriebHolen: async (id) => eins(await sb('vermittlung_betriebe?or=(id.eq.' + q(id) + ',aliase.cs.{' + q(id) + '})&select=*&limit=1')),
+    betriebeHolen: async (ids) => (ids.length ? (await sb('vermittlung_betriebe?or=(id.in.(' + ids.map(q).join(',') + '),aliase.ov.{' + ids.map(q).join(',') + '})&select=*')) || [] : []),
+    betriebNachKontakt: async (tel, host) => {
+      const t = []; if (tel) t.push('tel_norm.eq.' + q(tel)); if (host) t.push('web_host.eq.' + q(host));
+      return t.length ? eins(await sb('vermittlung_betriebe?or=(' + t.join(',') + ')&select=*&limit=1')) : null;
+    },
+    betriebeNachKonto: async (konto) => (await sb('vermittlung_betriebe?konto=eq.' + q(konto) + '&select=*')) || [],
+    betriebeNachMail: async (mail) => (await sb('vermittlung_betriebe?mail=eq.' + q(mail) + '&select=*')) || [],
+    betriebePartner: async () => (await sb('vermittlung_betriebe?stand=eq.partner&select=*')) || [],
+    betriebeAlle: async () => (await sb('vermittlung_betriebe?select=*&order=updated_at.desc&limit=1000')) || [],
+    betriebSetzen: async (row) => eins(await sb('vermittlung_betriebe?on_conflict=id', { method: 'POST', body: row, headers: { prefer: 'resolution=merge-duplicates,return=representation' } })),
+    betriebAendern: async (id, fn) => {
+      for (let i = 0; i < 4; i++) {
+        const r = eins(await sb('vermittlung_betriebe?id=eq.' + q(id) + '&select=*')); if (!r) throw new ApiFehler('Diesen Betrieb gibt es im Register nicht.', 404);
+        const z = kopie(r), out = await fn(z); if (out === false) return false;
+        const felder = {}; Object.keys(z).forEach((s) => { if (s !== 'id' && s !== 'version' && s !== 'created_at' && s !== 'updated_at' && JSON.stringify(z[s]) !== JSON.stringify(r[s])) felder[s] = z[s] === undefined ? null : z[s]; });
+        felder.version = (r.version || 0) + 1; felder.updated_at = jetzt();
+        const neu = eins(await schreiben('vermittlung_betriebe?id=eq.' + q(id) + '&version=eq.' + (r.version || 0), 'PATCH', felder));
+        if (neu) return neu;
+      }
+      throw new ApiFehler('Gerade gleichzeitig geändert. Bitte noch einmal.', 409);
     }
   };
 }

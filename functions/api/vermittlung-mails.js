@@ -3,8 +3,10 @@
    - inhaberMail: neue Anfrage an MAIL_KONTAKT, mit Aufmaßblatt im Anhang, Kunde, Eckdaten und den gewählten Betrieben samt Telefon
      (tel:-Link), Website und km, Link zur Zentrale
    - eingangMail: Bestätigung an den Kunden (Du-Form, ohne Aufmaßblatt)
-   - betriebMail: an einen Betrieb, der im Gespräch zugestimmt hat (Sie-Form, sachlich, keine Werbung), mit Aufmaßblatt im Anhang
-   - weitergabeMail: an den Kunden, welcher Betrieb sein Aufmaß hat (Du-Form) */
+   - betriebMail: an einen Betrieb, der im Gespräch zugestimmt hat (Sie-Form, sachlich, keine Werbung): seit 30.10.2026 ohne Anhang und
+     ohne Kontaktdaten des Kunden, nur der Link in den Bereich für Fensterbauer (Inhaber: „die Daten von den Kunden nicht per E-Mail“)
+   - kundeMail: freie Nachricht des Inhabers an den Kunden aus der Zentrale (Betreff und Text vom Inhaber, Du-Form, mit Anfragenummer)
+   - freigeschaltetMail: an den Kunden, wenn ein Betrieb sein Aufmaß freigeschaltet hat (Du-Form; nur auf Wunsch des Inhabers) */
 import { esc } from './post.js';
 import { rahmen } from '../auftrag/mails.js';
 
@@ -61,20 +63,31 @@ export function eingangMail(v) {
     zeilen([['Anfrage', esc(v.nr)], ['Ort', esc(v.plz + ' ' + (k.ort || ''))], namen.length ? ['Betriebe', esc(namen.join(', '))] : null])) };
 }
 
-export function betriebMail(v, b) {
-  const k = v.kunde || {}, ort = v.plz + ' ' + (k.ort || '');
-  return { betreff: 'Anfrage aus ' + (k.ort || v.plz) + ': Fenster (' + v.nr + ')', html: rahmen('Anfrage von ' + (k.name || 'einem Kunden') + ' aus ' + (k.ort || v.plz),
-    absatz(esc('Guten Tag,')) + absatz(esc('wie eben am Telefon besprochen, erhalten Sie die Anfrage von ' + (k.name || 'unserem Kunden') + ' aus ' + ort + '. Das Aufmaßblatt mit den Maßen, Fotos und Wünschen finden Sie im Anhang. Bitte melden Sie sich direkt beim Kunden.')) +
-    titel2('Kontakt des Kunden') + zeilen([['Name', esc(k.name)], ['Telefon', telLink(k.tel, k.anzeige) + esc(v.bestaetigt ? ' (per Code bestätigt)' : '')], ['E-Mail', k.mail ? link('mailto:' + k.mail, k.mail) : ''], ['Erreichbar', esc(erreichText(k.erreich))], ['Ort', esc(ort)]]) +
-    titel2('Eckdaten') + zeilen(eckZeilen(v.eckdaten).map((z) => [z[0], esc(z[1])])) +
+/* o: { link (Zugang im Bereich für Fensterbauer), bis (ISO, solange der Link gilt), preis (Text, z. B. „29 € zzgl. USt“), erstesFrei } */
+export function betriebMail(v, b, o) {
+  o = o || {};
+  const k = v.kunde || {}, ort = v.plz + ' ' + (k.ort || ''), e = v.eckdaten || {}, bis = o.bis ? new Date(o.bis).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  return { betreff: 'Anfrage aus ' + (k.ort || v.plz) + ': Fenster (' + v.nr + ')', html: rahmen('Anfrage eines Hauseigentümers aus ' + (k.ort || v.plz),
+    absatz(esc('Guten Tag,')) + absatz(esc('wie eben am Telefon besprochen, liegt die Anfrage eines Hauseigentümers aus ' + ort + ' für Sie bereit' + (e.fenster ? ': ' + e.fenster + (e.fenster === 1 ? ' Fenster' : ' Fenster') + (e.gebaeude ? ', ' + wert('gebaeude', e.gebaeude) : '') + (e.zeit ? ', ' + wert('zeit', e.zeit).toLowerCase() : '') : '') + '.')) +
+    absatz(esc('Kontaktdaten und Aufmaßblatt sehen Sie in Ihrem Bereich bei eeziframes. Dort bestätigen Sie einmal kurz Ihre E-Mail-Adresse mit einem Code; so bleiben die Daten des Kunden geschützt.')) +
+    (o.link ? '<p style="margin:18px 0 22px">' + pille(o.link, 'Anfrage ansehen') + '</p>' : '') +
+    titel2('Eckdaten') + zeilen(eckZeilen(v.eckdaten).map((z) => [z[0], esc(z[1])]).concat([['Telefonnummer', esc(v.bestaetigt ? 'vom Kunden per Code bestätigt' : 'nicht bestätigt')], ['Ort', esc(ort)]])) +
+    absatz(esc((o.erstesFrei ? 'Ihr erstes Aufmaß über eeziframes ist kostenlos. ' : '') + 'Jedes weitere Aufmaß kostet ' + (o.preis || '29 € zzgl. USt') + ' und wird erst fällig, wenn Sie es freischalten.' + (bis ? ' Der Link gilt bis zum ' + bis + '.' : ''))) +
     absatz(esc('Der Kunde hat eingewilligt, dass wir seine Angaben für diese Anfrage an Sie weitergeben. Bitte nutzen Sie sie nur dafür.')) +
     absatz(esc('Vermittelt von eeziframes (Anfrage ' + v.nr + ').'))) };
 }
-
-export function weitergabeMail(v, b) {
+/* Freie Nachricht des Inhabers an den Kunden (Zentrale, Abschnitt Kunde): Betreff und Absätze so, wie er sie schreibt */
+export function kundeMail(v, o) {
+  const k = v.kunde || {}, betreff = String(o.betreff || 'Zu deiner Anfrage ' + v.nr).trim(), text = String(o.text || '').trim();
+  const absaetze = text.split(/\n{2,}/).map((t) => absatz(esc(t).replace(/\n/g, '<br>'))).join('');
+  return { betreff: betreff, html: rahmen(betreff, absatz(esc('Hallo ' + (k.name || '') + ',').replace(' ,', ',')) + absaetze + absatz(esc('Fragen? Antworte einfach auf diese E-Mail.')) + zeilen([['Anfrage', esc(v.nr)]])) };
+}
+/* An den Kunden, wenn ein Betrieb sein Aufmaß freigeschaltet hat */
+export function freigeschaltetMail(v, b) {
   const k = v.kunde || {};
-  return { betreff: b.name + ' hat dein Aufmaß (' + v.nr + ')', html: rahmen(b.name + ' hat dein Aufmaß', absatz(esc('Hallo ' + (k.name || '') + ',')) +
-    absatz(esc(b.name + ' aus ' + (b.ort || 'deiner Nähe') + ' möchte dir ein Angebot machen und hat dein Aufmaß von uns bekommen. Der Betrieb meldet sich bei dir' + (k.anzeige ? ', meist telefonisch unter ' + k.anzeige : '') + '.')) +
-    zeilen([['Betrieb', esc(b.name)], ['Ort', esc(b.ort || '')], b.tel ? ['Telefon', telLink(b.tel)] : null, b.web ? ['Website', link(b.web, b.web.replace(/^https?:\/\//, '').replace(/\/$/, ''))] : null]) +
+  return { betreff: b.name + ' hat dein Aufmaß (' + v.nr + ')', html: rahmen(b.name + ' hat dein Aufmaß', absatz(esc('Hallo ' + (k.name || '') + ',').replace(' ,', ',')) +
+    absatz(esc(b.name + ' aus ' + (b.ort || 'deiner Nähe') + ' hat dein Aufmaß gerade abgerufen und meldet sich bei dir' + (k.anzeige ? ', meist telefonisch unter ' + k.anzeige : '') + '.')) +
+    zeilen([['Betrieb', esc(b.name)], ['Ort', esc(b.ort || '')], b.web ? ['Website', link(b.web, b.web.replace(/^https?:\/\//, '').replace(/\/$/, ''))] : null]) +
     absatz(esc('Fragen? Antworte einfach auf diese E-Mail.'))) };
 }
+

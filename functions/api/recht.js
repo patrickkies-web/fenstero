@@ -15,6 +15,7 @@ export const AGB_STAND = '2026-10-30'; // 30.10.2026: § 4a Vermittlung, § 2 Ab
    (bestellungen.zustimmung, Metadaten der Stripe-Kasse). Die Fassung als PDF liegt unter /konfigurator-bedingungen/paketbedingungen-<STAND>.pdf
    bzw. av-vertrag-<STAND>.pdf und geht mit der Eingangsbestätigung an den Fensteranbieter. */
 export const PAKET_STAND = '2026-10-28';
+export const PARTNER_STAND = '2026-10-30'; // Partnerbedingungen der Vermittlung (web/partnerbedingungen/): erstes Aufmaß kostenlos, danach 29 € netto je Aufmaß
 export const NB_STAND = '2026-10-28';
 export const ZUSTIMMUNG = 'Ich stimme ausdrücklich zu, dass eeziframes (Patrick Kies) vor Ablauf der Widerrufsfrist mit der Bereitstellung des Aufmaßblatts beginnt. Mir ist bekannt, dass ich durch diese Zustimmung mit Beginn der Bereitstellung mein Widerrufsrecht verliere.';
 

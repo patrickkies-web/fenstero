@@ -397,3 +397,54 @@ Quellenzeile der Folie.
 
 Prüfung: Abschnitt 31 (Suche aus der Umgebung, Entfernung aus dem Ort, Tabelle, Vorrat; in der App Weiche, Postleitzahl, Kontakt danach).
 
+
+## 13. Bereich für Fensterbauer, Register und Partner (Auftrag des Inhabers, 30.10.2026)
+
+> „Ich möchte die Daten von den Kunden nicht per E-Mail verschicken. Der Fensterbauer erhält eine E-Mail, in der steht, dass er sich auf
+> meiner Webseite die Daten runterladen kann […] Grundsätzlich soll das Prinzip so sein, dass das erste Aufmaß komplett kostenlos ist und
+> ab dem zweiten die Kosten bei 29 € liegen pro vermitteltes Aufmaß. […] Ich hätte gerne ein kleines Lexikon von Betrieben, mit denen ich
+> bisher Informationen ausgetauscht habe […] und einen Abschnitt für den Kunden selbst, dass ich ihm Mails schicken kann.“
+
+Entscheidungen des Inhabers im Gespräch: Die Betriebe schalten das Aufmaß in ihrem Bereich selbst frei und zahlen dabei über Stripe
+(nicht Monatsrechnung); 29 € netto zzgl. USt; Partner mit Etikett „Partner“ und einem Satz zur Reihenfolge.
+
+### Ablauf
+
+1. **Anruf wie bisher.** Der Inhaber ruft die Betriebe an. Wer zustimmt, bekommt „Zugang schicken“ (Zentrale, früher „Aufmaß schicken“).
+2. **Mail ohne Daten.** Die Mail an den Betrieb enthält nur Ort, Eckdaten, dass die Nummer bestätigt ist, Preis und einen Link
+   `/konto/#zugang/<Token>` (unterschrieben wie der Code der Kunden, gültig 180 Tage). Kein Anhang, kein Name, keine Nummer.
+3. **Bereich für Fensterbauer** (`/konto/`, derselbe wie für die Pakete, Anmeldung per Code an die E-Mail-Adresse): Vorschau der Anfrage
+   (Ort, Eingang, Eckdaten, Echtheitsprofil), dann Anmeldung mit genau der Adresse, an die der Zugang ging (sonst 403), „Annehmen“
+   verbindet den Betrieb im Register mit dem Konto.
+4. **Freischalten.** Das erste Aufmaß eines Kontos ist kostenlos; jedes weitere kostet `PREIS_NETTO` = 29 € netto (Stripe-Kasse, Karte,
+   Rechnung von Stripe, Metadaten `art: 'vermittlung'`; Rückkehr `/konto/?kasse=<session>#anfrage/<id>`, dazu der Webhook, falls der Betrieb
+   nicht zurückkehrt). Danach Kontaktdaten, Aufmaßblatt (PDF, ansehen und herunterladen), Zweckbindung. Der Kunde bekommt per Mail, welcher
+   Betrieb sein Aufmaß abgerufen hat (`freigeschaltetMail`).
+5. **Register und Partner.** Im Bereich trägt sich der Betrieb ein (Name, Ort, PLZ, Straße, Telefon, Website, Leistungen) und erklärt seine
+   Bereitschaft (Partnerbedingungen). Partner stehen bei Kunden im Umkreis von 30 km auf Platz 1 und 2 (`partnerVorn`, höchstens zwei, die
+   nächsten zuerst; die App zeigt „Partner“ und „Partnerbetriebe stehen oben, danach nach Entfernung“), auch wenn keine Suche sie kannte.
+   Wählt ein Kunde einen Partner, bekommt der Inhaber die Anfrage wie bisher; der Zugang geht über „Zugang schicken“ (ohne Anruf nötig).
+6. **Lexikon der Zentrale** (`#betriebe`): jeder Betrieb mit Kontakt, Stand (neu, kontakt, partner, abgelehnt, pausiert), Partner-Erklärung,
+   Konto, Zählern (Anfragen, Anrufergebnisse, Zugänge, geöffnet, kostenlos, bezahlt, Umsatz) und der Liste seiner Anfragen mit Ergebnis;
+   Notiz, Verlauf, „Register neu aufbauen“. Doppelte: gleiche Kennung, Telefonnummer oder Website werden ein Eintrag mit Alias.
+7. **Kunde in der Zentrale:** Nachricht an den Kunden (Betreff, Text, Vorlagen), geht an seine E-Mail, steht im Verlauf und unter
+   `nachrichten`.
+
+### Teile
+
+| Teil | Stelle | Was es tut |
+|---|---|---|
+| Register | `functions/api/vermittlung-register.js`, Tabelle `vermittlung_betriebe` (schema.sql) | `registerFuer` (finden oder anlegen, Alias bei gleicher Nummer oder Website), `registerMerken` (nach jeder Änderung an einem Betrieb in einer Anfrage), `registerNeuAufbauen`, `partnerVorn` |
+| Bereich für Fensterbauer | `functions/api/vermittlung-partner.js` | Routen `GET /api/anfrage/:token`, `POST …/annehmen`, `GET /api/konto/anfragen[/:id[/pdf|/kasse]]`, `POST …/:id/freischalten`, `POST /api/konto/partner`, `POST /api/konto/betrieb`; Kasse bei Stripe, `zugangBezahlt` für den Webhook |
+| Zentrale | `functions/api/vermittlung.js` (INHABER) | `senden` schickt den Zugang; `kunde-mail`; `GET/POST /api/inhaber/betriebe[/:id]`, `neu-aufbauen` |
+| Mails | `functions/api/vermittlung-mails.js` | `betriebMail` (Link, ohne Daten), `kundeMail`, `freigeschaltetMail` |
+| App | `web/assets/app.js`, `vermittlung.css` | Etikett „Partner“ (`.vm-partner`), Satz zur Reihenfolge in der Quellenzeile |
+| Oberflächen | `web/assets/inhaber.js` + `zentrale-register.css`; `web/assets/konto.js` + `konto-anfragen.css`; „Anmelden“ im Kopf der Seite für Fensterbauer | Lexikon, Kundenabschnitt, Zugang schicken; Zugang, Anfrage, Freischalten, Karten (Register/Bereitschaft, Echtheit, Pakete), Übersicht für beide Seiten |
+| Recht | `web/partnerbedingungen/` (`PARTNER_STAND` in recht.js), Datenschutz 6a und 9, AGB § 4a | Entwurf vom 30.10.2026, vom Anwalt zu prüfen (Fragen in VERMITTLUNG-RECHT.md) |
+| Prüfung | Abschnitt 31.5 (Zugang statt Aufmaß), 31.7 (Bereich, Register, Partner, Kundenmail, Rechtsseite) | |
+
+Lokal ausprobieren: Server starten (ONLINE-STELLEN.md, „Lokal ausprobieren“), `node scripts/dev-vermittlung-anlegen.mjs http://localhost:8795 4`
+legt Testanfragen an; in der Zentrale „Zugang schicken“ an eine Adresse ohne `.example`, den Link aus `GET /api/test/post` öffnen, Code 123456.
+
+Offen: Reklamation aus dem Bereich heraus (heute per E-Mail, Partnerbedingungen § 6); Stripe-Kundenportal im Bereich für Rechnungen der
+Vermittlung (die Pakete haben es schon); automatische Zugänge an Partner ohne Anruf.

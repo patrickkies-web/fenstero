@@ -305,6 +305,12 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Liste da (kein Ladebild, wo gespeicherte Suchen der Umgebung reichen); Name, Telefon und Einwilligung erst danach. Protokoll
   docs/profis/2026-10-30-vermittlung-sofort.md. Vorschlag für seine DNA: „Was der Kunde zuerst sehen will (die Betriebe), kommt vor dem,
   was wir von ihm wollen (seine Nummer).“
+- Bereich für Fensterbauer (Inhaber, 30.10.2026): Ein Bereich für beide Seiten (Anfragen aus der Vermittlung und Konfigurator-Pakete) im
+  vorhandenen `/konto/`, gleichwertig und ohne Vorwurf „Noch keine Bestellung“; Kundendaten nie per E-Mail, nur hinter Code und
+  Freischalten; Vorschau mit Echtheitsprofil, die eine Pille ist „Freischalten“; darunter Karten im Stil der Seite (Register und
+  Bereitschaft, Echtheit der Nummer, Konfigurator-Pakete). Partner stehen in der App auf Platz 1 und 2 mit Etikett „Partner“ in Indigo
+  und einem Satz zur Reihenfolge. „Anmelden“ im Kopf der Ansicht Fensterbauer. In der Zentrale ein Lexikon der Betriebe und ein
+  Abschnitt Kunde mit Nachricht. Protokoll docs/profis/2026-10-30-partner-bereich.md, Doku docs/VERMITTLUNG.md Abschnitt 13.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

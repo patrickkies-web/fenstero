@@ -286,6 +286,7 @@ Code und schicken ab; du rufst die Betriebe aus der Zentrale an und schickst das
 `SITZUNG_GEHEIMNIS` sind da. **Seit dem 29.10.2026 ist der Code online, die Vermittlung aber aus**, bis du sie mit Schritt 5 einschaltest.
 
 1. **Supabase:** `supabase/schema.sql` noch einmal komplett ausführen (Abschnitt „Vermittlung“ legt `vermittlungen`, `vermittlung_suche`
+   und seit 30.10.2026 `vermittlung_betriebe` an, das Register der Betriebe für den Bereich für Fensterbauer, VERMITTLUNG.md Abschnitt 13;
    und die Nummernfolge an; den Bucket `vermittlung` legt der Server beim ersten Aufmaßblatt selbst an).
 2. **KI-Suche:** braucht nur den vorhandenen `ANTHROPIC_API_KEY`. Kosten nach dem Skill `claude-api` (Stand Oktober 2026): Websuche
    10 $ je 1.000 Suchen, dazu Tokens von Claude Opus 5.5 (4 $ je Million Eingabe, 20 $ je Million Ausgabe; Suchergebnisse zählen als
@@ -303,7 +304,9 @@ Code und schicken ab; du rufst die Betriebe aus der Zentrale an und schickst das
    sendet nur und braucht keine Antworten). Vor dem Start einmal an dein Handy und an eine Festnetznummer probieren. Ohne `SMS_API_KEY` geht die Anfrage ohne Code
    durch und steht in der Zentrale als „Nummer nicht bestätigt“.
 4. **Rechtstexte:** erledigt am 30.10.2026 (Datenschutz Abschnitt 6a und 10, AGB § 4a und § 2 Abs. 3, Stand 30.10.2026; Entwurf und
-   Fragen in [VERMITTLUNG-RECHT.md](VERMITTLUNG-RECHT.md), vom Anwalt des Inhabers durchgesehen).
+   Fragen in [VERMITTLUNG-RECHT.md](VERMITTLUNG-RECHT.md), vom Anwalt des Inhabers durchgesehen). **Noch zu prüfen:** die
+   Partnerbedingungen (`/partnerbedingungen/`, Stand 30.10.2026) und die Änderungen in Datenschutz 6a/9 und AGB § 4a für den Bereich
+   für Fensterbauer (Zugang statt PDF-Mail, 29 € je Aufmaß, Partner vorn); Fragen 10 bis 14 in VERMITTLUNG-RECHT.md.
 5. **Einschalten:** bei Cloudflare die Variable `VERMITTLUNG` mit dem Wert `an` anlegen. Danach `/api/status` öffnen: `"vermittlung"`
    zeigt `"an": true`. Ausschalten: Variable löschen. Ist sie an, sollte auch die Startseite in den festen Texten für Suchmaschinen die
    Weitergabe nennen (in `web/index.html` am 29.10.2026 herausgenommen: Satz in der Beschreibung der App, dritte Offer im JSON-LD, Zeile

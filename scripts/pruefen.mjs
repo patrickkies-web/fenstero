@@ -636,9 +636,9 @@ if (teil(5)) {
   {
     const rb = await import(new URL('./recht-bausteine.mjs', import.meta.url).href), rs = rb.gebaut();
     const anders = rs.filter(([, , alt, neu]) => alt !== neu).map(([p]) => p);
-    const ohneInhalt = rs.filter(([p, , alt]) => ['/agb/', '/datenschutz/', '/konfigurator-bedingungen/'].includes(p) && !/<nav class="recht-inhalt"/.test(alt)).map(([p]) => p);
+    const ohneInhalt = rs.filter(([p, , alt]) => ['/agb/', '/datenschutz/', '/konfigurator-bedingungen/', '/partnerbedingungen/'].includes(p) && !/<nav class="recht-inhalt"/.test(alt)).map(([p]) => p);
     const ohneFb = rs.filter(([, , alt]) => !/<footer class="fuss">[\s\S]*href="\/fuer-fensterbauer\/"[\s\S]*<\/footer>/.test(alt)).map(([p]) => p);
-    ok(!anders.length && !ohneInhalt.length && !ohneFb.length && rs.length === 8, 'Rechtstexte und Fehlerseite so, wie scripts/recht-bausteine.mjs sie baut (Schriften, Fuß mit „Für Fensterbauer“, „Auf dieser Seite“ bei AGB, Datenschutz, Paketbedingungen)' + (anders.length ? ' (nicht neu gebaut: ' + anders.join(', ') + ')' : '') + (ohneInhalt.length ? ' (ohne Verzeichnis: ' + ohneInhalt.join(', ') + ')' : '') + (ohneFb.length ? ' (Fuß ohne Für Fensterbauer: ' + ohneFb.join(', ') + ')' : ''));
+    ok(!anders.length && !ohneInhalt.length && !ohneFb.length && rs.length === 9, 'Rechtstexte und Fehlerseite so, wie scripts/recht-bausteine.mjs sie baut (Schriften, Fuß mit „Für Fensterbauer“, „Auf dieser Seite“ bei AGB, Datenschutz, Paket- und Partnerbedingungen)' + (anders.length ? ' (nicht neu gebaut: ' + anders.join(', ') + ')' : '') + (ohneInhalt.length ? ' (ohne Verzeichnis: ' + ohneInhalt.join(', ') + ')' : '') + (ohneFb.length ? ' (Fuß ohne Für Fensterbauer: ' + ohneFb.join(', ') + ')' : ''));
   }
   const ctx = await browser.newContext(telefon);
   const page = await neueSeite(ctx);
@@ -1709,7 +1709,7 @@ if (teil(10)) {
   for (const s of seo.SEITEN) {
     const r = await roh(s.pfad);
     const titel = (r.text.match(/<title>([^<]*)<\/title>/) || [])[1] || '', beschr = (r.text.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
-    const rechts = ['/impressum/', '/datenschutz/', '/agb/', '/nutzungsbedingungen/', '/cookies/', '/widerruf/', '/konfigurator-bedingungen/'].includes(s.pfad), ld = ldjson(r.text);
+    const rechts = ['/impressum/', '/datenschutz/', '/agb/', '/nutzungsbedingungen/', '/cookies/', '/widerruf/', '/konfigurator-bedingungen/', '/partnerbedingungen/'].includes(s.pfad), ld = ldjson(r.text);
     ok(r.status === 200 && (r.text.replace(/<template[\s\S]*?<\/template>/g, '').match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titel) && titel.length <= 75 && (rechts || (beschr.length >= 70 && beschr.length <= 170)), s.pfad + ': ohne JavaScript genau ein h1, Titel mit Marke (' + titel.length + ' Zeichen)' + (rechts ? '' : ', Beschreibung (' + beschr.length + ' Zeichen)'));
     ok(!/<meta name="robots"/.test(r.text) && r.h.get('x-robots-tag') === seo.SPERRE && !!r.h.get('content-security-policy') && r.h.get('link') === '<' + BASE + s.pfad + '>; rel="canonical"', s.pfad + ': Pilotphase per Kopfzeile noindex (kein Meta-Tag), CSP und Canonical vom Worker');
     if (!rechts) ok(ld.length > 0 && ld.every((x) => x && x['@context'] === 'https://schema.org') && !/"(url|@id|item|mainEntityOfPage|logo)":"\//.test(r.text) && (r.text.match(/<meta property="og:image" content="([^"]*)"/) || [])[1] === BASE + ogBild(s.pfad), s.pfad + ': strukturierte Daten (JSON-LD) lesbar, Adressen darin und im Vorschaubild absolut (' + ogBild(s.pfad) + ')');
