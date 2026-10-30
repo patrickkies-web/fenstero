@@ -294,8 +294,10 @@ Code und schicken ab; du rufst die Betriebe aus der Zentrale an und schickst das
    Betriebe, die Anfrage geht als „Betrieb für mich suchen“ weiter. Ohne Schlüssel gibt es keine Liste, nur diesen Weg.
 3. **Code per SMS oder Anruf:** Konto bei **seven.io** (Kiel) anlegen, Guthaben aufladen, Vertrag zur Auftragsverarbeitung abschließen,
    im Konto einen API-Schlüssel erzeugen und bei Cloudflare als Secret `SMS_API_KEY` eintragen. Optional
-   `SMS_ABSENDER` (Absender der SMS, bis 11 Zeichen, Vorgabe `eeziframes`) und `SMS_STIMME` (Stimme des Anrufs für Festnetz, Vorgabe
-   `de-de-female`). Vor dem Start einmal an dein Handy und an eine Festnetznummer probieren. Ohne `SMS_API_KEY` geht die Anfrage ohne Code
+   `SMS_ABSENDER` (Absender der SMS, bis 11 Zeichen aus Buchstaben, Ziffern und Leerzeichen, längere werden gekürzt; Vorgabe
+   `eeziframes`) und `SMS_STIMME` (Stimme des Anrufs für Festnetz, Vorgabe `de-de-female`; `female` oder `male` allein wird zur
+   deutschen Stimme). Beim Schlüssel nur die Rechte **sms** und **voice**, ohne IP-Beschränkung; keine Rufnummer buchen (die App
+   sendet nur und braucht keine Antworten). Vor dem Start einmal an dein Handy und an eine Festnetznummer probieren. Ohne `SMS_API_KEY` geht die Anfrage ohne Code
    durch und steht in der Zentrale als „Nummer nicht bestätigt“.
 4. **Rechtstexte:** Entwurf und Fragen an den Anwalt in [VERMITTLUNG-RECHT.md](VERMITTLUNG-RECHT.md); nach der Prüfung Datenschutz
    (Abschnitt 6a) und Nutzungsbedingungen (§ 4a) mit neuem Stand einbauen.
