@@ -38,6 +38,14 @@ export const SEITEN_INFO = {
   '/ratgeber/fenster-reparieren-oder-austauschen/': ['Reparieren oder tauschen', 'Drei Fragen, mit denen du entscheidest, was dein Fenster braucht.'],
   '/ratgeber/fenster-austauschen/': ['Fenster austauschen', 'Sechs Schritte vom Aufmaß bis zum Einbau, Kosten pro Fenster, Förderung 2026.'],
   '/ratgeber/fenstertausch-altbau/': ['Fenstertausch im Altbau', 'Laibung, Abdichtung und wie du Schimmel nach dem Tausch vermeidest.'],
+  '/ratgeber/haus-gekauft-fenster/': ['Haus gekauft: Fenster?', 'Keine Tauschpflicht nach Hauskauf oder Erbe: was in zwei Jahren Pflicht ist, Energieausweis, Förderung.'],
+  '/ratgeber/fenster-oder-daemmung-zuerst/': ['Fenster oder Fassade', 'Fenster in die Dämmebene, Heizung zuletzt: die Reihenfolge der Sanierung im Altbau.'],
+  '/ratgeber/fenster-nach-und-nach-tauschen/': ['Alle oder in Etappen', 'Ein Auftrag spart Anfahrt und Einrichtung, Etappen schonen Budget und Fördergrenze. Welche Fenster zuerst.'],
+  '/ratgeber/fenster-planen-raum-fuer-raum/': ['Fenster Raum für Raum', 'Bad, Küche, Schlaf- und Kinderzimmer: Glas, Öffnungsart, RC 2, Schallschutz und Brüstung je Raum.'],
+  '/ratgeber/fenster-vergroessern/': ['Fenster vergrößern', 'Größer oder bodentief: wann es ohne Bauantrag geht, wer den Sturz rechnet, was es kostet.'],
+  '/ratgeber/fenster-foerderung-2026/': ['Fenster-Förderung 2026', '15 % Zuschuss bis 4.500 €, Uw höchstens 0,95, und was die neue Richtlinie vom Juli 2026 ändert.'],
+  '/ratgeber/fenster-foerderung-beantragen/': ['Förderung beantragen', 'Experte, Vertrag mit Bedingung, Antrag, Fristen: der Weg zum BAFA-Zuschuss für Fenster.'],
+  '/ratgeber/fenster-steuerlich-absetzen/': ['Fenster von der Steuer', '20 % Steuerbonus über drei Jahre oder 15 % Zuschuss: Bedingungen, Vergleich und Ablauf.'],
   '/ratgeber/fenster-material-vergleich/': ['Fenstermaterial', 'Kunststoff, Holz, Holz-Alu oder Alu: Preise, Lebensdauer und Pflege im Vergleich.'],
   '/ratgeber/dreifachverglasung/': ['Dreifachverglasung', 'Lohnt sich 3-fach-Glas? Werte, Aufpreis und Nachteile.'],
   '/ratgeber/fenster-oeffnungsarten/': ['Öffnungsarten', 'Dreh-Kipp, Kipp, Stulp oder fest: was wo passt und was du vorher klären solltest.'],
@@ -71,8 +79,8 @@ export const SEITEN_INFO = {
 /* Der Weg zu neuen Fenstern; die erste Seite eines Schritts ist sein Ziel in der Wegleiste und im „Nächster Schritt“ */
 export const WEG = [
   { name: 'Prüfen', text: 'Beschlagen, undicht, wie alt?', seiten: ['/ratgeber/fenster-alter-erkennen/', '/ratgeber/fenster-beschlagen/', '/ratgeber/fenster-undicht/'] },
-  { name: 'Entscheiden', text: 'Reparieren oder neu, Kosten, Förderung', seiten: ['/ratgeber/fenster-reparieren-oder-austauschen/', '/ratgeber/fenster-austauschen/', '/ratgeber/fenstertausch-altbau/'] },
-  { name: 'Auswählen', text: 'Material, Glas, Öffnungsart', seiten: ['/ratgeber/fenster-material-vergleich/', '/ratgeber/dreifachverglasung/', '/ratgeber/fenster-oeffnungsarten/', '/ratgeber/uw-wert-fenster/', '/ratgeber/din-links-rechts/', '/ratgeber/fenster-standardmasse/'] },
+  { name: 'Entscheiden', text: 'Reparieren oder neu, Kosten, Förderung', seiten: ['/ratgeber/fenster-reparieren-oder-austauschen/', '/ratgeber/haus-gekauft-fenster/', '/ratgeber/fenster-austauschen/', '/ratgeber/fenster-foerderung-2026/', '/ratgeber/fenster-foerderung-beantragen/', '/ratgeber/fenster-steuerlich-absetzen/', '/ratgeber/fenstertausch-altbau/', '/ratgeber/fenster-oder-daemmung-zuerst/', '/ratgeber/fenster-nach-und-nach-tauschen/'] },
+  { name: 'Auswählen', text: 'Material, Glas, Öffnungsart', seiten: ['/ratgeber/fenster-material-vergleich/', '/ratgeber/fenster-planen-raum-fuer-raum/', '/ratgeber/dreifachverglasung/', '/ratgeber/fenster-oeffnungsarten/', '/ratgeber/uw-wert-fenster/', '/ratgeber/din-links-rechts/', '/ratgeber/fenster-standardmasse/', '/ratgeber/fenster-vergroessern/'] },
   { name: 'Ausmessen', text: 'Selbst messen, fürs Angebot', seiten: ['/ratgeber/fenster-ausmessen/', '/ratgeber/balkontuer-ausmessen/', '/ratgeber/fenster-mit-rollladen-ausmessen/', '/ratgeber/kellerfenster-ausmessen/', '/ratgeber/fensterbank-ausmessen/', '/ratgeber/bruestungshoehe-fenster/', '/ratgeber/aufmassblatt-fenster/', '/ratgeber/bestellmass-fenster/'] },
   { name: 'Vergleichen', text: 'Angebote richtig lesen', seiten: ['/ratgeber/fenster-angebot-vergleichen/'] },
   { name: 'Einbauen', text: 'RAL-Montage, Lüftung', seiten: ['/ratgeber/ral-montage-fenster/', '/ratgeber/lueftungskonzept-fenstertausch/'] }

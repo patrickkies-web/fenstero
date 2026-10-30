@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400">
+
+
+<rect width="480" height="400" rx="16" fill="#ffffff"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="16" fill="#07090a">
+
+
+
+
+
+<!-- 1 Heute: alte Wand, Fenster mittig -->
+<rect x="24" y="180" width="40" height="80" fill="#d2d0d3"/>
+<rect x="120" y="180" width="40" height="80" fill="#d2d0d3"/>
+<rect x="64" y="213" width="96" height="14" fill="none"/>
+<rect x="60" y="212" width="8" height="16" fill="#202022"/>
+<rect x="116" y="212" width="8" height="16" fill="#202022"/>
+<rect x="68" y="216" width="48" height="8" fill="#897efc"/>
+<!-- 2 Fenster zuerst: Fenster außen bündig, Laibung vorübergehend gedämmt, spätere Dämmung gestrichelt -->
+<rect x="176" y="180" width="40" height="80" fill="#d2d0d3"/>
+<rect x="272" y="180" width="40" height="80" fill="#d2d0d3"/>
+<rect x="176" y="140" width="136" height="40" fill="none" stroke="#f88962" stroke-width="4.4" stroke-dasharray="6 5"/>
+<rect x="216" y="196" width="8" height="64" fill="#fde3d8" stroke="#f88962" stroke-width="4.4"/>
+<rect x="264" y="196" width="8" height="64" fill="#fde3d8" stroke="#f88962" stroke-width="4.4"/>
+<rect x="212" y="180" width="8" height="16" fill="#202022"/>
+<rect x="268" y="180" width="8" height="16" fill="#202022"/>
+<rect x="220" y="184" width="48" height="8" fill="#897efc"/>
+<!-- 3 Zusammen: Dämmung voll, Fenster in der Dämmebene, Dämmung überdeckt den Rahmen -->
+<rect x="328" y="180" width="40" height="80" fill="#d2d0d3"/>
+<rect x="424" y="180" width="40" height="80" fill="#d2d0d3"/>
+<rect x="328" y="140" width="40" height="40" fill="#fde3d8" stroke="#f88962" stroke-width="4.4"/>
+<rect x="424" y="140" width="40" height="40" fill="#fde3d8" stroke="#f88962" stroke-width="4.4"/>
+<rect x="368" y="140" width="10" height="20" fill="#fde3d8" stroke="#f88962" stroke-width="4.4"/>
+<rect x="414" y="140" width="10" height="20" fill="#fde3d8" stroke="#f88962" stroke-width="4.4"/>
+<rect x="372" y="152" width="8" height="16" fill="#202022"/>
+<rect x="412" y="152" width="8" height="16" fill="#202022"/>
+<rect x="380" y="156" width="32" height="8" fill="#897efc"/>
+<!-- Beschriftung unten -->
+
+
+
+
+
+
+
+
+</g>
+</svg>

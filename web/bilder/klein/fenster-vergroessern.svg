@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400">
+
+
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#07090a"/></marker><marker id="k" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#f88962"/></marker></defs>
+<rect width="480" height="400" rx="16" fill="#ffffff"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="16" fill="#07090a">
+
+
+<rect x="24" y="56" width="204" height="304" fill="#ecebec"/>
+<rect x="252" y="56" width="204" height="304" fill="#ecebec"/>
+<rect x="24" y="360" width="432" height="18" fill="#d2d0d3"/>
+<line x1="24" y1="360" x2="456" y2="360" stroke="#07090a" stroke-width="4.4"/>
+<rect x="70" y="108" width="112" height="12" fill="#a8a4a9"/>
+<rect x="76" y="120" width="100" height="120" fill="#eceef1" stroke="#897efc" stroke-width="6.6"/>
+<line x1="126" y1="120" x2="126" y2="240" stroke="#897efc" stroke-width="6.6"/>
+<rect x="70" y="240" width="112" height="7" fill="#a8a4a9"/>
+<line x1="50" y1="247" x2="50" y2="358" stroke="#f88962" stroke-width="4.4"/>
+
+<line x1="230" y1="200" x2="250" y2="200" stroke="#07090a" stroke-width="4.4"/>
+<rect x="266" y="104" width="176" height="16" fill="#202022"/>
+
+<rect x="278" y="120" width="152" height="240" fill="#eceef1" stroke="#897efc" stroke-width="6.6"/>
+<rect x="279.5" y="241.5" width="149" height="117" fill="#fde3d8"/>
+<line x1="278" y1="240" x2="430" y2="240" stroke="#897efc" stroke-width="6.6"/>
+<line x1="354" y1="120" x2="354" y2="240" stroke="#897efc" stroke-width="6.6"/>
+<rect x="304" y="120" width="100" height="120" fill="none" stroke="#a8a4a9" stroke-width="4.4" stroke-dasharray="5 5"/>
+<rect x="272" y="114" width="164" height="246" fill="none" stroke="#f88962" stroke-width="5.5" stroke-dasharray="8 6"/>
+
+
+</g>
+</svg>
