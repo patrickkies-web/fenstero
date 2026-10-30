@@ -125,14 +125,14 @@
       <div class="ez-hero">
         <div class="ez-hero__buehne">
           <!-- Dreh-Betrachter: drei Fenster aus dem echten 3-D-Modell der App (buehne.js in WebGL) wechseln sich ab, je Modell und Farbe ein
-               Raster aus 25 Blickwinkeln von −36° bis +36° (scripts/hero-fenster.mjs, Angaben in /bilder/start/fenster/fenster.json);
-               startseite.js blättert darin und wechselt die Fenster (Inhaber, 29.10.2026) -->
-          <div class="ez-dreh" data-ez="dreh" data-bilder="25" data-spalten="5" data-ruhe="5" data-von="-36" data-schritt="3" data-modell="raff" data-farbe="7016" data-modelle='[{"k":"raff","f":"7016","n":"Mit Raffstore"},{"k":"sprossen","f":"9016","n":"Mit Sprossen"},{"k":"drei","f":"9016","n":"Dreiteilig mit Rollladen"}]'>
+               Raster aus 37 Blickwinkeln von −36° bis +36° in 2°-Schritten (scripts/hero-fenster.mjs, Angaben in /bilder/start/fenster/fenster.json);
+               startseite.js zeichnet daraus auf die Leinwand und wechselt die Fenster (Inhaber, 29.10.2026) -->
+          <div class="ez-dreh" data-ez="dreh" data-bilder="37" data-spalten="5" data-ruhe="8" data-von="-36" data-schritt="2" data-modell="raff" data-farbe="7016" data-modelle='[{"k":"raff","f":"7016","n":"Mit Raffstore"},{"k":"sprossen","f":"9016","n":"Mit Sprossen"},{"k":"drei","f":"9016","n":"Dreiteilig mit Rollladen"}]'>
             <span class="ez-dreh__marke">Aus dem 3-D-Modell der App<span class="ez-dreh__modellname" data-ez="modellname">Mit Raffstore</span></span>
-            <div class="ez-dreh__fenster" role="slider" tabindex="0" aria-label="Fenster drehen: Mit Raffstore, Rahmen außen Anthrazitgrau" aria-valuemin="-36" aria-valuemax="36" aria-valuenow="-21" aria-valuetext="Blick von rechts, 21 Grad" aria-describedby="dreh-hilfe">
+            <div class="ez-dreh__fenster" role="slider" tabindex="0" aria-label="Fenster drehen: Mit Raffstore, Rahmen außen Anthrazitgrau" aria-valuemin="-36" aria-valuemax="36" aria-valuenow="-20" aria-valuetext="Blick von rechts, 20 Grad" aria-describedby="dreh-hilfe">
               <span class="ez-dreh__modell">
                 <img class="ez-dreh__ruhe" src="/bilder/start/fenster/raff-7016-ruhe.webp" width="600" height="560" alt="" fetchpriority="high" decoding="async" draggable="false">
-                <span class="ez-dreh__bild" aria-hidden="true"></span><span class="ez-dreh__bild" aria-hidden="true"></span>
+                <canvas class="ez-dreh__bild" width="600" height="560" aria-hidden="true"></canvas>
               </span>
             </div>
             <div class="ez-dreh__skala" aria-hidden="true"></div>
@@ -324,8 +324,9 @@
     </div>
   </section>
   <section class="dna-szene" data-theme="hell" id="preis-szene" aria-labelledby="preis-titel">
-    <!-- Preis wie vor dem Umbau; die Weitergabe an Fensterbetriebe steht nur als leiser Zusatz beim Preis (Gewichtung des Inhabers,
-         29.10.2026), mit Deep-Link /app/?weg=gratis#ausmessen; versteckt, bis /api/status die Vermittlung meldet (VERMITTLUNG=an) -->
+    <!-- Preis wie vor dem Umbau; darüber groß der Gratis-Weg (Inhaber, 29.10.2026, abends: „über den 7,99 €“, Etikett „Empfohlen“,
+         daneben „Kostenlos“, pulsiert beim Erscheinen), mit Deep-Link /app/?weg=gratis#ausmessen; versteckt, bis /api/status die
+         Vermittlung meldet (VERMITTLUNG=an) -->
     <div class="ez-huelle ez-abschnitt" id="preis">
       <div class="ez-zwei">
         <div class="ez-text">
@@ -337,17 +338,18 @@
           <a class="dna-pille" href="/app/#ausmessen">Jetzt ausmessen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
         </div>
         <div class="ez-preisspalte">
+        <article class="ez-gratis ez-karte-dunkel" data-theme="dunkel" data-ez="weitergabe" aria-labelledby="gratis-titel" hidden>
+          <header class="ez-gratis__kopf"><span class="ez-badge-koralle">Empfohlen</span><h3 class="ez-gratis__titel" id="gratis-titel">Kostenlos</h3></header>
+          <p>Am Ende des Konfigurators zeigen wir dir mehrere Betriebe in deiner Nähe. Erlaubst du uns, dein Aufmaß an mindestens zwei Betriebe deiner Wahl zu schicken, erhältst du es kostenlos und obendrein das gesamte Aufmaß als PDF.</p>
+          <p class="ez-gratis__zusage">Keine versteckten Kosten, keine Weitergabe deiner Daten an weitere Betriebe und keine Belästigung durch Dritte. Garantiert.</p>
+          <a class="dna-pille dna-pille--leise ez-gratis__los" href="/app/?weg=gratis#ausmessen">Kostenlos weiter <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
+        </article>
         <article class="dna-leucht ez-preis">
           <span class="ez-raster" aria-hidden="true"></span>
           <header class="dna-leucht__kopf"><span class="dna-label">Aufmaßblatt als PDF</span><span class="ez-badge-koralle" data-ez="einf-badge" hidden>Einführungspreis</span></header>
           <div class="dna-zahl"><span class="dna-zahl__wert"><span data-ez="preiszahl"></span><span class="dna-zahl__einheit">€</span></span></div>
           <div class="ez-preis__fuss"><b>einmal fürs Aufmaßblatt, alle Fenster</b><span data-ez="einf" hidden></span></div>
         </article>
-        <aside class="ez-weitergabe" aria-label="Weitergabe an Fensterbetriebe" data-ez="weitergabe" hidden>
-          <p><b>Wenn du magst:</b> Wir schicken dein Aufmaßblatt an Fensterbetriebe in deiner Nähe, dann ist es kostenlos. Nur wenn du das willst.</p>
-          <p class="ez-weitergabe__klein">Du wählst die Betriebe selbst und bekommst vergleichbare Angebote auf denselben Maßen; die Betriebe bezahlen uns für die Vermittlung.</p>
-          <a class="ez-linkzeile" href="/app/?weg=gratis#ausmessen">Mit Weitergabe planen</a>
-        </aside>
         </div>
       </div>
     </div>

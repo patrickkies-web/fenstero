@@ -257,6 +257,9 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Der Schein unter dem Fenster ist weiß, nicht violett („keinen lila, sondern weißen Schein“). Als Beispiel immer ein Fenster zeigen, das
   man sich ans eigene Haus wünscht, nicht das schlichteste. Pendeln und Wechsel laufen weiter, solange der Hero zu sehen ist (Ausnahme
   von „Bewegung endet nach 2,6 s“).
+  Flüssig (Inhaber, 29.10.2026: „läuft überhaupt nicht smooth“): Blickwinkel in 2°-Schritten, gemalt auf eine Leinwand aus
+  Einzelbildern (createImageBitmap) mit echtem Überblenden zwischen zwei Winkeln, Pendel ±26° in 12 s. Nie ein großes Rasterbild mit
+  wechselnder background-position: das muss das Telefon bei jedem Schritt neu malen.
 - Startseite als Planungswerkzeug (Inhaber, 29.10.2026: „Der Konfigurator sollte selbst der Einstieg sein“; am selben Tag gewichtet:
   „auf den ersten Blick ein Planungswerkzeug, kein Vergleichs- oder Lead-Portal“, Abgrenzung von Seiten, die erst alle Daten abfragen):
   Der Hero zeigt das 3-D-Fenster als Bildfolge des echten App-Modells (scripts/hero-fenster.mjs: buehne.js in WebGL mit ?gl=voll und
@@ -278,6 +281,16 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Licht, Ring und Punkt; gewählte Farbtupfen tragen einen weißen Ring. Erst Vorher/Nachher einer Folie gezeigt, dann übernommen
   (Block „Proportionen des Konfigurators“ am Ende von web/assets/app.css; Protokoll docs/profis/2026-10-29-konfigurator-proportionen.md).
   Vorschlag für seine DNA (Abschnitt 9): „Gewählt heißt Weiß, nie Leuchten; Ziele 44–48 px, Schrift 14 px in Knöpfen und Chips.“
+- Gratis-Weg groß über dem Preis (Inhaber, 29.10.2026, abends; ersetzt auf der Startseite den „leisen Zusatz“ aus dem Punkt
+  „Startseite als Planungswerkzeug“): Über der Karte mit 7,99 € steht eine dunkle Karte (G14) mit violettem Ring, Etikett „Empfohlen“
+  (Koralle) und daneben groß in Weiß „KOSTENLOS“, darunter sein Text, auf seinen Wunsch in Rechtschreibung und Grammatik korrigiert
+  („Am Ende des Konfigurators zeigen wir dir mehrere Betriebe in deiner Nähe. Erlaubst du uns, dein Aufmaß an mindestens zwei Betriebe
+  deiner Wahl zu schicken, erhältst du es kostenlos und obendrein das gesamte Aufmaß als PDF. Keine versteckten Kosten, keine
+  Weitergabe deiner Daten an weitere Betriebe und keine Belästigung durch Dritte. Garantiert.“), beide Absätze in Weiß („dass man das
+  gut lesen kann“), und „Kostenlos weiter“ als leise Pille. Dieselbe Karte hängt in der App ganz oben auf den Folien zum Bezahlen (dort
+  „Wir zeigen dir mehrere Betriebe … erhältst du es kostenlos statt für 7,99 € und obendrein …“). Beim Erscheinen läuft dreimal ein violetter Ring nach außen und der Pfeil stupst
+  (1,4 s je Takt, einmal je Seitenaufruf bzw. Folie, ruhige Fassung ohne), nie in Schleife. Sichtbar nur bei eingeschalteter
+  Vermittlung. Vorschlag für seine DNA: „Ein Angebot, das Geld spart, darf über dem Preis stehen und einmal auf sich aufmerksam machen.“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

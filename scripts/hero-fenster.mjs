@@ -31,7 +31,9 @@ const ZIEL = path.join(WURZEL, 'web/bilder/start/fenster');
 /* Farben als Schlüssel aus ral.js (so setzt die App sie in w.fa; die Startseite verlinkt /app/?farbe=<schlüssel>#ausmessen) */
 export const FARBEN = ['9016', '7016', '9005', 'goak'];
 /* Schwenk von außen: 180° ist frontal von außen, die App schaut von außen mit rx −8° (VIEWS.outside); WINKEL sind die Abweichungen */
-export const BILD = { rx: -8, von: -36, bis: 36, schritt: 3, ruhe: -21, spalten: 5, breite: 600, hoehe: 560, rand: 0.035, qualitaet: 80, alpha: 90, buehne: 600 };
+/* 2°-Schritte (37 Blickwinkel; vorher 3°, das Überblenden zwischen weiter auseinanderliegenden Winkeln wirkte unruhig, Inhaber 29.10.2026:
+   „läuft überhaupt nicht smooth“); ein Raster je Modell und Farbe bleibt unter 16 Megapixel (Grenze älterer iPhones beim Dekodieren) */
+export const BILD = { rx: -8, von: -36, bis: 36, schritt: 2, ruhe: -20, spalten: 5, breite: 600, hoehe: 560, rand: 0.035, qualitaet: 78, alpha: 90, buehne: 600 };
 export const WINKEL = Array.from({ length: Math.round((BILD.bis - BILD.von) / BILD.schritt) + 1 }, (x, i) => BILD.von + i * BILD.schritt);
 /* Die Fenster: Felder wie in der App (baseWin), frei schwebend ohne Wand (o.frei, wie die Bühne in Schritt 1), Rahmen außen in der
    Farbe, innen Verkehrsweiß. farbe = Vorgabe, bis der Besucher eine Farbe wählt. Behang: stand 0 oben bis 1 unten, wend 1 = Lamellen
@@ -139,7 +141,7 @@ async function main() {
       for (let i = 0; i < WINKEL.length; i++) {
         await page.evaluate(([rx, ry]) => { const st = document.getElementById('hero3d'); st.style.setProperty('--rx', rx + 'deg'); st.style.setProperty('--ry', ry + 'deg'); }, [BILD.rx, 180 + WINKEL[i]]);
         await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-        await page.waitForTimeout(i === 0 ? 1200 : 450);
+        await page.waitForTimeout(i === 0 ? 1200 : 300);
         await page.locator('#hero3d').screenshot({ path: path.join(tmp, m.key + '-' + farbe + '-' + String(i).padStart(2, '0') + '.png'), omitBackground: true, animations: 'disabled' });
       }
       console.log(m.key + ' ' + farbe + ': ' + WINKEL.length + ' Blickwinkel');

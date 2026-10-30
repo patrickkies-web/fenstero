@@ -347,3 +347,19 @@ Wunsch des Inhabers, steht im Begleit-Skill, Abschnitt 4.
 Bilder: docs/profis/bilder/2026-10-29-startseite-hero-drei-tel.jpg (die drei Fenster, Farbe gewählt, Farbe bleibt beim Wechsel) und
 -desk.jpg. Gewicht: das erste Fenster (Raffstore, Anthrazitgrau) 395 KB mit Ruhebild; jede weitere Bildfolge 230 bis 490 KB, sie lädt
 erst, wenn das Fenster als Nächstes dran ist oder die Farbe gewählt wird. Prüfsuite Abschnitt 2 (50 Prüfungen) und 6 grün.
+
+### Nachtrag 29.10.2026, nachts: das Fenster läuft flüssig
+
+Inhaber: „Aber das Fenster läuft ja mal überhaupt nicht smooth.“
+
+| Wo | Was | Warum |
+|---|---|---|
+| scripts/hero-fenster.mjs | 37 Blickwinkel in 2°-Schritten statt 25 in 3°-Schritten (Raster 5 × 8 aus Feldern 600 × 560 px), Ruhewinkel −20° | kleinere Sprünge zwischen zwei Bildern |
+| startseite.js | Die Folge kommt als Datei (fetch), wird einmal im Hintergrund dekodiert (createImageBitmap), in Einzelbilder zerlegt (je vier, dann Pause für die Hauptspur) und auf eine Leinwand gemalt; zwischen zwei Winkeln echtes Überblenden (1 − f und f, addiert), gemalt nur bei Änderung. Bis die Einzelbilder da sind, steht das Ruhebild | Das große Raster als Hintergrundbild mit wechselnder Position muss das Telefon bei jedem Schritt neu malen |
+| startseite.js | Pendel ±26° in 12 s statt ±35° in 10 s; Ziehen dreht weiter 48° je Bildbreite | ruhiger, ohne harte Wechsel |
+
+Gemessen im Testbrowser (Pixel 7, CPU vierfach gedrosselt): 37 Ausschnitte direkt aus dem Bild-Element 8,2 s, aus einmal dekodiertem
+Raster 0,3 s; 200 überblendete Bilder aus dem Raster 674 ms, aus Einzelbildern 10 ms. Über 300 Frames mit Wechsel 59 Bilder je Sekunde,
+keine Aufgabe über 50 ms (vorher ein Hänger von 2 s beim Wechsel, solange aus dem Bild-Element gemalt wurde). Der Testbrowser malt
+ohne Grafikchip; ob es auf dem Telefon rund läuft, zeigt erst das Telefon. Gewicht: das erste Fenster 541 KB Folge (lädt nach dem
+Seitenaufbau) + 16 KB Ruhebild (steht sofort), die übrigen 355 bis 691 KB. Prüfsuite Abschnitte 2 und 6 grün (161 Prüfungen).
