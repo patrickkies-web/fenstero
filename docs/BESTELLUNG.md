@@ -9,7 +9,7 @@ Ein Fensterbauer bestellt auf eeziframes.com seine Landingpage mit Fenster-Konfi
 | Merkmale und Preise je Paket | `web/assets/pakete.js` (einzige Stelle für Preise; `VORLAEUFIG`, `PREIS_STAND`) |
 | Regeln der Aufträge: Stationen je Paket, Felder mit Grenzen und Prüfung, Plätze für Dateien, Stände und Übergänge, was ein Paket veränderbar macht, Anreiz zum nächsten Paket | `web/assets/auftragsregeln.js` (Browser `window.Auftrag`, Server `globalThis.Auftrag`) |
 | Bestellung `/bestellen/` | `web/bestellen/index.html`, `web/assets/bestellen.js` |
-| Kundenbereich `/konto/` | `web/konto/index.html`, `web/assets/konto.js` |
+| Kundenbereich `/konto/` (Bereich für Fensterbauer: Anfragen der Vermittlung und Aufträge) | `web/konto/index.html`, `web/assets/konto.js`, Stile der Anfragen `web/assets/konto-anfragen.css` (Präfix `a-an-`); Server der Anfragen `functions/api/vermittlung-partner.js` |
 | Zentrale `/zentrale/` | `web/zentrale/index.html`, `web/assets/inhaber.js`, [ZENTRALE.md](ZENTRALE.md) |
 | Gemeinsame Bausteine und Stil (Design-DNA, Palette „Task-App dunkel“, App-Rahmen) | `web/assets/auftrag-ui.js`, `web/assets/auftrag.css` (Präfix `a-`) |
 | Server: Routen, Mails, Stripe, Daten | `functions/auftrag/index.js`, `mails.js`, `zahlung.js`, `daten.js` |
@@ -49,6 +49,22 @@ Gespeichert wird nach jeder Eingabe (kurz verzögert, beim Verlassen der Seite n
 | `pausiert`, `beendet`, `storniert` | du (oder Stripe, Tageslauf) | Pause, Ende (Abo zum Monatsende oder sofort), Storno mit Erstattung. Pause und Ende schalten den verknüpften Konfigurator mit (Pause: nur Name und Kontakt, Ende: vom Netz; bei „zum Monatsende“ erst nach dem bezahlten Monat). Ablauf bei Nichtzahlung unten |
 
 Übergänge stehen in `Auftrag.UEBERGAENGE` (wer darf was); der Server prüft jeden Schritt. Nach der Zahlung bleibt alles änderbar (Stationen der Bestellung mit „Speichern“), aber nur vollständig; jede Änderung erscheint in der Zentrale als „geändert“. Ein Paketwechsel nach der Zahlung ist eine Anfrage (Differenz der Einrichtung, neuer Monatspreis ab Wechsel, § 7 Abs. 3).
+
+## Kundenbereich `/konto/`: ein Bereich für Fensterbauer
+
+Seit dem 30.10.2026 (Wunsch des Inhabers) ist `/konto/` der gemeinsame Bereich für zwei Arten von Fensterbauern: Betriebe, die über die Vermittlung Anfragen von Hauseigentümern bekommen (docs/VERMITTLUNG.md, Abschnitt 13; Server `functions/api/vermittlung-partner.js`), und Paket-Kunden mit ihren Aufträgen. Eine Anmeldung per Code für beides; das Konto entsteht mit dem ersten Code, nicht erst mit einer Bestellung. Alle Texte siezen.
+
+| Adresse | Was steht da |
+|---|---|
+| `/konto/` (abgemeldet) | Anmeldeseite: „Für Fensterbauer: Anfragen von Hauseigentümern und Ihr Konfigurator-Paket. *Anmelden mit Code.*“, Feld E-Mail (`[data-k="mail"]`), Pille „Code schicken“, dann Feld Code (`[data-k="code"]`, Attrappe `123456`) und Pille „Anmelden“; Fußzeile „Noch kein Konto? Es entsteht mit dem ersten Code, den Sie anfordern.“ mit Link zur Seite für Fensterbauer |
+| `/konto/#zugang/<token>` | Link aus der Mail an den Betrieb (`GET /api/anfrage/:token`, ohne Anmeldung): Bühne mit dem Aufmaßblatt als Papier (`.a-an-buehne .a-an-papier`, gesperrt mit Schloss `.a-an-schloss`), Frage „Anfrage aus <Ort>. *<n> Fenster, <Zeitraum>.*“, Karte **Echtheit** (Chips „Telefonnummer per Code bestätigt“, „Einwilligung des Kunden“, „Ging an n Betriebe“ bzw. „Ging nur an Sie“, „Vom Kunden gewählt“), Karte **Eckdaten** (`dl.a-kv`), darunter die Karte „Anmelden mit Code“: E-Mail vorbelegt, wenn die Sitzung passt (`mailVoll`), sonst leer mit dem Hinweis „Den Zugang haben wir an br•••@… geschickt“. Nach dem Anmelden ruft `zugang()` `POST /api/anfrage/:token/annehmen` und wechselt zu `#anfrage/<id>`; passt die angemeldete Adresse nicht (403 bzw. `passt: false`): Karte „Andere Adresse“ (`.a-an-hinweiskarte`) mit der maskierten Adresse und die Pille „Mit anderer Adresse anmelden“ (meldet ab, zeigt die Anmeldung mit dem Hinweis) |
+| `/konto/#anfrage/<id>` | Eine Anfrage (`GET /api/konto/anfragen/:id`). Band „V-2026-0001 · Eingang 30.10.2026“ (+ Chip „Vom Kunden gewählt“), Bühne mit dem Papier, Frage wie oben. **Vor dem Freischalten:** Karten Echtheit, Eckdaten und **Freischalten** (`.a-an-freischalten`: Preis als Zahl „0 € · Ihr erstes Aufmaß“ oder „29 € zzgl. USt“ mit Brutto, Pflicht-Häkchen `[data-k="zustimmung"]` „Ich akzeptiere die Partnerbedingungen (erstes Aufmaß kostenlos, danach 29 € zzgl. USt je freigeschaltetem Aufmaß).“, Link `/partnerbedingungen/`), darunter im Fuß die Zeile `.a-grund` („Kostenlos, ohne weitere Verpflichtung“ bzw. „Weiter zur Zahlung bei Stripe, mit Karte“; ohne Häkchen in Koralle „Bitte die Partnerbedingungen bestätigen“, das Häkchen bekommt `.fehlt`) und die eine Pille **„Kostenlos freischalten“** (`erstesFrei`) bzw. **„Für 29 € zzgl. USt freischalten“**. `POST …/freischalten { zustimmung: true }` → kostenlos: Anzeige wechselt, Meldung „Freigeschaltet. Kontakt und Aufmaßblatt sind offen.“; sonst Weiterleitung auf `kasse`; Rückkehr `/konto/?kasse=<session>#anfrage/<id>` → `GET …/kasse?session=` → Meldung „Danke, Ihre Zahlung ist da. Die Anfrage ist freigeschaltet.“ **Nach dem Freischalten:** Karte **Kontakt des Kunden** (`.a-an-kontakt`: Name `.a-an-name`, Telefon groß als `a.a-anruf[href^="tel:"]`, E-Mail als `mailto:`, Erreichbar, Ort, Hinweis `.a-an-zweck` „Nur für diese Anfrage. …“ mit dem Wortlaut der Einwilligung und dem Löschdatum), Echtheit, Eckdaten; im Fuß die Pille **„Aufmaßblatt (PDF)“** (`a.a-pille[href="/api/konto/anfragen/<id>/pdf"]`, neuer Tab) und der Ring **„Herunterladen“** (`?laden=1`); auf der Papierkante der runde Knopf zum PDF (`.a-an-papier-knopf`). Am Telefon klebt der Fuß unten, am Laptop in der linken Spalte (`main.a-an-unten`). Darunter (`.a-an-drei`) drei Kacheln: **Register und Bereitschaft** (`.a-an-register`: Nutzen „Partner stehen bei Kunden in ihrer Umgebung auf Platz 1 und 2 und bekommen neue Anfragen direkt hier.“, Preis „Das erste Aufmaß ist kostenlos, jedes weitere 29 € zzgl. USt, erst fällig beim Freischalten.“, Betrieb mit Stand-Chip, Schalter `.a-an-schalter[role="switch"]` „Bereitschaft erklären“, Ring „Als Betrieb eintragen“ / „Angaben ändern“), **Echtheit** (Text des Inhabers, Ring „Partnerbedingungen“), **Konfigurator für Ihre Website** (Ring „Pakete ansehen“ → `/fuer-fensterbauer/#pakete`) |
+| `/konto/` (angemeldet) | Übersicht `uebersicht()`: Frage „Ihr Bereich *für Anfragen und Ihre Seite.*“; Kachel **Anfragen** (`.a-an-anfragen`: Zahl als Held `.a-an-kennzahl`, Chip „n zum Freischalten“, die letzten fünf als Zeilen `a.a-an-zeile[href="#anfrage/<id>"]` mit Ort bzw. Name, Datum, Nummer, Fenster und Chip „Freischalten“ (Hinweis) / „Freigeschaltet“ (aktiv), Ring „Alle n Anfragen“), Kachel **Ihre Seite mit Konfigurator** (`.a-an-seite`: Aufträge als Zeilen `a.a-an-zeile[href="#auftrag/<id>"]` mit Stand-Chip; ohne Auftrag die Einladung mit Ring „Pakete ansehen“), Karte **Ihr Betrieb** (Register-Eintrag mit Stand-Chip, Schalter, Ring „Angaben ändern“; ohne Eintrag Ring „Als Betrieb eintragen“). Die eine Pille: neueste offene Anfrage („Anfrage aus <Ort> öffnen“), sonst „Als Betrieb eintragen“, sonst „Bereitschaft erklären“, sonst „Neue Bestellung“ (mit Aufträgen) oder „Konfigurator ausprobieren“. Ein einziger Auftrag ohne Anfragen öffnet sich weiter direkt (`route()`) |
+| `/konto/#auftrag/<id>` | ein Auftrag der Pakete, unverändert (Stände unten) |
+
+**Register und Bereitschaft:** „Als Betrieb eintragen“ öffnet ein Blatt (`.a-blatt .a-an-formular`) mit Name, PLZ, Ort, Straße, Telefon, Website und den Leistungen als Kapseln (`.a-wahl button[aria-pressed]`, Liste `Kunststoff, Holz, Holz-Alu, Alu, Haustüren, Rollläden, Insektenschutz`), Pille „Eintragen“ bzw. „Speichern“ → `POST /api/konto/betrieb` (Fehler je Feld aus `felder`). Der Schalter „Bereitschaft erklären: Ich möchte Anfragen aus meiner Umgebung erhalten“ öffnet beim Einschalten das Blatt „Bereitschaft erklären?“ mit dem Pflicht-Häkchen Partnerbedingungen (`[data-k="zustimmung"]`) und der Pille „Bereitschaft erklären“ → `POST /api/konto/partner { betrieb, bereit: true, zustimmung: true }` (Stand `partner`, Chip „Partner“); beim Ausschalten die Rückfrage „Bereitschaft zurücknehmen?“ → `bereit: false`. Ohne Eintrag öffnet der Schalter zuerst das Formular. Ist die Vermittlung nicht eingerichtet (`GET /api/konto/anfragen` schlägt fehl), zeigt die Übersicht nur die Kachel der Seite.
+
+Browser-Prüfungen (Abschnitt 26) finden: Anmeldung `[data-k="mail"] input`, `.a-fuss .a-pille` („Code schicken“ → „Anmelden“), `[data-k="code"] input`; Zugang `.a-an-papier`, `.a-an-schloss`, `.a-an-hinweiskarte`; Anfrage `.a-an-freischalten`, `[data-k="zustimmung"] input`, `.a-fuss .a-grund(.offen)`, `.a-an-kontakt`, `.a-anruf`, `.a-fuss .a-pille[href$="/pdf"]`, `.a-fuss .a-ring[href$="?laden=1"]`, `.a-an-papier-knopf`; Übersicht `.a-an-anfragen`, `.a-an-seite`, `.a-an-zeile`, `.a-an-kennzahl`; Register `.a-an-register`, `.a-an-schalter[aria-checked]`, `.a-an-formular`. Je Bildschirm genau eine volle Pille (`.a-pille` außerhalb `.a-blatt`), Ziele ab 44 px, Schrift ab 13 px, kein Querscrollen; Fotos vom 30.10.2026 im Scratchpad des Auftrags.
 
 ## Preise und KI-Auswertungen
 
@@ -108,13 +124,32 @@ Täglicher Lauf `auftraegeLauf`: nicht bezahlte Bestellungen 30 Tage nach der le
 
 Anmeldung per Code (6 Ziffern, 15 Minuten, nur als HMAC gespeichert, höchstens fünf Versuche; Bremsen je Adresse und Anschluss), Sitzung `__Host-kunde` (14 Tage) bzw. `__Host-inhaber` (8 Stunden), signiert mit `SITZUNG_GEHEIMNIS`; POST nur mit eigener Herkunft. Jeder Auftrag gehört einem Kunden, fremde antworten 404. Dateityp aus den ersten Bytes, SVG und PDF nur als Anhang mit Sandbox. Bestellung und Zentrale gibt es nur auf der Hauptdomain, nicht auf dem Host einer Instanz.
 
+## Anfragen der Vermittlung im selben Bereich
+
+Seit 30.10.2026 ist `/konto/` der eine Bereich für beide Arten von Fensterbauern (Wunsch des Inhabers): die Aufträge der Pakete und die
+Anfragen von Hauseigentümern aus der Vermittlung. Wer kein Paket hat, sieht keine Mahnung, sondern die Pakete als Angebot in einer Karte.
+
+- **Zugang:** Die Zentrale schickt dem Betrieb eine Mail mit einem Link `/konto/#zugang/<token>` (180 Tage gültig; Token in
+  `functions/api/sitzung.js`, Zweck `vzugang`). Die Seite zeigt die Anfrage als Vorschau ohne Kundendaten (Ort, Eckdaten, Echtheit) und
+  bittet um die Anmeldung per Code mit genau der Adresse, an die der Zugang ging; eine andere Adresse wird abgewiesen (403).
+- **Anfrage** (`#anfrage/<id>`): Aufmaßblatt als Objekt auf der Bühne (vor dem Freischalten mit Schraffur statt Kontakt), Echtheit,
+  Eckdaten; Pille „Kostenlos freischalten“ oder „Freischalten · 29 € zzgl. USt“, nur mit dem Häkchen zu den Partnerbedingungen. Das
+  zweite und jedes weitere Aufmaß führt zur Kasse von Stripe (Rückkehr `/konto/?kasse=<session>#anfrage/<id>`). Danach Kontakt des Kunden
+  mit dem Satz „Nur für diese Anfrage“ und dem Wortlaut seiner Einwilligung, Pille „Aufmaßblatt (PDF)“.
+- **Übersicht:** Kachel „Anfragen“ (Zahl als Held, Zeilen mit Chip Freigeschaltet/Offen), Kachel „Ihre Seite mit Konfigurator“
+  (Aufträge oder das Angebot der Pakete), Karte des Betriebs mit dem Schalter „Bereitschaft erklären“ (Partner, Platz 1 und 2 in der
+  Suche) und „Angaben ändern“ (Blatt mit Name, Ort, PLZ, Straße, Telefon, Website, Leistungen).
+- **Server:** `functions/api/vermittlung-partner.js` (Routen `/api/anfrage/:token`, `/api/konto/anfragen…`, `/api/konto/partner`,
+  `/api/konto/betrieb`), Register `functions/api/vermittlung-register.js`; alles Weitere in docs/VERMITTLUNG.md, Abschnitt 13.
+- **Prüfung:** Abschnitt 31, Teil 7 (Schnittstelle) und Teil K (Browser).
+
 ## Lokal ausprobieren
 
 ```
 KI_ATTRAPPE=1 DATEN_ATTRAPPE=1 ZAHLUNG_ATTRAPPE=1 MAIL_ATTRAPPE=1 ZENTRALE_PASSWORT=lokal-zentrale-2026 PORT=8789 node scripts/dev-server.mjs
 ```
 
-Bestellung `http://localhost:8789/bestellen/#plus`, Code `123456`, Mails unter `/api/test/post`, Zentrale mit dem Passwort oben.
+Bestellung `http://localhost:8789/bestellen/#plus`, Code `123456`, Mails unter `/api/test/post`, Zentrale mit dem Passwort oben. Anfragen für den Bereich: `node scripts/dev-vermittlung-anlegen.mjs http://localhost:8789 4`, dann in der Zentrale (`/zentrale/#vermittlung`) bei einem Betrieb „will“ setzen und den Zugang an eine E-Mail-Adresse schicken; der Link `/konto/#zugang/<token>` steht in der Mail der Attrappe. Die Kasse der Attrappe führt sofort zurück und gilt als bezahlt.
 
 ## Offen
 

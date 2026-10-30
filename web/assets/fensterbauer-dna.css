@@ -333,7 +333,13 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-wm b { font-weight: 900; }
 .ez-ansicht a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
 @media (max-width: 359px) { .ez-ansicht a { padding-inline: 11px; font-size: 13px; gap: 6px; } }
-.ez-kopf > .dna-pille--klein, .ez-leiste .dna-pille--klein { height: 44px; padding: 0 18px; font-size: 14px; }
+.ez-kopf > .dna-pille--klein, .ez-kopf__rechts .dna-pille--klein, .ez-leiste .dna-pille--klein { height: 44px; padding: 0 18px; font-size: 14px; }
+/* Rechts im Kopf: „Anmelden“ als Ring (Umriss, G13; kein dna-pille, damit die eine Pille „Paket anfragen“ bleibt) und die leise Pille */
+.ez-kopf__rechts { grid-area: pille; justify-self: end; display: flex; align-items: center; gap: var(--raum-2); min-width: 0; }
+.ez-anmelden { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 16px; border-radius: var(--rund-pille); color: var(--tinte); font: 500 14px/1 var(--font-sans); text-decoration: none; white-space: nowrap; box-shadow: inset 0 0 0 1px var(--linie); transition: transform var(--dna-t-rueck) var(--dna-druck), background-color var(--dna-t-rueck) ease; -webkit-tap-highlight-color: transparent; }
+.ez-anmelden:active { transform: scale(.97); transition-duration: 0s; }
+@media (hover: hover) and (pointer: fine) { .ez-anmelden:hover { background: var(--flaeche-hoch); } }
+@media (max-width: 599px) { .ez-kopf__rechts { gap: var(--raum-1); } .ez-kopf__rechts .ez-anmelden, .ez-kopf__rechts .dna-pille--klein { padding: 0 12px; } }
 .ez-ansicht [aria-current] { background: var(--grund); color: var(--tinte); }
 .ez-ansicht [aria-current]::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); }
 .ez-leiste { position: fixed; top: 0; left: 0; right: 0; z-index: 40; padding-top: env(safe-area-inset-top, 0px); transform: translateY(-100%); transition: transform 220ms var(--dna-druck); background: var(--glas); -webkit-backdrop-filter: blur(16px) saturate(150%); backdrop-filter: blur(16px) saturate(150%); box-shadow: 0 1px 0 var(--glas-rand); }

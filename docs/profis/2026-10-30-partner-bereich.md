@@ -64,7 +64,26 @@ Muss-Punkte und Vetos: keine.
 
 ## Messung
 
-Farbanteile je Bildschirm mit `werkzeuge/farben.py`; Telefon 390 × 844, Laptop 1280 × 800. (Tabelle folgt mit den Bildern.)
+Farbanteile je Bildschirm mit `werkzeuge/farben.py`; Telefon 390 × 844, Laptop 1280 × 800. Indigo auf den Betriebe-Seiten der Zentrale
+ist das Leuchten der Kennzahl-Kachel (dieselbe Kachel wie in der Vermittlung), Violett nur Punkt, Chip und gewählte Kapsel.
+
+| Bildschirm | Neutral % | Violett | Koralle | Indigo | Farbe gesamt |
+| --- | --- | --- | --- | --- | --- |
+| Konto, Zugang, Telefon | 98,7 | 0,0 | 0,0 | 1,3 | 1,3 |
+| Konto, Anfrage freigeschaltet, Telefon | 98,9 | 0,0 | 0,0 | 1,1 | 1,1 |
+| Konto, Übersicht mit Partner, Telefon | 99,6 | 0,0 | 0,0 | 0,3 | 0,4 |
+| Konto, Zugang, Laptop | 99,3 | 0,0 | 0,0 | 0,7 | 0,7 |
+| Konto, Anfrage freigeschaltet, Laptop | 99,5 | 0,0 | 0,0 | 0,5 | 0,5 |
+| Konto, Übersicht mit Partner, Laptop | 99,6 | 0,0 | 0,0 | 0,3 | 0,4 |
+| Zentrale, Betriebe, Telefon | 92,6 | 2,1 | 0,1 | 5,2 | 7,4 |
+| Zentrale, ein Betrieb, Telefon | 92,7 | 0,0 | 0,0 | 7,2 | 7,3 |
+| Zentrale, Anfrage mit Kundenabschnitt, Telefon | 99,3 | 0,0 | 0,7 | 0,0 | 0,7 |
+| Zentrale, Betriebe, Laptop | 96,4 | 0,7 | 0,0 | 2,9 | 3,6 |
+| Zentrale, ein Betrieb, Laptop | 96,1 | 0,0 | 0,0 | 3,9 | 3,9 |
+| Zentrale, Anfrage mit Kundenabschnitt, Laptop | 99,5 | 0,0 | 0,5 | 0,0 | 0,5 |
+
+Bilder (Telefon, ganze Seite): `bilder/2026-10-30-konto-zugang.jpg`, `-konto-anfrage.jpg`, `-konto-uebersicht.jpg`,
+`bilder/2026-10-30-zentrale-betriebe.jpg`, `-zentrale-betrieb.jpg`, `-zentrale-kundenabschnitt.jpg`.
 
 ## Prüfungen
 
@@ -79,3 +98,6 @@ Abschnitt 31 (31.5 angepasst, 31.7 neu):
 - **Kundenmail** aus der Zentrale (400 ohne Text, 409 ohne Adresse).
 - **Rechtsseite** `/partnerbedingungen/` im Impressum, Datenschutz und in den AGB verlinkt.
 - **App:** Etikett „Partner“ (Indigo) am ersten Eintrag und der Satz zur Reihenfolge.
+- **Bereich im Browser (31.K, Telefon und Schreibtisch):** Zugang über den Link ohne Kunde, Code, Freischalten nur mit Häkchen, Kontakt und
+  PDF, Übersicht mit „Freigeschaltet“, Bereitschaft nur mit Häkchen; eine Pille je Bildschirm, Ziele 44 px, Schrift ab 13 px, keine
+  Konsolenfehler; Ring „Anmelden“ auf der Seite für Fensterbauer.
