@@ -36,7 +36,7 @@ export const SEITEN_INFO = {
   '/ratgeber/fenster-undicht/': ['Fenster undicht', 'Der Papiertest zeigt in einer Minute, wo es zieht, und was du tun kannst.'],
   '/ratgeber/fenster-alter-erkennen/': ['Alter der Fenster', 'Abstandhalter lesen, Feuerzeugtest und Tabelle nach Bauzeit.'],
   '/ratgeber/fenster-reparieren-oder-austauschen/': ['Reparieren oder tauschen', 'Drei Fragen, mit denen du entscheidest, was dein Fenster braucht.'],
-  '/ratgeber/fenster-austauschen/': ['Fenster austauschen', 'Sechs Schritte vom Aufmaß bis zum Einbau, Kosten pro Fenster, Förderung 2026.'],
+  '/ratgeber/fenster-austauschen/': ['Fenster austauschen', 'Sechs Schritte vom Aufmaß bis zum Einbau, Kosten pro Fenster und Dauer.'],
   '/ratgeber/fenstertausch-altbau/': ['Fenstertausch im Altbau', 'Laibung, Abdichtung und wie du Schimmel nach dem Tausch vermeidest.'],
   '/ratgeber/haus-gekauft-fenster/': ['Haus gekauft: Fenster?', 'Keine Tauschpflicht nach Hauskauf oder Erbe: was in zwei Jahren Pflicht ist, Energieausweis, Förderung.'],
   '/ratgeber/fenster-oder-daemmung-zuerst/': ['Fenster oder Fassade', 'Fenster in die Dämmebene, Heizung zuletzt: die Reihenfolge der Sanierung im Altbau.'],
@@ -49,7 +49,7 @@ export const SEITEN_INFO = {
   '/ratgeber/fenster-material-vergleich/': ['Fenstermaterial', 'Kunststoff, Holz, Holz-Alu oder Alu: Preise, Lebensdauer und Pflege im Vergleich.'],
   '/ratgeber/dreifachverglasung/': ['Dreifachverglasung', 'Lohnt sich 3-fach-Glas? Werte, Aufpreis und Nachteile.'],
   '/ratgeber/fenster-oeffnungsarten/': ['Öffnungsarten', 'Dreh-Kipp, Kipp, Stulp oder fest: was wo passt und was du vorher klären solltest.'],
-  '/ratgeber/uw-wert-fenster/': ['Uw-Wert und Förderung', 'Was der Wert bedeutet und welchen die Förderung 2026 verlangt.'],
+  '/ratgeber/uw-wert-fenster/': ['Uw-Wert erklärt', 'Was der Wert bedeutet, wie er entsteht und welche Grenzwerte 2026 gelten.'],
   '/ratgeber/din-links-rechts/': ['DIN links oder rechts', 'Von innen gesehen: Bänder links heißt DIN links. Mit Merkregel und Zeichnung.'],
   '/ratgeber/fenster-standardmasse/': ['Standardmaße', 'Übliche Größen als Tabelle, und warum es im Altbau selten passt.'],
   '/ratgeber/fenster-ausmessen/': ['Fenster ausmessen', 'Maueröffnung an drei Stellen messen, das kleinste Maß zählt. Mit Messpunkten und typischen Fehlern.'],
@@ -106,6 +106,18 @@ const KOPF = '<style>html,body{background:#07090a}</style>\n<link rel="preload" 
   '<link rel="stylesheet" href="/assets/ratgeber-dna.css?v=' + pruefsumme('ratgeber-dna.css') + '">\n<script src="/assets/ratgeber-dna.js?v=' + pruefsumme('ratgeber-dna.js') + '" defer></script>\n';
 const KOPF_RAUS = [/<style>html,body\{background:#07090a\}<\/style>\n/g, /<link rel="preload" href="\/fonts\/[^"]+" as="font"[^>]*>\n/g,
   /<link rel="stylesheet" href="\/(?:fonts\/(?:fonts|dna)|assets\/(?:gemeinsam|ratgeber|ratgeber-dna))\.css(?:\?v=[0-9a-f]+)?">\n/g, /<script src="\/assets\/ratgeber-dna\.js(?:\?v=[0-9a-f]+)?" defer><\/script>\n/g];
+/* Vorschaubild zum Teilen je Seite (web/bilder/og/<slug>.png aus scripts/og-bilder.mjs, 1200 × 630), sonst /og.png; der
+   Alternativtext ist dann der Titel der Seite. Autor aller Artikel ist die Redaktion mit ihrer Seite /redaktion/ (wie geprüft wird). */
+const OG_ALT = 'eeziframes: Fenster ausmessen. Selbst. eezi.';
+function vorschau(h, pfad) {
+  const slug = (pfad || '').split('/').filter(Boolean).slice(1).join('-');
+  const datei = slug && path.join(ASSETS, '..', 'bilder', 'og', slug + '.png');
+  const eigen = datei && fs.existsSync(datei);
+  const titel = ((h.match(/<h1>([\s\S]*?)<\/h1>/) || [])[1] || '').replace(/<[^>]+>/g, '').replace(/"/g, '&quot;');
+  return h.replace(/<meta property="og:image" content="[^"]*">/, '<meta property="og:image" content="' + (eigen ? '/bilder/og/' + slug + '.png' : '/og.png') + '">')
+    .replace(/<meta property="og:image:alt" content="[^"]*">/, '<meta property="og:image:alt" content="' + (eigen && titel ? titel : OG_ALT) + '">')
+    .replace(/"author":\{"@type":"Organization","name":"eeziframes","url":"\/(?:redaktion\/)?"\}/g, '"author":{"@type":"Organization","name":"eeziframes","url":"/redaktion/"}');
+}
 function kopf(h) {
   let k = h.replace(/<meta name="theme-color" content="#[0-9a-fA-F]+">/, '<meta name="theme-color" content="#07090a">');
   for (const r of KOPF_RAUS) k = k.replace(r, '');
@@ -140,7 +152,7 @@ export const GRUPPEN = [
      (28.10.2026) nicht mehr */
   ['Für Fensterbauer', FENSTERBAUER.map((p) => [p, name(p)]).concat([['/konfigurator-bedingungen/', 'Paketbedingungen']])],
   ['Ratgeber', [['/ratgeber/', 'Alle Ratgeber']].concat(WEG.flatMap((s) => s.seiten.map((p) => [p, name(p)])))],
-  ['Mehr', [['/', 'Startseite'], ['/app/', 'App'], ['/agb/', 'AGB'], ['/datenschutz/', 'Datenschutz'], ['/cookies/', 'Cookies'], ['/impressum/', 'Impressum']]]
+  ['Mehr', [['/', 'Startseite'], ['/app/', 'App'], ['/redaktion/', 'Redaktion und Prüfung'], ['/agb/', 'AGB'], ['/datenschutz/', 'Datenschutz'], ['/cookies/', 'Cookies'], ['/impressum/', 'Impressum']]]
 ];
 export function fusszeile(eigen) {
   const link = ([href, text]) => '<a href="' + href + '"' + (href === eigen ? ' aria-current="page"' : '') + '>' + text + '</a>';
@@ -257,6 +269,7 @@ export const SYMBOLE = {
   ki: '<path d="M11 4l1.7 4.8L17.5 10.5l-4.8 1.7L11 17l-1.7-4.8L4.5 10.5l4.8-1.7z"/><path d="M18 15v5M15.5 17.5h5"/>',
   magnet: '<path d="M6 3h4v9a2 2 0 0 0 4 0V3h4v9a6 6 0 0 1-12 0z"/><path d="M6 7h4M14 7h4"/>'
 };
+const symbolSvg = (n) => '<svg class="rg-sym" data-sym="' + n + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + SYMBOLE[n] + '</svg>';
 const symbole = (main) => main.replace(/<svg class="rg-sym" data-sym="([a-z-]+)"[^>]*>[\s\S]*?<\/svg>/g, (m, n) => (SYMBOLE[n]
   ? '<svg class="rg-sym" data-sym="' + n + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + SYMBOLE[n] + '</svg>'
   : m));
@@ -320,7 +333,12 @@ function wegBlock(pfad, zeichnungen) {
   const weiter = naechster
     ? auf(naechster.seiten[0]) + '<span class="eyebrow" id="rg-weiter-etikett">Nächster Schritt · ' + (i + 2) + ' von ' + WEG.length + ': ' + naechster.name + '</span><b id="rg-weiter-titel">' + name(naechster.seiten[0]) + '</b><span>' + karte(naechster.seiten[0]) + '</span></span></a>'
     : auf('/app/') + '<span class="eyebrow" id="rg-weiter-etikett">Alles geplant?</span><b id="rg-weiter-titel">Fenster ausmessen, kostenlos</b><span>Etwa fünf Minuten je Fenster; das Aufmaßblatt kann jeder Fensterbauer lesen.</span></span></a>';
-  return '\n  <section class="rg-weg" aria-labelledby="weg"><h2 id="weg">Dein Weg zu neuen Fenstern</h2><ol class="rg-weg-liste">' + liste + '</ol>' + weiter + '</section>';
+  /* Mehr in diesem Schritt: alle anderen Seiten desselben Schritts als Zeilen mit dem ersten Symbol ihrer Antwort-Kacheln (Strukturprüfung
+     30.10.2026: Weg und „Nächster Schritt“ zeigten nur auf die erste Seite eines Schritts, die übrigen hingen allein an Fußzeile und Übersicht) */
+  const geschwister = WEG[i].seiten.filter((p) => p !== pfad);
+  const zeile = (p) => '<a href="' + p + '">' + symbolSvg((zeichnungen && zeichnungen.symbol && zeichnungen.symbol[p]) || 'liste') + '<b>' + name(p) + '</b><span>' + karte(p) + '</span></a>';
+  const mehr = geschwister.length ? '<div class="rg-geschwister"><p class="eyebrow" id="rg-geschwister">Mehr in Schritt ' + (i + 1) + ' · ' + WEG[i].name + '</p><nav class="rg-faelle" aria-labelledby="rg-geschwister">' + geschwister.map(zeile).join('') + '</nav></div>' : '';
+  return '\n  <section class="rg-weg" aria-labelledby="weg"><h2 id="weg">Dein Weg zu neuen Fenstern</h2><ol class="rg-weg-liste">' + liste + '</ol>' + weiter + mehr + '</section>';
 }
 
 /* Eine Seite (nicht die Übersicht): Bausteine entfernen, ids setzen, Feinsatz, neu einsetzen, in Szenen ordnen, Fußzeile */
@@ -328,7 +346,7 @@ export function baue(pfad, html, zeichnungen) {
   let h = pfeil(zweiteStimme(kicker(html.replace(INHALT, '').replace(WEGBLOCK, '').replace(PREIS_RAUS, ''))));
   const MAIN = /<main class="rg"[^>]*>[\s\S]*<\/main>/;
   if (!MAIN.test(h)) return h.replace(FUSS, () => fusszeile(pfad));
-  h = kopf(h);
+  h = vorschau(kopf(h), pfad);
   let main = ohneHuellen(h.match(MAIN)[0]);
   const vergeben = new Set([...main.matchAll(/ id="([^"]+)"/g)].map((x) => x[1]));
   main = main.replace(/<h2(\s[^>]*)?>([\s\S]*?)<\/h2>/g, (alles, attr, inhalt) => {
@@ -411,6 +429,10 @@ export function zeichnungenVon(alle) {
     const datei = a('src') ? path.join(path.dirname(d).replace(/[\\/](ratgeber|fuer-fensterbauer)([\\/].*)?$/, ''), a('src')) : '';
     if (a('src')) z[p] = { src: a('src'), w: a('width'), h: a('height'), alt: a('alt'), beispiel: fs.existsSync(datei) && /\(Beispiel\)/.test(fs.readFileSync(datei, 'utf8')) };
   }
+  /* erstes Symbol der Antwort-Kacheln je Seite, für „Mehr in diesem Schritt“ (nicht aufzählbar, damit die Zeichnungen-Liste bleibt, wie sie ist) */
+  const symbol = {};
+  for (const [p, d] of alle) { const m = fs.readFileSync(d, 'utf8').match(/<nav class="rg-faelle"[^>]*>[\s\S]*?data-sym="([a-z-]+)"/); if (m && SYMBOLE[m[1]]) symbol[p] = m[1]; }
+  Object.defineProperty(z, 'symbol', { value: symbol, enumerable: false });
   return z;
 }
 /* Was die Seite nach dem Bauen enthalten muss (für die Prüfsuite und den Lauf unten) */

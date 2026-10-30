@@ -208,6 +208,14 @@ body.rg-seite { margin: 0; background: var(--schwarz); color: var(--weiss); font
   .rg-faelle > a:hover b { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
   .rg-faelle > a:hover::after { background-color: var(--tinte); transform: translateY(2px) rotate(90deg); }
 }
+/* Mehr in diesem Schritt (Strukturprüfung 30.10.2026): unter „Nächster Schritt“ die übrigen Seiten desselben Schritts in den Zeilen der
+   Antwort-Kacheln, über die volle Breite der Weg-Szene; der Pfeil schräg nach oben, weil er auf eine andere Seite führt */
+.rg-geschwister { max-width: 840px; margin-top: 48px; }
+.rg-geschwister > .eyebrow { display: block; margin: 0 0 12px; }
+.rg-geschwister .rg-faelle { max-width: none; margin-top: 0; }
+.rg-geschwister .rg-faelle > a::after { transform: rotate(-45deg); }
+.rg-geschwister .rg-faelle > a:active::after { transform: translate(2px, -2px) rotate(-45deg); }
+@media (hover: hover) and (pointer: fine) { .rg-geschwister .rg-faelle > a:hover::after { transform: translate(2px, -2px) rotate(-45deg); } }
 /* die Zeichnung: weißes Blatt, gerade (es ist eine Messskizze), liegt auf Beton im Fensterlicht (Foto des Inhabers, gespiegelt:
    das Licht fällt von der Außenkante, nicht neben der Textspalte, ein; /bilder/ratgeber/buehne.webp; wie der Betonboden im
    Konfigurator). Das Fensterlicht liegt hinter dem Blatt und ist gedämpft, das Blatt wirft seinen Schatten in Lichtrichtung;
