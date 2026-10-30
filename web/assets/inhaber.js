@@ -567,6 +567,7 @@
     }
     zeichnen();
     const titel = 'Betriebe. *' + (!l.length ? 'Noch leer' : partner ? (partner === 1 ? 'Ein Partner' : partner + ' Partner') + ', ' + l.length + ' im Lexikon' : l.length + ' im Lexikon') + '.*';
+<<<<<<< HEAD
     /* Gefahrenbereich (Wunsch des Inhabers, 30.10.2026): alle Daten der Vermittlung auf einmal löschen, etwa die eigenen Tests; nur mit dem
        Wortlaut „ALLES LÖSCHEN“. Weg sind dann Anfragen samt Aufmaßblättern, das Register und die Code-Zähler je Nummer; die Suchen bleiben. */
     const best = U.feld({ k: 'bestaetigung', label: 'Zur Bestätigung „ALLES LÖSCHEN“ eintragen', auto: 'off' });
@@ -583,6 +584,9 @@
       h('p', { class: 'a-hilfe', text: 'Löscht alle Anfragen samt Aufmaßblättern, das ganze Register und die Zähler „drei Codes je Nummer und Tag“; damit fällt auch die Grenze von zwei Anfragen je Nummer in 90 Tagen. Die gespeicherten Suchen bleiben. Gedacht für Ihre Tests; das lässt sich nicht rückgängig machen.' }),
       best, h('div', { class: 'a-knoepfe' }, weg)], { class: 'a-karte a-reg-gefahr' });
     seite({ band: umschalter('betriebe'), frage: U.frage(titel, null), inhalt: [zahlen, h('div', { class: 'a-reg-werkzeug' }, suche, neu), filter, U.karte(null, null, [liste, leer], { class: 'a-karte a-eingang-karte' }), gefahr], stehen: o && o.stehen });
+=======
+    seite({ band: umschalter('betriebe'), frage: U.frage(titel, null), inhalt: [zahlen, h('div', { class: 'a-reg-werkzeug' }, suche, neu), filter, U.karte(null, null, [liste, leer], { class: 'a-karte a-eingang-karte' })], stehen: o && o.stehen });
+>>>>>>> origin/main
   }
   function bzeile(b) {
     const z = b.zaehler || {}, n = aufmasse(b);

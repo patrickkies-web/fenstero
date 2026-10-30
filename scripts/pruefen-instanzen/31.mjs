@@ -11,7 +11,11 @@
 //   Kontaktdaten und ohne Anhang) · 31.7 Bereich für Fensterbauer und Register (Abschnitt 13: Vorschau über den Link, Konto per Code, Annehmen,
 //   erstes Aufmaß kostenlos, zweites über die Kasse, Mail an den Kunden, Partner vorn in der Suche, Lexikon der Zentrale, Nachricht an den Kunden,
 //   Rechtsseite Partnerbedingungen) · K Bereich für Fensterbauer im Browser (Zugang, Code, Freischalten, PDF, Partner; „Anmelden“ auf der
+<<<<<<< HEAD
 //   Seite für Fensterbauer) · 31.6 Tageslauf (nach 180 Tagen weg, mit dem Aufmaßblatt) · 31.8 Gefahrenbereich (alles der Vermittlung löschen).
+=======
+//   Seite für Fensterbauer) · 31.6 Tageslauf (nach 180 Tagen weg, mit dem Aufmaßblatt).
+>>>>>>> origin/main
 // Teil B im Browser (Telefon 390 px und Schreibtisch): Zentrale mit Umschalter, Liste, Anfrage, Anruf-Knopf, „Will“, Senden nur mit Häkchen;
 //   genau eine volle Pille, Ziele ab 44 px, Schrift ab 13 px, kein Querscrollen, keine Konsolenfehler.
 // Teil C (App, Folien weg, betriebe, vcode, angefragt): ergänzt die Sitzung, die die App baut; Platz unten am Ende markiert.
