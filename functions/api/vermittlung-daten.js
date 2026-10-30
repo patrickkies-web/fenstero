@@ -7,7 +7,7 @@
    API: vermittlungDaten(k) → { art, anlegen(row), holen(id), alle(), vonTel(tel, seitIso), aendern(id, fn), loeschen(id),
         aelterAls(iso), allesLoeschen(), sucheHolen(plz), sucheSetzen(plz, row), suchenFuer(plzListe), suchenStand(plzListe), suchenAufraeumen(iso, isoVorrat),
         betriebHolen(id), betriebeHolen(ids), betriebNachKontakt(telNorm, webHost), betriebeNachKonto(kontoId), betriebeNachMail(mail),
-        betriebePartner(), betriebeAlle(), betriebSetzen(row), betriebAendern(id, fn) } | null
+        betriebePartner(), betriebeAlle(), betriebSetzen(row), betriebAendern(id, fn), betriebLoeschen(id) } | null
    Register der Betriebe (seit 30.10.2026, Tabelle vermittlung_betriebe, docs/VERMITTLUNG.md Abschnitt 13): je Betrieb eine Zeile mit
    Kennung (betriebId aus Name und Ort), Kontakt, Stand (neu, kontakt, partner, abgelehnt, pausiert), Partner-Erklärung, Konto im
    Kundenbereich, Zähler und der Liste seiner Anfragen; aliase sind Kennungen doppelt gefundener Einträge (gleiche Nummer oder Website).
@@ -65,6 +65,7 @@ function attrappe() {
     betriebePartner: async () => Array.from(A.betriebe.values()).filter((r) => r.stand === 'partner').map(kopie),
     betriebeAlle: async () => Array.from(A.betriebe.values()).sort((a, b) => (a.updated_at < b.updated_at ? 1 : -1)).slice(0, 1000).map(kopie),
     betriebSetzen: async (row) => { const alt = A.betriebe.get(row.id); const r = Object.assign({ version: 0, created_at: jetzt() }, alt || {}, kopie(row), { updated_at: jetzt() }); A.betriebe.set(r.id, r); return kopie(r); },
+    betriebLoeschen: async (id) => { A.betriebe.delete(id); return true; },
     betriebAendern: async (id, fn) => {
       const r = A.betriebe.get(id); if (!r) throw new ApiFehler('Diesen Betrieb gibt es im Register nicht.', 404);
       const z = kopie(r), out = await fn(z); if (out === false) return false;
@@ -150,6 +151,7 @@ function supabase(k) {
     betriebePartner: async () => (await sb('vermittlung_betriebe?stand=eq.partner&select=*')) || [],
     betriebeAlle: async () => (await sb('vermittlung_betriebe?select=*&order=updated_at.desc&limit=1000')) || [],
     betriebSetzen: async (row) => eins(await sb('vermittlung_betriebe?on_conflict=id', { method: 'POST', body: row, headers: { prefer: 'resolution=merge-duplicates,return=representation' } })),
+    betriebLoeschen: async (id) => { await sb('vermittlung_betriebe?id=eq.' + q(id), { method: 'DELETE' }); return true; },
     betriebAendern: async (id, fn) => {
       for (let i = 0; i < 4; i++) {
         const r = eins(await sb('vermittlung_betriebe?id=eq.' + q(id) + '&select=*')); if (!r) throw new ApiFehler('Diesen Betrieb gibt es im Register nicht.', 404);

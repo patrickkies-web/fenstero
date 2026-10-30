@@ -413,6 +413,9 @@
     const teile = [anrufKnopf(x.tel, x.tel, 'Betrieb anrufen'),
       kv([['Ort', [x.ort, x.km != null ? x.km + ' km' : ''].filter(Boolean).join(' · ')], ['Leistungen', (x.leistungen || []).join(', ')], ['Website', x.web ? h('a', { href: x.web, target: '_blank', rel: 'noopener noreferrer', text: x.web.replace(/^https?:\/\//, '').replace(/\/$/, '') }) : ''], ['Straße', x.strasse],
         ['Herkunft', x.quelle === 'inhaber' ? 'von Ihnen eingetragen' : x.partner ? 'Partner, bei der Suche vorn' : x.gewaehlt ? 'vom Kunden gewählt' : ''], ['Zugang', zugangText(x)], ['Aufmaß', aufmassText(x)]])];
+    /* Lexikon-Auszug (Wunsch des Inhabers, 30.10.2026): vor dem Anruf sehen, was zu diesem Betrieb schon vorliegt, und das Register von hier
+       aus pflegen: „Anderer Betrieb“ trennt ab (zwei „Fensterbau Schmidt“), „Zuordnen“ hängt die Anfrage an einen bestehenden Eintrag */
+    teile.push(lexikonAuszug(v, x, neuLaden));
     /* Ergebnis des Anrufs */
     teile.push(h('div', { class: 'a-feld' }, h('span', { class: 'a-label', text: 'Ergebnis des Anrufs' }), U.segment([{ w: 'nicht_erreicht', t: 'Nicht erreicht' }, { w: 'will', t: 'Will' }, { w: 'will_nicht', t: 'Will nicht' }], x.status, async (w) => {
       try { neuLaden(await U.api('POST', vpfad(v) + '/betrieb', { bid: x.id, status: w }), x.name + ': ' + V_STATUS[w]); } catch (e) { U.toast(e.message); }
@@ -444,8 +447,54 @@
     /* Kopf: Chip des Stands (Aufmaß freigeschaltet, Zugang geschickt oder Ergebnis des Anrufs), Etikett „Partner“, Weg ins Lexikon */
     const chip = x.freischaltung ? (x.freischaltung.art === 'bezahlt' ? 'Aufmaß bezahlt' : 'Aufmaß kostenlos') : x.gesendet ? 'Zugang geschickt' : V_STATUS[x.status] || x.status;
     const rechts = h('span', { class: 'a-reg-kopfrechts' }, U.chip(chip, art), x.partner ? U.chip('Partner', 'aktiv') : null,
-      h('a', { class: 'a-link', href: '#betriebe/' + x.id }, 'Im Lexikon', U.icon('pfeil')));
+      h('a', { class: 'a-link', href: '#betriebe/' + ((x.register && x.register.id) || x.id) }, 'Im Lexikon', U.icon('pfeil')));
     return U.karte(x.name, rechts, teile, { class: 'a-karte a-betrieb' + (x.partner ? ' a-reg-ist-partner' : ''), 'data-bid': x.id });
+  }
+  function lexikonAuszug(v, x, neuLaden) {
+    const r = x.register, z = (r && r.zaehler) || {}, teile = [];
+    const kopf = h('p', { class: 'a-label-klein', style: 'margin:0;display:flex;flex-wrap:wrap;gap:6px;align-items:center' }, h('span', { class: 'a-label', style: 'margin-right:4px', text: 'Im Lexikon' }),
+      r ? U.chip(r.standText || r.stand, r.stand === 'partner' ? 'aktiv' : 'leise') : U.chip('Noch kein Eintrag', 'leise'), r && r.genutzt ? U.chip('Erstes Aufmaß schon genutzt', 'hinweis') : null, r && r.anders ? U.chip('Eintrag: ' + r.name + (r.ort ? ', ' + r.ort : ''), 'leise') : null);
+    teile.push(kopf);
+    if (r) {
+      const geld = U.euro((z.umsatz_cent || 0) / 100);
+      teile.push(kv([['Anfragen', String(r.anfragen || z.anfragen || 0) + (z.will ? ' · ' + z.will + ' will' : '') + (z.will_nicht ? ' · ' + z.will_nicht + ' will nicht' : '') + (z.nicht_erreicht ? ' · ' + z.nicht_erreicht + ' nicht erreicht' : '')],
+        ['Aufmaße', (z.frei || 0) + (z.bezahlt || 0) ? (z.frei ? z.frei + ' kostenlos' : '') + (z.frei && z.bezahlt ? ' · ' : '') + (z.bezahlt ? z.bezahlt + ' bezahlt (' + geld + ')' : '') : 'noch keins; das erste ist kostenlos'],
+        ['Konten', r.konten ? r.konten + (r.konten === 1 ? ' Konto' : ' Konten') + (r.mails.length ? ' · ' + r.mails.join(', ') : '') : r.mails.length ? 'kein Konto · bekannt: ' + r.mails.join(', ') : 'kein Konto, keine E-Mail bekannt'],
+        r.notiz ? ['Notiz', r.notiz] : null]));
+    } else teile.push(h('p', { class: 'a-hilfe', style: 'padding:4px 0 0', text: 'Der Eintrag entsteht mit dem ersten Ergebnis des Anrufs oder über „Register neu aufbauen“.' }));
+    /* Pflege: trennen, zuordnen, öffnen */
+    const knoepfe = h('div', { class: 'a-knoepfe a-reg-pflege' });
+    if (r) {
+      const trennen = U.ring('Anderer Betrieb', { class: 'klein', title: 'Diese Anfrage gehört zu einem anderen Betrieb mit gleichem Namen oder gleicher Nummer: eigener Eintrag im Lexikon' });
+      trennen.addEventListener('click', async () => {
+        if (U.wartet(trennen) || !confirm('„' + x.name + '“ in dieser Anfrage als eigenen Betrieb vom Eintrag „' + r.name + '“ abtrennen? Die Anfrage zählt dann dort nicht mehr.')) return; U.warten(trennen, true);
+        try { S.bliste = null; neuLaden(await U.api('POST', vpfad(v) + '/betrieb-trennen', { bid: x.id }), x.name + ' als eigener Betrieb abgetrennt'); } catch (e) { U.warten(trennen, false); U.toast(e.message); }
+      });
+      knoepfe.appendChild(trennen);
+    }
+    const zuordnen = U.ring('Zuordnen …', { class: 'klein', title: 'Diese Anfrage einem bestehenden Eintrag des Lexikons zuordnen (gleiche Firma, anderer Name)' });
+    const suche = h('div', { class: 'a-reg-zuordnen', hidden: true });
+    zuordnen.addEventListener('click', async () => {
+      if (!suche.hidden) { suche.hidden = true; return; }
+      if (!S.bliste) { try { await betriebeLaden(); } catch (e) { U.toast(e.message); return; } }
+      U.leeren(suche); suche.hidden = false;
+      const eingabe = h('input', { type: 'search', placeholder: 'Name oder Ort im Lexikon', 'aria-label': 'Eintrag im Lexikon suchen', autocomplete: 'off' }), liste = h('ol', { class: 'a-reg-treffer' });
+      const zeichnen = () => {
+        const q = eingabe.value.trim().toLowerCase().split(/\s+/).filter(Boolean), treffer = (S.bliste || []).filter((b) => (!r || b.id !== r.id) && (!q.length || q.every((w) => suchtext(b).includes(w)))).slice(0, 6);
+        U.leeren(liste);
+        treffer.forEach((b) => liste.appendChild(h('li', null, h('button', { type: 'button', class: 'a-reg-treffer-knopf', on: { click: async () => {
+          if (!confirm('Anfrage ' + v.nr + ' dem Eintrag „' + b.name + (b.ort ? ', ' + b.ort : '') + '“ zuordnen?')) return;
+          try { S.bliste = null; neuLaden(await U.api('POST', vpfad(v) + '/betrieb-zuordnen', { bid: x.id, register: b.id }), x.name + ' dem Eintrag „' + b.name + '“ zugeordnet'); } catch (e) { U.toast(e.message); }
+        } } }, h('b', { text: b.name }), h('small', { text: [b.ort, (b.zaehler || {}).anfragen ? (b.zaehler.anfragen + ' Anfragen') : '', b.standText || b.stand].filter(Boolean).join(' · ') })))));
+        if (!treffer.length) liste.appendChild(h('li', { class: 'a-reg-treffer-leer', text: 'Kein Eintrag passt.' }));
+      };
+      eingabe.addEventListener('input', zeichnen); zeichnen();
+      suche.appendChild(h('div', { class: 'a-reg-suche' }, zeichen(LUPE), eingabe)); suche.appendChild(liste); eingabe.focus();
+    });
+    knoepfe.appendChild(zuordnen);
+    if (r) knoepfe.appendChild(h('a', { class: 'a-ring klein', href: '#betriebe/' + r.id }, h('span', { text: 'Im Lexikon öffnen' })));
+    teile.push(knoepfe, suche);
+    return h('div', { class: 'a-reg-lexikon' }, teile);
   }
   /* Weiteren Betrieb eintragen (selbst gefunden oder vom Kunden genannt) */
   function neuBetriebKarte(v, neuLaden) {
@@ -623,16 +672,34 @@
     /* Kontakt: Anruf, Daten, E-Mail und Postleitzahl änderbar */
     const mailF = U.feld({ k: 'mail', label: 'E-Mail', typ: 'email', modus: 'email', optional: true, wert: b.mail || '', platzhalter: 'info@betrieb.de', max: 120, hilfe: 'Wird beim nächsten „Zugang schicken“ vorgeschlagen.' });
     const plzF = U.feld({ k: 'plz', label: 'Postleitzahl', modus: 'numeric', optional: true, wert: b.plz || '', platzhalter: '33442', max: 5, hilfe: 'Mit Postleitzahl steht ein Partner bei der Suche im Umkreis vorn, auch wenn ihn keine Suche gefunden hat.' });
-    const speichern = U.ring(h('span', { text: 'Kontakt speichern' }), { class: 'klein' }), kontaktTeil = h('div', { class: 'a-zwei' }, mailF, plzF);
+    const nameF = U.feld({ k: 'name', label: 'Name des Betriebs', wert: b.name || '', max: 80 }), ortF = U.feld({ k: 'ort', label: 'Ort', optional: true, wert: b.ort || '', max: 80 });
+    const strasseF = U.feld({ k: 'strasse', label: 'Straße', optional: true, wert: b.strasse || '', max: 80 }), telF = U.feld({ k: 'tel', label: 'Telefon', typ: 'tel', modus: 'tel', optional: true, wert: b.tel || '', max: 40 });
+    const webF = U.feld({ k: 'web', label: 'Website', typ: 'url', optional: true, wert: b.web || '', platzhalter: 'www.betrieb.de', max: 200 });
+    const speichern = U.ring(h('span', { text: 'Angaben speichern' }), { class: 'klein' }), kontaktTeil = h('div', null, h('div', { class: 'a-zwei' }, nameF, ortF), h('div', { class: 'a-zwei' }, strasseF, plzF), h('div', { class: 'a-zwei' }, telF, webF), mailF);
     speichern.addEventListener('click', async () => {
       if (U.wartet(speichern)) return; U.warten(speichern, true);
-      try { await U.api('POST', bpfad(b.id), { mail: mailF.eingabe.value.trim(), plz: plzF.eingabe.value.trim() }); neuLaden('Kontakt gespeichert'); }
+      try { await U.api('POST', bpfad(b.id), { name: nameF.eingabe.value.trim(), ort: ortF.eingabe.value.trim(), strasse: strasseF.eingabe.value.trim(), tel: telF.eingabe.value.trim(), web: webF.eingabe.value.trim(), mail: mailF.eingabe.value.trim(), plz: plzF.eingabe.value.trim() }); neuLaden('Angaben gespeichert'); }
       catch (e) { U.warten(speichern, false); if (e.daten && e.daten.felder) U.zuFeld(U.fehlerZeigen(kontaktTeil, e.daten.felder)); else U.toast(e.message); }
     });
-    inhalt.push(U.karte('Kontakt', QUELLE[b.quelle] || 'aus der Suche', [anrufKnopf(b.tel, b.tel, 'Betrieb anrufen'),
-      kv([['Ort', (b.plz + ' ' + b.ort).trim()], ['Straße', b.strasse], ['Website', b.web ? h('a', { href: b.web, target: '_blank', rel: 'noopener noreferrer', text: b.web.replace(/^https?:\/\//, '').replace(/\/$/, '') }) : ''], ['Leistungen', (b.leistungen || []).join(', ')],
-        ['Konto', b.konto ? 'verbunden: der Betrieb ist im Bereich für Fensterbauer angemeldet' : 'kein Konto'], (b.aliase || []).length ? ['Auch gefunden als', b.aliase.length + (b.aliase.length === 1 ? ' weitere Kennung' : ' weitere Kennungen') + ' (gleiche Nummer oder Website)'] : null]),
+    inhalt.push(U.karte('Kontakt und Angaben', QUELLE[b.quelle] || 'aus der Suche', [anrufKnopf(b.tel, b.tel, 'Betrieb anrufen'),
+      kv([['Website', b.web ? h('a', { href: b.web, target: '_blank', rel: 'noopener noreferrer', text: b.web.replace(/^https?:\/\//, '').replace(/\/$/, '') }) : ''], ['Leistungen', (b.leistungen || []).join(', ')],
+        ['Konto', b.konto ? 'verbunden: der Betrieb ist im Bereich für Fensterbauer angemeldet' + (b.konten > 1 ? ' (' + b.konten + ' Konten)' : '') : 'kein Konto'], (b.aliase || []).length ? ['Auch gefunden als', b.aliase.length + (b.aliase.length === 1 ? ' weitere Kennung' : ' weitere Kennungen') + ' (gleiche Nummer, Website oder zusammengeführt)'] : null]),
       kontaktTeil, h('div', { class: 'a-knoepfe', style: 'padding:6px 0 16px' }, speichern)]));
+    /* Zusammenführen: ein doppelter Eintrag (andere Schreibweise, zweite Nummer) geht in diesem auf */
+    const zsEingabe = h('input', { type: 'search', placeholder: 'Doppelten Eintrag suchen (Name, Ort)', 'aria-label': 'Doppelten Eintrag suchen', autocomplete: 'off' }), zsListe = h('ol', { class: 'a-reg-treffer' });
+    const zsZeichnen = () => {
+      const q = zsEingabe.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      const treffer = q.length ? (S.bliste || []).filter((c) => c.id !== b.id && q.every((w) => suchtext(c).includes(w))).slice(0, 6) : [];
+      U.leeren(zsListe);
+      treffer.forEach((c) => zsListe.appendChild(h('li', null, h('button', { type: 'button', class: 'a-reg-treffer-knopf', on: { click: async () => {
+        if (!confirm('„' + c.name + (c.ort ? ', ' + c.ort : '') + '“ in „' + b.name + '“ aufgehen lassen? Anfragen, Konten und Notiz wandern hierher, der andere Eintrag verschwindet.')) return;
+        try { await U.api('POST', bpfad(b.id) + '/zusammenfuehren', { mit: c.id }); S.bliste = null; neuLaden('„' + c.name + '“ zusammengeführt'); } catch (e) { U.toast(e.message); }
+      } } }, h('b', { text: c.name }), h('small', { text: [c.ort, (c.zaehler || {}).anfragen ? c.zaehler.anfragen + ' Anfragen' : '', c.standText || c.stand].filter(Boolean).join(' · ') })))));
+      if (q.length && !treffer.length) zsListe.appendChild(h('li', { class: 'a-reg-treffer-leer', text: 'Kein Eintrag passt.' }));
+    };
+    zsEingabe.addEventListener('input', zsZeichnen);
+    inhalt.push(U.karte('Zusammenführen', 'derselbe Betrieb, doppelt im Lexikon', [h('p', { class: 'a-hilfe', style: 'padding:4px 0 8px', text: 'Steht derselbe Betrieb zweimal im Lexikon (andere Schreibweise, zweite Nummer), suchen Sie den doppelten Eintrag; er geht dann in diesem auf. Umgekehrt trennt „Anderer Betrieb“ in der Anfrage zwei verschiedene Betriebe mit gleichem Namen.' }),
+      h('div', { class: 'a-reg-suche' }, zeichen(LUPE), zsEingabe), zsListe], { class: 'a-karte a-reg-zusammen' }));
     /* Stand als Wahl und die Partner-Erklärung */
     const wahl = h('div', { class: 'a-wahl', role: 'group', 'aria-label': 'Stand des Betriebs' }, Object.keys(bstaende()).map((s) => h('button', { type: 'button', 'aria-pressed': String(b.stand === s), on: { click: async () => {
       if (s === b.stand) return;

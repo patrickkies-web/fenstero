@@ -79,7 +79,7 @@ async function tokenDaten(ctx) {
 async function betriebeDesKontos(d, kunde) { return (await d.betriebeNachKonto(kunde.id)).filter(Boolean); }
 function eigenerBetrieb(v, kunde, rows) {
   const ids = new Set(); rows.forEach((r) => { ids.add(r.id); (r.aliase || []).forEach((a) => ids.add(a)); });
-  return (v.betriebe || []).find((x) => (x.zugang && x.zugang.konto === kunde.id) || ((x.zugang || x.gesendet) && ids.has(x.id))) || null;
+  return (v.betriebe || []).find((x) => (x.zugang && x.zugang.konto === kunde.id) || ((x.zugang || x.gesendet) && (ids.has(x.register || '') || ids.has(x.id)))) || null;
 }
 async function eigeneAnfrage(ctx, d, kunde) {
   const v = await d.holen(String(ctx.params.id || '')); if (!v) throw new ApiFehler('Diese Anfrage gibt es nicht.', 404);
@@ -169,7 +169,7 @@ export const PARTNER = {
   'GET /api/anfrage/:token': async (ctx) => {
     const { d, v, x, mail } = await tokenDaten(ctx);
     const s = await sitzungLesen(ctx, 'kunde'), passt = !!(s && String(s.mail || '').toLowerCase() === mail);
-    return { ok: true, vorschau: vorschau(v, x), mail: maskMail(mail), mailVoll: passt ? mail : '', angemeldet: !!s, passt: passt, preis: preisInfo(ctx), fassung: PARTNER_STAND, erstesFrei: await erstesFreiFuer(d, mail, x.id) };
+    return { ok: true, vorschau: vorschau(v, x), mail: maskMail(mail), mailVoll: passt ? mail : '', angemeldet: !!s, passt: passt, preis: preisInfo(ctx), fassung: PARTNER_STAND, erstesFrei: await erstesFreiFuer(d, mail, x.register || x.id) };
   },
   'POST /api/anfrage/:token/annehmen': async (ctx) => {
     const { d, v, x, mail } = await tokenDaten(ctx), kunde = await kundeVon(ctx);
@@ -187,7 +187,7 @@ export const PARTNER = {
   'GET /api/konto/anfragen': async (ctx) => { const kunde = await kundeVon(ctx); return antwortListe(ctx, vd(ctx), kunde); },
   'GET /api/konto/anfragen/:id': async (ctx) => {
     const kunde = await kundeVon(ctx), d = vd(ctx), { v, x, rows } = await eigeneAnfrage(ctx, d, kunde);
-    return { ok: true, anfrage: vorschau(v, x), preis: preisInfo(ctx), fassung: PARTNER_STAND, kasse: kassenStand(ctx), erstesFrei: erstesFrei(await rundum(d, { rows: rows, bid: x.id, mail: kunde.mail })) };
+    return { ok: true, anfrage: vorschau(v, x), preis: preisInfo(ctx), fassung: PARTNER_STAND, kasse: kassenStand(ctx), erstesFrei: erstesFrei(await rundum(d, { rows: rows, bid: x.register || x.id, mail: kunde.mail })) };
   },
   'GET /api/konto/anfragen/:id/pdf': async (ctx) => {
     const kunde = await kundeVon(ctx), d = vd(ctx), { v, x } = await eigeneAnfrage(ctx, d, kunde);
@@ -202,7 +202,7 @@ export const PARTNER = {
     if (b.zustimmung !== true) throw new ApiFehler('Bitte bestätigen Sie die Partnerbedingungen.', 400, { feld: 'zustimmung' });
     if (!(v.pdf && v.pdf.pfad)) throw new ApiFehler('Das Aufmaßblatt dieser Anfrage gibt es nicht mehr.', 410);
     const row = rows.find((r) => r.id === x.id || (r.aliase || []).includes(x.id)) || rows[0] || (await registerFuer(d, x, x.quelle));
-    if (erstesFrei(await rundum(d, { rows: rows, bid: x.id, mail: kunde.mail }))) { const r = await freischalten(ctx, d, v, x, 'frei', { fassung: PARTNER_STAND }); return { ok: true, frei: true, anfrage: vorschau(r.v, r.x) }; }
+    if (erstesFrei(await rundum(d, { rows: rows, bid: x.register || x.id, mail: kunde.mail }))) { const r = await freischalten(ctx, d, v, x, 'frei', { fassung: PARTNER_STAND }); return { ok: true, frei: true, anfrage: vorschau(r.v, r.x) }; }
     const k = await kasse(ctx, kunde, v, x, row);
     await d.aendern(v.id, (z) => { const y = (z.betriebe || []).find((w) => w.id === x.id); if (!y) return false; y.kasse = { session: k.id, zeit: ZEIT(), fassung: PARTNER_STAND }; });
     return { ok: true, kasse: k.url, session: k.id };

@@ -411,6 +411,25 @@ export default async function (h) {
     st7.ok && st7.betrieb.stand === 'abgelehnt' && st7.betrieb.mail === 'neu@fensterbau-brandt.de' && stFalsch7.status === 400 && auf7.ok && auf7.betriebe >= 8 && rd2.betrieb.stand === 'abgelehnt' && rd2.betrieb.notiz === 'Will erst 2027 wieder' && rd2.betrieb.zaehler.bezahlt === 1 &&
     neuD.ok && regD.ok && regD.betrieb.id === rBrandt.id && regD.betrieb.aliase.includes(neuD.bid),
     '31.7 Lexikon der Zentrale: Liste mit Zählern (1 kostenlos, 1 bezahlt, 29 € Umsatz, Konto verbunden), Detail mit allen Anfragen und Ergebnissen, Stand/Notiz/Mail ändern (unbekannt 400), „neu aufbauen“ behält Stand und Notiz, ein Betrieb mit derselben Nummer wird Alias statt Doppeleintrag');
+  /* Pflege des Registers aus der Anfrage (Inhaber, 30.10.2026): Auszug je Betrieb vor dem Anruf; „Dora Doppelt“ hat Brandt Fenster GmbH als Alias
+     von Brandt. Trennen gibt ihr einen eigenen Eintrag (x.register), Zuordnen hängt sie wieder an Brandt, Zusammenführen lässt einen Eintrag im anderen
+     aufgehen, Angaben lassen sich ändern. */
+  const detD1 = ((await zapi('/api/inhaber/vermittlungen/' + vD.id)).json || {}).vermittlung || {}, xD1 = (detD1.betriebe || []).find((x) => x.id === neuD.bid) || {}, azD1 = xD1.register || {};
+  const tr = (await zapi('/api/inhaber/vermittlungen/' + vD.id + '/betrieb-trennen', { bid: neuD.bid })).json || {}, xD2 = ((tr.vermittlung || {}).betriebe || []).find((x) => x.id === neuD.bid) || {}, azD2 = xD2.register || {};
+  const rBrandtNachTr = ((await zapi('/api/inhaber/betriebe/' + rBrandt.id)).json || {}).betrieb || {}, rNeuTr = ((await zapi('/api/inhaber/betriebe/' + (tr.register || 'x'))).json || {}).betrieb || {};
+  const zu = (await zapi('/api/inhaber/vermittlungen/' + vD.id + '/betrieb-zuordnen', { bid: neuD.bid, register: rBrandt.id })).json || {}, azD3 = ((((zu.vermittlung || {}).betriebe || []).find((x) => x.id === neuD.bid) || {}).register) || {};
+  const zuFalschP = await zapi("/api/inhaber/vermittlungen/" + vD.id + "/betrieb-zuordnen", { bid: neuD.bid, register: "gibtsnicht" });
+  const rBrandtNachZu = ((await zapi('/api/inhaber/betriebe/' + rBrandt.id)).json || {}).betrieb || {};
+  const zs = (await zapi('/api/inhaber/betriebe/' + rBrandt.id + '/zusammenfuehren', { mit: tr.register })).json || {}, wegTr = await zapi('/api/inhaber/betriebe/' + (tr.register || 'x'));
+  const rbZs = ((await zapi('/api/inhaber/betriebe/' + rBrandt.id)).json || {}).betrieb || {};
+  const aend = (await zapi('/api/inhaber/betriebe/' + rBrandt.id, { strasse: 'Werkstattweg 7a', web: 'www.fensterbau-brandt.de' })).json || {}, aendFalsch = await zapi('/api/inhaber/betriebe/' + rBrandt.id, { name: '' });
+  ok(azD1.id === rBrandt.id && azD1.anders === true && azD1.genutzt === true && azD1.konten >= 2 && azD1.mails.includes(BMAIL) && (azD1.zaehler || {}).frei === 1 && azD1.zugeordnet === false &&
+    tr.ok && /~/.test(tr.register || '') && azD2.id === tr.register && azD2.zugeordnet === true && azD2.anders === false && azD2.genutzt === false && rNeuTr.name === 'Brandt Fenster GmbH' && (rNeuTr.zaehler || {}).anfragen === 1 && (rBrandtNachTr.zaehler || {}).anfragen === (rBrandt.zaehler.anfragen || 0) - 0 - (rBrandt.anfragen || rb.anfragen || []).filter((a) => a.nr === nrD).length &&
+    zu.ok && azD3.id === rBrandt.id && zuFalschP.status === 404 && (rBrandtNachZu.anfragen || []).some((a) => a.nr === nrD) && zs.ok && (rbZs.aliase || []).includes(tr.register) && wegTr.status === 200 && ((wegTr.json || {}).betrieb || {}).id === rBrandt.id &&
+    aend.ok && aend.betrieb.strasse === 'Werkstattweg 7a' && aend.betrieb.web === 'www.fensterbau-brandt.de' && aendFalsch.status === 400,
+    '31.7 Pflege aus der Anfrage: Lexikon-Auszug je Betrieb (Eintrag, Zähler, Konten, E-Mails, „erstes Aufmaß genutzt“), „Anderer Betrieb“ trennt mit eigener Kennung, „Zuordnen“ hängt an einen Eintrag (unbekannt 404), Zusammenführen lässt den Eintrag aufgehen (seine Kennung führt als Alias zum Ziel), Angaben änderbar (leerer Name 400)' +
+    ' (' + JSON.stringify({ auszug: { id: azD1.id === rBrandt.id, anders: azD1.anders, genutzt: azD1.genutzt, konten: azD1.konten }, trennen: tr.register, neu: (rNeuTr.zaehler || {}).anfragen, zu: azD3.id === rBrandt.id, zusammen: zs.ok, weg: wegTr.status, aend: aend.ok }) + ')');
+
   /* Nachricht an den Kunden aus der Zentrale */
   const vorK = await ids();
   const km1 = (await zapi(P7 + '/kunde-mail', { betreff: 'Kurz zum Stand', text: 'Hallo Heike,\n\nFensterbau Brandt hat dein Aufmaß und meldet sich diese Woche.\n\nViele Grüße' })).json || {};

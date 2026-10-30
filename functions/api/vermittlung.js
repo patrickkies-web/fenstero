@@ -20,7 +20,7 @@
      schicken“: Mail mit Link in den Bereich für Fensterbauer, kein Aufmaßblatt und keine Kontaktdaten mehr in der Mail) · POST …/:id/stand
      { stand } · POST …/:id/notiz { text } · POST …/:id/kunde-mail { betreff, text } (Nachricht an den Kunden)
      Register der Betriebe (Lexikon, vermittlung-register.js): GET /api/inhaber/betriebe · GET …/:id · POST …/:id { stand, notiz, mail, plz,
-     bereit } · POST /api/inhaber/betriebe/neu-aufbauen · POST /api/inhaber/vermittlung/alles-loeschen { bestaetigung: 'ALLES LÖSCHEN' }
+     bereit } · POST /api/inhaber/betriebe/neu-aufbauen · POST …/betriebe/:id/zusammenfuehren { mit } · POST …/vermittlungen/:id/betrieb-trennen { bid } · POST …/vermittlungen/:id/betrieb-zuordnen { bid, register } (Pflege, x.register) · POST /api/inhaber/vermittlung/alles-loeschen { bestaetigung: 'ALLES LÖSCHEN' }
      (Gefahrenbereich: Anfragen samt Aufmaßblättern, Register, Code-Zähler je Nummer; Suchen bleiben)
    Bereich für Fensterbauer (vermittlung-partner.js): GET /api/anfrage/:token, POST …/annehmen, GET /api/konto/anfragen[/:id[/pdf|/kasse]],
    POST /api/konto/anfragen/:id/freischalten, POST /api/konto/partner, POST /api/konto/betrieb. Partner stehen in der Suche vorn.
@@ -39,7 +39,7 @@ import { plzInfo, km as kmZwischen, umkreisPlz, betriebLage, vorratPlz } from '.
 import { smsArt, smsDienst } from './vermittlung-sms.js';
 import { inhaberMail, eingangMail, betriebMail, kundeMail, eckZeilen, erreichText } from './vermittlung-mails.js';
 import { kaufNachweis } from './eigene.js';
-import { registerMerken, registerFuer, registerNeuAufbauen, partnerVorn, STAENDE_BETRIEB } from './vermittlung-register.js';
+import { registerMerken, registerFuer, registerNeuAufbauen, partnerVorn, STAENDE_BETRIEB, registerAuszug, registerTrennen, registerZuordnen, registerZusammenfuehren, telNorm, webHost } from './vermittlung-register.js';
 import { PARTNER, zugangToken, zugangLink, preisInfo, erstesFreiFuer, ZUGANG_TAGE, registerSicht } from './vermittlung-partner.js';
 import { daten as kundenDaten } from '../auftrag/daten.js';
 
@@ -313,6 +313,17 @@ function sicht(v) {
 const statusAus = (s) => { const x = String(s == null ? '' : s).trim().toLowerCase().replace(/[\s-]+/g, '_'); return STATUS[x] ? x : null; };
 function betriebVon(v, bid) { const x = (v.betriebe || []).find((y) => y.id === String(bid || '')); if (!x) throw new ApiFehler('Diesen Betrieb gibt es in dieser Anfrage nicht.', 404); return x; }
 
+/* Lexikon-Auszug je Betrieb der Anfrage (Register-Eintrag nach x.register, Kennung oder Alias) */
+async function mitRegister(d, sv, v) {
+  if (!d.betriebeHolen) return sv;
+  try {
+    const ids = Array.from(new Set((v.betriebe || []).flatMap((x) => [x.register, x.id].filter(Boolean))));
+    const rows = ids.length ? await d.betriebeHolen(ids) : [];
+    const finde = (x) => rows.find((r) => x.register && r.id === x.register) || rows.find((r) => r.id === x.id) || rows.find((r) => (r.aliase || []).includes(x.id)) || null;
+    sv.betriebe.forEach((b) => { const x = (v.betriebe || []).find((y) => y.id === b.id); b.register = registerAuszug(finde(x || b), x || b); });
+  } catch (e) { console.log('Register-Auszug', String(e && e.message ? e.message : e).slice(0, 160)); }
+  return sv;
+}
 const INHABER = {
   'GET /api/inhaber/vermittlungen': async (ctx) => {
     const d = await inhaberDaten(ctx), l = await d.alle();
@@ -320,7 +331,23 @@ const INHABER = {
   },
   'GET /api/inhaber/vermittlungen/:id': async (ctx) => {
     const d = await inhaberDaten(ctx), v = await eine(ctx, d);
-    return { ok: true, vermittlung: sicht(v), staende: STAENDE, status: STATUS };
+    return { ok: true, vermittlung: await mitRegister(d, sicht(v), v), staende: STAENDE, status: STATUS };
+  },
+  /* Pflege des Registers aus der Anfrage heraus (Wunsch des Inhabers, 30.10.2026: „zwei unterschiedliche Fensterbau Schmidt“): trennen gibt dem
+     Betrieb dieser Anfrage einen eigenen Eintrag, zuordnen hängt ihn an einen bestehenden; beides merkt sich die Anfrage in x.register */
+  'POST /api/inhaber/vermittlungen/:id/betrieb-trennen': async (ctx) => {
+    const d = await inhaberDaten(ctx), v = await eine(ctx, d), x = (v.betriebe || []).find((y) => y.id === String((ctx.body || {}).bid || ''));
+    if (!x) throw new ApiFehler('Diesen Betrieb gibt es in der Anfrage nicht.', 404);
+    const neu = await registerTrennen(d, v, x);
+    const z = await d.aendern(v.id, (z) => { const y = (z.betriebe || []).find((w) => w.id === x.id); if (!y) return false; y.register = neu.id; verlauf(z, 'inhaber', x.name + ' als eigener Betrieb abgetrennt (Lexikon ' + neu.id + ')'); });
+    return { ok: true, vermittlung: await mitRegister(d, sicht(z), z), register: neu.id };
+  },
+  'POST /api/inhaber/vermittlungen/:id/betrieb-zuordnen': async (ctx) => {
+    const d = await inhaberDaten(ctx), v = await eine(ctx, d), b = ctx.body || {}, x = (v.betriebe || []).find((y) => y.id === String(b.bid || ''));
+    if (!x) throw new ApiFehler('Diesen Betrieb gibt es in der Anfrage nicht.', 404);
+    const ziel = await registerZuordnen(d, v, x, String(b.register || '')); if (!ziel) throw new ApiFehler('Diesen Eintrag gibt es im Register nicht.', 404);
+    const z = await d.aendern(v.id, (z) => { const y = (z.betriebe || []).find((w) => w.id === x.id); if (!y) return false; y.register = ziel.id; verlauf(z, 'inhaber', x.name + ' dem Eintrag „' + ziel.name + '“ zugeordnet'); });
+    return { ok: true, vermittlung: await mitRegister(d, sicht(z), z), register: ziel.id };
   },
   'GET /api/inhaber/vermittlungen/:id/pdf': async (ctx) => {
     const d = await inhaberDaten(ctx), v = await eine(ctx, d), ab = ablage(ctx.k, 'vermittlung');
@@ -440,6 +467,9 @@ const INHABER = {
     const d = await inhaberDaten(ctx), r = await d.betriebHolen(String(ctx.params.id || '')); if (!r) throw new ApiFehler('Diesen Betrieb gibt es im Register nicht.', 404);
     const b = ctx.body || {}, f = {};
     const stand = b.stand === undefined ? undefined : String(b.stand), notiz = b.notiz === undefined ? undefined : String(b.notiz).slice(0, 4000), mail = b.mail === undefined ? undefined : kurz(b.mail, 120).toLowerCase(), plz = b.plz === undefined ? undefined : kurz(b.plz, 5);
+    const angaben = {}; ['name', 'ort', 'strasse', 'tel', 'web'].forEach((f) => { if (b[f] !== undefined) angaben[f] = kurz(b[f], f === 'web' ? 200 : 80); });
+    if (angaben.name !== undefined && !angaben.name) f.name = 'Bitte den Namen des Betriebs eintragen.';
+    if (angaben.web && !webHost(angaben.web)) f.web = 'Bitte eine Website wie www.betrieb.de eintragen.';
     if (stand !== undefined && !STAENDE_BETRIEB[stand]) f.stand = 'Unbekannter Stand.';
     if (mail !== undefined && mail && !mailOk(mail)) f.mail = 'Bitte eine gültige E-Mail-Adresse.';
     if (plz !== undefined && plz && !/^\d{5}$/.test(plz)) f.plz = 'Bitte eine fünfstellige Postleitzahl.';
@@ -447,9 +477,15 @@ const INHABER = {
     const z = await d.betriebAendern(r.id, (z) => {
       if (stand !== undefined && stand !== z.stand) { z.stand = stand; if (stand === 'partner') z.partner = Object.assign({ seit: ZEIT(), fassung: 'inhaber' }, z.partner || {}, { bereit: true }); else if (z.partner && z.partner.bereit && stand !== 'partner') z.partner = Object.assign({}, z.partner, { bereit: false, bis: ZEIT() }); verlauf(z, 'inhaber', 'Stand: ' + STAENDE_BETRIEB[stand]); }
       if (notiz !== undefined) z.notiz = notiz;
+      if (Object.keys(angaben).length) { Object.assign(z, angaben); z.tel_norm = telNorm(z.tel); z.web_host = webHost(z.web); verlauf(z, 'inhaber', 'Angaben geändert (' + Object.keys(angaben).join(', ') + ')'); }
       if (mail !== undefined) z.mail = mail;
       if (plz !== undefined) z.plz = plz;
     });
+    return { ok: true, betrieb: registerZeile(z) };
+  },
+  'POST /api/inhaber/betriebe/:id/zusammenfuehren': async (ctx) => {
+    const d = await inhaberDaten(ctx), z = await registerZusammenfuehren(d, String(ctx.params.id || ''), String((ctx.body || {}).mit || ''));
+    if (!z) throw new ApiFehler('Einer der beiden Einträge fehlt, oder es ist derselbe.', 404);
     return { ok: true, betrieb: registerZeile(z) };
   },
   'POST /api/inhaber/betriebe/neu-aufbauen': async (ctx) => { const d = await inhaberDaten(ctx); return Object.assign({ ok: true }, await registerNeuAufbauen(d)); },

@@ -42,7 +42,9 @@ const verlauf = (z, von, text) => { (z.verlauf = z.verlauf || []).push({ zeit: j
 /* Den Eintrag zu einem Betrieb finden (Kennung, Alias, Nummer, Website) oder anlegen; ein Treffer über Nummer oder Website bekommt die
    Kennung als Alias und, wo noch leer, die Angaben aus b */
 export async function registerFuer(d, b, quelle) {
-  let r = await d.betriebHolen(b.id);
+  /* b.register: der Inhaber hat den Betrieb dieser Anfrage von Hand einem Eintrag zugeordnet oder abgetrennt (Pflege in der Zentrale) */
+  let r = b.register ? await d.betriebHolen(b.register) : null;
+  if (!r) r = await d.betriebHolen(b.id);
   if (!r) {
     const tn = telNorm(b.tel), wh = webHost(b.web);
     if (tn || wh) r = await d.betriebNachKontakt(tn, wh);
@@ -62,7 +64,7 @@ export async function registerFuer(d, b, quelle) {
 /* Eintrag einer Anfrage in der Liste des Betriebs aus dem Stand in der Anfrage (v) und seinem Betrieb (x) ableiten */
 export function anfrageEintrag(v, x) {
   const k = v.kunde || {}, f = x.freischaltung || null, z = x.zugang || null;
-  return { id: v.id, nr: v.nr, zeit: v.created_at, ort: (v.plz + ' ' + (k.ort || '')).trim(), gewaehlt: !!x.gewaehlt, status: x.status || 'offen', status_zeit: x.status_zeit || '',
+  return { id: v.id, nr: v.nr, zeit: v.created_at, ort: (v.plz + ' ' + (k.ort || '')).trim(), bid: x.id, mail: String((z && z.mail) || x.mail || '').toLowerCase(), gewaehlt: !!x.gewaehlt, status: x.status || 'offen', status_zeit: x.status_zeit || '',
     zugang: z ? z.zeit : (x.gesendet ? x.gesendet.zeit : ''), geoeffnet: z && z.geoeffnet ? z.geoeffnet : '', frei: f ? f.zeit : '', art: f ? f.art : '', cent: f ? f.cent || 0 : 0 };
 }
 export function zaehlen(l) {
@@ -117,4 +119,52 @@ export async function partnerVorn(d, lage, liste) {
   const nachKm = (a, b) => a.km - b.km || a.name.localeCompare(b.name, 'de');
   vorn.sort(nachKm);
   return vorn.slice(0, PARTNER_VORN).concat(vorn.slice(PARTNER_VORN).concat(rest).sort(nachKm));
+}
+
+/* ---------- Pflege durch den Inhaber (Zentrale) ---------- */
+/* Auszug eines Eintrags für die Betriebskarte in der Anfrage: was der Inhaber vor dem Anruf wissen will */
+export function registerAuszug(r, x) {
+  if (!r) return null;
+  const z = r.zaehler || {}, mails = Array.from(new Set([r.mail].concat((r.anfragen || []).map((a) => a.mail)).filter(Boolean)));
+  return { id: r.id, name: r.name, ort: r.ort || '', stand: r.stand, standText: STAENDE_BETRIEB[r.stand] || r.stand, zaehler: z, konten: (r.konto ? 1 : 0) + (r.konten || []).length, mails: mails.slice(0, 6),
+    notiz: String(r.notiz || '').slice(0, 200), aliase: (r.aliase || []).length, anfragen: (r.anfragen || []).length, partner: !!(r.partner || {}).bereit, genutzt: (z.frei || 0) + (z.bezahlt || 0) > 0,
+    anders: !!x && r.id !== x.id && r.name !== x.name, zugeordnet: !!(x && x.register) };
+}
+/* Den Eintrag einer Anfrage aus einem Register-Eintrag nehmen und einem anderen geben (beide Zähler neu) */
+async function eintragVerschieben(d, v, x, von, nach, text) {
+  if (von && von.id !== nach.id) await d.betriebAendern(von.id, (z) => { z.anfragen = (z.anfragen || []).filter((a) => a.id !== v.id); z.zaehler = zaehlen(z.anfragen); verlauf(z, 'inhaber', text + ' (' + v.nr + ')'); });
+  await d.betriebAendern(nach.id, (z) => { const e = anfrageEintrag(v, x), l = (z.anfragen || []).filter((a) => a.id !== v.id).concat([e]).sort((a, b) => (a.zeit < b.zeit ? -1 : 1)).slice(-200); z.anfragen = l; z.zaehler = zaehlen(l); if (z.stand === 'neu' && (e.status !== 'offen' || e.zugang)) z.stand = 'kontakt'; verlauf(z, 'inhaber', 'Anfrage ' + v.nr + ' zugeordnet'); });
+}
+/* Trennen: der Betrieb dieser Anfrage ist ein anderer als der im Eintrag (zwei „Fensterbau Schmidt“): neuer Eintrag mit eigener Kennung,
+   die Anfrage merkt sich ihn in x.register. Liefert die neue Zeile. */
+export async function registerTrennen(d, v, x) {
+  const von = await registerFuer(d, x, x.quelle), id = x.id + '~' + Math.random().toString(36).slice(2, 6);
+  const z = zeileAus(Object.assign({}, x, { id: id }), { quelle: 'inhaber' }); z.aliase = []; verlauf(z, 'inhaber', 'Abgetrennt von „' + von.name + '“ als eigener Betrieb (' + v.nr + ')');
+  const neu = await d.betriebSetzen(z);
+  await eintragVerschieben(d, v, x, von, neu, 'Anfrage als anderer Betrieb abgetrennt');
+  return neu;
+}
+/* Zuordnen: der Betrieb dieser Anfrage gehört zu einem bestehenden Eintrag (anderer Name, gleiche Firma) */
+export async function registerZuordnen(d, v, x, zielId) {
+  const ziel = await d.betriebHolen(zielId); if (!ziel) return null;
+  const von = await registerFuer(d, x, x.quelle);
+  await eintragVerschieben(d, v, x, von, ziel, 'Anfrage einem anderen Eintrag zugeordnet');
+  return ziel;
+}
+/* Zusammenführen: Eintrag „mit“ geht im Eintrag „id“ auf (Aliase, Anfragen, Konten, Kontakt, Notiz), „mit“ wird gelöscht */
+export async function registerZusammenfuehren(d, id, mitId) {
+  const r = await d.betriebHolen(id), m = await d.betriebHolen(mitId);
+  if (!r || !m || r.id === m.id) return null;
+  const z = await d.betriebAendern(r.id, (z) => {
+    z.aliase = Array.from(new Set((z.aliase || []).concat([m.id], m.aliase || []).filter((a) => a !== z.id)));
+    const da = new Set((z.anfragen || []).map((a) => a.id)); z.anfragen = (z.anfragen || []).concat((m.anfragen || []).filter((a) => !da.has(a.id))).sort((a, b) => (a.zeit < b.zeit ? -1 : 1)).slice(-200); z.zaehler = zaehlen(z.anfragen);
+    const konten = new Set((z.konten || []).concat(m.konten || [], m.konto ? [m.konto] : [])); if (z.konto) konten.delete(z.konto); if (!z.konto && m.konto) { z.konto = m.konto; konten.delete(m.konto); } z.konten = Array.from(konten).slice(0, 20);
+    ['mail', 'tel', 'web', 'strasse', 'plz', 'ort'].forEach((f) => { if (!z[f] && m[f]) z[f] = m[f]; }); z.tel_norm = telNorm(z.tel); z.web_host = webHost(z.web);
+    if (!(z.leistungen || []).length) z.leistungen = m.leistungen || [];
+    if (m.notiz) z.notiz = (z.notiz ? z.notiz + '\n' : '') + m.notiz;
+    if (m.stand === 'partner' && z.stand !== 'partner') { z.stand = 'partner'; z.partner = m.partner || { bereit: true }; }
+    verlauf(z, 'inhaber', '„' + m.name + (m.ort ? ', ' + m.ort : '') + '“ hier zusammengeführt (' + (m.anfragen || []).length + ' Anfragen)');
+  });
+  await d.betriebLoeschen(m.id);
+  return z;
 }
