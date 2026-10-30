@@ -11,7 +11,7 @@
 //   Kontaktdaten und ohne Anhang) · 31.7 Bereich für Fensterbauer und Register (Abschnitt 13: Vorschau über den Link, Konto per Code, Annehmen,
 //   erstes Aufmaß kostenlos, zweites über die Kasse, Mail an den Kunden, Partner vorn in der Suche, Lexikon der Zentrale, Nachricht an den Kunden,
 //   Rechtsseite Partnerbedingungen) · K Bereich für Fensterbauer im Browser (Zugang, Code, Freischalten, PDF, Partner; „Anmelden“ auf der
-//   Seite für Fensterbauer) · 31.6 Tageslauf (nach 180 Tagen weg, mit dem Aufmaßblatt).
+//   Seite für Fensterbauer) · 31.6 Tageslauf (nach 180 Tagen weg, mit dem Aufmaßblatt) · 31.8 Gefahrenbereich (alles der Vermittlung löschen).
 // Teil B im Browser (Telefon 390 px und Schreibtisch): Zentrale mit Umschalter, Liste, Anfrage, Anruf-Knopf, „Will“, Senden nur mit Häkchen;
 //   genau eine volle Pille, Ziele ab 44 px, Schrift ab 13 px, kein Querscrollen, keine Konsolenfehler.
 // Teil C (App, Folien weg, betriebe, vcode, angefragt): ergänzt die Sitzung, die die App baut; Platz unten am Ende markiert.
@@ -498,6 +498,20 @@ export default async function (h) {
   const v179 = ((lauf179 || {}).nachholen || {}).vermittlung || {}, v181 = ((lauf181 || {}).nachholen || {}).vermittlung || {};
   ok(vorher >= 5 && blaetter.length === vorher && v179.geloescht === 0 && nach179 === vorher && v181.geloescht === vorher && nach181 === 0 && blaetterNach.length === 0 && v179.suchen >= 1 && neuSuche.quelle === 'attrappe',
     '31.6 Tageslauf: nach 179 Tagen bleibt alles, nach 181 Tagen sind alle ' + vorher + ' Anfragen samt Aufmaßblatt gelöscht; Suchen älter als 30 Tage ebenso (neue Suche statt Zwischenspeicher)' + ' (' + JSON.stringify({ blaetter: blaetter.length, v179, nach179, v181, nach181, blaetterNach: blaetterNach.length, suche: neuSuche.quelle }) + ')');
+
+  /* ---------- 31.8 Gefahrenbereich: alle Vermittlungsdaten löschen (Anfragen, Aufmaßblätter, Register, Code-Zähler je Nummer) ---------- */
+  const TEL8 = '0179 8877665';
+  const nr8g = await anfrageNeu(TEL8, 'Gudrun Gefahr'), vorG = (((await zapi('/api/inhaber/vermittlungen')).json || {}).vermittlungen || []).length, regG = (((await zapi('/api/inhaber/betriebe')).json || {}).betriebe || []).length;
+  for (let i = 0; i < 2; i++) await post('/api/vermittlung/code', { tel: TEL8 });
+  const vierter = await post('/api/vermittlung/code', { tel: TEL8 });
+  const ohneWort = await zapi('/api/inhaber/vermittlung/alles-loeschen', { bestaetigung: 'alles löschen' }), weg = (await zapi('/api/inhaber/vermittlung/alles-loeschen', { bestaetigung: 'ALLES LÖSCHEN' })).json || {};
+  const nachG = (((await zapi('/api/inhaber/vermittlungen')).json || {}).vermittlungen || []).length, regNach = (((await zapi('/api/inhaber/betriebe')).json || {}).betriebe || []).length;
+  const blaetterG = (((await h.attrappe()).ablage || {}).vermittlung || []).length;
+  const wiederCode = await post('/api/vermittlung/code', { tel: TEL8 }), wiederAnfrage = await anfrageNeu(TEL8, 'Gudrun Danach');
+  const sucheBleibt = (await post('/api/vermittlung/suche', { plz: PLZ })).json || {};
+  ok(!!nr8g && vorG >= 1 && regG >= 1 && vierter.status === 429 && ohneWort.status === 400 && ohneWort.json.feld === 'bestaetigung' && weg.ok && weg.anfragen === vorG && weg.betriebe === regG && weg.blaetter >= 1 && nachG === 0 && regNach === 0 && blaetterG === 0 && wiederCode.status === 200 && !!wiederAnfrage && sucheBleibt.quelle === 'zwischenspeicher',
+    '31.8 Gefahrenbereich: nur mit „ALLES LÖSCHEN“ (sonst 400); danach keine Anfragen, keine Aufmaßblätter, kein Register, die Nummer darf wieder Codes und Anfragen (vorher 429 nach drei Codes), die Suchen bleiben' +
+    ' (' + JSON.stringify({ vorher: vorG, register: regG, vierter: vierter.status, weg: weg, nachher: nachG, registerNach: regNach, blaetter: blaetterG, wiederCode: wiederCode.status, suche: sucheBleibt.quelle }) + ')');
 
   /* ---------- Teil C: App (Folien weg, betriebe, vcode, angefragt) ----------
      Platz für die Prüfungen der App: Die Sitzung, die die Folien in web/assets/app.js baut, ergänzt sie hier (Weg A bis „Angefragt“ mit

@@ -448,3 +448,5 @@ legt Testanfragen an; in der Zentrale „Zugang schicken“ an eine Adresse ohne
 
 Offen: Reklamation aus dem Bereich heraus (heute per E-Mail, Partnerbedingungen § 6); Stripe-Kundenportal im Bereich für Rechnungen der
 Vermittlung (die Pakete haben es schon); automatische Zugänge an Partner ohne Anruf.
+
+**Alles löschen (Zentrale, Reiter Betriebe, unten):** `POST /api/inhaber/vermittlung/alles-loeschen { bestaetigung: 'ALLES LÖSCHEN' }` löscht alle Anfragen samt Aufmaßblättern in der Ablage, das Register und die Zähler `budget:vcode:*` (drei Codes je Nummer und Tag); die Grenze „zwei Anfragen je Nummer in 90 Tagen“ fällt damit von selbst. Suchen bleiben. Für die Tests des Inhabers (30.10.2026).
