@@ -270,10 +270,11 @@ Text in der App sagt genau das („Wir fragen bei den Betrieben an …“), nich
 
 ### Weg in der App (nur eeziframes.com ohne Betriebslink, nicht auf Instanzen)
 
-Haus → Zeit und Budget → **Weiche** (Folie `weg`): „Angebote aus deiner Nähe, kostenlos“ oder „Aufmaßblatt für dich, Preis wie
-`PREIS()`“ → Kontakt (`anfrage3`; auf Weg A Pflicht: Name, PLZ und Ort, Telefon; E-Mail freiwillig) → A: **Betriebe** (Folie
-`betriebe`: KI-Suche zur PLZ, Auswahl von zwei bis fünf (Abschnitt 11), Einwilligung, „Abschicken“) → **Code** (Folie `vcode`: Code per SMS bzw. Anruf,
-Zifferntasten) → **Angefragt** (Folie `angefragt`) · B: wie bisher Freischalten (`teilen`, Kasse). Ohne Server (Pilot) gibt es nur B.
+Haus → Zeit und Budget → **Weiche** (Folie `weg`): „Gestatte uns, das Aufmaßblatt an von dir ausgewählte Betriebe zu schicken (und nur
+an diese).“ für 0 € oder „Aufmaßblatt für dich, Preis wie `PREIS()`“ → A (Reihenfolge seit 30.10.2026, Abschnitt 12): **Betriebe** (Folie
+`betriebe`: nur die Postleitzahl, mit der fünften Ziffer sofort die Liste, Auswahl von zwei bis fünf (Abschnitt 11)) → **Kontakt**
+(`anfrage3`; Pflicht: Name, Telefon; E-Mail freiwillig; Einwilligung; „Abschicken“) → **Code** (Folie `vcode`: Code per SMS bzw. Anruf,
+Zifferntasten) → **Angefragt** (Folie `angefragt`) · B: Kontakt wie bisher und Freischalten (`teilen`, Kasse). Ohne Server (Pilot) gibt es nur B.
 
 ### Schnittstelle
 
@@ -282,7 +283,7 @@ und Mailversand.
 
 | Route | Eingabe | Antwort |
 |---|---|---|
-| `POST /api/vermittlung/suche` | `{ plz, ort }` | `{ ok, betriebe: [{ id, name, ort, km, leistungen }], umkreis, quelle: 'ki'|'zwischenspeicher'|'attrappe'|'keine' }` ohne Telefon und Website (die sieht nur die Zentrale); höchstens 8, nach km; Zwischenspeicher je PLZ 30 Tage; Bremse je IP und Tagesgrenze `VERMITTLUNG_SUCHE_TAG_MAX` (300) mit Mail bei 80 % |
+| `POST /api/vermittlung/suche` | `{ plz }` | `{ ok, betriebe: [{ id, name, ort, km, leistungen }], umkreis, quelle: 'zwischenspeicher'|'umgebung'|'ki'|'attrappe'|'keine', plz, ort }` ohne Telefon und Website (die sieht nur die Zentrale); höchstens 8, nach km; zuerst aus den gespeicherten Suchen im Umkreis von 25 km (Abschnitt 12), erst darunter eine neue KI-Suche; unbekannte PLZ 400 am Feld `plz`; Bremse je IP und Tagesgrenze `VERMITTLUNG_SUCHE_TAG_MAX` (300) mit Mail bei 80 % |
 | `POST /api/vermittlung/code` | `{ tel }` | `{ ok, kanal: 'sms'|'anruf', an: '0171 ••• 4567', token, attrappe? }` (Code 6 Ziffern, 10 Minuten, Token mit HMAC ohne Speicher); ohne SMS-Anbieter und ohne Attrappe `{ ok, ohneCode: true }`; höchstens 3 Codes je Nummer und Tag |
 | `POST /api/vermittlung/senden` | `{ kontakt: { name, ort, tel, mail, erreich }, plz, betriebe: [id, …] (0–3, leer = „Betrieb für mich suchen“), token, code, einwilligung: { fassung, text }, aufmass: '<packProject>', eckdaten: { fenster, elemente, gebaeude, baujahr, zeit, budget, foerdweg }, pdf: '<Base64>' }` | `{ ok, nr: 'V-2026-0001' }`; höchstens 2 Anfragen je Nummer in 90 Tagen; PDF in der Ablage `vermittlung`; Mail an `MAIL_KONTAKT` mit PDF und den gewählten Betrieben samt Telefon und Website; Bestätigung an den Kunden ohne PDF, falls E-Mail angegeben |
 
@@ -299,9 +300,10 @@ Gebaut sind Server, Zentrale, Datenbank und Prüfung (Abschnitt 31 der Prüfsuit
 
 | Teil | Stelle | Was es tut |
 |---|---|---|
-| Routen | `functions/api/vermittlung.js` | Suche, Code, Senden, Zentrale, Tageslauf; `vermittlung` in `/api/status` (`an` = Datenbank, Mailversand, `SITZUNG_GEHEIMNIS` und Ablage da) |
-| KI-Suche | `functions/api/vermittlung-suche.js` | Messages-API mit Websuche `web_search_20260209`, Modell `claude-opus-5-5` (Variable `VERMITTLUNG_MODELL`), Aufwand `medium`, höchstens 6 Suchen, Ort als `user_location` (DE), Portale und Baumärkte gesperrt, `fallbacks: "default"`; `pause_turn` wird fortgesetzt; Zeitlimit 80 s (`VERMITTLUNG_SUCHE_MS`), danach `quelle: 'keine'`. Die Antwort wird geprüft: ohne Name, Ort, Telefon und Website, Portale, über 60 km und Doppelte fallen weg; Leistungen nur aus der festen Liste; Kennung `b` + 12 Hex-Zeichen aus Name und Ort |
-| Zwischenspeicher | Tabelle `vermittlung_suche` | je PLZ 30 Tage (eine leere Suche einen Tag), mit Telefon, Website und Straße für die Zentrale; die App bekommt nur `id, name, ort, km, leistungen` |
+| Routen | `functions/api/vermittlung.js` | Suche (zuerst aus der Umgebung), Code, Senden, Zentrale, Tageslauf, Vorrat (alle 10 Minuten, `vorratLauf`); `vermittlung` in `/api/status` (`an` = Datenbank, Mailversand, `SITZUNG_GEHEIMNIS` und Ablage da) |
+| KI-Suche | `functions/api/vermittlung-suche.js` | Messages-API mit Websuche `web_search_20260209`, Modell `claude-opus-5-5` (Variable `VERMITTLUNG_MODELL`); wartet ein Kunde, Aufwand `low` und höchstens 4 Suchen, für den Vorrat Aufwand `medium` und höchstens 6; die KI nennt die PLZ jedes Betriebs mit; Ort als `user_location` (DE), Portale und Baumärkte gesperrt, `fallbacks: "default"`; `pause_turn` wird fortgesetzt; Zeitlimit 80 s (`VERMITTLUNG_SUCHE_MS`), danach `quelle: 'keine'`. Die Antwort wird geprüft: ohne Name, Ort, Telefon und Website, Portale, über 60 km und Doppelte fallen weg; Leistungen nur aus der festen Liste; Kennung `b` + 12 Hex-Zeichen aus Name und Ort |
+| Zwischenspeicher | Tabelle `vermittlung_suche` | Suchen der Kunden je PLZ 30 Tage (eine leere Suche einen Tag), Vorrat 180 Tage (`info.vorrat`), mit Telefon, Website und Straße für die Zentrale; die App bekommt nur `id, name, ort, km, leistungen` |
+| Orte und Umgebung | `functions/api/vermittlung-ort.js`, `functions/api/plz-de.js` (gebaut mit `scripts/plz-tabelle.py` aus GeoNames, CC BY 4.0, Nennung im Impressum und auf der Folie) | 8.997 Postleitzahlen mit Mittelpunkt und Ort, Postleitzahlen im Umkreis, Lage eines Betriebs aus seiner PLZ oder seinem Ort, 483 Stützpunkte für den Vorrat (Abschnitt 12) |
 | Code | `functions/api/vermittlung-sms.js` | seven.io: SMS an Handys (015x, 016x, 017x), Anruf mit Ansage an Festnetz; 6 Ziffern, 10 Minuten, Token mit HMAC über Nummer und Code (`SITZUNG_GEHEIMNIS`, Zweck `vcode`), nichts gespeichert; 3 Codes je Nummer und Tag, Bremse je Anschluss, 5 Fehlversuche je Token |
 | Anfragen | Tabelle `vermittlungen`, Ablage `vermittlung` | Nummer `V-JJJJ-NNNN`; Kunde, Eckdaten, Aufmaß (`AM1.…`), Einwilligung mit Fassung, Wortlaut, Zeit und gekürztem Netz, gewählte Betriebe mit allen Angaben und Ergebnis der Anrufe, Verlauf, Notiz; Aufmaßblatt als PDF (bis 10 MB); höchstens 2 Anfragen je Nummer in 90 Tagen; nach 180 Tagen löscht der Tageslauf Anfrage und PDF |
 | Mails | `functions/api/vermittlung-mails.js` | an `MAIL_KONTAKT` mit PDF, Kunde, Eckdaten, Betrieben samt Telefon (tel:-Link), Website, km und Link zur Zentrale; an den Kunden (Du-Form, ohne PDF): „Wir fragen bei … an und schicken dein Aufmaß an die, die ein Angebot machen möchten; sie melden sich dann bei dir.“; an den Betrieb nur über die Zentrale mit Häkchen (Sie-Form, PDF, „Vermittelt von eeziframes“, Impressum im Fuß); auf Wunsch an den Kunden, welcher Betrieb sein Aufmaß hat |
@@ -309,10 +311,10 @@ Gebaut sind Server, Zentrale, Datenbank und Prüfung (Abschnitt 31 der Prüfsuit
 
 Antworten, auf die sich die App verlässt: Fehler kommen als `{ ok: false, fehler, feld }` (bei Senden zusätzlich `felder` mit allen
 Feldern). `feld` ist `tel` (Nummer falsch, auch beim Code), `code` (401: fehlt, falsch, abgelaufen, andere Nummer, zu viele Versuche; mit
-`neu: true`, wenn ein neuer Code nötig ist), `betriebe` (400 mehr als drei, 409 `neuSuchen` wenn die Auswahl nicht mehr im Zwischenspeicher
-dieser PLZ steht), `name`, `mail`, `plz`, `einwilligung`, `aufmass` oder `pdf`. Die Grenze „zwei in 90 Tagen“ antwortet 429 mit
+`neu: true`, wenn ein neuer Code nötig ist), `betriebe` (400 mehr als fünf, 409 `neuSuchen` wenn die Auswahl nicht mehr in den gültigen
+Suchen im Umkreis dieser PLZ steht), `name`, `mail`, `plz`, `einwilligung`, `aufmass` oder `pdf`. Die Grenze „zwei in 90 Tagen“ antwortet 429 mit
 `grenze: '90tage'` und `feld: 'tel'`. Derselbe Code mit demselben Token zweimal (Doppelklick) liefert dieselbe Nummer mit `schon: true`.
-`kontakt.ort` darf das ganze Feld „PLZ und Ort“ sein; der Server trennt die PLZ ab. Telefonnummern prüft der Server mit derselben Regel wie
+`kontakt.ort` darf das ganze Feld „PLZ und Ort“ sein; der Server trennt die PLZ ab (die App füllt es seit 30.10.2026 aus der Suche). Telefonnummern prüft der Server mit derselben Regel wie
 die App (`vmTel`), dazu Länge, Sonder- und Servicenummern und einen Anschluss aus lauter gleichen Ziffern.
 
 Attrappen und Prüfung: `KI_ATTRAPPE=1` liefert feste, erfundene Betriebe um Herzebrock-Clarholz (Fensterbau Brandt vorn); `SMS_ATTRAPPE=1` oder
@@ -321,7 +323,7 @@ Attrappen und Prüfung: `KI_ATTRAPPE=1` liefert feste, erfundene Betriebe um Her
 ohne SMS-Anbieter und ohne Attrappe der Code `{ ohneCode: true }`; die Anfrage geht dann ohne Code durch und steht in der Zentrale als
 „Nummer nicht bestätigt“. Prüfung: `node scripts/mit-server.mjs 8971 env NUR=31 PW_PFAD=/opt/node-tools node scripts/pruefen.mjs`.
 
-Offen: Rückfrage per SMS nach zwei Werktagen, Turnstile und KI-Grenze ohne bestätigte Nummer (Prüfung 1), Prüfung der E-Mail auf
+Offen: Turnstile und KI-Grenze ohne bestätigte Nummer (Prüfung 1), Prüfung der E-Mail auf
 Tippfehler und Wegwerf-Domains (Prüfung 3), Einladungslink für Partner, Tür B mit 9,99 € und Erstattung, Rechtstexte
 ([VERMITTLUNG-RECHT.md](VERMITTLUNG-RECHT.md)), Vertrag zur Auftragsverarbeitung mit seven.io.
 
@@ -334,11 +336,11 @@ fünf, mindestens zwei** (Inhaber: „nicht beschränken, anfangen mit fünf“)
 
 | Punkt | Jetzt |
 |---|---|
-| Weiche | zwei Karten nebeneinander: „Aufmaßblatt für dich“ mit Preis und „Aufmaßblatt + an bis zu 5 Fensterbauer in deiner Nähe“ für 0 € mit durchgestrichenem Preis, vorgewählt, mit Ring und dem Etikett „Empfohlen“ (nicht „Beliebt“: ohne Nutzerzahlen unbelegt) |
+| Weiche | zwei Karten, seit 30.10.2026 untereinander: „Gestatte uns, das Aufmaßblatt an von dir ausgewählte Betriebe zu schicken (und nur an diese).“ für 0 € mit durchgestrichenem Preis, vorgewählt, mit Ring und dem Etikett „Empfohlen“ (nicht „Beliebt“: ohne Nutzerzahlen unbelegt), darunter „Aufmaßblatt für dich“ mit Preis; Untertitel „Wähle, wie du fortfahren möchtest.“ |
 | Betriebe | zwei bis fünf (oder „Sucht ihr passende für mich aus“, dann sucht der Inhaber bis zu fünf aus); mindestens zwei, damit es etwas zu vergleichen gibt (findet die Suche nur einen, reicht einer); der Server nimmt zwei bis fünf (`MAX_WAHL`, `MIN_WAHL` in `functions/api/vermittlung.js`, `VM_MAX`, `VM_MIN` in der App), die Zentrale schickt an höchstens fünf und, wenn der Kunde gewählt hat, nur an die gewählten. Im Umkreis tragen bis zwei Gewählte ein Namensschild, ab drei nur die Nummer wie in der Liste |
 | Aufmaßblatt | gehört auf dem Gratis-Weg dazu: nach dem Abschicken frei (Nachweis vom Server wie beim Kauf, Sitzung `vermittlung:<Nr>`) und als PDF in der Bestätigungsmail; vor dem Abschicken bleibt es gesperrt, die Nummer ist da schon per Code bestätigt |
-| Vertrauen | „Nur die Betriebe, die du auswählst, bekommen dein Aufmaß. Sonst niemand.“ unter der Karte; Telefon: „Damit die Betriebe wissen, dass ein echter Mensch anfragt. So bekommst du ernsthafte Rückmeldungen.“; „Warum kostenlos? Die Fensterbetriebe bezahlen uns für die Vermittlung.“ |
-| Einwilligung | eigener Haken im Auswahlschritt, nennt die gewählten Betriebe (bei „Sucht ihr …“: „bis zu fünf passende Fensterbetriebe, die eeziframes für mich aussucht“), „Sonst bekommt niemand meine Daten“, jederzeit widerrufbar (Fassung `2026-10-29c`) |
+| Vertrauen | seit 30.10.2026 die Daten-Garantie unter den Karten (Abschnitt 12) und „Warum kostenlos?“ zum Aufklappen; Telefon: „Damit die Betriebe wissen, dass ein echter Mensch anfragt. So bekommst du ernsthafte Rückmeldungen.“; „Warum kostenlos? Die Fensterbetriebe bezahlen uns für die Vermittlung.“ |
+| Einwilligung | eigener Haken, seit 30.10.2026 im Kontakt nach der Wahl, nennt die gewählten Betriebe (bei „Sucht ihr …“: „bis zu fünf passende Fensterbetriebe, die eeziframes für mich aussucht“) und was sie bekommen (Name, Ort, Telefonnummer, falls angegeben E-Mail-Adresse), „Sonst bekommt niemand meine Daten“, jederzeit widerrufbar; ohne die frühere Rückfrage nach zwei Tagen (Fassung `2026-10-30`) |
 | Bezahlen | auf Freischalten, Rechnungsadresse und Kasse noch einmal die Gratis-Karte („Lieber kostenlos?“, „Kostenlos weiter“) |
 | Startseite | Konfigurator als Einstieg (3-D-Fenster mit Farbfeldern, Fassade, Drei-Schritte-Leiste, die zwei Karten); die Wahl dort steuert die App: `/app/?farbe=<RAL>#ausmessen` setzt die Rahmenfarbe außen des ersten Fensters, `?weg=gratis` bzw. `?weg=blatt` die Weiche |
 | Bühnen | ohne das Foto mit dem Lichtschatten (Inhaber: „muss ich nicht überall haben“): Anthrazit mit Punktraster wie eine Karte |
@@ -347,3 +349,51 @@ Rechnung (Abschnitt 4) je Anfrage: Erlös = Gebühr × Zahl der Betriebe, die zu
 rund 70 € bei zwei Betrieben und rund 175 € bei fünf. Ein Kunde, der vorher 7,99 € gezahlt hätte, bringt auf dem Gratis-Weg mehr.
 Gegengewicht: Je mehr Betriebe anrufen, desto eher fühlt sich der Kunde bedrängt und desto seltener gewinnt der einzelne Betrieb den
 Auftrag; Portale nennen meist drei. Daher erst fünf und an der Zahl der Reklamationen und Zusagen ablesen, ob die Grenze passt.
+
+## 12. Sofort Betriebe finden, Kontakt danach (Auftrag des Inhabers, 30.10.2026)
+
+> „Wie erreichen dich die Betriebe: da will ich das erst haben, nachdem ausgewählt wurde, welche Unternehmen in der Nähe sind. Dafür würde
+> ich vorschlagen, zieht man die Maske mit Betriebe finden nach vorne […] Da musst du dann auch wirklich nur die Postleitzahl eintragen und
+> dann sucht die KI entsprechend die Betriebe raus. Das Ganze hat jetzt ganz schön lange gedauert […] ich will, dass der Nutzer sofort
+> Betriebe findet.“
+
+**Weiche.** Untertitel „Wähle, wie du fortfahren möchtest.“, im weißen Feld sein Satz („Gestatte uns, das Aufmaßblatt an von dir
+ausgewählte Betriebe zu schicken (und nur an diese).“), darunter die Daten-Garantie als Feld mit Chip und „Warum kostenlos?“ zum
+Aufklappen; die Pille heißt „Betriebe finden“. Die Karten stehen untereinander, weil der Satz die ganze Breite braucht.
+
+**Daten-Garantie.** Sein Wortlaut, so gefasst, dass er stimmt: Die gewählten Betriebe melden sich ja (das ist der Zweck), und von uns
+kommen der Code und Nachrichten zur Anfrage (Bestätigung, auf Wunsch welcher Betrieb das Aufmaß hat); gespeichert wird, was im
+Datenschutz steht, also nichts versteckt:
+
+> Außer den Fensterbauern, die dein Aufmaß bekommen, meldet sich niemand bei dir, weder per E-Mail noch per Telefon noch auf anderen
+> Wegen. Von uns bekommst du nur den Code und Nachrichten zu deiner Anfrage. Deine Daten geben wir nur an die Fensterbauer weiter, die du
+> auswählst (oder uns für dich aussuchen lässt), so wie du es vermutlich auch selbst tun würdest. Kein versteckter Verkauf und keine
+> versteckte Speicherung deiner Daten.
+
+Damit entfällt die Rückfrage nach zwei Tagen, die bisher in der Einwilligung stand (gebaut war sie nie).
+
+**Sofort statt warten.** Eine KI-Suche mit Websuche dauert 20 bis 80 Sekunden; schneller wird sie nicht verlässlich. Deshalb wartet der
+Kunde in der Regel gar nicht auf sie:
+
+1. **Umgebung:** Der Server nimmt alle gültigen Suchen der Postleitzahlen im Umkreis von 25 km (eine Abfrage, etwa 10 bis 60 ms) und
+   rechnet die Entfernung jedes Betriebs zum Kunden neu: aus der PLZ des Betriebs (die KI nennt sie seit 30.10.2026 mit), sonst aus
+   seinem Ort (der nächste gleichnamige, höchstens 60 km), sonst höchstens Abstand der beiden PLZ plus die Schätzung der Suche. Nur bis
+   30 km, jeder Betrieb einmal (gleiche Kennung, Telefonnummer oder Website), die nächsten acht. Ab drei Betrieben ist das die Antwort
+   (`quelle: 'umgebung'`), ohne neue Suche und ohne Kosten.
+2. **Vorrat:** Damit auch der erste Kunde einer Gegend sofort Betriebe sieht, sucht der Server ohne Kunden für 483 Stützpunkte (jede PLZ
+   in Deutschland höchstens 20 km von einem, dicht besiedelte zuerst), alle 10 Minuten eine, am Tag höchstens `VERMITTLUNG_VORRAT`
+   (Vorgabe 0 = aus). Diese Suchen gelten 180 Tage und werden danach von selbst erneuert, solange die Variable gesetzt ist.
+3. **Neue Suche nur, wenn nichts da ist:** knapp (Aufwand `low`, höchstens 4 Websuchen); die App sagt nach 2,5 Sekunden, dass die KI für
+   diese Gegend gerade neu sucht. Eine Postleitzahl, die es nicht gibt, sucht gar nicht (Hinweis am Feld).
+
+Kosten des Vorrats (Preise nach dem Skill `claude-api`, Stand Oktober 2026): je Suche grob 0,15 bis 0,35 $, also für alle 483
+Stützpunkte einmalig etwa 70 bis 170 $ und danach dasselbe je 180 Tage (im Mittel 0,20 bis 0,50 $ am Tag). Mit `VERMITTLUNG_VORRAT=50`
+ist ganz Deutschland nach etwa zehn Tagen gefüllt, mit 144 (Höchstwert, eine je Lauf) nach dreieinhalb. Eingeschaltet wird er nur auf
+das Wort des Inhabers.
+
+**Datenschutz.** Unverändert richtig: An Anthropic gehen nur Postleitzahl und Ort, wenn neu gesucht wird; die Suchen der Kunden gelten
+30 Tage. Der Vorrat enthält keine Daten von Kunden. Die Ortsdaten stammen von GeoNames (CC BY 4.0), genannt im Impressum und in der
+Quellenzeile der Folie.
+
+Prüfung: Abschnitt 31 (Suche aus der Umgebung, Entfernung aus dem Ort, Tabelle, Vorrat; in der App Weiche, Postleitzahl, Kontakt danach).
+

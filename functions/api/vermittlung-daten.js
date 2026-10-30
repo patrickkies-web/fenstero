@@ -5,7 +5,10 @@
    erneutes Ausführen schadet nicht. Eine Anfrage ist ein Dokument (kunde, eckdaten, aufmass, einwilligung, betriebe, verlauf, notiz);
    Änderungen laufen über aendern(id, fn) mit Versionszähler wie bei den Aufträgen (functions/auftrag/daten.js).
    API: vermittlungDaten(k) → { art, anlegen(row), holen(id), alle(), vonTel(tel, seitIso), aendern(id, fn), loeschen(id),
-        aelterAls(iso), sucheHolen(plz), sucheSetzen(plz, row), suchenAufraeumen(iso) } | null */
+        aelterAls(iso), sucheHolen(plz), sucheSetzen(plz, row), suchenFuer(plzListe), suchenStand(plzListe), suchenAufraeumen(iso, isoVorrat) } | null
+   suchenStand: wie suchenFuer, aber nur plz, created_at, info und der erste Betrieb (reicht für gueltig; der Vorrat liest alle 10 Minuten)
+   Vorrat (seit 30.10.2026): Suchen, die der Server ohne Kunden für Stützpunkte über ganz Deutschland füllt, tragen info.vorrat = true;
+   sie gelten länger (isoVorrat) als die Suchen der Kunden (iso). */
 import { ApiFehler, sbNeu } from './umgebung.js';
 
 const kopie = (o) => (o == null ? o : JSON.parse(JSON.stringify(o)));
@@ -43,7 +46,9 @@ function attrappe() {
     aelterAls: async (iso) => Array.from(V.values()).filter((r) => r.created_at < iso).slice(0, 200).map((r) => ({ id: r.id, nr: r.nr, pdf: kopie(r.pdf), created_at: r.created_at })),
     sucheHolen: async (plz) => kopie(A.suche.get(plz) || null),
     sucheSetzen: async (plz, row) => { A.suche.set(plz, Object.assign({ plz: plz, created_at: jetzt() }, kopie(row))); return true; },
-    suchenAufraeumen: async (iso) => { let n = 0; for (const [p, r] of A.suche) if (r.created_at < iso) { A.suche.delete(p); n++; } return n; }
+    suchenFuer: async (liste) => liste.map((p) => A.suche.get(p)).filter(Boolean).map(kopie),
+    suchenStand: async (liste) => liste.map((p) => A.suche.get(p)).filter(Boolean).map((r) => ({ plz: r.plz, created_at: r.created_at, info: kopie(r.info), betriebe: kopie((r.betriebe || []).slice(0, 1)) })),
+    suchenAufraeumen: async (iso, isoVorrat) => { let n = 0; for (const [p, r] of A.suche) if (r.created_at < (r.info && r.info.vorrat ? isoVorrat || iso : iso)) { A.suche.delete(p); n++; } return n; }
   };
 }
 
@@ -92,6 +97,20 @@ function supabase(k) {
     aelterAls: async (iso) => (await sb('vermittlungen?created_at=lt.' + q(iso) + '&select=id,nr,pdf,created_at&order=created_at.asc&limit=200')) || [],
     sucheHolen: async (plz) => eins(await sb('vermittlung_suche?plz=eq.' + q(plz) + '&select=*')),
     sucheSetzen: async (plz, row) => { await sb('vermittlung_suche?on_conflict=plz', { method: 'POST', body: Object.assign({ plz: plz, created_at: jetzt() }, row), headers: { prefer: 'resolution=merge-duplicates,return=minimal' } }); return true; },
-    suchenAufraeumen: async (iso) => { const l = (await sb('vermittlung_suche?created_at=lt.' + q(iso) + '&select=plz')) || []; if (l.length) await sb('vermittlung_suche?created_at=lt.' + q(iso), { method: 'DELETE' }); return l.length; }
+    /* Suchen mehrerer Postleitzahlen (Umkreis, Stützpunkte); in Teilen zu 120, damit die Adresse kurz bleibt, die Teile gleichzeitig */
+    suchenFuer: async (liste) => {
+      const teile = []; for (let i = 0; i < liste.length; i += 120) teile.push(liste.slice(i, i + 120));
+      return (await Promise.all(teile.map((t) => sb('vermittlung_suche?plz=in.(' + t.map(q).join(',') + ')&select=plz,ort,quelle,betriebe,info,created_at')))).flatMap((l) => l || []);
+    },
+    suchenStand: async (liste) => {
+      const teile = []; for (let i = 0; i < liste.length; i += 120) teile.push(liste.slice(i, i + 120));
+      return (await Promise.all(teile.map((t) => sb('vermittlung_suche?plz=in.(' + t.map(q).join(',') + ')&select=plz,info,created_at,erster:betriebe->0')))).flatMap((l) => l || []).map((r) => ({ plz: r.plz, created_at: r.created_at, info: r.info, betriebe: r.erster ? [r.erster] : [] }));
+    },
+    suchenAufraeumen: async (iso, isoVorrat) => {
+      const kunden = 'vermittlung_suche?created_at=lt.' + q(iso) + '&info->>vorrat=is.null', vorrat = 'vermittlung_suche?created_at=lt.' + q(isoVorrat || iso) + '&info->>vorrat=eq.true';
+      const l = ((await sb(kunden + '&select=plz')) || []).concat((await sb(vorrat + '&select=plz')) || []);
+      if (l.length) { await sb(kunden, { method: 'DELETE' }); await sb(vorrat, { method: 'DELETE' }); }
+      return l.length;
+    }
   };
 }

@@ -2,8 +2,8 @@
 // Server functions/api/vermittlung.js (mit vermittlung-suche.js, -sms.js, -daten.js, -mails.js) und die Zentrale (web/assets/inhaber.js)
 // mit den Attrappen des Instanz-Testservers (Daten, Mail, KI; SMS über DATEN_ATTRAPPE: Code 123456).
 // Teil A über die API (Kopfzeile Host, je Anfrage ein eigener Anschluss, damit die Bremsen nur dort greifen, wo sie geprüft werden):
-//   31.1 Stand in /api/status, nicht auf dem Host einer Instanz · 31.2 Suche (Attrappe, Zwischenspeicher, nur öffentliche Felder, Bremse,
-//   Tagesbudget mit Alarm, ohne Schlüssel „keine“), KI-Suche im Prozess gegen ein nachgestelltes fetch (Anfrage nach Skill claude-api,
+//   31.1 Stand in /api/status, nicht auf dem Host einer Instanz · 31.2 Suche (Attrappe, Zwischenspeicher, sofort aus der Umgebung, nur
+//   öffentliche Felder, Bremse, Tagesbudget mit Alarm, ohne Schlüssel „keine“, Tabelle der Postleitzahlen, Vorrat), KI-Suche im Prozess gegen ein nachgestelltes fetch (Anfrage nach Skill claude-api,
 //   pause_turn, Zeitlimit, Ablehnung, Unsinn verwerfen) · 31.3 Code (Attrappe, falsche Nummern, Festnetz per Anruf, Grenze je Nummer, Bremse
 //   je Anschluss, ohne Anbieter „ohneCode“) · 31.4 Senden (alle Ablehnungen, Code, abgelaufenes Token, Fehlversuche, Mails an den Inhaber mit
 //   PDF und an den Kunden mit, Freischaltung, Doppelklick, zwei Anfragen in 90 Tagen, ohne Code „nicht bestätigt“) · 31.5 Zentrale (nur angemeldet, Liste,
@@ -33,7 +33,9 @@ export default async function (h) {
   const keks = (r) => (r.cookies || []).map((c) => c.split(';')[0]).find((c) => /^__Host-inhaber=./.test(c)) || '';
   const S = await import(path.join(h.WURZEL, 'functions/api/vermittlung-suche.js'));
   const { ANBIETER } = await import(path.join(h.WURZEL, 'functions/api/anbieter.js'));
-  const PLZ = '33449', PLZ2 = '33378'; // 33442 nimmt der App-Teil (31-app.mjs), der vorher läuft
+  /* PLZ weit weg von 33442 (nimmt der App-Teil 31-app.mjs, der vorher läuft), damit die erste Suche neu ist und nicht aus der Umgebung kommt */
+  const PLZ = '79098', PLZ_NAH = '79104', PLZ_FERN = '80331';
+  const O = await import(path.join(h.WURZEL, 'functions/api/vermittlung-ort.js'));
   /* Stimme des Anrufs: „female“ oder „male“ allein (so im Cloudflare-Dashboard leicht eingetragen) wird zur deutschen Stimme, Unbekanntes zur Vorgabe */
   const SMS = await import(path.join(h.WURZEL, 'functions/api/vermittlung-sms.js'));
   const stimmen = ['female', 'Male', 'de-de-female', 'en-gb-male', '', 'weiblich'].map(SMS.stimmeName).join();
@@ -45,32 +47,46 @@ export default async function (h) {
   ok(vs.an === true && vs.suche === 'attrappe' && vs.sms === 'attrappe' && fremd.status === 404, '31.1 /api/status: vermittlung { an, suche: attrappe, sms: attrappe }; auf dem Host einer Instanz gibt es die Vermittlung nicht (' + fremd.status + ')');
 
   /* ---------- 31.2 Suche ---------- */
-  const s0 = await post('/api/vermittlung/suche', { plz: '1234', ort: 'Clarholz' });
-  const s1 = await post('/api/vermittlung/suche', { plz: PLZ, ort: 'Herzebrock-Clarholz' });
-  const s2 = await post('/api/vermittlung/suche', { plz: PLZ, ort: 'Herzebrock' });
+  const s0 = await post('/api/vermittlung/suche', { plz: '1234' }), sUnbekannt = await post('/api/vermittlung/suche', { plz: '05999' });
+  const s1 = await post('/api/vermittlung/suche', { plz: PLZ });
+  const s2 = await post('/api/vermittlung/suche', { plz: PLZ });
   const b1 = (s1.json || {}).betriebe || [], namen = b1.map((b) => b.name);
-  ok(s0.status === 400 && s0.json.feld === 'plz' && s1.status === 200 && s1.json.quelle === 'attrappe' && s1.json.umkreis === 30 && b1.length === 8 && namen[0] === 'Fensterbau Brandt' && b1.every((b, i) => i === 0 || b1[i - 1].km <= b.km) && !namen.some((n) => /Amsel|Fink|Specht|Meise/.test(n)),
-    '31.2 Suche: PLZ fünfstellig (sonst 400), Attrappe mit 8 erfundenen Betrieben nach km, Fensterbau Brandt vorn, keine Testbetriebe der Instanzen (' + namen.slice(0, 3).join(', ') + ' …)');
+  ok(s0.status === 400 && s0.json.feld === 'plz' && sUnbekannt.status === 400 && sUnbekannt.json.feld === 'plz' && /kennen wir nicht/.test(sUnbekannt.json.fehler) && s1.status === 200 && s1.json.quelle === 'attrappe' && s1.json.umkreis === 30 && s1.json.ort === 'Freiburg im Breisgau' && s1.json.plz === PLZ && b1.length === 8 && namen[0] === 'Fensterbau Brandt' && b1.every((b, i) => i === 0 || b1[i - 1].km <= b.km) && !namen.some((n) => /Amsel|Fink|Specht|Meise/.test(n)),
+    '31.2 Suche: nur die PLZ, fünfstellig und bekannt (sonst 400, ohne KI-Suche), Ort aus der Tabelle, Attrappe mit 8 erfundenen Betrieben nach km, Fensterbau Brandt vorn, keine Testbetriebe der Instanzen (' + namen.slice(0, 3).join(', ') + ' …)');
   const nurOeffentlich = (r) => (r.json.betriebe || []).every((b) => Object.keys(b).sort().join() === 'id,km,leistungen,name,ort' && /^b[0-9a-f]{12}$/.test(b.id)) && !/"(tel|web|strasse)"|https?:|\.example|5550101/.test(r.text);
   ok(s2.json.quelle === 'zwischenspeicher' && JSON.stringify(s2.json.betriebe) === JSON.stringify(s1.json.betriebe) && nurOeffentlich(s1) && nurOeffentlich(s2) && b1.every((b) => b.leistungen.every((l) => S.LEISTUNGEN.includes(l))),
     '31.2 Zweite Suche derselben PLZ aus dem Zwischenspeicher, gleiche Kennungen; an die App gehen nur id, name, ort, km, leistungen (kein Telefon, keine Website, keine Straße)');
+  /* sofort aus der Umgebung: eine Nachbar-PLZ ohne eigene Suche nimmt die gespeicherten Suchen im Umkreis von 25 km, ohne neue KI-Suche */
+  const t1 = Date.now(), sn = await post('/api/vermittlung/suche', { plz: PLZ_NAH }), dn = Date.now() - t1, bn = (sn.json || {}).betriebe || [];
+  const abstand = O.km(O.plzInfo(PLZ), O.plzInfo(PLZ_NAH)), brandtNah = bn.find((b) => b.name === 'Fensterbau Brandt') || {};
+  ok(sn.json.quelle === 'umgebung' && bn.length >= 5 && bn.every((b) => b.km <= 30) && bn.every((b, i) => i === 0 || bn[i - 1].km <= b.km) && brandtNah.km === Math.round(abstand + 3) && nurOeffentlich(sn) && dn < 1500,
+    '31.2 Nachbar-PLZ ' + PLZ_NAH + ' sofort aus der Umgebung (' + dn + ' ms, ' + bn.length + ' Betriebe): ohne Lage des Betriebs höchstens Abstand der PLZ (' + abstand.toFixed(1) + ' km) plus Schätzung, nur bis 30 km');
+  /* mit Lage: Betriebe rund um 33442 (App-Teil) für 33378 Rheda-Wiedenbrück aus ihrem Ort neu gerechnet */
+  await post('/api/vermittlung/suche', { plz: '33442' });
+  const sr = await post('/api/vermittlung/suche', { plz: '33378' }), br = (sr.json || {}).betriebe || [], lindR = br.find((b) => b.name === 'Tischlerei Lindholz') || {}, brandtR = br.find((b) => b.name === 'Fensterbau Brandt') || {};
+  const erwartet = Math.round(O.km(O.plzInfo('33378'), O.betriebLage({ ort: 'Herzebrock-Clarholz' }, O.plzInfo('33378'))));
+  ok(sr.json.quelle === 'umgebung' && sr.json.ort === 'Rheda-Wiedenbrück' && br[0] && br[0].name === 'Tischlerei Lindholz' && lindR.km === 0 && brandtR.km === erwartet && erwartet >= 5 && br.every((b) => b.km <= 30),
+    '31.2 Entfernung aus dem Ort des Betriebs neu gerechnet: für 33378 steht Tischlerei Lindholz (Rheda-Wiedenbrück, 0 km) vorn, Fensterbau Brandt ' + brandtR.km + ' km statt 3 km (' + br.map((b) => b.name.split(' ').pop() + ' ' + b.km).join(', ') + ')');
+  const tab = [O.plzInfo('96076'), O.plzInfo('10875'), O.plzInfo('33442'), O.vorratPlz()];
+  ok(tab[0] === null && tab[1] && tab[1].ort === 'Berlin' && tab[2].ort === 'Herzebrock-Clarholz' && tab[3].length > 400 && tab[3].every((p) => { const i = O.plzInfo(p); return i && !/GmbH|AG\b|Bank|Versicherung|GEMA/.test(i.ort); }) && O.umkreisPlz('33442', 25)[0] === '33442',
+    '31.2 Tabelle der Postleitzahlen (GeoNames): Großkunden-PLZ ohne Ort draußen oder mit dem Ort der Nachbarn („GEMA Geschäftsstelle“, „DaimlerChrysler …“ nicht), ' + tab[3].length + ' Stützpunkte des Vorrats');
   const bremsIp = neueIp(), brems = [];
-  for (let i = 0; i < 12; i++) brems.push((await post('/api/vermittlung/suche', { plz: PLZ, ort: 'Herzebrock' }, bremsIp)).status);
+  for (let i = 0; i < 12; i++) brems.push((await post('/api/vermittlung/suche', { plz: PLZ }, bremsIp)).status);
   ok(brems.slice(0, 10).every((s) => s === 200) && brems.slice(10).every((s) => s === 429), '31.2 Bremse je Anschluss: zehn Suchen in der Minute, danach 429 (' + brems.join(' ') + ')');
 
   /* KI-Suche im Prozess (vermittlung-suche.js) gegen ein nachgestelltes fetch: Anfrage nach Skill claude-api, pause_turn, Prüfung der Antwort */
   const ROH = [
     { name: 'MyHammer Fensterbauer Köln', ort: 'Köln', tel: '0221 1234567', web: 'https://www.myhammer.de/x', km: 3, leistungen: ['Kunststoff'] },
-    { name: 'Tischlerei Prüfholz', ort: 'Gütersloh', strasse: 'Holzweg 4', tel: '05241 998877', web: 'www.pruefholz.de', km: '12.4', leistungen: ['Holzfenster', 'Aluminium', 'Haustür', 'Rolladen', 'Quatsch'] },
+    { name: 'Tischlerei Prüfholz', plz: '33330', ort: 'Gütersloh', strasse: 'Holzweg 4', tel: '05241 998877', web: 'www.pruefholz.de', km: '12.4', leistungen: ['Holzfenster', 'Aluminium', 'Haustür', 'Rolladen', 'Quatsch'] },
     { name: 'Fenster Weit', ort: 'Hamburg', tel: '040 7364528', km: 280 },
     { name: 'Ohne Kontakt GmbH', ort: 'Rheda', km: 5 },
     { name: 'Tischlerei Prüfholz', ort: 'Gütersloh', tel: '05241 998877', km: 12 },
-    { name: 'Glaserei Nah', ort: 'Oelde', tel: '02522 4433', web: 'https://www.gelbeseiten.de/glaserei-nah', km: 7, leistungen: 'Kunststoff, Insektenschutz' },
+    { name: 'Glaserei Nah', plz: '5930', ort: 'Oelde', tel: '02522 4433', web: 'https://www.gelbeseiten.de/glaserei-nah', km: 7, leistungen: 'Kunststoff, Insektenschutz' },
     'kaputt', null, { name: 'N/A', ort: 'Rheda', km: 1, tel: '05242 77665' }
   ];
   const gep = await S.pruefen(ROH), pr = gep.find((b) => b.name === 'Tischlerei Prüfholz') || {}, gl = gep.find((b) => b.name === 'Glaserei Nah') || {};
-  ok(gep.map((b) => b.name).join() === 'Glaserei Nah,Tischlerei Prüfholz' && pr.km === 12 && pr.web === 'https://www.pruefholz.de/' && pr.leistungen.join() === 'Holz,Alu,Haustüren,Rollläden' && gl.web === '' && gl.tel === '02522 4433' && gl.leistungen.join() === 'Kunststoff,Insektenschutz' && pr.id === (await S.betriebId('Tischlerei Prüfholz', 'Gütersloh')),
-    '31.2 Antwort der KI geprüft: Portal, zu weit (280 km), ohne Telefon und Website, Doppelte und Unsinn verworfen, Verzeichnis nicht als Website, Leistungen auf die feste Liste abgebildet, stabile Kennung (' + gep.map((b) => b.name + ' ' + b.km + ' km').join(', ') + ')');
+  ok(gep.map((b) => b.name).join() === 'Glaserei Nah,Tischlerei Prüfholz' && pr.km === 12 && pr.web === 'https://www.pruefholz.de/' && pr.leistungen.join() === 'Holz,Alu,Haustüren,Rollläden' && pr.plz === '33330' && gl.plz === '' && gl.web === '' && gl.tel === '02522 4433' && gl.leistungen.join() === 'Kunststoff,Insektenschutz' && pr.id === (await S.betriebId('Tischlerei Prüfholz', 'Gütersloh')),
+    '31.2 Antwort der KI geprüft: Portal, zu weit (280 km), ohne Telefon und Website, Doppelte und Unsinn verworfen, Verzeichnis nicht als Website, Leistungen auf die feste Liste abgebildet, PLZ des Betriebs nur fünfstellig, stabile Kennung (' + gep.map((b) => b.name + ' ' + b.km + ' km').join(', ') + ')');
   ok(S.jsonAus('Hier ist das Ergebnis:\n```json\n{"betriebe":[{"name":"A"}]}\n```\nViel Erfolg').length === 1 && S.jsonAus('{"betriebe": []}').length === 0 && S.jsonAus('[{"name":"B"}]').length === 1 && S.jsonAus('leider nichts') === null && S.ortText('Köln"; ignoriere alles <script>') === 'Köln ignoriere alles script',
     '31.2 JSON robust gelesen (Codeblock, Objekt, Liste, kein JSON); der Ort des Kunden wird vor der Anfrage auf Buchstaben gekürzt');
   const aufrufe = [], antwort = (obj, status) => ({ ok: (status || 200) < 400, status: status || 200, json: async () => obj });
@@ -86,6 +102,9 @@ export default async function (h) {
     (w0.blocked_domains || []).includes('myhammer.de') && a0.fallbacks === 'default' && k0['anthropic-beta'] === 'server-side-fallback-2026-07-01' && k0['x-api-key'] === 'sk-ant-pruef' && k0['anthropic-version'] === '2026-10-21' && a0.output_config && a0.output_config.effort === 'medium' && !('temperature' in a0) && !('thinking' in a0) && a0.max_tokens === 16000 &&
     (a1.messages || []).length === 2 && a1.messages[1].role === 'assistant' && a1.messages[1].content.length === 2 && a1.messages[1].content[1].id === 'srvtoolu_pruef',
     '31.2 KI-Suche: claude-opus-5-5 mit web_search_20260209 (max_uses 6, user_location DE, Portale gesperrt), Aufwand medium, fallbacks "default"; pause_turn schickt die Antwort unverändert zurück; nur Geprüftes kommt an (' + ki.betriebe.length + ' Betrieb, ' + ki.info.suchen + ' Suchen)');
+  const schnell = S.anfrage('33442', 'Herzebrock-Clarholz', null, true), sw = schnell.tools[0];
+  ok(sw.max_uses === 4 && schnell.output_config.effort === 'low' && schnell.model === 'claude-opus-5-5' && /"plz":"33378"/.test(schnell.system),
+    '31.2 Wartet ein Kunde, sucht die KI knapp (Aufwand low, höchstens 4 Suchen); sie liefert die PLZ jedes Betriebs mit');
   const haengt = (url, init) => new Promise((ja, nein) => init.signal.addEventListener('abort', () => nein(Object.assign(new Error('abgebrochen'), { name: 'AbortError' }))));
   const t0 = Date.now(), zeit = await S.kiSuche({ key: 'k', fetch: haengt, ms: 300 }, PLZ, ''), dauer = Date.now() - t0;
   const abgelehnt = await S.kiSuche({ key: 'k', fetch: async () => antwort({ stop_reason: 'refusal', content: [], usage: {} }), ms: 2000 }, PLZ, '');
@@ -97,15 +116,23 @@ export default async function (h) {
   /* zweiter Server: Tagesbudget 2 mit Alarm bei 80 %, ohne SMS-Anbieter (Weg ohne Code) */
   const s3 = await h.server({ VERMITTLUNG_SUCHE_TAG_MAX: '2', SMS_ATTRAPPE: '0' });
   const vor3 = await ids(s3), bud = [];
-  for (const p of ['50667', '50823', '40210']) bud.push((await post('/api/vermittlung/suche', { plz: p, ort: 'Köln' }, null, s3)).json);
+  for (const p of ['50667', '80331', '20095']) bud.push((await post('/api/vermittlung/suche', { plz: p }, null, s3)).json);
   await warte(300);
   const alarm = (await neueMails(vor3, s3)).find((m) => /80 %/.test(m.betreff) && /Vermittlung/.test(m.betreff));
   ok(bud[0].quelle === 'attrappe' && bud[1].quelle === 'attrappe' && bud[2].quelle === 'keine' && bud[2].grenze === 'tag' && bud[2].betriebe.length === 0 && !!alarm && /VERMITTLUNG_SUCHE_TAG_MAX/.test(alarm.html),
     '31.2 Tagesbudget VERMITTLUNG_SUCHE_TAG_MAX: darüber quelle „keine“ (die App macht mit „Betrieb für mich suchen“ weiter), Mail an den Inhaber bei 80 %');
+  /* Vorrat: alle 10 Minuten eine gründliche Suche für den nächsten Stützpunkt, höchstens VERMITTLUNG_VORRAT am Tag; ohne die Variable aus */
+  const s5 = await h.server({ VERMITTLUNG_VORRAT: '2' }), vrl = [];
+  for (let i = 0; i < 3; i++) vrl.push(((await s5.geplant('*/10 * * * *')) || {}).vorrat || {});
+  const stz = O.vorratPlz(), nahVorrat = O.umkreisPlz(stz[0], 25).find((x) => x !== stz[0]);
+  const tv = Date.now(), sv = (await post('/api/vermittlung/suche', { plz: nahVorrat }, null, s5)).json || {}, dv = Date.now() - tv;
+  const vorratAus = ((await s3.geplant('*/10 * * * *')) || {}).vorrat || {};
+  ok(vrl[0].plz === stz[0] && vrl[0].betriebe === 8 && vrl[1].plz === stz[1] && vrl[2].grenze === 2 && !vrl[2].plz && sv.quelle === 'umgebung' && (sv.betriebe || []).length >= 3 && vorratAus.aus === true,
+    '31.2 Vorrat: je Lauf ein Stützpunkt (' + vrl.map((v) => v.plz || 'Grenze').join(', ') + '), am Tag höchstens VERMITTLUNG_VORRAT; ein Kunde nebenan (' + nahVorrat + ') findet sofort ' + (sv.betriebe || []).length + ' Betriebe (' + dv + ' ms); ohne Variable aus');
   /* dritter Server: ohne Datenbank, ohne Schlüssel, ohne SMS */
   const s4 = await testserver({ DATEN_ATTRAPPE: '0', KI_ATTRAPPE: '', ANTHROPIC_API_KEY: '', SMS_ATTRAPPE: '', SMS_API_KEY: '' }, freierPort);
   const st4 = (await s4.api('localhost', '/api/status')).json.vermittlung || {};
-  const su4 = (await post('/api/vermittlung/suche', { plz: PLZ, ort: 'Clarholz' }, null, s4)).json || {};
+  const su4 = (await post('/api/vermittlung/suche', { plz: PLZ }, null, s4)).json || {};
   const co4 = (await post('/api/vermittlung/code', { tel: '0171 2894563' }, null, s4)).json || {};
   const se4 = await post('/api/vermittlung/senden', { plz: PLZ }, null, s4);
   ok(st4.an === false && st4.suche === '' && st4.sms === '' && su4.ok && su4.quelle === 'keine' && su4.betriebe.length === 0 && co4.ok && co4.ohneCode === true && !co4.token && se4.status === 503,
@@ -139,8 +166,8 @@ export default async function (h) {
   const gross = Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(10200000, 0x20)]), zuGross = Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(11200000, 0x20)]);
   const g1 = await post('/api/vermittlung/senden', anfrage({ pdf: gross.toString('base64') })), g2 = await post('/api/vermittlung/senden', anfrage({ pdf: zuGross.toString('base64') }));
   ok(g1.status === 400 && !!(g1.json.felder || {}).pdf && /10 MB/.test(g1.json.fehler) && g2.status === 413, '31.4 Aufmaßblatt über 10 MB: 400 am Feld pdf; über dem Grenzwert des Pfads 413 (' + g1.status + ', ' + g2.status + ')');
-  const unbekannt = await post('/api/vermittlung/senden', anfrage({ betriebe: ['b000000000000'] })), anderePlz = await post('/api/vermittlung/senden', anfrage({ plz: PLZ2 }));
-  ok(unbekannt.status === 409 && unbekannt.json.neuSuchen === true && anderePlz.status === 409, '31.4 Nur Betriebe aus dem Zwischenspeicher dieser PLZ (unbekannt oder andere PLZ: 409 neuSuchen)');
+  const unbekannt = await post('/api/vermittlung/senden', anfrage({ betriebe: ['b000000000000'] })), anderePlz = await post('/api/vermittlung/senden', anfrage({ plz: PLZ_FERN }));
+  ok(unbekannt.status === 409 && unbekannt.json.neuSuchen === true && anderePlz.status === 409, '31.4 Nur Betriebe aus den Suchen im Umkreis dieser PLZ (unbekannt oder PLZ weit weg: 409 neuSuchen)');
   const ohneToken = await post('/api/vermittlung/senden', anfrage({ token: '' })), falscherCode = await post('/api/vermittlung/senden', anfrage({ code: '000000' }));
   const fremdesToken = await post('/api/vermittlung/senden', anfrage({ token: cf.token })), kaputtesToken = await post('/api/vermittlung/senden', anfrage({ token: c1.token.slice(0, -3) + 'abc' }));
   ok(ohneToken.status === 401 && ohneToken.json.feld === 'code' && falscherCode.status === 401 && /stimmt nicht/.test(falscherCode.json.fehler) && fremdesToken.status === 401 && /anderen Nummer/.test(fremdesToken.json.fehler) && kaputtesToken.status === 401 && kaputtesToken.json.neu === true,
@@ -291,7 +318,7 @@ export default async function (h) {
   await h.uhr(179); const lauf179 = await h.geplant('17 4 * * *'); await h.uhr(null);
   const nach179 = (((await zapi('/api/inhaber/vermittlungen')).json || {}).vermittlungen || []).length;
   await h.uhr(181); const lauf181 = await h.geplant('17 4 * * *');
-  const neuSuche = (await post('/api/vermittlung/suche', { plz: PLZ, ort: 'Herzebrock' })).json || {};
+  const neuSuche = (await post('/api/vermittlung/suche', { plz: PLZ })).json || {};
   await h.uhr(null);
   const Z2 = keks(await post('/api/inhaber/anmelden', { passwort: h.PASSWORT }));
   const nach181 = (((await h.api('localhost', '/api/inhaber/vermittlungen', { cookie: Z2 })).json || {}).vermittlungen || []).length, blaetterNach = ((await h.attrappe()).ablage || {}).vermittlung || [];

@@ -28,11 +28,12 @@ g.vm-pkt.ist-gewaehlt text { font: 600 12px var(--font-sans); fill: var(--schwar
 .vm-kegel { transform-box: view-box; transform-origin: 180px 134px; animation: vm-dreh 2.8s linear infinite }
 @keyframes vm-dreh { to { transform: rotate(-360deg) } }
 
-/* ---------- Weiche: zwei Karten nebeneinander (Inhaber, 29.10.2026) ----------
+/* ---------- Weiche: zwei Karten (Inhaber, 29.10.2026), seit 30.10.2026 untereinander ----------
    Anthrazit, gewählt weiß mit schwarzer Schrift; die Gratis-Karte mit violettem Ring und dem Etikett „Empfohlen“ (Koralle, schwarze Schrift);
-   der Preis ist die Zahl (G3), daneben der durchgestrichene Preis als Anker */
-.dna .vm-wege { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 20px }
-.dna .vm-karte { position: relative; display: grid; align-content: start; gap: 8px; width: 100%; min-height: 176px; padding: 14px 14px 16px; border: 0; border-radius: var(--rund-l, 28px); text-align: left; cursor: pointer; color: var(--weiss);
+   der Preis ist die Zahl (G3), daneben der durchgestrichene Preis als Anker. Untereinander, weil der Satz des Inhabers im weißen Feld
+   („Gestatte uns, das Aufmaßblatt …“) die ganze Breite braucht; nebeneinander wäre die Karte acht Zeilen hoch */
+.dna .vm-wege { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: 20px }
+.dna .vm-karte { position: relative; display: grid; align-content: start; gap: 8px; width: 100%; min-height: 0; padding: 16px 18px 18px; border: 0; border-radius: var(--rund-l, 28px); text-align: left; cursor: pointer; color: var(--weiss);
   background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045);
   transition: transform 160ms var(--dna-druck), background-color 220ms ease, color 220ms ease }
 .dna .vm-karte:active { transform: scale(.98); transition-duration: 0s }
@@ -42,18 +43,31 @@ g.vm-pkt.ist-gewaehlt text { font: 600 12px var(--font-sans); fill: var(--schwar
 .dna .vm-karte-etikett { justify-self: start; height: 24px; padding: 0 10px; border-radius: 999px; font: 600 12px/24px var(--font-sans); letter-spacing: .02em; color: var(--schwarz); background: var(--koralle) }
 .dna .vm-karte-etikett--leise { color: var(--silbergrau); background: transparent; box-shadow: inset 0 0 0 1px rgba(168, 164, 169, .45) }
 .dna .vm-karte[aria-pressed="true"] .vm-karte-etikett--leise { color: var(--textgrau); box-shadow: inset 0 0 0 1px rgba(107, 103, 108, .45) }
-.dna .vm-karte-titel { font: 600 16px/1.25 var(--font-sans); letter-spacing: -.01em; padding-right: 26px }
+.dna .vm-karte-titel { font: 600 16px/1.3 var(--font-sans); letter-spacing: -.01em; padding-right: 34px; text-wrap: pretty }
 .dna .vm-preis { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 6px; margin-top: auto }
 .dna .vm-preis b { font: 200 48px/1 var(--font-sans); letter-spacing: -.04em; font-variant-numeric: tabular-nums }
 .dna .vm-preis small { font: 400 15px/1 var(--font-sans); color: var(--silbergrau) }
 .dna .vm-preis s { font: 400 15px/1 var(--font-sans); color: var(--silbergrau); text-decoration-thickness: 1.5px }
 .dna .vm-karte[aria-pressed="true"] .vm-preis :is(small, s) { color: var(--textgrau) }
-.dna .vm-karte .vm-mark { top: 14px; right: 14px; margin-top: 0 }
+.dna .vm-karte .vm-mark { top: 16px; right: 16px; margin-top: 0 }
 .dna .vm-vertrauen { margin: 14px 2px 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
 .dna .vm-vertrauen b { font-weight: 500; color: var(--weiss) }
 .dna .vm-warum { margin-top: 10px }
 .dna .vm-warum b { font-weight: 500; color: var(--weiss) }
 .dna .ab-felder + .vm-vertrauen--tel { margin: 12px 4px 0 }
+/* Daten-Garantie (Inhaber, 30.10.2026: „ein Chip beziehungsweise noch mal so ein Feld, wo drin steht: Daten-Garantie“): Fläche nach G14,
+   oben der Chip in Indigo (Zustand: zugesagt) mit Schild, darunter die Zusage; das Wichtigste weiß, der Rest in Silbergrau */
+.dna .vm-garantie { margin-top: 16px; padding: 16px 18px 18px; border-radius: 20px;
+  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+.dna .vm-garantie-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px 0 8px; border-radius: 999px; background: var(--indigo); color: var(--weiss); font: 600 12px/1 var(--font-sans); letter-spacing: .03em }
+.dna .vm-garantie-chip svg { width: 16px; height: 16px; flex: none }
+.dna .vm-garantie p { margin: 10px 0 0; font: 400 14px/1.5 var(--font-sans); color: var(--silbergrau) }
+.dna .vm-garantie p + p { margin-top: 8px }
+.dna .vm-garantie b { font-weight: 500; color: var(--weiss) }
+/* „Warum kostenlos?“ zum Aufklappen, wie „Falls zur Hand“ beim Messen */
+.dna .vm-falls { margin-top: 10px }
+.dna .vm-falls summary { min-height: 52px }
+.dna .vm-falls .fold-body p { margin: 0; font: 400 14px/1.5 var(--font-sans); color: var(--silbergrau) }
 .dna .vm-codewarum { margin-top: 2px }
 /* Auf den Folien zum Bezahlen: der Gratis-Weg noch einmal, als Fläche in der Folie (Regel des Inhabers: Hinweise in die Folie) */
 .dna .vm-gratis-hinweis { position: relative; isolation: isolate; display: grid; gap: 10px; justify-items: start; margin: 18px 0 0; padding: 16px 18px; border-radius: 20px;
@@ -81,7 +95,6 @@ g.vm-pkt.ist-gewaehlt text { font: 600 12px var(--font-sans); fill: var(--schwar
    der Pfeil von „Aufmaßblatt laden“ heraus; „Fertig“ bleibt so schmal wie sein Wort */
 .dna.dt .dna-rechts .lg-fuss.vm-fuss-zwei .dna-pille--leise { flex: 0 0 auto }
 .dna.dt .dna-rechts .lg-fuss.vm-fuss-zwei .lg-weiter { flex: 1 1 auto }
-@media (max-width: 359px) { .dna .vm-wege { grid-template-columns: 1fr } .dna .vm-karte { min-height: 0 } }
 
 /* Haken bzw. Nummer rechts: leer als Ring, gewählt schwarz gefüllt (auf Weiß) */
 .dna .vm-mark { position: absolute; right: 16px; top: 50%; display: grid; place-items: center; width: 28px; height: 28px; margin-top: -14px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--silbergrau); font: 600 13px/1 var(--font-sans); color: var(--weiss) }
@@ -142,7 +155,12 @@ g.vm-pkt.ist-gewaehlt text { font: 600 12px var(--font-sans); fill: var(--schwar
 .dna .vm-z i { width: 100%; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--silbergrau) 30%, var(--anthrazit)) }
 .dna .vm-z.ist-da i { background: var(--weiss) }
 .dna .vm-z.ist-da + .vm-z:not(.ist-da) i, .dna .vm-ziffern:not(:has(.ist-da)) .vm-z:first-child i { background: var(--violett) } /* die nächste Ziffer */
-.dna .vm-codefeld { height: 60px }
+.dna .vm-codefeld, .dna .vm-plzfeld { height: 60px }
+.dna .vm-plzfeld input { width: 100%; height: 60px; padding-left: .3em; text-align: center; letter-spacing: .3em; font-size: 28px }
+.dna .vm-plzfeld input::placeholder { letter-spacing: 0; font-size: 18px }
+.dna .vm-plzfeld.ist-bad { box-shadow: inset 0 0 0 2px var(--koralle) }
+.dna .vm-plzfeld + .vm-feldfehler { margin-top: 8px }
+.dna .vm-ergebnis[hidden] { display: none }
 .dna .vm-codefeld input { width: 100%; height: 60px; padding-left: .4em; text-align: center; letter-spacing: .4em; font-size: 28px }
 .dna .vm-codefeld input::placeholder { letter-spacing: .4em; font-size: 28px }
 .dna .vm-codefeld.ist-bad { box-shadow: inset 0 0 0 2px var(--koralle) }
