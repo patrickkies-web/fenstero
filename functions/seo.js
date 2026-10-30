@@ -67,6 +67,7 @@ export const SEITEN = [
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-28' },
   { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-30' },
   { pfad: '/agb/', prio: '0.2', stand: '2026-10-30' },
+  { pfad: '/partnerbedingungen/', prio: '0.3', stand: '2026-10-30' },
   { pfad: '/cookies/', prio: '0.1', stand: '2026-10-28' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
 ].concat(PAKETE_SEITEN);
@@ -92,7 +93,7 @@ export const frei = (env, url) => !!env && String(env.INDEXIERUNG || '') === '1'
 /* Lokal (Testserver, wrangler dev) gilt die aufgerufene Adresse; im Netz immer https, auch wenn eine Seite über http:// abgerufen wurde */
 const LOKAL = /^(localhost|127\.\d+\.\d+\.\d+|\[::1\])$/i;
 export const basis = (env, url) => (env && env.KANONISCH ? String(env.KANONISCH).replace(/\/+$/, '') : (LOKAL.test(url.hostname) ? url.protocol : 'https:') + '//' + url.host.replace(/^www\./i, ''));
-export const istSeite = (pfad) => pfad === '/' || pfad === '/index.html' || /^\/(app|ratgeber|fuer-fensterbauer|impressum|datenschutz|agb|nutzungsbedingungen|cookies|widerruf|konfigurator-bedingungen|redaktion)(\/|$)/.test(pfad);
+export const istSeite = (pfad) => pfad === '/' || pfad === '/index.html' || /^\/(app|ratgeber|fuer-fensterbauer|impressum|datenschutz|agb|nutzungsbedingungen|cookies|widerruf|konfigurator-bedingungen|partnerbedingungen|redaktion)(\/|$)/.test(pfad);
 const kanonischerPfad = (pfad) => pfad.replace(/index\.html$/, '');
 
 export function robots(origin, an) {

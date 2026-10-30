@@ -10,7 +10,7 @@ import path from 'node:path';
 import url from 'node:url';
 
 const WEB = path.join(path.dirname(url.fileURLToPath(import.meta.url)), '..', 'web');
-export const SEITEN = ['/impressum/', '/datenschutz/', '/agb/', '/nutzungsbedingungen/', '/cookies/', '/widerruf/', '/konfigurator-bedingungen/', '/404.html'];
+export const SEITEN = ['/impressum/', '/datenschutz/', '/agb/', '/nutzungsbedingungen/', '/cookies/', '/widerruf/', '/konfigurator-bedingungen/', '/partnerbedingungen/', '/404.html'];
 const datei = (p) => path.join(WEB, p === '/404.html' ? '404.html' : p + 'index.html');
 
 const KOPF = '<link rel="preload" href="/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>\n<link rel="preload" href="/fonts/inter-marke.woff2" as="font" type="font/woff2" crossorigin>\n' +

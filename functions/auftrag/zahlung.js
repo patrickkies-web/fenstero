@@ -12,14 +12,14 @@ import { ApiFehler, zufall } from '../api/umgebung.js';
 import { stripe } from '../api/stripe.js';
 
 const P = () => globalThis.Pakete;
-const cent = (euro) => Math.round(Number(euro || 0) * 100);
+export const cent = (euro) => Math.round(Number(euro || 0) * 100);
 export const mitStripe = (k) => !!k.stripe;
-const attrappe = (k) => !k.stripe && !!k.zahlungAttrappe;
-const pruefe = (k) => { if (!k.stripe && !k.zahlungAttrappe) throw new ApiFehler('Die Zahlung ist hier noch nicht eingerichtet (STRIPE_SECRET_KEY).', 503); };
+export const attrappe = (k) => !k.stripe && !!k.zahlungAttrappe;
+export const pruefe = (k) => { if (!k.stripe && !k.zahlungAttrappe) throw new ApiFehler('Die Zahlung ist hier noch nicht eingerichtet (STRIPE_SECRET_KEY).', 503); };
 
 /* Steuersatz 19 % zzgl. (Nettopreise für Unternehmer); ohne Umsatzsteuer (MWST=0) keiner. Einmal je Instanz gesucht oder angelegt. */
 const merk = new Map();
-async function steuersatz(ctx, s) {
+export async function steuersatz(ctx, s) {
   if (!mwst(ctx)) return '';
   const schluessel = ctx.k.stripe.key.slice(-10) + ':auftrag-mwst19';
   if (!merk.has(schluessel)) merk.set(schluessel, (async () => {
@@ -32,10 +32,12 @@ async function steuersatz(ctx, s) {
 }
 export const mwst = (ctx) => String((ctx.env || {}).MWST == null ? '19' : ctx.env.MWST).trim() !== '0';
 
-/* Stripe-Kunde des Fensterbauers (einer je Kunde, Name und Anschrift aus dem Betrieb für die Rechnung) */
-async function stripeKunde(ctx, s, a, kunde) {
-  const b = (a.angaben || {}).betrieb || {};
-  const daten = { email: kunde.mail, name: b.firma || kunde.mail, address: { line1: b.strasse || '', postal_code: b.plz || '', city: b.ort || '', country: 'DE' }, preferred_locales: ['de'], metadata: { eeziframes_kunde: kunde.id } };
+/* Stripe-Kunde des Fensterbauers (einer je Kunde, Name und Anschrift aus dem Betrieb für die Rechnung); stripeKundeFuer auch für die
+   Vermittlung (Freischalten eines Aufmaßes, vermittlung-partner.js) mit Anschrift aus dem Register */
+async function stripeKunde(ctx, s, a, kunde) { const b = (a.angaben || {}).betrieb || {}; return stripeKundeFuer(ctx, s, kunde, { name: b.firma, strasse: b.strasse, plz: b.plz, ort: b.ort }); }
+export async function stripeKundeFuer(ctx, s, kunde, b) {
+  b = b || {};
+  const daten = { email: kunde.mail, name: b.name || b.firma || kunde.mail, address: { line1: b.strasse || '', postal_code: b.plz || '', city: b.ort || '', country: 'DE' }, preferred_locales: ['de'], metadata: { eeziframes_kunde: kunde.id } };
   if (kunde.stripe) { await s.post('/customers/' + kunde.stripe, daten).catch(() => null); return kunde.stripe; }
   const c = await s.post('/customers', daten, { idem: 'auftrag-kunde-' + kunde.id });
   return c.id;

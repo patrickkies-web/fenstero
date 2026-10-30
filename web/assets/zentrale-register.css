@@ -1,0 +1,86 @@
+/* eeziframes · Zentrale: Betriebe-Lexikon, Zugang statt Aufmaß, Nachricht an den Kunden (Wunsch des Inhabers, 30.10.2026)
+   Ergänzt auftrag.css (Präfix a-) um alles Neue der Partner-Stufe der Vermittlung; Präfix a-reg-. Dieselbe Palette „Task-App dunkel“,
+   G14 (keine flache Fläche: Kachel-Verlauf und Lichtkante), G3 (die Zahl ist der Held, Einheit klein), G13 (Ringe und Rundknöpfe,
+   genau eine volle Pille je Bildschirm bleibt in auftrag.css), Ziele 44 px, Schrift ab 13 px. Nach auftrag.css einbinden. */
+
+/* ---------- Kennzahlen des Registers: eine große Zahl, drei kleine daneben ---------- */
+.a-reg-zahlen { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.a-reg-zahlen .a-zahl.gross { grid-column: 1 / -1; }
+@media (min-width: 760px) { .a-reg-zahlen { grid-template-columns: 2fr 1fr 1fr 1fr; } .a-reg-zahlen .a-zahl.gross { grid-column: auto; } }
+.a-zahl b small { margin-left: 3px; font: 400 15px/1 var(--font-sans); letter-spacing: 0; color: var(--silbergrau); }
+/* Dunkle Innenkarte mit den feinen Zählern (G8): Beschriftung klein, Wert 300 */
+.a-reg-mini { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 10px; }
+@media (min-width: 560px) { .a-reg-mini { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 960px) { .a-reg-mini { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+.a-reg-mini > span { display: grid; gap: 3px; min-width: 0; }
+.a-reg-mini b { font: 300 24px/1 var(--font-sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--weiss); }
+.a-reg-mini small { font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau); }
+
+/* ---------- Werkzeugzeile: Suche als dunkle Kapsel, daneben der Ring „Register neu aufbauen“ ---------- */
+.a-reg-werkzeug { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.a-reg-suche { flex: 1 1 240px; display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 4px 0 16px; border-radius: var(--rund-pille); background: var(--kachel); box-shadow: var(--kachel-kante), inset 0 0 0 1.5px rgba(168,164,169,.5); transition: box-shadow 220ms ease; }
+.a-reg-suche:focus-within { box-shadow: var(--kachel-kante), inset 0 0 0 2px var(--violett); }
+.a-reg-suche > svg { width: 16px; height: 16px; flex: none; color: var(--silbergrau); }
+.a-reg-suche input { flex: 1; min-width: 0; height: 44px; border: 0; background: transparent; color: var(--weiss); font: 400 16px/1 var(--font-sans); outline: none; -webkit-appearance: none; appearance: none; }
+.a-reg-suche input::placeholder { color: var(--silbergrau); }
+.a-reg-suche input::-webkit-search-cancel-button, .a-reg-suche input::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+.a-reg-suche .a-rund { color: var(--silbergrau); }
+.a-reg-suche .a-rund svg { width: 13px; height: 13px; }
+
+/* ---------- Zeile eines Betriebs in der Liste: Name, Ort, drei Zahlen (G3), Stand, letzte Anfrage ---------- */
+.a-reg-zeile { grid-template-columns: minmax(0, 1fr) auto; }
+.a-reg-zeile .a-ez-zeit { grid-column: 2; grid-row: 1; text-align: right; }
+.a-reg-werte { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 22px; }
+.a-reg-werte > span { display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+.a-reg-werte b { font: 300 22px/1 var(--font-sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--schwarz); }
+.a-reg-werte b small { font: 400 13px/1 var(--font-sans); letter-spacing: 0; color: var(--textgrau); margin-left: 2px; }
+.a-reg-werte > span > small { font: 400 13px/1.3 var(--font-sans); color: var(--textgrau); }
+.a-reg-zeile .a-ez-stand { grid-column: 1 / -1; }
+@media (min-width: 760px) {
+  .a-reg-zeile { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, .9fr) auto; align-items: center; }
+  .a-reg-werte { grid-column: 2; grid-row: 1; gap: 6px 18px; }
+  .a-reg-zeile .a-ez-stand { grid-column: 3; grid-row: 1; }
+  .a-reg-zeile .a-ez-zeit { grid-column: 4; }
+}
+/* Partner in der Liste: violetter Punkt am Namen (ein Zeichen je Bedeutung: der Punkt heißt „aktiv“) */
+.a-reg-zeile .a-ez-haupt b.a-reg-partner-name { display: inline-flex; align-items: center; gap: 8px; }
+.a-reg-zeile .a-ez-haupt b.a-reg-partner-name::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 35%, transparent); flex: none; }
+
+/* ---------- Anfragen eines Betriebs (Detail): Kunde, Nummer und Ort, Ergebnis des Anrufs, Zugang, Aufmaß; die Zeile führt zur Anfrage ---------- */
+.a-reg-anfragen { margin: 0; padding: 4px 0 8px; list-style: none; }
+.a-reg-anfragen li + li { border-top: 1px solid rgba(7,9,10,.08); }
+.a-reg-anfrage.weg { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 14px 0; color: var(--textgrau); }
+.a-reg-anfrage.weg .a-ez-haupt b { color: var(--textgrau); font-weight: 400; }
+.a-reg-anfrage .a-ez-pfeil { grid-column: 2; grid-row: 1 / 3; align-self: center; display: none; }
+@media (min-width: 760px) {
+  .a-reg-anfrage { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto; }
+  .a-reg-anfrage .a-ez-stand { grid-column: 2; grid-row: 1; }
+  .a-reg-anfrage .a-ez-zeit { grid-column: 3; }
+}
+
+/* ---------- Kopf der Betriebskarte in der Anfrage: Chips (Zugang, Partner) und der Weg ins Lexikon ---------- */
+.a-reg-kopfrechts { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; white-space: normal !important; }
+.a-reg-kopfrechts .a-link { gap: 6px; font-size: 14px; color: var(--textgrau); }
+.a-reg-kopfrechts .a-link svg { width: 12px; height: 12px; }
+
+/* ---------- Partner-Erklärung auf weißer Karte: Fläche mit feinem Ring, violetter Punkt nur bei „aktiv“ ---------- */
+.a-reg-partner { margin: 0 0 14px; padding: 12px 14px; border-radius: 16px; background: linear-gradient(180deg, #f8f8fa, #f1f1f4); box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(7,9,10,.08); display: grid; gap: 4px; }
+.a-reg-partner b { display: inline-flex; align-items: center; gap: 8px; font: 500 15px/1.3 var(--font-sans); color: var(--schwarz); }
+.a-reg-partner.an b::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 35%, transparent); flex: none; }
+.a-reg-partner span { font: 400 14px/1.45 var(--font-sans); color: var(--textgrau); max-width: 60ch; }
+
+/* ---------- Nachricht an den Kunden: Vorlagen als Kapseln (gewählt Violett mit Punkt, wie .a-wahl), zwei Felder, Ring; Liste zum Aufklappen ---------- */
+.a-reg-nachricht { border-top: 1px solid rgba(7,9,10,.08); padding-top: 4px; }
+.a-reg-nachricht > .a-label { display: block; padding: 12px 0 2px; font: 500 13px/1.3 var(--font-sans); letter-spacing: .02em; color: var(--textgrau); }
+.a-reg-nachricht .a-wahl { padding: 8px 0 4px; }
+.a-reg-nachricht .a-wahl button { font-size: 14px; padding: 0 14px; }
+.a-reg-nachricht .a-hilfe { padding: 2px 0 6px; }
+.a-reg-nachrichten { margin: 0; padding: 0 0 12px; list-style: none; display: grid; gap: 8px; }
+.a-reg-nachrichten li { padding: 10px 14px; border-radius: 16px; background: #f4f4f6; box-shadow: inset 0 0 0 1px rgba(7,9,10,.06); font: 400 14px/1.45 var(--font-sans); color: var(--schwarz); white-space: pre-wrap; overflow-wrap: anywhere; }
+.a-reg-nachrichten small { display: block; margin-bottom: 4px; font: 500 13px/1.3 var(--font-sans); color: var(--textgrau); white-space: normal; }
+.a-reg-nachrichten small b { font-weight: 500; color: var(--schwarz); }
+.a-reg-ohne { display: flex; gap: 10px; align-items: baseline; padding: 10px 0 14px; margin: 0; font: 400 15px/1.45 var(--font-sans); color: var(--schwarz); }
+.a-reg-ohne::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--koralle); transform: translateY(-1px); }
+
+/* ---------- Hinweis zum Zugang unter dem Formular ---------- */
+.a-reg-zugang-hilfe { margin: 0; padding: 8px 0 2px; font: 400 14px/1.45 var(--font-sans); color: var(--textgrau); max-width: 60ch; }

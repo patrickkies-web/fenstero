@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Kundenbereich | eeziframes für Fensterbauer</title>
-<meta name="description" content="Kundenbereich für Fensterbauer: Stand Ihrer Seite, Vorschau und Freigabe, Angaben ändern, Nachrichten und Rechnungen.">
+<title>Bereich für Fensterbauer | eeziframes</title>
+<meta name="description" content="Bereich für Fensterbauer: Anfragen von Hauseigentümern freischalten, Kontakt und Aufmaßblatt, Register und Bereitschaft als Partner; Stand Ihrer Seite mit Konfigurator, Vorschau, Nachrichten und Rechnungen.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
 <meta name="theme-color" content="#07090a">
@@ -16,15 +16,18 @@
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="/fonts/dna.css">
 <link rel="stylesheet" href="/assets/auftrag.css">
+<link rel="stylesheet" href="/assets/konto-anfragen.css">
 </head>
 <body class="au">
-<!-- Kundenbereich der Fensterbauer: Aufträge, Stand, Vorschau, Freigabe, Nachrichten, Rechnungen (Server functions/auftrag/).
-     Die Seite enthält keine Daten; alles kommt nach der Anmeldung von /api/auftrag/ und wird von konto.js gebaut. Doku: docs/BESTELLUNG.md. -->
+<!-- Bereich für Fensterbauer: Anfragen von Hauseigentümern aus der Vermittlung (Zugang #zugang/<token>, Anfrage #anfrage/<id>, Register
+     und Bereitschaft; Server functions/api/vermittlung-partner.js) und die Aufträge der Konfigurator-Pakete (#auftrag/<id>; Server
+     functions/auftrag/). Die Seite enthält keine Daten; alles kommt nach der Anmeldung per Code von der API und wird von konto.js gebaut
+     (Stile auftrag.css und konto-anfragen.css). Doku: docs/BESTELLUNG.md, Abschnitt „Kundenbereich“. -->
 <a class="au-sr" href="#inhalt">Zum Inhalt</a>
 <div class="a-seite">
   <header class="a-kopf" id="kopf"><a class="a-marke" href="/" aria-label="eeziframes, zur Startseite"><svg viewBox="0 0 64 64" aria-hidden="true"><rect class="fi-kachel" width="64" height="64" rx="10" fill="#000"/><g class="fi-licht" fill="#fff"><path class="fi-decke" d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path class="fi-fenster" d="M45 22 57 17.6V41.9L45 39.8Z"/><path class="fi-strahl" d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect class="fi-rand" x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#000" stroke-opacity=".1"/></svg><span class="a-wm" translate="no"><b>eezi</b>frames</span></a></header>
   <div id="app">
-    <noscript><main class="a-raster eins" id="inhalt"><div class="a-frage"><h1>Der Kundenbereich braucht JavaScript.</h1><p>Bitte schalten Sie JavaScript ein oder schreiben Sie uns über die <a href="/fuer-fensterbauer/#pakete">Seite für Fensterbauer</a>.</p></div></main></noscript>
+    <noscript><main class="a-raster eins" id="inhalt"><div class="a-frage"><h1>Der Bereich für Fensterbauer braucht JavaScript.</h1><p>Bitte schalten Sie JavaScript ein oder schreiben Sie uns über die <a href="/fuer-fensterbauer/#pakete">Seite für Fensterbauer</a>.</p></div></main></noscript>
   </div>
 </div>
 <script src="/assets/pakete.js"></script>

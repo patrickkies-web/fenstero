@@ -79,6 +79,24 @@ möglich.
 9. seven.io speichert Nummer und Text der SMS bzw. Ansage für Zustellung und Abrechnung: Reicht der Verweis auf den AV-Vertrag, oder muss
    die Speicherdauer bei seven in der Datenschutzerklärung stehen?
 
+10. (30.10.2026, Bereich für Fensterbauer) Statt des Aufmaßblatts per Mail bekommt der Betrieb einen Link in seinen Bereich bei eeziframes,
+    bestätigt dort seine E-Mail-Adresse per Code und schaltet die Anfrage frei; erst dann sieht er Name, Nummer und Blatt. Genügt die
+    Beschreibung in Datenschutz 6a („Weitergabe“) und 9 („Anfragen aus der Vermittlung“)? Ist die automatische Mail an den Kunden, welcher
+    Betrieb sein Aufmaß abgerufen hat, von der Anfrage gedeckt (Art. 6 Abs. 1 lit. b)?
+11. Partnerbedingungen (`/partnerbedingungen/`, Stand 30.10.2026, nur Unternehmer): erstes Aufmaß kostenlos, danach 29 € netto je
+    freigeschaltetem Aufmaß, Zahlung beim Freischalten über Stripe; Reklamation mit festen Gründen (§ 6); Zweckbindung der Kundendaten
+    (§ 7). Bitte Haftung (§ 9), Reklamationsgründe und die Pflicht zur Löschung nach sechs Monaten prüfen. Brauchen wir eine
+    Widerrufsbelehrung, obwohl nur Unternehmer freischalten (Bestätigung per Häkchen)?
+12. Reihenfolge der Betriebe in der App: Partner (eingetragen, zahlen die Vermittlung) stehen auf Platz 1 und 2 mit Etikett „Partner“;
+    darunter steht „Partnerbetriebe stehen oben (bei eeziframes eingetragen, sie bezahlen die Vermittlung), danach nach Entfernung.“ AGB
+    § 4a Abs. 2 und 5 sagen dasselbe. Genügt das für § 5b Abs. 2 UWG und Anhang Nr. 11a UWG (Kennzeichnung bezahlter Plätze), oder muss
+    das Etikett „Anzeige“ heißen?
+13. Register der Betriebe (Zentrale): Wir speichern zu Betrieben aus der KI-Suche Name, Ort, Telefon, Website und je Anfrage das Ergebnis
+    unserer Anrufe (Art. 6 Abs. 1 lit. f, Datenschutz 9). Reicht der Hinweis im Gespräch („woher wir die Nummer haben“) als Information
+    nach Art. 14 DSGVO, oder braucht es einen Text, den wir nennen können?
+14. Ein Betrieb kann die Bereitschaft zurücknehmen; Einträge löschen wir auf Verlangen, „wenn keine offene Abrechnung mehr besteht“. Passt
+    die Formulierung in Datenschutz 9?
+
 ## Abgleich mit dem gebauten Stand (30.10.2026)
 
 | Stelle im Entwurf | Vorher | Jetzt | Warum |

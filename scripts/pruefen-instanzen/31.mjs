@@ -7,12 +7,16 @@
 //   pause_turn, Zeitlimit, Ablehnung, Unsinn verwerfen) · 31.3 Code (Attrappe, falsche Nummern, Festnetz per Anruf, Grenze je Nummer, Bremse
 //   je Anschluss, ohne Anbieter „ohneCode“) · 31.4 Senden (alle Ablehnungen, Code, abgelaufenes Token, Fehlversuche, Mails an den Inhaber mit
 //   PDF und an den Kunden mit, Freischaltung, Doppelklick, zwei Anfragen in 90 Tagen, ohne Code „nicht bestätigt“) · 31.5 Zentrale (nur angemeldet, Liste,
-//   Detail mit Telefon und Website, PDF, Ergebnis der Anrufe, Betrieb neu, Senden nur mit Zustimmung, höchstens fünf und nur die gewählten, Mails) · 31.6 Tageslauf
-//   (nach 180 Tagen weg, mit dem Aufmaßblatt).
+//   Detail mit Telefon und Website, PDF, Ergebnis der Anrufe, Betrieb neu, Zugang nur mit Zustimmung, höchstens fünf und nur die gewählten, Mail ohne
+//   Kontaktdaten und ohne Anhang) · 31.7 Bereich für Fensterbauer und Register (Abschnitt 13: Vorschau über den Link, Konto per Code, Annehmen,
+//   erstes Aufmaß kostenlos, zweites über die Kasse, Mail an den Kunden, Partner vorn in der Suche, Lexikon der Zentrale, Nachricht an den Kunden,
+//   Rechtsseite Partnerbedingungen) · K Bereich für Fensterbauer im Browser (Zugang, Code, Freischalten, PDF, Partner; „Anmelden“ auf der
+//   Seite für Fensterbauer) · 31.6 Tageslauf (nach 180 Tagen weg, mit dem Aufmaßblatt).
 // Teil B im Browser (Telefon 390 px und Schreibtisch): Zentrale mit Umschalter, Liste, Anfrage, Anruf-Knopf, „Will“, Senden nur mit Häkchen;
 //   genau eine volle Pille, Ziele ab 44 px, Schrift ab 13 px, kein Querscrollen, keine Konsolenfehler.
 // Teil C (App, Folien weg, betriebe, vcode, angefragt): ergänzt die Sitzung, die die App baut; Platz unten am Ende markiert.
 import path from 'node:path';
+import fs from 'node:fs';
 import net from 'node:net';
 import { testserver } from './hilfe.mjs';
 
@@ -38,6 +42,7 @@ export default async function (h) {
   const O = await import(path.join(h.WURZEL, 'functions/api/vermittlung-ort.js'));
   /* Stimme des Anrufs: „female“ oder „male“ allein (so im Cloudflare-Dashboard leicht eingetragen) wird zur deutschen Stimme, Unbekanntes zur Vorgabe */
   const SMS = await import(path.join(h.WURZEL, 'functions/api/vermittlung-sms.js'));
+  const RECHT7 = await import(path.join(h.WURZEL, 'functions/api/recht.js'));
   const stimmen = ['female', 'Male', 'de-de-female', 'en-gb-male', '', 'weiblich'].map(SMS.stimmeName).join();
   ok(stimmen === 'de-de-female,de-de-male,de-de-female,en-gb-male,de-de-female,de-de-female' && /^<voice name="de-de-female">/.test(SMS.ansage('123456', 'female')), '31.0 Stimme des Anrufs: „female“ allein wird „de-de-female“, ungültige Werte die Vorgabe (' + stimmen + ')');
 
@@ -53,7 +58,7 @@ export default async function (h) {
   const b1 = (s1.json || {}).betriebe || [], namen = b1.map((b) => b.name);
   ok(s0.status === 400 && s0.json.feld === 'plz' && sUnbekannt.status === 400 && sUnbekannt.json.feld === 'plz' && /kennen wir nicht/.test(sUnbekannt.json.fehler) && s1.status === 200 && s1.json.quelle === 'attrappe' && s1.json.umkreis === 30 && s1.json.ort === 'Freiburg im Breisgau' && s1.json.plz === PLZ && b1.length === 8 && namen[0] === 'Fensterbau Brandt' && b1.every((b, i) => i === 0 || b1[i - 1].km <= b.km) && !namen.some((n) => /Amsel|Fink|Specht|Meise/.test(n)),
     '31.2 Suche: nur die PLZ, fünfstellig und bekannt (sonst 400, ohne KI-Suche), Ort aus der Tabelle, Attrappe mit 8 erfundenen Betrieben nach km, Fensterbau Brandt vorn, keine Testbetriebe der Instanzen (' + namen.slice(0, 3).join(', ') + ' …)');
-  const nurOeffentlich = (r) => (r.json.betriebe || []).every((b) => Object.keys(b).sort().join() === 'id,km,leistungen,name,ort' && /^b[0-9a-f]{12}$/.test(b.id)) && !/"(tel|web|strasse)"|https?:|\.example|5550101/.test(r.text);
+  const nurOeffentlich = (r) => (r.json.betriebe || []).every((b) => /^id,km,leistungen,name,ort(,partner)?$/.test(Object.keys(b).sort().join()) && /^b[0-9a-f]{12}$/.test(b.id)) && !/"(tel|web|strasse)"|https?:|\.example|5550101/.test(r.text);
   ok(s2.json.quelle === 'zwischenspeicher' && JSON.stringify(s2.json.betriebe) === JSON.stringify(s1.json.betriebe) && nurOeffentlich(s1) && nurOeffentlich(s2) && b1.every((b) => b.leistungen.every((l) => S.LEISTUNGEN.includes(l))),
     '31.2 Zweite Suche derselben PLZ aus dem Zwischenspeicher, gleiche Kennungen; an die App gehen nur id, name, ort, km, leistungen (kein Telefon, keine Website, keine Straße)');
   /* sofort aus der Umgebung: eine Nachbar-PLZ ohne eigene Suche nimmt die gespeicherten Suchen im Umkreis von 25 km, ohne neue KI-Suche */
@@ -238,17 +243,18 @@ export default async function (h) {
   const nb = ((neu1.vermittlung || {}).betriebe || []).find((x) => x.id === neu1.bid) || {};
   ok(neuFalsch.status === 400 && neu1.ok && nb.quelle === 'inhaber' && nb.tel === '02522 938271' && nb.web === 'https://www.pruefnachbar.de/' && nb.status === 'offen' && neuDoppelt.status === 409 && neuGewaehlt.status === 409 && /selbst gewählt/.test((neuGewaehlt.json || {}).fehler || ''), '31.5 Weiteren Betrieb nur bei „Sucht ihr für mich aus“ (hat der Kunde gewählt: 409); Name Pflicht, Telefon und Website geprüft, doppelt 409');
   const ohneZu = await zapi(P + '/senden', { bid: brandt.id, mail: 'info@fensterbau-brandt.example' }), zuFalsch = await zapi(P + '/senden', { bid: brandt.id, mail: 'kaputt', zustimmung: true }), zuString = await zapi(P + '/senden', { bid: brandt.id, mail: 'info@fensterbau-brandt.example', zustimmung: 'ja' });
-  ok(ohneZu.status === 400 && !!ohneZu.json.felder.zustimmung && zuFalsch.status === 400 && !!zuFalsch.json.felder.mail && zuString.status === 400, '31.5 Aufmaß an einen Betrieb nur mit zustimmung: true (Zustimmung im Gespräch) und gültiger E-Mail');
+  ok(ohneZu.status === 400 && !!ohneZu.json.felder.zustimmung && zuFalsch.status === 400 && !!zuFalsch.json.felder.mail && zuString.status === 400, '31.5 Zugang an einen Betrieb nur mit zustimmung: true (Zustimmung im Gespräch) und gültiger E-Mail');
   const vorS = await ids();
   const ges = (await zapi(P + '/senden', { bid: brandt.id, mail: 'info@fensterbau-brandt.example', zustimmung: true, kunde: true })).json || {};
   await warte(300);
   const mS = await neueMails(vorS), anBetrieb = mS.find((m) => m.an === 'info@fensterbau-brandt.example'), anKunde2 = mS.find((m) => m.an === MAIL);
   const vb = ((ges.vermittlung || {}).betriebe || [])[0] || {}, vl = ((ges.vermittlung || {}).verlauf || []).map((x) => x.text).join(' | ');
-  ok(ges.ok && ges.vermittlung.stand === 'vermittelt' && vb.status === 'will' && vb.gesendet && vb.gesendet.mail === 'info@fensterbau-brandt.example' && !!vb.gesendet.zustimmung && /Zustimmung im Gespräch: Fensterbau Brandt/.test(vl) && /Aufmaß an Fensterbau Brandt geschickt/.test(vl),
-    '31.5 Aufmaß an Fensterbau Brandt geschickt: Zustimmung mit Zeit im Verlauf, Stand „vermittelt“');
-  ok(!!anBetrieb && (anBetrieb.anhaenge || []).length === 1 && anBetrieb.anhaenge[0].bytes === PDF.length && /Anfrage aus Herzebrock-Clarholz/.test(anBetrieb.betreff) && /Erika Prüfmann/.test(anBetrieb.html) && /tel:\+491712894563/.test(anBetrieb.html) && /Vermittelt von eeziframes/.test(anBetrieb.html) && anBetrieb.html.includes(ANBIETER.name) && /Sie /.test(anBetrieb.html) && !/\b(dein|dir|du)\b/i.test(anBetrieb.html.replace(/<[^>]+>/g, ' ')) && /Einfamilienhaus/.test(anBetrieb.html) &&
-    !!anKunde2 && /Fensterbau Brandt hat dein Aufmaß/.test(anKunde2.betreff) && (anKunde2.anhaenge || []).length === 0,
-    '31.5 Mail an den Betrieb in Sie-Form mit Aufmaßblatt, Kontakt und Eckdaten, „Vermittelt von eeziframes“ und Impressum; kurze Mail an den Kunden, wer sein Aufmaß hat');
+  ok(ges.ok && ges.vermittlung.stand === 'vermittelt' && vb.status === 'will' && vb.gesendet && vb.gesendet.mail === 'info@fensterbau-brandt.example' && !!vb.gesendet.zustimmung && vb.zugang && vb.zugang.mail === 'info@fensterbau-brandt.example' && !vb.zugang.geoeffnet && !vb.freischaltung && /Zustimmung im Gespräch: Fensterbau Brandt/.test(vl) && /Zugang an Fensterbau Brandt geschickt/.test(vl),
+    '31.5 Zugang an Fensterbau Brandt geschickt: Zustimmung mit Zeit im Verlauf, Zugang noch nicht geöffnet, nichts freigeschaltet, Stand „vermittelt“');
+  const mailText = anBetrieb ? anBetrieb.html.replace(/<[^>]+>/g, ' ') : '';
+  ok(!!anBetrieb && (anBetrieb.anhaenge || []).length === 0 && /Anfrage aus Herzebrock-Clarholz/.test(anBetrieb.betreff) && !/Erika|Prüfmann|2894563|pruef-kunde/.test(mailText) && /\/konto\/#zugang\/[A-Za-z0-9_.-]{20,}/.test(anBetrieb.html) && /Vermittelt von eeziframes/.test(anBetrieb.html) && anBetrieb.html.includes(ANBIETER.name) && /Sie /.test(anBetrieb.html) && !/\b(dein|dir|du)\b/i.test(mailText) && /Einfamilienhaus/.test(anBetrieb.html) && /per Code bestätigt/.test(mailText) && /erstes Aufmaß .* kostenlos/.test(mailText) && /29 € zzgl\. USt/.test(mailText) &&
+    !anKunde2,
+    '31.5 Mail an den Betrieb in Sie-Form ohne Anhang und ohne Kontaktdaten des Kunden: Link in den Bereich für Fensterbauer, Eckdaten, Nummer bestätigt, erstes Aufmaß kostenlos, 29 € zzgl. USt; an den Kunden geht beim Zugang keine Mail (erst beim Freischalten)');
   const s12 = await zapi(P + '/senden', { bid: lind.id, mail: 'info@tischlerei-lindholz.example', zustimmung: true });
   const nochmal = await zapi(P + '/senden', { bid: brandt.id, mail: 'angebot@fensterbau-brandt.example', zustimmung: true });
   /* „Sucht ihr für mich aus“: der Inhaber trägt fünf weitere ein; fünf bekommen das Aufmaß, der sechste nicht */
@@ -257,12 +263,12 @@ export default async function (h) {
   const sAus = [await zapi(P2 + '/senden', { bid: nb.id, mail: 'info@pruefnachbar.example', zustimmung: true })];
   for (const x of weitere.slice(0, 4)) sAus.push(await zapi(P2 + '/senden', { bid: x.bid, mail: 'info@' + x.bid + '.example', zustimmung: true }));
   const zuViele = await zapi(P2 + '/senden', { bid: weitere[4].bid, mail: 'info@sechster.example', zustimmung: true });
-  ok(s12.status === 200 && nochmal.status === 200 && sAus.every((r) => r.status === 200) && zuViele.status === 409 && /fünf Betriebe/.test(zuViele.json.fehler), '31.5 Höchstens fünf Betriebe bekommen das Aufmaß (der sechste: 409), bei eigener Wahl nur die gewählten; an einen schon belieferten geht es noch einmal (' + sAus.map((r) => r.status).join(' ') + ')');
+  ok(s12.status === 200 && nochmal.status === 200 && sAus.every((r) => r.status === 200) && zuViele.status === 409 && /fünf Betriebe/.test(zuViele.json.fehler), '31.5 Höchstens fünf Betriebe bekommen den Zugang (der sechste: 409), bei eigener Wahl nur die gewählten; an einen schon belieferten geht es noch einmal (' + sAus.map((r) => r.status).join(' ') + ')');
   const stand = (await zapi(P + '/stand', { stand: 'erledigt' })).json || {}, standFalsch = await zapi(P + '/stand', { stand: 'weg' }), notiz = await zapi(P + '/notiz', { text: 'Kundin ruft Freitag zurück' });
   const det2 = ((await zapi(P)).json || {}).vermittlung || {};
   ok(stand.ok && stand.vermittlung.stand === 'erledigt' && standFalsch.status === 400 && notiz.status === 200 && det2.notiz === 'Kundin ruft Freitag zurück', '31.5 Stand der Vermittlung (erledigt; unbekannt 400) und interne Notiz');
   const nachher = await post('/api/vermittlung/suche', { plz: PLZ, ort: 'Herzebrock' });
-  ok(nurOeffentlich(nachher) && nachher.json.quelle === 'zwischenspeicher', '31.5 Auch nach der Arbeit in der Zentrale sieht die App von den Betrieben nur id, name, ort, km, leistungen');
+  ok(nurOeffentlich(nachher) && nachher.json.quelle === 'zwischenspeicher', '31.5 Auch nach der Arbeit in der Zentrale sieht die App von den Betrieben nur id, name, ort, km, leistungen (und partner)');
 
   /* ---------- Teil B: Zentrale im Browser ---------- */
   const messen = (page) => page.evaluate(() => {
@@ -301,15 +307,182 @@ export default async function (h) {
       await pruefe('4-will', true);
       await karte2.locator('[data-k="zustimmung"] input').check();
       await karte2.locator('.a-senden').click();
-      await page.waitForFunction(() => [...document.querySelectorAll('.a-betrieb')].some((k) => /Fensterbau Brandt/.test(k.textContent) && /Aufmaß geschickt/.test(k.textContent)), null, { timeout: 8000 });
+      await page.waitForFunction(() => [...document.querySelectorAll('.a-betrieb')].some((k) => /Fensterbau Brandt/.test(k.textContent) && /Zugang geschickt/.test(k.textContent)), null, { timeout: 8000 });
       await pruefe('5-geschickt', true);
       const v = (((await zapi('/api/inhaber/vermittlungen')).json || {}).vermittlungen || []).find((x) => x.nr === nr) || {};
       ok(zahl >= 1 && aktiv === 'page' && m3.pillen === 1 && /^tel:\+?\d+$/.test(m3.pilleTel) && anruf.length >= 3 && anruf.every((a) => /^tel:\+?\d+$/.test(a.href) && a.h >= 44) && /\/pdf$/.test(pdfHref || '') && ohneHaken === 1 && v.gesendet === 1 && v.stand === 'vermittelt',
-        '31.B ' + name + ': Umschalter mit der Zahl der neuen (' + zahl + '), Liste, Anfrage mit Anruf-Knöpfen (tel:, ab 44 px) und der Pille „Anrufen: …“, Aufmaßblatt (PDF); „Will“ öffnet E-Mail und Häkchen, ohne Häkchen geht nichts raus, mit Häkchen „Aufmaß geschickt“' +
+        '31.B ' + name + ': Umschalter mit der Zahl der neuen (' + zahl + '), Liste, Anfrage mit Anruf-Knöpfen (tel:, ab 44 px) und der Pille „Anrufen: …“, Aufmaßblatt (PDF); „Will“ öffnet E-Mail und Häkchen, ohne Häkchen geht nichts raus, mit Häkchen „Zugang geschickt“' +
         ' (' + JSON.stringify({ anruf: anruf.length, ohneHaken, gesendet: v.gesendet, stand: v.stand }) + ')');
       ok(!befund.length, '31.B ' + name + ': genau eine volle Pille je Anfrage, ein h1, Ziele ab 44 px, Schrift ab 13 px, kein Querscrollen' + (befund.length ? ': ' + befund.join(' | ') : ''));
     } catch (e) { ok(false, '31.B ' + name + ' läuft durch: ' + String(e && e.message || e).split('\n')[0]); }
     h.sauber(page, '31.B Zentrale der Vermittlung (' + name + ') ohne Fehler und CSP-Verstöße');
+    await c.close();
+  }
+
+  /* ---------- 31.7 Bereich für Fensterbauer und Register (docs/VERMITTLUNG.md, Abschnitt 13) ---------- */
+  const VP = await import(path.join(h.WURZEL, 'functions/api/vermittlung-partner.js')), RE = await import(path.join(h.WURZEL, 'functions/api/vermittlung-register.js'));
+  const BMAIL = 'zugang-' + stempel + '@pruef-betrieb.de';
+  const anfrageNeu = async (tel, name, plz, betriebe) => { const r = await post('/api/vermittlung/senden', anfrage(Object.assign(betriebe ? { betriebe: betriebe } : {}, { token: await code(tel), plz: plz || PLZ, kontakt: { name: name, ort: (plz || PLZ) + ' Prüfort', tel: tel, mail: 'kunde-' + tel.replace(/\D/g, '') + '@pruef-kunde.de' } }))); return (r.json || {}).nr; };
+  const vonNr = async (nr) => { const l = ((await zapi('/api/inhaber/vermittlungen')).json || {}).vermittlungen || []; const z = l.find((v) => v.nr === nr); return ((await zapi('/api/inhaber/vermittlungen/' + z.id)).json || {}).vermittlung; };
+  const nr7 = await anfrageNeu('0176 4455667', 'Heike Zugang'), v7 = await vonNr(nr7), b7 = v7.betriebe.find((x) => x.name === 'Fensterbau Brandt'), P7 = '/api/inhaber/vermittlungen/' + v7.id;
+  const vor7 = await ids();
+  const z7 = (await zapi(P7 + '/senden', { bid: b7.id, mail: BMAIL, zustimmung: true })).json || {};
+  await warte(200);
+  const m7 = (await neueMails(vor7)).find((m) => m.an === BMAIL), token7 = m7 ? (/\/konto\/#zugang\/([A-Za-z0-9_.-]+)/.exec(m7.html) || [])[1] : '';
+  const vs7 = (await h.api('localhost', '/api/anfrage/' + token7)).json || {}, vo = vs7.vorschau || {};
+  const kaputt = await h.api('localhost', '/api/anfrage/' + String(token7).slice(0, -2) + 'xx'), kurz7 = await h.api('localhost', '/api/anfrage/abc');
+  ok(z7.ok && !!token7 && vs7.ok && vo.nr === nr7 && vo.ort === PLZ + ' Prüfort' && vo.stand === 'vorschau' && vo.echtheit && vo.echtheit.nummer === true && vo.echtheit.fenster === 4 && !vo.kunde && !vo.pdf && vs7.mail === 'zu•••@pruef-betrieb.de' && !vs7.mailVoll && vs7.angemeldet === false && vs7.erstesFrei === true && vs7.preis && vs7.preis.netto === 29 && vs7.preis.brutto === 34.51 && vs7.fassung === RECHT7.PARTNER_STAND && kaputt.status === 410 && kurz7.status === 400 && !/Heike|4455667/.test(JSON.stringify(vs7)),
+    '31.7 Vorschau über den Link ohne Anmeldung: Ort, Eckdaten, Echtheit (Nummer bestätigt), ohne Kunde und PDF, Adresse maskiert, erstes Aufmaß kostenlos, Preis 29 € netto / 34,51 € brutto; verändertes Token 410, Unsinn 400');
+  /* Konto per Code (Kundenbereich) mit der Adresse des Zugangs; eine andere Adresse darf nicht annehmen */
+  const kk = async (mail) => { await post('/api/auftrag/code', { mail: mail }); const r = await post('/api/auftrag/anmelden', { mail: mail, code: '123456' }); return (r.cookies || []).map((c) => c.split(';')[0]).find((c) => /^__Host-kunde=./.test(c)) || ''; };
+  const KA = await kk('andere-' + stempel + '@pruef-betrieb.de'), KB = await kk(BMAIL);
+  const kapi = (K) => (pfad, body) => h.api('localhost', pfad, body === undefined ? { cookie: K } : { cookie: K, body: body, origin: true });
+  const ka = kapi(KA), kb = kapi(KB);
+  const falsch7 = await ka('/api/anfrage/' + token7 + '/annehmen', {}), ohne7 = await post('/api/anfrage/' + token7 + '/annehmen', {});
+  const an7 = (await kb('/api/anfrage/' + token7 + '/annehmen', {})).json || {}, vs8 = (await h.api('localhost', '/api/anfrage/' + token7, { cookie: KB })).json || {};
+  const li7 = (await kb('/api/konto/anfragen')).json || {}, leer7 = (await ka('/api/konto/anfragen')).json || {};
+  ok(falsch7.status === 403 && /zu•••@pruef-betrieb.de/.test(falsch7.json.fehler) && ohne7.status === 401 && an7.ok && an7.id === v7.id && an7.betrieb === b7.id && vs8.passt === true && vs8.mailVoll === BMAIL && li7.anfragen.length >= 1 && li7.anfragen[0].nr === nr7 && li7.anfragen[0].geoeffnet && li7.betriebe.length === 1 && li7.betriebe[0].name === 'Fensterbau Brandt' && li7.betriebe[0].stand === 'kontakt' && li7.erstesFrei === true && li7.kasse === true && leer7.anfragen.length === 0 && leer7.betriebe.length === 0,
+    '31.7 Annehmen nur mit dem Konto der Adresse, an die der Zugang ging (fremdes Konto 403, ohne 401); danach steht die Anfrage im Konto (mit den früheren Zugängen des Betriebs), der Betrieb ist mit dem Konto verbunden, der Zugang gilt als geöffnet' +
+    ' (' + JSON.stringify({ falsch: falsch7.status, ohne: ohne7.status, an: an7.ok, passt: vs8.passt, anfragen: li7.anfragen.length, betriebe: li7.betriebe.map((b) => b.name + ':' + b.stand), erstesFrei: li7.erstesFrei }) + ')');
+  const fremd7 = await ka('/api/konto/anfragen/' + v7.id), pdfVor = await kb('/api/konto/anfragen/' + v7.id + '/pdf'), ohneZu7 = await kb('/api/konto/anfragen/' + v7.id + '/freischalten', {});
+  const vorF = await ids();
+  const frei7 = (await kb('/api/konto/anfragen/' + v7.id + '/freischalten', { zustimmung: true })).json || {}, a7 = frei7.anfrage || {};
+  const pdfNach = await kb('/api/konto/anfragen/' + v7.id + '/pdf'), det7 = (await kb('/api/konto/anfragen/' + v7.id)).json || {};
+  await warte(200);
+  const mF = await neueMails(vorF), anKundeF = mF.find((m) => m.an === 'kunde-01764455667@pruef-kunde.de');
+  const zv7 = await vonNr(nr7), zb7 = zv7.betriebe.find((x) => x.id === b7.id);
+  ok(fremd7.status === 404 && pdfVor.status === 402 && ohneZu7.status === 400 && ohneZu7.json.feld === 'zustimmung' && frei7.ok && frei7.frei === true && a7.stand === 'frei' && a7.frei && a7.frei.art === 'frei' && a7.frei.cent === 0 && a7.kunde && a7.kunde.name === 'Heike Zugang' && /4455667/.test(a7.kunde.tel) && a7.pdf === true && pdfNach.status === 200 && /application\/pdf/.test(pdfNach.headers['content-type'] || '') && det7.erstesFrei === false && (det7.anfrage || {}).kunde && zb7.freischaltung && zb7.freischaltung.art === 'frei' && zb7.status === 'will' &&
+    !!anKundeF && /Fensterbau Brandt hat dein Aufmaß/.test(anKundeF.betreff) && /abgerufen/.test(anKundeF.html.replace(/<[^>]+>/g, ' ')),
+    '31.7 Erstes Aufmaß kostenlos freischalten (nur mit Zustimmung zu den Partnerbedingungen; fremdes Konto 404, PDF vorher 402): danach Kontakt des Kunden und PDF, die Zentrale sieht „kostenlos“, der Kunde bekommt eine Mail, wer sein Aufmaß abgerufen hat');
+  /* zweite Anfrage an dieselbe Adresse: Konto ist schon verbunden, die Anfrage steht sofort im Konto; Freischalten kostet, Kasse der Attrappe */
+  const nr8 = await anfrageNeu('0177 5566778', 'Gerd Zweiter'), v8 = await vonNr(nr8), b8 = v8.betriebe.find((x) => x.name === 'Fensterbau Brandt');
+  const z8 = (await zapi('/api/inhaber/vermittlungen/' + v8.id + '/senden', { bid: b8.id, mail: BMAIL, zustimmung: true })).json || {}, zb8 = (z8.vermittlung || {}).betriebe.find((x) => x.id === b8.id) || {};
+  const li8 = (await kb('/api/konto/anfragen')).json || {};
+  const kasse8 = (await kb('/api/konto/anfragen/' + v8.id + '/freischalten', { zustimmung: true })).json || {};
+  const falscheKasse = await kb('/api/konto/anfragen/' + v8.id + '/kasse?session=test_falsch'), bez8 = (await kb('/api/konto/anfragen/' + v8.id + '/kasse?session=' + encodeURIComponent(kasse8.session || ''))).json || {};
+  const nochmal8 = (await kb('/api/konto/anfragen/' + v8.id + '/freischalten', { zustimmung: true })).json || {};
+  ok(z8.ok && zb8.zugang && zb8.zugang.konto === true && li8.anfragen.length === li7.anfragen.length + 1 && li8.anfragen[0].nr === nr8 && li8.erstesFrei === false && kasse8.ok && !kasse8.frei && /^http.*\/konto\/\?kasse=test_[A-Za-z0-9_-]+#anfrage\//.test(kasse8.kasse || '') && falscheKasse.status === 400 && bez8.ok && bez8.bezahlt === true && bez8.anfrage.frei.art === 'bezahlt' && bez8.anfrage.frei.cent === 2900 && bez8.anfrage.kunde.name === 'Gerd Zweiter' && nochmal8.schon === true,
+    '31.7 Zweites Aufmaß: Zugang landet sofort im verbundenen Konto, Freischalten führt zur Kasse (29 € netto), nach der Rückkehr bezahlt und offen; fremde Kasse 400, noch einmal freischalten ist unschädlich' +
+    ' (' + JSON.stringify({ konto: (zb8.zugang || {}).konto, anfragen: li8.anfragen.length, kasse: kasse8.kasse, falsch: falscheKasse.status, bezahlt: bez8.bezahlt, frei: (bez8.anfrage || {}).frei, nochmal: nochmal8.schon }) + ')');
+  /* Partner: Bereitschaft erklären (mit Zustimmung), danach in der Suche vorn und gekennzeichnet; Register-Eintrag ohne Anfrage; eigene Angaben */
+  const ohneBetrieb = await ka('/api/konto/partner', { bereit: true, zustimmung: true }), ohneZuP = await kb('/api/konto/partner', { betrieb: li8.betriebe[0].id, bereit: true });
+  const partner7 = (await kb('/api/konto/partner', { betrieb: li8.betriebe[0].id, bereit: true, zustimmung: true })).json || {};
+  const su7 = (await post('/api/vermittlung/suche', { plz: '33378' })).json || {}, erster = (su7.betriebe || [])[0] || {};
+  const eigener7 = (await ka('/api/konto/betrieb', { name: 'Fensterwerk Prüfpartner', ort: 'Rheda-Wiedenbrück', plz: '33378', tel: '05242 998877', web: 'www.pruefpartner.de', leistungen: ['Holz', 'Quatsch', 'Alu'] })).json || {};
+  const eigenerFalsch = await ka('/api/konto/betrieb', { name: 'X', plz: '123' });
+  const partner2 = (await ka('/api/konto/partner', { betrieb: (eigener7.betrieb || {}).id, bereit: true, zustimmung: true })).json || {};
+  const su8 = (await post('/api/vermittlung/suche', { plz: '33378' })).json || {}, zwei = (su8.betriebe || []).slice(0, 3);
+  const zurueck7 = (await kb('/api/konto/partner', { betrieb: li8.betriebe[0].id, bereit: false })).json || {};
+  const su9 = (await post('/api/vermittlung/suche', { plz: '33378' })).json || {};
+  ok(ohneBetrieb.status === 404 && ohneZuP.status === 400 && partner7.ok && partner7.betrieb.stand === 'partner' && partner7.betrieb.partner.bereit === true && partner7.betrieb.partner.fassung === RECHT7.PARTNER_STAND && erster.name === 'Fensterbau Brandt' && erster.partner === true && (su7.betriebe || []).filter((b) => b.partner).length === 1 &&
+    eigener7.ok && eigener7.betrieb.name === 'Fensterwerk Prüfpartner' && eigener7.betrieb.leistungen.join() === 'Holz,Alu' && eigenerFalsch.status === 400 && partner2.ok && partner2.betrieb.stand === 'partner' && zwei[0].name === 'Fensterwerk Prüfpartner' && zwei[0].partner === true && zwei[0].km === 0 && zwei[1].name === 'Fensterbau Brandt' && zwei[1].partner === true && !zwei[2].partner && (su8.betriebe || []).length <= 8 &&
+    zurueck7.ok && zurueck7.betrieb.stand === 'pausiert' && zurueck7.betrieb.partner.bereit === false && (su9.betriebe || [])[0].name === 'Fensterwerk Prüfpartner' && !(su9.betriebe || []).some((b) => b.name === 'Fensterbau Brandt' && b.partner),
+    '31.7 Partner: Bereitschaft nur mit Zustimmung und eigenem Betrieb; Partner stehen in der Suche auf Platz 1 und 2 mit partner: true (auch ein eingetragener Betrieb, den keine Suche kannte), zurückgenommen wieder nach Entfernung (' + zwei.map((b) => b.name + (b.partner ? '*' : '')).join(', ') + ')');
+  /* Register in der Zentrale: Liste, Detail mit Anfragen und Ergebnissen, Stand und Notiz, neu aufbauen; Doppelte über die Nummer */
+  const reg7 = (await zapi('/api/inhaber/betriebe')).json || {}, rBrandt = (reg7.betriebe || []).find((b) => b.name === 'Fensterbau Brandt') || {}, rNeu = (reg7.betriebe || []).find((b) => b.name === 'Fensterwerk Prüfpartner') || {};
+  const rd7 = (await zapi('/api/inhaber/betriebe/' + rBrandt.id)).json || {}, rb = rd7.betrieb || {};
+  const st7 = (await zapi('/api/inhaber/betriebe/' + rBrandt.id, { stand: 'abgelehnt', notiz: 'Will erst 2027 wieder', mail: 'neu@fensterbau-brandt.de' })).json || {}, stFalsch7 = await zapi('/api/inhaber/betriebe/' + rBrandt.id, { stand: 'weg' });
+  const auf7 = (await zapi('/api/inhaber/betriebe/neu-aufbauen', {})).json || {}, rd2 = (await zapi('/api/inhaber/betriebe/' + rBrandt.id)).json || {};
+  /* gleiche Nummer wie Fensterbau Brandt → Alias statt zweiter Eintrag; über eine Anfrage ohne Wahl des Kunden (sonst 409) */
+  const nrD = (await post('/api/vermittlung/senden', anfrage({ betriebe: [], token: await code('0178 6677889'), kontakt: { name: 'Dora Doppelt', ort: PLZ + ' Prüfort', tel: '0178 6677889', mail: 'dora@pruef-kunde.de' } }))).json.nr, vD = await vonNr(nrD);
+  const neuD = (await zapi('/api/inhaber/vermittlungen/' + vD.id + '/betrieb-neu', { name: 'Brandt Fenster GmbH', ort: 'Herzebrock', tel: '05245 555010' })).json || {};
+  const regD = (await zapi('/api/inhaber/betriebe/' + (neuD.bid || 'x'))).json || {};
+  ok(reg7.ok && reg7.betriebe.length >= 8 && reg7.staende.partner === 'Partner' && rBrandt.zaehler.frei === 1 && rBrandt.zaehler.bezahlt === 1 && rBrandt.zaehler.umsatz_cent === 2900 && rBrandt.zaehler.zugaenge >= 3 && rBrandt.konto === true && rNeu.stand === 'partner' && rNeu.quelle === 'register' &&
+    rd7.ok && rb.anfragen.length >= 3 && rb.anfragen.some((a) => a.nr === nr7 && a.art === 'frei' && a.kunde === 'Heike Zugang') && rb.anfragen.some((a) => a.nr === nr8 && a.art === 'bezahlt' && a.cent === 2900) && rb.verlauf.length >= 3 &&
+    st7.ok && st7.betrieb.stand === 'abgelehnt' && st7.betrieb.mail === 'neu@fensterbau-brandt.de' && stFalsch7.status === 400 && auf7.ok && auf7.betriebe >= 8 && rd2.betrieb.stand === 'abgelehnt' && rd2.betrieb.notiz === 'Will erst 2027 wieder' && rd2.betrieb.zaehler.bezahlt === 1 &&
+    neuD.ok && regD.ok && regD.betrieb.id === rBrandt.id && regD.betrieb.aliase.includes(neuD.bid),
+    '31.7 Lexikon der Zentrale: Liste mit Zählern (1 kostenlos, 1 bezahlt, 29 € Umsatz, Konto verbunden), Detail mit allen Anfragen und Ergebnissen, Stand/Notiz/Mail ändern (unbekannt 400), „neu aufbauen“ behält Stand und Notiz, ein Betrieb mit derselben Nummer wird Alias statt Doppeleintrag');
+  /* Nachricht an den Kunden aus der Zentrale */
+  const vorK = await ids();
+  const km1 = (await zapi(P7 + '/kunde-mail', { betreff: 'Kurz zum Stand', text: 'Hallo Heike,\n\nFensterbau Brandt hat dein Aufmaß und meldet sich diese Woche.\n\nViele Grüße' })).json || {};
+  const kmLeer = await zapi(P7 + '/kunde-mail', { betreff: 'X', text: '' }), kmOhne = await zapi(P2 + '/kunde-mail', { betreff: 'Hallo', text: 'Der Kunde hat keine Mail.' });
+  await warte(200);
+  const mK = (await neueMails(vorK)).find((m) => m.an === 'kunde-01764455667@pruef-kunde.de' && m.betreff === 'Kurz zum Stand');
+  ok(km1.ok && (km1.vermittlung.nachrichten || []).length === 1 && /Nachricht an den Kunden: „Kurz zum Stand“/.test((km1.vermittlung.verlauf || []).map((x) => x.text).join()) && kmLeer.status === 400 && kmOhne.status === 409 && !!mK && /meldet sich diese Woche/.test(mK.html) && /Anfrage/.test(mK.html) && mK.html.includes(nr7),
+    '31.7 Nachricht an den Kunden aus der Zentrale: geht an seine E-Mail mit Anfragenummer, steht im Verlauf und in den Nachrichten; leer 400, Kunde ohne E-Mail 409');
+  /* Rechtsseite Partnerbedingungen und die App: Etikett „Partner“ in der Liste */
+  const pb = await h.api('localhost', '/partnerbedingungen/'), pbText = pb.text || '';
+  ok(pb.status === 200 && /<h1>Partnerbedingungen für Fensterbetriebe<\/h1>/.test(pbText) && /29 € zuzüglich/.test(pbText) && /<nav class="recht-inhalt"/.test(pbText) && /Stand: 30\. Oktober 2026/.test(pbText) && new RegExp('name="stand" content="' + RECHT7.PARTNER_STAND + '"').test(pbText) && /\/partnerbedingungen\//.test((await h.api('localhost', '/impressum/')).text) && /Partnerbedingungen/.test((await h.api('localhost', '/datenschutz/')).text) && /als „Partner“ gekennzeichnet/.test((await h.api('localhost', '/agb/')).text),
+    '31.7 Rechtsseite /partnerbedingungen/ (Stand ' + RECHT7.PARTNER_STAND + ', Inhaltsverzeichnis), im Impressum und Datenschutz verlinkt; die AGB nennen die Reihenfolge mit Partnern');
+  /* die App zeigt Partner mit Etikett und sagt, wonach sortiert ist (Fensterwerk Prüfpartner ist Partner für 33378) */
+  {
+    const cA = await h.browser.newContext(Object.assign({}, h.telefon, { extraHTTPHeaders: { 'x-forwarded-for': '198.51.100.231' } })), pA = await h.neueSeite(cA, h.base());
+    await pA.goto(h.base() + '/app/', { waitUntil: 'networkidle' });
+    await pA.waitForFunction(() => typeof SERVER !== 'undefined' && !!SERVER.vermittlung, null, { timeout: 8000 }).catch(() => null);
+    await pA.evaluate(() => { S.windows = demoProject(); S.proj = Object.assign({}, PROJ0, { total: 8, zeit: 'asap', budget: 'b2', ort: '' }); S.verm = null; vm().weg = 'A'; go('betriebe'); });
+    await pA.waitForSelector('#vm-plz'); await pA.type('#vm-plz', '33378');
+    await pA.waitForSelector('.vm-betrieb', { timeout: 8000 }).catch(() => null);
+    const appP = await pA.evaluate(() => ({ erster: (document.querySelector('.vm-betrieb .vm-tx b') || {}).textContent || '', etikett: !!document.querySelector('.vm-betrieb:first-child .vm-partner'), partner: document.querySelectorAll('.vm-partner').length, satz: /Partnerbetriebe stehen oben/.test((document.querySelector('.vm-quelle') || {}).textContent || ''), farbe: getComputedStyle(document.querySelector('.vm-partner') || document.body).backgroundColor }));
+    ok(/Fensterwerk Prüfpartner/.test(appP.erster) && appP.etikett && appP.partner === 1 && appP.satz && appP.farbe === 'rgb(60, 58, 102)', '31.7 App: der Partner steht oben mit Etikett „Partner“ in Indigo, die Quellenzeile nennt die Reihenfolge (' + JSON.stringify(appP) + ')');
+    h.sauber(pA, '31.7 App mit Partner ohne Fehler');
+    await cA.close();
+  }
+  ok(VP.PREIS_NETTO === 29 && VP.PREIS_CENT === 2900 && RE.PARTNER_VORN === 2 && RE.telNorm('+49 5245 555-010') === '05245555010' && RE.webHost('https://www.Pruef-Partner.de/kontakt') === 'pruef-partner.de' && RE.webHost('kaputt') === '', '31.7 Konstanten und Normalisierung: 29 € netto, zwei Partner vorn, Nummer und Website für Doppelte vereinheitlicht');
+
+  /* ---------- Teil K: Bereich für Fensterbauer im Browser (Zugang über den Link, Code, Freischalten, PDF, Übersicht, Partner) ---------- */
+  const messenK = (page) => page.evaluate(() => {
+    const sicht = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'; };
+    const pillen = [...document.querySelectorAll('.a-pille')].filter((p) => sicht(p) && !p.closest('.a-blatt'));
+    const klein = [...document.querySelectorAll('main a, main button, main summary, main input:not([type=file]):not([type=checkbox]), .a-kopf a, .a-kopf button')].filter((e) => sicht(e) && !e.closest('.a-haken, p, .a-kv, .a-fuss-links, footer') && e.getBoundingClientRect().height < 43.5).map((e) => (e.className || e.tagName) + ' ' + Math.round(e.getBoundingClientRect().height));
+    const schrift = [...document.querySelectorAll('main *')].filter((e) => sicht(e) && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && parseFloat(getComputedStyle(e).fontSize) < 13).map((e) => e.className + ' ' + getComputedStyle(e).fontSize);
+    return { pillen: pillen.length, pille: pillen[0] ? pillen[0].textContent.trim() : '', klein: klein.slice(0, 4), schrift: schrift.slice(0, 4), quer: document.scrollingElement.scrollWidth > innerWidth + 1, h1: document.querySelectorAll('h1').length, text: document.body.innerText };
+  });
+  for (const [name, opts, tel, mailK, betriebK] of [['Telefon', h.telefon, '0174 5566771', 'konto-telefon-' + stempel + '@pruef-betrieb.de', 'Tischlerei Lindholz'], ['Schreibtisch', { viewport: { width: 1280, height: 900 }, locale: 'de-DE' }, '0175 6677882', 'konto-laptop-' + stempel + '@pruef-betrieb.de', 'Glas und Rahmen Nolte']]) {
+    /* je Lauf ein anderer Betrieb: ein Betrieb hängt an genau einem Konto (sonst 409 beim Annehmen) */
+    const suK = (await post('/api/vermittlung/suche', { plz: PLZ })).json || {}, idK = ((suK.betriebe || []).find((x) => x.name === betriebK) || {}).id;
+    const nrK = await anfrageNeu(tel, 'Kunde ' + name, undefined, idK ? [idK, bid[0]] : undefined), vK = await vonNr(nrK), bK = vK.betriebe.find((x) => x.name === betriebK) || vK.betriebe[0];
+    const vorK = await ids();
+    await zapi('/api/inhaber/vermittlungen/' + vK.id + '/senden', { bid: bK.id, mail: mailK, zustimmung: true }); await warte(200);
+    const mK = (await neueMails(vorK)).find((m) => m.an === mailK), tokenK = mK ? (/\/konto\/#zugang\/([A-Za-z0-9_.-]+)/.exec(mK.html) || [])[1] : '';
+    const c = await h.browser.newContext(opts), page = await h.neueSeite(c, h.base()), befund = [], mess = {};
+    const pruefeK = async (wo, pille) => { await page.waitForTimeout(350); const m = await messenK(page); mess[wo] = m; if (m.pillen !== (pille ? 1 : 0) || m.klein.length || m.schrift.length || m.quer || m.h1 !== 1) befund.push(wo + ': ' + JSON.stringify({ pillen: m.pillen, pille: m.pille, klein: m.klein, schrift: m.schrift, quer: m.quer, h1: m.h1 })); await h.foto(page, 'konto-' + wo + '-' + (name === 'Telefon' ? 'telefon' : 'desktop')); return m; };
+    try {
+      /* Zugang über den Link: Vorschau ohne Kunde, Anmeldung mit der Adresse aus dem Zugang */
+      await page.goto(h.base() + '/konto/#zugang/' + tokenK, { waitUntil: 'networkidle' }); await page.waitForSelector('.a-an-papier', { timeout: 8000 });
+      const m1 = await pruefeK('1-zugang', true);
+      const ohneKunde = !new RegExp('Kunde ' + name + '|' + tel.replace(/\D/g, '').slice(-6)).test(m1.text.replace(/\D/g, '') + m1.text) && /Code bestätigt/.test(m1.text) && /Partnerbedingungen/.test(m1.text);
+      if (!(await page.inputValue('[data-k="mail"] input'))) await page.fill('[data-k="mail"] input', mailK);
+      await page.click('.a-fuss .a-pille'); await page.waitForSelector('[data-k="code"] input', { timeout: 8000 });
+      await page.fill('[data-k="code"] input', '123456'); await page.click('.a-fuss .a-pille');
+      await page.waitForURL(/#anfrage\//, { timeout: 10000 }); await page.waitForSelector('.a-an-freischalten', { timeout: 8000 });
+      const m2 = await pruefeK('2-anfrage', true);
+      /* Freischalten nur mit Zustimmung; das erste Aufmaß ist kostenlos */
+      await page.click('.a-fuss .a-pille'); await page.waitForTimeout(400);
+      const ohneHakenK = await page.locator('.a-haken.fehlt').count();
+      await page.check('[data-k="zustimmung"] input'); await page.click('.a-fuss .a-pille');
+      await page.waitForSelector('.a-an-kontakt', { timeout: 10000 });
+      const m3 = await pruefeK('3-frei', true);
+      const pdfHrefK = await page.getAttribute('.a-fuss .a-pille', 'href'), pdfK = await page.request.get(h.base() + pdfHrefK);
+      const mitKunde = new RegExp('Kunde ' + name).test(m3.text) && /Nur für diese Anfrage/.test(m3.text) && /kostenlos/.test(m3.text);
+      /* Übersicht: die Anfrage steht da, der Betrieb mit dem Schalter „Bereitschaft erklären“ */
+      await page.click('#kopf .a-rund'); await page.waitForSelector('.a-an-anfragen', { timeout: 8000 });
+      const m4 = await pruefeK('4-uebersicht', true);
+      const schalterK = page.locator('.a-an-schalter[aria-checked="false"]').first(), hatSchalter = await schalterK.count();
+      let partnerOk = false;
+      if (hatSchalter) {
+        await schalterK.click(); await page.waitForSelector('.a-blatt', { timeout: 5000 }); await page.waitForTimeout(300);
+        await page.click('.a-blatt .a-pille'); await page.waitForTimeout(400);
+        const fehltK = await page.locator('.a-blatt .a-haken.fehlt').count();
+        await page.check('.a-blatt [data-k="zustimmung"] input'); await page.click('.a-blatt .a-pille'); await page.waitForSelector('.a-blatt', { state: 'detached', timeout: 8000 }); await page.waitForTimeout(400);
+        partnerOk = fehltK === 1 && (await page.locator('.a-an-schalter[aria-checked="true"]').count()) === 1;
+      }
+      const regK = (await zapi('/api/inhaber/betriebe/' + bK.id)).json || {}, rK = regK.betrieb || {};
+      ok(!!tokenK && ohneKunde && m2.pillen === 1 && /freischalten/i.test(m2.pille) && ohneHakenK === 1 && mitKunde && /\/pdf$/.test(pdfHrefK || '') && pdfK.status() === 200 && /application\/pdf/.test(pdfK.headers()['content-type'] || '') && /Freigeschaltet/.test(m4.text) && hatSchalter === 1 && partnerOk && rK.stand === 'partner' && rK.konto,
+        '31.K ' + name + ': Zugang über den Link ohne Kunde („Code bestätigt“, Partnerbedingungen), Anmeldung per Code, Freischalten nur mit Häkchen, danach Kunde, „Nur für diese Anfrage“ und PDF (200); Übersicht mit „Freigeschaltet“, Bereitschaft nur mit Häkchen, danach Partner im Register' +
+        ' (' + JSON.stringify({ ohneKunde, ohneHaken: ohneHakenK, pdf: pdfK.status(), schalter: hatSchalter, partnerOk, stand: rK.stand, konto: !!rK.konto }) + ')');
+      ok(!befund.length, '31.K ' + name + ': genau eine volle Pille je Bildschirm, ein h1, Ziele ab 44 px, Schrift ab 13 px, kein Querscrollen' + (befund.length ? ': ' + befund.join(' | ') : ''));
+    } catch (e) { ok(false, '31.K ' + name + ' läuft durch: ' + String(e && e.message || e).split('\n')[0]); }
+    h.sauber(page, '31.K Bereich für Fensterbauer (' + name + ') ohne Fehler und CSP-Verstöße');
+    await c.close();
+  }
+  /* „Anmelden“ für Fensterbauer: Ring neben „Paket anfragen“ auf der Seite für Fensterbauer (auch in der Ansicht Fensterbauer der Startseite eingebettet) */
+  {
+    const c = await h.browser.newContext(h.telefon), page = await h.neueSeite(c, h.base());
+    await page.goto(h.base() + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
+    const an = await page.$$eval('a.ez-anmelden', (l) => l.filter((a) => { const r = a.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight; }).map((a) => ({ href: a.getAttribute('href'), h: Math.round(a.getBoundingClientRect().height), text: a.textContent.trim() })));
+    const start = fs.readFileSync(path.join(h.WURZEL, 'web/fuer-fensterbauer/index.html'), 'utf8'), vorschau = fs.readFileSync(path.join(h.WURZEL, 'docs/profis/fensterbauer-vorschau/index.html'), 'utf8');
+    ok(an.length === 1 && an[0].href === '/konto/' && an[0].h >= 44 && an[0].text === 'Anmelden' && /class="ez-anmelden"/.test(start) && /class="ez-anmelden"/.test(vorschau), '31.K Seite für Fensterbauer: Ring „Anmelden“ (44 px) führt in den Bereich /konto/, in Vorschau und Seite gleich (' + JSON.stringify(an) + ')');
+    h.sauber(page, '31.K Seite für Fensterbauer mit „Anmelden“ ohne Fehler');
     await c.close();
   }
 

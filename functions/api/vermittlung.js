@@ -16,8 +16,13 @@
      POST /api/vermittlung/senden { kontakt, plz, betriebe, token, code, einwilligung, aufmass, eckdaten, pdf } → { ok, nr }
    Zentrale (Sitzung des Inhabers, wie /api/inhaber/auftraege):
      GET /api/inhaber/vermittlungen · GET …/:id · GET …/:id/pdf · POST …/:id/betrieb { bid, status, notiz }
-     POST …/:id/betrieb-neu { name, ort, tel, web } · POST …/:id/senden { bid, mail, zustimmung: true, kunde } · POST …/:id/stand { stand }
-     POST …/:id/notiz { text }
+     POST …/:id/betrieb-neu { name, ort, tel, web } · POST …/:id/senden { bid, mail, zustimmung: true, kunde } (seit 30.10.2026 „Zugang
+     schicken“: Mail mit Link in den Bereich für Fensterbauer, kein Aufmaßblatt und keine Kontaktdaten mehr in der Mail) · POST …/:id/stand
+     { stand } · POST …/:id/notiz { text } · POST …/:id/kunde-mail { betreff, text } (Nachricht an den Kunden)
+     Register der Betriebe (Lexikon, vermittlung-register.js): GET /api/inhaber/betriebe · GET …/:id · POST …/:id { stand, notiz, mail, plz,
+     bereit } · POST /api/inhaber/betriebe/neu-aufbauen
+   Bereich für Fensterbauer (vermittlung-partner.js): GET /api/anfrage/:token, POST …/annehmen, GET /api/konto/anfragen[/:id[/pdf|/kasse]],
+   POST /api/konto/anfragen/:id/freischalten, POST /api/konto/partner, POST /api/konto/betrieb. Partner stehen in der Suche vorn.
    /api/status: vermittlungStatus(k, env) → { an, suche, sms }. Tageslauf: vermittlungLauf(k) löscht Anfragen und Aufmaßblätter 180 Tage
    nach dem Eingang und abgelaufene Suchen. Teile: vermittlung-suche.js (KI), vermittlung-sms.js (Code), vermittlung-daten.js (Speicher),
    vermittlung-mails.js (Mails). Prüfung: scripts/pruefen-instanzen/31.mjs. */
@@ -31,8 +36,11 @@ import { vermittlungDaten } from './vermittlung-daten.js';
 import { sucheArt, kiSuche, attrappeBetriebe, oeffentlich, betriebId, webText, UMKREIS, MAX_BETRIEBE, MODELL, ZEIT_MS } from './vermittlung-suche.js';
 import { plzInfo, km as kmZwischen, umkreisPlz, betriebLage, vorratPlz } from './vermittlung-ort.js';
 import { smsArt, smsDienst } from './vermittlung-sms.js';
-import { inhaberMail, eingangMail, betriebMail, weitergabeMail, eckZeilen, erreichText } from './vermittlung-mails.js';
+import { inhaberMail, eingangMail, betriebMail, kundeMail, eckZeilen, erreichText } from './vermittlung-mails.js';
 import { kaufNachweis } from './eigene.js';
+import { registerMerken, registerFuer, registerNeuAufbauen, partnerVorn, STAENDE_BETRIEB } from './vermittlung-register.js';
+import { PARTNER, zugangToken, zugangLink, preisInfo, erstesFreiFuer, ZUGANG_TAGE, registerSicht } from './vermittlung-partner.js';
+import { daten as kundenDaten } from '../auftrag/daten.js';
 
 const MIN = 60000, TAG = 864e5;
 export const AUFBEWAHRUNG_TAGE = 180;
@@ -133,7 +141,8 @@ async function umgebung(d, plz, jetzt, neu) {
     if (schluessel.some((x) => schon.has(x))) continue;
     schluessel.forEach((x) => schon.add(x)); betriebe.push(b);
   }
-  return { betriebe: betriebe, eigene: eigene };
+  /* Partner (Register, Bereitschaft erklärt) auf Platz 1 und 2, vermittlung-register.js */
+  return { betriebe: await partnerVorn(d, lage, betriebe), eigene: eigene };
 }
 /* Eine neue Suche: KI (schnell, wenn ein Kunde wartet) oder Attrappe */
 const neueSuche = (env, art, plz, ort, schnell) => (art === 'attrappe' ? attrappeBetriebe().then((l) => ({ ok: true, quelle: 'attrappe', betriebe: l, info: {} }))
@@ -265,6 +274,8 @@ async function senden(ctx) {
   ctx.waitUntil(post.senden({ an: post.kontakt, betreff: m.betreff, html: m.html, antwortAn: mail || undefined, anhaenge: [{ filename: 'Aufmassblatt-' + v.nr + '.pdf', content: pdf.b64, content_type: 'application/pdf' }], idempotenz: 'vermittlung-neu-' + v.id }).catch(() => false));
   /* Bestätigung an den Kunden mit seinem Aufmaßblatt: auf dem Gratis-Weg gehört es dazu (Nummer bestätigt, Anfrage an bis zu fünf Betriebe) */
   if (mail) { const e = eingangMail(v); ctx.waitUntil(post.senden({ an: mail, betreff: e.betreff, html: e.html, antwortAn: post.kontakt, anhaenge: [{ filename: 'Aufmassblatt-' + v.nr + '.pdf', content: pdf.b64, content_type: 'application/pdf' }], idempotenz: 'vermittlung-eingang-' + v.id }).catch(() => false)); }
+  /* die gewählten Betriebe ins Register (Lexikon der Zentrale), im Hintergrund */
+  ctx.waitUntil(Promise.all((v.betriebe || []).map((x) => registerMerken(d, v, x, 'Vom Kunden gewählt'))).catch(() => false));
   if (ctx.zaehlen) ctx.zaehlen('ereignis:vermittlung');
   return { ok: true, nr: v.nr, freischaltung: await freischaltung(ctx.k, kennung, v.nr, Date.now()) };
 }
@@ -293,8 +304,9 @@ function sicht(v) {
     kunde: { name: k.name || '', ort: k.ort || '', tel: k.tel || '', anzeige: k.anzeige || '', kanal: k.kanal || '', mail: k.mail || '', erreich: erreichText(k.erreich) },
     eckdaten: v.eckdaten || {}, eckZeilen: eckZeilen(v.eckdaten), einwilligung: v.einwilligung || {}, aufmassZeichen: String(v.aufmass || '').length,
     betriebe: (v.betriebe || []).map((x) => ({ id: x.id, name: x.name, ort: x.ort || '', strasse: x.strasse || '', tel: x.tel || '', web: x.web || '', km: x.km == null ? null : x.km, leistungen: x.leistungen || [], quelle: x.quelle || '', gewaehlt: !!x.gewaehlt,
-      status: x.status || 'offen', notiz: x.notiz || '', mail: x.mail || '', zustimmung: x.zustimmung || '', gesendet: x.gesendet || null })),
-    pdf: !!(v.pdf && v.pdf.pfad), pdfBytes: (v.pdf || {}).bytes || 0, verlauf: (v.verlauf || []).slice(), notiz: v.notiz || '', loeschenAm: new Date(Date.parse(v.created_at) + AUFBEWAHRUNG_TAGE * TAG).toISOString()
+      status: x.status || 'offen', notiz: x.notiz || '', mail: x.mail || '', zustimmung: x.zustimmung || '', gesendet: x.gesendet || null, partner: !!x.partner,
+      zugang: x.zugang ? { zeit: x.zugang.zeit, mail: x.zugang.mail, geoeffnet: x.zugang.geoeffnet || '', konto: !!x.zugang.konto } : null, freischaltung: x.freischaltung ? { zeit: x.freischaltung.zeit, art: x.freischaltung.art, cent: x.freischaltung.cent || 0 } : null })),
+    pdf: !!(v.pdf && v.pdf.pfad), pdfBytes: (v.pdf || {}).bytes || 0, verlauf: (v.verlauf || []).slice(), notiz: v.notiz || '', nachrichten: (v.nachrichten || []).slice(), loeschenAm: new Date(Date.parse(v.created_at) + AUFBEWAHRUNG_TAGE * TAG).toISOString()
   });
 }
 const statusAus = (s) => { const x = String(s == null ? '' : s).trim().toLowerCase().replace(/[\s-]+/g, '_'); return STATUS[x] ? x : null; };
@@ -326,6 +338,7 @@ const INHABER = {
       if (notiz !== undefined) y.notiz = notiz;
     });
     if (z === false) throw new ApiFehler('Diesen Betrieb gibt es in dieser Anfrage nicht.', 404);
+    if (status !== undefined && status !== x.status) await registerMerken(d, z, (z.betriebe || []).find((w) => w.id === x.id), 'Anruf: ' + STATUS[status]);
     return { ok: true, vermittlung: sicht(z) };
   },
   /* Weiteren Betrieb eintragen (selbst gefunden oder vom Kunden genannt) */
@@ -345,37 +358,59 @@ const INHABER = {
       (z.betriebe = z.betriebe || []).push({ id: id, name: name, ort: ort, strasse: '', tel: t ? t.anzeige : '', web: web, km: null, leistungen: [], quelle: 'inhaber', gewaehlt: false, status: 'offen', notiz: '', mail: '', zustimmung: '', gesendet: null });
       verlauf(z, 'inhaber', 'Betrieb eingetragen: ' + name + (ort ? ', ' + ort : ''));
     });
+    await registerMerken(d, z, (z.betriebe || []).find((w) => w.id === id), 'In der Zentrale zu einer Anfrage eingetragen');
     return { ok: true, vermittlung: sicht(z), bid: id };
   },
-  /* Aufmaß an einen Betrieb: nur mit Zustimmung im Gespräch (Zeit steht im Verlauf), höchstens MAX_WAHL Betriebe und, wenn der Kunde gewählt
-     hat, nur an die gewählten; auf Wunsch eine Mail an den
-     Kunden, welcher Betrieb sein Aufmaß hat */
+  /* Zugang an einen Betrieb (seit 30.10.2026 statt des Aufmaßblatts per Mail): nur mit Zustimmung im Gespräch (Zeit steht im Verlauf),
+     höchstens MAX_WAHL Betriebe und, wenn der Kunde gewählt hat, nur an die gewählten. Die Mail trägt einen Link in den Bereich für
+     Fensterbauer (Token, ZUGANG_TAGE); Kontaktdaten und Blatt sieht der Betrieb erst dort nach Code und Freischalten. Hat die Adresse schon
+     ein Konto, ist die Anfrage dort sofort da. Auf Wunsch eine Mail an den Kunden, welcher Betrieb seine Anfrage hat */
   'POST /api/inhaber/vermittlungen/:id/senden': async (ctx) => {
     const d = await inhaberDaten(ctx), v = await eine(ctx, d), b = ctx.body || {}, x = betriebVon(v, b.bid), f = {};
     const mail = kurz(b.mail, 120).toLowerCase();
     if (b.zustimmung !== true) f.zustimmung = 'Bitte bestätigen Sie, dass der Betrieb im Gespräch zugestimmt hat.';
     if (!mailOk(mail)) f.mail = 'Bitte die E-Mail-Adresse des Betriebs eintragen.';
     if (Object.keys(f).length) throw new ApiFehler(Object.values(f)[0], 400, { felder: f });
-    if ((v.betriebe || []).some((y) => y.gewaehlt) && !x.gewaehlt) throw new ApiFehler('Der Kunde hat andere Betriebe gewählt. Sein Aufmaß geht nur an diese.', 409);
-    if ((v.betriebe || []).filter((y) => y.gesendet && y.id !== x.id).length >= MAX_WAHL) throw new ApiFehler('Das Aufmaß ging schon an ' + ZAHL[MAX_WAHL] + ' Betriebe. Mehr sind nicht erlaubt.', 409);
+    if ((v.betriebe || []).some((y) => y.gewaehlt) && !x.gewaehlt) throw new ApiFehler('Der Kunde hat andere Betriebe gewählt. Seine Anfrage geht nur an diese.', 409);
+    if ((v.betriebe || []).filter((y) => y.gesendet && y.id !== x.id).length >= MAX_WAHL) throw new ApiFehler('Die Anfrage ging schon an ' + ZAHL[MAX_WAHL] + ' Betriebe. Mehr sind nicht erlaubt.', 409);
     const post = postDienst(ctx.k), ab = ablage(ctx.k, 'vermittlung');
     if (!post) throw new ApiFehler('Der Mailversand ist hier noch nicht eingerichtet (MAIL_API_KEY).', 503);
-    const bytes = v.pdf && v.pdf.pfad && ab ? await ab.holen(v.pdf.pfad) : null;
-    if (!bytes) throw new ApiFehler('Das Aufmaßblatt gibt es nicht mehr.', 410);
+    if (!(v.pdf && v.pdf.pfad && ab)) throw new ApiFehler('Das Aufmaßblatt gibt es nicht mehr.', 410);
     const zeit = ZEIT();
-    await d.aendern(v.id, (z) => { const y = (z.betriebe || []).find((w) => w.id === x.id); if (!y) return false; y.zustimmung = zeit; y.mail = mail; if (y.status !== 'will') { y.status = 'will'; y.status_zeit = zeit; } verlauf(z, 'inhaber', 'Zustimmung im Gespräch: ' + y.name + ' möchte die Anfrage per E-Mail an ' + mail); });
-    const m = betriebMail(v, x);
-    const r = await post.senden({ an: mail, betreff: m.betreff, html: m.html, antwortAn: post.kontakt, anhaenge: [{ filename: 'Aufmassblatt-' + v.nr + '.pdf', content: b64Aus(bytes), content_type: 'application/pdf' }], idempotenz: 'vermittlung-betrieb-' + v.id + '-' + x.id + '-' + mail }).catch(() => ({ ok: false }));
+    await d.aendern(v.id, (z) => { const y = (z.betriebe || []).find((w) => w.id === x.id); if (!y) return false; y.zustimmung = zeit; y.mail = mail; if (y.status !== 'will') { y.status = 'will'; y.status_zeit = zeit; } verlauf(z, 'inhaber', 'Zustimmung im Gespräch: ' + y.name + ' möchte die Anfrage (' + mail + ')'); });
+    const token = await zugangToken(ctx.k, v, x, mail), link = zugangLink(ctx.url.origin, token), preis = preisInfo(ctx);
+    const m = betriebMail(v, x, { link: link, bis: new Date(Date.parse(v.created_at) + ZUGANG_TAGE * TAG).toISOString(), preis: preis.text, erstesFrei: await erstesFreiFuer(d, mail, x.id) });
+    const r = await post.senden({ an: mail, betreff: m.betreff, html: m.html, antwortAn: post.kontakt, idempotenz: 'vermittlung-zugang-' + v.id + '-' + x.id + '-' + mail + '-' + Math.floor(Date.now() / 60000) }).catch(() => null);
     if (!r || !r.ok) throw new ApiFehler('Die E-Mail ließ sich gerade nicht senden. Bitte gleich noch einmal.', 502);
-    const kundeMail = b.kunde === true && (v.kunde || {}).mail ? v.kunde.mail : '';
+    const kd = kundenDaten(ctx.k), konto = kd ? await kd.kundeNachMail(mail).catch(() => null) : null;
+    /* den Kunden informiert der Server erst, wenn der Betrieb freischaltet (vermittlung-partner.js, freigeschaltetMail); das frühere Häkchen
+       „Kunden per E-Mail sagen“ gibt es nicht mehr, eigene Nachrichten schreibt der Inhaber über kunde-mail */
     const z2 = await d.aendern(v.id, (z) => {
       const y = (z.betriebe || []).find((w) => w.id === x.id); if (!y) return false;
-      y.gesendet = { zeit: ZEIT(), mail: mail, zustimmung: zeit };
-      verlauf(z, 'inhaber', 'Aufmaß an ' + y.name + ' geschickt (' + mail + ')' + (kundeMail ? '; Kunde per E-Mail informiert' : ''));
+      y.gesendet = { zeit: ZEIT(), mail: mail, zustimmung: zeit, art: 'zugang' };
+      y.zugang = Object.assign({ zeit: ZEIT(), mail: mail, geoeffnet: '' }, y.zugang || {}, konto ? { konto: konto.id } : {});
+      verlauf(z, 'inhaber', 'Zugang an ' + y.name + ' geschickt (' + mail + ')' + (konto ? '; die Adresse hat schon ein Konto' : ''));
       if (['neu', 'in_arbeit', 'kein_betrieb'].indexOf(z.stand) >= 0) z.stand = 'vermittelt';
     });
-    if (kundeMail) { const w = weitergabeMail(z2, x); ctx.waitUntil(post.senden({ an: kundeMail, betreff: w.betreff, html: w.html, antwortAn: post.kontakt, idempotenz: 'vermittlung-kunde-' + v.id + '-' + x.id }).catch(() => false)); }
+    const y = (z2.betriebe || []).find((w) => w.id === x.id);
+    const reg = await registerMerken(d, z2, y, 'Zugang geschickt an ' + mail);
+    if (reg && konto && !reg.konto) await d.betriebAendern(reg.id, (z) => { z.konto = konto.id; if (!z.mail) z.mail = mail; }).catch(() => null);
     return { ok: true, vermittlung: sicht(z2) };
+  },
+  /* Nachricht des Inhabers an den Kunden (Abschnitt Kunde in der Zentrale): Betreff und Text frei, geht an die E-Mail des Kunden */
+  'POST /api/inhaber/vermittlungen/:id/kunde-mail': async (ctx) => {
+    const d = await inhaberDaten(ctx), v = await eine(ctx, d), b = ctx.body || {}, f = {};
+    const betreff = kurz(b.betreff, 120), text = String(b.text == null ? '' : b.text).replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, ' ').trim().slice(0, 4000);
+    if (!(v.kunde || {}).mail) throw new ApiFehler('Der Kunde hat keine E-Mail-Adresse angegeben. Bitte rufen Sie ihn an.', 409);
+    if (betreff.length < 3) f.betreff = 'Bitte einen Betreff eintragen.';
+    if (text.length < 5) f.text = 'Bitte einen Text eintragen.';
+    if (Object.keys(f).length) throw new ApiFehler(Object.values(f)[0], 400, { felder: f });
+    const post = postDienst(ctx.k); if (!post) throw new ApiFehler('Der Mailversand ist hier noch nicht eingerichtet (MAIL_API_KEY).', 503);
+    const m = kundeMail(v, { betreff: betreff, text: text });
+    const r = await post.senden({ an: v.kunde.mail, betreff: m.betreff, html: m.html, antwortAn: post.kontakt, idempotenz: 'vermittlung-kundemail-' + v.id + '-' + Date.now() }).catch(() => null);
+    if (!r || !r.ok) throw new ApiFehler('Die E-Mail ließ sich gerade nicht senden. Bitte gleich noch einmal.', 502);
+    const z = await d.aendern(v.id, (z) => { verlauf(z, 'inhaber', 'Nachricht an den Kunden: „' + betreff + '“'); (z.nachrichten = z.nachrichten || []).push({ zeit: ZEIT(), betreff: betreff, text: text }); if (z.nachrichten.length > 50) z.nachrichten = z.nachrichten.slice(-50); });
+    return { ok: true, vermittlung: sicht(z) };
   },
   'POST /api/inhaber/vermittlungen/:id/stand': async (ctx) => {
     const d = await inhaberDaten(ctx), v = await eine(ctx, d), stand = String((ctx.body || {}).stand || '');
@@ -387,12 +422,45 @@ const INHABER = {
     const d = await inhaberDaten(ctx), v = await eine(ctx, d), text = String((ctx.body || {}).text == null ? '' : ctx.body.text).slice(0, 4000);
     await d.aendern(v.id, (z) => { z.notiz = text; });
     return { ok: true };
-  }
+  },
+  /* Register der Betriebe (Lexikon): Liste mit Zählern, ein Betrieb mit allen Anfragen und Ergebnissen, Stand und Notiz ändern */
+  'GET /api/inhaber/betriebe': async (ctx) => {
+    const d = await inhaberDaten(ctx), l = await d.betriebeAlle();
+    return { ok: true, betriebe: l.map(registerZeile), staende: STAENDE_BETRIEB, preis: preisInfo(ctx) };
+  },
+  'GET /api/inhaber/betriebe/:id': async (ctx) => {
+    const d = await inhaberDaten(ctx), r = await d.betriebHolen(String(ctx.params.id || '')); if (!r) throw new ApiFehler('Diesen Betrieb gibt es im Register nicht.', 404);
+    /* zu jeder Anfrage der aktuelle Stand aus der Anfrage selbst */
+    const anfragen = [];
+    for (const a of (r.anfragen || []).slice().reverse()) { const v = await d.holen(a.id); const x = v ? (v.betriebe || []).find((y) => y.id === r.id || (r.aliase || []).includes(y.id)) : null; anfragen.push(Object.assign({}, a, v ? { stand: v.stand, kunde: (v.kunde || {}).name || '', fenster: (v.eckdaten || {}).fenster || null, status: x ? x.status : a.status, notiz: x ? x.notiz || '' : '', geloescht: false } : { geloescht: true })); }
+    return { ok: true, betrieb: Object.assign(registerZeile(r), { strasse: r.strasse || '', mail: r.mail || '', notiz: r.notiz || '', verlauf: (r.verlauf || []).slice(), aliase: r.aliase || [], konto: !!r.konto, anfragen: anfragen }), staende: STAENDE_BETRIEB, status: STATUS, preis: preisInfo(ctx) };
+  },
+  'POST /api/inhaber/betriebe/:id': async (ctx) => {
+    const d = await inhaberDaten(ctx), r = await d.betriebHolen(String(ctx.params.id || '')); if (!r) throw new ApiFehler('Diesen Betrieb gibt es im Register nicht.', 404);
+    const b = ctx.body || {}, f = {};
+    const stand = b.stand === undefined ? undefined : String(b.stand), notiz = b.notiz === undefined ? undefined : String(b.notiz).slice(0, 4000), mail = b.mail === undefined ? undefined : kurz(b.mail, 120).toLowerCase(), plz = b.plz === undefined ? undefined : kurz(b.plz, 5);
+    if (stand !== undefined && !STAENDE_BETRIEB[stand]) f.stand = 'Unbekannter Stand.';
+    if (mail !== undefined && mail && !mailOk(mail)) f.mail = 'Bitte eine gültige E-Mail-Adresse.';
+    if (plz !== undefined && plz && !/^\d{5}$/.test(plz)) f.plz = 'Bitte eine fünfstellige Postleitzahl.';
+    if (Object.keys(f).length) throw new ApiFehler(Object.values(f)[0], 400, { felder: f });
+    const z = await d.betriebAendern(r.id, (z) => {
+      if (stand !== undefined && stand !== z.stand) { z.stand = stand; if (stand === 'partner') z.partner = Object.assign({ seit: ZEIT(), fassung: 'inhaber' }, z.partner || {}, { bereit: true }); else if (z.partner && z.partner.bereit && stand !== 'partner') z.partner = Object.assign({}, z.partner, { bereit: false, bis: ZEIT() }); verlauf(z, 'inhaber', 'Stand: ' + STAENDE_BETRIEB[stand]); }
+      if (notiz !== undefined) z.notiz = notiz;
+      if (mail !== undefined) z.mail = mail;
+      if (plz !== undefined) z.plz = plz;
+    });
+    return { ok: true, betrieb: registerZeile(z) };
+  },
+  'POST /api/inhaber/betriebe/neu-aufbauen': async (ctx) => { const d = await inhaberDaten(ctx); return Object.assign({ ok: true }, await registerNeuAufbauen(d)); }
 };
+/* Zeile des Registers für die Zentrale */
+function registerZeile(r) {
+  return Object.assign(registerSicht(r), { mail: r.mail || '', konto: !!r.konto, notizKurz: String(r.notiz || '').slice(0, 80), anfragenZahl: (r.anfragen || []).length, letzte: (r.anfragen || []).reduce((m, a) => (a.zeit > m ? a.zeit : m), ''), updated_at: r.updated_at, created_at: r.created_at });
+}
 const OEFFENTLICH = { 'POST /api/vermittlung/suche': suche, 'POST /api/vermittlung/code': code, 'POST /api/vermittlung/senden': senden };
 /* Nur auf der Hauptdomain (der Host einer Konfigurator-Instanz kennt diese Routen ohnehin nicht, functions/instanz/seiten.js) */
 const nurHaupt = (fn) => (ctx) => { if (ctx.instanz) throw new ApiFehler('not_found', 404); return fn(ctx); };
-export const VERMITTLUNG = Object.fromEntries(Object.entries(Object.assign({}, OEFFENTLICH, INHABER)).map(([k, fn]) => [k, nurHaupt(fn)]));
+export const VERMITTLUNG = Object.fromEntries(Object.entries(Object.assign({}, OEFFENTLICH, INHABER, PARTNER)).map(([k, fn]) => [k, nurHaupt(fn)]));
 
 /* ---------- Tageslauf (router.js geplant): Anfrage und Aufmaßblatt 180 Tage nach dem Eingang löschen, alte Suchen weg ---------- */
 export async function vermittlungLauf(k) {
