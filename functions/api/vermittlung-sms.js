@@ -16,9 +16,16 @@ const GATEWAY = 'https://gateway.seven.io/api/';
 export const smsArt = (env) => { env = env || {}; return String(env.SMS_API_KEY || '').trim() ? 'sms' : env.SMS_ATTRAPPE === '1' || (env.DATEN_ATTRAPPE === '1' && env.SMS_ATTRAPPE !== '0') ? 'attrappe' : ''; };
 
 /* Text, den die Stimme vorliest: Ziffern einzeln, zweimal, mit Pausen */
+/* Stimme laut seven: Region und Geschlecht („de-de-female“); „female“ oder „male“ allein (so im Dashboard leicht eingetragen) bekommt die
+   deutsche Region dazu, Unbekanntes die Vorgabe */
+export function stimmeName(stimme) {
+  const s = String(stimme || '').trim().toLowerCase().replace(/[^a-z-]/g, '');
+  if (/^(female|male)$/.test(s)) return 'de-de-' + s;
+  return /^[a-z]{2}-[a-z]{2}-(female|male|child)$/.test(s) ? s : 'de-de-female';
+}
 export function ansage(code, stimme) {
   const z = String(code).split('').join(', ');
-  return '<voice name="' + String(stimme || 'de-de-female').replace(/[^a-z-]/gi, '') + '">Hallo, hier ist eezi frames. Dein Code lautet: <break time="600ms"/>' + z + '. <break time="1s"/>Noch einmal: ' + z + '. Er gilt zehn Minuten.</voice>';
+  return '<voice name="' + stimmeName(stimme) + '">Hallo, hier ist eezi frames. Dein Code lautet: <break time="600ms"/>' + z + '. <break time="1s"/>Noch einmal: ' + z + '. Er gilt zehn Minuten.</voice>';
 }
 export const smsText = (code) => 'Dein Code für eeziframes: ' + String(code).replace(/(\d{3})(\d{3})/, '$1 $2') + '. Er gilt 10 Minuten. Hast du keinen angefordert, ignoriere diese SMS.';
 

@@ -34,6 +34,10 @@ export default async function (h) {
   const S = await import(path.join(h.WURZEL, 'functions/api/vermittlung-suche.js'));
   const { ANBIETER } = await import(path.join(h.WURZEL, 'functions/api/anbieter.js'));
   const PLZ = '33449', PLZ2 = '33378'; // 33442 nimmt der App-Teil (31-app.mjs), der vorher läuft
+  /* Stimme des Anrufs: „female“ oder „male“ allein (so im Cloudflare-Dashboard leicht eingetragen) wird zur deutschen Stimme, Unbekanntes zur Vorgabe */
+  const SMS = await import(path.join(h.WURZEL, 'functions/api/vermittlung-sms.js'));
+  const stimmen = ['female', 'Male', 'de-de-female', 'en-gb-male', '', 'weiblich'].map(SMS.stimmeName).join();
+  ok(stimmen === 'de-de-female,de-de-male,de-de-female,en-gb-male,de-de-female,de-de-female' && /^<voice name="de-de-female">/.test(SMS.ansage('123456', 'female')), '31.0 Stimme des Anrufs: „female“ allein wird „de-de-female“, ungültige Werte die Vorgabe (' + stimmen + ')');
 
   /* ---------- 31.1 Stand ---------- */
   const st = await h.api('localhost', '/api/status'), vs = (st.json || {}).vermittlung || {};

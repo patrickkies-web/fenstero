@@ -5480,14 +5480,35 @@ function lgFuss(c) {
 function lageDna(c) {
   const w = S.win, tuer = istTuer(w), fest = w.art === 'fest';
   const nomen = tuer ? ['die', 'Tür'] : fest ? ['die', 'Verglasung'] : ['das', 'Fenster'];
-  /* Bühne: das Haus im Schnitt (Feinzeichnung), das gewählte Stockwerk leicht aufgehellt, Koralle am Fenster; ohne Schraffur und ohne
-     violettes Leuchten (Wunsch des Inhabers, 28.10.2026) */
-  const stockKn = [['dg', 47, 44, 'Dachgeschoss'], ['og', 91, 50, 'Obergeschoss'], ['eg', 141, 49, 'Erdgeschoss'], ['kg', 190, 45, 'Keller']].map((s) => '<button type="button" class="lg-stock" data-act="lg-stock" data-v="' + s[0] + '" style="top: ' + s[1] + 'px; height: ' + s[2] + 'px" aria-label="' + s[3] + ' wählen"></button>').join('');
+  /* Bühne: das Haus als Körper in der Dämmerung statt als Strichzeichnung (Inhaber, 30.10.2026: „diese komischen Linien vom Haus“
+     und „Leuchten wie Neonlicht“ weg; Vorbild Startseite und Seite für Fensterbauer): Fassade, Walmdach mit Gaube, Keller im Erdreich,
+     in jedem Stockwerk Fenster. Das gewählte Stockwerk ist innen erleuchtet (weiße Scheiben, weicher Lichtschein ohne Weichzeichner),
+     die übrigen bleiben dunkel; das Fenster aus dem 3-D-Modell gleitet hinein, der Name hängt als Etikett daran. Flächen nach G14:
+     Licht von oben links, Lichtkanten statt Striche, Schatten unter Traufe und Gesims. */
+  const stockKn = [['dg', 30, 61, 'Dachgeschoss'], ['og', 91, 50, 'Obergeschoss'], ['eg', 141, 49, 'Erdgeschoss'], ['kg', 190, 50, 'Keller']].map((s) => '<button type="button" class="lg-stock" data-act="lg-stock" data-v="' + s[0] + '" style="top: ' + s[1] + 'px; height: ' + s[2] + 'px" aria-label="' + s[3] + ' wählen"></button>').join('');
+  /* ein Fenster der Fassade: Rahmen, dunkles Glas; erleuchtet (in .schnitt) weiß mit Licht von innen */
+  const lgFe = (x, y, w, h, an) => an ? '<rect class="glas-an" x="' + (x + 2) + '" y="' + (y + 2) + '" width="' + (w - 4) + '" height="' + (h > 36 ? Math.round(h * 0.4) : h - 4) + '" rx="1"/>' : '<rect class="rahmen" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="1.5"/><rect class="glas" x="' + (x + 2) + '" y="' + (y + 2) + '" width="' + (w - 4) + '" height="' + (h - 4) + '" rx="1"/><rect class="bank" x="' + (x - 2) + '" y="' + (y + h) + '" width="' + (w + 4) + '" height="2"/>';
+  const FE = { dg: [[232, 54, 40, 34]], og: [[118, 100, 32, 34], [236, 100, 40, 34]], eg: [[118, 150, 32, 34], [166, 148, 26, 42], [236, 150, 40, 34]], kg: [[118, 194, 32, 10], [232, 194, 36, 10]] };
+  const SCHEIN = { dg: [252, 70, 58, 36], og: [240, 117, 150, 40], eg: [240, 166, 150, 40], kg: [240, 212, 130, 30] };
+  const licht = (k) => '<g class="schnitt" data-s="' + k + '"><ellipse class="schein" fill="url(#lg-schein)" cx="' + SCHEIN[k][0] + '" cy="' + SCHEIN[k][1] + '" rx="' + SCHEIN[k][2] + '" ry="' + SCHEIN[k][3] + '"/>' + FE[k].map((f) => lgFe(f[0], f[1], f[2], f[3], true)).join('') + '</g>';
   const buehne = '<div class="lg-buehne"><div class="lg-buehne-in">' +
-    '<svg class="lg-haus" viewBox="0 0 358 250" aria-hidden="true"><g class="lg-skala">' + lgSkala() + '</g>' +
-    '<path class="schnitt" data-s="dg" d="M92 91V89L199 25 306 89V91Z"/><rect class="schnitt" data-s="og" x="92" y="91" width="214" height="50"/><rect class="schnitt" data-s="eg" x="92" y="141" width="214" height="49"/>' +
-    '<rect class="erde" x="0" y="190" width="358" height="60"/><rect class="keller" x="92" y="190" width="214" height="45"/><rect class="schnitt" data-s="kg" x="92" y="190" width="214" height="45"/>' +
-    '<path class="wand" d="M92 235V91H306V235Z"/><path class="wand" d="M80 96 199 24 318 96"/><path class="fein" d="M92 91H306M92 141H306M92 190H306"/><path class="fein" d="M120 91 199 43 278 91"/><line class="boden" x1="48" y1="190" x2="346" y2="190"/>' +
+    '<svg class="lg-haus" viewBox="0 0 358 250" aria-hidden="true"><defs>' +
+    '<linearGradient id="lg-fas" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#4c4c51"/><stop offset="1" stop-color="#343438"/></linearGradient>' +
+    '<linearGradient id="lg-dach" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38383c"/><stop offset=".12" stop-color="#2a2a2d"/><stop offset="1" stop-color="#17171a"/></linearGradient>' +
+    '<linearGradient id="lg-erde" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#151617"/><stop offset="1" stop-color="#0a0b0c"/></linearGradient>' +
+    '<radialGradient id="lg-schein"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".4" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="lg-teich" cx=".55" cy=".45" r=".6"><stop offset="0" stop-color="#2b2b2e"/><stop offset="1" stop-color="#2b2b2e" stop-opacity="0"/></radialGradient>' +
+    '<clipPath id="lg-huelle"><path d="M78 97 138 30H260L320 97H306V235H92V97Z"/><rect x="218" y="39" width="68" height="58"/></clipPath></defs>' +
+    '<rect x="40" y="0" width="318" height="200" fill="url(#lg-teich)"/><g class="lg-skala">' + lgSkala() + '</g>' +
+    /* Erdreich mit Geländekante, darin der Keller */
+    '<rect class="erde" x="0" y="190" width="358" height="60" fill="url(#lg-erde)"/><rect class="kante" x="0" y="189.4" width="358" height="1.2"/>' +
+    '<rect class="keller" x="92" y="191" width="214" height="44"/><rect class="sohle" x="86" y="235" width="226" height="5"/>' +
+    /* Dach (Walm von vorn) mit Gaube, Fassade, Schatten unter Traufe und Gesims */
+    '<path class="dach" d="M78 97 138 30H260L320 97Z" fill="url(#lg-dach)"/>' +
+    '<rect class="fassade" x="92" y="96" width="214" height="94" fill="url(#lg-fas)"/><rect class="traufe" x="92" y="96" width="214" height="7"/><rect class="gesims" x="92" y="139" width="214" height="3"/>' +
+    '<rect class="fassade" x="224" y="46" width="56" height="51" fill="url(#lg-fas)"/><path class="gaubendach" d="M218 47 252 39 286 47Z"/><rect class="traufe" x="224" y="47" width="56" height="4"/>' +
+    ['dg', 'og', 'eg', 'kg'].map((k) => FE[k].map((f) => lgFe(f[0], f[1], f[2], f[3])).join('')).join('') +
+    '<g clip-path="url(#lg-huelle)">' + ['dg', 'og', 'eg', 'kg'].map(licht).join('') + '</g>' +
     '<text x="12" y="75" data-t="dg">DG</text><text x="12" y="120" data-t="og">OG</text><text x="12" y="170" data-t="eg">EG</text><text x="12" y="217" data-t="kg">KG</text></svg>' + stockKn +
     '<div class="lg-strich"></div><div class="lg-etikett"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b class="lg-et-name"></b></span></div><div class="lg-fenster"><img src="/bilder/app/lage-fenster.webp" alt="" width="412" height="420" decoding="async"></div>' +
     '</div><span class="dna-badge lg-erkannt" hidden>aus deinem Außenfoto</span><span class="lg-tippen">Stockwerk antippen</span></div>';
@@ -5511,8 +5532,10 @@ function lageDna(c) {
 }
 /* Maßstab links: Strichmarken alle 5 px, lang an Decke und Boden jedes Stockwerks */
 function lgSkala() {
-  const lang = [51, 91, 141, 190, 235]; let h = '';
-  for (let y = 51; y <= 235; y += 5) { const l = lang.some((v) => Math.abs(v - y) < 3); h += '<line class="strich' + (l ? ' lang' : '') + '" x1="' + (l ? 34 : 40) + '" y1="' + y + '" x2="46" y2="' + y + '"/>'; }
+  const lang = [30, 91, 141, 190, 235]; let h = '';
+  /* je Strich das Stockwerk (data-s): die Striche des gewählten werden violett (aktiver Zustand) */
+  const stock = (y) => (y < 91 ? 'dg' : y < 141 ? 'og' : y < 190 ? 'eg' : 'kg');
+  for (let y = 30; y <= 235; y += 5) { const l = lang.some((v) => Math.abs(v - y) < 3); h += '<line class="strich' + (l ? ' lang' : '') + '" data-s="' + stock(y + 1) + '" x1="' + (l ? 34 : 40) + '" y1="' + y + '" x2="46" y2="' + y + '"/>'; }
   lang.forEach((v) => { h += '<line class="strich lang" x1="34" y1="' + v + '" x2="46" y2="' + v + '"/>'; });
   return h;
 }
@@ -5630,7 +5653,7 @@ function lpDaten() {
 function tiefeDna(c) {
   const d = lpDaten(), jetzt = KAPITEL[KAP_I[c.q.kap || QKAP.tiefe] != null ? KAP_I[c.q.kap || QKAP.tiefe] : 0].k;
   const raster = d.reihen.map((r) => { let h = ''; for (let i = 0; i < r.z[2]; i++) h += '<i style="--n: ' + i + '"></i>'; return '<div class="lp-reihe' + (r.k === jetzt ? ' ist' : '') + '"><span>' + esc(r.n) + '</span><span class="lp-punkte">' + h + '</span></div>'; }).join('');
-  const buehne = '<div class="lg-buehne lp-buehne"><div class="lp-in"><div class="lp-glut" aria-hidden="true"></div><div class="lp-sonne" aria-hidden="true"></div>' +
+  const buehne = '<div class="lg-buehne lp-buehne"><div class="lp-in"><div class="lp-glut" aria-hidden="true"></div>' +
     '<div class="lp-kopf"><div class="lp-zahl"><output class="lp-n"></output><span>Fragen<small><i></i>wählst du</small></span></div><div class="lp-zwei"><output class="lp-rest"></output><span><i></i>plant dein Fensterbauer</span></div></div>' +
     '<div class="lp-raster" aria-hidden="true" style="--lp-n: ' + d.max + '">' + raster + '</div><p class="lp-sr" aria-live="polite"></p></div></div>';
   const frage = lgFrage('Wie genau möchtest du <em>planen?</em>', 'tiefe', 'Was du nicht gefragt wirst, plant ' + (fbName() || 'dein Fensterbauer') + ' nach seinem Standard.');
@@ -5708,8 +5731,6 @@ function lpZeigen(rasten) {
   const rest = d.alle - n, z = q('.lp-n'), z2 = q('.lp-rest');
   if (z) { z.textContent = String(n); if (rasten) lgRasten(z); }
   if (z2) z2.textContent = String(rest);
-  const g = q('.lp-glut'); if (g) g.style.transform = 'scaleX(' + (0.35 + 0.65 * n / (d.alle || 1)).toFixed(3) + ')';
-  const so = q('.lp-sonne'); if (so) so.style.transform = 'scale(' + Math.min(rest / (d.alle || 1) * 1.6, 0.35 + 0.65 * n / (d.alle || 1)).toFixed(3) + ')';
   const o = TIEFEN.find((x) => x.k === t) || TIEFEN[1];
   const nm = q('.lp-name'); if (nm) nm.textContent = o.label;
   const sz = q('.lp-satz'); if (sz) sz.textContent = LP_SATZ[t] || '';

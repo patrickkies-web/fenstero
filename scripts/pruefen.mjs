@@ -3519,6 +3519,10 @@ if (teil(16)) {
   // Lage im Look der Design-DNA: ein Kopf mit Logo, kein Querscrollen, OG-Nummer im Blatt, Brüstung im OG Pflicht, doppelte Namen
   await d16.evaluate((MO) => { const k = Object.assign(baseWin(), { name: 'Küche', etage: 'eg', mo: MO, el: { w: 1230, h: 1410 } }); S.windows = [k]; const w = Object.assign(baseWin(), { name: '', etage: 'eg', bru: '', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 } }); S.win = w; S.editIdx = -1; S.q = 'lage'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
   const dna0 = await d16.evaluate(() => ({ koepfe: document.querySelectorAll('header.hdr, .lg-kopf').length, logo: !!document.querySelector('.lg-kopf .lg-marke .fi-logo'), quer: document.querySelector('.scroll').scrollWidth > document.querySelector('.scroll').clientWidth + 1 || document.documentElement.scrollWidth > innerWidth + 1, schrift: getComputedStyle(document.querySelector('.lg-frage h1')).fontFamily, weiter: !document.querySelector('.lg-weiter').disabled }));
+  /* Haus als Körper statt Strichzeichnung (Inhaber, 30.10.2026: „komische Linien vom Haus“, „Leuchten wie Neonlicht“): keine gestrichelten
+     Linien, kein Weichzeichner auf der Bühne, das gewählte Stockwerk innen erleuchtet, die anderen dunkel */
+  const haus16 = await d16.evaluate(() => { const b = document.querySelector('.scr.dna .lg-buehne'), alle = [b].concat(Array.from(b.querySelectorAll('*'))); return { gestrichelt: Array.from(b.querySelectorAll('svg *')).filter((e) => { const d = getComputedStyle(e).strokeDasharray; return d && d !== 'none'; }).length + (getComputedStyle(b.querySelector('.lg-strich')).borderTopStyle === 'dashed' ? 1 : 0), blur: alle.concat(alle.map((e) => [e, '::before']), alle.map((e) => [e, '::after'])).filter((x) => { const f = Array.isArray(x) ? getComputedStyle(x[0], x[1]).filter : getComputedStyle(x).filter; return /blur/.test(f || ''); }).length, koerper: b.querySelectorAll('.lg-haus .fassade, .lg-haus .dach, .lg-haus .keller').length, an: Array.from(b.querySelectorAll('.lg-haus .schnitt')).filter((g) => getComputedStyle(g).opacity === '1').map((g) => g.getAttribute('data-s')).join(), hell: b.querySelectorAll('.lg-haus .schnitt.frei .glas-an').length, soll: lgStock(S.win) }; });
+  ok(haus16.gestrichelt === 0 && haus16.blur === 0 && haus16.koerper >= 4 && haus16.an === haus16.soll && haus16.hell >= 1, 'Lage: das Haus als Körper (Fassade, Dach mit Gaube, Keller), ohne gestrichelte Linien und ohne Weichzeichner; nur das gewählte Stockwerk ist innen erleuchtet ' + JSON.stringify(haus16));
   await d16.click('.lg-vorschlaege [data-v="Küche"]'); await d16.waitForTimeout(150);
   const dna1 = await d16.evaluate(() => ({ name: S.win.name, doppelt: !document.querySelector('.lg-doppelt').hidden, wahl: Array.from(document.querySelectorAll('.lg-doppelt-wahl button')).map((b) => b.textContent).join('|'), etikett: document.querySelector('.lg-et-name').textContent }));
   await d16.click('.lg-doppelt-wahl button'); await d16.click('.lg-stockwahl [data-v="og"]'); await d16.click('[data-act="lg-og"][data-v="2"]'); await d16.waitForTimeout(150);
@@ -4410,6 +4414,14 @@ if (teil(20)) {
   await frage20(g, 'material');
   const an = await g.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), cv: !!st.querySelector('canvas.w3d-gl'), flaeche: getComputedStyle(st.querySelector('[data-r="wall-in"]')).display, rollen: Buehne3D.pruef.rollen(st).length }; });
   ok(an.gl && an.cv && an.flaeche === 'none' && an.rollen > 20, 'WebGL-Bühne: die Leinwand zeichnet das Modell, die Flächen bleiben unsichtbar als Beschreibung im DOM (' + an.rollen + ' Flächen)');
+  /* Glas von innen (Inhaber, 30.10.2026: die Scheiben sahen „ausgegraut“ aus): Klarglas zeigt die Aussicht, oben Himmel, unten Rasen,
+     deckend (das Gerät malt nichts Graues darunter); Sonnenschutzglas getönt, Ornamentglas bleibt gemalt */
+  const glasBlick = (pg) => pg.evaluate(() => { const st = document.getElementById('w3d'); st.classList.add('is-drag'); st.style.setProperty('--rx', '-6deg'); st.style.setProperty('--ry', '0deg'); const P = Buehne3D.pruef.pixel(st), G = Buehne3D.pruef.glas(st), f = (q) => { const x = Math.round(q[0] * P.k), y = Math.round(q[1] * P.k), i = ((P.h - 1 - y) * P.w + x) * 4; return Array.from(P.px.slice(i, i + 4)); }; st.classList.remove('is-drag'); return G.map((x) => ({ art: x.art, oben: f(x.oben), unten: f(x.unten) })); });
+  const gl20 = await glasBlick(g), hell = (c) => 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2];
+  await frage20(g, 'material', { glasfn: ['sonne'] }); const gs20 = await glasBlick(g);
+  await frage20(g, 'material', { glasfn: ['sicht'] }); const go20 = await glasBlick(g);
+  await frage20(g, 'material');
+  ok(gl20.length >= 2 && gl20.every((x) => x.art === 2 && x.oben[3] === 255 && x.unten[3] === 255 && x.oben[2] > x.oben[0] + 12 && x.unten[1] > x.unten[2] + 6 && hell(x.oben) > hell(x.unten)) && gs20.every((x) => x.art === 3) && hell(gs20[0].oben) < hell(gl20[0].oben) - 25 && go20.every((x) => x.art === 1), 'Glas von innen: Klarglas zeigt die Aussicht (oben Himmel, unten Rasen, deckend), Sonnenschutzglas getönt, Ornamentglas wie gemalt ' + JSON.stringify({ klar: gl20[0], sonne: gs20[0] && gs20[0].oben, ornament: go20.map((x) => x.art) }));
   /* Nahtlinien: außerhalb der Öffnung (samt Fensterbank) ist nur Wand, ihr Helligkeitsverlauf hat keine Knicke */
   const WINKEL = [[-9, -27], [-30, -74], [-30, 6], [10, -74], [10, 6], [-20, -50], [-28, 112], [-8, 152]];
   const naht = await g.evaluate((winkel) => {
@@ -4640,6 +4652,12 @@ if (teil(21)) {
   /* Tiefe wählen per Antippen, Pille im Kopf führt zurück */
   await a21.evaluate(() => { const w = demoProject()[0]; S.win = w; delete S.proj.tiefe; S.q = 'tiefe'; S.screen = 'frage'; render(true); }); await a21.waitForTimeout(300);
   const tw = await a21.evaluate(() => Array.from(document.querySelectorAll('[data-act="tiefe"]')).map((b) => b.getAttribute('data-v')).join(','));
+  /* Bühne ohne Neonflecken (Inhaber, 30.10.2026): ein ruhiges violettes Licht aus der Ecke, radial ohne Weichzeichner, kein Korallen-Fleck,
+     und es steht still (Zustand zeigen die Punkte, nicht ein Leuchten) */
+  const lpLicht = () => a21.evaluate(() => { const g = document.querySelector('.scr.dna .lp-glut'); return { da: !!g, blur: g ? getComputedStyle(g).filter : '', sonne: document.querySelectorAll('.scr.dna .lp-sonne').length, t: g ? g.style.transform : '' }; });
+  await a21.click('[data-act="tiefe"][data-v="kurz"]'); await a21.waitForTimeout(400); const lpK = await lpLicht();
+  await a21.click('[data-act="tiefe"][data-v="genau"]'); await a21.waitForTimeout(400); const lpG = await lpLicht();
+  ok(lpK.da && lpK.blur === 'none' && lpK.sonne === 0 && !lpK.t && !lpG.t, 'Wie genau planen: ein ruhiges violettes Licht ohne Weichzeichner und ohne Korallen-Fleck, es steht still');
   await a21.click('[data-act="tiefe"][data-v="kurz"]'); await a21.waitForTimeout(300);
   const tk = await a21.evaluate(() => ({ t: S.proj.tiefe, pille: !!document.querySelector('.qtiefe') }));
   const tk2 = await a21.evaluate(() => ({ n: document.querySelector('.scr.dna .lp-n').textContent, rest: document.querySelector('.scr.dna .lp-rest').textContent, ja: document.querySelectorAll('.scr.dna .lp-punkte i.ja').length, alle: document.querySelectorAll('.scr.dna .lp-punkte i').length, gedrueckt: (document.querySelector('.scr.dna [data-act="tiefe"][aria-pressed="true"]') || {}).textContent, zahl: qSichtbar(S.win).filter((q) => q.id !== 'tiefe').length, modell: !!document.querySelector('.scr.dna #w3d') }));

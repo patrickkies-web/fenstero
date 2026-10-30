@@ -183,6 +183,13 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Streifen im Haus und in der Karte „Genau gleiche Fenster“ und die violetten Leuchten sollten weg, der gewählte Stockwerk-Knopf weiß
   gefüllt sein. Auswahl auf dunkler Kachel heißt weiß mit schwarzer Schrift; Zustand zeigt sich über Helligkeit, nicht über Leuchten.
   Vorschlag für seine DNA: G1 (Schraffur als „Rest“) und das Leuchten als Zustand in App-Folien nur noch auf sein Wort.
+- Keine Strichlinien, kein Neonleuchten, Glas wie Glas (Korrektur des Inhabers, 30.10.2026, Folien „Wo ist das Fenster?“, „Wie genau
+  möchtest du planen?“ und „Welche Form?“; Vorbild Startseite und Seite für Fensterbauer): Das Haus der Lage war ihm mit seinen
+  „komischen Linien“ zu sehr Plan, die Flecken mit Weichzeichner leuchteten „wie Neonlicht“, die Scheiben im 3-D-Modell sahen
+  „ausgegraut“ aus. Regel: Bühnen zeigen Körper statt Strichzeichnungen (das Haus in der Dämmerung, das gewählte Stockwerk innen
+  erleuchtet, Zustand über Helligkeit); Licht nur als ruhiger radialer Schein ohne Weichzeichner und ohne Bewegung, nie als farbiger
+  Fleck über Inhalten; Glas zeigt von innen die Aussicht (Himmel, unscharfe Baumreihe, Rasen), deckend und mit der Kamera wandernd.
+  Protokoll docs/profis/2026-10-30-lage-tiefe-glas.md. Vorschlag für seine DNA, Abschnitt 4 „Nie“: „Farbflecken mit Weichzeichner“.
 - Laptop wie die Start-Folie (Wunsch des Inhabers, 28.10.2026): Jede Folie des Konfigurators füllt im Browser den Bildschirm wie
   „Was planst du?“: Kopf 60 px, links die Bühne über die ganze Höhe, rechts eine Spalte von 380 px mit Frage, Karten und der Pille
   unten, darunter die rechtlichen Verweise. Neue Folien bekommen diese Ansicht von Anfang an (`dnaTisch` oder eigenes Raster).
