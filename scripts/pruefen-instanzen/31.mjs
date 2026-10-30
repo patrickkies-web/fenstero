@@ -419,6 +419,20 @@ export default async function (h) {
   }
   ok(VP.PREIS_NETTO === 29 && VP.PREIS_CENT === 2900 && RE.PARTNER_VORN === 2 && RE.telNorm('+49 5245 555-010') === '05245555010' && RE.webHost('https://www.Pruef-Partner.de/kontakt') === 'pruef-partner.de' && RE.webHost('kaputt') === '', '31.7 Konstanten und Normalisierung: 29 € netto, zwei Partner vorn, Nummer und Website für Doppelte vereinheitlicht');
 
+  /* Wie online: ohne BETRIEBSKONTO sperrt der Router das alte /api/konto… (410); die Routen des Bereichs müssen trotzdem gehen (Fehler vom 30.10.2026) */
+  {
+    const s6 = await h.server({ BETRIEBSKONTO: '0' }), M6 = 'ohne-schalter-' + stempel + '@pruef-betrieb.de';
+    const ohneAnmeldung = await s6.api('localhost', '/api/konto/anfragen'), alt6 = await s6.api('localhost', '/api/konto/sitzung', { body: {}, origin: true });
+    await s6.api('localhost', '/api/auftrag/code', { body: { mail: M6 }, origin: true });
+    const an6 = await s6.api('localhost', '/api/auftrag/anmelden', { body: { mail: M6, code: '123456' }, origin: true });
+    const K6 = (an6.cookies || []).map((c) => c.split(';')[0]).find((c) => /^__Host-kunde=./.test(c)) || '';
+    const li6 = await s6.api('localhost', '/api/konto/anfragen', { cookie: K6 }), pa6 = await s6.api('localhost', '/api/konto/partner', { cookie: K6, body: { bereit: true, zustimmung: true }, origin: true });
+    ok(ohneAnmeldung.status === 401 && alt6.status === 410 && an6.status === 200 && li6.status === 200 && (li6.json || {}).ok === true && Array.isArray(li6.json.anfragen) && pa6.status === 404,
+      '31.7 Ohne BETRIEBSKONTO (wie online): /api/konto/anfragen und /api/konto/partner erreichbar (401 ohne, 200/404 mit Anmeldung per Code), das alte /api/konto/sitzung bleibt 410' +
+      ' (' + JSON.stringify({ ohne: ohneAnmeldung.status, alt: alt6.status, anmelden: an6.status, liste: li6.status, partner: pa6.status }) + ')');
+    s6.stop();
+  }
+
   /* ---------- Teil K: Bereich für Fensterbauer im Browser (Zugang über den Link, Code, Freischalten, PDF, Übersicht, Partner) ---------- */
   const messenK = (page) => page.evaluate(() => {
     const sicht = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'; };
