@@ -71,14 +71,19 @@ export function rechtVollstaendig(recht) {
 function seite(inst, titel, inhalt) {
   const name = (inst && inst.name) || '';
   return '<!doctype html>\n<html lang="de">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n' +
-    '<title>' + esc(titel + (name ? ' · ' + name : '')) + '</title>\n<meta name="robots" content="noindex">\n<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n<link rel="stylesheet" href="/fonts/fonts.css">\n' +
-    '<style>:root{color-scheme:dark}body{margin:0;background:#161616;color:#f3f2ee;font:500 17px/1.6 Inter,system-ui,sans-serif}main{max-width:760px;margin:0 auto;padding:32px 16px 64px}' +
-    'h1{font-size:32px;line-height:1.15;font-weight:800;letter-spacing:-.02em;margin:8px 0 24px}h2{font-size:20px;line-height:1.3;font-weight:800;margin:32px 0 8px}p,address,li{margin:0 0 12px;color:#c9c8c3;font-style:normal}ul{padding-left:20px;margin:0 0 12px}' +
-    'a{color:#f3f2ee;text-underline-offset:2px}.klein{font-size:13px;color:#93928d}.karte{border:2px solid #2b2b2b;border-radius:24px;padding:16px 20px;background:#1f1f1f;margin:0 0 16px}.karte p:last-child{margin:0}' +
-    'nav{display:flex;flex-wrap:wrap;gap:4px 16px}nav a{font-size:15px;min-height:44px;display:inline-flex;align-items:center}' +
-    '.tabelle{overflow-x:auto;margin:0 0 16px;border:2px solid #2b2b2b;border-radius:16px;background:#1f1f1f}table{width:100%;border-collapse:collapse;font-size:15px;line-height:1.45}' +
-    'th,td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid #2b2b2b;color:#c9c8c3}tr:last-child td{border-bottom:0}th{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#93928d}' +
-    '@media (max-width:600px){h1{font-size:28px}table,tbody,tr,td{display:block}thead{display:none}tr{padding:10px 12px;border-bottom:1px solid #2b2b2b}td{padding:0;border:0}td+td{margin-top:4px}td[data-k]::before{content:attr(data-k);display:block;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#93928d}}' +
+    '<title>' + esc(titel + (name ? ' · ' + name : '')) + '</title>\n<meta name="robots" content="noindex">\n<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n<link rel="stylesheet" href="/fonts/fonts.css">\n<link rel="stylesheet" href="/fonts/dna.css">\n' +
+    /* Design-DNA (28.10.2026), neutral in Schwarz, Weiß und Grau, ohne die Akzente von eeziframes: der Text als helles Blatt auf Schwarz */
+    '<style>:root{color-scheme:light}*,*::before,*::after{box-sizing:border-box}html,body{background:#07090a}body{margin:0;color:#07090a;font:400 16px/1.65 Outfit,"Avenir Next","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}' +
+    'main{margin:12px 0 0;min-height:calc(100vh - 12px);padding:24px max(16px,calc((100% - 760px) / 2)) 72px;border-radius:40px 40px 0 0;background:#fff}' +
+    'h1{font-size:clamp(34px,8.4vw,48px);line-height:1;font-weight:600;letter-spacing:-.035em;margin:20px 0 24px;text-wrap:balance}h2{font-size:clamp(21px,5vw,26px);line-height:1.2;font-weight:600;letter-spacing:-.02em;margin:44px 0 10px}' +
+    'p,address,li{margin:0 0 12px;color:#6b676c;font-style:normal}strong,b{font-weight:500;color:#07090a}ul{list-style:none;padding:0;margin:0 0 12px}ul>li{position:relative;padding-left:20px}ul>li::before{content:"";position:absolute;left:2px;top:.72em;width:6px;height:6px;border-radius:50%;background:#a8a4a9}' +
+    'a{color:#07090a;text-decoration-color:#a8a4a9;text-underline-offset:3px}.klein{font-size:13px;line-height:1.5;color:#6b676c}:focus-visible{outline:2px solid #07090a;outline-offset:3px}' +
+    '.karte{border-radius:28px;padding:20px 22px;background:#fff;box-shadow:inset 0 0 0 1px rgba(168,164,169,.45),0 24px 48px -28px rgba(7,9,10,.3);margin:0 0 16px}.karte p:last-child{margin:0}' +
+    'nav{display:flex;flex-wrap:wrap;gap:0 18px}nav a{font-size:14px;min-height:44px;display:inline-flex;align-items:center;color:#6b676c;text-decoration:none}nav a:hover{color:#07090a}' +
+    '.tabelle{overflow-x:auto;margin:0 0 16px;border-radius:20px;box-shadow:inset 0 0 0 1px rgba(168,164,169,.45),0 18px 40px -28px rgba(7,9,10,.3)}table{width:100%;border-collapse:collapse;font-size:15px;line-height:1.45}' +
+    'th,td{padding:12px 16px;text-align:left;vertical-align:top;border-bottom:1px solid rgba(168,164,169,.45);color:#6b676c}tr:last-child td{border-bottom:0}td:first-child{color:#07090a;font-weight:500}th{font-size:12px;font-weight:400;letter-spacing:.03em;color:#6b676c}' +
+    '@media (min-width:760px){main{padding-top:48px}p,address,li{font-size:17px}}' +
+    '@media (max-width:600px){table,tbody,tr,td{display:block}thead{display:none}tr{padding:12px 16px;border-bottom:1px solid rgba(168,164,169,.45)}td{padding:0;border:0}td+td{margin-top:6px}td[data-k]::before{content:attr(data-k);display:block;font-size:12px;letter-spacing:.03em;color:#6b676c}}' +
     '</style>\n</head>\n<body>\n<main>\n<nav aria-label="Rechtliches"><a href="/">Zur Startseite</a><a href="/impressum/">Impressum</a><a href="/datenschutz/">Datenschutz</a></nav>\n' + inhalt +
     '\n<p class="klein">' + (VORLAGE.geprueft ? 'Fassung vom ' + esc(datum(VORLAGE.stand)) : 'Vorlage vom ' + esc(datum(VORLAGE.stand)) + ', anwaltliche Prüfung ausstehend') + '</p>\n</main>\n</body>\n</html>\n';
 }

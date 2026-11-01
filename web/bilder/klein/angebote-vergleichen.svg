@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 380" width="480" height="380">
+
+
+<rect width="480" height="380" rx="16" fill="#ffffff"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" fill="#07090a">
+
+<rect x="24" y="52" width="204" height="236" rx="14" fill="#f3f3f4" stroke="#c4c1c5" stroke-width="4.4"/><path d="M46 152l12 12M58 152l-12 12" fill="none" stroke="#f88962" stroke-width="7.7" stroke-linecap="round"/><path d="M46 186l12 12M58 186l-12 12" fill="none" stroke="#f88962" stroke-width="7.7" stroke-linecap="round"/><path d="M46 220l12 12M58 220l-12 12" fill="none" stroke="#f88962" stroke-width="7.7" stroke-linecap="round"/><path d="M46 254l12 12M58 254l-12 12" fill="none" stroke="#f88962" stroke-width="7.7" stroke-linecap="round"/><rect x="252" y="52" width="204" height="236" rx="14" fill="#f3f3f4" stroke="#c4c1c5" stroke-width="4.4"/><path d="M272 158l6 6l11 -13" fill="none" stroke="#897efc" stroke-width="7.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M272 192l6 6l11 -13" fill="none" stroke="#897efc" stroke-width="7.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M272 226l6 6l11 -13" fill="none" stroke="#897efc" stroke-width="7.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M272 260l6 6l11 -13" fill="none" stroke="#897efc" stroke-width="7.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+
+</g>
+</svg>

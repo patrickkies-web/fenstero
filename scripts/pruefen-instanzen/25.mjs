@@ -340,6 +340,25 @@ export default async (h) => {
   ok(!schreibend.length && !gelesen.some((u) => /\/api\/(status|instanz|link|aufmass)/.test(u)), '25.11 Testansicht: kein Aufruf an den Server außer Lesen der KI-Bereitschaft' + (schreibend.length ? ' (' + schreibend.join(', ') + ')' : ''));
   ok(!(await waagrecht(sT)), '25.11 Testansicht: kein waagrechter Scroll');
   h.sauber(sT, '25.11 Testansicht ohne Fehler'); await ctxT.close();
+  /* 25.12 Testansicht mit dem Beispiel (…?ausprobieren=signature&beispiel): Familie Mustermann aus web/beispiele/mustermann/projekt.json
+     im Konfigurator, mit den Bildern im Speicher der Fotos; nach dem (simulierten) Senden ist das Aufmaßblatt inhaltlich das Beispiel-PDF
+     der Website (dieselben Maße und Richtmaße, dieselben Klärpunkte): das Beispiel zeigt, was der Konfigurator wirklich schreibt */
+  const ctxBs = await desktop(), sBsp = await h.neueSeite(ctxBs, X.base('localhost'));
+  await sBsp.goto(X.base('localhost') + '/app/?ausprobieren=signature&beispiel', { waitUntil: 'networkidle' });
+  const bGeladen = await bis(sBsp, () => S.windows.length === 13 && S.screen === 'home', 15000);
+  const b1 = await sBsp.evaluate(async () => ({ n: S.windows.length, name: S.proj.name, fotos: (await Promise.all(S.windows.flatMap((w) => bilderVon(w)).map((id) => Fotos.holen(id)))).filter((v) => v && v.blob).length, text: document.body.innerText }));
+  await sBsp.evaluate(() => go('anfrage3')); await sBsp.waitForTimeout(400); await sBsp.click('.scr.dna .lg-weiter');
+  await bis(sBsp, () => S.screen === 'gesendet' && !!S.sent, 10000);
+  await sBsp.click('.probe-wahl [data-act="probe-betrieb"]'); await sBsp.waitForTimeout(400);
+  const [dlBsp] = await Promise.all([sBsp.waitForEvent('download', { timeout: 30000 }), sBsp.click('[data-act="probe-blatt"]')]);
+  const fBsp = path.join(ordner, 'beispiel-' + Math.random().toString(36).slice(2) + '.pdf'); await dlBsp.saveAs(fBsp);
+  const rohB = fs.readFileSync(fBsp), txtBsp = pdfText(rohB), txtWeb = pdfText(fs.readFileSync(new URL('../../web/beispiele/aufmassblatt-fensterbau-brandt.pdf', import.meta.url)));
+  const masse = (t) => (t.match(/\b\d{1,2}\.?\d{3} × \d{1,2}\.?\d{3}\b/g) || []).sort().join(' '), knr = (t) => Math.max(0, ...(t.match(/\bK(\d{1,2})\b/g) || []).map((x) => +x.slice(1)));
+  const bilderB = (rohB.toString('latin1').match(/\/Subtype \/Image/g) || []).length;
+  ok(bGeladen && b1.n === 13 && b1.name === 'Familie Mustermann' && b1.fotos === 24 && /Wohnen links/.test(b1.text), '25.12 Testansicht mit Beispiel: Familie Mustermann mit 13 Positionen und 24 Bildern im Konfigurator (' + b1.n + ' Positionen, ' + b1.fotos + ' Bilder)');
+  ok(masse(txtBsp).length > 200 && masse(txtBsp) === masse(txtWeb) && knr(txtBsp) === knr(txtWeb) && knr(txtWeb) >= 20 && /RICHTMA(?:SS|ẞ) FÜRS ANGEBOT/.test(txtBsp) && /PROJEKTSTANDARD/.test(txtBsp) && /Beispiel: Bild aus dem 3-D-Modell statt Foto/.test(txtBsp) && bilderB >= 24,
+    '25.12 Aus dem Konfigurator gesendet ist das Aufmaßblatt das Beispiel der Website: dieselben Maße und Richtmaße, ' + knr(txtWeb) + ' Klärpunkte, Projektstandard, ' + bilderB + ' Bilder' + (masse(txtBsp) === masse(txtWeb) ? '' : ' (Maße weichen ab)'));
+  h.sauber(sBsp, '25.12 Testansicht mit Beispiel ohne Fehler'); await ctxBs.close();
   const ctxPE = await desktop(), sPE = await h.neueSeite(ctxPE, X.base('localhost'));
   await sPE.goto(X.base('localhost') + '/app/?ausprobieren=essential', { waitUntil: 'networkidle' }); await sPE.waitForTimeout(300);
   const tPE = await sPE.evaluate(() => ({ paket: PROBE_PAKET, farbe: !!INST.m.farbe, kz: INST.m.kennzeichnung, hinweis: (document.querySelector('.st-rechts .probe-info') || {}).innerText || '' }));

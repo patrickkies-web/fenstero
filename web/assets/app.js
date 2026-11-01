@@ -359,6 +359,7 @@ const OPT = {
   /* Detailangaben (Register AW.DETAIL in modell.js); k '' = nicht gewählt, der Standard des Fensterbauers */
   kvd: [{ k: '', label: 'Dreh-Kipp' }, { k: 'kvd', label: 'Kipp vor Dreh' }],
   seiten: [{ k: '', label: 'Ohne' }, { k: 'links', label: 'Links' }, { k: 'rechts', label: 'Rechts' }, { k: 'beide', label: 'Beide' }],
+  festFl: [{ k: '', label: 'Im Flügel', sub: 'Sieht aus wie die anderen' }, { k: 'rahmen', label: 'Im Rahmen', sub: 'Etwas mehr Glas' }],
   paneel: [{ k: '', label: 'Ganz Glas' }, { k: 'paneel', label: 'Unten Paneel' }],
   hstEck: [{ k: '', label: 'Gerade' }, { k: 'eck', label: 'Über Eck' }],
   fswAuf: [{ k: 'innen', label: 'Nach innen' }, { k: 'aussen', label: 'Nach außen' }],
@@ -456,7 +457,7 @@ const GLOSS = {
   dk: { s: 'Dreh-Kipp', t: 'Was ist ein Dreh-Kipp-Fenster?', x: ['Der Standard in Deutschland. Griff nach oben: Das Fenster kippt und du lüftest. Griff zur Seite: Der Flügel dreht sich ganz auf, zum Putzen oder Stoßlüften.', 'Griff nach unten heißt geschlossen. Die Beschläge rundum ziehen den Flügel dabei fest an die Dichtung.'], tipp: 'Lieber kurz stoßlüften als lange kippen: Ein gekipptes Fenster kühlt im Winter die Laibung aus, und dort bildet sich leicht Schimmel.', ico: () => ICO.typ('DK'), see: ['symbol', 'kipp', 'dinlr'] },
   dreh: { s: 'Drehfenster', t: 'Was ist ein Drehfenster?', x: ['Ein Drehflügel geht nur zur Seite auf, wie eine kleine Tür. Kippen lässt er sich nicht.', 'Das ist üblich beim zweiten Flügel eines Stulpfensters und bei Flügeln, die nur selten geöffnet werden. Der Beschlag ist einfacher und etwas günstiger als Dreh-Kipp.'], tipp: 'Möchtest du an diesem Flügel auch lüften, ohne ihn ganz zu öffnen, nimm lieber Dreh-Kipp.', ico: () => ICO.typ('D'), see: ['dk', 'stulp', 'oeffnungsart'] },
   kipp: { s: 'Kippfenster', t: 'Was ist ein Kippfenster?', x: ['Ein Flügel, der nur oben kippt und sich nicht ganz aufdrehen lässt. Typisch für Oberlichter und kleine Fenster in Bad, Keller oder Treppenhaus.', 'Geputzt wird ein Kippfenster außen von draußen oder mit einer Putzhilfe durch den Spalt. Bei hoch liegenden Flügeln gibt es eine Stange oder einen Hebel zum Öffnen.'], tipp: 'Liegt der Flügel hoch, frag nach einem Oberlichtöffner. Dann kippst du ihn bequem von unten.', ico: () => ICO.typ('K'), see: ['oberlicht', 'dk'] },
-  fest: { s: 'Festes Feld', t: 'Was ist ein festes Feld?', x: ['Ein festes Feld hat keinen Flügel: Das Glas sitzt direkt im Rahmen. Es lässt sich nicht öffnen, ist dafür schlanker, dichter und günstiger.', 'In einem Fenster mit mehreren Feldern ist oft das mittlere fest und die äußeren gehen auf. Geputzt wird es von außen.'], tipp: 'Im Obergeschoss ohne Balkon kommst du an ein festes Feld außen nur schwer heran. Plane dort lieber einen Flügel, der aufgeht.', ico: () => ICO.typ('F'), see: ['festverglasung', 'oeffnungsart'] },
+  fest: { s: 'Festes Feld', t: 'Was ist ein festes Feld?', x: ['Ein festes Feld lässt sich nicht öffnen. Im Flügel sitzt das Glas in einem Flügelrahmen, der nicht aufgeht: Dann sieht es aus wie die Flügel daneben. Im Rahmen sitzt das Glas direkt im Blendrahmen: schlanker, mit etwas mehr Glas und meist günstiger.', 'In einem Fenster mit mehreren Feldern ist oft das mittlere fest und die äußeren gehen auf. Geputzt wird es von außen.'], tipp: 'Im Obergeschoss ohne Balkon kommst du an ein festes Feld außen nur schwer heran. Plane dort lieber einen Flügel, der aufgeht.', ico: () => ICO.typ('F'), see: ['festverglasung', 'oeffnungsart'] },
   symbol: { s: 'Öffnungssymbole', t: 'Wie lese ich die Linien im Fenster?', x: ['In Fensterzeichnungen zeigen dünne Linien, wie ein Flügel aufgeht. Die Linien starten an den Ecken der Scharnierseite, die Spitze zeigt zum Griff.', 'Ein Dreieck mit der Spitze nach oben steht fürs Kippen. Durchgezogene Linien bedeuten: öffnet nach innen. Gestrichelte: öffnet nach außen.'], tipp: 'Die Spitze zeigt immer zum Griff. So liest du auch fremde Zeichnungen sofort und weißt, wo die Scharniere sitzen.', ico: () => ICO.typ('DK'), see: ['dinlr', 'dk', 'aussen'] },
   dinlr: { s: 'DIN links/rechts', t: 'Was bedeutet DIN links und DIN rechts?', x: ['Die Angabe sagt, auf welcher Seite die Scharniere sitzen. Man schaut dafür immer von innen, also von der Seite, zu der das Fenster aufgeht.', 'Scharniere links heißt DIN links. Der Griff sitzt dann rechts. Merkhilfe: Stell dich innen vor das offene Fenster und leg die Hand auf die Scharniere. Linke Hand bedeutet DIN links.'], tipp: 'Denk an die Möbel: Der Flügel sollte zu der Seite aufgehen, auf der kein Schrank und kein Vorhang im Weg ist.', ico: () => [...ICO.typ('DK'), P(R(10.5, 14, 3, 9, 1), INK), P(R(10.5, 41, 3, 9, 1), INK)], see: ['symbol', 'dk'] },
   aussen: { s: 'Nach außen öffnend', t: 'Was heißt nach außen öffnend?', x: ['In Deutschland gehen Fenster fast immer nach innen auf. Nach außen öffnende Flügel kennt man aus Skandinavien, von manchen Holzfenstern und von Fenstern, vor denen innen kein Platz ist.', 'In Zeichnungen sind sie gestrichelt. Sie brauchen besondere Beschläge, lassen sich schwerer putzen und vertragen sich nicht mit einem Rollladen außen.'], tipp: 'Wähle das nur, wenn es einen Grund gibt. Im Zweifel bleibt es beim Standard nach innen.', ico: () => winIco({ teilung: '1', richtung: 'aussen', sashes: [{ t: 'D', din: 'L' }] }, 14, 8, 36, 48), see: ['symbol', 'oeffnungsart'] },
@@ -534,6 +535,7 @@ const GLOSS = {
   zeitraum: { s: 'Zeitraum', t: 'Wann soll es losgehen?', x: ['Fenster werden nach dem Feinaufmaß einzeln gefertigt. Bis zum Einbau vergehen meist einige Wochen, in der Saison auch mehr.', 'Mit deinem Zeitraum plant der Fensterbauer Termin und Lieferung. Willst du erst Angebote vergleichen, wähle „Später, erst Angebote“.'], tipp: 'Für den Zuschuss vom BAFA muss der Antrag vor Beginn gestellt sein. Plane dafür ein paar Wochen ein.', ico: kalenderIco, see: ['foerderung', 'feinaufmass'] },
   budget: { s: 'Budget', t: 'Warum fragt die App nach dem Budget?', x: ['Mit deinem Budget kann der Fensterbauer gezielt anbieten: wo es sich lohnt, mehr auszugeben, und wo die einfache Lösung reicht.', 'Die Angabe ist freiwillig und bindet dich nicht. „Weiß ich noch nicht“ ist eine gute Antwort, wenn du erst Preise kennenlernen willst.'], tipp: 'Denk an das Drumherum: Fensterbänke, Rollläden, Putz und Entsorgung machen einen spürbaren Teil des Preises aus.', ico: muenzIco, see: ['foerderung', 'montage'] },
   kontakt: { s: 'Kontakt', t: 'Wozu die Kontaktdaten?', x: ['Sie stehen oben auf deinem Aufmaßblatt, damit sich der Fensterbauer mit dem Angebot bei dir melden kann. Das Blatt bekommt nur, wem du es gibst.', 'Alles ist freiwillig. Ohne Kontaktdaten gibst du sie dem Fensterbauer eben selbst mit.'], tipp: 'Eine Handynummer und die Zeit, zu der du gut erreichbar bist, sparen viel Hin und Her.', ico: telefonIco, see: ['aufmassblatt'] },
+  vermittlung: { s: 'Angebote aus deiner Nähe', t: 'Wie funktioniert die Anfrage?', x: ['Du wählst zwei bis fünf Fensterbetriebe aus deiner Nähe oder lässt uns passende aussuchen. Wir rufen sie an und fragen, ob sie dir ein Angebot machen möchten. Alle Angebote beruhen auf denselben Maßen und sind direkt vergleichbar.', 'Nur wer zusagt, bekommt dein Aufmaß mit Namen, Ort und Telefonnummer und meldet sich dann bei dir. Sonst bekommt niemand deine Daten. Für dich ist das kostenlos, dein Aufmaßblatt als PDF bekommst du dazu. Die Fensterbetriebe bezahlen uns für die Vermittlung.', 'Die Betriebe stellt eine KI aus öffentlichen Angaben zusammen. Die Entfernung ist Luftlinie und ungefähr.'], tipp: 'Mit dem Code bestätigst du deine Nummer. So wissen die Betriebe, dass die Anfrage echt ist.', ico: telefonIco, see: ['aufmassblatt', 'kontakt'] },
   aufmassblatt: { s: 'Aufmaßblatt', t: 'Was steht im Aufmaßblatt?', x: ['Dein Fensterbauer bekommt das Aufmaß als PDF: je Fenster eine Zeichnung mit allen Maßen, deine Wünsche, die Auswertung der Fotos und deine Notizen an der passenden Stelle.', 'Oben steht, was noch zu klären ist, etwa eine Absturzsicherung oder offene Wünsche. So weiß er vor dem Termin, worüber ihr sprechen müsst.'], tipp: 'Je vollständiger deine Angaben, desto weniger Rückfragen und desto genauer das Angebot.', ico: () => ICO.ref('a4'), see: ['notizen', 'offen', 'feinaufmass'] },
   design: { s: 'Gestaltung übernehmen', t: 'Was heißt Gestaltung übernehmen?', x: ['Hast du schon ein Fenster gespeichert, übernimmst du dessen Gestaltung mit einem Tipp: Material, Farben, Glas, Sprossen, Griff, Einbruchschutz, Sonnenschutz, Fensterbänke und Montage. Maße, Lage und Flügel bleiben die des neuen Fensters.', 'Danach speicherst du gleich oder gehst die Fragen einzeln durch und passt an.'], tipp: 'Ideal, wenn im ganzen Haus dieselben Fenster kommen: einmal gestalten, den Rest nur noch messen.', ico: zweiIco, see: ['offen'] },
   offen: { s: 'Weiß ich noch nicht', t: 'Was passiert bei „Weiß ich noch nicht“?', x: ['Du musst nicht alles selbst entscheiden. Tippst du „Weiß ich noch nicht“, bleibt die Frage offen; im Modell steht dann ein neutrales Weiß.', 'Dein Fensterbauer sieht im Aufmaß, was offen ist, und berät dich dazu im Angebot. Tippst du später eine Option an, ist die Frage entschieden.'], tipp: 'Lieber offen lassen als raten. Eine falsch gewählte Option fällt vielleicht erst beim Einbau auf.', ico: frageIco, see: ['aufmassblatt', 'notizen'] },
@@ -578,7 +580,7 @@ const GLOSS_GRUPPEN = [
   ['Griff und Sicherheit', ['griff', 'grifffarbe', 'ziehgriff', 'basisschutz', 'rc1n', 'rc2', 'pilzkopf', 'kindersicherung', 'baender', 'softclose', 'zwang', 'oeffner', 'falzluefter', 'alarmkontakt', 'rcstufen', 'fenstergitter']],
   ['Sonnen- und Sichtschutz', ['sonnenschutz', 'rollladen', 'raffstore', 'screen', 'aufsatz', 'vorbau', 'antrieb', 'innenschutz', 'insekt', 'sensor', 'klappladen', 'unterputz', 'sfarbe', 'insektgewebe']],
   ['Fensterbank und Montage', ['fensterbank', 'werzalit', 'montage', 'ralmontage', 'beiputz', 'endkappen', 'abdeckleiste']],
-  ['Projekt und Förderung', ['angaben', 'gebaeude', 'baujahr', 'lueftung', 'foerderung', 'zeitraum', 'budget', 'kontakt', 'aufmassblatt', 'design', 'offen', 'notizen', 'tiefe']]
+  ['Projekt und Förderung', ['angaben', 'gebaeude', 'baujahr', 'lueftung', 'foerderung', 'zeitraum', 'budget', 'kontakt', 'vermittlung', 'aufmassblatt', 'design', 'offen', 'notizen', 'tiefe']]
 ].map(([t, k]) => [t, k.slice().sort((a, b) => GLOSS[a].s.localeCompare(GLOSS[b].s, 'de'))]);
 const GLOSS_ORDER = [].concat.apply([], GLOSS_GRUPPEN.map((g) => g[1]));
 /* ---------- Fenster-Modell ---------- */
@@ -748,8 +750,8 @@ function openingText(w) {
   if (w.art === 'fsw') { const f = w.fsw || {}; return ol + 'Faltschiebewand, ' + w.sashes.length + ' Flügel, ' + lab('fswSchema', f.schema) + (f.geh ? ', mit Gehflügel' : ', ohne Gehflügel') + (w.fswAuf ? ', ' + AW.lab('fswAuf', w.fswAuf) : '') + ', ' + ov(w, 'schwelle', schwelleText(f.schwelle)); }
   if (w.art === 'psk') { const p = w.psk || {}; return 'PSK-Tür ' + lab('pskSchema', p.schema) + (p.schema === 'C' ? ', 2 Schiebeflügel mittig' : ', Schiebeflügel ' + (p.richtung === 'L' ? 'links' : 'rechts')) + ', kippbar, mit Schwelle'; }
   const s = w.sashes.map((x) => (x.st ? 'Seitenteil' : TYPNAME[x.t]) + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ');
-  if (w.art === 'balkon') return 'Balkontür, ' + ol + s + kvd + (w.paneel === 'paneel' ? ' · unten Paneel ' + thousand(num(w.paneelH) || 400) + ' mm' : '') + ', ' + ov(w, 'schwelle', schwelleText((w.bt || {}).schwelle));
-  return ol + s + kvd + (w.ul ? ' · ' + lab('ul', w.ulA) + ' ' + thousand(w.ulH) + ' mm' : '');
+  if (w.art === 'balkon') return 'Balkontür, ' + ol + s + AW.festText(w) + kvd + (w.paneel === 'paneel' ? ' · unten Paneel ' + thousand(num(w.paneelH) || 400) + ' mm' : '') + ', ' + ov(w, 'schwelle', schwelleText((w.bt || {}).schwelle));
+  return ol + s + AW.festText(w) + kvd + (w.ul ? ' · ' + lab('ul', w.ulA) + ' ' + thousand(w.ulH) + ' mm' : '');
 }
 /* Sonnenschutz außen in Worten */
 function sonneText(w) {
@@ -1447,7 +1449,9 @@ function w3dPaint(stage, w) {
   /* Werkstoff der Bühne (buehne.js): Profilform, Oberfläche, Dichtungs- und Abstandhalterfarbe; das Attribut löst das Neuzeichnen aus */
   stage._profil = dg(w, 'profil') ? w.profil : ''; stage._oberfl = dg(w, 'oberfl') ? w.oberfl : '';
   stage._dicht = dg(w, 'dicht') ? (OPT.dicht.find((o) => o.k === w.dicht) || {}).bg || '' : ''; stage._ah = dg(w, 'ahFarbe') ? AH_SOL[w.ahFarbe] || '' : '';
-  const mat = [stage._profil, stage._oberfl, w.dicht || '', w.ahFarbe || ''].join('|'); if (stage.getAttribute('data-mat') !== mat) stage.setAttribute('data-mat', mat);
+  /* Art der Sprossen: die Bühne zeichnet Wiener und aufgesetzte als Profil auf dem Glas, innenliegende flach im Zwischenraum */
+  const spr = (w.bars || []).length ? w.spross || 'wiener' : ''; if (stage._spross !== spr) { stage._spross = spr; if (window.Buehne3D) window.Buehne3D.anstoss(stage); }
+  const mat = [stage._profil, stage._oberfl, w.dicht || '', w.ahFarbe || '', stage._spross].join('|'); if (stage.getAttribute('data-mat') !== mat) stage.setAttribute('data-mat', mat);
   stage._orn = (ORN.find((o) => o.k === w.orn) || ORN[0]).bg; stage.style.setProperty('--orn', stage._orn); stage.setAttribute('data-scheiben', w.glas === '2' ? '2' : '3');
   stage.classList.toggle('mit-schloss', AW.rcAb(w, 'rc2n') || w.griff === 'abschliessbar' || (dg(w, 'kinder') && w.kinder === 'schloss')); stage.classList.toggle('mit-knopf', w.griff === 'druckknopf');
   stage.classList.toggle('ohne-griff', w.griff === 'ohne' || (w.griff === 'motor' && w.art === 'hst'));
@@ -1706,10 +1710,11 @@ function w3dLayout(stage, w, o, gr) {
     face(q('mul-' + i), mul, sashH, mx, sashTop, z0, '', '0 0', c ? polyClip(c, mx, sashTop, mul, sashH) : null);
     face(q('mulb-' + i), mul, sashH, mx, sashTop, z0 - fd, 'rotateY(180deg)', '50% 50%', c ? polyClip(c, mx, sashTop, mul, sashH, mul) : null);
   }
-  const griffe = [];
+  const griffe = [], rand = barBezug(w, V, sf);
+  stage._bez = { rand: rand, sashH: sashH }; // fürs Ziehen der Sprossen (bindRails)
   w.sashes.forEach((x, i) => {
     /* Hebe-Schiebe-Tür: das Festteil sitzt in der äußeren Laufebene mit eigenem Profil, der Schiebeflügel innen davor */
-    const sashW = V.sw[i] * s, sash = q('sash-' + i), fixed = x.t === 'F', hstFest = fixed && V.art === 'hst', ssf = hstFest ? sf * 0.75 : fixed ? 3 : sf, left = ix + V.sx[i] * s, zS = hstFest ? -(fd - sd) : 0;
+    const sashW = V.sw[i] * s, sash = q('sash-' + i), fixed = x.t === 'F', hstFest = fixed && V.art === 'hst', ssf = rand.r[i], left = ix + V.sx[i] * s, zS = hstFest ? -(fd - sd) : 0;
     if (!sash) return;
     sash.style.width = px(sashW); sash.style.height = px(sashH);
     sash.style.transformOrigin = x.t === 'K' ? '50% 100%' : (x.din === 'L' ? '0 50%' : '100% 50%');
@@ -1771,16 +1776,19 @@ function w3dLayout(stage, w, o, gr) {
        immer im geraden Profil, nie im Bogen oder in der Schräge. Stulp: nur der Gehflügel hat einen Griff. */
     const hd = q('handle-' + i), ro = q('hros-' + i), gl = w3dGriffLage(V, w, x, i, s, { G: G, gI: gI, left: left, sashTop: sashTop, sashW: sashW, sashH: sashH, sf: sf });
     if (sash) { sash.classList.toggle('is-steh', gl.steh && !gl.sichtbar); sash.classList.toggle('mit-griff', gl.bedien); }
+    /* Abstand vom Flügel nach dem Maßstab (29.10.2026): der Hebel steht etwa 28 mm ab, die Rosette 10 mm; vorher fest 6 und 3,5 px,
+       herangezoomt wirkte der Griff dann flach wie ein Schalter */
+    const gz = Math.max(6, Math.min(22, 28 * s)), rz = Math.max(3.5, Math.min(gz - 2, 10 * s));
     if (hd) {
       hd.style.width = px(gl.lw); hd.style.height = px(gl.lh); hd.style.transformOrigin = gl.origin; hd.style.setProperty('--hw', px(Math.min(gl.lw, gl.lh)));
-      hd.style.translate = px(gl.lx) + ' ' + px(gl.ly) + ' 6px';
+      hd.style.translate = px(gl.lx) + ' ' + px(gl.ly) + ' ' + px(gz);
       /* WebGL-Bühne: Maße und Drehpunkt des Hebels; ein Griff, den es nicht gibt (Standflügel, festes Feld, ohne Griff), fällt weg */
-      w3dWerte(hd, '_h', { w: gl.lw, h: gl.lh, tx: gl.lx, ty: gl.ly, tz: 6, ox: gl.ox, oy: gl.oy });
+      w3dWerte(hd, '_h', { w: gl.lw, h: gl.lh, tx: gl.lx, ty: gl.ly, tz: gz, ox: gl.ox, oy: gl.oy });
       hd._aus = !gl.sichtbar;
       hd.style.transform = 'none';
     }
-    face(ro, gl.rw, gl.rh, gl.ax - gl.rw / 2, gl.ay - gl.rh / 2, 3.5, '', '50% 50%');
-    if (ro) { ro._rund = Math.min(gl.rw, gl.rh) * 0.3; ro.style.borderRadius = px(ro._rund); ro.style.opacity = gl.sichtbar ? '' : '0'; } // Deckkraft und Rundung inline: die WebGL-Bühne liest keine Klassen
+    face(ro, gl.rw, gl.rh, gl.ax - gl.rw / 2, gl.ay - gl.rh / 2, rz, '', '50% 50%');
+    if (ro) { ro._tief = rz; ro._rund = Math.min(gl.rw, gl.rh) * 0.3; ro.style.borderRadius = px(ro._rund); ro.style.opacity = gl.sichtbar ? '' : '0'; } // Deckkraft und Rundung inline: die WebGL-Bühne liest keine Klassen
     /* Druckknopf an der Hebelwurzel, Schließzylinder in der Nabe (an der Achse ox, oy, auch beim Kipp- und Hebegriff) */
     const hk = q('hk-' + i), hs = q('hs-' + i);
     if (hk && hs) {
@@ -1789,7 +1797,7 @@ function w3dLayout(stage, w, o, gr) {
       face(hs, ds, ds, gl.ox - ds / 2, gl.oy - ds / 2, 0, '', '50% 50%'); hs._rund = ds / 2;
       hk.style.opacity = stage.classList.contains('mit-knopf') ? '' : '0'; hs.style.opacity = stage.classList.contains('mit-schloss') ? '' : '0';
     }
-    griffe[i] = gl.sichtbar ? [left + gl.ax, sashTop + gl.ay, z0 + 6] : null;
+    griffe[i] = gl.sichtbar ? [left + gl.ax, sashTop + gl.ay, z0 + gz] : null;
     /* Griff außen: Balkontür nach Wahl (Ziehgriff mit Schnäpper oder abschließbar), bei Hebe-Schiebe-, PSK- und Faltschiebetür nur
        abschließbar (Schließzylinder auf der Außenseite des bedienten Flügels); auf derselben Höhe wie der Griff innen */
     const ga = q('ga-' + i);
@@ -1805,7 +1813,7 @@ function w3dLayout(stage, w, o, gr) {
       /* Schließzylinder außen: eigene Fläche oben im Griff */
       const gas = q('gas-' + i); if (gas) { const dz2 = gw2 * 0.64; face(gas, dz2, dz2, gw2 / 2 - dz2 / 2, gh2 * 0.14, 0, '', '50% 50%'); gas._rund = dz2 / 2; gas.style.opacity = !zg && !muschel ? '' : '0'; }
     }
-    w.bars.filter((b) => b.s === i).forEach((b) => { w3dBarPos(q('bar-' + b.id), b, Math.max(2, w.breite * s)); });
+    w.bars.filter((b) => b.s === i).forEach((b) => { w3dBarPos(q('bar-' + b.id), barLokal(b, rand, sashH), Math.max(2, w.breite * s)); });
   });
   stage._griffe = griffe;
   if (q('mesh')) face(q('mesh'), iw, ih, ix, iy, z0 - fd - 6 * s, '', '0 0', G ? polyClip(gI.pts, ix, iy, iw, ih) : null);
@@ -2073,6 +2081,18 @@ function w3dGriffLage(V, w, x, i, s, g) {
   const ay = lage === 'tief' ? clamp(Math.max(ay0, k[0] + (k[1] - k[0]) * 0.64), lo, hi) : lage === 'hoch' ? clamp(Math.min(ay0, k[0] + (k[1] - k[0]) * 0.3), lo, hi) : ay0;
   return Object.assign(r, { ax: ax, ay: ay, lw: hw, lh: hl, lx: ax - hw / 2, ly: ay - hw / 2, origin: '50% ' + px(hw / 2), ox: hw / 2, oy: hw / 2, rw: rw, rh: rh });
 }
+/* Glasrand je Feld in Bildpunkten: Flügel mit Flügelrahmen (sf), das Festteil der Hebe-Schiebe-Tür im eigenen Profil (drei Viertel), ein
+   festes Feld im Blendrahmen nur mit Glasleiste (3 px); im Flügel (Detailangabe festFl, ohne Wahl) mit Flügelrahmen wie die Flügel daneben */
+function glasRand(w, V, x, sf) { return x.t !== 'F' ? sf : V.art === 'hst' ? sf * 0.75 : AW.festImFluegel(w) ? sf : 3; }
+/* Waagerechte Sprossen fluchten über alle Felder einer Reihe (Inhaber, 29.10.2026): p gilt fürs Glas des Bezugsfelds (der erste Flügel mit
+   Flügelrahmen, sonst Feld 0; daran stehen auch die Regler links), ein Feld mit anderem Glasrand bekommt dieselbe Höhe umgerechnet.
+   Gespeichert bleibt p; senkrechte Sprossen teilen weiter das eigene Glas. barLokal gibt die Sprosse mit der Lage im eigenen Glas zurück */
+function barBezug(w, V, sf) { const r = w.sashes.map((x) => glasRand(w, V, x, sf)), k = r.indexOf(sf); return { r: r, b: k < 0 ? 0 : k }; }
+function barLokal(b, rand, sashH) {
+  const a = rand && rand.r[rand.b], e = rand && rand.r[b.s];
+  if (b.d !== 'h' || a == null || e == null || a === e || !(sashH > 2 * e)) return b;
+  return Object.assign({}, b, { p: (a + b.p * (sashH - 2 * a) - e) / (sashH - 2 * e) });
+}
 function w3dBarPos(be, b, bw) {
   if (!be) return;
   be._b = { d: b.d, p: b.p, bw: bw };
@@ -2087,7 +2107,7 @@ function w3dGlassRects(stage, w, o, gr) {
   const d = V.laib * s, fd = W3D.FD * s, z = -d - fd / 2, f = W3D_PERSP / (W3D_PERSP - z);
   const x0 = V.x0 * s, y0 = V.y0 * s, pf = V.pf * s, sf = V.sf * s, mul = V.mul * s, olH = V.olH * s, sashTop = y0 + pf + (olH ? olH + V.km * s : 0), sashW = V.sashW * s, sashH = V.sashH * s;
   const proj = (x, y) => [cx + x * f, oy + (cy + y - oy) * f];
-  return { s: s, sashes: w.sashes.map((x, i) => { const ssf = x.t === 'F' ? 3 : sf, sw = V.sw[i] * s, left = x0 + pf + V.sx[i] * s + ssf, top = sashTop + ssf, a = proj(left, top), b = proj(left + sw - 2 * ssf, top + sashH - 2 * ssf); return { x: a[0], y: a[1], w: b[0] - a[0], h: b[1] - a[1] }; }) };
+  return { s: s, bez: barBezug(w, V, sf).b, sashes: w.sashes.map((x, i) => { const ssf = glasRand(w, V, x, sf), sw = V.sw[i] * s, left = x0 + pf + V.sx[i] * s + ssf, top = sashTop + ssf, a = proj(left, top), b = proj(left + sw - 2 * ssf, top + sashH - 2 * ssf); return { x: a[0], y: a[1], w: b[0] - a[0], h: b[1] - a[1] }; }) };
 }
 /* Schieberegler neben dem Modell: waagerechte Leiste für senkrechte Sprossen, senkrechte Leiste für waagerechte */
 function layoutRails(stage, w, o, gr) {
@@ -2096,7 +2116,7 @@ function layoutRails(stage, w, o, gr) {
   if (!o.rails) { rh.hidden = true; rv.hidden = true; return; }
   rh.hidden = false; rv.hidden = false;
   const G = w3dGlassRects(stage, w, o, gr), gs = G.sashes;
-  const left = Math.min.apply(null, gs.map((g) => g.x)), right = Math.max.apply(null, gs.map((g) => g.x + g.w)), top = gs[0].y, bottom = gs[0].y + gs[0].h;
+  const left = Math.min.apply(null, gs.map((g) => g.x)), right = Math.max.apply(null, gs.map((g) => g.x + g.w)), gb = gs[G.bez] || gs[0], top = gb.y, bottom = gb.y + gb.h;
   rh.style.left = px(left); rh.style.width = px(right - left); rh.style.top = px(bottom + 40);
   rv.style.top = px(top); rv.style.height = px(bottom - top); rv.style.left = px(left - 42);
   rh.setAttribute('data-span', JSON.stringify(gs.map((g) => [Math.round((g.x - left) * 10) / 10, Math.round(g.w * 10) / 10])));
@@ -2429,7 +2449,7 @@ const APP_URL = location.href.split('#')[0].split('?')[0];
 const PORTAL_URL = new URL('../', APP_URL).href;
 const PORTAL_OPEN = PORTAL_URL;
 const PORTAL_KURZ = PORTAL_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
-const RATGEBER_URL = new URL('ratgeber/fenster-ausmessen/', PORTAL_URL).href, FB_URL = PORTAL_URL + '#fensterbauer';
+const RATGEBER_URL = new URL('ratgeber/fenster-ausmessen/', PORTAL_URL).href, FB_URL = PORTAL_URL + 'fensterbauer';
 const STORE = 'aufmass.v1';
 /* ---------- Konfigurator-Instanz: eigene Domain eines Fensterbauers (docs/INSTANZEN.md, Bauplan Strang B) ----------
    window.KONFIG.instanz kommt vom Server (/config.js der Instanz); ohne INST ändert sich nichts. Mit INST ist die App immer im Modus
@@ -2452,13 +2472,22 @@ if (PROBE) {
   const P = window.Pakete, m = P ? P.oeffentlich(P.merkmale(PROBE_PAKET)) : { kopieKunde: true }, farbe = m.farbe ? '#2ab4bd' : '';
   (window.KONFIG = window.KONFIG || {}).instanz = { id: 'muster01', v: 1, host: location.host, name: 'Fensterbau Brandt', du: true, status: 'aktiv', vorschau: false, demo: true, probe: true, m: m,
     auftritt: { logo: '', grund: 'dunkel', col: farbe, gruss: { sie: '', du: '' }, ap: 'Petra Brandt', foto: '', tel: '', mail: '', web: '', ort: '', tiefe: '', std: '' },
-    start: { kicker: '', ueberschrift: '', text: '', bilder: [] }, farbe: farbe, akzent: farbe, kontakt: { tel: '', mail: '' }, logo: '', grenzen: { fenster: 50 } };
+    start: { kicker: '', ueberschrift: '', text: '', bilder: [] }, farbe: farbe, akzent: farbe, kontakt: { tel: '', mail: '' }, logo: '', grenzen: { fenster: 50 },
+    abzug: { seite: 15, oben: 15, unten: 30, untenT: 0 } }; // Abzug fürs Richtmaß wie im Beispiel des Betriebs (web/beispiele/mustermann)
   /* Firmenfarbe wie auf der Seite einer Instanz (der Server setzt dort --accent im Kopf, functions/instanz/seiten.js) */
   if (farbe) { try { document.documentElement.style.setProperty('--accent', farbe); document.documentElement.style.setProperty('--accent-soft', 'rgba(42, 180, 189, .14)'); } catch (e) { /* ok */ } }
 }
+/* Direkt in den Konfigurator (…?ausprobieren=<paket>&direkt, Knopf „Zum Konfigurator“ in der Leiste der Seite für Fensterbauer, Wunsch
+   des Inhabers 29.10.2026): ohne den Umweg über die Beispielseite; der Rückweg führt zur Seite für Fensterbauer */
+const PROBE_DIREKT = PROBE && (() => { try { return new URLSearchParams(location.search).has('direkt'); } catch (e) { return false; } })();
 /* Rückweg: Kam der Fensterbauer über die Beispielseite (Paket in der Adresse), führt „Zurück“ dorthin, sonst zur Seite für Fensterbauer */
-const PROBE_LANDING = (() => { if (!PROBE) return ''; let p = ''; try { p = String(new URLSearchParams(location.search).get('ausprobieren') || '').toLowerCase(); } catch (e) { p = ''; } return window.Pakete && window.Pakete.gueltig(p) ? '/vorschau/paket-beispiel/' + p + '.html?ausprobieren' : ''; })();
+const PROBE_LANDING = (() => { if (!PROBE) return ''; if (PROBE_DIREKT) return '/fuer-fensterbauer/'; let p = ''; try { p = String(new URLSearchParams(location.search).get('ausprobieren') || '').toLowerCase(); } catch (e) { p = ''; } return window.Pakete && window.Pakete.gueltig(p) ? '/vorschau/paket-beispiel/' + p + '.html?ausprobieren' : ''; })();
 let PROBE_DA = false; // nach dem Einstieg: eine leere Startseite führt zurück zur Beispielseite
+/* Testansicht mit dem Beispiel (…?ausprobieren&beispiel): das Projekt Familie Mustermann aus web/beispiele/mustermann/projekt.json, aus
+   dem auch das Beispiel-PDF der Website entsteht (scripts/blatt-beispiel.mjs); der Fensterbauer ändert es im Konfigurator und sieht im
+   Aufmaßblatt, was davon ankommt */
+const PROBE_BEISPIEL = PROBE && (() => { try { return new URLSearchParams(location.search).has('beispiel'); } catch (e) { return false; } })();
+const BEISPIEL_ORDNER = '/beispiele/mustermann/';
 const probePaketName = () => { const P = window.Pakete; return (P && P.PAKETE && P.PAKETE[PROBE_PAKET] && P.PAKETE[PROBE_PAKET].name) || PROBE_PAKET; };
 const INST = window.KONFIG && window.KONFIG.instanz && typeof window.KONFIG.instanz === 'object' && /^[a-z0-9]{8}$/.test(String(window.KONFIG.instanz.id || '')) ? window.KONFIG.instanz : null;
 const INST_M = INST ? INST.m || {} : {};
@@ -2609,7 +2638,7 @@ function lokalSpeichern() {
   try {
     if (S.betrieb) localStorage.setItem(linkKey(), JSON.stringify({ windows: S.windows, proj: S.proj, sent: S.sent, nb: S.nb || null, kauf: kaufSicher(), name: S.betrieb.name, angelegt: angelegt(), stand: S.stand || 0, projTs: S.projTs || 0, bekannt: S.sync.bekannt, geloescht: S.sync.geloescht, offen: !!S.sync.offen }));
     else {
-      const daten = JSON.stringify({ windows: S.windows, proj: S.proj, kauf: kaufSicher(), teil: S.teil || null, angelegt: angelegt(), stand: S.stand || 0, projTs: S.projTs || 0, bekannt: S.sync.bekannt, geloescht: S.sync.geloescht, offen: !!S.sync.offen, voll: !!S.sync.voll });
+      const daten = JSON.stringify({ windows: S.windows, proj: S.proj, kauf: kaufSicher(), teil: S.teil || null, verm: vmSicher(), angelegt: angelegt(), stand: S.stand || 0, projTs: S.projTs || 0, bekannt: S.sync.bekannt, geloescht: S.sync.geloescht, offen: !!S.sync.offen, voll: !!S.sync.voll });
       try { localStorage.setItem(STORE, daten); } catch (e) { platzMachen(); localStorage.setItem(STORE, daten); } // voll: zuerst beiseitegelegte Bilder anderer Aufmaße opfern
     }
     return true;
@@ -2657,6 +2686,7 @@ function restore() {
     if (o && o.proj) normProj(Object.assign(S.proj, o.proj));
     if (o && o.kauf) S.kauf = o.kauf;
     S.teil = o && o.teil ? o.teil : null;
+    S.verm = o && o.verm ? Object.assign({ weg: 'A', wahl: [], suchen: false, einw: false, gesendet: null }, o.verm) : null; // Vermittlung: Weg, Wahl, Anfrage (ohne Code)
     S.angelegt = o ? Number(o.angelegt) || 0 : 0;
     if (o) { S.stand = Number(o.stand) || 0; S.projTs = Number(o.projTs) || 0; S.sync.bekannt = Array.isArray(o.bekannt) ? o.bekannt.slice(-200) : []; if (o.geloescht && typeof o.geloescht === 'object') S.sync.geloescht = o.geloescht; S.sync.offen = o.offen === undefined ? S.windows.length > 0 : !!o.offen; S.sync.voll = !!o.voll; } // ältere Speicher: alles gilt als noch nicht gesichert
     S.sync.fp = entwurfFp(); S.sync.pfp = stabil(S.proj);
@@ -3157,7 +3187,7 @@ function startDna() {
   const stelle = '<div class="lg-karte lg-hell st-stelle-karte"><div class="lg-feld"><span class="dna-label" id="st-stelle-l">Die Stelle</span><div class="st-stelle" role="radiogroup" aria-labelledby="st-stelle-l">' +
     OPT.situation.map((x) => { const an = (x.k === 'neu') === neu; return '<button type="button" role="radio" data-act="situation" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '">' + esc(x.label) + '</button>'; }).join('') + '</div>' +
     '<p class="st-stelle-text" aria-live="polite">' + ST_STELLE[neu ? 'neu' : 'ersatz'] + (neu ? ' <button type="button" class="ulink" data-act="gloss" data-k="neuoeffnung">Mehr erfahren</button>' : '') + '</p></div></div>';
-  const zurLanding = PROBE && PROBE_LANDING && !S.windows.length, zur = zurLanding ? ['probe-landing', 'Zurück zur Website von Fensterbau Brandt'] : ['back', 'Zurück: Aufmaß']; // Testansicht: die Beispielseite ist die Website des Betriebs
+  const zurLanding = PROBE && PROBE_LANDING && !S.windows.length, zur = zurLanding ? ['probe-landing', PROBE_DIREKT ? 'Zurück zur Seite für Fensterbauer' : 'Zurück zur Website von Fensterbau Brandt'] : ['back', 'Zurück: Aufmaß']; // Testansicht: die Beispielseite ist die Website des Betriebs
   const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="' + zur[0] + '" aria-label="' + zur[1] + '">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="fotos">Weiter zu den Fotos' + pfeil + '</button></div>';
   return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(zur) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + probeInfo() + bento + stelle + rechtLinks() + fuss + '</div></div>', back: ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
 }
@@ -3825,7 +3855,7 @@ function fertigDna() {
 SCREENS.fertigAlt = SCREENS.fertig;
 SCREENS.fertig = fertigDna;
 /* Anfrage: zwei kurze Seiten im Link, drei ohne Link (dann mit Kontakt) */
-const anfrageHead = (step, lk) => lk ? 'Fast fertig · ' + step + ' von ' + (instWebsite() ? 3 : 2) : 'Fürs Angebot · ' + step + ' von 3'; // Instanz, Website: dazu der Kontakt
+const anfrageHead = (step, lk) => lk ? 'Fast fertig · ' + step + ' von ' + (instWebsite() ? 3 : 2) : vermAn() ? vmSchritt(step) : 'Fürs Angebot · ' + step + ' von 3'; // mit Vermittlung: Weiche 3, Kontakt 4, Betriebe 5 // Instanz, Website: dazu der Kontakt
 /* Was der gewählte Förderweg bedeutet (Quellen: BAFA, BEG EM; § 35c EStG mit ESanMV; docs/GESTALTUNG.md) */
 const FOERD_HINWEIS = {
   bafa: '15 % Zuschuss vom BAFA. Ein Energieeffizienz-Experte begleitet den Antrag, gestellt wird er vor Beginn der Arbeiten; den Vertrag erst mit Förderklausel unterschreiben. Die Fenster müssen gut dämmen (Uw höchstens 0,95). Dein Fensterbauer plant das ein.',
@@ -3927,7 +3957,7 @@ function anfrage2Dna() {
   if (FOERD_HINWEIS[fw]) karte += noteBox(FOERD_HINWEIS[fw], null, 'ab-note');
   if (lk) karte += '<div class="ab-teil">' + abKopf('Nachricht an ' + bn) + '<p class="ab-klein">' + (web ? anr('Freiwillig, zum Beispiel was Ihnen wichtig ist.', 'Freiwillig, zum Beispiel was dir wichtig ist.') : 'Freiwillig, zum Beispiel wann du erreichbar bist.') + '</p><div class="rows">' + textRow('Nachricht', 'notiz', 'z. B. Rollladen im Bad klemmt', 'text', 'p') + '</div></div>';
   karte += '</div>';
-  const weiter = lk && !web ? ['go', 'blatt', 'Prüfen und senden'] : ['go', 'anfrage3', 'Weiter'];
+  const weiter = lk && !web ? ['go', 'blatt', 'Prüfen und senden'] : vermAn() ? ['go', 'weg', 'Weiter'] : ['go', 'anfrage3', 'Weiter'];
   return { html: lgKopf(['back', 'Zurück: Haus']) + dnaTisch(abZeitBuehne(pr, anfrageHead(2, lk)), frage + karte + abFuss('Zurück: Haus', weiter[0], weiter[1], weiter[2])), back: ['Haus', 'anfrage'], dna: true, cls: 'dna ab dt', voll: true };
 }
 /* Kontakt: das Aufmaßblatt als Objekt im Fensterlicht; was getippt wird, steht sofort oben auf dem Blatt (abLive), Maße als Punkte */
@@ -3950,14 +3980,317 @@ function abLive() {
 }
 function anfrage3Dna() {
   if (instWebsite()) return instAnfrage3();
-  const pr = S.proj;
+  if (vmWegA()) return vmKontakt(); // Vermittlung, Weg A: Pflichtfelder
+  const pr = S.proj, vw = vermAn(), zur = vw ? 'Zurück: Wie geht es weiter?' : 'Zurück: Zeit und Budget';
   const frage = lgFrage('Wie erreicht dich <em>dein Fensterbauer?</em>', 'kontakt', 'Steht auf dem Aufmaßblatt, damit er sich mit dem Angebot melden kann. Alles freiwillig; das Blatt bekommt nur, wem du es gibst.');
   const karte = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Kontakt') + '<div class="rows ab-felder">' + textRow('Name', 'name', 'Vor- und Nachname', 'text', 'p') + textRow('PLZ und Ort', 'ort', 'z. B. 50667 Köln', 'text', 'p') + textRow('Telefon', 'tel', 'Für Rückfragen', 'tel', 'p') + textRow('E-Mail', 'mail', 'name@beispiel.de', 'email', 'p') + '</div></div>' +
     '<div class="ab-teil">' + abKopf('Am besten erreichbar') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div></div>';
-  return { html: lgKopf(['back', 'Zurück: Zeit und Budget']) + dnaTisch(abBuehne('ab-blatt', anfrageHead(3, false), abPapier()), frage + karte + abFuss('Zurück: Zeit und Budget', 'go', 'teilen', 'Zum Aufmaßblatt')), back: ['Zurück', 'anfrage2'], dna: true, cls: 'dna ab dt', voll: true };
+  return { html: lgKopf(['back', zur]) + dnaTisch(abBuehne('ab-blatt', vw ? vmSchritt(4) : anfrageHead(3, false), abPapier()), frage + karte + abFuss(zur, 'go', 'teilen', 'Zum Aufmaßblatt')), back: ['Zurück', vw ? 'weg' : 'anfrage2'], dna: true, cls: 'dna ab dt', voll: true };
 }
 SCREENS.anfrageAlt = SCREENS.anfrage; SCREENS.anfrage2Alt = SCREENS.anfrage2; SCREENS.anfrage3Alt = SCREENS.anfrage3;
 SCREENS.anfrage = anfrageDna; SCREENS.anfrage2 = anfrage2Dna; SCREENS.anfrage3 = anfrage3Dna;
+/* ---------- Vermittlung „Angebote aus deiner Nähe“ (29.10.2026, Auftrag des Inhabers; docs/VERMITTLUNG.md, Abschnitt 10) ----------
+   Nur auf eeziframes.com ohne Betriebslink und mit Server (SERVER.vermittlung.an). Nach „Zeit und Budget“ die Weiche (weg): Angebote aus
+   der Nähe (kostenlos) oder das Aufmaßblatt für sich (PREIS(), weiter wie bisher über Kontakt und Freischalten). Weg A (Reihenfolge des
+   Inhabers, 30.10.2026): Betriebe (nur die Postleitzahl, sofort Betriebe aus den gespeicherten Suchen der Umgebung, Auswahl von zwei bis
+   fünf oder „Sucht für mich aus“) → Kontakt mit Pflichtfeldern und Einwilligung → Code an die Nummer (SMS, Festnetz per Anruf) → Angefragt. Der Inhaber ruft die gewählten Betriebe an und schickt das Aufmaßblatt aus der Zentrale nur an
+   die, die zustimmen; deshalb sagen die Texte „Wir fragen an“, nie „gesendet“. Auf Weg A ist das Blatt nach dem Abschicken freigeschaltet. */
+/* Bis zu fünf Betriebe je Anfrage, mindestens zwei, damit es etwas zu vergleichen gibt (Inhaber, 29.10.2026: „nicht beschränken,
+   anfangen mit fünf“) */
+const VM_MAX = 5, VM_MIN = 2, VM_FASSUNG = '2026-10-30';
+const VM_ZAHL = ['keinen', 'einen', 'zwei', 'drei', 'vier', 'fünf'];
+const vermAn = () => !S.betrieb && !INST && !PROBE && !!(SERVER.vermittlung && SERVER.vermittlung.an);
+const vm = () => S.verm || (S.verm = { weg: 'A', wahl: [], suchen: false, einw: false, gesendet: null });
+const vmWegA = () => vermAn() && vm().weg === 'A';
+/* PLZ und Ort aus dem einen Feld „PLZ und Ort“ */
+function vmOrt() { const t = String(S.proj.ort || '').replace(/\s+/g, ' ').trim(), m = /(^|\D)(\d{5})(?!\d)/.exec(t); return { plz: m ? m[2] : '', ort: m ? t.replace(m[2], '').replace(/^[\s,·-]+|[\s,·-]+$/g, '') : t }; }
+/* Postleitzahl der Suche: was auf der Folie Betriebe steht, anfangs die aus „PLZ und Ort“ */
+function vmPlz() { const v = vm(); if (v.plz == null) v.plz = vmOrt().plz; return v.plz; }
+/* Deutsche Nummer: Mobil (015x, 016x, 017x) oder Festnetz; offensichtlicher Unsinn zählt nicht (dieselbe Regel prüft der Server) */
+function vmTel(t) {
+  let d = String(t || '').replace(/[\s()./-]/g, '');
+  if (/^\+49/.test(d)) d = '0' + d.slice(3); else if (/^0049/.test(d)) d = '0' + d.slice(4);
+  if (!/^0[1-9]\d{5,13}$/.test(d)) return null;
+  const rest = d.slice(1);
+  if (/^(\d)\1+$/.test(rest) || '1234567890123456'.includes(rest) || '9876543210987654'.includes(rest)) return null;
+  return { nr: d, mobil: /^01[5-7]/.test(d) };
+}
+function vmKontaktPruefen() {
+  const p = S.proj || {}, f = {}, mail = String(p.mail || '').trim();
+  if (String(p.name || '').replace(/\s+/g, ' ').trim().length < 2) f.name = 'Bitte deinen Namen angeben.';
+  if (!vmTel(p.tel)) f.tel = String(p.tel || '').trim() ? 'Diese Nummer stimmt so nicht. Bitte eine deutsche Telefonnummer, am besten deine Handynummer.' : 'Bitte deine Telefonnummer angeben, am besten die Handynummer.';
+  if (mail && !mailOkI(mail)) f.mail = 'Bitte eine gültige E-Mail-Adresse eingeben oder das Feld leer lassen.';
+  f.fehlt = !!(f.name || f.tel || f.mail);
+  return f;
+}
+/* Gewählte Betriebe als Namen, für Einwilligung und Bestätigung */
+const vmNamen = () => { const v = vm(), l = v.liste || []; return v.wahl.map((id) => (l.find((b) => b.id === id) || {}).name).filter(Boolean); };
+const vmUnd = (a) => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' und ' + a[a.length - 1]);
+function vmEinwText() {
+  const v = vm(), n = vmNamen();
+  return 'Ich bin einverstanden, dass eeziframes ' + (v.suchen || !n.length ? 'bis zu ' + VM_ZAHL[VM_MAX] + ' passende Fensterbetriebe in meiner Nähe, die eeziframes für mich aussucht,' : vmUnd(n)) + ' für mich anfragt und ' + (n.length === 1 && !v.suchen ? 'ihm' : 'ihnen') + ' mein Aufmaß mit Namen, Ort, Telefonnummer und, falls angegeben, E-Mail-Adresse schickt, damit ich ein Angebot bekomme. Sonst bekommt niemand meine Daten. Ich kann diese Einwilligung jederzeit widerrufen.';
+}
+const vmStr = (s, n) => { s = String(s || ''); return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s; };
+const vmHash = (s) => String(s || '').split('').reduce((x, c) => (x * 31 + c.charCodeAt(0)) >>> 0, 7);
+
+/* Bühne: der Umkreis um das Haus des Kunden. Ringe mit Strichmarken (10, 20, 30 km), die Betriebe als Punkte in ihrer Entfernung
+   (Richtung nur zur Verteilung, keine Karte), gewählte weiß mit Nummer und Linie, bis zwei auch mit Etikett; beim Suchen ein Lichtkegel */
+function vmUmkreis(o) {
+  const W = 360, H = 268, cx = 180, cy = 134, R = 112, um = o.umkreis || 30, l = o.betriebe || [], wahl = o.wahl || [];
+  const tick = []; for (let a = 0; a < 360; a += 6) { const lang = a % 30 === 0, r1 = R + 3, r2 = R + (lang ? 10 : 6), s = Math.sin(a * Math.PI / 180), c = Math.cos(a * Math.PI / 180); tick.push('<line x1="' + (cx + r1 * c).toFixed(1) + '" y1="' + (cy + r1 * s).toFixed(1) + '" x2="' + (cx + r2 * c).toFixed(1) + '" y2="' + (cy + r2 * s).toFixed(1) + '"' + (lang ? ' class="lang"' : '') + '/>'); }
+  const ringe = [1, 2, 3].map((k) => '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R * k / 3).toFixed(1) + '"/>').join('');
+  const kmTxt = [1, 2, 3].map((k) => { const r = R * k / 3, a = -0.7; return '<text x="' + (cx + r * Math.cos(a) + 5).toFixed(1) + '" y="' + (cy + r * Math.sin(a) - 3).toFixed(1) + '">' + Math.round(um * k / 3) + ' km</text>'; }).join(''); // schräg nach rechts oben, frei vom Haus und seinem Namen
+  const start = vmHash(o.plz || 'x') % 360, pos = l.map((b, i) => { const a = (start + i * 137.508) % 360, rr = Math.max(R * .38, Math.min(R, (Number(b.km) || um) / um * R)), s = Math.sin(a * Math.PI / 180), c = Math.cos(a * Math.PI / 180); return { b: b, x: cx + rr * c, y: cy + rr * s, i: wahl.indexOf(b.id) }; });
+  const linien = pos.filter((p) => p.i >= 0).map((p) => '<line class="vm-linie" x1="' + cx + '" y1="' + cy + '" x2="' + p.x.toFixed(1) + '" y2="' + p.y.toFixed(1) + '"/>').join('');
+  const punkte = pos.map((p) => (p.i >= 0 ? '<g class="vm-pkt ist-gewaehlt"><circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="10"/><text x="' + p.x.toFixed(1) + '" y="' + (p.y + 4).toFixed(1) + '" text-anchor="middle">' + (p.i + 1) + '</text></g>' : '<circle class="vm-pkt" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="4.5"/>')).join('');
+  /* Namen nur bis zwei Gewählte; ab drei überdecken sich die Etiketten, dann tragen die Nummern (wie in der Liste daneben) */
+  const etiketten = pos.filter((p) => p.i >= 0 && wahl.length <= 2).map((p) => { const t = vmStr(p.b.name, 22), w = Math.round(t.length * 6.3 + 18), rechts = p.x >= cx, x = rechts ? Math.min(W - w - 2, p.x + 16) : Math.max(2, p.x - 16 - w), y = Math.max(4, Math.min(H - 26, p.y - 11)); return '<g class="vm-etikett"><rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w + '" height="22" rx="11"/><text x="' + (x + w / 2).toFixed(1) + '" y="' + (y + 15).toFixed(1) + '" text-anchor="middle">' + esc(t) + '</text></g>'; }).join('');
+  const beispiel = o.beispiel ? [[38, 0.55], [158, 0.8], [262, 0.42]].map((p) => { const a = p[0] * Math.PI / 180, x = cx + R * p[1] * Math.cos(a), y = cy + R * p[1] * Math.sin(a); return '<line class="vm-linie" x1="' + cx + '" y1="' + cy + '" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1) + '"/><circle class="vm-pkt ist-beispiel" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="7"/>'; }).join('') : '';
+  const kegel = o.laedt ? '<g class="vm-kegel"><path d="M' + cx + ' ' + cy + 'L' + (cx + R) + ' ' + cy + 'A' + R + ' ' + R + ' 0 0 0 ' + (cx + R * Math.cos(-0.7)).toFixed(1) + ' ' + (cy + R * Math.sin(-0.7)).toFixed(1) + 'Z"/></g>' : '';
+  const mitte = '<circle class="vm-hof" cx="' + cx + '" cy="' + cy + '" r="13"/><circle class="vm-du" cx="' + cx + '" cy="' + cy + '" r="6.5"/><text class="vm-du-t" x="' + cx + '" y="' + (cy + 30) + '" text-anchor="middle">' + esc(o.du || 'Du') + '</text>';
+  return '<svg class="vm-umkreis' + (o.laedt ? ' ist-suchend' : '') + '" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true" focusable="false"><defs><radialGradient id="vm-kegel-v" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(' + cx + ' ' + cy + ') scale(' + R + ')"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset=".6" stop-color="#fff" stop-opacity=".07"/><stop offset="1" stop-color="#fff" stop-opacity=".16"/></radialGradient></defs>' +
+    '<g class="vm-ringe">' + ringe + '</g><g class="vm-ticks">' + tick.join('') + '</g><g class="vm-km">' + kmTxt + '</g>' + kegel + linien + beispiel + punkte + mitte + etiketten + '</svg>';
+}
+/* Bühnen der Vermittlung ohne das Foto mit dem Lichtschatten (Inhaber, 29.10.2026: „muss ich nicht überall haben“): Anthrazit mit Licht
+   von oben links und einem feinen Punktraster wie eine Karte; darauf der Umkreis oder das Aufmaßblatt */
+function vmBuehne(chip, o, extra) { return abBuehne('vm-buehne', chip, '<div class="vm-umkreis-wrap">' + vmUmkreis(o) + '</div>' + (extra || '')); }
+function vmBlattBuehne(chip, offen, extra, live) { return abBuehne('vm-buehne vm-blattbuehne', chip, abPapier(offen, !offen && !live) + (extra || '')); }
+/* Schritte: Haus 1, Zeit 2, Weg 3, dann auf Weg A Betriebe 4 und Kontakt 5 (der Code bestätigt 5), auf Weg B Kontakt 4 */
+const vmSchritt = (n) => 'Fürs Angebot · ' + n + ' von ' + (vm().weg === 'A' ? 5 : 4);
+
+/* Weiche: zwei Wege als Karten auf Anthrazit, die gewählte weiß; die Bühne zeigt, was der Weg bringt (Umkreis oder das Blatt) */
+const VM_SCHILD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5.2c0 4.3-2.9 8.1-7 9.8-4.1-1.7-7-5.5-7-9.8V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.6 12.2l2.3 2.3 4.5-4.9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function vmWeg() {
+  const v = vm(), a = v.weg !== 'B', g = v.gesendet, frei = FREI(), preis = euro(PREIS());
+  /* Zwei Karten untereinander (bis 29.10.2026 nebeneinander; der Satz des Inhabers im weißen Feld, 30.10.2026, braucht die ganze Breite):
+     das Aufmaßblatt an Betriebe der Wahl für 0 € mit dem durchgestrichenen Preis als Anker und dem Etikett „Empfohlen“, darunter das Blatt
+     allein mit Preis. Die gewählte Karte wird weiß, die Gratis-Karte trägt dazu einen Ring */
+  const karteA = '<button type="button" class="vm-karte vm-karte--gratis" data-act="vm-weg" data-v="A" aria-pressed="' + a + '"><span class="vm-karte-etikett">' + (g ? 'Angefragt' : 'Empfohlen') + '</span>' +
+    '<span class="vm-karte-titel">Gestatte uns, das Aufmaßblatt an von dir ausgewählte Betriebe zu schicken (und nur an diese).</span><span class="vm-preis"><b>0</b><small>€</small>' + (frei ? '' : '<s>' + esc(preis) + '</s>') + '</span>' +
+    '<span class="vm-mark" aria-hidden="true">' + CHECK_S + '</span></button>';
+  const karteB = '<button type="button" class="vm-karte" data-act="vm-weg" data-v="B" aria-pressed="' + !a + '"><span class="vm-karte-etikett vm-karte-etikett--leise">' + (frei ? 'Freigeschaltet' : 'Nur für dich') + '</span>' +
+    '<span class="vm-karte-titel">Aufmaßblatt für dich</span><span class="vm-preis">' + (frei ? '<b>✓</b>' : '<b>' + esc(preis.replace(/\s*€$/, '')) + '</b><small>€</small>') + '</span>' +
+    '<span class="vm-mark" aria-hidden="true">' + CHECK_S + '</span></button>';
+  /* Daten-Garantie (Wortlaut des Inhabers, so gefasst, dass er stimmt: Die gewählten Betriebe melden sich, von uns kommen Code und
+     Nachrichten zur Anfrage; gespeichert wird nur, was im Datenschutz steht) und „Warum kostenlos?“ zum Aufklappen */
+  const garantie = '<div class="vm-garantie"><span class="vm-garantie-chip">' + VM_SCHILD + 'Daten-Garantie</span>' +
+    '<p><b>Außer den Fensterbauern, die dein Aufmaß bekommen, meldet sich niemand bei dir,</b> weder per E-Mail noch per Telefon noch auf anderen Wegen. Von uns bekommst du nur den Code und Nachrichten zu deiner Anfrage.</p>' +
+    '<p>Deine Daten geben wir nur an die Fensterbauer weiter, die du auswählst (oder uns für dich aussuchen lässt), so wie du es vermutlich auch selbst tun würdest. <b>Kein versteckter Verkauf und keine versteckte Speicherung deiner Daten.</b></p></div>';
+  const warum = '<details class="er-falls vm-falls"><summary><span><b>Warum kostenlos?</b></span></summary><div class="fold-body"><p>Die Fensterbetriebe bezahlen uns für die Vermittlung. Für dich bleibt es kostenlos, das Aufmaßblatt bekommst du dazu.</p></div></details>';
+  const unten = a ? (g ? '<p class="vm-vertrauen">Anfrage ' + esc(g.nr || '') + ' vom ' + esc(new Date(g.when).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })) + ' ist bei uns. Wir melden uns.</p>' : garantie + warum)
+    : '<p class="ab-klein vm-warum">Als PDF, du gibst es weiter, an wen du willst.' + (EINF() && !frei ? ' ' + esc(EINF()) : '') + '</p>';
+  const karte = '<div class="vm-wege" role="group" aria-label="Wie geht es weiter?">' + karteA + karteB + '</div>' + unten;
+  const frage = lgFrage('Wie geht es <em>weiter?</em>', 'vermittlung', 'Wähle, wie du fortfahren möchtest.');
+  const plz = vm().plz != null ? vm().plz : vmOrt().plz, buehne = a ? vmBuehne(vmSchritt(3), { beispiel: true, du: plz ? 'Du · ' + plz : 'Du', plz: plz }) : vmBlattBuehne(vmSchritt(3), frei, frei ? '' : abBetrag());
+  const weiter = a ? (g ? ['go', 'angefragt', 'Zur Anfrage'] : ['vm-weiter', '', 'Betriebe finden']) : ['vm-weiter', '', frei ? 'Zum Aufmaßblatt' : 'Weiter zum Aufmaßblatt'];
+  return { html: lgKopf(['back', 'Zurück: Zeit und Budget']) + dnaTisch(buehne, frage + karte + abFuss('Zurück: Zeit und Budget', weiter[0], weiter[1], weiter[2])), back: ['Zeit und Budget', 'anfrage2'], dna: true, cls: 'dna ab dt vm', voll: true };
+}
+/* Kontakt auf Weg A, nach der Wahl der Betriebe: Name und Telefon sind Pflicht (Fehler am Feld wie auf den Instanzen), E-Mail freiwillig;
+   der Ort kommt aus der Postleitzahl der Folie Betriebe. Hier steht auch die Einwilligung, weil sie die gewählten Betriebe nennt */
+function vmKontakt() {
+  const pr = S.proj, f = S.vmFehler || {}, v = vm(), C = window.KONFIG || {};
+  const frage = lgFrage('Wie erreichen dich <em>die Betriebe?</em>', 'vermittlung', 'Name und Telefon brauchen wir für die Anfrage.');
+  const karte = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Kontakt') + '<div class="rows ab-felder kontakt-felder">' +
+    kontaktFeld('Name', 'name', 'Vor- und Nachname', 'text', 'name', f.name, true) +
+    kontaktFeld('Telefon, am besten Handy', 'tel', 'z. B. 0171 2345678', 'tel', 'tel', f.tel, true) + kontaktFeld('E-Mail', 'mail', 'Freiwillig, dann kommt das Aufmaßblatt auch per Mail', 'email', 'email', f.mail, false) +
+    '</div><p class="vm-vertrauen vm-vertrauen--tel"><b>Deine Nummer bestätigst du gleich mit einem Code.</b> Damit die Betriebe wissen, dass ein echter Mensch anfragt. So bekommst du ernsthafte Rückmeldungen.</p>' +
+    '<p class="ab-pflicht">* Pflicht. Deine Angaben bekommen nur die Betriebe, die du ausgewählt hast, und erst, wenn sie zugesagt haben. Mehr im <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>.</p></div>' +
+    '<div class="ab-teil">' + abKopf('Am besten erreichbar · freiwillig') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div></div>' +
+    '<button type="button" class="vm-einw' + (f.einw ? ' ist-bad' : '') + '" data-act="vm-einw" role="checkbox" aria-checked="' + !!v.einw + '"><span class="vm-box" aria-hidden="true">' + CHECK_S + '</span><span>' + esc(vmEinwText()) + '</span></button>';
+  const grund = f.fehlt || f.einw ? '<p class="vm-grund" role="status">' + esc(f.fehlt ? 'Bitte noch die markierten Felder ausfüllen.' : f.einw) + '</p>' : '';
+  const busy = v.codeLaeuft, fuss = busy ? rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Betriebe" disabled>' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter btn primary" disabled aria-busy="true">Einen Moment …</button></div>' : abFuss('Zurück: Betriebe', 'vm-kontakt', '', 'Abschicken');
+  return { html: lgKopf(['back', 'Zurück: Betriebe']) + dnaTisch(vmBlattBuehne(vmSchritt(5), false, '', true), frage + karte + grund + fuss), back: ['Betriebe', 'betriebe'], dna: true, cls: 'dna ab dt vm', voll: true };
+}
+/* Suche zur Postleitzahl: meist sofort aus den gespeicherten Suchen der Umgebung, sonst sucht die KI neu (dann ein Hinweis nach 2,5 s);
+   die Liste bleibt, bis sich die Postleitzahl ändert. Den Ort nennt der Server; er kommt ins Feld „PLZ und Ort“ (Aufmaßblatt) */
+async function vmSuchen(neu) {
+  const v = vm(), plz = vmPlz();
+  if (!/^\d{5}$/.test(plz) || v.laedt) return;
+  if (!neu && v.liste && v.listePlz === plz) return;
+  v.laedt = true; v.suchFehler = ''; if (S.screen === 'betriebe') render();
+  const langsam = setTimeout(() => { const e = document.querySelector('.vm-suche small'); if (e && vm().laedt) e.textContent = 'Für diese Gegend sucht die KI gerade neu. Das kann bis zu einer Minute dauern.'; }, 2500);
+  try {
+    const r = await fetch('/api/vermittlung/suche', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ plz: plz }) }), j = await r.json().catch(() => null);
+    if (!j || !j.ok) { v.suchFehler = (j && j.fehler) || 'Die Suche hat gerade nicht geklappt.'; v.suchFehlerPlz = j && j.feld === 'plz'; v.liste = v.liste && v.listePlz === plz ? v.liste : null; }
+    else {
+      v.liste = (j.betriebe || []).slice(0, 8); v.listePlz = plz; v.ortName = String(j.ort || ''); v.umkreis = Number(j.umkreis) || 30; v.quelle = j.quelle || ''; v.suchFehlerPlz = false;
+      v.wahl = v.wahl.filter((id) => v.liste.some((b) => b.id === id)); if (!v.liste.length) v.suchen = true;
+      if (v.ortName && vmOrt().plz !== plz) S.proj.ort = plz + ' ' + v.ortName;
+    }
+  } catch (e) { v.suchFehler = 'Keine Verbindung. Bitte gleich noch einmal versuchen.'; }
+  clearTimeout(langsam); v.laedt = false; persist(); if (S.screen === 'betriebe') render();
+  if (vmPlz() !== plz && /^\d{5}$/.test(vmPlz())) vmSuchen(); // während der Suche geändert
+}
+/* Betriebe (erster Schritt auf Weg A): nur die Postleitzahl; mit der fünften Ziffer kommt die Liste. Umkreis auf der Bühne, die Liste weiß
+   mit Haken wie in den Wunsch-Fragen, „Sucht für mich aus“; weiter zum Kontakt */
+function vmBetriebe() {
+  const v = vm(), plz = vmPlz(), f = S.vmFehler || {}, gilt = !!(v.liste && v.listePlz === plz), l = gilt ? v.liste : [], voll = v.wahl.length >= VM_MAX, laedt = !!v.laedt;
+  if (/^\d{5}$/.test(plz) && !laedt && !gilt && !v.suchFehler) setTimeout(() => vmSuchen(), 0);
+  const ortText = plz + (gilt && v.ortName ? ' ' + v.ortName : '');
+  const frage = lgFrage('Betriebe in deiner <em>Nähe.</em>', 'vermittlung', 'Nur deine Postleitzahl, dann siehst du Fensterbetriebe rund um dein Haus. Wähle ' + VM_ZAHL[VM_MIN] + ' bis ' + VM_ZAHL[VM_MAX] + '; nur sie bekommen dein Aufmaß.');
+  const pf = f.plz || (v.suchFehlerPlz && v.suchFehler) || '';
+  const feld = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Postleitzahl') + '<label class="ab-eingabe vm-plzfeld' + (pf ? ' ist-bad' : '') + '"><input type="text" id="vm-plz" data-in="vm-plz" inputmode="numeric" autocomplete="postal-code" maxlength="5" pattern="[0-9]*" value="' + esc(plz) + '" placeholder="z. B. 33442" aria-label="Postleitzahl"' + (pf ? ' aria-invalid="true" aria-describedby="vm-plz-f"' : '') + '></label>' +
+    (pf ? '<p class="vm-feldfehler" id="vm-plz-f">' + esc(pf) + '</p>' : '') + '</div></div>';
+  let erg = '';
+  if (laedt) erg = '<div class="vm-suche" role="status"><span class="vm-suche-punkt" aria-hidden="true"></span><span><b>Wir suchen Fensterbetriebe rund um ' + esc(plz) + ' …</b><small>Meist geht das sofort.</small></span></div>';
+  else if (gilt || (v.suchFehler && !v.suchFehlerPlz)) {
+    if (v.suchFehler && !v.suchFehlerPlz) erg += '<p class="ab-note warn">' + esc(v.suchFehler) + ' <button type="button" class="ulink" data-act="vm-nochmal">Noch einmal suchen</button></p>';
+    if (l.length) {
+      /* Partner (bei eeziframes eingetragen, bezahlen die Vermittlung) stehen auf Platz 1 und 2 und sind so gekennzeichnet; die Reihenfolge wird offengelegt (§ 5b Abs. 2 UWG) */
+      const mitPartner = l.some((b) => b.partner);
+      erg += '<p class="ab-klein vm-quelle">' + l.length + (l.length === 1 ? ' Betrieb' : ' Betriebe') + ' rund um ' + esc(ortText) + ', von einer KI aus öffentlichen Angaben zusammengestellt. ' + (mitPartner ? '<b>Partnerbetriebe stehen oben</b> (bei eeziframes eingetragen, sie bezahlen die Vermittlung), danach nach Entfernung. ' : '') + 'Entfernung Luftlinie, ungefähr; Orte nach <a class="ulink" href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0).</p>' +
+        '<div class="qpanel ab-panel"><div class="vm-liste' + (f.wahl ? ' ist-bad' : '') + '" role="group" aria-label="Betriebe, ' + VM_ZAHL[VM_MIN] + ' bis ' + VM_ZAHL[VM_MAX] + ' wählen">' + l.map((b) => {
+          const i = v.wahl.indexOf(b.id), an = i >= 0, aus = !an && (voll || v.suchen), lei = (b.leistungen || []).slice(0, 4).join(' · ');
+          return '<button type="button" class="vm-betrieb' + (b.partner ? ' ist-partner' : '') + '" data-act="vm-wahl" data-v="' + esc(b.id) + '" aria-pressed="' + an + '"' + (aus ? ' aria-disabled="true"' : '') + '><span class="vm-tx"><b>' + esc(b.name) + (b.partner ? ' <i class="vm-partner">Partner</i>' : '') + '</b><small>' + esc(b.ort || '') + (b.km != null ? ' · ca. ' + Math.round(b.km) + ' km' : '') + '</small>' + (lei ? '<small class="vm-lei">' + esc(lei) + '</small>' : '') + '</span><span class="vm-mark" aria-hidden="true">' + (an ? i + 1 : '') + '</span></button>';
+        }).join('') + '</div></div>' + (v.wahl.length && !v.suchen ? '<p class="ab-klein vm-zahl" role="status">' + v.wahl.length + ' von höchstens ' + VM_MAX + ' gewählt.' + (voll ? ' Tipp einen an, um ihn abzuwählen.' : '') + '</p>' : '');
+    } else if (!v.suchFehler) erg += '<p class="ab-note">Hier haben wir gerade keine Betriebe gefunden. Kein Problem: Wir suchen für dich passende Betriebe aus.</p>';
+    erg += '<button type="button" class="vm-selbst" data-act="vm-suchen" aria-pressed="' + !!v.suchen + '"><span class="vm-tx"><b>Sucht ihr passende für mich aus</b><small>Wir wählen bis zu ' + VM_ZAHL[VM_MAX] + ' passende Betriebe in deiner Nähe.</small></span><span class="vm-mark" aria-hidden="true">' + CHECK_S + '</span></button>';
+  }
+  const karte = feld + '<div class="vm-ergebnis">' + erg + '</div>';
+  const grund = f.wahl ? '<p class="vm-grund" role="status">' + esc(f.wahl) + '</p>' : '';
+  return { html: lgKopf(['back', 'Zurück: Wie geht es weiter?']) + dnaTisch(vmBuehne(vmSchritt(4), { betriebe: laedt ? [] : l, wahl: v.wahl, laedt: laedt, umkreis: v.umkreis, plz: plz, du: plz ? 'Du · ' + plz : 'Du', beispiel: !laedt && !l.length }), frage + karte + grund + abFuss('Zurück: Wie geht es weiter?', 'vm-betriebe', '', 'Weiter')), back: ['Zurück', 'weg'], dna: true, cls: 'dna ab dt vm', voll: true };
+}
+/* Code: sechs Ziffern als Kapseln auf der Bühne, das Feld darunter nimmt den Code aus der SMS (one-time-code) */
+function vmCodeZiffern() { const c = String(vm().code || ''); return Array.from({ length: 6 }, (_, i) => '<span class="vm-z' + (c[i] ? ' ist-da' : '') + '"><b>' + (c[i] || '·') + '</b><i></i></span>').join(''); }
+function vmCode() {
+  const v = vm(), f = S.vmFehler || {}, an = v.an || maskTel(S.proj.tel);
+  const buehne = abBuehne('vm-buehne vm-codebuehne', vmSchritt(5), '<div class="vm-code" aria-hidden="true"><span class="dna-label">' + (v.kanal === 'anruf' ? 'Code per Anruf an ' : 'Code per SMS an ') + esc(an) + '</span><div class="vm-ziffern">' + vmCodeZiffern() + '</div></div>');
+  const frage = lgFrage('Code <em>eingeben.</em>', 'vermittlung', v.kanal === 'anruf' ? 'Wir rufen dich unter ' + an + ' an und sagen dir einen Code mit sechs Ziffern.' : 'Wir haben dir eine SMS mit einem Code an ' + an + ' geschickt.');
+  const karte = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Code aus der ' + (v.kanal === 'anruf' ? 'Ansage' : 'SMS')) + '<label class="ab-eingabe vm-codefeld' + (f.code ? ' ist-bad' : '') + '"><input type="text" id="vm-code" data-in="vm-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" value="' + esc(v.code || '') + '" placeholder="000000" aria-label="Code mit sechs Ziffern"' + (f.code ? ' aria-invalid="true" aria-describedby="vm-code-f"' : '') + '></label>' +
+    (f.code ? '<p class="vm-feldfehler" id="vm-code-f">' + esc(f.code) + '</p>' : '') +
+    '<p class="ab-klein vm-codewarum">Damit die Betriebe wissen, dass ein echter Mensch anfragt.</p>' +
+    (v.attrappe ? '<p class="ab-klein">Testbetrieb: Es geht keine SMS raus, der Code ist 123456.</p>' : '') +
+    '<div class="vm-codewege"><button type="button" class="ulink" data-act="vm-code-neu">Neuen Code schicken</button><button type="button" class="ulink" data-act="go" data-v="anfrage3">Nummer ändern</button></div></div></div>' +
+    (f.grenze ? '<p class="ab-note warn vm-grenze">' + esc(f.grenze) + ' <button type="button" class="ulink" data-act="vm-blatt">Aufmaßblatt für dich</button></p>' : '');
+  const busy = v.sendet;
+  const fuss = busy ? rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Kontakt" disabled>' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter btn primary" disabled aria-busy="true">' + esc(v.sendetText || 'Wird abgeschickt …') + '</button></div>' : abFuss('Zurück: Kontakt', 'vm-bestaetigen', '', 'Bestätigen und abschicken');
+  return { html: lgKopf(['back', 'Zurück: Kontakt']) + dnaTisch(buehne, frage + karte + fuss), back: ['Kontakt', 'anfrage3'], dna: true, cls: 'dna ab dt vm', voll: true };
+}
+function vmCodeLive() { const z = document.querySelector('.vm-ziffern'); if (z) z.innerHTML = vmCodeZiffern(); }
+/* Angefragt: Umkreis mit den gewählten Betrieben, was jetzt passiert, das Blatt für sich als leiser Weg */
+function vmAngefragt() {
+  const v = vm(), g = v.gesendet || {}, n = g.namen || [], frei = FREI();
+  const wer = g.suchen || !n.length ? 'bis zu ' + VM_ZAHL[VM_MAX] + ' passende Fensterbetriebe in deiner Nähe' : vmUnd(n);
+  const frage = lgFrage('Angefragt. <em>Dein Blatt ist da.</em>', 'vermittlung', 'Wir fragen ' + wer + ' für dich an und schicken dein Aufmaß an jeden, der ein Angebot machen möchte. Die Betriebe melden sich dann bei dir' + (g.an ? ' unter ' + g.an : '') + '.');
+  const schritte = [['Wir fragen an', 'meist noch am selben Werktag'], ['Die Betriebe melden sich', 'mit Fragen oder gleich mit dem Angebot'], ['Angebote vergleichen', 'alle beruhen auf denselben Maßen'], ['Feinaufmaß und Einbau', 'erst danach wird bestellt']];
+  const karte = '<ol class="vm-schritte">' + schritte.map((s, i) => '<li' + (i === 0 ? ' class="ist-dran"' : '') + '><i aria-hidden="true"></i><b>' + s[0] + '</b><small>' + s[1] + '</small></li>').join('') + '</ol>' +
+    (g.nr ? '<p class="ab-klein">Deine Anfrage hat die Nummer <b>' + esc(g.nr) + '</b>.' + (g.mail ? ' Das Aufmaßblatt ist auch per E-Mail an ' + esc(g.mail) + ' unterwegs.' : '') + '</p>' : '') +
+    (frei ? '' : '<p class="ab-note">Dein Aufmaßblatt ist auf diesem Gerät noch nicht freigeschaltet. Schreib uns mit deiner Anfragenummer, dann schicken wir es dir.</p>');
+  /* eine volle Pille: das Blatt, das jetzt dazugehört; zur Übersicht leise daneben */
+  const fuss = rechtLinks() + '<div class="lg-fuss vm-fuss-zwei"><button type="button" class="dna-pille dna-pille--leise lg-zurueck-pille" data-act="vm-heim">Fertig</button>' +
+    (frei ? '<button type="button" class="dna-pille lg-weiter btn primary" data-act="k-dl">Aufmaßblatt laden' + abPfeil + '</button>' : '') + '</div>';
+  const bl = (v.liste || []).filter((b) => (g.wahl || []).includes(b.id));
+  return { html: lgKopf(['liste', 'Zur Übersicht']) + dnaTisch(vmBuehne('Angefragt', { betriebe: bl, wahl: g.wahl || [], umkreis: v.umkreis, plz: g.plz, du: 'Du · ' + (g.plz || '') }), frage + karte + fuss), back: ['Übersicht', 'home'], dna: true, cls: 'dna ab dt vm', voll: true };
+}
+/* Code anfordern; ohne SMS-Anbieter (ohneCode) gleich abschicken */
+async function vmCodeHolen(neu) {
+  const v = vm();
+  if (v.codeLaeuft) return;
+  v.codeLaeuft = true; S.vmFehler = null; render();
+  try {
+    const r = await fetch('/api/vermittlung/code', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ tel: S.proj.tel }) }), j = await r.json().catch(() => null);
+    v.codeLaeuft = false;
+    if (!j || !j.ok) { const t = (j && j.fehler) || 'Der Code ließ sich gerade nicht schicken. Bitte gleich noch einmal.'; if (j && j.feld === 'tel') { S.vmFehler = Object.assign(vmKontaktPruefen(), { tel: t, fehlt: true }); return go('anfrage3'); } render(); return toast(t); }
+    if (j.ohneCode) { v.ohneCode = true; v.token = ''; return vmSenden(); }
+    Object.assign(v, { token: j.token || '', kanal: j.kanal || 'sms', an: j.an || '', attrappe: !!j.attrappe, code: '', codeZeit: Date.now(), ohneCode: false });
+    if (neu) toast(v.kanal === 'anruf' ? 'Wir rufen gleich mit einem neuen Code an.' : 'Neuer Code ist unterwegs.');
+    if (S.screen === 'vcode') { render(); const i = document.getElementById('vm-code'); if (i) i.focus(); return; }
+    return go('vcode');
+  } catch (e) { v.codeLaeuft = false; render(); toast('Keine Verbindung. Bitte gleich noch einmal.'); }
+}
+/* Abschicken: Aufmaßblatt als PDF im Browser (wie zum Herunterladen, mit Fotos), dazu das Aufmaß als Code und die Eckdaten */
+const vmBase64 = (blob) => new Promise((fertig, fehler) => { const r = new FileReader(); r.onload = () => fertig(String(r.result).replace(/^data:[^,]*,/, '')); r.onerror = fehler; r.readAsDataURL(blob); });
+async function vmSenden() {
+  const v = vm(), plz = (v.listePlz && v.listePlz === vmPlz() ? v.listePlz : vmPlz()) || vmOrt().plz, pr = S.proj;
+  if (v.sendet) return;
+  if (!v.ohneCode && !/^\d{6}$/.test(String(v.code || ''))) { S.vmFehler = { code: 'Bitte die sechs Ziffern aus der ' + (v.kanal === 'anruf' ? 'Ansage' : 'SMS') + ' eingeben.' }; render(); const i = document.getElementById('vm-code'); if (i) i.focus(); return; }
+  v.sendet = true; v.sendetText = 'Aufmaßblatt wird erstellt …'; S.vmFehler = null; if (S.screen === 'vcode') render();
+  try {
+    await kiVorher('blatt');
+    await blattSchrift();
+    let blob = blattPDF('fensterbauer', await fotosFuerBlatt(S.windows));
+    if (blob && blob.size > 9e6) blob = blattPDF('fensterbauer', {}); // zu groß: ohne Fotos (die Auswertung der Fotos steht trotzdem drin)
+    const pdf = blob && blob.size ? await vmBase64(blob) : '';
+    v.sendetText = 'Wird abgeschickt …'; if (S.screen === 'vcode') render();
+    const eck = { fenster: S.windows.length, elemente: S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), gebaeude: pr.gebaeude || '', baujahr: pr.baujahr || '', zeit: pr.zeit || '', budget: pr.budget || '', foerdweg: AW.foerdWeg(pr) || '' };
+    const body = { kennung: kennung(), kontakt: { name: String(pr.name || '').trim(), ort: String(pr.ort || '').trim(), tel: String(pr.tel || '').trim(), mail: String(pr.mail || '').trim(), erreich: pr.erreich || '' }, plz: plz, betriebe: v.suchen ? [] : v.wahl.slice(0, VM_MAX), token: v.token || '', code: v.ohneCode ? '' : String(v.code || ''), einwilligung: { fassung: VM_FASSUNG, text: vmEinwText() }, aufmass: packProject(S.windows, S.proj, null), eckdaten: eck, pdf: pdf };
+    const r = await fetch('/api/vermittlung/senden', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(body) }), j = await r.json().catch(() => null);
+    v.sendet = false;
+    if (!j || !j.ok) {
+      const t = (j && j.fehler) || 'Abschicken hat nicht geklappt. Bitte gleich noch einmal.';
+      if (j && j.grenze === '90tage') { S.vmFehler = { grenze: t }; if (S.screen !== 'vcode') return go('vcode'); return render(); } // zwei Anfragen in 90 Tagen: kostenlos nicht mehr, das Blatt geht
+      if (j && (j.feld === 'code' || r.status === 401)) { S.vmFehler = { code: t }; v.code = ''; if (S.screen !== 'vcode') return go('vcode'); render(); const i = document.getElementById('vm-code'); if (i) i.focus(); return; }
+      if (j && j.feld === 'betriebe') { v.liste = null; S.vmFehler = { wahl: t }; return go('betriebe'); }
+      if (S.screen === 'vcode') render(); return toast(t);
+    }
+    v.gesendet = { nr: String(j.nr || ''), when: Date.now(), namen: vmNamen(), wahl: v.suchen ? [] : v.wahl.slice(), suchen: !!v.suchen || !v.wahl.length, plz: plz, an: v.an || maskTel(pr.tel), mail: String(pr.mail || '').trim() };
+    /* Gratis-Weg: das Aufmaßblatt gehört dazu; der Server schickt den Nachweis wie beim Kauf (Anfrage statt Stripe-Sitzung) */
+    const fs = j.freischaltung; if (fs && fs.token) { const k = kauf(); k.paid = true; k.when = Number(fs.at) || Date.now(); k.session = String(fs.session || ''); k.token = String(fs.token); k.wartet = ''; k.frei = 'vermittlung'; }
+    v.code = ''; v.token = ''; persist(); S._feier = 'gesendet'; go('angefragt');
+  } catch (e) { v.sendet = false; if (S.screen === 'vcode') render(); toast('Keine Verbindung. Bitte gleich noch einmal.'); }
+}
+/* Wahl von der Startseite: ?weg=gratis|blatt legt den Weg an der Weiche fest, ?farbe=<Schlüssel aus ral.js> die Rahmenfarbe außen des ersten
+   neuen Fensters (Inhaber: „sollte der Benutzer entsprechende Möglichkeiten wählen, dann soll der Konfigurator angepasst werden“). Die
+   Angaben verschwinden danach aus der Adresse */
+function vmVorgaben() {
+  let q; try { q = new URLSearchParams(location.search); } catch (e) { return; }
+  const weg = q.get('weg'), farbe = q.get('farbe');
+  if (!weg && !farbe) return;
+  if (weg === 'gratis' || weg === 'blatt') { const z = vm(); if (!z.gesendet) z.weg = weg === 'blatt' ? 'B' : 'A'; }
+  if (farbe && /^[A-Za-z0-9_-]{2,24}$/.test(farbe) && ralFarbe(farbe)) S.vorgabeFarbe = farbe;
+  q.delete('weg'); q.delete('farbe');
+  try { const rest = q.toString(); history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash); } catch (e) { /* ok */ }
+}
+/* Auf dem Gerät: Weg, Wahl, Liste und die abgeschickte Anfrage; nie Code, Token oder die Einwilligung (die gibt es nur je Abschicken) */
+function vmSicher() { const v = S.verm; if (!v) return null; return { weg: v.weg, wahl: v.wahl, suchen: !!v.suchen, plz: v.plz == null ? null : v.plz, liste: v.liste || null, listePlz: v.listePlz || '', ortName: v.ortName || '', umkreis: v.umkreis || 30, gesendet: v.gesendet || null }; }
+const maskTel = (t) => { const d = String(t || '').replace(/\D/g, ''); return d.length > 7 ? d.slice(0, 4) + ' ••• ' + d.slice(-4) : ''; };
+/* Aktionen der Vermittlung (act: Namen mit vm-) */
+function vmAct(name, el, v) {
+  const z = vm();
+  switch (name) {
+    case 'vm-weg': { if (v === z.weg) return; z.weg = v === 'B' ? 'B' : 'A'; persist(); return render(); }
+    case 'vm-weiter': { S.vmFehler = null; return go(z.weg === 'B' ? 'anfrage3' : 'betriebe'); }
+    /* Betriebe → Kontakt: Postleitzahl und Wahl (mindestens zwei, findet die Suche weniger, alle; oder „Sucht für mich aus“) */
+    case 'vm-betriebe': {
+      const plz = vmPlz(), l = z.liste && z.listePlz === plz ? z.liste : [], f = {};
+      if (!/^\d{5}$/.test(plz)) f.plz = 'Bitte gib deine Postleitzahl mit fünf Ziffern ein.';
+      else if (z.laedt) return toast('Einen Moment, wir suchen noch.');
+      else if (!z.suchen) {
+        const n = Math.min(VM_MIN, l.length);
+        if (!l.length) f.wahl = 'Bitte wähle „Sucht ihr passende für mich aus“.';
+        else if (z.wahl.length < n) f.wahl = n === 1 ? 'Bitte wähle den Betrieb oder „Sucht ihr passende für mich aus“.' : z.wahl.length ? 'Bitte wähle noch mindestens einen Betrieb, damit du vergleichen kannst, oder „Sucht ihr passende für mich aus“.' : 'Bitte wähle mindestens ' + VM_ZAHL[n] + ' Betriebe oder „Sucht ihr passende für mich aus“.';
+      }
+      if (f.plz || f.wahl) { S.vmFehler = f; render(); if (f.plz) { const i = document.getElementById('vm-plz'); if (i) i.focus(); } return; }
+      S.vmFehler = null; persist(); return go('anfrage3');
+    }
+    /* Kontakt → Code: Pflichtfelder und Einwilligung; fehlt die Wahl (etwa nach einem Neuladen), zurück zu den Betrieben */
+    case 'vm-kontakt': {
+      const f = vmKontaktPruefen();
+      if (!z.einw) f.einw = 'Bitte bestätige, dass wir die Betriebe für dich anfragen dürfen.';
+      if (f.fehlt || f.einw) { S.vmFehler = f; render(); const k = ['name', 'tel', 'mail'].find((x) => f[x]), i = k && document.getElementById('t-' + k); if (i) i.focus(); return; }
+      if (!/^\d{5}$/.test(vmPlz()) || (!z.suchen && !z.wahl.length)) { S.vmFehler = { wahl: 'Bitte wähle zuerst die Betriebe.' }; return go('betriebe'); }
+      S.vmFehler = null; persist(); return vmCodeHolen();
+    }
+    case 'vm-wahl': {
+      if (!v) return;
+      const i = z.wahl.indexOf(v);
+      if (i >= 0) z.wahl.splice(i, 1);
+      else { if (z.wahl.length >= VM_MAX) return toast(VM_ZAHL[VM_MAX].replace(/^./, (c) => c.toUpperCase()) + ' sind gewählt. Wähl erst einen ab.'); z.wahl.push(v); z.suchen = false; }
+      if (S.vmFehler) S.vmFehler.wahl = ''; persist(); return render();
+    }
+    case 'vm-suchen': { z.suchen = !z.suchen; if (z.suchen) z.wahl = []; if (S.vmFehler) S.vmFehler.wahl = ''; persist(); return render(); }
+    case 'vm-einw': { z.einw = !z.einw; if (S.vmFehler) S.vmFehler.einw = ''; return render(); }
+    case 'vm-nochmal': { z.suchFehler = ''; return vmSuchen(true); }
+    case 'vm-code-neu': { if (z.codeZeit && Date.now() - z.codeZeit < 30000) return toast('Einen Moment noch, der Code kann ein paar Sekunden brauchen.'); return vmCodeHolen(true); }
+    case 'vm-bestaetigen': return vmSenden();
+    case 'vm-blatt': return go('teilen');
+    /* Auf den Folien zum Bezahlen: doch kostenlos (Inhaber: „soll die Möglichkeit trotzdem noch mal angezeigt werden“) */
+    case 'vm-gratis': { z.weg = 'A'; S.vmFehler = null; persist(); return go(z.gesendet ? 'angefragt' : 'betriebe'); }
+    case 'vm-heim': return go('home');
+    default: return;
+  }
+}
+SCREENS.weg = vmWeg; SCREENS.betriebe = vmBetriebe; SCREENS.vcode = vmCode; SCREENS.angefragt = vmAngefragt;
 function blattMarkdown(windows, pr) {
   const fw = AW.foerdWeg(pr), kl = klaerListe(windows, pr);
   const lines = ['# Aufmaßblatt · ' + (pr.name || '[Name]'), (pr.ort || '') + (pr.tel ? ' · ' + pr.tel : '') + (pr.mail ? ' · ' + pr.mail : ''), '', 'Gebäude: ' + (lab('gebaeude', pr.gebaeude) || '–') + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '') + ' · Zeitraum: ' + (lab('zeit', pr.zeit) || '–') + ' · Budget: ' + (lab('budget', pr.budget) || '–') + (fw ? ' · Förderung: ' + lab('foerdweg', fw) : ''), ''];
@@ -4182,10 +4515,24 @@ function abRahmen(view, buehne) {
   return Object.assign({}, view, { html: lgKopf(back ? ['back', zur] : false) + dnaTisch(buehne, '<div class="ab-inhalt">' + inhalt + '</div>' + fuss), dna: true, cls: 'dna ab ab2 dt' + (view.cls ? ' ' + view.cls : ''), voll: true, bar: null });
 }
 const AB_ALT = { blatt: SCREENS.blatt, teilen: SCREENS.teilen, konto: SCREENS.konto, kasse: SCREENS.kasse, gekauft: SCREENS.gekauft, gesendet: SCREENS.gesendet, sichern: SCREENS.sichern, meinkonto: SCREENS.meinkonto, linkanmelden: SCREENS.linkanmelden };
-SCREENS.teilen = () => { const v = AB_ALT.teilen(), f = FREI(); if (!f && !INST) v.html = v.html.replace(blattVorschau(), ''); /* das Blatt steht auf der Bühne */ return abRahmen(v, abBlattBuehne(f ? (KUNDE_FREI() ? 'Fertig gemessen' : 'Freigeschaltet') : 'Fertig gemessen', f, f ? '' : abBetrag())); };
+/* Auf den Folien zum Bezahlen der Gratis-Weg ganz oben, über dem Preis (Inhaber, 29.10.2026: „soll er dennoch die Möglichkeit haben
+   kostenlos zu bleiben“; abends: „dass diese kostenlose Variante quasi noch darüber hängt und auch zum Klicken animiert“): Etikett
+   „Empfohlen“, daneben groß „Kostenlos“, sein Text, „Kostenlos weiter“. Beim ersten Zeigen je Folie läuft dreimal ein Ring nach außen und
+   der Pfeil stupst (VM_PULS), danach Ruhe; die ruhige Fassung ohne */
+const VM_PULS = new Set();
+function vmGratisKarte() {
+  if (!vermAn() || FREI() || (S.verm && S.verm.gesendet)) return '';
+  const puls = !VM_PULS.has(S.screen); VM_PULS.add(S.screen);
+  return '<div class="vm-gratis-hinweis vm-gratis-gross' + (puls ? ' ist-puls' : '') + '"><div class="vm-gratis-kopf"><span class="vm-karte-etikett">Empfohlen</span><b class="vm-gratis-titel">Kostenlos</b></div>' +
+    '<p>Wir zeigen dir mehrere Betriebe in deiner Nähe. Erlaubst du uns, dein Aufmaß an mindestens ' + VM_ZAHL[VM_MIN] + ' Betriebe deiner Wahl zu schicken, erhältst du es kostenlos statt für ' + esc(euro(PREIS())) + ' und obendrein das gesamte Aufmaß als PDF.</p>' +
+    '<p class="vm-gratis-zusage">Keine versteckten Kosten, keine Weitergabe deiner Daten an weitere Betriebe und keine Belästigung durch Dritte. Garantiert.</p>' +
+    '<button type="button" class="dna-pille dna-pille--leise vm-gratis-los" data-act="vm-gratis">Kostenlos weiter' + abPfeil + '</button></div>';
+}
+const vmMitGratis = (v) => (v && v.html ? Object.assign(v, { html: vmGratisKarte() + v.html }) : v);
+SCREENS.teilen = () => { const v = AB_ALT.teilen(), f = FREI(); if (!f && !INST) v.html = v.html.replace(blattVorschau(), ''); /* das Blatt steht auf der Bühne */ if (!f && !INST) vmMitGratis(v); return abRahmen(v, abBlattBuehne(f ? (KUNDE_FREI() ? 'Fertig gemessen' : 'Freigeschaltet') : 'Fertig gemessen', f, f ? '' : abBetrag())); };
 SCREENS.datei = () => SCREENS.teilen();
-SCREENS.konto = () => { const k = kauf(); return abRahmen(AB_ALT.konto(), abBlattBuehne('Schritt 1 von 2', false, abEtikett('Rechnung an', k.mail || 'deine E-Mail-Adresse'))); };
-SCREENS.kasse = () => { const k = kauf(); if (!k.mail) return SCREENS.konto(); return abRahmen(AB_ALT.kasse(), abBlattBuehne('Schritt 2 von 2', false, abBetrag())); };
+SCREENS.konto = () => { const k = kauf(); return abRahmen(vmMitGratis(AB_ALT.konto()), abBlattBuehne('Schritt 1 von 2', false, abEtikett('Rechnung an', k.mail || 'deine E-Mail-Adresse'))); };
+SCREENS.kasse = () => { const k = kauf(); if (!k.mail) return SCREENS.konto(); return abRahmen(vmMitGratis(AB_ALT.kasse()), abBlattBuehne('Schritt 2 von 2', false, abBetrag())); };
 SCREENS.gekauft = () => abRahmen(AB_ALT.gekauft(), abBlattBuehne('Freigeschaltet', true));
 SCREENS.gesendet = () => abRahmen(AB_ALT.gesendet(), abBlattBuehne('Gesendet', false));
 SCREENS.sichern = () => { const z = S.sichern || {}, v = AB_ALT.sichern(); return abRahmen(v, abSymBuehne(z.zweck === 'anmelden' ? 'Anmelden' : z.zweck === 'kauf' ? 'Schritt 1 von 2' : 'Aufmaß sichern', z.mail && z.schritt === 2 ? abEtikett('Code an', z.mail) : '')); };
@@ -4324,6 +4671,7 @@ const MEHR = new WeakMap();
    Einstellungen in FW), mm (nur der Regler) */
 const DETAIL_UI = {
   seiten: { t: 'Seitenteile dazu?', sub: 'Feste Glasfelder neben den Flügeln, im selben Rahmen.', nach: ['teilung'], g: 'seitenteil', kurz: 'Seitenteile', mass: { f: 'seitenB', t: 'Breite je Seitenteil', st: 'fest verglast', min: 250, max: 1200, schritt: 50, std: 400 } },
+  festFl: { t: 'Festes Feld im Flügel oder im Rahmen?', sub: 'Im Flügel sieht es aus wie die Flügel daneben. Im Rahmen hat es etwas mehr Glas.', nach: ['din-*', 'typ-*', 'seiten'], g: 'fest', kurz: 'Festes Feld', view: 'front' },
   kvd: { t: 'Erst kippen oder erst drehen?', sub: 'Bei Kipp vor Dreh kippt die erste Griffstellung. Das schützt Kinder.', nach: ['din-*', 'typ-*'], g: 'kvd', kurz: 'Kipp vor Dreh' },
   paneel: { t: 'Unten Glas oder Paneel?', sub: 'Ein gedämmtes Paneel unten schützt vor Blicken und Stößen.', nach: ['ol'], g: 'paneel', kurz: 'Paneel unten', mass: { f: 'paneelH', t: 'Höhe des Paneels', st: 'ab Unterkante Flügel', min: 200, max: 900, schritt: 50, std: 400 } },
   hstEck: { t: 'Gerade oder über Eck?', sub: 'Über Eck treffen zwei Türen ohne Pfosten zusammen. Das Modell zeigt eine Seite.', nach: ['hstr', 'hsts'], g: 'eckhst', kurz: 'Ecklösung' },
@@ -5161,14 +5509,35 @@ function lgFuss(c) {
 function lageDna(c) {
   const w = S.win, tuer = istTuer(w), fest = w.art === 'fest';
   const nomen = tuer ? ['die', 'Tür'] : fest ? ['die', 'Verglasung'] : ['das', 'Fenster'];
-  /* Bühne: das Haus im Schnitt (Feinzeichnung), das gewählte Stockwerk leicht aufgehellt, Koralle am Fenster; ohne Schraffur und ohne
-     violettes Leuchten (Wunsch des Inhabers, 28.10.2026) */
-  const stockKn = [['dg', 47, 44, 'Dachgeschoss'], ['og', 91, 50, 'Obergeschoss'], ['eg', 141, 49, 'Erdgeschoss'], ['kg', 190, 45, 'Keller']].map((s) => '<button type="button" class="lg-stock" data-act="lg-stock" data-v="' + s[0] + '" style="top: ' + s[1] + 'px; height: ' + s[2] + 'px" aria-label="' + s[3] + ' wählen"></button>').join('');
+  /* Bühne: das Haus als Körper in der Dämmerung statt als Strichzeichnung (Inhaber, 30.10.2026: „diese komischen Linien vom Haus“
+     und „Leuchten wie Neonlicht“ weg; Vorbild Startseite und Seite für Fensterbauer): Fassade, Walmdach mit Gaube, Keller im Erdreich,
+     in jedem Stockwerk Fenster. Das gewählte Stockwerk ist innen erleuchtet (weiße Scheiben, weicher Lichtschein ohne Weichzeichner),
+     die übrigen bleiben dunkel; das Fenster aus dem 3-D-Modell gleitet hinein, der Name hängt als Etikett daran. Flächen nach G14:
+     Licht von oben links, Lichtkanten statt Striche, Schatten unter Traufe und Gesims. */
+  const stockKn = [['dg', 30, 61, 'Dachgeschoss'], ['og', 91, 50, 'Obergeschoss'], ['eg', 141, 49, 'Erdgeschoss'], ['kg', 190, 50, 'Keller']].map((s) => '<button type="button" class="lg-stock" data-act="lg-stock" data-v="' + s[0] + '" style="top: ' + s[1] + 'px; height: ' + s[2] + 'px" aria-label="' + s[3] + ' wählen"></button>').join('');
+  /* ein Fenster der Fassade: Rahmen, dunkles Glas; erleuchtet (in .schnitt) weiß mit Licht von innen */
+  const lgFe = (x, y, w, h, an) => an ? '<rect class="glas-an" x="' + (x + 2) + '" y="' + (y + 2) + '" width="' + (w - 4) + '" height="' + (h > 36 ? Math.round(h * 0.4) : h - 4) + '" rx="1"/>' : '<rect class="rahmen" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="1.5"/><rect class="glas" x="' + (x + 2) + '" y="' + (y + 2) + '" width="' + (w - 4) + '" height="' + (h - 4) + '" rx="1"/><rect class="bank" x="' + (x - 2) + '" y="' + (y + h) + '" width="' + (w + 4) + '" height="2"/>';
+  const FE = { dg: [[232, 54, 40, 34]], og: [[118, 100, 32, 34], [236, 100, 40, 34]], eg: [[118, 150, 32, 34], [166, 148, 26, 42], [236, 150, 40, 34]], kg: [[118, 194, 32, 10], [232, 194, 36, 10]] };
+  const SCHEIN = { dg: [252, 70, 58, 36], og: [240, 117, 150, 40], eg: [240, 166, 150, 40], kg: [240, 212, 130, 30] };
+  const licht = (k) => '<g class="schnitt" data-s="' + k + '"><ellipse class="schein" fill="url(#lg-schein)" cx="' + SCHEIN[k][0] + '" cy="' + SCHEIN[k][1] + '" rx="' + SCHEIN[k][2] + '" ry="' + SCHEIN[k][3] + '"/>' + FE[k].map((f) => lgFe(f[0], f[1], f[2], f[3], true)).join('') + '</g>';
   const buehne = '<div class="lg-buehne"><div class="lg-buehne-in">' +
-    '<svg class="lg-haus" viewBox="0 0 358 250" aria-hidden="true"><g class="lg-skala">' + lgSkala() + '</g>' +
-    '<path class="schnitt" data-s="dg" d="M92 91V89L199 25 306 89V91Z"/><rect class="schnitt" data-s="og" x="92" y="91" width="214" height="50"/><rect class="schnitt" data-s="eg" x="92" y="141" width="214" height="49"/>' +
-    '<rect class="erde" x="0" y="190" width="358" height="60"/><rect class="keller" x="92" y="190" width="214" height="45"/><rect class="schnitt" data-s="kg" x="92" y="190" width="214" height="45"/>' +
-    '<path class="wand" d="M92 235V91H306V235Z"/><path class="wand" d="M80 96 199 24 318 96"/><path class="fein" d="M92 91H306M92 141H306M92 190H306"/><path class="fein" d="M120 91 199 43 278 91"/><line class="boden" x1="48" y1="190" x2="346" y2="190"/>' +
+    '<svg class="lg-haus" viewBox="0 0 358 250" aria-hidden="true"><defs>' +
+    '<linearGradient id="lg-fas" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#4c4c51"/><stop offset="1" stop-color="#343438"/></linearGradient>' +
+    '<linearGradient id="lg-dach" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38383c"/><stop offset=".12" stop-color="#2a2a2d"/><stop offset="1" stop-color="#17171a"/></linearGradient>' +
+    '<linearGradient id="lg-erde" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#151617"/><stop offset="1" stop-color="#0a0b0c"/></linearGradient>' +
+    '<radialGradient id="lg-schein"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".4" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="lg-teich" cx=".55" cy=".45" r=".6"><stop offset="0" stop-color="#2b2b2e"/><stop offset="1" stop-color="#2b2b2e" stop-opacity="0"/></radialGradient>' +
+    '<clipPath id="lg-huelle"><path d="M78 97 138 30H260L320 97H306V235H92V97Z"/><rect x="218" y="39" width="68" height="58"/></clipPath></defs>' +
+    '<rect x="40" y="0" width="318" height="200" fill="url(#lg-teich)"/><g class="lg-skala">' + lgSkala() + '</g>' +
+    /* Erdreich mit Geländekante, darin der Keller */
+    '<rect class="erde" x="0" y="190" width="358" height="60" fill="url(#lg-erde)"/><rect class="kante" x="0" y="189.4" width="358" height="1.2"/>' +
+    '<rect class="keller" x="92" y="191" width="214" height="44"/><rect class="sohle" x="86" y="235" width="226" height="5"/>' +
+    /* Dach (Walm von vorn) mit Gaube, Fassade, Schatten unter Traufe und Gesims */
+    '<path class="dach" d="M78 97 138 30H260L320 97Z" fill="url(#lg-dach)"/>' +
+    '<rect class="fassade" x="92" y="96" width="214" height="94" fill="url(#lg-fas)"/><rect class="traufe" x="92" y="96" width="214" height="7"/><rect class="gesims" x="92" y="139" width="214" height="3"/>' +
+    '<rect class="fassade" x="224" y="46" width="56" height="51" fill="url(#lg-fas)"/><path class="gaubendach" d="M218 47 252 39 286 47Z"/><rect class="traufe" x="224" y="47" width="56" height="4"/>' +
+    ['dg', 'og', 'eg', 'kg'].map((k) => FE[k].map((f) => lgFe(f[0], f[1], f[2], f[3])).join('')).join('') +
+    '<g clip-path="url(#lg-huelle)">' + ['dg', 'og', 'eg', 'kg'].map(licht).join('') + '</g>' +
     '<text x="12" y="75" data-t="dg">DG</text><text x="12" y="120" data-t="og">OG</text><text x="12" y="170" data-t="eg">EG</text><text x="12" y="217" data-t="kg">KG</text></svg>' + stockKn +
     '<div class="lg-strich"></div><div class="lg-etikett"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b class="lg-et-name"></b></span></div><div class="lg-fenster"><img src="/bilder/app/lage-fenster.webp" alt="" width="412" height="420" decoding="async"></div>' +
     '</div><span class="dna-badge lg-erkannt" hidden>aus deinem Außenfoto</span><span class="lg-tippen">Stockwerk antippen</span></div>';
@@ -5192,8 +5561,10 @@ function lageDna(c) {
 }
 /* Maßstab links: Strichmarken alle 5 px, lang an Decke und Boden jedes Stockwerks */
 function lgSkala() {
-  const lang = [51, 91, 141, 190, 235]; let h = '';
-  for (let y = 51; y <= 235; y += 5) { const l = lang.some((v) => Math.abs(v - y) < 3); h += '<line class="strich' + (l ? ' lang' : '') + '" x1="' + (l ? 34 : 40) + '" y1="' + y + '" x2="46" y2="' + y + '"/>'; }
+  const lang = [30, 91, 141, 190, 235]; let h = '';
+  /* je Strich das Stockwerk (data-s): die Striche des gewählten werden violett (aktiver Zustand) */
+  const stock = (y) => (y < 91 ? 'dg' : y < 141 ? 'og' : y < 190 ? 'eg' : 'kg');
+  for (let y = 30; y <= 235; y += 5) { const l = lang.some((v) => Math.abs(v - y) < 3); h += '<line class="strich' + (l ? ' lang' : '') + '" data-s="' + stock(y + 1) + '" x1="' + (l ? 34 : 40) + '" y1="' + y + '" x2="46" y2="' + y + '"/>'; }
   lang.forEach((v) => { h += '<line class="strich lang" x1="34" y1="' + v + '" x2="46" y2="' + v + '"/>'; });
   return h;
 }
@@ -5311,7 +5682,7 @@ function lpDaten() {
 function tiefeDna(c) {
   const d = lpDaten(), jetzt = KAPITEL[KAP_I[c.q.kap || QKAP.tiefe] != null ? KAP_I[c.q.kap || QKAP.tiefe] : 0].k;
   const raster = d.reihen.map((r) => { let h = ''; for (let i = 0; i < r.z[2]; i++) h += '<i style="--n: ' + i + '"></i>'; return '<div class="lp-reihe' + (r.k === jetzt ? ' ist' : '') + '"><span>' + esc(r.n) + '</span><span class="lp-punkte">' + h + '</span></div>'; }).join('');
-  const buehne = '<div class="lg-buehne lp-buehne"><div class="lp-in"><div class="lp-glut" aria-hidden="true"></div><div class="lp-sonne" aria-hidden="true"></div>' +
+  const buehne = '<div class="lg-buehne lp-buehne"><div class="lp-in"><div class="lp-glut" aria-hidden="true"></div>' +
     '<div class="lp-kopf"><div class="lp-zahl"><output class="lp-n"></output><span>Fragen<small><i></i>wählst du</small></span></div><div class="lp-zwei"><output class="lp-rest"></output><span><i></i>plant dein Fensterbauer</span></div></div>' +
     '<div class="lp-raster" aria-hidden="true" style="--lp-n: ' + d.max + '">' + raster + '</div><p class="lp-sr" aria-live="polite"></p></div></div>';
   const frage = lgFrage('Wie genau möchtest du <em>planen?</em>', 'tiefe', 'Was du nicht gefragt wirst, plant ' + (fbName() || 'dein Fensterbauer') + ' nach seinem Standard.');
@@ -5389,8 +5760,6 @@ function lpZeigen(rasten) {
   const rest = d.alle - n, z = q('.lp-n'), z2 = q('.lp-rest');
   if (z) { z.textContent = String(n); if (rasten) lgRasten(z); }
   if (z2) z2.textContent = String(rest);
-  const g = q('.lp-glut'); if (g) g.style.transform = 'scaleX(' + (0.35 + 0.65 * n / (d.alle || 1)).toFixed(3) + ')';
-  const so = q('.lp-sonne'); if (so) so.style.transform = 'scale(' + Math.min(rest / (d.alle || 1) * 1.6, 0.35 + 0.65 * n / (d.alle || 1)).toFixed(3) + ')';
   const o = TIEFEN.find((x) => x.k === t) || TIEFEN[1];
   const nm = q('.lp-name'); if (nm) nm.textContent = o.label;
   const sz = q('.lp-satz'); if (sz) sz.textContent = LP_SATZ[t] || '';
@@ -5616,7 +5985,8 @@ function bindRails(stage) {
         out = raw < -0.12 || raw > 1.12; p = snapP(raw);
         h.classList.toggle('is-out', out);
         moveBar(w, id, p);
-        w.bars.filter((b) => barBase(b.id) === b0).forEach((b) => w3dBarPos(stage.querySelector('[data-r="bar-' + b.id + '"]'), b, bw));
+        const bz = stage._bez || {};
+        w.bars.filter((b) => barBase(b.id) === b0).forEach((b) => w3dBarPos(stage.querySelector('[data-r="bar-' + b.id + '"]'), barLokal(b, bz.rand, bz.sashH), bw));
         rail.querySelectorAll('.rh').forEach((x) => { if (barBase(x.getAttribute('data-rb')) !== b0) return; const xs = +x.getAttribute('data-rs') || 0; if (horizontal) x.style.left = (spans[xs] ? spans[xs][0] + p * spans[xs][1] : p * r.width) + 'px'; else x.style.top = (p * r.height) + 'px'; });
       };
       const up = () => {
@@ -6934,6 +7304,8 @@ function newWin() {
   S.win = baseWin(); S.editIdx = -1; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; S.nameFehler = false; S.lgGrund = null;
   /* Keine Vorauswahl, wo eine Vorgabe Geld kostet: Farbe außen und Fensterbank außen starten offen, bis der Kunde wählt */
   S.win.offen = { fa: true, fba: true };
+  /* Farbe, die der Besucher auf der Startseite gewählt hat: gilt für das erste neue Fenster als gewählt */
+  if (S.vorgabeFarbe && ralFarbe(S.vorgabeFarbe)) { S.win.fa = S.vorgabeFarbe; S.win.offen = { fba: true }; S.vorgabeFarbe = ''; }
   S.mess = { step: 0, cur: '', msg: null, ack: false }; S.rest = { i: 0, cur: '', msg: null }; S.openSash = -1;
   S.selSash = 0; S.selBar = null; S.side = 'aussen'; S.designVorher = null;
   go('start');
@@ -7008,6 +7380,7 @@ function act(name, el) {
     if (el.getAttribute && el.getAttribute('aria-disabled') === 'true') return tourSchloss();
     if (!TOUR_DARF.test(name)) return;
   }
+  if (name.startsWith('vm-')) return vmAct(name, el, v); // Vermittlung
   switch (name) {
     case 'none': return;
     case 'tour-start': return tourStart();
@@ -7259,7 +7632,7 @@ function act(name, el) {
 const TOUR_DARF = /^(tour-[a-z]+|gloss|gindex|gclose|back|teilung|sash|felder|hst|fsw|psk|setw|color|sart|glasfn|situation|detail|none)$/;
 /* Zifferntasten und Tastatur fürs Messen: kein Eingabefeld, keine Systemtastatur, nichts springt */
 /* Haptik (gemeinsam.js): Tasten, Auswahl und Schalter tippen kurz; Fehler und fertige Schritte melden sich in feiern()/messNext() */
-const TIPPT = /^(key|rest-same|qnext|qprev|new|send|gloss|q-|chip|seg|opt|sw|tile|pos|share|copy|k-pay|k-buy|situation|art|felder|ul|hst|fsw|sart|farbe|detail|tiefe|kap-mehr)/;
+const TIPPT = /^(vm-|key|rest-same|qnext|qprev|new|send|gloss|q-|chip|seg|opt|sw|tile|pos|share|copy|k-pay|k-buy|situation|art|felder|ul|hst|fsw|sart|farbe|detail|tiefe|kap-mehr)/;
 function tippen(name, el) { if (!window.Haptik) return; if (TIPPT.test(name) || el.matches('.chip, .seg > button, .qopt, .qlist > button, .qli > button[data-v], .qsw, .pill, .switch, .keypad button, .stepper button, .colors button')) window.Haptik.tick(); }
 function keyIn(k) {
   if (S.qMass && S.screen === 'frage') return massKey(k);
@@ -7300,6 +7673,16 @@ function onInput(el, ev) {
   if (kind === 'sc') { const z = S.sichern; if (!z) return; z[f] = el.checked; if (z.err && z.err[f]) { delete z.err[f]; render(); } return; }
   if (kind === 'teil') { teilPfosten(S.win, +f, parseFloat(el.value)); teilLive(el); if (ev.type === 'change') render(); return; } // Aufteilung: Regler
   if (kind === 'rest') return restInput(el.value);
+  if (kind === 'vm-plz') { // Betriebe: nur Ziffern; mit der fünften sucht die App (Tastatur zu, damit die Liste zu sehen ist)
+    const z = vm(), c = String(el.value).replace(/\D/g, '').slice(0, 5); if (el.value !== c) el.value = c; z.plz = c;
+    if (S.vmFehler && S.vmFehler.plz) S.vmFehler.plz = '';
+    if (z.suchFehlerPlz) { z.suchFehler = ''; z.suchFehlerPlz = false; }
+    const b = el.closest('.vm-plzfeld'); if (b) b.classList.remove('ist-bad'); const m = document.getElementById('vm-plz-f'); if (m) m.remove(); el.removeAttribute('aria-invalid');
+    const erg = document.querySelector('.vm-ergebnis'); if (erg) erg.hidden = c !== z.listePlz;
+    if (c.length === 5) { el.blur(); if (c !== z.listePlz || !z.liste) { z.suchFehler = ''; vmSuchen(); } else render(); } // dieselbe PLZ wie die Liste: die Liste wieder zeigen
+    return;
+  }
+  if (kind === 'vm-code') { const z = vm(), c = String(el.value).replace(/\D/g, '').slice(0, 6); z.code = c; if (el.value !== c) el.value = c; vmCodeLive(); if (S.vmFehler && S.vmFehler.code) { S.vmFehler = null; const b = el.closest('.vm-codefeld'); if (b) b.classList.remove('ist-bad'); const m = document.getElementById('vm-code-f'); if (m) m.remove(); el.removeAttribute('aria-invalid'); } if (c.length === 6 && !z.sendet) vmSenden(); return; }
   if (kind === 'lg-bru') return lgBruInput(el);
   if (kind === 'farbe') { S.win[f] = String(el.value).slice(0, 60); if (f === 'wunschI' && S.win.wunschI.trim()) S.win.gleich = false; if (S.win[f].trim()) { offenMerken(S.win, f); entschieden(S.win, f); } else offenZurueck(S.win, f); farbeLive(el, f); if (ev.type === 'change') nachAenderung(); return; }
   if (kind === 'plan') { if (ev.type !== 'change') return; planMasse(S.win, f, String(el.value).replace(/\D/g, '')); return nachAenderung(); }
@@ -7314,7 +7697,7 @@ function onInput(el, ev) {
   }
   /* Übrige Felder des Fensters und der Angaben: beim Tippen übernehmen (nichts geht verloren, wenn die App zwischendurch neu zeichnet),
      neu gezeichnet wird erst nach dem Verlassen und ohne den Tipp auf den nächsten Knopf zu schlucken (nachAenderung) */
-  if (kind === 'w' || kind === 'p') { feldUebernehmen(kind, f, el); if (kind === 'p') abLive(); if (ev.type === 'change') { if (kind === 'p') persist(); nachAenderung(); } return; }
+  if (kind === 'w' || kind === 'p') { feldUebernehmen(kind, f, el); if (kind === 'p') abLive(); if (kind === 'p' && S.vmFehler && S.vmFehler[f]) { delete S.vmFehler[f]; const b = el.closest('.trow'); if (b) { b.classList.remove('bad'); const m = b.querySelector('.trow-f'); if (m) m.remove(); } el.removeAttribute('aria-invalid'); } if (ev.type === 'change') { if (kind === 'p') persist(); nachAenderung(); } return; }
   if (ev.type !== 'change') return;
   if (kind === 'ohnefoto-zu') { try { if (el.checked) localStorage.setItem(OHNE_FOTO_ZU, '1'); else localStorage.removeItem(OHNE_FOTO_ZU); } catch (e) { /* ohne Speicher */ } return; }
   if (kind === 'photo') { S.ohneFotoFrage = false; S.fotoGross = null; return onPhoto(f, el.files && el.files[0]); }
@@ -7620,6 +8003,7 @@ function boot() {
   const ausmessen = location.hash === '#ausmessen';
   if (ausmessen) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } }
   restore();
+  vmVorgaben();
   S.betrieb = readHash();
   /* Instanz: ohne #k-… die laufende Planung dieses Geräts (oder noch keine, dann kommt der Code beim ersten Fenster) */
   if (INST && S.betrieb && !S.betrieb.name) S.betrieb.name = INST.name || '';
@@ -7798,8 +8182,24 @@ function instGesendetKurz(weg) {
    Folie „Was planst du?“. Ein angefangenes Fenster wird fortgesetzt; ein abgeschlossener Test beginnt neu */
 function probeEinstieg() {
   if (S.sent) instanzVergessen(true);
+  if (PROBE_BEISPIEL) return probeBeispiel(); // PROBE_DA erst nach dem Laden: vorher ist die Liste leer und führte zurück zur Beispielseite
   if (entwurfLesen()) entwurfFortsetzen(); else act('new', document.body);
   PROBE_DA = true;
+}
+/* Das Beispielprojekt laden, wie die App ein Projekt hält (Standard und Abweichungen, wie unpackProject), mit seinen Bildern im
+   Speicher der Fotos; danach die Liste der Fenster. Schlägt das Laden fehl, beginnt die Testansicht wie sonst */
+async function probeBeispiel() {
+  try {
+    const r = await fetch(BEISPIEL_ORDNER + 'projekt.json', { cache: 'no-cache' }); if (!r.ok) throw new Error('kein Beispiel');
+    const d = await r.json(), jetzt = Date.now();
+    if (!d || d.v !== 1 || !Array.isArray(d.w)) throw new Error('Beispiel unlesbar');
+    S.windows = d.w.map((x) => { const w = altAngleichen(Object.assign(baseWin(), JSON.parse(JSON.stringify(x)), { t0: jetzt, ts: jetzt, aend: 0 })); if (!x.sashes) w.sashes = sashesFor(w.teilung); return w; }).slice(0, GRENZE.fenster);
+    S.proj = Object.assign(S.proj || {}, d.p || {}); S.editIdx = -1; S.win = baseWin();
+    for (const w of S.windows) for (const id of bilderVon(w)) {
+      try { const f = await fetch(BEISPIEL_ORDNER + id + '.jpg', { cache: 'force-cache' }); if (f.ok) await Fotos.ablegen(id, await f.blob(), 0, 0); } catch (e) { /* ohne dieses Bild */ }
+    }
+    PROBE_DA = true; persist(); go('home'); toast('Beispiel geladen: Familie Mustermann, ' + S.windows.length + ' Positionen. Ändere, was du willst, und sende ab.');
+  } catch (e) { act('new', document.body); PROBE_DA = true; }
 }
 /* Infobereich der Testansicht in der ersten Folie */
 function probeInfo() {
@@ -7910,7 +8310,9 @@ async function probeBlatt() {
     await blattSchrift();
     const d = lkDaten(), pr = S.proj, fotos = await fotosFuerBlatt(S.windows);
     const kunde = { name: pr.name || '', kontakt: pr.tel || pr.mail || '', adresse: pr.ort || '', mehr: AW.kundeKontakt({ kontakt: pr.tel || pr.mail || '', aufmass: { proj: pr } }) };
-    const pdf = window.Blatt ? window.Blatt.pdf({ variante: 'betrieb', kennzeichnung: INST_M.pdfKennzeichnung, fenster: S.windows, projekt: pr, kunde: kunde, klaerung: AW.klaerung(S.windows, pr, {}), klaerStand: {}, portalKurz: location.host, nr: S.sent.nr || '', fotos: fotos || {}, betrieb: { name: d.name, nr: S.sent.nr || '', eingegangen: '' }, h: BLATT_H }) : null;
+    /* wie beim Server (functions/api/blatt-server.js): Abzug und Logo des Betriebs, hier die des Beispielbetriebs */
+    const logo = await logoFuerBlatt(BEISPIEL_ORDNER + 'logo.png');
+    const pdf = window.Blatt ? window.Blatt.pdf({ variante: 'betrieb', kennzeichnung: INST_M.pdfKennzeichnung, fenster: S.windows, projekt: pr, kunde: kunde, klaerung: AW.klaerung(S.windows, pr, {}), klaerStand: {}, portalKurz: location.host, nr: S.sent.nr || '', fotos: fotos || {}, betrieb: { name: d.name, nr: S.sent.nr || '', eingegangen: '', abzug: (INST && INST.abzug) || null, logo: logo ? Object.assign(logo, { grund: 'hell' }) : null }, h: BLATT_H }) : null;
     if (!pdf) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); return; }
     await dateiSpeichern(pdf, 'Aufmassblatt-' + (String(S.sent.nr || '').replace(/[^A-Za-z0-9-]/g, '') || 'Test') + '.pdf');
   } catch (e) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); }
@@ -8009,7 +8411,7 @@ function gesendetPilot() {
    zahlung: das Aufmaßblatt wird über Stripe bezahlt */
 async function statusHolen() {
   if (PROBE) return false; // Testansicht: ohne Server, wie eine Instanz ohne Verbindung, aber ohne Hinweis darauf
-  try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); const j = r.ok ? await r.json() : null; if (j && j.ok) { SERVER.daten = !!j.daten; SERVER.konten = !!j.konten; SERVER.zahlung = !!j.zahlung; SERVER.attrappe = !!j.attrappe; SERVER.testmodus = !!j.testmodus; SERVER.preise = j.preise || null; SERVER.betriebskonto = !!j.betriebskonto; if (j.preise && window.Abrechnung && window.Abrechnung.setPreise) window.Abrechnung.setPreise(j.preise); /* auch die Box für Fensterbauer im Aufmaßblatt (blatt.js) */ if (window.Abrechnung && window.Abrechnung.setEinfuehrung) window.Abrechnung.setEinfuehrung(j.einfuehrung || null); SERVER.zahlarten = Array.isArray(j.zahlarten) ? j.zahlarten : null; SERVER.recht = j.recht || null; } } catch (e) { /* ohne Server weiter */ }
+  try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); const j = r.ok ? await r.json() : null; if (j && j.ok) { SERVER.daten = !!j.daten; SERVER.konten = !!j.konten; SERVER.zahlung = !!j.zahlung; SERVER.attrappe = !!j.attrappe; SERVER.testmodus = !!j.testmodus; SERVER.preise = j.preise || null; SERVER.betriebskonto = !!j.betriebskonto; SERVER.vermittlung = j.vermittlung || null; if (j.preise && window.Abrechnung && window.Abrechnung.setPreise) window.Abrechnung.setPreise(j.preise); /* auch die Box für Fensterbauer im Aufmaßblatt (blatt.js) */ if (window.Abrechnung && window.Abrechnung.setEinfuehrung) window.Abrechnung.setEinfuehrung(j.einfuehrung || null); SERVER.zahlarten = Array.isArray(j.zahlarten) ? j.zahlarten : null; SERVER.recht = j.recht || null; } } catch (e) { /* ohne Server weiter */ }
   return SERVER.daten;
 }
 async function serverStart() {

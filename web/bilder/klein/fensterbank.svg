@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360">
+
+
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#07090a"/></marker></defs>
+<rect width="480" height="360" rx="16" fill="#ffffff"/>
+<rect x="160" y="186" width="170" height="150" fill="#ecebec"/>
+<path d="M212 172H264V180L330 185.5V186H212Z" fill="#e6e5e7"/>
+<line x1="160" y1="186" x2="160" y2="336" stroke="#07090a" stroke-width="4.4"/>
+<line x1="330" y1="186" x2="330" y2="336" stroke="#07090a" stroke-width="4.4"/>
+<rect x="212" y="40" width="52" height="132" fill="#ffffff" stroke="#897efc" stroke-width="6.6"/>
+<rect x="232" y="40" width="12" height="122" fill="#eceef1" stroke="#897efc" stroke-width="4.4"/>
+<path d="M98 172H212V186H98Z" fill="#d2d0d3" stroke="#07090a" stroke-width="4.4"/>
+<path d="M264 172L384 182.5V194H378V189.5L264 180Z" fill="#d2d0d3" stroke="#07090a" stroke-width="4.4" stroke-linejoin="round"/>
+<g stroke="#07090a" stroke-width="3.3">
+<line x1="331" y1="214" x2="383" y2="214"/>
+<line x1="99" y1="214" x2="159" y2="214"/>
+</g>
+
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+
+
+
+
+
+
+
+
+
+
+
+
+
+</g>
+</svg>

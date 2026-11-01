@@ -449,3 +449,89 @@ revoke all on function public.naechste_auftrag_nr() from public, anon, authentic
 grant select, insert, update, delete on public.kunden, public.anmeldecodes, public.auftraege, public.auftrag_nachrichten to service_role;
 grant usage, select on sequence public.auftrag_nr to service_role;
 grant execute on function public.naechste_auftrag_nr() to service_role;
+
+-- ========== Vermittlung (seit 29.10.2026): Anfragen der Hauseigentümer an bis zu drei Fensterbetriebe, Zentrale /zentrale/#vermittlung ==========
+-- functions/api/vermittlung.js und vermittlung-daten.js, docs/VERMITTLUNG.md Abschnitt 10. Eine Anfrage ist ein Dokument (kunde, eckdaten,
+-- aufmass, einwilligung, betriebe mit Telefon, Website und Ergebnis der Anrufe, verlauf, notiz) mit Versionszähler wie die Aufträge; tel ist
+-- die bestätigte Nummer (+49…) für die Grenze „zwei Anfragen in 90 Tagen“. Das Aufmaßblatt liegt im Bucket vermittlung (privat, legt der
+-- Server selbst an). Der Tageslauf löscht Anfrage und Blatt 180 Tage nach dem Eingang. vermittlung_suche ist der Zwischenspeicher der
+-- KI-Suche je Postleitzahl (30 Tage). Erneut ausführen schadet nicht.
+create sequence if not exists public.vermittlung_nr;
+create table if not exists public.vermittlungen (
+  id uuid primary key default gen_random_uuid(),
+  nr text not null unique,
+  tel text not null,
+  plz text not null,
+  stand text not null default 'neu',
+  kunde jsonb not null default '{}'::jsonb,
+  eckdaten jsonb not null default '{}'::jsonb,
+  aufmass text not null default '',
+  einwilligung jsonb not null default '{}'::jsonb,
+  betriebe jsonb not null default '[]'::jsonb,
+  bestaetigt boolean not null default false,
+  pdf jsonb,
+  verlauf jsonb not null default '[]'::jsonb,
+  notiz text not null default '',
+  meta jsonb not null default '{}'::jsonb,
+  version integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists vermittlungen_tel on public.vermittlungen (tel, created_at);
+create index if not exists vermittlungen_eingang on public.vermittlungen (created_at);
+create table if not exists public.vermittlung_suche (
+  plz text primary key,
+  ort text not null default '',
+  quelle text not null default '',
+  betriebe jsonb not null default '[]'::jsonb,
+  info jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+create index if not exists vermittlung_suche_alter on public.vermittlung_suche (created_at);
+create or replace function public.naechste_vermittlung_nr() returns bigint language sql security invoker set search_path = '' as $$ select nextval('public.vermittlung_nr') $$;
+alter table public.vermittlungen     enable row level security;
+alter table public.vermittlung_suche enable row level security;
+revoke all on public.vermittlungen, public.vermittlung_suche from anon, authenticated;
+revoke all on function public.naechste_vermittlung_nr() from public, anon, authenticated;
+grant select, insert, update, delete on public.vermittlungen, public.vermittlung_suche to service_role;
+grant usage, select on sequence public.vermittlung_nr to service_role;
+grant execute on function public.naechste_vermittlung_nr() to service_role;
+drop trigger if exists vermittlungen_touch on public.vermittlungen; create trigger vermittlungen_touch before update on public.vermittlungen for each row execute function public.eeziframes_touch();
+-- Register der Fensterbetriebe (seit 30.10.2026, functions/api/vermittlung-register.js, docs/VERMITTLUNG.md Abschnitt 13): je Betrieb eine
+-- Zeile mit der Kennung aus den Anfragen (betriebId), Kontakt, Stand (neu, kontakt, partner, abgelehnt, pausiert), Partner-Erklärung
+-- (partner: { bereit, seit, fassung }), Konto im Kundenbereich (kunden.id), Zähler, Liste seiner Anfragen, Aliase doppelt gefundener
+-- Kennungen (gleiche Nummer oder Website). Der Inhaber sieht es in der Zentrale als Lexikon; die Suche stellt Partner nach vorn.
+create table if not exists public.vermittlung_betriebe (
+  id text primary key,
+  name text not null default '',
+  ort text not null default '',
+  plz text not null default '',
+  strasse text not null default '',
+  tel text not null default '',
+  web text not null default '',
+  mail text not null default '',
+  tel_norm text not null default '',
+  web_host text not null default '',
+  leistungen jsonb not null default '[]'::jsonb,
+  quelle text not null default 'ki',
+  stand text not null default 'neu',
+  partner jsonb not null default '{}'::jsonb,
+  konto uuid references public.kunden(id) on delete set null,
+  zaehler jsonb not null default '{}'::jsonb,
+  anfragen jsonb not null default '[]'::jsonb,
+  aliase text[] not null default '{}',
+  notiz text not null default '',
+  verlauf jsonb not null default '[]'::jsonb,
+  version integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists vermittlung_betriebe_konto on public.vermittlung_betriebe (konto);
+create index if not exists vermittlung_betriebe_stand on public.vermittlung_betriebe (stand);
+create index if not exists vermittlung_betriebe_tel on public.vermittlung_betriebe (tel_norm);
+create index if not exists vermittlung_betriebe_web on public.vermittlung_betriebe (web_host);
+create index if not exists vermittlung_betriebe_aliase on public.vermittlung_betriebe using gin (aliase);
+alter table public.vermittlung_betriebe enable row level security;
+revoke all on public.vermittlung_betriebe from anon, authenticated;
+grant select, insert, update, delete on public.vermittlung_betriebe to service_role;
+drop trigger if exists vermittlung_betriebe_touch on public.vermittlung_betriebe; create trigger vermittlung_betriebe_touch before update on public.vermittlung_betriebe for each row execute function public.eeziframes_touch();

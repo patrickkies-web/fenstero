@@ -183,6 +183,13 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Streifen im Haus und in der Karte „Genau gleiche Fenster“ und die violetten Leuchten sollten weg, der gewählte Stockwerk-Knopf weiß
   gefüllt sein. Auswahl auf dunkler Kachel heißt weiß mit schwarzer Schrift; Zustand zeigt sich über Helligkeit, nicht über Leuchten.
   Vorschlag für seine DNA: G1 (Schraffur als „Rest“) und das Leuchten als Zustand in App-Folien nur noch auf sein Wort.
+- Keine Strichlinien, kein Neonleuchten, Glas wie Glas (Korrektur des Inhabers, 30.10.2026, Folien „Wo ist das Fenster?“, „Wie genau
+  möchtest du planen?“ und „Welche Form?“; Vorbild Startseite und Seite für Fensterbauer): Das Haus der Lage war ihm mit seinen
+  „komischen Linien“ zu sehr Plan, die Flecken mit Weichzeichner leuchteten „wie Neonlicht“, die Scheiben im 3-D-Modell sahen
+  „ausgegraut“ aus. Regel: Bühnen zeigen Körper statt Strichzeichnungen (das Haus in der Dämmerung, das gewählte Stockwerk innen
+  erleuchtet, Zustand über Helligkeit); Licht nur als ruhiger radialer Schein ohne Weichzeichner und ohne Bewegung, nie als farbiger
+  Fleck über Inhalten; Glas zeigt von innen die Aussicht (Himmel, unscharfe Baumreihe, Rasen), deckend und mit der Kamera wandernd.
+  Protokoll docs/profis/2026-10-30-lage-tiefe-glas.md. Vorschlag für seine DNA, Abschnitt 4 „Nie“: „Farbflecken mit Weichzeichner“.
 - Laptop wie die Start-Folie (Wunsch des Inhabers, 28.10.2026): Jede Folie des Konfigurators füllt im Browser den Bildschirm wie
   „Was planst du?“: Kopf 60 px, links die Bühne über die ganze Höhe, rechts eine Spalte von 380 px mit Frage, Karten und der Pille
   unten, darunter die rechtlichen Verweise. Neue Folien bekommen diese Ansicht von Anfang an (`dnaTisch` oder eigenes Raster).
@@ -212,6 +219,98 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   auf Wunsch mitgestalten, erklärt „Fenster planen“ auf der Seite und bietet „Fenster konfigurieren“ gleich im Kästchen (Inhaber, später
   am selben Tag). Vorschlag für seine DNA (Abschnitt 9):
   „Ein Ablauf ist erst fertig, wenn jeder erreichbare Bildschirm darin im neuen Look steht.“
+- Bestandsaufnahmen gründlich (Inhaber, 28.10.2026: „diese ganzen Ratgeber Seiten die hast du ja noch gar nicht überprüft … vernünftig
+  vorgehen“; „Wo kommen denn diese ganzen komischen Firmen her“): Jede Seite in voller Länge fotografieren (vorher durchscrollen), am
+  Telefon und am Schreibtisch, und selbst ansehen, nicht nur messen; der erste Bildschirm allein reicht nie. Bilder für den Inhaber nie
+  mit den Testbetrieben der Prüfsuite (Amsel, Fink, Specht, Meise); wo ein Betrieb gezeigt werden muss, den es online noch nicht gibt,
+  Fensterbau Brandt aus der Paket-Vorschau, lokal nachgestellt, und das in der Lieferung sagen. Bilder in einer Liste laden sofort
+  (kein `loading="lazy"`). Werkzeug: `docs/profis/werkzeuge/altes-design.mjs`. Vorschlag für seine DNA (Abschnitt 7):
+  „Geprüft heißt: jede Seite ganz gesehen, mit Beispielen, die der Inhaber kennt.“
+- Ratgeber einheitlich, Inhalte bleiben, Konfigurator bleibt (Inhaber, 28.10.2026: „die Inhalte so zu lassen wie sie sind aber das
+  Design zu verändern … so dass der Ratgeber einheitlich aussieht“; „den Konfigurator der Seite sowie die Seiten, die bereits dem neuen
+  Design entsprechen, lässt du, wie sie sind“; „die Links zu überprüfen, ob die Wege auch passend sind“): Alle 24 Ratgeber, die 5 Seiten
+  Wissen für Fensterbauer, die Rechtstexte und die Fehlerseite stehen in einer Vorlage (Generatoren `scripts/ratgeber-bausteine.mjs` und
+  `scripts/recht-bausteine.mjs`); ihr Text bleibt Wort für Wort, nur Auszeichnung (Etikett, geschütztes Leerzeichen, kräftiger erster
+  Satz eines Fehlers) und Navigation kommen dazu. Konfigurator beim Fensterbauer (Start, Signature-Dashboard) und Seiten im neuen Look
+  werden nicht angefasst, auch wenn die Bestandsaufnahme sie als alt führt; das steht in der Lieferung als offen. Jede Lieferung prüft
+  die Links der berührten Seiten (intern alle, extern mit Status). Protokoll docs/profis/2026-10-28-ratgeber-dna.md. Vorschlag für seine
+  DNA (Abschnitt 7): „Überarbeiten heißt: Gestalt neu, Wortlaut gleich, Wege geprüft.“
+- Knopf „Zum Konfigurator“ in der Leiste der Seite für Fensterbauer (Wunsch des Inhabers, 29.10.2026: „wenn ich … über die Seite
+  scrolle, so ein Button, wo drin steht zum Konfigurator … direkt in die erste Seite … soll auch zum Drücken animieren … nicht … die
+  Pakete … sondern direkt in den Konfigurator“): Oben im Kopf bleibt „Paket anfragen“; unterhalb des Kopfs zieht sich die Leiste wie
+  in den Paket-Vorlagen genau auf den Knopf zusammen (Umriss-Pille auf dunklem Glas mit weißem Pfeilkreis), beim Hochscrollen kommt sie
+  ganz (am Telefon Zeichen und Knopf, der Umschalter steht im Kopf der Seite). Beim ersten Erscheinen je Seitenaufruf leuchtet der Rand
+  zweimal violett auf und der Pfeil stupst zweimal im Kreis (1,4 s, nie in Schleife; ruhige Fassung ohne). Ziel
+  `/app/?ausprobieren=signature&direkt`: gleich „Was planst du?“ in der Kundenansicht, ohne Beispielseite und Kästchen, Rückweg zur
+  Seite für Fensterbauer. Vorschlag für seine DNA: „Eine Leiste darf einen zweiten Weg tragen, wenn der Inhaber ihn nennt; der Anreiz
+  ist einmalig, nie Dauerbewegung.“
+- Das Foto mit dem Lichtschatten auf dem Boden nicht überall (Inhaber, 29.10.2026: „nutzt bitte nicht schon wieder dieses Foto … ich muss
+  das nicht überall haben“): web/bilder/konfigurator/buehne.webp bleibt auf den Folien, die es schon tragen (Start, Gespeichert,
+  Haus, Zeit, Kontakt), neue Folien und Abschnitte nehmen eine andere Bühne. In der Vermittlung: Anthrazit mit Licht von oben links,
+  feinem Punktraster (wie eine Karte) und Vignette. Vorschlag für seine DNA (Abschnitt 9): „Ein Foto als Bühne trägt höchstens ein
+  Ablauf; neue Folien bekommen ihr eigenes Material.“
+- Gratis-Weg als Wahl, nicht im Kleingedruckten (Inhaber, 29.10.2026, übernommen aus einem Vorschlag): zwei Karten nebeneinander,
+  „Aufmaßblatt für dich“ mit Preis und „Aufmaßblatt + an bis zu 5 Fensterbauer in deiner Nähe“ (zuerst 2, am selben Abend auf bis zu
+  fünf, mindestens zwei erweitert) für 0 € mit durchgestrichenem Preis als
+  Anker; die Gratis-Karte mit violettem Ring und Etikett (Koralle, schwarze Schrift). Etikett „Empfohlen“ statt des vorgeschlagenen
+  „Beliebt“, weil Beliebtheit ohne Nutzerzahlen eine erfundene Kennzahl wäre (DNA Abschnitt 4). Vertrauenssätze stehen dort, wo der
+  Zweifel entsteht (unter der Karte, am Telefonfeld), nicht gesammelt am Ende. Wo bezahlt wird, steht der Gratis-Weg noch einmal als
+  Fläche in der Folie. Was der Besucher auf der Startseite wählt (Farbe, Weg), übernimmt der Konfigurator. Das gilt für die App; auf
+  der Startseite ist die Weitergabe nur ein leiser Zusatz (nächster Punkt). Gefragt, ob die App leiser werden soll, entschied der
+  Inhaber am 29.10.2026: „App bleibt wie jetzt“.
+- Drei Fenster im Hero statt eines (Inhaber, 29.10.2026: „Du hast einfach das hässlichste Fenster genommen“): ein schickes graues mit
+  Raffstore, ein weißes mit Sprossen, ein weißes dreiteiliges mit Rollladen, aus dem 3-D-Modell der App, im Wechsel. Solange jemand
+  dreht, bleibt das Fenster; nach dem Loslassen kommt das nächste. Die Farbe wählt der Besucher frei, sie gilt dann für alle und bleibt.
+  Der Schein unter dem Fenster ist weiß, nicht violett („keinen lila, sondern weißen Schein“). Als Beispiel immer ein Fenster zeigen, das
+  man sich ans eigene Haus wünscht, nicht das schlichteste. Pendeln und Wechsel laufen weiter, solange der Hero zu sehen ist (Ausnahme
+  von „Bewegung endet nach 2,6 s“).
+  Flüssig (Inhaber, 29.10.2026: „läuft überhaupt nicht smooth“): Blickwinkel in 2°-Schritten, gemalt auf eine Leinwand aus
+  Einzelbildern (createImageBitmap) mit echtem Überblenden zwischen zwei Winkeln, Pendel ±26° in 12 s. Nie ein großes Rasterbild mit
+  wechselnder background-position: das muss das Telefon bei jedem Schritt neu malen.
+- Startseite als Planungswerkzeug (Inhaber, 29.10.2026: „Der Konfigurator sollte selbst der Einstieg sein“; am selben Tag gewichtet:
+  „auf den ersten Blick ein Planungswerkzeug, kein Vergleichs- oder Lead-Portal“, Abgrenzung von Seiten, die erst alle Daten abfragen):
+  Der Hero zeigt das 3-D-Fenster als Bildfolge des echten App-Modells (scripts/hero-fenster.mjs: buehne.js in WebGL mit ?gl=voll und
+  SwiftShader, ohne raum-licht; im Browser läuft kein WebGL, weil app.js zu schwer für die Startseite ist), es pendelt bis zur ersten
+  Berührung, lässt sich ziehen und mit Pfeiltasten drehen; 3 bis 4 Farbfelder (Schlüssel aus ral.js) wechseln den Rahmen, „Kostenlos
+  losplanen“ führt mit /app/?farbe=<Schlüssel>#ausmessen in die App; darunter „Ohne Konto, ohne Telefonnummer. Dein Ergebnis siehst du
+  sofort.“ Danach „Drei Schritte zu deinem Aufmaß“ (Messen, In 3D planen, Aufmaßblatt). Die Weitergabe an Fensterbetriebe steht nur als
+  leiser Zusatz beim Preis (/app/?weg=gratis#ausmessen): kein Etikett „Empfohlen“ oder „Beliebt“, kein durchgestrichener Preis, keine
+  Karte mit Pins, keine Überschrift mit „Angebote vergleichen“; „vergleichbare Angebote“ höchstens in diesem Zusatz. Das Foto mit dem
+  Lichtschatten auf dem Boden (bilder/konfigurator/buehne.webp) gehört nicht überall hin („muss ich nicht überall haben“). Sein Hausfoto
+  ist Material (Ausschnitt bilder/start/fassade.webp im Schritt „In 3D planen“), bis er ein eigenes Foto für die Fenster-Animation schickt.
+  Text überall ab 13 px. Protokoll docs/profis/2026-10-26-startseite-dna.md, Abschnitt „Umbau 29.10.2026“. Vorschläge für seine DNA:
+  „Ein Objekt zum Anfassen darf von selbst pendeln, bis der Besucher es berührt“ (Abschnitt 2, Bewegungs-Gene) und „Werkzeug vor
+  Vermittlung: Was der Besucher selbst tun kann, steht vorn; Weitergabe an Dritte ist ein leiser Zusatz“ (Abschnitt 4).
+- Proportionen des Konfigurators (Wunsch des Inhabers, 29.10.2026, vom iPhone aus): Am Telefon ist die helle Bühne mit dem Element ein
+  Fünftel höher (Wünsche 272 → 326 px, Fotos 250 → 300, Ergebnis 390 → 444; Messen füllt den Bildschirm schon); am Laptop bleibt die
+  Bühne, dort „kein Platzproblem“. Knöpfe, Chips, Kacheln und Zeilen überall eine Spur kleiner (52 → 48, Schrift 15 → 14, Luft 10 → 8,
+  Innenränder enger; Ziele bleiben 44 px, weil Prüfsuite und DNA es verlangen), weil sie „klobig“ wirkten und „viel Luft“ hatten. Gewählte Kacheln sind weiß mit schwarzer Schrift, ohne violettes
+  Licht, Ring und Punkt; gewählte Farbtupfen tragen einen weißen Ring. Erst Vorher/Nachher einer Folie gezeigt, dann übernommen
+  (Block „Proportionen des Konfigurators“ am Ende von web/assets/app.css; Protokoll docs/profis/2026-10-29-konfigurator-proportionen.md).
+  Vorschlag für seine DNA (Abschnitt 9): „Gewählt heißt Weiß, nie Leuchten; Ziele 44–48 px, Schrift 14 px in Knöpfen und Chips.“
+- Gratis-Weg groß über dem Preis (Inhaber, 29.10.2026, abends; ersetzt auf der Startseite den „leisen Zusatz“ aus dem Punkt
+  „Startseite als Planungswerkzeug“): Über der Karte mit 7,99 € steht eine dunkle Karte (G14) mit violettem Ring, Etikett „Empfohlen“
+  (Koralle) und daneben groß in Weiß „KOSTENLOS“, darunter sein Text, auf seinen Wunsch in Rechtschreibung und Grammatik korrigiert
+  („Am Ende des Konfigurators zeigen wir dir mehrere Betriebe in deiner Nähe. Erlaubst du uns, dein Aufmaß an mindestens zwei Betriebe
+  deiner Wahl zu schicken, erhältst du es kostenlos und obendrein das gesamte Aufmaß als PDF. Keine versteckten Kosten, keine
+  Weitergabe deiner Daten an weitere Betriebe und keine Belästigung durch Dritte. Garantiert.“), beide Absätze in Weiß („dass man das
+  gut lesen kann“), und „Kostenlos weiter“ als leise Pille. Dieselbe Karte hängt in der App ganz oben auf den Folien zum Bezahlen (dort
+  „Wir zeigen dir mehrere Betriebe … erhältst du es kostenlos statt für 7,99 € und obendrein …“). Beim Erscheinen läuft dreimal ein violetter Ring nach außen und der Pfeil stupst
+  (1,4 s je Takt, einmal je Seitenaufruf bzw. Folie, ruhige Fassung ohne), nie in Schleife. Sichtbar nur bei eingeschalteter
+  Vermittlung. Vorschlag für seine DNA: „Ein Angebot, das Geld spart, darf über dem Preis stehen und einmal auf sich aufmerksam machen.“
+- Weiche und Betriebe (Inhaber, 30.10.2026): Untertitel „Wähle, wie du fortfahren möchtest.“, im weißen Feld sein Satz („Gestatte uns,
+  das Aufmaßblatt an von dir ausgewählte Betriebe zu schicken (und nur an diese).“), die zwei Karten deshalb untereinander; darunter die
+  Daten-Garantie als Feld nach G14 mit Chip in Indigo und Schild (sein Wortlaut, so gefasst, dass er stimmt), dann „Warum kostenlos?“ zum
+  Aufklappen. Auf Weg A kommen die Betriebe vor dem Kontakt: Die Folie hat nur das Feld Postleitzahl, mit der fünften Ziffer steht die
+  Liste da (kein Ladebild, wo gespeicherte Suchen der Umgebung reichen); Name, Telefon und Einwilligung erst danach. Protokoll
+  docs/profis/2026-10-30-vermittlung-sofort.md. Vorschlag für seine DNA: „Was der Kunde zuerst sehen will (die Betriebe), kommt vor dem,
+  was wir von ihm wollen (seine Nummer).“
+- Bereich für Fensterbauer (Inhaber, 30.10.2026): Ein Bereich für beide Seiten (Anfragen aus der Vermittlung und Konfigurator-Pakete) im
+  vorhandenen `/konto/`, gleichwertig und ohne Vorwurf „Noch keine Bestellung“; Kundendaten nie per E-Mail, nur hinter Code und
+  Freischalten; Vorschau mit Echtheitsprofil, die eine Pille ist „Freischalten“; darunter Karten im Stil der Seite (Register und
+  Bereitschaft, Echtheit der Nummer, Konfigurator-Pakete). Partner stehen in der App auf Platz 1 und 2 mit Etikett „Partner“ in Indigo
+  und einem Satz zur Reihenfolge. „Anmelden“ im Kopf der Ansicht Fensterbauer. In der Zentrale ein Lexikon der Betriebe und ein
+  Abschnitt Kunde mit Nachricht. Protokoll docs/profis/2026-10-30-partner-bereich.md, Doku docs/VERMITTLUNG.md Abschnitt 13.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

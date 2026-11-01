@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400">
+
+
+<rect width="480" height="400" rx="16" fill="#ffffff"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="16" fill="#07090a">
+
+
+<path d="M60 136H380a80 80 0 0 1 0 160H60" fill="none" stroke="#a8a4a9" stroke-width="6.6" stroke-linecap="round"/>
+<path d="M380 274V264H167V274" fill="none" stroke="#6b676c" stroke-width="4.4"/>
+
+<rect x="207" y="80" width="132" height="30" rx="15" fill="#fde3d8" stroke="#f88962" stroke-width="4.4"/>
+
+<path d="M273 110V120" stroke="#f88962" stroke-width="4.4"/>
+<g stroke-width="5.5">
+<circle cx="60" cy="136" r="15" fill="#ffffff" stroke="#202022"/>
+<circle cx="167" cy="136" r="15" fill="#ffffff" stroke="#202022"/>
+<circle cx="273" cy="136" r="15" fill="#ffffff" stroke="#f88962"/>
+<circle cx="380" cy="136" r="19" fill="#897efc" stroke="#3c3a66"/>
+<circle cx="380" cy="296" r="15" fill="#ffffff" stroke="#202022"/>
+<circle cx="273" cy="296" r="15" fill="#ffffff" stroke="#202022"/>
+<circle cx="167" cy="296" r="15" fill="#ffffff" stroke="#202022"/>
+<circle cx="60" cy="296" r="15" fill="#202022" stroke="#202022"/>
+</g>
+<g font-weight="700" text-anchor="middle">
+
+
+</g>
+<g text-anchor="middle">
+
+
+
+
+
+
+
+
+</g>
+</g>
+</svg>

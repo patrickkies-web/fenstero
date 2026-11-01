@@ -1,0 +1,817 @@
+{
+ "v": 1,
+ "hinweis": "Erfundenes Beispiel: Familie Mustermann bei Fensterbau Brandt (Köln). Quelle für web/beispiele/*.pdf (scripts/blatt-beispiel.mjs) und die Testansicht (/app/?ausprobieren&beispiel). Fenster im Format der App, nur Abweichungen vom Standard.",
+ "nr": "A-2026-0142",
+ "eingegangen": "27. Oktober 2026",
+ "adresse": "Musterweg 12, 50667 Köln",
+ "p": {
+  "name": "Familie Mustermann",
+  "ort": "50667 Köln",
+  "tel": "0221 555 01 23",
+  "mail": "familie.mustermann@beispiel.de",
+  "erreich": "nm",
+  "gebaeude": "efh",
+  "baujahr": "1978",
+  "total": 16,
+  "zeit": "3m",
+  "budget": "b4",
+  "foerd": true,
+  "foerdweg": "bafa",
+  "notiz": "Bitte vorher anrufen, unser Hund ist freundlich."
+ },
+ "w": [
+  {
+   "wid": "mmeg01",
+   "bilder": {
+    "in": "bmustereg01innen",
+    "out": "bmustereg01aussen"
+   },
+   "fotos": 2,
+   "name": "Wohnen links",
+   "etage": "eg",
+   "teilung": "3",
+   "mo": {
+    "wt": 2011,
+    "wm": 2009,
+    "wb": 2010,
+    "hl": 1412,
+    "hm": 1412,
+    "hr": 1411
+   },
+   "el": {
+    "w": 1980,
+    "h": 1386
+   },
+   "bru": 600,
+   "laib": 150,
+   "fa": "7016",
+   "fi": "9016",
+   "glas": "3",
+   "glasfn": [
+    "schall"
+   ],
+   "rc": "rc2",
+   "erreichbar": "ja",
+   "sart": "raffstore",
+   "roll": "vorbau",
+   "sfarbe": "anthrazit",
+   "antrieb": "smart",
+   "insekt": "spann",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Rollladen",
+      "Einbaukasten innen im Sturz, Gurt links"
+     ],
+     [
+      "Anschlag",
+      "Innenanschlag, Blendrahmen etwa 2 cm hinter der Innenkante"
+     ],
+     [
+      "Fassade",
+      "Putz auf Mauerwerk"
+     ]
+    ],
+    "chips": [
+     "Rollladenkasten innen",
+     "Putzfassade"
+    ],
+    "hints": [],
+    "pruefen": [
+     "Sturzhöhe für den Raffstore-Kasten"
+    ],
+    "fach": {
+     "rollladen": "einbau",
+     "anschlagI": "innen",
+     "fassade": "putz",
+     "strom": true,
+     "erreichbar": true
+    }
+   },
+   "fassade": "putz",
+   "anschlag": "innen"
+  },
+  {
+   "wid": "mmeg02",
+   "bilder": {
+    "in": "bmustereg02innen",
+    "out": "bmustereg02aussen"
+   },
+   "fotos": 2,
+   "name": "Wohnen Terrasse",
+   "etage": "eg",
+   "art": "hst",
+   "hst": {
+    "schema": "A",
+    "richtung": "R",
+    "schwelle": "null"
+   },
+   "teilung": "2",
+   "sashes": [
+    {
+     "t": "F",
+     "din": "R"
+    },
+    {
+     "t": "S",
+     "din": "R"
+    }
+   ],
+   "griff": "abschliessbar",
+   "mo": {
+    "wt": 3021,
+    "wm": 3017,
+    "wb": 3019,
+    "hl": 2258,
+    "hm": 2260,
+    "hr": 2264
+   },
+   "el": {
+    "w": 2987,
+    "h": 2243
+   },
+   "laib": 150,
+   "fa": "7016",
+   "fi": "9016",
+   "glas": "3",
+   "glasfn": [
+    "vsg"
+   ],
+   "sart": "raffstore",
+   "roll": "vorbau",
+   "sfarbe": "anthrazit",
+   "antrieb": "smart",
+   "insekt": "schiebe",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Situation",
+      "Terrassentür mit festem Seitenteil, Terrasse auf gleicher Höhe"
+     ],
+     [
+      "Boden",
+      "Fliesen innen, Terrasse aus Holz auf Stelzlagern"
+     ]
+    ],
+    "chips": [
+     "Terrasse ebenerdig"
+    ],
+    "hints": [
+     "Terrasse aus Holz auf Stelzlagern: Anschluss an die Schwelle abstimmen."
+    ],
+    "pruefen": [
+     "Entwässerung vor der Schwelle"
+    ],
+    "fach": {
+     "fassade": "putz",
+     "strom": true
+    }
+   },
+   "fassade": "putz"
+  },
+  {
+   "wid": "mmeg03",
+   "bilder": {
+    "in": "bmustereg03innen",
+    "out": "bmustereg03aussen"
+   },
+   "fotos": 2,
+   "name": "Küche",
+   "etage": "eg",
+   "teilung": "2p",
+   "mo": {
+    "wt": 1261,
+    "wm": 1258,
+    "wb": 1262,
+    "hl": 1217,
+    "hm": 1213,
+    "hr": 1214
+   },
+   "el": {
+    "w": 1232,
+    "h": 1183
+   },
+   "bru": 950,
+   "laib": 140,
+   "fa": "7016",
+   "fi": "9016",
+   "sart": "rollladen",
+   "roll": "aufsatz",
+   "sfarbe": "anthrazit",
+   "antrieb": "motor",
+   "insekt": "dreh",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Fensterbank innen",
+      "keine, die Arbeitsplatte reicht bis an den Rahmen"
+     ],
+     [
+      "Strom",
+      "Steckdose neben dem Fenster"
+     ]
+    ],
+    "chips": [
+     "über Arbeitsplatte"
+    ],
+    "hints": [],
+    "pruefen": [],
+    "fach": {
+     "rollladen": "keiner",
+     "fassade": "putz",
+     "strom": true
+    }
+   },
+   "fassade": "putz"
+  },
+  {
+   "wid": "mmeg04",
+   "bilder": {
+    "in": "bmustereg04innen",
+    "out": "bmustereg04aussen"
+   },
+   "fotos": 2,
+   "name": "Essen",
+   "etage": "eg",
+   "art": "balkon",
+   "teilung": "1",
+   "mo": {
+    "wt": 910,
+    "wm": 913,
+    "wb": 913,
+    "hl": 2191,
+    "hm": 2190,
+    "hr": 2192
+   },
+   "el": {
+    "w": 884,
+    "h": 2171
+   },
+   "laib": 140,
+   "fa": "7016",
+   "fi": "9016",
+   "bt": {
+    "schwelle": "flach",
+    "griffA": "ziehgriff",
+    "boden": "bleibt"
+   },
+   "sart": "rollladen",
+   "roll": "aufsatz",
+   "sfarbe": "anthrazit",
+   "antrieb": "motor",
+   "insekt": "pendel",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Situation",
+      "Balkontür, alter Rollladenkasten innen"
+     ],
+     [
+      "Boden",
+      "Parkett innen, Balkon eine Stufe tiefer"
+     ],
+     [
+      "Anschlag",
+      "Innenanschlag"
+     ]
+    ],
+    "chips": [
+     "Balkon eine Stufe tiefer"
+    ],
+    "hints": [],
+    "pruefen": [],
+    "fach": {
+     "rollladen": "einbau",
+     "anschlagI": "innen",
+     "fassade": "putz"
+    }
+   },
+   "fassade": "putz",
+   "anschlag": "innen"
+  },
+  {
+   "wid": "mmeg05",
+   "bilder": {
+    "in": "bmustereg05innen",
+    "out": "bmustereg05aussen"
+   },
+   "fotos": 2,
+   "name": "Gäste-WC",
+   "etage": "eg",
+   "teilung": "1",
+   "sashes": [
+    {
+     "t": "K",
+     "din": "L"
+    }
+   ],
+   "mo": {
+    "wt": 617,
+    "wm": 615,
+    "wb": 617,
+    "hl": 818,
+    "hm": 817,
+    "hr": 815
+   },
+   "el": {
+    "w": 591,
+    "h": 788
+   },
+   "bru": 1450,
+   "laib": 120,
+   "fa": "9016",
+   "fi": "9016",
+   "glasfn": [
+    "sicht"
+   ],
+   "orn": "satinato",
+   "putz": false,
+   "fbi": "behalten",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Situation",
+      "Kleines Kippfenster mit Ornamentglas"
+     ],
+     [
+      "Laibung",
+      "gefliest bis zur Hälfte"
+     ]
+    ],
+    "chips": [
+     "Fliesenlaibung"
+    ],
+    "hints": [],
+    "pruefen": [],
+    "fach": {
+     "fassade": "putz"
+    }
+   },
+   "fassade": "putz"
+  },
+  {
+   "wid": "mmeg06",
+   "bilder": {
+    "in": "bmustereg06innen"
+   },
+   "fotos": 1,
+   "name": "Flur neben der Haustür",
+   "etage": "eg",
+   "art": "fest",
+   "mo": {
+    "wt": 422,
+    "wm": 420,
+    "wb": 423,
+    "hl": 2122,
+    "hm": 2120,
+    "hr": 2121
+   },
+   "el": {
+    "w": 398,
+    "h": 2101
+   },
+   "laib": 130,
+   "fa": "7016",
+   "fi": "9016",
+   "glasfn": [
+    "vsg",
+    "sicht"
+   ],
+   "orn": "master",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Situation",
+      "Schmales festes Seitenfenster neben der Haustür"
+     ],
+     [
+      "Fassade",
+      "Putz auf Mauerwerk"
+     ]
+    ],
+    "chips": [
+     "neben der Haustür"
+    ],
+    "hints": [],
+    "pruefen": [],
+    "fach": {
+     "fassade": "putz"
+    }
+   },
+   "fassade": "putz"
+  },
+  {
+   "wid": "mmog01",
+   "bilder": {
+    "in": "bmusterog01innen",
+    "out": "bmusterog01aussen"
+   },
+   "fotos": 2,
+   "name": "Schlafen",
+   "etage": "og",
+   "ogNr": 1,
+   "teilung": "2p",
+   "mo": {
+    "wt": 1510,
+    "wm": 1510,
+    "wb": 1507,
+    "hl": 1263,
+    "hm": 1262,
+    "hr": 1265
+   },
+   "el": {
+    "w": 1481,
+    "h": 1236
+   },
+   "bru": 950,
+   "laib": 140,
+   "fa": "7016",
+   "fi": "9016",
+   "glasfn": [
+    "schall"
+   ],
+   "fbi": "werzalit",
+   "sart": "rollladen",
+   "roll": "vorbau",
+   "sfarbe": "anthrazit",
+   "antrieb": "smart",
+   "insekt": "spann",
+   "iart": "plissee",
+   "ifarbe": "grau",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Rollladen",
+      "Einbaukasten innen, Gurt rechts"
+     ],
+     [
+      "Heizung",
+      "Heizkörper direkt unter dem Fenster"
+     ]
+    ],
+    "chips": [
+     "Rollladenkasten innen"
+    ],
+    "hints": [
+     "Heizkörper unter dem Fenster: neue Fensterbank innen nicht tiefer als 20 cm."
+    ],
+    "pruefen": [],
+    "fach": {
+     "rollladen": "einbau",
+     "fassade": "putz",
+     "strom": false
+    }
+   },
+   "fassade": "putz"
+  },
+  {
+   "wid": "mmog02",
+   "bilder": {
+    "in": "bmusterog02innen",
+    "out": "bmusterog02aussen"
+   },
+   "fotos": 2,
+   "name": "Kind 1",
+   "etage": "og",
+   "ogNr": 1,
+   "teilung": "1",
+   "ul": true,
+   "ulA": "glas",
+   "ulH": 400,
+   "mo": {
+    "wt": 1014,
+    "wm": 1010,
+    "wb": 1012,
+    "hl": 1263,
+    "hm": 1261,
+    "hr": 1260
+   },
+   "el": {
+    "w": 986,
+    "h": 1234
+   },
+   "bru": 780,
+   "laib": 140,
+   "fa": "7016",
+   "fi": "9016",
+   "absturz": "fest",
+   "griff": "abschliessbar",
+   "sart": "rollladen",
+   "roll": "aufsatz",
+   "sfarbe": "anthrazit",
+   "antrieb": "solar",
+   "insekt": "spann",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Situation",
+      "Einflügliges Fenster, niedrige Brüstung"
+     ],
+     [
+      "Fassade",
+      "Putz, Südseite"
+     ]
+    ],
+    "chips": [
+     "Südseite"
+    ],
+    "hints": [],
+    "pruefen": [],
+    "fach": {
+     "rollladen": "keiner",
+     "fassade": "putz",
+     "bruestung": "niedrig"
+    }
+   },
+   "fassade": "putz"
+  },
+  {
+   "wid": "mmog03",
+   "bilder": {
+    "in": "bmusterog03innen",
+    "out": "bmusterog03aussen"
+   },
+   "fotos": 2,
+   "name": "Kind 2",
+   "etage": "og",
+   "ogNr": 1,
+   "teilung": "2p",
+   "mo": {
+    "wt": 1263,
+    "wm": 1262,
+    "wb": 1260,
+    "hl": 1260,
+    "hm": 1263,
+    "hr": 1264
+   },
+   "el": {
+    "w": 1229,
+    "h": 1237
+   },
+   "bru": 900,
+   "laib": 140,
+   "fa": "7016",
+   "fi": "9016",
+   "sart": "raffstore",
+   "roll": "unterputz",
+   "sfarbe": "anthrazit",
+   "antrieb": "motor",
+   "insekt": "spann",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Sturz",
+      "Betonsturz, verputzt, kein Rollladenkasten"
+     ],
+     [
+      "Strom",
+      "Steckdose unter dem Fenster"
+     ]
+    ],
+    "chips": [
+     "Betonsturz"
+    ],
+    "hints": [],
+    "pruefen": [],
+    "fach": {
+     "rollladen": "keiner",
+     "fassade": "putz",
+     "strom": true
+    }
+   },
+   "fassade": "putz"
+  },
+  {
+   "wid": "mmog04",
+   "bilder": {
+    "in": "bmusterog04innen",
+    "out": "bmusterog04aussen"
+   },
+   "fotos": 2,
+   "name": "Bad",
+   "etage": "og",
+   "ogNr": 1,
+   "teilung": "1",
+   "mo": {
+    "wt": 906,
+    "wm": 906,
+    "wb": 905,
+    "hl": 1043,
+    "hm": 1040,
+    "hr": 1042
+   },
+   "el": {
+    "w": 879,
+    "h": 1012
+   },
+   "bru": 1320,
+   "laib": 120,
+   "fa": "9016",
+   "fi": "9016",
+   "glasfn": [
+    "sicht"
+   ],
+   "orn": "chinchilla",
+   "iart": "rollo",
+   "ifarbe": "weiss",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Laibung",
+      "gefliest bis an den Blendrahmen"
+     ],
+     [
+      "Feuchte",
+      "Feuchteflecken in der unteren Laibungsecke"
+     ]
+    ],
+    "chips": [
+     "Fliesenlaibung"
+    ],
+    "hints": [
+     "Feuchteflecken in der Laibung: Ursache vor dem Einbau klären."
+    ],
+    "pruefen": [],
+    "fach": {
+     "fassade": "putz"
+    }
+   },
+   "fassade": "putz"
+  },
+  {
+   "wid": "mmdg01",
+   "bilder": {
+    "in": "bmusterdg01innen",
+    "out": "bmusterdg01aussen"
+   },
+   "fotos": 2,
+   "name": "Studio",
+   "etage": "dg",
+   "teilung": "2p",
+   "ol": true,
+   "olT": "K",
+   "mo": {
+    "wt": 1410,
+    "wm": 1406,
+    "wb": 1410,
+    "hl": 1812,
+    "hm": 1815,
+    "hr": 1816
+   },
+   "el": {
+    "w": 1382,
+    "h": 1784
+   },
+   "bru": 450,
+   "laib": 160,
+   "fa": "7016",
+   "fi": "9016",
+   "absturz": "gelaender",
+   "sart": "screen",
+   "roll": "vorbau",
+   "sfarbe": "anthrazit",
+   "antrieb": "motor",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Situation",
+      "Großes Fenster in der Giebelwand mit Oberlicht"
+     ],
+     [
+      "Fassade",
+      "Holzverschalung"
+     ]
+    ],
+    "chips": [
+     "Giebelwand"
+    ],
+    "hints": [
+     "Oberlicht nur mit Leiter erreichbar: kippbar mit Stange planen."
+    ],
+    "pruefen": [],
+    "fach": {
+     "fassade": "holz",
+     "strom": true,
+     "geruest": true
+    }
+   },
+   "fassade": "holz"
+  },
+  {
+   "wid": "mmdg02",
+   "bilder": {
+    "in": "bmusterdg02innen",
+    "out": "bmusterdg02aussen"
+   },
+   "fotos": 2,
+   "name": "Ankleide",
+   "etage": "dg",
+   "teilung": "2s",
+   "mo": {
+    "wt": 1013,
+    "wm": 1010,
+    "wb": 1013,
+    "hl": 1213,
+    "hm": 1210,
+    "hr": 1212
+   },
+   "el": {
+    "w": 985,
+    "h": 1184
+   },
+   "bru": 900,
+   "laib": 160,
+   "fa": "7016",
+   "fi": "9016",
+   "sart": "klappladen",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Situation",
+      "Stulpfenster, alte Klappläden aus Holz"
+     ]
+    ],
+    "chips": [
+     "Klappläden vorhanden"
+    ],
+    "hints": [],
+    "pruefen": [],
+    "fach": {
+     "fassade": "holz"
+    }
+   },
+   "fassade": "holz"
+  },
+  {
+   "wid": "mmkg01",
+   "bilder": {
+    "in": "bmusterkg01innen"
+   },
+   "fotos": 1,
+   "name": "Hobbyraum",
+   "etage": "kg",
+   "teilung": "1",
+   "sashes": [
+    {
+     "t": "K",
+     "din": "L"
+    }
+   ],
+   "mo": {
+    "wt": 809,
+    "wm": 808,
+    "wb": 811,
+    "hl": 614,
+    "hm": 613,
+    "hr": 611
+   },
+   "el": {
+    "w": 786,
+    "h": 587
+   },
+   "bru": 1650,
+   "laib": 300,
+   "fa": "9016",
+   "fi": "9016",
+   "glas": "2",
+   "rc": "rc2",
+   "griff": "abschliessbar",
+   "insekt": "spann",
+   "ki": {
+    "auto": true,
+    "rows": [
+     [
+      "Situation",
+      "Kellerfenster mit Lichtschacht"
+     ],
+     [
+      "Laibung",
+      "tiefe Laibung, Lichtschacht außen"
+     ]
+    ],
+    "chips": [
+     "Lichtschacht"
+    ],
+    "hints": [],
+    "pruefen": [],
+    "fach": {
+     "fassade": "putz",
+     "erreichbar": true
+    }
+   },
+   "fassade": "putz"
+  }
+ ]
+}

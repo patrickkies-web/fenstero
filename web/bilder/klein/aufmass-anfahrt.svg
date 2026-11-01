@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 416" width="480" height="416">
+
+
+<defs><marker id="o" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 1L9 5L0 9z" fill="#f88962"/></marker></defs>
+<rect width="480" height="416" rx="16" fill="#ffffff"/>
+<rect x="16" y="16" width="448" height="184" rx="12" fill="#ffffff" stroke="#d2d0d3" stroke-width="3.3"/>
+<rect x="16" y="216" width="448" height="184" rx="12" fill="#ffffff" stroke="#d2d0d3" stroke-width="3.3"/>
+<line x1="36" y1="108" x2="394" y2="108" stroke="#f88962" stroke-width="6.6"/>
+<path d="M402 118V100L421 84L440 100V118Z" fill="#ecebec" stroke="#07090a" stroke-width="4.4" stroke-linejoin="round"/><rect x="415" y="106" width="12" height="12" fill="#ffffff" stroke="#07090a" stroke-width="3.3"/>
+<line x1="36" y1="166" x2="394" y2="166" stroke="#f88962" stroke-width="6.6"/>
+<path d="M402 176V158L421 142L440 158V176Z" fill="#ecebec" stroke="#07090a" stroke-width="4.4" stroke-linejoin="round"/><rect x="415" y="164" width="12" height="12" fill="#ffffff" stroke="#07090a" stroke-width="3.3"/>
+
+<rect x="410" y="282" width="22" height="38" rx="4" fill="#eceef1" stroke="#897efc" stroke-width="4.4"/><line x1="417" y1="314" x2="425" y2="314" stroke="#897efc" stroke-width="4.4"/>
+<line x1="36" y1="366" x2="394" y2="366" stroke="#f88962" stroke-width="6.6"/>
+<path d="M402 376V358L421 342L440 358V376Z" fill="#ecebec" stroke="#07090a" stroke-width="4.4" stroke-linejoin="round"/><rect x="415" y="364" width="12" height="12" fill="#ffffff" stroke="#07090a" stroke-width="3.3"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+
+
+
+
+
+
+</g>
+</svg>

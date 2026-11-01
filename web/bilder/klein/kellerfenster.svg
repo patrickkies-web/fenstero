@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 350" width="480" height="350">
+
+
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#07090a"/></marker></defs>
+<rect width="480" height="350" rx="16" fill="#ffffff"/>
+<path d="M240 92H456V326H240Z" fill="#e6e5e7"/>
+<path d="M240 92H384V244H240Z" fill="#ffffff"/>
+<path d="M376 92H386V250H240V242H376Z" fill="#d2d0d3" stroke="#07090a" stroke-width="3.3"/>
+<rect x="170" y="24" width="70" height="302" fill="#ecebec" stroke="#07090a" stroke-width="3.3"/>
+<rect x="170" y="124" width="70" height="88" fill="#ffffff" stroke="#f88962" stroke-width="6.6"/>
+<rect x="196" y="132" width="20" height="72" fill="#eceef1" stroke="#897efc" stroke-width="6.6"/>
+<g stroke="#07090a" stroke-width="5.5"><line x1="240" y1="89" x2="386" y2="89"/></g>
+<g stroke="#07090a" stroke-width="3.3"><path d="M252 84V94M264 84V94M276 84V94M288 84V94M300 84V94M312 84V94M324 84V94M336 84V94M348 84V94M360 84V94M372 84V94"/></g>
+<line x1="386" y1="92" x2="456" y2="92" stroke="#07090a" stroke-width="4.4"/>
+<g stroke="#07090a" stroke-width="3.3">
+<line x1="171" y1="290" x2="239" y2="290"/>
+<line x1="242" y1="226" x2="374" y2="226"/>
+</g>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+
+
+
+
+
+
+
+
+
+
+</g>
+</svg>

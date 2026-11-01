@@ -128,3 +128,19 @@ Farbanteile (Telefon, Mittel der Seite): Schwarz 43 %, Anthrazit 20 %, Silbergra
 - Farbanteile unter den Zielwerten (Pixelzählung); Entscheidung des Inhabers wie bei der Startseite.
 - Alte Bilder der Seite vom 24.10. (web/bilder/fensterbauer/, Astronaut) sind unbenutzt und könnten gelöscht werden.
 - Bereitstellung bei Cloudflare nach dem Push auf main prüfen (Dashboard, Bau des Workers).
+
+## Nachtrag 29.10.2026: Knopf „Zum Konfigurator“ in der Leiste
+
+Inhaber: „… wenn ich entsprechend über die Seite scrolle, so ein Button, wo drin steht zum Konfigurator, und man springt direkt in die
+erste Seite von dem Konfigurator … Und der Button soll halt auch zum Drücken animieren … oben steht der Pakete auswählen … nicht so …,
+dass dann die Pakete da kommen, … sondern direkt in den Konfigurator.“
+
+| Wo | Was | Stand |
+| --- | --- | --- |
+| Kopf der Seite | bleibt wie er ist („Paket anfragen“) | bleibt |
+| Leiste, unterhalb des Kopfs | zieht sich beim Herunterscrollen genau auf „Zum Konfigurator“ zusammen (Umriss-Pille auf dunklem Glas, weißer Pfeilkreis), wie die schmale Leiste der Paket-Vorlagen; beim Hochscrollen ganz: Laptop Marke, Umschalter, „Paket anfragen“, „Zum Konfigurator“; Telefon Zeichen und Knopf | neu |
+| Anreiz | beim ersten Erscheinen je Seitenaufruf leuchtet der Rand zweimal violett auf, der Pfeil stupst zweimal im Kreis (1,4 s); Hover stupst den Pfeil; ruhige Fassung ohne Bewegung | neu |
+| Ziel | `/app/?ausprobieren=signature&direkt`: gleich „Was planst du?“ in der Kundenansicht von Fensterbau Brandt (Paket Signature), ohne Beispielseite und Kästchen; „Zurück“ führt zur Seite für Fensterbauer (app.js `PROBE_DIREKT`) | neu |
+
+Geprüft bei 390 und 1280 px in der Vorschau und auf der Seite (`/fuer-fensterbauer/` und Ansicht Fensterbauer der Startseite): Knopf
+trifft, Zuschnitt genau auf die Pille, kein waagrechter Scroll, keine Konsolenfehler. Gremium nicht befragt (ein Element auf Wunsch).

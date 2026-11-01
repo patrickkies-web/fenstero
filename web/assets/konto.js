@@ -1,39 +1,65 @@
-/* eeziframes · Kundenbereich der Fensterbauer (/konto/): Anmeldung per Code, Übersicht der Aufträge, ein Auftrag mit Stand, Vorschau,
-   Freigabe, Nachrichten, Angaben (Ändern über die Stationen der Bestellung, /bestellen/#<paket>/<id>/<station>), Paket und Wechsel,
-   Zahlung und Rechnungen (Kundenportal von Stripe), Verlauf, Storno bis Arbeitsbeginn (Paketbedingungen § 7 Abs. 2).
-   Adresse: #auftrag/<id>; Rückkehr aus der Kasse: /konto/?kasse=<session>#auftrag/<id>. Rahmen wie die Bestellung (auftrag.css). */
+/* eeziframes · Bereich für Fensterbauer (/konto/): ein Bereich für zwei Dinge, Anfragen von Hauseigentümern aus der Vermittlung und die
+   Aufträge der Konfigurator-Pakete (Wunsch des Inhabers, 30.10.2026).
+   Anfragen (Server functions/api/vermittlung-partner.js): Zugang über den Link aus der Mail (#zugang/<token>, Vorschau ohne Anmeldung,
+   dann Anmeldung per Code und Annehmen), eine Anfrage (#anfrage/<id>) mit dem Aufmaßblatt als Objekt, Echtheit, Eckdaten, Freischalten
+   (erstes Aufmaß kostenlos, danach 29 € zzgl. USt über die Kasse von Stripe; Rückkehr /konto/?kasse=<session>#anfrage/<id>), danach
+   Kontakt des Kunden und Aufmaßblatt als PDF; Register-Eintrag des Betriebs und Bereitschaft als Partner (Partnerbedingungen).
+   Aufträge (Server functions/auftrag/): Übersicht, ein Auftrag mit Stand, Vorschau, Freigabe, Nachrichten, Angaben (Ändern über die
+   Stationen der Bestellung, /bestellen/#<paket>/<id>/<station>), Paket und Wechsel, Zahlung und Rechnungen (Kundenportal von Stripe),
+   Verlauf, Storno bis Arbeitsbeginn (Paketbedingungen § 7 Abs. 2). Adresse: #auftrag/<id>; Rückkehr aus der Kasse:
+   /konto/?kasse=<session>#auftrag/<id>. Anmeldung per Code für beides (functions/auftrag/index.js); das Konto entsteht mit dem ersten
+   Code. Rahmen wie die Bestellung (auftrag.css), die Stile der Anfragen in konto-anfragen.css (Präfix a-an-). */
 (function () {
   'use strict';
   const U = window.AuftragUI, A = window.Auftrag, P = window.Pakete, h = U.h;
   const wurzel = document.getElementById('app');
-  const S = { ich: null, stand: null, mail: '', codeGeschickt: false, auftrag: null, nachrichten: null, start: true };
+  /* anfragen: Antwort von GET /api/konto/anfragen (betriebe, anfragen, preis, fassung, kasse, erstesFrei) oder null, wenn die
+     Vermittlung nicht eingerichtet ist; ktx: Zugangs-Kontext für die Anmeldung über den Link (#zugang/<token>); ansicht: was gerade steht */
+  const S = { ich: null, stand: null, mail: '', codeGeschickt: false, auftrag: null, nachrichten: null, start: true, anfragen: null, ktx: null, ansicht: null };
   const kurz = U.kurzname;
   const vorZahlung = (a) => ['entwurf', 'angefragt'].indexOf(a.stand) >= 0;
   const zuEnde = (a) => ['beendet', 'storniert'].indexOf(a.stand) >= 0;
+  const LEISTUNGEN = ['Kunststoff', 'Holz', 'Holz-Alu', 'Alu', 'Haustüren', 'Rollläden', 'Insektenschutz'];
+  const ohnePlz = (ort) => String(ort || '').replace(/^\d{5}\s*/, '');
+  const PARTNER_LINK = () => h('a', { href: '/partnerbedingungen/', target: '_blank', rel: 'noopener', text: 'Partnerbedingungen' });
 
   /* ---------- Gerüst ---------- */
   function kopf(zurueck) {
     const rechts = [];
     if (S.ich && S.ich.angemeldet) { rechts.push(h('span', { class: 'a-wer', text: S.ich.mail })); rechts.push(U.ring('Abmelden', { class: 'klein', on: { click: abmelden } })); }
-    const k = U.kopf({ zurueck: zurueck || '/fuer-fensterbauer/', zurueckLabel: zurueck ? 'Zur Übersicht' : 'Zur Seite für Fensterbauer', zusatz: 'Kundenbereich', rechts: rechts });
+    const k = U.kopf({ zurueck: zurueck || '/fuer-fensterbauer/', zurueckLabel: zurueck ? 'Zur Übersicht' : 'Zur Seite für Fensterbauer', zusatz: 'Für Fensterbauer', rechts: rechts });
     k.id = 'kopf';
     const alt = document.getElementById('kopf'); if (alt) alt.replaceWith(k);
   }
+  /* o: { band, buehne, frage, inhalt, fuss, nach, stehen, aktionUnten }. Die Pille steht unter der Frage (aktion-oben), bei
+     aktionUnten unter dem Inhalt (die Handlung unter dem, was man bestätigt); nach kommt nach dem Fuß (Raster-Bereich „nach“) */
   function seite(o) {
     U.leeren(wurzel);
-    const main = h('main', { class: 'a-raster aktion-oben ' + (o.buehne ? 'zwei' : 'eins'), id: 'inhalt' },
-      h('div', { class: 'a-r-band' }, o.band || null), h('aside', { class: 'a-r-buehne', 'aria-label': 'Ihre Seite' }, o.buehne || null),
-      h('div', { class: 'a-r-frage' }, o.frage), h('div', { class: 'a-r-inhalt' }, o.inhalt || null), o.fuss ? h('div', { class: 'a-r-fuss a-fuss' }, o.fuss) : null);
+    const main = h('main', { class: 'a-raster ' + (o.aktionUnten ? 'a-an-unten ' : 'aktion-oben ') + (o.buehne ? 'zwei' : 'eins'), id: 'inhalt' },
+      h('div', { class: 'a-r-band' }, o.band || null), h('aside', { class: 'a-r-buehne', 'aria-label': o.buehneLabel || 'Ihre Seite' }, o.buehne || null),
+      h('div', { class: 'a-r-frage' }, o.frage), h('div', { class: 'a-r-inhalt' }, o.inhalt || null), o.fuss ? h('div', { class: 'a-r-fuss a-fuss' }, o.fuss) : null,
+      o.nach ? h('div', { class: 'a-r-nach' }, o.nach) : null);
     wurzel.appendChild(main);
-    wurzel.appendChild(h('p', { class: 'a-recht' }, h('a', { href: '/impressum/', text: 'Impressum' }), h('a', { href: '/datenschutz/', text: 'Datenschutz' }), h('a', { href: '/konfigurator-bedingungen/', text: 'Paketbedingungen' })));
+    wurzel.appendChild(h('p', { class: 'a-recht' }, h('a', { href: '/impressum/', text: 'Impressum' }), h('a', { href: '/datenschutz/', text: 'Datenschutz' }), h('a', { href: '/konfigurator-bedingungen/', text: 'Paketbedingungen' }), h('a', { href: '/partnerbedingungen/', text: 'Partnerbedingungen' })));
     if (!o.stehen) { window.scrollTo(0, 0); if (!S.start) { const t = main.querySelector('h1'); if (t) t.focus({ preventScroll: true }); } }
-    S.start = false;
+    if (!o.ladend) S.start = false; /* eine Ladeansicht zählt nicht als erste Seite: die echte bekommt beim Start keinen Fokusring */
   }
 
-  /* ---------- Anmeldung ---------- */
+  /* ---------- Anmeldung ----------
+     Ohne Kontext die Anmeldeseite des Bereichs; mit S.ktx (Zugang über den Link) steht darüber die Vorschau der Anfrage: Aufmaßblatt auf
+     der Bühne, Echtheit und Eckdaten, darunter die Anmeldung mit der Adresse, an die der Zugang ging (voll, wenn die Sitzung passt,
+     sonst maskiert als Hinweis). Passt die angemeldete Adresse nicht, steht statt des Formulars der Hinweis mit „Mit anderer Adresse anmelden“. */
   function anmeldung() {
+    const k = S.ktx;
     kopf();
-    const mail = U.feld({ k: 'mail', label: 'Ihre E-Mail-Adresse', typ: 'email', auto: 'email', wert: S.mail, platzhalter: 'name@ihr-betrieb.de', onInput: (v) => { S.mail = v.trim(); } });
+    if (k && k.angemeldet && !k.passt) {
+      seite({ buehne: blattObjekt(k.vorschau, { gesperrt: true }), buehneLabel: 'Die Anfrage', frage: U.frage(anfrageTitel(k.vorschau), 'Den Zugang zu dieser Anfrage haben wir an eine andere E-Mail-Adresse geschickt.'),
+        inhalt: [echtheitKarte(k.vorschau), eckdatenKarte(k.vorschau), U.karte('Andere Adresse', null, h('p', null, 'Sie sind als ', h('b', { text: S.ich.mail }), ' angemeldet. Den Zugang haben wir an ', h('b', { text: k.mail }), ' geschickt. Melden Sie sich mit dieser Adresse an, dann ist die Anfrage in Ihrem Bereich.'), { class: 'a-karte a-an-hinweiskarte' })],
+        fuss: [U.pille('Mit anderer Adresse anmelden', { on: { click: (e) => andereAdresse(e.currentTarget) } })], aktionUnten: true });
+      return;
+    }
+    const hinweis = k && !S.codeGeschickt ? (k.mailVoll ? 'An diese Adresse haben wir den Zugang geschickt.' : 'Den Zugang haben wir an ' + k.mail + ' geschickt. Bitte melden Sie sich mit dieser Adresse an.') : null;
+    const mail = U.feld({ k: 'mail', label: 'Ihre E-Mail-Adresse', typ: 'email', auto: 'email', wert: S.mail, platzhalter: 'name@ihr-betrieb.de', hilfe: hinweis, onInput: (v) => { S.mail = v.trim(); } });
     const teile = [mail]; let code = null;
     if (S.codeGeschickt) {
       mail.eingabe.readOnly = true;
@@ -42,11 +68,28 @@
     }
     const knopf = U.pille(S.codeGeschickt ? 'Anmelden' : 'Code schicken', { on: { click: () => weiter() } });
     const weiter = () => { if (U.wartet(knopf)) return; if (S.codeGeschickt) anmelden(knopf); else codeSchicken(knopf); };
-    seite({ frage: U.frage('Ihr Kundenbereich. *Anmelden mit Code.*', 'Geben Sie die E-Mail-Adresse ein, mit der Sie bestellt haben. Wir schicken Ihnen einen Code, ein Passwort brauchen Sie nicht.'),
-      inhalt: [U.karte(null, null, h('form', { novalidate: true, on: { submit: (e) => { e.preventDefault(); weiter(); } } }, teile, h('button', { type: 'submit', hidden: true, tabindex: '-1', 'aria-hidden': 'true' }))),
-        h('p', { class: 'a-fusszeile' }, U.aenderbar('Noch kein Konto? Es entsteht mit Ihrer ersten Bestellung.'), ' ', h('a', { class: 'a-link', href: '/bestellen/', text: 'Zur Bestellung' }))],
-      fuss: [knopf], stehen: !!S.codeGeschickt });
+    const formular = h('form', { novalidate: true, on: { submit: (e) => { e.preventDefault(); weiter(); } } }, teile, h('button', { type: 'submit', hidden: true, tabindex: '-1', 'aria-hidden': 'true' }));
+    if (k) {
+      /* Zugang über den Link: erst die Anfrage, dann die Anmeldung; die Pille steht unter dem Formular */
+      const v = k.vorschau, p = k.preis || {};
+      seite({ buehne: blattObjekt(v, { gesperrt: true }), buehneLabel: 'Die Anfrage', frage: U.frage(anfrageTitel(v), 'Melden Sie sich an, um die Anfrage freizuschalten. ' + (k.erstesFrei ? 'Ihr erstes Aufmaß über eeziframes ist kostenlos.' : 'Jedes Aufmaß kostet ' + (p.text || '29 € zzgl. USt') + ', fällig erst beim Freischalten.')),
+        inhalt: [echtheitKarte(v), eckdatenKarte(v), U.karte('Anmelden mit Code', 'Ein Passwort brauchen Sie nicht', formular)], fuss: [knopf], stehen: !!S.codeGeschickt, aktionUnten: true });
+    } else {
+      const frage = U.frage('Für Fensterbauer: Anfragen von Hauseigentümern und Ihr Konfigurator-Paket. *Anmelden mit Code.*', 'Geben Sie Ihre E-Mail-Adresse ein. Wir schicken Ihnen einen Code, ein Passwort brauchen Sie nicht.');
+      frage.classList.add('a-an-anmeldefrage');
+      seite({ frage: frage, inhalt: [U.karte(null, null, formular),
+        h('p', { class: 'a-fusszeile' }, U.aenderbar('Noch kein Konto? Es entsteht mit dem ersten Code, den Sie anfordern.'), ' ', h('a', { class: 'a-link', href: '/fuer-fensterbauer/', text: 'Zur Seite für Fensterbauer' }))],
+        fuss: [knopf], stehen: !!S.codeGeschickt });
+    }
     setTimeout(() => { const e = (code || mail).eingabe; if (e && S.codeGeschickt) e.focus({ preventScroll: true }); }, 30);
+  }
+  /* Angemeldet mit einer Adresse, an die der Zugang nicht ging: abmelden und mit der richtigen Adresse neu anmelden */
+  async function andereAdresse(knopf) {
+    if (U.wartet(knopf)) return; U.warten(knopf, true);
+    await U.api('POST', '/api/auftrag/abmelden', {}).catch(() => null);
+    S.ich = { angemeldet: false }; S.anfragen = null; S.codeGeschickt = false; S.mail = '';
+    if (S.ktx) { S.ktx.angemeldet = false; S.ktx.passt = false; S.ktx.mailVoll = ''; }
+    anmeldung();
   }
   async function codeSchicken(knopf) {
     const f = wurzel.querySelector('[data-k="mail"]');
@@ -59,28 +102,65 @@
     const f = wurzel.querySelector('[data-k="code"]'), code = f.eingabe.value.replace(/\D/g, '');
     if (code.length !== 6) { U.fehlerSetzen(f, 'Bitte den sechsstelligen Code eingeben.'); U.zuFeld(f); return; }
     U.warten(knopf, true);
-    try { await U.api('POST', '/api/auftrag/anmelden', { mail: S.mail, code: code }); S.ich = await U.api('GET', '/api/auftrag/ich'); route(); }
+    try { await U.api('POST', '/api/auftrag/anmelden', { mail: S.mail, code: code }); S.ich = await U.api('GET', '/api/auftrag/ich'); await anfragenLaden(); route(); }
     catch (e) { U.warten(knopf, false); if (e.daten && e.daten.neu) { S.codeGeschickt = false; anmeldung(); U.toast(e.message); return; } U.fehlerSetzen(f, e.message); }
   }
-  async function abmelden() { await U.api('POST', '/api/auftrag/abmelden', {}).catch(() => null); S.ich = { angemeldet: false }; S.codeGeschickt = false; location.hash = ''; anmeldung(); }
+  async function abmelden() { await U.api('POST', '/api/auftrag/abmelden', {}).catch(() => null); S.ich = { angemeldet: false }; S.anfragen = null; S.codeGeschickt = false; S.ktx = null; if (location.hash) location.hash = ''; else anmeldung(); }
 
-  /* ---------- Übersicht ---------- */
-  function uebersicht() {
+  /* ---------- Übersicht ----------
+     Für beide Seiten gleichwertig (Wunsch des Inhabers, 30.10.2026): die Kachel „Anfragen“ (Zahl als Held, die letzten Anfragen als
+     Zeilen mit Ort, Datum und Stand), die Kachel „Ihre Seite mit Konfigurator“ (Aufträge als Zeilen; ohne Auftrag eine ruhige Einladung
+     zu den Paketen) und der Betrieb im Register als kleine Karte. Kein Vorwurf „Noch keine Bestellung“. */
+  function uebersicht(o) {
+    o = o || {};
     kopf();
-    const l = S.ich.auftraege || [];
-    if (!l.length) {
-      seite({ frage: U.frage('Noch keine Bestellung. *Welches Paket passt zu Ihnen?*', 'Ihre Landingpage mit Konfigurator: Paket wählen, Angaben machen, bestellen.'), fuss: [U.pille('Paket wählen', { href: '/bestellen/' })] });
-      return;
-    }
-    const inhalt = l.map((a) => {
-      const b = (a.angaben || {}).betrieb || {};
-      return U.kachel([h('div', { class: 'a-karte-kopf' }, h('h2', { text: b.name || b.firma || 'Ohne Namen' }), U.chip(A.STAND_TITEL[a.stand], a.stand === 'live' ? 'aktiv' : 'leise')),
-        h('p', { text: a.paketName + ' · ' + (a.adresse || 'Adresse folgt') + ' · ' + a.nr }),
-        vorZahlung(a) || zuEnde(a) ? null : h('div', { style: 'margin-top:16px' }, U.leiste(a)),
-        h('div', { class: 'a-knoepfe', style: 'margin-top:16px' }, U.ring(a.ungelesen ? 'Öffnen · ' + a.ungelesen + ' neue Nachricht' + (a.ungelesen > 1 ? 'en' : '') : 'Öffnen', { href: '#auftrag/' + a.id }))], 'a-auftrag-kachel');
-    });
-    seite({ frage: U.frage('Ihre Aufträge', null), inhalt: inhalt, fuss: [U.pille('Neue Bestellung', { href: '/bestellen/' })] });
+    S.ansicht = { art: 'uebersicht' };
+    const l = S.ich.auftraege || [], an = !!S.anfragen, liste = anfragenListe(), b = betriebe()[0] || null;
+    const offen = liste.filter((x) => x.stand !== 'frei'), frei = liste.filter((x) => x.stand === 'frei');
+    const inhalt = [];
+    if (an) inhalt.push(anfragenKachel(liste, offen, frei));
+    inhalt.push(seiteKachel(l));
+    if (an) inhalt.push(betriebKarte(b));
+    /* die eine Handlung: die neueste offene Anfrage, sonst der nächste Schritt als Partner, sonst Bestellung oder Konfigurator ausprobieren */
+    let pille;
+    if (offen.length) pille = U.pille('Anfrage aus ' + ohnePlz(offen[0].ort) + ' öffnen', { href: '#anfrage/' + offen[0].id });
+    else if (an && !b) pille = U.pille('Als Betrieb eintragen', { on: { click: () => betriebBearbeiten(null) } });
+    else if (an && !(b.partner || {}).bereit) pille = U.pille('Bereitschaft erklären', { on: { click: () => partnerErklaeren(b) } });
+    else if (l.length) pille = U.pille('Neue Bestellung', { href: '/bestellen/' });
+    else pille = U.pille('Konfigurator ausprobieren', { href: '/app/?ausprobieren=signature&direkt' });
+    seite({ frage: U.frage('Ihr Bereich *für Anfragen und Ihre Seite.*', 'Anfragen von Hauseigentümern aus Ihrer Umgebung und Ihr Konfigurator-Paket, an einem Ort.'), inhalt: inhalt, fuss: [pille], stehen: o.stehen });
   }
+  function anfragenKachel(liste, offen, frei) {
+    const teile = [h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Anfragen' }), offen.length ? U.chip(offen.length === 1 ? '1 zum Freischalten' : offen.length + ' zum Freischalten', 'hinweis') : null)];
+    teile.push(h('div', { class: 'a-an-kennzahl' }, h('b', null, String(liste.length), h('small', { text: liste.length === 1 ? 'Anfrage' : 'Anfragen' })),
+      h('span', { text: liste.length ? (frei.length ? frei.length + ' freigeschaltet' : 'noch keine freigeschaltet') + (offen.length ? ' · ' + offen.length + (offen.length > 1 ? ' warten' : ' wartet') + ' auf Sie' : '') : 'Partner bekommen neue Anfragen aus ihrer Umgebung direkt hier, mit Eckdaten und Echtheitsprofil.' })));
+    if (liste.length) {
+      const ol = h('ul', { class: 'a-an-zeilen' });
+      const zeichnen = (n) => { U.leeren(ol); liste.slice(0, n).forEach((x) => ol.appendChild(h('li', null, anfrageZeile(x)))); };
+      zeichnen(5); teile.push(ol);
+      if (liste.length > 5) teile.push(h('div', { class: 'a-knoepfe' }, U.ring('Alle ' + liste.length + ' Anfragen', { class: 'klein', on: { click: (e) => { zeichnen(liste.length); e.currentTarget.remove(); } } })));
+    }
+    return U.kachel(teile, 'a-an-kachel a-an-anfragen');
+  }
+  function anfrageZeile(x) {
+    const e = x.echtheit || {}, frei = x.stand === 'frei';
+    return h('a', { class: 'a-an-zeile', href: '#anfrage/' + x.id }, h('span', null, h('b', { text: frei && x.kunde && x.kunde.name ? x.kunde.name + ' · ' + ohnePlz(x.ort) : ohnePlz(x.ort) }),
+      h('small', { text: [U.datum(x.eingang), x.nr, e.fenster ? e.fenster + ' Fenster' : ''].filter(Boolean).join(' · ') })), U.chip(frei ? 'Freigeschaltet' : 'Freischalten', frei ? 'aktiv' : 'hinweis'));
+  }
+  function seiteKachel(l) {
+    const teile = [h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Ihre Seite mit Konfigurator' }), l.length ? U.chip(l.length === 1 ? '1 Auftrag' : l.length + ' Aufträge', 'leise') : null)];
+    if (!l.length) {
+      teile.push(h('p', { text: 'Anfragen in dieser Qualität auch von Ihrer eigenen Website: Ihre Kunden planen zu Hause, Sie bekommen jede Anfrage mit Aufmaßblatt. Pakete ab ' + U.euro(minMonat()) + ' im Monat.' }));
+      teile.push(h('div', { class: 'a-knoepfe' }, U.ring('Pakete ansehen', { href: '/fuer-fensterbauer/#pakete' })));
+    } else teile.push(h('ul', { class: 'a-an-zeilen' }, l.map((a) => h('li', null, auftragZeile(a)))));
+    return U.kachel(teile, 'a-an-kachel a-an-seite');
+  }
+  function auftragZeile(a) {
+    const b = (a.angaben || {}).betrieb || {};
+    return h('a', { class: 'a-an-zeile a-auftrag-kachel', href: '#auftrag/' + a.id }, h('span', null, h('b', { text: b.name || b.firma || 'Ohne Namen' }),
+      h('small', { text: [a.paketName, a.adresse || 'Adresse folgt', a.nr, a.ungelesen ? a.ungelesen + ' neue Nachricht' + (a.ungelesen > 1 ? 'en' : '') : ''].filter(Boolean).join(' · ') })), U.chip(A.STAND_TITEL[a.stand], a.stand === 'live' ? 'aktiv' : 'leise'));
+  }
+  const minMonat = () => Math.min.apply(null, P.LISTE.map((p) => P.preis(p).monat));
 
   /* ---------- Ein Auftrag ---------- */
   const dateiUrl = (a, d) => (d && /^image\/(png|jpeg|webp|svg\+xml)$/.test(d.typ) ? '/api/auftrag/' + a.id + '/datei/' + d.id : '');
@@ -403,9 +483,277 @@
   }
   function ersetzen(neu) { const l = S.ich.auftraege || []; const i = l.findIndex((x) => x.id === neu.id); if (i >= 0) l[i] = Object.assign(l[i], neu); }
 
+  /* ========== Anfragen der Vermittlung (functions/api/vermittlung-partner.js) ========== */
+  async function anfragenLaden() {
+    if (!S.ich || !S.ich.angemeldet) { S.anfragen = null; return null; }
+    try { S.anfragen = await U.api('GET', '/api/konto/anfragen'); } catch (e) { S.anfragen = null; }
+    return S.anfragen;
+  }
+  const anfragenListe = () => (S.anfragen && S.anfragen.anfragen) || [];
+  const betriebe = () => (S.anfragen && S.anfragen.betriebe) || [];
+  const info = () => (S.anfragen ? { preis: S.anfragen.preis, fassung: S.anfragen.fassung, kasse: S.anfragen.kasse, erstesFrei: S.anfragen.erstesFrei } : null);
+  function anfrageErsetzen(a) { if (!S.anfragen || !a) return; const l = S.anfragen.anfragen; const i = l.findIndex((x) => x.id === a.id); if (i >= 0) l[i] = a; else l.unshift(a); }
+  function betriebErsetzen(b) { if (!S.anfragen || !b) return; const l = S.anfragen.betriebe; const i = l.findIndex((x) => x.id === b.id); if (i >= 0) l[i] = b; else l.push(b); }
+  const pdfUrl = (a) => '/api/konto/anfragen/' + encodeURIComponent(a.id) + '/pdf';
+  const preisText = (p) => (p && p.text) || '29 € zzgl. USt';
+  /* Was gerade steht, noch einmal zeichnen (nach Register, Bereitschaft) */
+  function neuZeichnen() {
+    const v = S.ansicht || {};
+    if (v.art === 'anfrage') { const a = anfragenListe().find((x) => x.id === v.id); if (a && info()) { anfrageZeigen(a, info(), { stehen: true }); return; } }
+    if (v.art === 'uebersicht') { uebersicht({ stehen: true }); return; }
+  }
+  /* „Anfrage aus Herzebrock-Clarholz. 4 Fenster, in 1 bis 3 Monaten.“ */
+  function anfrageTitel(a) {
+    const e = a.echtheit || {}, start = (a.eckZeilen || []).find((z) => z[0] === 'Start'), teile = [];
+    if (e.fenster) teile.push(e.fenster + ' Fenster');
+    if (start && start[1]) teile.push(start[1].charAt(0).toLowerCase() + start[1].slice(1));
+    return 'Anfrage aus ' + ohnePlz(a.ort) + '.' + (teile.length ? ' *' + teile.join(', ') + '.*' : '');
+  }
+
+  /* ---------- Zugang über den Link (#zugang/<token>): ohne Anmeldung die Vorschau, dann anmelden und annehmen ---------- */
+  let zugangLauf = 0;
+  async function zugang(token) {
+    const lauf = ++zugangLauf;
+    if (!S.ktx || S.ktx.token !== token) { kopf(); seite({ frage: U.frage('Ihre Anfrage *wird geladen …*', null), ladend: true }); }
+    let r;
+    try { r = await U.api('GET', '/api/anfrage/' + encodeURIComponent(token)); }
+    catch (e) {
+      if (lauf !== zugangLauf) return;
+      S.ktx = null; kopf();
+      seite({ frage: U.frage('Dieser Link *gilt nicht mehr.*', e.message), fuss: [U.pille(S.ich && S.ich.angemeldet ? 'Zur Übersicht' : 'Zur Anmeldung', { on: { click: () => { history.replaceState(null, '', location.pathname); route(); } } })] });
+      return;
+    }
+    if (lauf !== zugangLauf) return;
+    if (r.angemeldet && r.passt) {
+      /* die Sitzung passt zur Adresse des Zugangs: annehmen und die Anfrage öffnen */
+      try {
+        const an = await U.api('POST', '/api/anfrage/' + encodeURIComponent(token) + '/annehmen', {});
+        await anfragenLaden(); S.ktx = null;
+        location.hash = '#anfrage/' + an.id;
+        return;
+      } catch (e) {
+        if (e.status !== 403) U.toast(e.message);
+        r.passt = false; r.mailVoll = ''; if (e.daten && e.daten.mail) r.mail = e.daten.mail;
+      }
+    }
+    if (r.mailVoll) S.mail = r.mailVoll; else if (!S.mail) S.mail = '';
+    S.ktx = { token: token, vorschau: r.vorschau, mail: r.mail, mailVoll: r.mailVoll || '', angemeldet: !!r.angemeldet, passt: !!r.passt, preis: r.preis, erstesFrei: !!r.erstesFrei };
+    anmeldung();
+  }
+
+  /* ---------- Eine Anfrage (#anfrage/<id>) ---------- */
+  let anfrageLauf = 0;
+  async function anfrage(id) {
+    const lauf = ++anfrageLauf, bekannt = anfragenListe().find((x) => x.id === id);
+    if (bekannt && info()) anfrageZeigen(bekannt, info());
+    else { kopf('#'); seite({ frage: U.frage('Anfrage *wird geladen …*', null), ladend: true }); }
+    try {
+      const r = await U.api('GET', '/api/konto/anfragen/' + encodeURIComponent(id));
+      if (lauf !== anfrageLauf) return;
+      if (!S.anfragen) S.anfragen = { betriebe: [], anfragen: [] };
+      Object.assign(S.anfragen, { preis: r.preis, fassung: r.fassung, kasse: r.kasse, erstesFrei: r.erstesFrei });
+      anfrageErsetzen(r.anfrage);
+      if (!bekannt || JSON.stringify(bekannt) !== JSON.stringify(r.anfrage)) anfrageZeigen(r.anfrage, info(), { stehen: !!bekannt });
+    } catch (e) {
+      if (lauf !== anfrageLauf) return;
+      U.toast(e.message); history.replaceState(null, '', location.pathname); uebersicht();
+    }
+  }
+  /* Bühne: das Aufmaßblatt als Objekt; Frage; vor dem Freischalten Echtheit, Eckdaten und die Karte mit Preis und Häkchen, die Pille
+     darunter; danach der Kontakt des Kunden, die Pille „Aufmaßblatt (PDF)“ und der Ring „Herunterladen“. Darunter die drei Kacheln. */
+  function anfrageZeigen(a, inf, o) {
+    o = o || {}; inf = inf || {};
+    S.ansicht = { art: 'anfrage', id: a.id };
+    kopf('#');
+    const frei = a.stand === 'frei', p = inf.preis || {}, fuss = [], inhalt = [];
+    let text;
+    if (!frei) {
+      text = 'Schalten Sie die Anfrage frei, dann sehen Sie Name und Telefonnummer des Kunden und bekommen das Aufmaßblatt als PDF. ' + (inf.erstesFrei ? 'Ihr erstes Aufmaß über eeziframes ist kostenlos.' : 'Dieses Aufmaß kostet ' + preisText(p) + (p.brutto ? ' (' + U.euro(p.brutto) + ' mit USt)' : '') + ', fällig jetzt beim Freischalten.');
+      inhalt.push(echtheitKarte(a), eckdatenKarte(a), freischaltKarte(a, inf));
+      const pille = U.pille(inf.erstesFrei ? 'Kostenlos freischalten' : 'Für ' + preisText(p) + ' freischalten', { on: { click: (e) => freischalten(a, inf, e.currentTarget) } });
+      fuss.push(h('p', { class: 'a-hinweis a-grund', text: inf.erstesFrei ? 'Kostenlos, ohne weitere Verpflichtung' : 'Weiter zur Zahlung bei Stripe, mit Karte' }), pille);
+    } else {
+      const f = a.frei || {};
+      text = 'Freigeschaltet am ' + U.datum(f.zeit) + (f.art === 'frei' ? ', kostenlos als Ihr erstes Aufmaß' : f.cent ? ', ' + U.euro(f.cent / 100) + ' zzgl. USt' : '') + '. Der Kunde weiß, dass Sie sein Aufmaß haben, und rechnet mit Ihrem Anruf.';
+      inhalt.push(kontaktKarte(a), echtheitKarte(a), eckdatenKarte(a));
+      if (a.pdf) fuss.push(U.pille('Aufmaßblatt (PDF)', { href: pdfUrl(a), target: '_blank', rel: 'noopener' }), U.ring('Herunterladen', { href: pdfUrl(a) + '?laden=1', download: 'Aufmassblatt-' + a.nr + '.pdf' }));
+      else fuss.push(h('p', { class: 'a-hinweis a-grund offen', text: 'Das Aufmaßblatt dieser Anfrage gibt es nicht mehr.' }), U.pille('Zur Übersicht', { href: '#' }));
+    }
+    seite({ band: h('p', { class: 'a-band-text a-an-band' }, h('span', { text: a.nr + ' · Eingang ' + U.datum(a.eingang) }), a.echtheit && a.echtheit.gewaehlt ? U.chip('Vom Kunden gewählt', 'leise') : null),
+      buehne: blattObjekt(a), buehneLabel: 'Das Aufmaßblatt', frage: U.frage(anfrageTitel(a), text), inhalt: inhalt, fuss: fuss, nach: dreiKacheln(inf), aktionUnten: true, stehen: o.stehen });
+  }
+  /* Das Aufmaßblatt als Papier auf der Bühne (G4): Nummer, wer, die Zahl der Fenster als Held (G3), die Positionen schraffiert, solange
+     nicht freigeschaltet (G1), das Schloss als schwarze Kapsel; frei: der Name des Kunden und der runde Knopf zum PDF auf der Kante (G13) */
+  function blattObjekt(a, o) {
+    o = o || {};
+    const frei = a.stand === 'frei' && !o.gesperrt, e = a.echtheit || {}, k = a.kunde || {};
+    const n = Math.max(3, Math.min(7, Number(e.elemente || e.fenster) || 3));
+    const zeilen = a.eckZeilen || [], z = (t) => { const x = zeilen.find((y) => y[0] === t); return x ? x[1] : ''; };
+    const meta = [e.elemente ? e.elemente + ' Element' + (e.elemente === 1 ? '' : 'e') : '', z('Gebäude'), z('Baujahr') ? 'Baujahr ' + z('Baujahr') : ''].filter(Boolean).join(' · ');
+    const papier = h('div', { class: 'a-an-papier' + (frei ? ' frei' : '') },
+      h('div', { class: 'a-an-papier-kopf' }, h('span', { text: 'Aufmaßblatt' }), h('span', { text: a.nr })),
+      h('b', { class: 'a-an-papier-wer', text: frei && k.name ? k.name : 'Hauseigentümer aus ' + ohnePlz(a.ort) }),
+      e.fenster ? h('div', { class: 'a-an-papier-zahl' }, h('b', null, String(e.fenster), h('small', { text: 'Fenster' })), meta ? h('span', { text: meta }) : null) : h('div', { class: 'a-an-papier-zahl' }, h('span', { text: meta || a.ort })),
+      h('ol', { class: 'a-an-positionen' + (frei ? ' offen' : ''), 'aria-hidden': 'true' }, Array.from({ length: n }, () => h('li', null, h('i'), h('i')))),
+      frei ? null : h('span', { class: 'a-an-schloss' }, U.icon('schloss'), 'Kontakt und PDF nach dem Freischalten'),
+      frei && a.pdf ? U.rund('pfeil', 'Aufmaßblatt als PDF öffnen', { class: 'voll gross a-an-papier-knopf', href: pdfUrl(a), target: '_blank', rel: 'noopener' }) : null);
+    return h('div', { class: 'a-an-buehne' }, papier,
+      h('div', { class: 'a-buehne-zeile' }, h('span', { text: 'Eingang ' + U.datum(a.eingang) }), U.chip(frei ? 'Freigeschaltet' : 'Zum Freischalten', frei ? 'aktiv' : 'leise')));
+  }
+  /* Website ohne Schema und Schrägstrich am Ende, wie man sie liest */
+  const webText = (w) => String(w || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
+  const betriebMeta = (b) => [[b.plz, b.ort].filter(Boolean).join(' '), b.strasse, b.tel, webText(b.web)].filter(Boolean).join(' · ');
+  const chipMit = (zeichen, text, art) => h('span', { class: 'a-chip' + (art ? ' ' + art : '') }, zeichen ? U.icon(zeichen) : null, text);
+  function echtheitKarte(a) {
+    const e = a.echtheit || {}, n = e.anBetriebe || 0;
+    const chips = [e.nummer ? chipMit('haken', 'Telefonnummer per Code bestätigt') : chipMit(null, 'Telefonnummer nicht bestätigt', 'hinweis'),
+      e.einwilligung ? chipMit('haken', 'Einwilligung des Kunden') : null,
+      chipMit(null, n <= 1 ? 'Ging nur an Sie' : 'Ging an ' + n + ' Betriebe', 'leise'), e.gewaehlt ? chipMit(null, 'Vom Kunden gewählt', 'leise') : null];
+    return U.karte('Echtheit', null, [h('div', { class: 'a-an-chips' }, chips),
+      h('p', { class: 'a-an-karte-text', text: 'Die Telefonnummer prüfen wir in jedem Fall mit einem Code beim Kunden; Name, Ort und Eckdaten gibt er selbst an. Hinter jeder Anfrage steht ein echter Mensch.' })]);
+  }
+  function eckdatenKarte(a) {
+    const zeilen = (a.eckZeilen || []).slice(); zeilen.push(['Ort', a.ort], ['Eingang', U.zeit(a.eingang)]);
+    return U.karte('Eckdaten', a.nr, h('dl', { class: 'a-kv' }, zeilen.map((x) => [h('dt', { text: x[0] }), h('dd', { text: x[1] })])));
+  }
+  /* Preis als Zahl, das Pflicht-Häkchen zu den Partnerbedingungen; die Pille steht darunter im Fuß */
+  function freischaltKarte(a, inf) {
+    const p = inf.preis || {}, frei = !!inf.erstesFrei;
+    const preis = h('div', { class: 'a-an-preis' }, h('b', null, frei ? '0' : String(p.netto != null ? p.netto : 29), h('small', { text: frei ? '€ · Ihr erstes Aufmaß' : '€ zzgl. USt' })),
+      h('span', { text: frei ? 'Kostenlos, als erstes Aufmaß über eeziframes. Jedes weitere ' + preisText(p) + ', erst fällig beim Freischalten.' : (p.brutto ? U.euro(p.brutto) + ' mit USt, ' : '') + 'Zahlung per Karte bei Stripe, die Rechnung kommt per E-Mail. Danach sind Kontakt und Aufmaßblatt sofort offen.' }));
+    const haken = U.haken({ k: 'zustimmung', text: ['Ich akzeptiere die ', PARTNER_LINK(), ' (erstes Aufmaß kostenlos, danach ' + preisText(p) + ' je freigeschaltetem Aufmaß).'], onChange: (an) => grundSetzen(an ? null : 'Bitte die Partnerbedingungen bestätigen', !an) });
+    return U.karte('Freischalten', frei ? 'Ihr erstes Aufmaß' : 'Je freigeschaltetem Aufmaß', [preis, haken, h('p', { class: 'a-hilfe', text: 'Sie sehen dann Name und Telefonnummer des Kunden und bekommen das Aufmaßblatt als PDF.' })], { class: 'a-karte a-an-freischalten' });
+  }
+  function grundSetzen(text, offen) {
+    const g = wurzel.querySelector('.a-fuss .a-grund'); if (!g) return;
+    if (text) g.textContent = text; else g.textContent = g.dataset.ruhig || g.textContent;
+    if (!g.dataset.ruhig && !offen) g.dataset.ruhig = g.textContent;
+    g.classList.toggle('offen', !!offen);
+  }
+  async function freischalten(a, inf, knopf) {
+    if (U.wartet(knopf)) return;
+    const hk = wurzel.querySelector('[data-k="zustimmung"]');
+    if (!(hk && hk.eingabe && hk.eingabe.checked)) { U.fehlerZeigen(wurzel, { zustimmung: 'Bitte bestätigen Sie die Partnerbedingungen.' }); grundSetzen('Bitte die Partnerbedingungen bestätigen', true); U.zuFeld(hk); return; }
+    U.warten(knopf, true);
+    try {
+      const r = await U.api('POST', '/api/konto/anfragen/' + encodeURIComponent(a.id) + '/freischalten', { zustimmung: true });
+      if (r.kasse) { location.href = r.kasse; return; }
+      anfrageErsetzen(r.anfrage); if (S.anfragen) S.anfragen.erstesFrei = false;
+      anfrageZeigen(r.anfrage, Object.assign({}, inf, { erstesFrei: false }));
+      U.toast(r.schon ? 'Diese Anfrage war schon freigeschaltet.' : 'Freigeschaltet. Kontakt und Aufmaßblatt sind offen.');
+    } catch (e) {
+      U.warten(knopf, false);
+      if (e.daten && e.daten.feld === 'zustimmung') { U.fehlerZeigen(wurzel, { zustimmung: e.message }); grundSetzen(e.message, true); U.zuFeld(hk); return; }
+      U.toast(e.message);
+    }
+  }
+  /* Nach dem Freischalten: Name, Telefon groß als tel:-Link (a-anruf aus auftrag.css), E-Mail, erreichbar, Ort; Zweckbindung und Löschdatum */
+  function kontaktKarte(a) {
+    const k = a.kunde || {}, f = a.frei || {};
+    const tel = String(k.tel || '').replace(/[^\d+]/g, '');
+    const zeilen = [k.mail ? ['E-Mail', h('a', { href: 'mailto:' + k.mail, text: k.mail })] : null, k.erreich ? ['Erreichbar', k.erreich] : null, ['Ort', k.ort || a.ort]].filter(Boolean);
+    return U.karte('Kontakt des Kunden', f.zeit ? 'Freigeschaltet am ' + U.datum(f.zeit) : null, [h('b', { class: 'a-an-name', text: k.name || 'Ohne Namen' }),
+      tel ? h('a', { class: 'a-anruf', href: 'tel:' + tel }, h('i', null, U.icon('telefon')), h('span', null, h('b', { text: k.anzeige || k.tel }), h('small', { text: (a.echtheit && a.echtheit.nummer ? 'Per Code bestätigt' : 'Nicht bestätigt') + (k.erreich ? ' · am besten ' + k.erreich.toLowerCase() : '') }))) : null,
+      h('dl', { class: 'a-kv' }, zeilen.map((x) => [h('dt', { text: x[0] }), h('dd', null, x[1])])),
+      h('p', { class: 'a-an-zweck' }, h('b', { text: 'Nur für diese Anfrage.' }), ' Der Kunde hat eingewilligt, dass wir seine Angaben für diese Anfrage an Sie weitergeben. Bitte nutzen Sie sie nur dafür, nicht für Werbung und nicht für Dritte.',
+        a.einwilligung ? [' Sein Wortlaut: ', h('q', { text: a.einwilligung })] : null, a.loeschenAm ? ' Wir löschen die Anfrage am ' + U.datum(a.loeschenAm) + '.' : '')], { class: 'a-karte a-an-kontakt' });
+  }
+
+  /* ---------- Die drei Kacheln: Register und Bereitschaft, Echtheit, Konfigurator für die eigene Website ---------- */
+  /* Unter der Anfrage: der eigene Betrieb mit der Bereitschaft (Partner) und das Angebot der Pakete. Die Echtheit steht schon als weiße
+     Karte in der Anfrage, deshalb hier nicht noch einmal (Doppelung, 30.10.2026). */
+  function dreiKacheln(inf) {
+    return h('div', { class: 'a-an-drei' }, registerKachel(inf), konfiguratorKachel());
+  }
+  function registerKachel(inf) {
+    const b = betriebe()[0] || null, p = (inf || {}).preis || (S.anfragen || {}).preis || {};
+    const teile = [h('div', { class: 'a-karte-kopf' }, h('h2', { text: b ? b.name : 'Register und Bereitschaft' }), b ? U.chip(b.standText || b.stand, b.stand === 'partner' ? 'aktiv' : 'leise') : null),
+      h('p', { text: 'Partner stehen bei Kunden in ihrer Umgebung auf Platz 1 und 2 und bekommen neue Anfragen direkt hier.' }),
+      h('p', { text: 'Das erste Aufmaß ist kostenlos, jedes weitere ' + preisText(p) + ', erst fällig beim Freischalten.' })];
+    if (b) teile.push(h('p', { class: 'a-an-meta', text: betriebMeta(b) }), (b.leistungen || []).length ? h('p', { class: 'a-an-meta', text: b.leistungen.join(', ') }) : null);
+    teile.push(schalter(b), h('div', { class: 'a-knoepfe' }, U.ring(b ? 'Angaben ändern' : 'Als Betrieb eintragen', { on: { click: () => betriebBearbeiten(b) } })));
+    return U.kachel(teile, 'a-an-kachel a-an-register');
+  }
+  function konfiguratorKachel() {
+    return U.kachel([h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Konfigurator für Ihre Website' })),
+      h('p', { text: 'Anfragen in dieser Qualität auch von Ihrer eigenen Website: Ihre Kunden planen zu Hause, Sie bekommen jede Anfrage mit Aufmaßblatt. Pakete ab ' + U.euro(minMonat()) + ' im Monat.' }),
+      h('div', { class: 'a-knoepfe' }, U.ring('Pakete ansehen', { href: '/fuer-fensterbauer/#pakete' }))], 'a-an-kachel');
+  }
+  /* Der Betrieb als kleine Karte in der Übersicht */
+  function betriebKarte(b) {
+    if (!b) return U.karte('Ihr Betrieb', 'Noch nicht eingetragen', [h('p', { class: 'a-an-karte-text', text: 'Im Register stehen Sie bei Kunden in Ihrer Umgebung; als Partner auf Platz 1 und 2, neue Anfragen kommen direkt hierher.' }),
+      h('div', { class: 'a-knoepfe', style: 'padding:0 0 16px' }, U.ring('Als Betrieb eintragen', { class: 'klein', on: { click: () => betriebBearbeiten(null) } }))]);
+    return U.karte(b.name, U.chip(b.standText || b.stand, b.stand === 'partner' ? 'aktiv' : 'leise'), [h('p', { class: 'a-an-karte-text', text: [betriebMeta(b), (b.leistungen || []).join(', ')].filter(Boolean).join(' · ') }),
+      schalter(b), h('div', { class: 'a-knoepfe', style: 'padding:8px 0 16px' }, U.ring('Angaben ändern', { class: 'klein', on: { click: () => betriebBearbeiten(b) } }))]);
+  }
+  /* Schalter „Bereitschaft erklären“: an öffnet das Blatt mit dem Pflicht-Häkchen, aus die Rückfrage; ohne Betrieb zuerst das Eintragen */
+  function schalter(b) {
+    const an = !!(b && b.partner && b.partner.bereit);
+    const s = h('button', { type: 'button', class: 'a-an-schalter', role: 'switch', 'aria-checked': String(an) }, h('i', { 'aria-hidden': 'true' }),
+      h('span', null, h('b', { text: 'Bereitschaft erklären' }), h('small', { text: an ? 'Ich möchte Anfragen aus meiner Umgebung erhalten · Partner seit ' + U.datum(b.partner.seit) : b ? 'Ich möchte Anfragen aus meiner Umgebung erhalten' : 'Zuerst den Betrieb eintragen, dann Anfragen aus der Umgebung erhalten' })));
+    s.addEventListener('click', () => { if (!b) betriebBearbeiten(null); else if (an) partnerZurueck(b); else partnerErklaeren(b); });
+    return s;
+  }
+  function partnerErklaeren(b) {
+    const p = (S.anfragen || {}).preis || {};
+    const haken = U.haken({ k: 'zustimmung', text: ['Ich akzeptiere die ', PARTNER_LINK(), ' (erstes Aufmaß kostenlos, danach ' + preisText(p) + ' je freigeschaltetem Aufmaß).'] });
+    const karte = h('div', { class: 'a-karte a-an-blatt-haken' }, haken);
+    const ja = U.pille('Bereitschaft erklären'), nein = U.ring('Abbrechen');
+    const zu = U.blatt({ titel: 'Bereitschaft erklären?', text: 'Partner stehen bei Kunden in ihrer Umgebung auf Platz 1 und 2 und bekommen neue Anfragen direkt hier. Das erste Aufmaß ist kostenlos, jedes weitere ' + preisText(p) + ', erst fällig beim Freischalten. Zurücknehmen können Sie die Bereitschaft jederzeit.', inhalt: karte, knoepfe: [ja, nein] });
+    nein.addEventListener('click', zu);
+    ja.addEventListener('click', async () => {
+      if (U.wartet(ja)) return;
+      if (!haken[0].eingabe.checked) { U.fehlerZeigen(karte, { zustimmung: 'Bitte bestätigen Sie die Partnerbedingungen.' }); return; }
+      U.warten(ja, true);
+      try { const r = await U.api('POST', '/api/konto/partner', { betrieb: b.id, bereit: true, zustimmung: true }); betriebErsetzen(r.betrieb); zu(); neuZeichnen(); U.toast('Bereitschaft erklärt. Sie stehen jetzt vorn.'); }
+      catch (e) { U.warten(ja, false); if (e.daten && e.daten.feld === 'zustimmung') U.fehlerZeigen(karte, { zustimmung: e.message }); else if (e.daten && e.daten.feld === 'plz') { zu(); betriebBearbeiten(b, e.message); } else U.toast(e.message); }
+    });
+  }
+  function partnerZurueck(b) {
+    bestaetigen('Bereitschaft zurücknehmen?', 'Sie stehen dann nicht mehr auf Platz 1 und 2 und bekommen keine neuen Anfragen aus Ihrer Umgebung. Offene und freigeschaltete Anfragen bleiben in Ihrem Bereich.', 'Zurücknehmen', async () => {
+      const r = await U.api('POST', '/api/konto/partner', { betrieb: b.id, bereit: false }); betriebErsetzen(r.betrieb); neuZeichnen(); U.toast('Bereitschaft zurückgenommen');
+    });
+  }
+  /* Eintragen oder Ändern des eigenen Betriebs: Name, Ort, PLZ, Straße, Telefon, Website, Leistungen als Kapseln */
+  function betriebBearbeiten(b, hinweis) {
+    b = b || {};
+    const gewaehlt = new Set(b.leistungen || []);
+    const felder = [U.feld({ k: 'name', label: 'Name des Betriebs', wert: b.name, platzhalter: 'Fensterbau Brandt', auto: 'organization' }),
+      h('div', { class: 'a-zwei', style: 'display:grid' }, U.feld({ k: 'plz', label: 'Postleitzahl', wert: b.plz, platzhalter: '33442', modus: 'numeric', max: 5, auto: 'postal-code' }), U.feld({ k: 'ort', label: 'Ort', wert: b.ort, platzhalter: 'Herzebrock-Clarholz', auto: 'address-level2' })),
+      U.feld({ k: 'strasse', label: 'Straße und Hausnummer', wert: b.strasse, platzhalter: 'Gartenstraße 12', optional: true, auto: 'street-address' }),
+      U.feld({ k: 'tel', label: 'Telefon', typ: 'tel', wert: b.tel, platzhalter: '05245 123456', optional: true, auto: 'tel' }),
+      U.feld({ k: 'web', label: 'Website', typ: 'url', wert: b.web, platzhalter: 'www.fensterbau-brandt.de', optional: true, auto: 'url' })];
+    const wahl = h('div', { class: 'a-wahl', role: 'group', 'aria-label': 'Leistungen' }, LEISTUNGEN.map((l) => { const k = h('button', { type: 'button', 'aria-pressed': String(gewaehlt.has(l)), text: l }); k.addEventListener('click', () => { const an = !gewaehlt.has(l); if (an) gewaehlt.add(l); else gewaehlt.delete(l); k.setAttribute('aria-pressed', String(an)); }); return k; }));
+    const karte = h('div', { class: 'a-karte a-an-formular' }, felder, h('p', { class: 'a-label', text: 'Leistungen' }), wahl);
+    const ja = U.pille(b.id ? 'Speichern' : 'Eintragen'), nein = U.ring('Abbrechen');
+    const senden = async () => {
+      if (U.wartet(ja)) return;
+      const w = (k) => karte.querySelector('[data-k="' + k + '"] input').value.trim();
+      const daten = { name: w('name'), ort: w('ort'), plz: w('plz'), strasse: w('strasse'), tel: w('tel'), web: w('web'), leistungen: LEISTUNGEN.filter((l) => gewaehlt.has(l)) };
+      if (b.id) daten.betrieb = b.id;
+      U.fehlerZeigen(karte, {});
+      U.warten(ja, true);
+      try { const r = await U.api('POST', '/api/konto/betrieb', daten); betriebErsetzen(r.betrieb); zu(); neuZeichnen(); U.toast(b.id ? 'Gespeichert' : 'Eingetragen. Jetzt können Sie Ihre Bereitschaft erklären.'); }
+      catch (e) {
+        U.warten(ja, false);
+        const f = (e.daten && e.daten.felder) || (e.daten && e.daten.feld ? { [e.daten.feld]: e.message } : null);
+        if (f) { const erstes = U.fehlerZeigen(karte, f); if (erstes) U.zuFeld(erstes); } else U.toast(e.message);
+      }
+    };
+    const zu = U.blatt({ titel: b.id ? 'Angaben zum Betrieb' : 'Als Betrieb eintragen', text: hinweis || (b.id ? null : 'Mit dem Eintrag stehen Sie im Register von eeziframes: Kunden in Ihrer Umgebung sehen Ihren Betrieb, als Partner auf Platz 1 und 2.'),
+      inhalt: h('form', { novalidate: true, on: { submit: (e) => { e.preventDefault(); senden(); } } }, karte, h('button', { type: 'submit', hidden: true, tabindex: '-1', 'aria-hidden': 'true' })), knoepfe: [ja, nein] });
+    nein.addEventListener('click', zu);
+    ja.addEventListener('click', senden);
+  }
+
   /* ---------- Weiche ---------- */
   function route() {
+    const z = /^#zugang\/([A-Za-z0-9_.-]{20,600})$/.exec(location.hash);
+    if (z) { zugang(z[1]); return; }
+    S.ktx = null;
     if (!S.ich || !S.ich.angemeldet) { anmeldung(); return; }
+    const an = /^#anfrage\/([0-9a-z-]{8,})$/i.exec(location.hash);
+    if (an) { anfrage(an[1]); return; }
     const m = /^#auftrag\/([0-9a-z-]{8,})(?:\/(gespeichert))?$/i.exec(location.hash);
     const l = S.ich.auftraege || [];
     if (m) {
@@ -413,7 +761,8 @@
       if (a) { zeigen(a); if (m[2]) { history.replaceState(null, '', '#auftrag/' + a.id); U.toast('Gespeichert'); } return; }
       history.replaceState(null, '', location.pathname);
     }
-    if (l.length === 1 && !location.hash) { history.replaceState(null, '', '#auftrag/' + l[0].id); zeigen(l[0]); return; }
+    /* ein Auftrag und keine Anfragen: gleich öffnen */
+    if (l.length === 1 && !anfragenListe().length && !location.hash) { history.replaceState(null, '', '#auftrag/' + l[0].id); zeigen(l[0]); return; }
     uebersicht();
   }
   addEventListener('hashchange', () => { if (S.ich) route(); });
@@ -422,10 +771,19 @@
     const q = new URLSearchParams(location.search), session = q.get('kasse');
     const [stand, ich] = await Promise.all([U.api('GET', '/api/auftrag/stand').catch(() => null), U.api('GET', '/api/auftrag/ich').catch(() => ({ angemeldet: false }))]);
     S.stand = stand; S.ich = ich;
+    if (ich.angemeldet) await anfragenLaden();
     if (session && ich.angemeldet) {
-      const m = /^#auftrag\/([0-9a-z-]{8,})/i.exec(location.hash);
+      const mA = /^#anfrage\/([0-9a-z-]{8,})/i.exec(location.hash), m = /^#auftrag\/([0-9a-z-]{8,})/i.exec(location.hash);
       history.replaceState(null, '', location.pathname + location.hash);
-      if (m) {
+      if (mA) {
+        /* Rückkehr aus der Kasse eines Aufmaßes: Zahlung prüfen, die Anfrage ist dann freigeschaltet */
+        try {
+          const r = await U.api('GET', '/api/konto/anfragen/' + encodeURIComponent(mA[1]) + '/kasse?session=' + encodeURIComponent(session));
+          if (!S.anfragen) S.anfragen = { betriebe: [], anfragen: [] };
+          anfrageErsetzen(r.anfrage); if (r.bezahlt) S.anfragen.erstesFrei = false;
+          U.toast(r.bezahlt ? 'Danke, Ihre Zahlung ist da. Die Anfrage ist freigeschaltet.' : 'Die Zahlung ist noch nicht abgeschlossen.');
+        } catch (e) { U.toast(e.message); }
+      } else if (m) {
         try {
           const r = await U.api('GET', '/api/auftrag/' + m[1] + '/kasse?session=' + encodeURIComponent(session));
           ersetzen(r.auftrag);

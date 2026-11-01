@@ -16,6 +16,7 @@ import { kontenDa, eigenesBezahlt, kaufNachweis, entfernt } from './eigene.js';
 import { kaufBestaetigen } from './bestaetigung.js';
 import { AGB_STAND, ZUSTIMMUNG, verkaufStand } from './recht.js';
 import { istAuftragEreignis, auftragEreignis } from '../auftrag/index.js';
+import { zugangBezahlt } from './vermittlung-partner.js';
 import { alarmMail } from './ki.js';
 
 const str = (v, n) => String(v == null ? '' : v).trim().slice(0, n || 200);
@@ -133,7 +134,9 @@ export const ZAHLUNG = {
     /* Aufträge (functions/auftrag/): Kasse der Einrichtung und Monatsabo mit metadata.art auftrag; nie ein Betrieb oder ein Aufmaßblatt.
        Alles andere läuft unverändert weiter */
     if (istAuftragEreignis(ev)) await auftragEreignis(ctx, ev);
-    else if ((ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded') && obj.mode === 'payment') {
+    else if ((ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded') && obj.mode === 'payment' && obj.metadata && obj.metadata.art === 'vermittlung') {
+      await zugangBezahlt(ctx, obj).catch((e) => console.log('Vermittlung: Kasse aus dem Webhook', String(e && e.message ? e.message : e).slice(0, 160))); // Freischalten eines Aufmaßes (vermittlung-partner.js), falls der Betrieb nicht zurückkehrt
+    } else if ((ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded') && obj.mode === 'payment') {
       const kennung = (obj.metadata && obj.metadata.kennung) || obj.client_reference_id || '';
       const z = { session: obj.id, kennung: kennung, mail: (obj.customer_details && obj.customer_details.email) || obj.customer_email || '', betragCent: obj.amount_total || 0, zustimmung: zustimmungAus(obj.metadata) };
       if (kennungOk(kennung) && obj.payment_status === 'paid' && obj.metadata && obj.metadata.art === 'aufmass') {

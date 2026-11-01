@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 372" width="480" height="372">
+
+
+<rect width="480" height="372" rx="16" fill="#ffffff"/>
+<g stroke="#d2d0d3" stroke-width="3.3"><line x1="260" y1="32" x2="260" y2="262"/><line x1="320" y1="32" x2="320" y2="262"/><line x1="380" y1="32" x2="380" y2="262"/><line x1="440" y1="32" x2="440" y2="262"/></g>
+<path d="M200 44H214a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H200Z" fill="#897efc"/>
+<path d="M200 116H316a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H200Z" fill="#897efc"/>
+<path d="M200 188H320V216H200Z" fill="#897efc"/>
+
+<line x1="200" y1="32" x2="200" y2="262" stroke="#07090a" stroke-width="3.3"/>
+<line x1="200" y1="262" x2="440" y2="262" stroke="#07090a" stroke-width="3.3"/>
+
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+
+
+
+
+
+
+<g fill="#6b676c" text-anchor="middle"></g>
+
+
+</g>
+</svg>

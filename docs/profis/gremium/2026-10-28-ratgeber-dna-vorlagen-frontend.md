@@ -1,0 +1,9 @@
+# Ratgeber in der DNA, Abgleich mit den Vorlagen: Frontend und Leistung (28.10.2026)
+
+Getrennter Agent, eine Runde, Fassung X; gemessen mit Chromium headless (390 × 844, Dichte 2,75, vierfach gedrosselte CPU; Zeichenzeiten nur im Vergleich gültig). Fünf Hebel nach Wirkung:
+
+1. **Scrollen ohne Ballast:** Die Leiste bekam beim Hochscrollen eine eigene Ebene mit Grund „BackdropFilter“; Einstieg und Lesen (8.125 px hoher Sticky-Block) wurden in jedem Bild mitgezeichnet. Zeichenzeit für 180 Bilder: heute 275–281 ms, ohne Weichzeichner 139 ms, zusätzlich verdeckte Szenen ausgeblendet und Lesen erst kurz vor dem Ende sticky 38 ms (−86 %). Wie: Leiste deckend ohne Filter; verdeckte Szenen `visibility: hidden` (nicht bei Fokus darin), Lesen erst eine Bildschirmhöhe vor dem Ende sticky; erst lesen, dann schreiben.
+2. **Schriftwechsel ohne Sprung:** Inter (48 KB) zeichnet nur die Wortmarke; Outfit doppelt erklärt, zwei blockierende CSS-Anfragen. Mit verzögerten Schriften springt die Pille 24 px (CLS 0,162). Wie: Teilmenge „eeziframes“ als eigene Datei (2,5 KB), Schriften in der Ratgeber-Datei, Ersatzschrift mit Outfit-Maßen (size-adjust, ascent/descent) → CLS 0,0005.
+3. **Zeichnungen scharf und in Outfit:** in der Übersicht grauer Brei (Schrift 2,6 px, Linien 0,47 px); als `<img>` erscheint Arial statt Outfit. Wie: Kleinbilder ohne Text mit kräftigeren Strichen; in den großen Zeichnungen eine Outfit-Teilmenge als data:-URL (mit der CSP getestet).
+4. **CSS halbieren und im Cache halten:** `dna/bundle.css` (19,9 KB) wird von keiner Ratgeberseite benutzt, dazu 6,1 KB Kommentare; für /assets/ keine Cache-Regel. Wie: nur Tokens, Fokusregel und Auswahl übernehmen, ohne Kommentare (−49 %), Adresse mit Prüfsumme und ein Jahr Cache.
+5. **Druckfassung:** Seite 1 zu 70 % leer (Mindesthöhe des Einstiegs), „Abschnitt 1“ verdeckt, Antworten der Fragen fehlen. Wie: Druckregeln ergänzen, Fragen beim Drucken öffnen.

@@ -1,0 +1,140 @@
+{
+  "stand": "18b4a1f194faeca2d794fff671034c0c",
+  "erzeugt": "2026-10-30",
+  "modelle": [
+    {
+      "key": "raff",
+      "name": "Mit Raffstore",
+      "farbe": "7016"
+    },
+    {
+      "key": "sprossen",
+      "name": "Mit Sprossen",
+      "farbe": "9016"
+    },
+    {
+      "key": "drei",
+      "name": "Dreiteilig mit Rollladen",
+      "farbe": "9016"
+    }
+  ],
+  "farben": [
+    {
+      "key": "9016",
+      "name": "Verkehrsweiß",
+      "code": "RAL 9016",
+      "hex": "#f1f0ea"
+    },
+    {
+      "key": "7016",
+      "name": "Anthrazitgrau",
+      "code": "RAL 7016",
+      "hex": "#383e42"
+    },
+    {
+      "key": "9005",
+      "name": "Tiefschwarz",
+      "code": "RAL 9005",
+      "hex": "#0e0e10"
+    },
+    {
+      "key": "goak",
+      "name": "Golden Oak",
+      "code": "Holzdekor",
+      "hex": "#b5732f"
+    }
+  ],
+  "winkel": [
+    -36,
+    -34,
+    -32,
+    -30,
+    -28,
+    -26,
+    -24,
+    -22,
+    -20,
+    -18,
+    -16,
+    -14,
+    -12,
+    -10,
+    -8,
+    -6,
+    -4,
+    -2,
+    0,
+    2,
+    4,
+    6,
+    8,
+    10,
+    12,
+    14,
+    16,
+    18,
+    20,
+    22,
+    24,
+    26,
+    28,
+    30,
+    32,
+    34,
+    36
+  ],
+  "ruhe": 8,
+  "rx": -8,
+  "spalten": 5,
+  "zeilen": 8,
+  "breite": 600,
+  "hoehe": 560,
+  "masse": {
+    "raff": [
+      25,
+      19,
+      549,
+      521
+    ],
+    "sprossen": [
+      78,
+      19,
+      444,
+      521
+    ],
+    "drei": [
+      21,
+      125,
+      558,
+      415
+    ]
+  },
+  "bytes": {
+    "raff-9016": 707264,
+    "raff-7016": 553614,
+    "raff-9005": 482068,
+    "raff-goak": 647658,
+    "sprossen-9016": 483988,
+    "sprossen-7016": 383890,
+    "sprossen-9005": 363966,
+    "sprossen-goak": 622144,
+    "drei-9016": 613136,
+    "drei-7016": 527534,
+    "drei-9005": 472524,
+    "drei-goak": 648086
+  },
+  "ruheBytes": {
+    "raff-9016": 20430,
+    "raff-7016": 15950,
+    "raff-9005": 13988,
+    "raff-goak": 18634,
+    "sprossen-9016": 13988,
+    "sprossen-7016": 11134,
+    "sprossen-9005": 10612,
+    "sprossen-goak": 17828,
+    "drei-9016": 17600,
+    "drei-7016": 14856,
+    "drei-9005": 13340,
+    "drei-goak": 18382
+  }
+}

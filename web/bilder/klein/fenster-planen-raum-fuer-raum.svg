@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 420" width="480" height="420">
+
+
+<rect width="480" height="420" rx="16" fill="#ffffff"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="16" fill="#07090a">
+<!-- Gelände -->
+<rect x="0" y="384" width="480" height="36" fill="#f3f3f4"/>
+<line x1="24" y1="384" x2="456" y2="384" stroke="#a8a4a9" stroke-width="4.4"/>
+<!-- Wände und Decken (Schnitt) -->
+<rect x="92" y="130" width="296" height="254" fill="#f5f6f8" stroke="#202022" stroke-width="6.6"/>
+<line x1="92" y1="258" x2="388" y2="258" stroke="#202022" stroke-width="6.6"/>
+<line x1="240" y1="130" x2="240" y2="384" stroke="#c4c1c5" stroke-width="4.4"/>
+<!-- Dach -->
+<path d="M80 134 L240 34 L400 134" fill="#ecebec" stroke="#202022" stroke-width="6.6" stroke-linejoin="round"/>
+<line x1="124" y1="106" x2="356" y2="106" stroke="#c4c1c5" stroke-width="4.4"/>
+<!-- Dachfenster mit Sonnenschutz -->
+<g transform="rotate(-32 160 84)">
+<rect x="134" y="74" width="52" height="20" fill="#897efc" stroke="#202022" stroke-width="4.4"/>
+<rect x="134" y="70" width="52" height="6" fill="#f88962" stroke="none"/>
+</g>
+<!-- Obergeschoss links: Kinderzimmer -->
+<rect x="130" y="166" width="56" height="70" fill="#897efc" stroke="#202022" stroke-width="4.4"/>
+<line x1="130" y1="201" x2="186" y2="201" stroke="#ffffff" stroke-width="4.4"/>
+<circle cx="178" cy="212" r="6" fill="#f88962"/>
+<rect x="175" y="212" width="6" height="12" rx="1.5" fill="#f88962"/>
+<!-- Obergeschoss rechts: Bad (Milchglas) -->
+<rect x="294" y="170" width="46" height="46" fill="#eceef1" stroke="#202022" stroke-width="4.4"/>
+<rect x="298" y="174" width="38" height="38" fill="#d2d0d3"/>
+<line x1="302" y1="208" x2="332" y2="178" stroke="#ffffff" stroke-width="6.6"/>
+<line x1="310" y1="210" x2="334" y2="186" stroke="#ffffff" stroke-width="6.6"/>
+<!-- Erdgeschoss links: Wohnzimmer, Hebe-Schiebe-Tür -->
+<rect x="112" y="280" width="104" height="104" fill="#897efc" stroke="#202022" stroke-width="4.4"/>
+<line x1="164" y1="280" x2="164" y2="384" stroke="#202022" stroke-width="4.4"/>
+<line x1="136" y1="332" x2="152" y2="332" stroke="#ffffff" stroke-width="6.6"/>
+<path d="M146 326 L152 332 L146 338" fill="none" stroke="#ffffff" stroke-width="6.6" stroke-linecap="round" stroke-linejoin="round"/>
+<!-- Erdgeschoss rechts: Küche, hohe Brüstung -->
+<rect x="288" y="280" width="68" height="46" fill="#897efc" stroke="#202022" stroke-width="4.4"/>
+<rect x="266" y="338" width="110" height="8" fill="#a8a4a9"/>
+<rect x="272" y="346" width="98" height="38" fill="#e6e5e7" stroke="none"/>
+<line x1="372" y1="326" x2="372" y2="338" stroke="#f88962" stroke-width="4.4"/>
+<!-- RC-2-Marke am Erdgeschoss (Schloss) -->
+<rect x="222" y="300" width="36" height="28" rx="6" fill="#ffffff" stroke="#f88962" stroke-width="6.6"/>
+<path d="M230 300 v-6 a10 10 0 0 1 20 0 v6" fill="none" stroke="#f88962" stroke-width="6.6"/>
+<circle cx="240" cy="314" r="3" fill="#07090a"/>
+<!-- Straße links mit Schallwellen -->
+<rect x="24" y="384" width="56" height="8" fill="#a8a4a9"/>
+<path d="M40 344 a14 14 0 0 1 0 24 M48 334 a24 24 0 0 1 0 44 M56 324 a34 34 0 0 1 0 64" fill="none" stroke="#f88962" stroke-width="5.5" stroke-linecap="round"/>
+<!-- Etiketten -->
+
+
+
+
+
+
+
+
+</g>
+</svg>

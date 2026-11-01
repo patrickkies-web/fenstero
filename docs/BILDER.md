@@ -36,14 +36,14 @@ Die drei Motive aus den Beiträgen können direkt wiederverwendet werden: der Wa
 | `beispiel/essential`, `beispiel/plus`, `beispiel/signature` | 640 × 400 | Seite /fuer-fensterbauer/, Paketkarten, Bereich „Beispiel · erfundener Betrieb“: echte Aufnahmen von Beispiel-Instanzen des erfundenen Betriebs Fensterbau Brandt (Gold #e3b75a), aufgenommen im Vorschau-Server mit `DATEN_ATTRAPPE=1` bei 1280 × 800 (`/__saat` mit den Instanzen brandt-e, brandt-p, brandt-s; Plus mit eigener Startseite, Signature im Dashboard mit drei eingeladenen Kunden); je unter 30 KB | – | – |
 | `beispiel/start-telefon` | 600 × 1240 | Seite /fuer-fensterbauer/, Bühne „So funktioniert es“, Bildschirm 1, und am Telefon über der ersten Schrittkarte: die Startseite der Plus-Instanz von Fensterbau Brandt bei 390 × 806, zweifach | – | – |
 | `fuer-fensterbauer` | 1200 × 1500 | nicht mehr eingebaut (früheres Startbild der Seite, Astronaut mit Zollstock); bleibt als Vorlage liegen | – | – |
-| `ratgeber` | 1600 × 1000 | Übersicht /ratgeber/, über dem Weg | Prüfen · Entscheiden · Auswählen · Ausmessen · Vergleichen · Einbauen | 2 |
-| `weg-pruefen` | 1600 × 1000 | Ratgeber, Schritt 1 (Übersicht; in den Seiten als Bild in „Nächster Schritt“) | – | 2 |
-| `weg-entscheiden` | 1600 × 1000 | Ratgeber, Schritt 2 | – | 2 |
-| `weg-auswaehlen` | 1600 × 1000 | Ratgeber, Schritt 3 | – | 2 |
-| `weg-ausmessen` | 1600 × 1000 | Ratgeber, Schritt 4 | – | 2 |
-| `weg-vergleichen` | 1600 × 1000 | Ratgeber, Schritt 5 | – | 2 |
-| `weg-einbauen` | 1600 × 1000 | Ratgeber, Schritt 6 | – | 2 |
-| `fehler` | 1600 × 1000 | Fehlerseite 404 | – | 3 |
+| `ratgeber` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-pruefen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-entscheiden` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-auswaehlen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-ausmessen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-vergleichen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `weg-einbauen` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): Ratgeber in der Design-DNA zeigen statt Fotos die Zeichnungen der Seiten (Übersicht je Seite, „Nächster Schritt“ die der nächsten Seite); die Tierfotos gehören zur früheren Bildsprache | – | – |
+| `fehler` | 1600 × 1000 | nicht mehr eingebaut (28.10.2026): die Fehlerseite zeigt ein Fenster aus dem 3-D-Modell der App (`/bilder/start/reihe/trapez.webp`) auf einer Bühne | – | – |
 
 ## Prompts
 
@@ -88,12 +88,20 @@ ohne Bildschirm wählen oder den Bildschirm leer lassen).
   dort bleiben die Zeichnungen.
 - Die Prüfsuite verlangt für Bilder in Ratgebern Breite, Höhe und einen Alternativtext ab 40 Zeichen; Fotos unter `/bilder/foto/`
   dürfen WebP sein, Zeichnungen bleiben SVG.
+- Zeichnungen (`web/bilder/*.svg`, seit 28.10.2026): `python3 scripts/zeichnungen-dna.py` bringt sie in die Druckpalette der DNA, bettet
+  je Datei eine Teilmenge von Outfit ein (ein SVG als `<img>` lädt keine Schrift der Seite, sonst erschiene Arial) und schreibt
+  Kleinbilder ohne Schrift, gestrichelte Linien und Pfeilspitzen mit 2,2-mal so kräftigen Strichen nach `web/bilder/klein/` (für die
+  Zeilen der Übersicht, 96 px breit). Ein zweiter Lauf ändert nichts. Braucht fontTools und brotli (`pip install fonttools brotli`).
+- Bühne der Zeichnung im Einstieg (`web/bilder/ratgeber/buehne.webp`, 1000 × 667, 66 KB, seit 28.10.2026): Foto des Inhabers, dunkler
+  Betonboden im harten Fensterlicht mit Sprossenschatten, ohne Gegenstände und Farbstich; erzeugt nach dem Prompt im Protokoll
+  docs/profis/2026-10-28-ratgeber-dna.md, verkleinert aus 1536 × 1024. Steht nur in der Gestaltung (`.rg-bild` in
+  docs/profis/ratgeber-vorschau/ratgeber.css), mit Vignette, Lichtkante und abgedunkeltem Rand unten für die Unterschrift.
 
 ## Plätze für die Fensterbauer-Seiten (Konfigurator-Pakete, Wunsch des Inhabers vom 23.10.2026)
 
 Die Seiten für Fensterbauer (Verkaufsseite, Bestellformular, Kundenkonto) sind textlastig. Damit die Aufmerksamkeit hält, bekommt
-jeder längere Abschnitt eine Bildkarte in derselben Bildsprache wie oben (ein Tier tut etwas Menschliches rund ums Fenster oder
-um den Betrieb). Die Bilder liefert der Inhaber nach den Prompts unten; bis dahin stehen Platzhalter. Einbau danach in drei
+jeder längere Abschnitt eine Bildkarte: ein Bild, eine Pointe, mit dem wiederkehrenden Meister (siehe unten). Die Bilder sind
+seit dem 23.10.2026 alle erzeugt (Abschnitt „Erzeugt am 23.10.2026“); `scripts/fotos.py` legt Platzhalter nur noch an, wenn ein Original fehlt. Einbau danach in drei
 Schritten: Platz in `scripts/fotos.py` (PLAETZE) eintragen, `python3 scripts/fotos.py` laufen lassen, `<figure class="foto-karte">`
 an der genannten Stelle (Verkaufsseite in `web/fuer-fensterbauer/index.html`). Bestellung, Kundenbereich und Zentrale (seit 27.10.2026,
 `web/assets/auftrag-ui.js`) zeigen die Seiten von Fensterbau Brandt und die Vorschau der eigenen Seite, keine weiteren Bilder. Auf den Instanzen der Betriebe (Plus, Signature) stehen nur die eigenen
@@ -151,3 +159,78 @@ Zweite Idee je Platz, falls das erste Motiv nicht gefällt (Wunsch des Inhabers 
 | `fb-kundenschutz` | Unter Ihrer Glasglocke: Niemand fischt Ihre Kunden ab. | The master window maker gently placing a large glass bell jar over a miniature family standing at a tiny kitchen table with a tiny window frame, on a wooden workbench; around the jar a crowd of anonymous hands in grey suit sleeves holding clipboards and business cards press against the glass and cannot reach in, warm workshop light, the family inside relaxed |
 | `fb-frage` | Ein Knopf, ein Rückruf. | A single oversized round red call button set into the brick wall of a tidy workshop, softly glowing; the master window maker's hand resting on it, inviting, the rest of the frame calm and empty, evening light through a window |
 
+### Erzeugt am 23.10.2026 über die API von Black Forest Labs
+
+Alle Plätze der Fensterbauer-Seiten (außer `fuer-fensterbauer` und `fb-kunden-planen`, Bilder vom Inhaber) sind mit FLUX.2 [pro]
+(`https://api.bfl.ai/v1/flux-2-pro`) erzeugt, 16:10 als 1792 × 1120, 4:5 als 1280 × 1600 (etwa 2 Megapixel, 7 Credits je Bild), ohne
+automatische Prompt-Erweiterung (`disable_pup`). Die Figur entstand zuerst (Seed 2042522027, Prompt unten) und ging jeder Szene als
+`input_image` mit; eine verkleinerte Kopie liegt unter `docs/bilder/meister-referenz.jpg`, damit spätere Bilder dasselbe Gesicht bekommen.
+Skript: `python3 scripts/bilder-erzeugen.py flux-2-pro <ziel.jpg> <breite> <hoehe> <prompt-datei> [referenz.jpg]`; den Schlüssel hängt der
+Proxy der Cloud-Umgebung als Header `x-key` an (Secret „Black Forest Labs“ für `*.bfl.ai`), im Repo steht keiner. Danach wie gehabt:
+Original nach `fotos-roh/<name>.jpg`, `python3 scripts/fotos.py`.
+
+Figur: *Full-body studio photograph of a German master window maker in his early fifties: short grey beard, friendly tired eyes, short grey hair, dark blue work jacket with rolled-up sleeves over a light grey t-shirt, dark work trousers, sturdy boots, a yellow folding rule in the chest pocket. Neutral relaxed stance, slight warm smile, looking at the camera, plain light grey seamless studio background, soft even lighting, photorealistic, sharp, 35 mm lens look, no text, no logos, no watermark.*
+
+Gemeinsamer Vorspann [Figur]: *The man in the reference image is the master window maker: keep his face, grey hair and beard, dark blue work jacket and the yellow folding rule in the chest pocket exactly as in the reference.*
+Gemeinsamer Anhang [Stil]: *Photorealistic editorial photograph, cinematic, shallow depth of field, 35 mm lens look, subtle film grain, natural colour grading, one clear idea in the centre of the frame, calm composition with some empty space at the bottom of the frame, no text, no letters, no numbers, no signs, no logos, no watermark.*
+
+| Platz | Seed | Prompt (so verwendet) |
+|---|---|---|
+| `fb-anfrage` | 3650227175 | [Figur] A fortune teller's table set up in a craftsman's workshop: a glowing crystal ball on a dark velvet cloth shows a sharp miniature of a window opening with a brick wall, a roller shutter box and glowing measurement lines inside it; the master window maker leans in and looks at it with raised eyebrows, candles, warm light. [Stil] |
+| `fb-kunden-planen` | – | Bild vom Inhaber (winziger Meister auf der Fensterbank), nicht hier erzeugt |
+| `fb-kundenschutz` | 2329446189 | [Figur] Inside a small window showroom in warm evening light, the master window maker shakes hands with a young couple holding a small child, a white window sample standing between them. Outside the glass shop door, in the rain, three wolves in grey business suits with briefcases wait and cannot get in; the glass door is locked with a large old-fashioned key. Warm golden light inside, cool blue rain outside. [Stil] |
+| `fb-pakete` | 432385364 | [Figur] A dark showroom with three white window frames presented like sports cars at a launch, each standing on its own round podium under a spotlight: the first plain white, the second with its frame painted in soft green (#8fd694), the third in the same green with a small golden crest and a velvet rope in front of it; the master window maker stands proudly beside the third podium; silhouettes of visitors in the foreground. [Stil] |
+| `fb-ablauf` | 249623372 | [Figur] The master window maker drawing a window with white chalk on a bare plastered wall; the chalk lines are turning into a real white window with glass and a sunny garden view behind it, halfway finished, dust floating in the light, hopeful. [Stil] |
+| `fb-frage` | 1072991259 | [Figur] Exactly one old red rotary telephone, caught mid-air above a wooden workbench as it rings so hard it has jumped up, its coiled cord still attached to the bench, sawdust and a yellow folding rule flying up around it; the master window maker lunges toward it from the side with both hands open and a surprised grin, bright workshop daylight, playful. There is only this single telephone in the picture. [Stil] |
+| `partner-start` | 639319999 | [Figur] The master window maker holding up an oversized golden key whose bow is shaped like a window frame, standing in front of a glowing small shop front at dusk, proud, warm light spilling onto the wet pavement. [Stil] |
+| `partner-gestaltung` | 1007369228 | [Figur] Close-up in front of a white rendered house wall: the master window maker holds up a large fanned-out paint colour swatch deck, and the one swatch he points at with his thumb is soft green (#8fd694); directly behind it the window frame has already been painted in exactly that green with crisp clean edges while the wall around it stays perfectly white; afternoon light, the man slightly to one side so the window is clearly visible. [Stil] |
+| `partner-warten` | ? | [Figur] The master window maker asleep in a hammock in his workshop at night; a dozen tiny elves in work clothes assemble a white window frame on the workbench by lamplight, carrying screws and a tiny spirit level, cosy and funny. [Stil] |
+| `partner-live` | 1731996385 | [Figur] The master window maker cutting a red ribbon stretched across a giant freestanding white window frame on a small town square, confetti in the air, a small crowd clapping, morning sun, celebratory. [Stil] |
+| `instanz-danke` | 1795372267 | A white paper airplane leaving a cosy living room through the open window toward a city at sunset, a relaxed homeowner on the sofa behind it with the phone lying face-down, the plane already far over the rooftops, warm light. [Stil] |
+
+Verworfene Fassungen (Seeds, falls man sie nachrechnen will): `fb-frage` erste Fassung 552766989 (zwei Telefone), `fb-anfrage` zweite
+Fassung 2775640972 (Maßpfeil außerhalb der Kugel), `fb-pakete` zweite Fassung 2957272450 (Schrift auf den Podesten),
+`partner-gestaltung` Eimer über der Fassade 2841679373 (Meister doppelt) und 1084975889 (Farbe auf der Wand);
+Glasglocke 3000205972 und roter Knopf 2409175626 als Alternativen zu Wölfen und Telefon.
+
+## Hausfoto für die Fenster-Animation der Startseite (Wunsch des Inhabers vom 29.10.2026)
+
+Platz: Startseite, Schritt „In 3D planen“. Auf dieses Foto setzt die Seite die 3-D-Fenster aus der App passgenau in die Öffnungen
+und lässt sie nacheinander einschweben (alt raus, neu rein). Der Inhaber wählt je Öffnung Art, Farbe und Sprossen. Deshalb muss
+das Foto streng von vorn sein, mit senkrechten Kanten, und kein Fenster darf verdeckt sein. Stimmung: sympathisch, Mittelschicht,
+nicht hochnäsig; eine Familie von hinten, die aufs Haus zeigt. Bei der Familie gilt: Köpfe unterhalb der Fensterbänke im
+Erdgeschoss, sonst verdeckt sie Öffnungen. Größe: 3:2, mindestens 3000 px breit. Am besten zusätzlich dasselbe Bild ohne Familie
+(„remove the family, keep everything else identical“) als Rückfall.
+
+Prompt (englisch, für Nano Banana, Flux oder Midjourney):
+
+> Photorealistic photograph of an ordinary, well-kept German detached family house from the 1980s, shot perfectly straight-on
+> from the front: frontal elevation, camera centred and slightly elevated at about the height of the ground-floor ceiling,
+> level horizon, all vertical lines perfectly parallel like a shift-lens architectural photo, no wide-angle distortion. The
+> house fills about 70 percent of the frame width, with some sky above the roof and some lawn below.
+> The house is modest and friendly, not luxurious: light beige rendered facade, dark red-brown concrete roof tiles, simple
+> gable roof with the eaves facing the camera, one and a half storeys. Ground floor: front door with a small canopy slightly
+> right of centre, two double-casement windows to the left, one wide three-part window and one small single window to the
+> right. Upper floor: three windows of different widths. All windows are older white PVC windows from the 1990s with roller
+> shutter boxes above them, shutters fully open, plain light curtains, glass softly reflecting the sky. Every window and the
+> door are completely visible: no trees, plants, ladders or people in front of any window.
+> Front garden: short lawn, low hedge along the edge, a paved path to the door, a few flower pots, a child's bike lying on
+> the grass. Quiet residential street, neighbouring houses only hinted at the edges, no cars.
+> In the lower foreground, slightly left of centre, a young family seen from behind: a father in jeans and a hoodie, a mother
+> in a light rain jacket, and a girl of about six holding her mother's hand and pointing at the house with her other arm
+> outstretched. Natural, relaxed everyday poses, no faces visible. They stand on the lawn in the lower third of the frame;
+> their heads stay below the ground-floor window sills and they do not overlap any window or the door.
+> Soft late-afternoon daylight in early summer, gentle and even, no hard shadows across the facade, no long cast shadows on
+> the ground, natural colours, calm sky with a few light clouds. Sharp from front to back (f/8), fine detail on the window
+> frames. Feels like a warm, honest photo a neighbour would take, not a glossy real-estate ad.
+> No text, no logos, no watermark, no house number, no licence plates. Landscape 3:2, highest resolution.
+
+Negativ (wo der Generator das Feld hat): luxury villa, modern cube house, swimming pool, sports car, fisheye, tilted or
+converging verticals, perspective from below, windows covered by plants or people, closed shutters, visible faces,
+dramatic sky, HDR look, oversaturated, text, watermark.
+
+Fassung ohne Menschen (Inhaber, 29.10.2026): den Absatz mit der Familie weglassen, im Garten statt dessen „a child's bike lying on
+the grass and a watering can by the path“, am Ende „no people, no animals“ ergänzen; im Negativ „people, person, family, faces“.
+
+Prüfen vor dem Einsetzen: senkrechte Kanten gerade; jedes Fenster ganz sichtbar und frei; Hände und Finger der Familie
+plausibel; kein Schriftsalat (Hausnummer, Schilder); Haus wirkt normal, nicht teuer.

@@ -1,6 +1,6 @@
 /* eeziframes · Geld der Aufträge über Stripe (REST, stripe.js) oder die Attrappe (ZAHLUNG_ATTRAPPE=1 ohne Schlüssel)
-   - Einrichtung beim Bestellen: Checkout (Karte oder SEPA-Lastschrift), Betrag aus pakete.js netto zzgl. Steuersatz, Rechnung von
-     Stripe, Zahlungsmittel bleibt für das Abo hinterlegt. Metadaten art: 'auftrag', auftrag: <id> (zahlung.js leitet die Ereignisse her).
+   - Einrichtung beim Bestellen: Checkout (Karte oder SEPA-Lastschrift), Betrag aus pakete.js netto zzgl. Steuersatz, Gutscheincodes
+     aus dem Stripe-Dashboard an der Kasse, Rechnung von Stripe, Zahlungsmittel bleibt für das Abo hinterlegt. Metadaten art: 'auftrag', auftrag: <id> (zahlung.js leitet die Ereignisse her).
    - Monatsabo ab Live: Preis über lookup_key je Paket und Betrag (eine Preisänderung in pakete.js legt einen neuen Preis an, laufende
      Abos behalten ihren), Steuersatz wie oben.
    - Kundenportal (Rechnungen, Zahlungsmittel, Kündigung), Erstattung der Einrichtung beim Storno.
@@ -12,14 +12,14 @@ import { ApiFehler, zufall } from '../api/umgebung.js';
 import { stripe } from '../api/stripe.js';
 
 const P = () => globalThis.Pakete;
-const cent = (euro) => Math.round(Number(euro || 0) * 100);
+export const cent = (euro) => Math.round(Number(euro || 0) * 100);
 export const mitStripe = (k) => !!k.stripe;
-const attrappe = (k) => !k.stripe && !!k.zahlungAttrappe;
-const pruefe = (k) => { if (!k.stripe && !k.zahlungAttrappe) throw new ApiFehler('Die Zahlung ist hier noch nicht eingerichtet (STRIPE_SECRET_KEY).', 503); };
+export const attrappe = (k) => !k.stripe && !!k.zahlungAttrappe;
+export const pruefe = (k) => { if (!k.stripe && !k.zahlungAttrappe) throw new ApiFehler('Die Zahlung ist hier noch nicht eingerichtet (STRIPE_SECRET_KEY).', 503); };
 
 /* Steuersatz 19 % zzgl. (Nettopreise für Unternehmer); ohne Umsatzsteuer (MWST=0) keiner. Einmal je Instanz gesucht oder angelegt. */
 const merk = new Map();
-async function steuersatz(ctx, s) {
+export async function steuersatz(ctx, s) {
   if (!mwst(ctx)) return '';
   const schluessel = ctx.k.stripe.key.slice(-10) + ':auftrag-mwst19';
   if (!merk.has(schluessel)) merk.set(schluessel, (async () => {
@@ -32,10 +32,12 @@ async function steuersatz(ctx, s) {
 }
 export const mwst = (ctx) => String((ctx.env || {}).MWST == null ? '19' : ctx.env.MWST).trim() !== '0';
 
-/* Stripe-Kunde des Fensterbauers (einer je Kunde, Name und Anschrift aus dem Betrieb für die Rechnung) */
-async function stripeKunde(ctx, s, a, kunde) {
-  const b = (a.angaben || {}).betrieb || {};
-  const daten = { email: kunde.mail, name: b.firma || kunde.mail, address: { line1: b.strasse || '', postal_code: b.plz || '', city: b.ort || '', country: 'DE' }, preferred_locales: ['de'], metadata: { eeziframes_kunde: kunde.id } };
+/* Stripe-Kunde des Fensterbauers (einer je Kunde, Name und Anschrift aus dem Betrieb für die Rechnung); stripeKundeFuer auch für die
+   Vermittlung (Freischalten eines Aufmaßes, vermittlung-partner.js) mit Anschrift aus dem Register */
+async function stripeKunde(ctx, s, a, kunde) { const b = (a.angaben || {}).betrieb || {}; return stripeKundeFuer(ctx, s, kunde, { name: b.firma, strasse: b.strasse, plz: b.plz, ort: b.ort }); }
+export async function stripeKundeFuer(ctx, s, kunde, b) {
+  b = b || {};
+  const daten = { email: kunde.mail, name: b.name || b.firma || kunde.mail, address: { line1: b.strasse || '', postal_code: b.plz || '', city: b.ort || '', country: 'DE' }, preferred_locales: ['de'], metadata: { eeziframes_kunde: kunde.id } };
   if (kunde.stripe) { await s.post('/customers/' + kunde.stripe, daten).catch(() => null); return kunde.stripe; }
   const c = await s.post('/customers', daten, { idem: 'auftrag-kunde-' + kunde.id });
   return c.id;
@@ -54,11 +56,12 @@ export async function kasse(ctx, a, kunde, o) {
      dann öffnet sie nur mit Karte (Befund des Inhabers, 27.10.2026) */
   const kasseMit = (arten, zusatz) => s.post('/checkout/sessions', {
     mode: 'payment', locale: 'de', customer: kid, line_items: [posten], payment_method_types: arten,
+    allow_promotion_codes: true, // Gutscheincodes aus dem Stripe-Dashboard (z. B. 50 % auf die Einrichtung); den Betrag nach Rabatt liefert kassePruefen (amount_total)
     payment_intent_data: { setup_future_usage: 'off_session', metadata: { art: 'auftrag', auftrag: a.id, nr: a.nr } },
     invoice_creation: { enabled: true, invoice_data: { description: 'Einrichtung ' + name + ' · Auftrag ' + a.nr, metadata: { art: 'auftrag', auftrag: a.id } } },
     customer_update: { address: 'auto', name: 'auto' }, success_url: o.zurueck.replace('{SESSION}', '{CHECKOUT_SESSION_ID}'), cancel_url: o.abbruch,
     metadata: { art: 'auftrag', auftrag: a.id, nr: a.nr, paket: a.paket, agb: (a.zustimmung || {}).agb || '' }, client_reference_id: a.id
-  }, { idem: 'auftrag-kasse-' + a.id + '-' + (a.version || 0) + zusatz });
+  }, { idem: 'auftrag-kasse-' + a.id + '-' + (a.version || 0) + '-g' + zusatz }); // -g: seit den Gutscheincodes andere Angaben, also ein neuer Schlüssel
   let sess;
   try { sess = await kasseMit(['card', 'sepa_debit'], ''); }
   catch (e) { if (!ohneSepa(e)) throw e; sess = await kasseMit(['card'], '-karte'); }

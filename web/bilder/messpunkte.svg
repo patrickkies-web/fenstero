@@ -1,26 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400" role="img" aria-labelledby="t d"><style id="schrift">@font-face{font-family:"Outfit";font-weight:400 900;src:url(data:font/woff2;base64,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) format("woff2")}</style>
 <title id="t">Messpunkte für das Fenster-Aufmaß</title>
 <desc id="d">Maueröffnung von innen: Breite oben, in der Mitte und unten messen, Höhe links, in der Mitte und rechts; es zählt das kleinste Maß. Dazu die Brüstungshöhe vom Fußboden bis zur Fensterbank.</desc>
-<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#c2410c"/></marker></defs>
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#f88962"/></marker></defs>
 <rect width="480" height="400" rx="16" fill="#ffffff"/>
-<rect x="16" y="16" width="448" height="324" fill="#ecebe6"/>
-<rect x="136" y="52" width="210" height="232" fill="#dceaf7"/>
-<rect x="144" y="60" width="194" height="216" fill="none" stroke="#3d3d3a" stroke-width="3"/>
-<line x1="241" y1="60" x2="241" y2="276" stroke="#3d3d3a" stroke-width="3"/>
-<rect x="136" y="52" width="210" height="232" fill="none" stroke="#c2410c" stroke-width="3"/>
-<rect x="122" y="284" width="238" height="10" rx="2" fill="#a8a79f"/>
-<g stroke="#c2410c" stroke-width="2.5" marker-start="url(#p)" marker-end="url(#p)">
+<rect x="16" y="16" width="448" height="324" fill="#ecebec"/>
+<rect x="136" y="52" width="210" height="232" fill="#eceef1"/>
+<rect x="144" y="60" width="194" height="216" fill="none" stroke="#202022" stroke-width="3"/>
+<line x1="241" y1="60" x2="241" y2="276" stroke="#202022" stroke-width="3"/>
+<rect x="136" y="52" width="210" height="232" fill="none" stroke="#f88962" stroke-width="3"/>
+<rect x="122" y="284" width="238" height="10" rx="2" fill="#a8a4a9"/>
+<g stroke="#f88962" stroke-width="2.5" marker-start="url(#p)" marker-end="url(#p)">
 <line x1="138" y1="78" x2="344" y2="78"/><line x1="138" y1="168" x2="344" y2="168"/><line x1="138" y1="258" x2="344" y2="258"/>
 <line x1="162" y1="54" x2="162" y2="282"/><line x1="214" y1="54" x2="214" y2="282"/><line x1="322" y1="54" x2="322" y2="282"/>
 </g>
-<g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
 <text x="126" y="84" text-anchor="end">Breite oben</text><text x="126" y="174" text-anchor="end">Mitte</text><text x="126" y="264" text-anchor="end">unten</text>
 <text x="162" y="42" text-anchor="middle">links</text><text x="214" y="42" text-anchor="middle">Mitte</text><text x="322" y="42" text-anchor="middle">rechts</text>
 <text x="358" y="164">Höhe an</text><text x="358" y="186">3 Stellen</text>
 <text x="398" y="324" text-anchor="end">Brüstungshöhe</text>
 </g>
-<line x1="16" y1="340" x2="464" y2="340" stroke="#141414" stroke-width="3"/>
-<line x1="360" y1="284" x2="426" y2="284" stroke="#3d3d3a" stroke-width="1.5" stroke-dasharray="4 3"/>
-<line x1="414" y1="339" x2="414" y2="285" stroke="#c2410c" stroke-width="2.5" marker-start="url(#p)" marker-end="url(#p)"/>
-<text x="240" y="374" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">Fußboden</text>
+<line x1="16" y1="340" x2="464" y2="340" stroke="#07090a" stroke-width="3"/>
+<line x1="360" y1="284" x2="426" y2="284" stroke="#202022" stroke-width="1.5" stroke-dasharray="4 3"/>
+<line x1="414" y1="339" x2="414" y2="285" stroke="#f88962" stroke-width="2.5" marker-start="url(#p)" marker-end="url(#p)"/>
+<text x="240" y="374" text-anchor="middle" font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">Fußboden</text>
 </svg>

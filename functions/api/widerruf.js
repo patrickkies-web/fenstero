@@ -68,7 +68,7 @@ async function annehmen(ctx) {
 async function seite(ctx, inhalt, status) {
   let html = '';
   try { const r = ctx.env && ctx.env.ASSETS ? await ctx.env.ASSETS.fetch(new Request(ctx.url.origin + '/widerruf/')) : null; if (r && r.ok) html = await r.text(); } catch (e) { html = ''; }
-  const main = '<main>\n' + inhalt + '\n</main>';
+  const main = '<main id="inhalt">\n' + inhalt + '\n</main>';
   html = html && /<main[^>]*>[\s\S]*?<\/main>/.test(html)
     ? html.replace(/<main[^>]*>[\s\S]*?<\/main>/, () => main).replace(/<script src="\/assets\/widerruf\.js"[^>]*><\/script>\n?/, '')
     : '<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vertrag widerrufen · eeziframes</title><link rel="stylesheet" href="/assets/recht.css"></head><body>' + main + '</body></html>';

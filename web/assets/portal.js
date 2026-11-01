@@ -359,7 +359,7 @@ function login(role, id, msg) { S.role = 'betrieb'; S.cur = id; S.sheet = null; 
    ein Bildschirm unter der Übersicht, ein offenes Blatt, ein Schritt in Registrierung, neuem Projekt oder Tour. Zurück im Browser
    landet auf dem Eintrag darunter; das fangen wir ab, gehen in der Seite einen Schritt zurück (Blatt zu, Schritt zurück, Bildschirm
    zurück) und stellen die Wache wieder auf, solange es noch weiter zurück geht. Auf der Übersicht ohne Blatt gibt es keine Wache,
-   dann verlässt Zurück die Seite. Die Anker der Startseite (#hauseigentuemer, #fensterbauer) ersetzen weiter nur die Adresse. */
+   dann verlässt Zurück die Seite. Die Ansichten der Startseite (/ und /fensterbauer, früher #hauseigentuemer und #fensterbauer) ersetzen weiter nur die Adresse. */
 const WACHE = 'eeziBetrieb';
 let wacheLeise = false, wacheAdresse = '';
 const wacheDa = () => { try { return !!(history.state && history.state[WACHE]); } catch (e) { return false; } };
@@ -409,7 +409,12 @@ const ANKER = { kunde: 'hauseigentuemer', betrieb: 'fensterbauer' };
 function ansicht() { return FB_SCREENS.includes(S.screen) ? 'betrieb' : (S.ansicht === 'betrieb' ? 'betrieb' : 'kunde'); }
 function ansichtMerken(neu) {
   S.ansicht = neu === 'betrieb' ? 'betrieb' : 'kunde';
-  try { if (location.hash !== '#' + ANKER[S.ansicht]) history.replaceState(history.state, '', location.pathname + location.search + '#' + ANKER[S.ansicht]); } catch (e) { /* ohne Verlauf */ }
+  /* Adresse ohne Anker: /fensterbauer bzw. / (der Worker liefert unter /fensterbauer die Startseite); auf anderen Pfaden wie bisher der Anker */
+  try {
+    const start = /^\/(index\.html|fensterbauer\/?)?$/.test(location.pathname), soll = S.ansicht === 'betrieb' ? '/fensterbauer' : '/';
+    if (start) { if (location.pathname !== soll || location.hash) history.replaceState(history.state, '', soll + location.search); }
+    else if (location.hash !== '#' + ANKER[S.ansicht]) history.replaceState(history.state, '', location.pathname + location.search + '#' + ANKER[S.ansicht]);
+  } catch (e) { /* ohne Verlauf */ }
 }
 /* Wechsel der Ansicht (Umschalter im Kopf, Karten am Ende, Baustein der Startseite) */
 function zurAnsicht(v) {
@@ -606,7 +611,7 @@ function afterRender(anim) {
   });
   /* Ansicht Hauseigentümer: den Baustein der Startseite aufbauen (startseite.js), Preise und Einstieg von hier */
   const sn = scr.querySelector('#startseite');
-  if (sn && window.Startseite) window.Startseite.auf(sn, { app: appEinstieg(), appLabel: eigenesAufmass() ? 'Aufmaß fortsetzen' : 'Jetzt konfigurieren', weiter: eigenesAufmass() || 0, fuehrung: APP_OPEN + '#fuehrung', preis: eur2(P().aufmass), einf: X.einfText('aufmass'), zuBetrieb: () => zurAnsicht('betrieb') });
+  if (sn && window.Startseite) window.Startseite.auf(sn, { vermittlung: !!(Server.status && Server.status.vermittlung && Server.status.vermittlung.an), app: appEinstieg(), appLabel: eigenesAufmass() ? 'Aufmaß fortsetzen' : 'Jetzt konfigurieren', weiter: eigenesAufmass() || 0, fuehrung: APP_OPEN + '#fuehrung', preis: eur2(P().aufmass), einf: X.einfText('aufmass'), zuBetrieb: () => zurAnsicht('betrieb') });
   /* Ansicht Fensterbauer: die eingebettete Seite für Fensterbauer füllen oder darauf fensterbauer.js starten (siehe „Einbettung der Seite für Fensterbauer“) */
   const vk = scr.querySelector('.vk-einbettung');
   if (vk) einbettungAuf(vk);
@@ -1534,7 +1539,7 @@ const TOUR_BILD = { breite: 920, hoehe: 872 };
 const tourBildSrc = (abzug) => '/bilder/tour-aufmassblatt-' + abzug + '.webp';
 function tourBlattKarte(abzug) {
   const w0 = demoWins('weber')[0], d0 = AW.derive(w0), bm = AW.th(d0.moW - 2 * abzug) + ' × ' + AW.th(d0.moH - abzug) + ' mm';
-  return '<div class="card tour-pdfkarte"><figure class="tpk-blatt"><img src="' + tourBildSrc(abzug) + '" width="' + TOUR_BILD.breite + '" height="' + TOUR_BILD.hoehe + '" decoding="async" alt="Ausschnitt aus Seite 1 des Aufmaßblatts: Kopf mit dem Namen von ' + esc(TOUR_BETRIEB.name) + ', Kunde Familie Weber mit Eckdaten, Übersicht aller Positionen, Position 1 ' + esc(w0.name) + ' mit Bestellmaß-Vorschlag ' + bm + '"></figure>' +
+  return '<div class="card tour-pdfkarte"><figure class="tpk-blatt"><img src="' + tourBildSrc(abzug) + '" width="' + TOUR_BILD.breite + '" height="' + TOUR_BILD.hoehe + '" decoding="async" alt="Ausschnitt aus Seite 1 des Aufmaßblatts: Kopf mit dem Namen von ' + esc(TOUR_BETRIEB.name) + ', Kunde Familie Weber mit Eckdaten, Übersicht aller Positionen, Position 1 ' + esc(w0.name) + ' mit Richtmaß fürs Angebot ' + bm + '"></figure>' +
     '<div class="tpk-tx"><b>Das Aufmaßblatt als PDF</b><p class="km-s">So sieht Seite 1 aus: mit Ihrem Namen und Logo, allen Positionen mit Bestellmaß nach Ihrem Abzug und der Klärungsliste. Danach je Position eine Seite mit Zeichnung, Wünschen und Fotoauswertung. Zum Ausdrucken, Weiterleiten, Abheften.</p><button type="button" class="btn small ghost" data-act="tour-pdf">' + icon('dl', 16) + 'Ganzes Beispiel-PDF ansehen</button></div></div>';
 }
 /* Die anderen Abzüge schon laden, damit der Wechsel ohne Lücke geht */
@@ -1989,7 +1994,7 @@ root.addEventListener('change', (e) => { const el = e.target; if (el && el.getAt
 tick();
 setInterval(tick, 60000);
 /* Direktlink zur Tour (/#tour), etwa von der Seite für Fensterbauer */
-/* Anker: /#tour öffnet die Tour, /#fensterbauer (auch #betriebe) und /#hauseigentuemer wählen die Ansicht; wer über den
+/* Anker: /#tour öffnet die Tour, /fensterbauer, /#fensterbauer (auch #betriebe) und /#hauseigentuemer wählen die Ansicht; wer über den
    QR-Code eines Aufmaßblatts kommt, ist Fensterbauer */
 const ankerLink = () => {
   const h = location.hash;
@@ -1999,7 +2004,7 @@ const ankerLink = () => {
   if (h === '#wie' && !S.role) { history.replaceState(null, '', location.pathname + location.search); ansichtMerken('betrieb'); S.hist = []; S.screen = 'wie'; S.sheet = null; render(); window.scrollTo(0, 0); return true; }
   const pm = /^#projekt-([a-z0-9]{1,40})$/i.exec(h);
   if (pm) { ankerProjekt = pm[1]; history.replaceState(history.state, '', location.pathname + location.search); if (!projektAnkerOeffnen()) render(); return true; }
-  const a = h === '#fensterbauer' || h === '#betriebe' ? 'betrieb' : h === '#hauseigentuemer' ? 'kunde' : '';
+  const a = h === '#fensterbauer' || h === '#betriebe' ? 'betrieb' : h === '#hauseigentuemer' ? 'kunde' : !h && /^\/fensterbauer\/?$/.test(location.pathname) ? 'betrieb' : '';
   if (!a) return false;
   ansichtMerken(a);
   if (!S.role) { if (S.screen === 'tour') { clearTimeout(tourTimer); S.tour = null; } S.hist = []; S.screen = 'landing'; S.sheet = null; }
@@ -2009,5 +2014,14 @@ const ankerLink = () => {
 if (vonPdf()) ansichtMerken('betrieb');
 if (!ankerLink()) render();
 window.addEventListener('hashchange', ankerLink);
+/* Links auf die Ansichten (/fensterbauer, /#fensterbauer, /#hauseigentuemer, auch im Schatten-DOM der Startseite und in der eingebetteten
+   Seite für Fensterbauer) wechseln in der Seite, statt sie neu zu laden: die Adresse ist ja nicht mehr nur ein anderer Anker */
+document.addEventListener('click', (e) => {
+  if (INST || S.role || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = (e.composedPath ? e.composedPath() : [e.target]).find((n) => n && n.tagName === 'A' && n.hasAttribute('href'));
+  const v = a && ({ '/fensterbauer': 'betrieb', '/#fensterbauer': 'betrieb', '/#hauseigentuemer': 'kunde' })[a.getAttribute('href')];
+  if (!v || !/^\/(index\.html|fensterbauer\/?)?$/.test(location.pathname)) return;
+  e.preventDefault(); zurAnsicht(v);
+});
 Server.start().then((an) => { if (an === 'ohne') return render(); if (an) { render(); setInterval(() => Server.aktualisieren(), 30000); } else { window.PilotHinweis(); if (Server.status) render(); } projektAnkerOeffnen(); });
 

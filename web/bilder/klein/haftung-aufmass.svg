@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400">
+
+
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#07090a"/></marker></defs>
+<rect width="480" height="400" rx="16" fill="#ffffff"/>
+<rect x="110" y="24" width="346" height="68" rx="10" fill="#eceef1" stroke="#897efc" stroke-width="4.4"/>
+<rect x="110" y="116" width="346" height="68" rx="10" fill="#eceef1" stroke="#897efc" stroke-width="4.4"/>
+<rect x="110" y="208" width="346" height="68" rx="10" fill="#ffffff" stroke="#f88962" stroke-width="6.6"/>
+<rect x="110" y="300" width="346" height="68" rx="10" fill="#ffffff" stroke="#f88962" stroke-width="6.6"/>
+<g stroke="#07090a" stroke-width="3.3">
+<line x1="283" y1="93" x2="283" y2="114"/><line x1="283" y1="185" x2="283" y2="206"/><line x1="283" y1="277" x2="283" y2="298"/>
+</g>
+<g stroke-width="6.6" fill="none">
+<path d="M92 28V180" stroke="#897efc"/><path d="M92 212V364" stroke="#f88962"/>
+</g>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="18" fill="#07090a">
+
+
+
+
+
+
+</g>
+</svg>

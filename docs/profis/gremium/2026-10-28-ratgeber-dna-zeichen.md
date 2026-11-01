@@ -1,0 +1,16 @@
+# Ratgeber in der DNA, Detail-Profi Zeichen (28.10.2026)
+
+Getrennter Agent, eine Runde, Fassung X (neu). Zehn Befunde nach Wirkung; Umsetzung siehe Protokoll docs/profis/2026-10-28-ratgeber-dna.md.
+
+1. **Rechtstexte: violetter Punkt ohne Bedeutung über jedem Paragrafen** (`recht.css`, `main > h2::before`). Der Punkt steht ohne Text, ist weder Etikett noch „aktiv“. Wie: weg, statt dessen Haarlinie über der Überschrift. Fehlerseite: „Fehler 404“ mit Punkt in Koralle statt Violett (Fehler = Koralle wie „Häufiger Fehler“).
+2. **„Abschnitt N von M“: viele violette Punkte, am Schreibtisch widersprüchlich** (neben dem aktiven Punkt im Inhaltsverzeichnis trägt auch ein nicht aktiver Abschnitt Violett; in der Übersicht stehen „Schritt N von 6“ ohne Punkt). Wie: Punkt grau (`var(--linie)`, ohne Hof); optional nur der Abschnitt im Blick violett.
+3. **„Nächster Schritt · 5 von 6“ sieht aus wie der aktive Schritt.** Wie: offener Ring wie die offene Station im Weg (`background: transparent; box-shadow: inset 0 0 0 1.5px var(--silbergrau)`).
+4. **„Du bist hier“ als weiße volle Marke** ist das Zeichen der Handlung für einen Zustand (G6, „Chips Indigo für Zustände“). Wie: `background: var(--indigo); color: var(--weiss)`. Herkunft: DNA-Baustein `.dna-schritte__zustand` (dem Inhaber vorlegen).
+5. **Schritte als schwarze volle Kreise** sehen aus wie Knöpfe (G13: voller Kreis = Aktion) und wiegen schwerer als die Zwischentitel (G15). Wie: Ring mit Ziffer (`background: var(--grund); color: var(--tinte); box-shadow: inset 0 0 0 1px var(--linie); font: 400 14px/1`).
+6. **Maßlinien der Zeichnungen: drei Zeichen, wechselnde Farben** (gefüllte Dreiecke, Koralle 2,5 oder Schwarz 1,5; Rahmen mal Anthrazit, mal Violett). Die Startseite zeichnet Maße mit Endstrichen 1,2 px und Öffnung Violett / Fenster Koralle, die Ratgeber umgekehrt wie DNA Abschnitt 9 und Aufmaßblatt (Entscheidung beim Inhaber). Wie: ein Maßzeichen (Linie 1,2 mit Endstrichen), Öffnung Koralle gestrichelt, Fenster Violett durchgezogen, keine schwarzen Maßlinien.
+7. **Strichstärken skalieren mit der Bildgröße** (Rahmen 3, 6 oder 8 Einheiten; in der Übersicht als kleines Bild etwa 0,4 px, „graue Flecken“). Wie: `vector-effect="non-scaling-stroke"` und 1,8 / 1,2 / 1 in zeichnungen-dna.py.
+8. **Ringe des Selbstchecks sehen aus wie Ankreuzfelder, die keine sind** (Begleit-Skill: nichts sieht nach Knopf aus, was keiner ist). Wie: Listenpunkt 6 px.
+9. **Ein Zeichen, mehrere Zeichnungen:** „→“ als Schriftzeichen im Band, „›“ als Text in den Brotkrumen, Ecke-Pfeil anders gezeichnet als auf der Startseite (`M5 4h5v5`), Plus-Knopf der Fragen ohne Anthrazit-Grund. Wie: Pfeil und Chevron als Maske, Pfad der Startseite, Anthrazit am Plus-Knopf.
+10. **Punkt für „aktiv“ uneinheitlich:** Fuß der Rechtstexte ohne `aria-current`; Hof dreimal verschieden (Violett 35 %, Indigo 40 %, Indigo 70 %); gelesene Abschnitte im Inhaltsverzeichnis bleiben leer, im Weg sind erledigte grau. Wie: zwei Werte (Etikett: Hof Violett 35 %; aktiv: Hof Indigo, `scale(1.45)`), erledigte Abschnitte grau gefüllt.
+
+Ohne Befund: Haarlinien, gepunktete Linien, Listenpunkte, Pfeile in Pillen und Pfeilkreisen, Plus zum Kreuz, Koralle mit Leuchten bei „Häufiger Fehler“.

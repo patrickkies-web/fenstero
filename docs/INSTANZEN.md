@@ -213,7 +213,7 @@ Hauptdomain: Zugangsadresse ohne Betriebskonto → 409 { umzug: 'https://<host>/
 - **Verkaufsseite (F):** `functions/pakete-seite.js` setzt die Bausteine je Umgebung ein: ohne `PAKETE_OFFEN` „Bestellung bald möglich“ mit Anfrageformular (`POST /api/partner/frage`, D, auch ohne JavaScript), mit `PAKETE_OFFEN=1` Knöpfe auf `/partner/#bestellen/<paket>` (partner.js wählt das Paket vor); `PAKETE_DEMOS=1` verlinkt die Demo-Instanzen.
 - **Fassung der Paketbedingungen:** `PAKET_STAND` (functions/api/recht.js) steht gleich in `GET /api/partner/stand`, in `<meta name="stand">` von `/konfigurator-bedingungen/` und in den Namen der beiden PDFs; die Kasse verlangt genau diese Fassung. `node scripts/bedingungen-pdf.mjs` schreibt Bausteine und PDFs, `--pruefen` vergleicht.
 - **Recht je Instanz (F):** `impressumSeite(inst)` und `datenschutzSeite(inst)` aus `instanzen.recht` (bei Instanzen aus einer Bestellung die Firma der Bestellung) und den Merkmalen; ein Paketwechsel ändert die Texte sofort (`__Host-betrieb` nur mit Dashboard, eeziframes mit Namen nur bei `rechtNennung: 'name'`).
-- **Startseite eeziframes.com (E.7):** Ansicht Hauseigentümer: Kasten „Für Fensterbauer“ → `/fuer-fensterbauer/` (dazu der Weg in die Ansicht für Bestandsbetriebe); Ansicht Fensterbauer: Karte „Pakete ansehen“. Registrierung und Tour des Betriebsbereichs bleiben über `/#fensterbauer` und `/#tour` erreichbar.
+- **Startseite eeziframes.com (E.7):** Ansicht Hauseigentümer: Kasten „Für Fensterbauer“ → `/fuer-fensterbauer/` (dazu der Weg in die Ansicht für Bestandsbetriebe); Ansicht Fensterbauer: Karte „Pakete ansehen“. Registrierung und Tour des Betriebsbereichs bleiben über `/fensterbauer` und `/#tour` erreichbar.
 
 ### Router (functions/api/router.js)
 

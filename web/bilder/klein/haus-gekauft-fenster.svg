@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400">
+
+
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#07090a"/></marker></defs>
+<rect width="480" height="400" rx="16" fill="#ffffff"/>
+<g font-family="Outfit, Helvetica Neue, Arial, sans-serif" font-size="16" fill="#07090a">
+<!-- Erdreich und Keller -->
+<rect x="24" y="300" width="302" height="76" fill="#ecebec"/>
+<rect x="72" y="300" width="206" height="62" fill="#f5f6f8" stroke="#202022" stroke-width="5.5"/>
+<!-- Haus -->
+<rect x="72" y="94" width="206" height="206" fill="#ffffff" stroke="#202022" stroke-width="6.6"/>
+<path d="M58 100 L175 26 L292 100" fill="#e6e5e7" stroke="#202022" stroke-width="6.6" stroke-linejoin="round"/>
+<line x1="72" y1="197" x2="278" y2="197" stroke="#c4c1c5" stroke-width="5.5"/>
+<!-- oberste Geschossdecke: Pflicht -->
+<rect x="72" y="89" width="206" height="10" fill="#f88962" stroke="#b4502f" stroke-width="3.3"/>
+<!-- Fenster -->
+<g fill="#eceef1" stroke="#897efc" stroke-width="6.6">
+<rect x="98" y="118" width="48" height="58"/><rect x="204" y="118" width="48" height="58"/>
+<rect x="98" y="222" width="48" height="58"/><rect x="204" y="222" width="48" height="58"/>
+</g>
+<g stroke="#897efc" stroke-width="4.8"><path d="M122 118v58M98 147h48M226 118v58M204 147h48M122 222v58M98 251h48M226 222v58M204 251h48"/></g>
+<!-- Tür -->
+<rect x="160" y="236" width="32" height="64" fill="#d2d0d3" stroke="#202022" stroke-width="5.5"/>
+<!-- Bodenlinie -->
+<line x1="24" y1="300" x2="326" y2="300" stroke="#07090a" stroke-width="6.6"/>
+<!-- Leitungen im Keller: Pflicht -->
+<g fill="none" stroke="#f88962" stroke-width="13.2" stroke-linecap="round" stroke-linejoin="round"><path d="M92 318h150v26H132"/></g>
+<g fill="none" stroke="#b4502f" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"><path d="M92 314.5h153.5v33H132M92 321.5h146.5v19H132"/></g>
+<!-- Etiketten -->
+<g fill="none" stroke="#07090a" stroke-width="4.4">
+<line x1="338" y1="60" x2="282" y2="90"/>
+<line x1="338" y1="170" x2="256" y2="147"/>
+<line x1="338" y1="336" x2="250" y2="331"/>
+</g>
+
+
+
+
+
+
+
+
+</g>
+</svg>

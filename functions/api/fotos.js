@@ -35,14 +35,16 @@ const X = () => globalThis.Abrechnung;
 /* Ablagen (private Buckets bei Supabase Storage, der Server legt sie beim ersten Gebrauch an). fotos: Fotos der Fenster (dazu die kleine
    Fassung <id>k, 640 px, für das Aufmaßblatt der Instanzen); marke: veröffentlichte Bilder einer Instanz (instanz/<id>/<v>/<name>);
    bestellungen: Uploads aus dem Bestellformular (partner/<partner>/<bestellung>/<datei>); blatt: abgelegte Aufmaßblätter (Signature,
-   instanz/<id>/<code>-<runde>.pdf). Siehe docs/INSTANZEN.md */
+   instanz/<id>/<code>-<runde>.pdf); vermittlung: Aufmaßblätter der Vermittlung. Siehe docs/INSTANZEN.md */
 export const ABLAGEN = {
   fotos: { bucket: 'fotos', typen: ['image/jpeg'], max: 1000000 },
   marke: { bucket: 'marke', typen: ['image/png', 'image/jpeg', 'image/webp'], max: 2000000 },
   bestellungen: { bucket: 'bestellungen', typen: ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'application/pdf'], max: 1000000 },
   blatt: { bucket: 'blatt', typen: ['application/pdf'], max: 10000000 },
   /* Dateien der Aufträge (functions/auftrag/): Logo, Porträt, Fotos für die Landingpage, auftrag/<id>/<datei> */
-  auftraege: { bucket: 'auftraege', typen: ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'application/pdf'], max: 4000000 }
+  auftraege: { bucket: 'auftraege', typen: ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'application/pdf'], max: 4000000 },
+  /* Aufmaßblätter der Vermittlung (functions/api/vermittlung.js): v/<anfrage>.pdf, gelöscht 180 Tage nach dem Eingang */
+  vermittlung: { bucket: 'vermittlung', typen: ['application/pdf'], max: 10000000 }
 };
 export const FOTO_MAX = 1000000;            // Bytes je Foto; die App schickt meist 0,2 bis 0,6 MB
 export const FOTOS_JE_ABLAGE = 160;         // je Link bzw. je eigenem Aufmaß: 50 Fenster mit je zwei Fotos und neu fotografierte

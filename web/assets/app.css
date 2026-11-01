@@ -391,7 +391,10 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 @keyframes w3d-glanz { 0% { opacity: 0; background-position: 130% 0 } 12%, 82% { opacity: .95 } 100% { opacity: 0; background-position: -30% 0 } }
 .w3d-griffa { position: absolute; left: 0; top: 0; border-radius: 4px; box-shadow: 0 1px 2px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(0, 0, 0, .2); transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s, height .7s, opacity .3s, background .5s }
 .w3d-handle { position: absolute; left: 0; top: 0; border-radius: 999px; box-shadow: 0 1px 2px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(0, 0, 0, .28); transition: transform .7s cubic-bezier(.3, .7, .2, 1), translate .7s cubic-bezier(.3, .7, .2, 1), width .7s, height .7s, opacity .3s, background .5s }
-.w3d-bar { position: absolute; box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 1px 3px rgba(0, 0, 0, .2); z-index: 2; touch-action: none; transition: left .25s, top .25s, width .3s, height .3s, background .5s }
+.w3d-bar { position: absolute; box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), -1px 2px 3px rgba(0, 0, 0, .2); z-index: 2; touch-action: none; transition: left .25s, top .25s, width .3s, height .3s, background .5s }
+/* Sprosse als Profil (29.10.2026, wie in der WebGL-Bühne): Licht auf der oberen bzw. rechten Kante, die andere im Schatten */
+.w3d-bar::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, .12)) }
+.w3d-bar[data-dir="v"]::after { background: linear-gradient(270deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, .12)) }
 .w3d-bar.is-sel { box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 0 0 2.5px var(--accent) }
 .w3d-roll { background: linear-gradient(180deg, #ededeb, #d2d2cf); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2) } .w3d-roll-b { background: #c9c9c6 } .w3d-roll-t { background: #f1f1ef } .w3d-roll-s { background: #d9d9d6 }
 /* Sonnenschutz: Behang außen mit Endleiste, Sichtschutz innen mit Kassette und Endleiste (Farben inline, Muster aus behangBg/innenBg) */
@@ -1561,34 +1564,42 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna .lg-band i.ist { width: 12px; height: 12px; background: var(--violett); box-shadow: 0 0 0 4px var(--indigo) }
 
 /* Bühne (Anthrazit): das Haus im Schnitt; alles darin bezieht sich auf 358 × 250 px und wird auf schmalen Telefonen verkleinert (--lg-s) */
-.dna .lg-buehne { position: relative; flex: none; height: calc(250px * var(--lg-s, 1)); border-radius: var(--rund-l); overflow: hidden; background: var(--anthrazit); isolation: isolate; color: var(--tinte) }
+/* Bühne nach G14: tonaler Abfall von oben links, Lichtkante oben */
+.dna .lg-buehne { position: relative; flex: none; height: calc(250px * var(--lg-s, 1)); border-radius: var(--rund-l); overflow: hidden; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), inset 0 0 0 1px rgba(255, 255, 255, .045); isolation: isolate; color: var(--tinte) }
 .dna .lg-buehne-in { position: absolute; left: 50%; top: 0; width: 358px; height: 250px; transform: translateX(-50%) scale(var(--lg-s, 1)); transform-origin: top center }
 .dna .lg-haus { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1 }
-.dna .lg-haus .wand { fill: none; stroke: var(--weiss); stroke-width: 1.4 }
-.dna .lg-haus .fein { fill: none; stroke: var(--silbergrau); stroke-width: 1.2; stroke-dasharray: 3 4 }
-.dna .lg-haus .boden { stroke: var(--silbergrau); stroke-width: 1.2 }
 .dna .lg-haus .strich { stroke: var(--silbergrau); stroke-width: 1.4 }
 .dna .lg-haus .strich.lang { stroke: var(--weiss) }
+.dna[data-stock="dg"] .lg-haus .strich[data-s="dg"], .dna[data-stock="og"] .lg-haus .strich[data-s="og"], .dna[data-stock="eg"] .lg-haus .strich[data-s="eg"], .dna[data-stock="kg"] .lg-haus .strich[data-s="kg"] { stroke: var(--violett); transition: stroke 320ms var(--dna-druck) }
 .dna .lg-haus text { font: 600 13px/1 var(--font-sans); fill: var(--silbergrau); letter-spacing: .02em }
 .dna .lg-haus text.ist { fill: var(--weiss) }
-/* Das gewählte Stockwerk (frei) leicht aufgehellt, die übrigen leer; Erde dunkler als die Bühne, der Keller im Schnitt wie die Räume.
-   Keine Schraffur und kein violettes Leuchten (Wunsch des Inhabers, 28.10.2026). */
-.dna .lg-haus .schnitt { fill: rgba(255, 255, 255, .07); opacity: 0; transition: opacity 320ms var(--dna-druck) }
+/* Das Haus als Körper in der Dämmerung (Inhaber, 30.10.2026: keine Strichlinien, kein Neonleuchten): Flächen in Nuancen von Anthrazit
+   (Verläufe im SVG), Lichtkanten an Gelände und First, Schatten unter Traufe und Gesims, dunkle Scheiben. Das gewählte Stockwerk
+   (.schnitt.frei) ist innen erleuchtet: weiße Scheiben und ein weicher weißer Schein, ohne Weichzeichner. Keine Schraffur (28.10.2026). */
+.dna .lg-haus .kante { fill: rgba(255, 255, 255, .14) }
+.dna .lg-haus .keller { fill: #19191b }
+.dna .lg-haus .sohle { fill: #0e0f10 }
+.dna .lg-haus .gaubendach { fill: #1c1c1e }
+.dna .lg-haus .traufe { fill: rgba(7, 9, 10, .38) }
+.dna .lg-haus .gesims { fill: rgba(7, 9, 10, .3) }
+.dna .lg-haus .rahmen { fill: #55555a }
+.dna .lg-haus .glas { fill: #101113 }
+.dna .lg-haus .bank { fill: #5e5e63 }
+.dna .lg-haus .glas-an { fill: var(--weiss); fill-opacity: .86 }
+.dna .lg-haus .schnitt { opacity: 0; transition: opacity 320ms var(--dna-druck) }
 .dna .lg-haus .schnitt.frei { opacity: 1 }
-.dna .lg-haus .erde { fill: rgba(7, 9, 10, .5) }
-.dna .lg-haus .keller { fill: var(--anthrazit) }
 .dna .lg-stock { position: absolute; z-index: 2; left: 48px; right: 12px; border: 0; background: none; padding: 0; cursor: pointer; border-radius: 12px }
 .dna .lg-stock:focus-visible { outline: 2px solid var(--fokus); outline-offset: -2px }
 .dna .lg-fenster { position: absolute; top: 0; z-index: 3; width: 56px; left: 228px; transition: transform 400ms var(--dna-auftritt), width 400ms var(--dna-auftritt); filter: drop-shadow(0 10px 10px rgba(7, 9, 10, .4)); pointer-events: none }
-.dna .lg-fenster::before { content: ""; position: absolute; inset: -30% -45%; z-index: -1; background: radial-gradient(closest-side, var(--koralle) 0, var(--koralle) 22%, transparent); filter: blur(7px) }
 .dna .lg-fenster img { position: relative; display: block; width: 100%; height: auto }
-.dna .lg-etikett { position: absolute; top: 0; z-index: 3; left: 70px; transition: transform 400ms var(--dna-auftritt); pointer-events: none }
+.dna .lg-etikett { position: absolute; top: 0; z-index: 3; left: 54px; transition: transform 400ms var(--dna-auftritt); pointer-events: none }
 .dna .lg-etikett .leer { color: var(--silbergrau); font-weight: 400 }
-.dna .lg-strich { position: absolute; top: 0; z-index: 3; left: 206px; width: 22px; border-top: 1.2px dashed var(--weiss); transition: transform 400ms var(--dna-auftritt); pointer-events: none }
+.dna .lg-etikett .dna-etikett { max-width: 150px } /* „Wohnzimmer“ passt ganz */
+.dna .lg-strich { position: absolute; top: 0; z-index: 3; left: 206px; width: 22px; border-top: 1.2px solid rgba(255, 255, 255, .7); transition: transform 400ms var(--dna-auftritt); pointer-events: none }
 .dna .lg-erkannt { position: absolute; z-index: 3; right: 14px; top: 12px; gap: 7px; height: 28px; background: var(--koralle); color: var(--schwarz) }
 .dna .lg-erkannt::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--schwarz) }
 .dna .lg-tippen { position: absolute; z-index: 3; left: 12px; top: 10px; padding: 5px 10px; border-radius: 999px; background: var(--schwarz); font: 500 13px/1 var(--font-sans); color: var(--weiss) }
-.dna.lg-still .lg-fenster, .dna.lg-still .lg-etikett, .dna.lg-still .lg-strich, .dna.lg-still .schnitt, .dna.lg-still .lp-punkte i, .dna.lg-still .lp-glut, .dna.lg-still .lp-sonne { transition: none !important }
+.dna.lg-still .lg-fenster, .dna.lg-still .lg-etikett, .dna.lg-still .lg-strich, .dna.lg-still .schnitt, .dna.lg-still .lp-punkte i { transition: none !important }
 
 /* Frage */
 .dna .lg-frage { padding: 20px 0 16px }
@@ -1660,8 +1671,11 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 /* Wie genau planen: Fragen als Punktraster je Kapitel, Violett für „wählst du“, Koralle für „plant dein Fensterbauer“ (Klassen lp-) */
 .dna .lp-buehne { height: auto; min-height: 250px }
 .dna .lp-in { position: relative; max-width: 358px; margin: 0 auto; padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 10px }
-.dna .lp-glut { position: absolute; z-index: 1; left: 90px; top: 76px; width: 292px; height: 180px; transform-origin: 0 50%; background: radial-gradient(55% 55% at 45% 50%, var(--violett) 0, var(--violett) 42%, var(--indigo) 66%, transparent 84%); filter: blur(12px); pointer-events: none; transition: transform 320ms var(--dna-druck) }
-.dna .lp-sonne { position: absolute; z-index: 1; right: 6px; top: 90px; width: 210px; height: 165px; transform-origin: 100% 50%; background: radial-gradient(closest-side, var(--koralle) 0, var(--koralle) 60%, transparent); filter: blur(14px); pointer-events: none; transition: transform 320ms var(--dna-druck) }
+.dna .lp-buehne { overflow: hidden }
+/* ein ruhiges violettes Licht aus der Ecke unten links, radial ohne Weichzeichner und ohne Bewegung (Inhaber, 30.10.2026: kein
+   Neonleuchten; wie die Kachel „RAL-Farben“ der Startseite; Zustand zeigt sich über die Punkte, nicht über Leuchten, 28.10.2026);
+   Koralle nur in der Zahl „plant dein Fensterbauer“ */
+.dna .lp-glut { position: absolute; z-index: 1; left: -120px; bottom: -150px; width: 420px; height: 340px; background: radial-gradient(closest-side, color-mix(in srgb, var(--violett) 58%, transparent), color-mix(in srgb, var(--indigo) 46%, transparent) 42%, transparent 100%); pointer-events: none }
 .dna .lp-kopf { position: relative; z-index: 2; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px }
 .dna .lp-zahl { display: flex; align-items: baseline; gap: 8px }
 .dna .lp-zahl output { font: 200 56px/.9 var(--font-sans); letter-spacing: -.04em; font-variant-numeric: tabular-nums; color: var(--violett); display: inline-block; transition: transform 320ms var(--dna-feder) }
@@ -1697,7 +1711,7 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna .lg-zurueck { width: 52px; height: 52px; flex: none; border-radius: 50%; border: 0; background: transparent; color: var(--tinte); box-shadow: inset 0 0 0 1.5px var(--silbergrau); display: grid; place-items: center; cursor: pointer }
 .dna .lg-zurueck svg { width: 16px; height: 16px }
 .dna .lg-grund { order: -1; flex: 0 0 100%; margin: 0 0 2px; text-align: center }
-@media (prefers-reduced-motion: reduce) { .dna .lg-fenster, .dna .lg-etikett, .dna .lg-strich, .dna .lg-haus .schnitt, .dna .lg-zahl output, .dna .lg-stockwahl button, .dna .dna-pille, .dna .lp-punkte i, .dna .lp-glut, .dna .lp-sonne, .dna .lp-zahl output { transition: none !important } }
+@media (prefers-reduced-motion: reduce) { .dna .lg-fenster, .dna .lg-etikett, .dna .lg-strich, .dna .lg-haus .schnitt, .dna .lg-zahl output, .dna .lg-stockwahl button, .dna .dna-pille, .dna .lp-punkte i, .dna .lp-zahl output { transition: none !important } }
 
 /* ---------- Wünsche im Look der Design-DNA (27.10.2026; Vorschau docs/profis/konfigurator-start-vorschau/, Folie „Wünsche“) ----------
    Rahmen aus app.js (frageDna): Kopf, Kapitelband als Knopf, Bühne mit dem 3-D-Modell der App, Frage, Antworten, Fuß mit einer Pille.
@@ -3214,3 +3228,112 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .probe-aktionen { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px }
 .probe-zurueck { justify-self: start; min-height: 44px; padding: 0; border: 0; background: none; color: var(--silbergrau); font: 400 14px/1.3 var(--font-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
 @media (prefers-reduced-motion: reduce) { .probe-anhang, .dna.gs .gs-k-rund { transition: none } }
+
+/* ---------- Proportionen des Konfigurators (29.10.2026, Wunsch des Inhabers; Vorschau docs/profis/bilder/2026-10-29-konfigurator-proportionen-*.jpg) ----------
+   Drei Dinge, am Design sonst nichts: 1. Am Telefon ist die Bühne mit dem Element ein Fünftel höher (Wünsche, Fotos, Ergebnis; Messen und
+   Ränder füllen den Bildschirm schon, Start und Lage sind keine Element-Bühne); am Laptop bleibt die Bühne, wie sie ist. 2. Knöpfe, Chips,
+   Kacheln und Zeilen sind eine Spur kleiner (Höhen 52 → 48, Schrift 15 → 14, Luft 10 → 8, Innenränder enger; Ziele bleiben 44 px, Regel
+   der DNA und Prüfsuite), damit nichts klobig wirkt. 3. Gewählt
+   heißt Weiß: die gewählte Kachel ist weiß mit schwarzer Schrift, ohne violettes Licht, Ring und Punkt; gewählte Farbtupfen tragen einen
+   weißen Ring. Die Regeln stehen gesammelt hier, damit sie sich zurücknehmen lassen, ohne die Folien anzufassen. */
+/* 1. Bühne am Telefon (unter 1024 px; am Laptop gelten die Regeln der Folien weiter) */
+@media (max-width: 1023px) {
+  .dna .wz-buehne { height: clamp(264px, calc(100svh - 430px), 326px) }
+  .dna .ft-buehne { height: 300px }
+  .dna.er { --bh: clamp(420px, calc(100svh - 400px), 520px) }
+}
+
+/* 2. Frage und Antworten in den Wünschen */
+.dna .wz-frage h1 { font-size: 26px }
+.dna .wz-sub { font-size: 13px; margin-top: 4px }
+.dna .wz-frage .qtiefe span { height: 26px; font-size: 11px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel { gap: 8px; margin-top: 14px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qcards, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen { gap: 8px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf { min-height: 62px; padding: 10px 10px 10px 12px; border-radius: 16px; gap: 2px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt > svg, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf > svg { width: 30px !important; height: 30px !important; margin: 0 0 2px -1px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt .lbl, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf::after { font-size: 14px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt .sb { font-size: 12px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt .pr { font-size: 11px; right: 10px; bottom: 9px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qinfo::before, .scr.dna:is(.wz, .ab, .tr) .qpanel .qci-i::before, .scr.dna:is(.wz, .ab, .tr) .qpanel .ibtn::before { width: 20px; height: 20px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qcards .qo:has(.qinfo) .qopt { padding-right: 34px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qseg, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips { gap: 3px; padding: 3px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qchips { border-radius: 22px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qseg > button, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips .chip { min-height: 44px; padding: 6px 10px; font-size: 14px; gap: 7px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qseg > button[aria-pressed="true"]::before, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips .chip[aria-pressed="true"]::before { width: 7px; height: 7px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qchips.mit-i .chip, .scr.dna:is(.wz, .ab, .tr) .qpanel .qchips .qci .chip { padding: 6px 38px 6px 10px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qlist, .scr.dna:is(.wz, .ab, .tr) .qpanel .qsteps, .scr.dna:is(.wz, .ab, .tr) .qpanel .rows { padding: 3px 14px; border-radius: 24px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qlist > button, .scr.dna:is(.wz, .ab, .tr) .qpanel .qlist .qli > button:first-child, .scr.dna:is(.wz, .ab, .tr) .qpanel .qstep, .scr.dna:is(.wz, .ab, .tr) .qpanel .sw-row { min-height: 46px; font-size: 14px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qstep .t, .scr.dna:is(.wz, .ab, .tr) .qpanel .sw-row .t, .scr.dna:is(.wz, .ab, .tr) .qpanel .qstep .t b, .scr.dna:is(.wz, .ab, .tr) .qpanel .sw-row .t b { font-size: 14px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qstep .t small, .scr.dna:is(.wz, .ab, .tr) .qpanel .sw-row .t small { font-size: 12px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qlist .mark, .scr.dna:is(.wz, .ab, .tr) .qpanel .qoffen .mark, .scr.dna:is(.wz, .ab, .tr) .qpanel .qmehr .plus { width: 22px; height: 22px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .stepper > button:not(.st-wert) { font-size: 20px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .stepper > b { font-size: 24px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qswatches { gap: 6px 4px; padding: 12px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qsw { min-height: 58px; gap: 4px; font-size: 11px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qsw .c { width: 34px; height: 34px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .fw-zeile { padding: 12px 12px 4px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .fw-cur .tx b { font-size: 14px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .fw-cur .tx small { font-size: 12px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .fw-tupf { width: 32px; height: 32px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .fw-mehr .chip { padding: 0 14px; font-size: 13px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qoffen, .scr.dna:is(.wz, .ab, .tr) .qpanel .qmehr { min-height: 48px; padding: 6px 12px 6px 14px; border-radius: 16px; gap: 10px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qoffen .tx b, .scr.dna:is(.wz, .ab, .tr) .qpanel .qmehr .tx b { font-size: 14px }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qoffen .tx small, .scr.dna:is(.wz, .ab, .tr) .qpanel .qmehr .tx small { font-size: 12px }
+.dna.wz-tasten .keypad .ok { height: 48px; font-size: 14px }
+.dna.wz-tasten .keypad .kp-zurueck { width: 48px; height: 48px }
+.dna .wz-kapitel button { min-height: 48px; font-size: 14px }
+
+/* Fuß: Pille und Zurück 48 statt 52, überall */
+.dna .dna-pille { height: 48px; padding: 0 22px; font-size: 14px }
+.dna .dna-pille:has(.dna-pille__pfeil) { padding: 0 6px 0 22px }
+.dna .dna-pille__pfeil { width: 36px; height: 36px }
+.dna .lg-zurueck { width: 48px; height: 48px }
+.dna .lg-fuss { padding-top: 12px; gap: 8px }
+.dna .ab-fuss-zwei .ab-zweit { height: 48px; font-size: 14px }
+
+/* Lage, Tiefe, Start, Fotos, Ergebnis */
+.dna .lg-frage h1 { font-size: 28px }
+.dna .lg-notiz-knopf { padding: 0 12px; font-size: 14px }
+.dna .lg-frage--i-daneben .lg-notiz-knopf { height: 48px }
+.dna .lg-vorschlaege button, .dna .lg-ogwahl button, .dna .lg-boden { padding: 0 14px; font-size: 14px }
+.dna .lg-stockwahl button { font-size: 14px }
+.dna .lg-stocktext, .dna .lg-hilfe { font-size: 14px }
+.dna .lg-knoepfe button { width: 44px; height: 44px }
+.dna .st-kachel { height: 58px; gap: 4px }
+.dna .st-stelle button { font-size: 13px }
+.dna .ft-leer b { font-size: 14px }
+.dna .ft-leer small { font-size: 12px }
+.dna .er-knopf { padding: 0 16px; font-size: 14px }
+.dna .er-falls .row > label { min-height: 46px }
+.dna .er-falls .row input { font-size: 16px }
+
+/* Abschluss, Liste, Gespeichert, Führung, Blätter: Knöpfe 48 statt 52, Schrift 14 */
+.dna .fg-chip-t, .dna.li .card .pill, .dna.li .card .btn.ghost, .dna.li .card .btn.primary, .dna.ab2 .pill, .dna.ab2 .btn.ghost:not(.lg-weiter), .dna .zn-werkzeuge .chip, .dna .tr-inhalt .qrow .chip, .dna .tr-inhalt .pill-row .pill, .dna .entwurf-karte .btn.ghost, html.dna-voll .fb .btn, html.dna-voll .fb .chip { font-size: 14px }
+.dna .fg-rund, .dna .ab-rund, .dna .pm-karte .row .rnd { font-size: 20px }
+.dna .fg-loeschen { font-size: 14px }
+.dna .li-kopf .hd-neu { font-size: 14px }
+.dna.li .dashed, .dna.ab2 .dashed { min-height: 48px; font-size: 14px }
+.dna.ab2 .ab-inhalt .btn.primary { min-height: 44px; padding: 0 20px; font-size: 15px }
+.dna.ab2 .pay .chip { min-height: 44px; font-size: 14px }
+.dna.ab2 .kf input { min-height: 48px; font-size: 16px; line-height: 48px }
+.dna .ab-eingabe, .dna .ab-eingabe input { height: 48px; line-height: 48px }
+.dna .ab-felder .trow input { font-size: 15px }
+.dna .pm-karte .row .val, .dna .pm-karte .row input { height: 44px; line-height: 44px }
+.dna .wl-tour, .dna .wl-neu { min-height: 44px; font-size: 14px }
+.dna .wl-links .link, .dna.li .li-links .link { font-size: 14px }
+.dna .tr-inhalt .ts-ziele li { min-height: 46px }
+html.dna-voll .sheet:not(.ofoto-dna) .btn { min-height: 48px; font-size: 15px }
+html.dna-voll .sheet:not(.ofoto-dna) .btn.ghost { font-size: 14px }
+
+/* 3. Gewählt heißt Weiß */
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"], .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf[aria-pressed="true"] { background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss))); color: var(--schwarz); box-shadow: inset 0 -1px 0 rgba(7, 9, 10, .06) }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"]::before, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf[aria-pressed="true"]::before { display: none }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"] > svg, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf[aria-pressed="true"] > svg { color: var(--schwarz) }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"] > svg [fill-opacity=".12"], .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf[aria-pressed="true"] > svg [fill-opacity=".12"] { fill: color-mix(in srgb, var(--silbergrau) 30%, var(--weiss)); fill-opacity: 1 }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"] .lbl, .scr.dna:is(.wz, .ab, .tr) .qpanel .qformen .qf[aria-pressed="true"]::after { color: var(--schwarz) }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"] .sb, .scr.dna:is(.wz, .ab, .tr) .qpanel .qopt[aria-pressed="true"] .pr { color: var(--textgrau) }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qopt .lbl::after { display: none }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qcards .qo:has(.qopt[aria-pressed="true"]) .qinfo { color: var(--textgrau) }
+.scr.dna:is(.wz, .ab, .tr) .qpanel .qsw[aria-pressed="true"] .c { box-shadow: 0 0 0 2px var(--anthrazit), 0 0 0 3.8px var(--weiss), inset 0 2px 4px rgba(255, 255, 255, .18), inset 0 -3px 6px rgba(7, 9, 10, .35) }
+html.dna-voll .fb .fw-raster .qsw[aria-pressed="true"] .c { box-shadow: 0 0 0 3px #161618, 0 0 0 5px var(--weiss) }
+html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px var(--weiss) }

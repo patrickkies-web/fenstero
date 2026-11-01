@@ -13,46 +13,61 @@ import { konfig, einfuehrungLaeuft, jetztAus, EINFUEHRUNG } from './api/umgebung
 /* Haken für die Konfigurator-Pakete (Verkaufsseite, llms.txt, Seiten der Paketbedingungen): functions/pakete-seite.js */
 import { paketeSeite, paketeLlms, PAKETE_SEITEN } from './pakete-seite.js';
 
-export const STAND = '2026-10-21';
+export const STAND = '2026-10-29';
 
 /* Alle Seiten für die Sitemap, wichtigste zuerst. stand = letzte inhaltliche Änderung (lastmod in der Sitemap, IndexNow); bei
    Ratgeberseiten gleich dem dateModified im JSON-LD und dem „Stand“ auf der Seite (prüft die Suite) */
 export const SEITEN = [
-  { pfad: '/', prio: '1.0', stand: '2026-10-28' },
+  { pfad: '/', prio: '1.0', stand: '2026-10-30' },
   { pfad: '/app/', prio: '0.9', stand: '2026-10-28' },
-  { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-28' },
-  { pfad: '/ratgeber/balkontuer-ausmessen/', prio: '0.8', stand: '2026-10-21' },
-  { pfad: '/ratgeber/fenster-mit-rollladen-ausmessen/', prio: '0.8', stand: '2026-10-21' },
-  { pfad: '/ratgeber/bestellmass-fenster/', prio: '0.8', stand: '2026-10-21' },
-  { pfad: '/ratgeber/aufmassblatt-fenster/', prio: '0.8', stand: '2026-10-21' },
-  { pfad: '/ratgeber/fenster-austauschen/', prio: '0.8', stand: '2026-10-21' },
-  { pfad: '/ratgeber/din-links-rechts/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/bruestungshoehe-fenster/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/fenster-standardmasse/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/fensterbank-ausmessen/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/kellerfenster-ausmessen/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/fenstertausch-altbau/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/ral-montage-fenster/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/uw-wert-fenster/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/lueftungskonzept-fenstertausch/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/fenster-beschlagen/', prio: '0.8', stand: '2026-10-21' },
-  { pfad: '/ratgeber/fenster-undicht/', prio: '0.8', stand: '2026-10-21' },
-  { pfad: '/ratgeber/fenster-alter-erkennen/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/fenster-reparieren-oder-austauschen/', prio: '0.8', stand: '2026-10-21' },
-  { pfad: '/ratgeber/fenster-material-vergleich/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/dreifachverglasung/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/fenster-oeffnungsarten/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/ratgeber/fenster-angebot-vergleichen/', prio: '0.8', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/erstaufmass-feinaufmass/', prio: '0.7', stand: '2026-10-23' },
-  { pfad: '/fuer-fensterbauer/falsches-aufmass-haftung/', prio: '0.7', stand: '2026-10-23' },
-  { pfad: '/fuer-fensterbauer/aufmass-kostenpflichtig/', prio: '0.7', stand: '2026-10-23' },
-  { pfad: '/fuer-fensterbauer/geplatzter-aufmasstermin/', prio: '0.7', stand: '2026-10-23' },
-  { pfad: '/fuer-fensterbauer/fensterbau-software/', prio: '0.7', stand: '2026-10-23' },
-  { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-21' },
+  { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-10-30' },
+  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-29' },
+  { pfad: '/ratgeber/balkontuer-ausmessen/', prio: '0.8', stand: '2026-10-29' },
+  { pfad: '/ratgeber/fenster-mit-rollladen-ausmessen/', prio: '0.8', stand: '2026-10-29' },
+  { pfad: '/ratgeber/bestellmass-fenster/', prio: '0.8', stand: '2026-10-29' },
+  { pfad: '/ratgeber/aufmassblatt-fenster/', prio: '0.8', stand: '2026-10-29' },
+  { pfad: '/ratgeber/fenster-austauschen/', prio: '0.8', stand: '2026-10-30' },
+  { pfad: '/ratgeber/din-links-rechts/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/ratgeber/bruestungshoehe-fenster/', prio: '0.7', stand: '2026-10-30' },
+  { pfad: '/ratgeber/fenster-standardmasse/', prio: '0.7', stand: '2026-10-30' },
+  { pfad: '/ratgeber/fensterbank-ausmessen/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/ratgeber/kellerfenster-ausmessen/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/ratgeber/fenstertausch-altbau/', prio: '0.7', stand: '2026-10-30' },
+  { pfad: '/ratgeber/ral-montage-fenster/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/ratgeber/uw-wert-fenster/', prio: '0.7', stand: '2026-10-30' },
+  { pfad: '/ratgeber/lueftungskonzept-fenstertausch/', prio: '0.7', stand: '2026-10-30' },
+  { pfad: '/ratgeber/fenster-beschlagen/', prio: '0.8', stand: '2026-10-29' },
+  { pfad: '/ratgeber/fenster-undicht/', prio: '0.8', stand: '2026-10-29' },
+  { pfad: '/ratgeber/fenster-alter-erkennen/', prio: '0.7', stand: '2026-10-30' },
+  { pfad: '/ratgeber/fenster-reparieren-oder-austauschen/', prio: '0.8', stand: '2026-10-30' },
+  { pfad: '/ratgeber/fenster-material-vergleich/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/ratgeber/dreifachverglasung/', prio: '0.7', stand: '2026-10-30' },
+  { pfad: '/ratgeber/fenster-oeffnungsarten/', prio: '0.7', stand: '2026-10-30' },
+  { pfad: '/ratgeber/fenster-angebot-vergleichen/', prio: '0.8', stand: '2026-10-30' },
+  { pfad: '/ratgeber/haus-gekauft-fenster/', prio: '0.8', stand: '2026-10-29' },
+  { pfad: '/ratgeber/fenster-oder-daemmung-zuerst/', prio: '0.8', stand: '2026-10-29' },
+  { pfad: '/ratgeber/fenster-nach-und-nach-tauschen/', prio: '0.8', stand: '2026-10-29' },
+  { pfad: '/ratgeber/fenster-planen-raum-fuer-raum/', prio: '0.8', stand: '2026-10-29' },
+  { pfad: '/ratgeber/fenster-vergroessern/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/ratgeber/fenster-foerderung-2026/', prio: '0.8', stand: '2026-10-29' },
+  { pfad: '/ratgeber/fenster-foerderung-beantragen/', prio: '0.8', stand: '2026-10-30' },
+  { pfad: '/ratgeber/fenster-steuerlich-absetzen/', prio: '0.8', stand: '2026-10-30' },
+  { pfad: '/fuer-fensterbauer/erstaufmass-feinaufmass/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/fuer-fensterbauer/falsches-aufmass-haftung/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/fuer-fensterbauer/aufmass-kostenpflichtig/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/fuer-fensterbauer/geplatzter-aufmasstermin/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/fuer-fensterbauer/fensterbau-software/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/fuer-fensterbauer/fensterangebot-erstellen/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/fuer-fensterbauer/fenster-konfigurator-website/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/fuer-fensterbauer/digitales-aufmass/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/fuer-fensterbauer/leads-fensterbau/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/fuer-fensterbauer/ki-im-fensterbau/', prio: '0.7', stand: '2026-10-29' },
+  { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-29' },
+  { pfad: '/redaktion/', prio: '0.4', stand: '2026-10-30' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-28' },
-  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-28' },
-  { pfad: '/agb/', prio: '0.2', stand: '2026-10-28' },
+  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-30' },
+  { pfad: '/agb/', prio: '0.2', stand: '2026-10-30' },
+  { pfad: '/partnerbedingungen/', prio: '0.3', stand: '2026-10-30' },
   { pfad: '/cookies/', prio: '0.1', stand: '2026-10-28' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
 ].concat(PAKETE_SEITEN);
@@ -78,7 +93,7 @@ export const frei = (env, url) => !!env && String(env.INDEXIERUNG || '') === '1'
 /* Lokal (Testserver, wrangler dev) gilt die aufgerufene Adresse; im Netz immer https, auch wenn eine Seite über http:// abgerufen wurde */
 const LOKAL = /^(localhost|127\.\d+\.\d+\.\d+|\[::1\])$/i;
 export const basis = (env, url) => (env && env.KANONISCH ? String(env.KANONISCH).replace(/\/+$/, '') : (LOKAL.test(url.hostname) ? url.protocol : 'https:') + '//' + url.host.replace(/^www\./i, ''));
-export const istSeite = (pfad) => pfad === '/' || pfad === '/index.html' || /^\/(app|ratgeber|fuer-fensterbauer|impressum|datenschutz|agb|nutzungsbedingungen|cookies|widerruf|konfigurator-bedingungen)(\/|$)/.test(pfad);
+export const istSeite = (pfad) => pfad === '/' || pfad === '/index.html' || /^\/(app|ratgeber|fuer-fensterbauer|impressum|datenschutz|agb|nutzungsbedingungen|cookies|widerruf|konfigurator-bedingungen|partnerbedingungen|redaktion)(\/|$)/.test(pfad);
 const kanonischerPfad = (pfad) => pfad.replace(/index\.html$/, '');
 
 export function robots(origin, an) {
@@ -120,13 +135,13 @@ export function absolut(html, b) {
 }
 
 /* Kopfzeilen einer Seite: Sicherheit wie in _headers; in der Pilotphase X-Robots-Tag: noindex, mit Freigabe ohne; dazu der Canonical-Hinweis */
-export async function seite(antwort, env, url) {
+export async function seite(antwort, env, url, kanonisch) {
   const h = new Headers(antwort.headers);
   for (const [k, v] of Object.entries(SICHERHEIT)) if (!h.has(k)) h.set(k, v);
   if (frei(env, url)) h.delete('X-Robots-Tag'); else h.set('X-Robots-Tag', SPERRE);
   const html = antwort.status === 200 && /text\/html/.test(h.get('content-type') || '');
   if (!html) return new Response(antwort.body, { status: antwort.status, statusText: antwort.statusText, headers: h });
-  const b = basis(env, url), kan = b + kanonischerPfad(url.pathname), nach = !einfuehrungLaeuft(env) && !RECHT_MIT_ZEITRAUM.includes(url.pathname);
+  const b = basis(env, url), kan = b + (kanonisch || kanonischerPfad(url.pathname)), nach = !einfuehrungLaeuft(env) && !RECHT_MIT_ZEITRAUM.includes(url.pathname);
   const mitTag = einfuehrungLaeuft(env) && BANNER_SEITEN.test(url.pathname); // Banner mit Countdown: der Text ändert sich jeden Tag
   h.set('Link', '<' + kan + '>; rel="canonical"');
   h.delete('content-length');
@@ -169,7 +184,7 @@ export function banner(pfad, env) {
   const text = '<b>Einführungspreis bis ' + bis + ':</b> Aufmaßblatt ' + geld(v.aufmass) + ' <span class="spaeter">· danach ' + geld(d.aufmass) + '</span>';
   return '<a class="einf-bar" href="/app/"><span><span class="txt">' + text + '</span><span class="rest">' + rest + '</span><span class="los">Jetzt ausmessen →</span></span></a>';
 }
-const mitBanner = (html, pfad, env) => { const b = BANNER_SEITEN.test(pfad) && konfig(env).einfuehrung ? banner(pfad, env) : ''; return b ? html.replace(/<body[^>]*>/, (m) => m + '\n' + b) : html; };
+const mitBanner = (html, pfad, env) => { const b = BANNER_SEITEN.test(pfad) && konfig(env).einfuehrung ? banner(pfad, env) : ''; return b ? html.replace(/<body[^>]*>(?:\n<a class="rg-skip"[^>]*>[^<]*<\/a>)?/, (m) => m + '\n' + b) : html; };
 
 /* Canonical und og:url zusätzlich im HTML: Bing und KI-Crawler lesen die Seite selbst, nicht immer die Kopfzeilen */
 export function kopf(html, kan) {
@@ -224,17 +239,26 @@ export function llms(origin, env) {
     '- [App: Fenster ausmessen](' + u('/app/') + '): kostenlose Aufmaß-App im Browser, mit Führung zum Ausprobieren',
     '- [Für Fensterbauer](' + u('/fuer-fensterbauer/') + '): eigener Fenster-Konfigurator unter der eigenen Domain, drei Pakete mit Preisen, Ablauf bis zum Livegang, Kundenschutz, Inhalt jeder Anfrage',
     '- [Ratgeber: in sechs Schritten zu neuen Fenstern](' + u('/ratgeber/') + '): prüfen, entscheiden, auswählen, ausmessen, vergleichen, einbauen',
+    '- [Redaktion und Prüfung](' + u('/redaktion/') + '): wie die Ratgeber entstehen, welche Quellen zählen, wann aktualisiert wird',
     '- [Fenster beschlagen](' + u('/ratgeber/fenster-beschlagen/') + '): innen, außen oder zwischen den Scheiben, was es bedeutet und was hilft',
     '- [Fenster undicht oder es zieht](' + u('/ratgeber/fenster-undicht/') + '): Zugluft finden, Dichtung und Beschlag prüfen, wann ein Tausch nötig ist',
     '- [Alter der Fenster erkennen](' + u('/ratgeber/fenster-alter-erkennen/') + '): Baujahr ablesen, Lebensdauer je Material',
     '- [Fenster reparieren oder austauschen](' + u('/ratgeber/fenster-reparieren-oder-austauschen/') + '): Entscheidungshilfe mit Tabelle, Kosten und Förderung',
+    '- [Haus gekauft oder geerbt: Fenster tauschen?](' + u('/ratgeber/haus-gekauft-fenster/') + '): keine Pflicht zum Fenstertausch, Nachrüstpflichten mit Zweijahresfrist, Energieausweis, Sanierungsfahrplan, Förderung vor dem Auftrag',
+    '- [Fenster-Förderung 2026](' + u('/ratgeber/fenster-foerderung-2026/') + '): 15 % BAFA-Zuschuss auf höchstens 30.000 € je Wohneinheit und Jahr, Uw-Höchstwerte je Fensterart, iSFP-Bonus nur über 30.000 €, mitgeförderte Arbeiten, Kredit und Steuerbonus im Vergleich',
+    '- [Fenster-Förderung beantragen](' + u('/ratgeber/fenster-foerderung-beantragen/') + '): Ablauf beim BAFA in zehn Schritten, Energieeffizienz-Experte mit TPB und TPN, Vertrag mit Bedingung, Unterlagen, Fristen, typische Fehler',
+    '- [Fenster steuerlich absetzen](' + u('/ratgeber/fenster-steuerlich-absetzen/') + '): Steuerbonus § 35c (20 % über drei Jahre, höchstens 40.000 € je Objekt, Abschluss vor 2030), Bedingungen, Vergleich mit dem BAFA-Zuschuss, Handwerkerleistungen § 35a',
+    '- [Fenster oder Fassade zuerst](' + u('/ratgeber/fenster-oder-daemmung-zuerst/') + '): Reihenfolge der Sanierung, Lage des Fensters bei späterer Dämmung, Heizung nach der Hülle, Sanierungsfahrplan',
+    '- [Alle Fenster auf einmal oder nach und nach](' + u('/ratgeber/fenster-nach-und-nach-tauschen/') + '): was ein Auftrag spart, Fördergrenze je Kalenderjahr, welche Fenster zuerst, Beispielrechnung',
+    '- [Fenster planen Raum für Raum](' + u('/ratgeber/fenster-planen-raum-fuer-raum/') + '): Glas, Öffnungsart, Einbruchschutz RC 2, Schallschutzklassen und Brüstung je Raum, mit Tabelle',
+    '- [Fenster vergrößern im Altbau](' + u('/ratgeber/fenster-vergroessern/') + '): Verfahrensfreiheit nach Bauordnung, Sturz und Statik, bodentiefes Fenster mit Absturzsicherung, Kostenposten, Uw-Wert und Förderung',
     '- [Fenstermaterial im Vergleich](' + u('/ratgeber/fenster-material-vergleich/') + '): Kunststoff, Holz, Holz-Alu und Alu',
     '- [Dreifachverglasung oder Zweifach](' + u('/ratgeber/dreifachverglasung/') + '): Dämmung, Förderung, Gewicht, wann sich 3-fach lohnt',
     '- [Fenster-Öffnungsarten](' + u('/ratgeber/fenster-oeffnungsarten/') + '): Dreh-Kipp, Stulp, Festverglasung und mehr',
     '- [Fensterangebote vergleichen](' + u('/ratgeber/fenster-angebot-vergleichen/') + '): Checkliste und Beispiel',
     '- [Fenster ausmessen](' + u('/ratgeber/fenster-ausmessen/') + '): Anleitung mit Messpunkten, Altbau, Rollladenkasten und typischen Fehlern',
     '- [Aufmaßblatt für Fenster](' + u('/ratgeber/aufmassblatt-fenster/') + '): was ein Aufmaß je Fenster umfasst, Punkt für Punkt; das Aufmaßblatt selbst entsteht als PDF in der App (keine Vorlage zum Ausdrucken)',
-    '- [Fenster austauschen](' + u('/ratgeber/fenster-austauschen/') + '): Ablauf, Kosten pro Fenster, Förderung 2026, Checkliste fürs Angebot',
+    '- [Fenster austauschen](' + u('/ratgeber/fenster-austauschen/') + '): Ablauf, Kosten pro Fenster, Dauer, Checkliste fürs Angebot; die Förderung im Einzelnen unter Fenster-Förderung 2026',
     '- [Balkontür ausmessen](' + u('/ratgeber/balkontuer-ausmessen/') + '): Balkon- und Terrassentür, Hebe-Schiebe- und PSK-Tür, Schwelle und Abdichtung',
     '- [Fenster mit Rollladenkasten ausmessen](' + u('/ratgeber/fenster-mit-rollladen-ausmessen/') + '): Aufsatz-, Einbau- oder Vorbaukasten erkennen und richtig messen',
     '- [Bestellmaß berechnen](' + u('/ratgeber/bestellmass-fenster/') + '): Fuge je Seite nach Größe und Profilfarbe, Tabelle und Beispiel',
@@ -245,7 +269,7 @@ export function llms(origin, env) {
     '- [Fenster-Standardmaße](' + u('/ratgeber/fenster-standardmasse/') + '): übliche Größen als Tabelle, Maßordnung, warum der Altbau selten passt',
     '- [Fenstertausch im Altbau](' + u('/ratgeber/fenstertausch-altbau/') + '): Laibung, Abdichtung, Schimmel vermeiden',
     '- [RAL-Montage](' + u('/ratgeber/ral-montage-fenster/') + '): Einbau in drei Ebenen, innen luftdicht, außen schlagregendicht',
-    '- [Uw-Wert und Förderung](' + u('/ratgeber/uw-wert-fenster/') + '): was der Uw-Wert bedeutet und welchen Wert Gesetz und Förderung 2026 verlangen',
+    '- [Uw-Wert beim Fenster](' + u('/ratgeber/uw-wert-fenster/') + '): was der Uw-Wert bedeutet, wie er berechnet wird und welche Grenzwerte Gesetz und Förderung 2026 setzen',
     '- [Lüftungskonzept beim Fenstertausch](' + u('/ratgeber/lueftungskonzept-fenstertausch/') + '): wann es nach DIN 1946-6 nötig ist und welche Maßnahmen es geben kann',
     '',
     '## Für Fensterbauer',
@@ -255,6 +279,11 @@ export function llms(origin, env) {
     '- [Aufmaß kostenlos oder kostenpflichtig?](' + u('/fuer-fensterbauer/aufmass-kostenpflichtig/') + '): Kostenanschlag, Anfahrtspauschale, Absprache vorab',
     '- [Geplatzter Aufmaßtermin](' + u('/fuer-fensterbauer/geplatzter-aufmasstermin/') + '): was eine Fahrt ohne Kunden kostet, mit Beispielrechnung',
     '- [Fensterbau-Software im Überblick](' + u('/fuer-fensterbauer/fensterbau-software/') + '): Aufmaß-Apps, Handwerkersoftware und ERP, nach Aufgabe geordnet',
+    '- [Fenster-Angebot erstellen](' + u('/fuer-fensterbauer/fensterangebot-erstellen/') + '): was hineingehört, Kundenmaße mit Feinaufmaß-Vorbehalt, Bindefrist und Widerruf bei Annahme per E-Mail',
+    '- [Fenster-Konfigurator für die Website](' + u('/fuer-fensterbauer/fenster-konfigurator-website/') + '): vier Wege (Widget, Hersteller, Agentur, fertig gemietet), Kosten nach Agenturangaben, wem die Anfrage gehört, Preise anzeigen oder nicht',
+    '- [Digitales Aufmaß für Fenster](' + u('/fuer-fensterbauer/digitales-aufmass/') + '): wie genau Laser, LiDAR und Foto messen, Toleranz der Öffnung nach DIN 18202, Kundenaufmaß fürs erste Angebot',
+    '- [Leads für Fensterbauer](' + u('/fuer-fensterbauer/leads-fensterbau/') + '): was Portale verlangen, Kosten je Auftrag, eigene Anfragen gewinnen; eeziframes plant selbst eine Gebühr je weitergeleiteter Anfrage',
+    '- [KI im Fensterbau](' + u('/fuer-fensterbauer/ki-im-fensterbau/') + '): wo KI hilft, warum sie nicht misst, was Datenschutz und KI-Verordnung seit August 2026 verlangen',
     '',
     '## Kurze Antworten',
     '',
@@ -269,6 +298,14 @@ export function llms(origin, env) {
     '- [Was tun, wenn es am Fenster zieht?](' + u('/ratgeber/fenster-undicht/') + '): mit dem Papiertest die Stelle finden; alte Dichtungen durch neue Gummiprofile ersetzen, Beschläge vom Fachbetrieb einstellen lassen; die Fuge zur Wand muss mit Dichtbändern angeschlossen sein, Bauschaum allein reicht nicht. Bei Fenstern von vor 1995 ist meist ein neues Fenster sinnvoll.',
     '- [Wie erkenne ich, wie alt meine Fenster sind?](' + u('/ratgeber/fenster-alter-erkennen/') + '): am Aufdruck auf dem Abstandhalter zwischen den Scheiben, dort steht oft das Herstellungsdatum der Verglasung. Einfachglas, Kasten- und Verbundfenster stammen meist von bis 1978, unbeschichtetes Isolierglas von 1978 bis 1995, Wärmeschutzglas ab etwa 1995. Das BBSR setzt für Rahmen 50 Jahre und mehr an, für Isolierglas 30, für Dichtungsprofile 20.',
     '- [Fenster reparieren oder austauschen?](' + u('/ratgeber/fenster-reparieren-oder-austauschen/') + '): austauschen bei morschem, gerissenem oder verzogenem Rahmen und bei Fenstern von vor 1995; ein neues Fenster spart je Fenstereinheit 176 bis 491 kWh im Jahr. Reparieren, wenn nur Dichtung (rund 20 bis 50 € je Fenster), Beschlag oder eine Scheibe Ärger machen. Gefördert wird auch die Ertüchtigung, wenn das Fenster danach Uw 1,3 erreicht.',
+    '- [Muss ich nach dem Hauskauf die Fenster tauschen?](' + u('/ratgeber/haus-gekauft-fenster/') + '): nein; Pflicht innerhalb von zwei Jahren sind nur die Dämmung der obersten Geschossdecke und ungedämmter Leitungen in unbeheizten Räumen (§ 35 und § 69 Gebäudemodernisierungsgesetz); wer Fenster tauscht, hält Uw höchstens 1,3 W/(m²K) ein.',
+    '- [Wie viel Förderung gibt es 2026 für neue Fenster?](' + u('/ratgeber/fenster-foerderung-2026/') + '): 15 % Zuschuss vom BAFA auf höchstens 30.000 € je Wohneinheit und Kalenderjahr, also bis 4.500 €, bei Uw höchstens 0,95 W/(m²K), mit Energieeffizienz-Experte und Antrag vor dem Vertrag (BEG EM vom 17. August 2026); den iSFP-Bonus gibt es seit 21. Juli 2026 nur noch auf Ausgaben über 30.000 €.',
+    '- [Wie beantrage ich die Förderung für neue Fenster?](' + u('/ratgeber/fenster-foerderung-beantragen/') + '): vor Vorhabenbeginn beim BAFA, mit Energieeffizienz-Experten (TPB-ID) und einem Vertrag unter aufschiebender oder auflösender Bedingung der Förderzusage; Einbau binnen 36 Monaten, Nachweis mit TPN-ID spätestens 6 Monate danach, dann Auszahlung von 15 %.',
+    '- [Kann man neue Fenster von der Steuer absetzen?](' + u('/ratgeber/fenster-steuerlich-absetzen/') + '): ja, bei selbst bewohntem Haus älter als zehn Jahre und Uw höchstens 0,95 mindert § 35c EStG die Einkommensteuer um 20 % der Kosten (7, 7 und 6 % über drei Jahre, höchstens 40.000 € je Objekt, Abschluss vor dem 1. Januar 2030); nicht zusätzlich zum BAFA-Zuschuss für dieselben Fenster.',
+    '- [Fenster oder Fassade zuerst?](' + u('/ratgeber/fenster-oder-daemmung-zuerst/') + '): am besten zusammen planen, das Fenster gehört in die Dämmebene; nacheinander erst die Hülle, zuletzt die Heizung, und das neue Fenster sitzt schon so weit außen, dass die spätere Dämmung anschließt.',
+    '- [Alle Fenster auf einmal oder nach und nach tauschen?](' + u('/ratgeber/fenster-nach-und-nach-tauschen/') + '): ein Auftrag spart Anfahrt und Einrichtung, Etappen je Fassadenseite schonen Budget und nutzen die Fördergrenze je Kalenderjahr; zuerst die undichten und beschlagenen Fenster.',
+    '- [Welche Fenster gehören in welchen Raum?](' + u('/ratgeber/fenster-planen-raum-fuer-raum/') + '): Bad Dreh-Kipp mit Milchglas, Kinderzimmer abschließbare Griffe, Schlafzimmer zur Straße Schallschutzglas, Erdgeschoss und Terrasse Widerstandsklasse RC 2.',
+    '- [Brauche ich eine Baugenehmigung, um ein Fenster zu vergrößern?](' + u('/ratgeber/fenster-vergroessern/') + '): in vielen Ländern nicht, Fenster und die dafür bestimmten Öffnungen sind nach Musterbauordnung, Bayern und NRW verfahrensfrei; Statik, Wärme- und Brandschutz gelten trotzdem, bei Denkmal oder Satzung braucht es eine Genehmigung.',
     '- [Kunststoff, Holz oder Alu: welches Fenstermaterial?](' + u('/ratgeber/fenster-material-vergleich/') + '): Kunststoff ist am günstigsten und pflegeleicht (2023 rund 598 € für 1,3 × 1,3 m mit Dreifachglas und Montage), Holz lässt sich reparieren, muss aber gestrichen werden (825 €), Holz-Alu (960 €) und Alu (1.153 €) sind außen pflegeleicht. Für die Planung setzt das BBSR alle Rahmen mit 50 Jahren und mehr an.',
     '- [Lohnt sich Dreifachverglasung?](' + u('/ratgeber/dreifachverglasung/') + '): meist ja: Uw zum Beispiel 0,9 statt etwa 1,2, nur damit in der Regel förderfähig (Uw höchstens 0,95), Aufpreis bei einem einflügeligen Fenster im Schnitt 40 bis 60 €. Nachteile: schwereres Glas, weniger Sonnenwärme, Schallschutz nicht automatisch besser.',
     '- [Welche Fenster-Öffnungsart ist die richtige?](' + u('/ratgeber/fenster-oeffnungsarten/') + '): im Wohnraum meist Dreh-Kipp; Kipp für Nebenräume, Keller und Oberlichter; Festverglasung ist günstiger, lässt sich aber nicht zum Lüften oder als Ausstieg öffnen; bei zwei Flügeln gibt der Stulp die ganze Öffnung frei, über etwa 1,6 m Breite ist ein Pfosten die sicherere Wahl.',
@@ -285,6 +322,11 @@ export function llms(origin, env) {
     '- [Ist ein Aufmaß vom Fensterbauer kostenlos?](' + u('/fuer-fensterbauer/aufmass-kostenpflichtig/') + '): in der Regel ja, wenn es dem Angebot dient: Ein Kostenanschlag ist im Zweifel nicht zu vergüten (§ 632 Abs. 3 BGB). Aufmaß- oder Anfahrtskosten nur bei ausdrücklicher Vereinbarung vorher, ein Satz in den AGB genügt nicht. Berechnete Anfahrt zählt nach § 35a EStG zu den Arbeitskosten (20 %, höchstens 1.200 € Steuerermäßigung im Jahr).',
     '- [Was kostet ein geplatzter Aufmaßtermin?](' + u('/fuer-fensterbauer/geplatzter-aufmasstermin/') + '): im Beispiel bei 25 km Entfernung rund 116 €: 24 € Fahrzeug (rund 48 Cent je km nach ADAC), 76 € Fahrzeit und 16 € Warten bei 65 € je Stunde; mit ungenutzter Zeit vor Ort rund 165 €. Ohne vorherige Vereinbarung lässt sich beim kostenlosen Aufmaß meist nichts davon berechnen.',
     '- [Welche Software brauchen Fensterbauer?](' + u('/fuer-fensterbauer/fensterbau-software/') + '): Branchensoftware oder ERP für Kalkulation, Konstruktion und Fertigung, Handwerkersoftware für Angebot und Rechnung, fürs Aufmaß eine Aufmaß-App vor Ort oder das Selbstaufmaß durch den Kunden per Link. eeziframes liefert das Erstaufmaß und ersetzt kein ERP.',
+    '- [Wie lange ist ein Angebot vom Handwerker bindend?](' + u('/fuer-fensterbauer/fensterangebot-erstellen/') + '): bis zum Ende der Bindefrist, die der Betrieb setzt (§ 148 BGB); ohne Frist nur so lange, wie er unter regelmäßigen Umständen mit einer Antwort rechnen darf (§ 147 BGB). Lief alles nur aus der Ferne oder beim Kunden zu Hause, kann ein Verbraucher 14 Tage widerrufen, auch bei Fenstern nach Maß mit Einbau (Werkvertrag, BGH I ZR 96/20).',
+    '- [Was kostet ein Fenster-Konfigurator für die Website?](' + u('/fuer-fensterbauer/fenster-konfigurator-website/') + '): als Widget kostenlos mit Hinweis auf den Anbieter; selbst gebaut nach Agenturangaben ab etwa 2.000 € für einfache Lösungen, mit 3-D ab etwa 25.000 €, individuell über 100.000 €, dazu Wartung; gemietet eine Einrichtung und ein fester Monatspreis. Wichtig ist, ob die Anfrage Maße und Fotos enthält und nur an den Betrieb geht.',
+    '- [Wie genau ist ein digitales Aufmaß für Fenster?](' + u('/fuer-fensterbauer/digitales-aufmass/') + '): Laser-Entfernungsmesser etwa ± 1,5 mm (Herstellerangabe), LiDAR im Handy etwa ± 1 cm (Studie mit dem iPhone 12 Pro), Foto mit A4-Blatt nach Anbieterangabe ± 1 bis 2 cm. Die Öffnung darf nach DIN 18202 um ± 10 bis 16 mm abweichen; fürs Angebot reicht ein geführtes Kundenaufmaß, bestellt wird nach dem Feinaufmaß.',
+    '- [Lohnen sich gekaufte Leads für Fensterbauer?](' + u('/fuer-fensterbauer/leads-fensterbau/') + '): das zeigen die Kosten je Auftrag, nicht der Preis je Lead. Aroundhome etwa berechnet einen Festpreis je Anfrage und vermittelt sie an höchstens drei Fachpartner. eeziframes plant selbst „Anfragen aus Ihrer Nähe“ mit Gebühr je weitergeleiteter Anfrage; Anfragen aus dem eigenen Konfigurator bleiben ohne Gebühr.',
+    '- [Kann KI ein Fensteraufmaß machen?](' + u('/fuer-fensterbauer/ki-im-fensterbau/') + '): nein. KI liest aus Fotos die Einbausituation (Rollladenkasten, Anschlag, Fensterbank, Schäden) und kann Handmaße auf Plausibilität prüfen; gemessen wird mit dem Zollstock, bestellt nach dem Feinaufmaß. Seit 2. August 2026 müssen Chatbots erkennbar machen, dass eine KI antwortet (Art. 50 KI-Verordnung).',
     '',
     ...(paketeLlms(origin, env) ? [paketeLlms(origin, env), ''] : []),
     '## Optional',
@@ -317,6 +359,7 @@ export function umleitung(request) {
   if (index) url.pathname = kanonischerPfad(url.pathname);
   return new Response(null, { status: 301, headers: { location: url.href, 'cache-control': 'public, max-age=86400' } });
 }
+export const ANSICHT_FB = /^\/fensterbauer\/?$/;
 const ohneBedingung = (r) => { const h = new Headers(r.headers); h.delete('if-none-match'); h.delete('if-modified-since'); return new Request(r.url, { method: r.method, headers: h }); };
 export async function behandeln(request, env, holen) {
   const url = new URL(request.url);
@@ -325,6 +368,9 @@ export async function behandeln(request, env, holen) {
   if (url.pathname === '/robots.txt') return text(robots(basis(env, url), frei(env, url)), 'text/plain; charset=utf-8');
   if (url.pathname === '/sitemap.xml') return frei(env, url) ? text(sitemap(basis(env, url)), 'application/xml; charset=utf-8') : text('Nicht freigegeben.\n', 'text/plain; charset=utf-8', 404);
   if (url.pathname === '/llms.txt') return text(llms(basis(env, url), env), 'text/plain; charset=utf-8', 200, frei(env, url) ? null : { 'x-robots-tag': SPERRE });
+  /* /fensterbauer: die Startseite in der Ansicht für Fensterbauer (portal.js liest den Pfad), Adresse ohne Anker statt /#fensterbauer;
+     derselbe Inhalt wie /fuer-fensterbauer/, daher dorthin kanonisch und nicht in der Sitemap */
+  if (ANSICHT_FB.test(url.pathname)) return await seite(await holen(new Request(new URL('/', url).href, request)), env, url, '/fuer-fensterbauer/');
   if (istSeite(url.pathname)) return await seite(await holen(einfuehrungLaeuft(env) && !BANNER_SEITEN.test(url.pathname) ? request : ohneBedingung(request)), env, url);
   return null;
 }
