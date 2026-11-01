@@ -8,7 +8,7 @@
   'use strict';
   const U = window.AuftragUI, A = window.Auftrag, P = window.Pakete, h = U.h;
   const wurzel = document.getElementById('app');
-  const S = { stand: null, liste: null, filter: 'tun', auftrag: null, start: true };
+  const S = { stand: null, liste: null, filter: 'tun', auftrag: null, start: true, zeit: '30' };
   const kurz = U.kurzname;
   const WARTEN = ['Kunde füllt aus', 'Warten auf Freigabe', ''];
   const zuTun = (a) => WARTEN.indexOf(a.naechster || '') < 0 || a.ungelesen > 0 || a.geaendert || !!a.wechsel;
@@ -23,7 +23,7 @@
 
   /* ---------- Gerüst ---------- */
   function kopf(zurueck) {
-    const rechts = S.stand && S.stand.angemeldet ? [U.ring('Abmelden', { class: 'klein', on: { click: abmelden } })] : [];
+    const rechts = S.stand && S.stand.angemeldet ? [zurueck ? null : U.ring('Statistik', { class: 'klein', href: '#statistik' }), U.ring('Abmelden', { class: 'klein', on: { click: abmelden } })].filter(Boolean) : [];
     const k = U.kopf({ zurueck: zurueck || null, zurueckLabel: 'Zum Eingang', zusatz: 'Zentrale', rechts: rechts });
     k.id = 'kopf';
     const alt = document.getElementById('kopf'); if (alt) alt.replaceWith(k);
@@ -296,9 +296,92 @@
     return U.kachel([h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Nachrichten' })), liste, h('div', { class: 'a-schreiben' }, h('div', { class: 'a-flaeche dunkel' }, feld), knopf)], 'a-nachrichten-kachel');
   }
 
+  /* ---------- Statistik (#statistik) ----------
+     Eigene Statistik ohne Cookies (functions/api/statistik.js): Besuche, Seiten, Herkunft, Anzeigen und Vorgänge, die über den Server laufen.
+     Planungen der kostenlosen App liegen nur im Browser der Besucher; sichtbar wird erst, was der Server mitbekommt (KI-Fotos, Kasse,
+     Kauf). Daten: /api/inhaber/statistik und /api/inhaber/anzeigen (functions/api/zentrale.js, dieselben wie in der früheren Zentrale). */
+  const ZEITEN = [{ w: '1', t: 'Heute' }, { w: '7', t: '7 Tage' }, { w: '30', t: '30 Tage' }, { w: 'anfang', t: 'Seit Start' }];
+  const zahlText = (n) => (Number(n) || 0).toLocaleString('de-DE');
+  async function statistik(o) {
+    kopf(() => { location.hash = ''; });
+    const q = S.zeit === 'anfang' ? '?von=anfang' : '?tage=' + S.zeit;
+    if (!(o && o.stehen)) seite({ frage: U.frage('Statistik. *Wird geladen …*', null) });
+    let st, an;
+    try { [st, an] = await Promise.all([U.api('GET', '/api/inhaber/statistik' + q), U.api('GET', '/api/inhaber/anzeigen' + q).catch(() => null)]); }
+    catch (e) { if (e.status === 401) { S.stand.angemeldet = false; anmeldung(); return; } seite({ frage: U.frage('Statistik. *Nicht erreichbar.*', e.message) }); return; }
+    if (location.hash !== '#statistik') return;
+    const wahl = U.segment(ZEITEN, S.zeit, (w) => { S.zeit = w; statistik({ stehen: true }); }, 'Zeitraum', true);
+    if (st.tabelle === false) {
+      seite({ frage: U.frage('Statistik. *Noch keine Tabelle.*', 'In der Datenbank fehlt die Tabelle „statistik“. Bitte supabase/schema.sql im SQL-Editor von Supabase ausführen (schadet nicht, wenn es schon lief).'), inhalt: [wahl], stehen: o && o.stehen });
+      return;
+    }
+    const zr = st.zeitraum || {}, ereignis = st.ereignisse || {}, kz = {};
+    ((an && an.kennzahlen) || []).forEach((k) => { kz[k.id] = k.wert; });
+    const seitenN = (pfad) => ((st.seiten || []).find((x) => x.schluessel === pfad) || {}).n || 0;
+    const ueberAnzeigen = (st.anzeigen || []).reduce((s, x) => s + x.n, 0);
+    const zeitText = zr.von === zr.bis ? U.datum(zr.von) : U.datum(zr.von) + ' bis ' + U.datum(zr.bis);
+
+    const zahlen = U.kachel([h('p', { class: 'a-label-klein', style: 'margin:0' }, U.chip(zeitText, 'aktiv')),
+      h('div', { class: 'a-zahlen' },
+        h('div', { class: 'a-zahl gross' }, h('b', { text: zahlText(st.summe.besuche) }), h('span', { text: st.summe.besuche === 1 ? 'Besuch' : 'Besuche' })),
+        h('div', { class: 'a-zahl' }, h('b', { text: zahlText(ueberAnzeigen) }), h('span', { text: 'davon über Anzeigen' })),
+        h('div', { class: 'a-zahl' }, h('b', { text: zahlText(st.summe.aufrufe) }), h('span', { text: 'Seitenaufrufe' }))),
+      /* Meta hängt an Anzeigen nur fbclid an, und das steht auch an normalen Links; als Anzeige zählt ein Besuch erst mit utm_medium=paid */
+      ueberAnzeigen ? null : h('p', { class: 'a-hinweis', style: 'margin:14px 0 0;font-weight:400;color:var(--silbergrau)' }, 'Als Anzeige zählt ein Besuch nur mit Link-Zusatz, z. B. ', h('b', { style: 'color:var(--weiss);font-weight:500;overflow-wrap:anywhere', text: '?utm_source=instagram&utm_medium=paid&utm_campaign=name' }), '. Ohne ihn erscheint Instagram nur unter Herkunft.')], 'leucht a-zahlen-kachel');
+
+    /* Weg der Besucher: jede Stufe mit Balken im Verhältnis zu den Besuchen */
+    const stufen = [
+      { t: 'Besuche', n: st.summe.besuche, z: 'Einstiege von außen, ohne Bots' },
+      { t: 'Aufrufe der App', n: seitenN('/app/'), z: 'Seitenaufrufe, nicht Personen' },
+      { t: 'Fotos von der KI ausgewertet', n: ereignis.ki_foto || 0, z: 'jemand hat ein Fenster fotografiert' },
+      { t: 'Kasse geöffnet', n: ereignis.kasse || 0, z: 'Aufmaßblatt freischalten angetippt' },
+      { t: 'Aufmaßblätter gekauft', n: kz.kauf, z: kz.umsatz ? U.euro(kz.umsatz) + ' brutto' : '' }
+    ].filter((x) => x.n != null);
+    const basis = Math.max(1, st.summe.besuche || 0);
+    const trichter = h('ol', { class: 'a-trichter' }, stufen.map((x) => h('li', null,
+      h('span', { class: 'a-tr-text' }, h('b', { text: x.t }), x.z ? h('small', { text: x.z }) : null),
+      h('span', { class: 'a-tr-zahl', text: zahlText(x.n) }),
+      h('span', { class: 'a-tr-balken', 'aria-hidden': 'true' }, h('i', { style: 'width:' + Math.min(100, Math.round((x.n / basis) * 100)) + '%' })))));
+    const weg = U.kachel([h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Weg der Hauseigentümer' })), trichter,
+      h('p', { class: 'a-hinweis', style: 'margin:12px 0 0', text: 'Planungen in der kostenlosen App bleiben im Browser der Besucher. Gezählt wird erst, was über den Server läuft: Fotos mit KI, Kasse, Kauf.' })]);
+
+    /* Fensterbauer: Seite, Anmeldungen, Aufträge der Pakete im Zeitraum */
+    const ab = Date.parse(zr.start || '') || 0, bis = Date.parse(zr.ende || '') || Date.now();
+    const neueAuftraege = (S.liste || []).filter((a) => { const t = Date.parse(a.created_at || a.updated_at || ''); return t >= ab && t <= bis; }).length;
+    const fb = U.kachel([h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Fensterbauer' })),
+      h('div', { class: 'a-zahlen a-zahlen-drei' },
+        h('div', { class: 'a-zahl' }, h('b', { text: zahlText(seitenN('/fuer-fensterbauer/')) }), h('span', { text: 'Aufrufe „Für Fensterbauer“' })),
+        h('div', { class: 'a-zahl' }, h('b', { text: zahlText(neueAuftraege) }), h('span', { text: 'neue Aufträge und Anfragen' })),
+        h('div', { class: 'a-zahl' }, h('b', { text: zahlText(seitenN('/ratgeber/') + seitenN('/ratgeber/fenster-ausmessen/') + seitenN('/ratgeber/aufmassblatt-fenster/') + seitenN('/ratgeber/fenster-austauschen/')) }), h('span', { text: 'Aufrufe im Ratgeber' })))]);
+
+    /* Verlauf: Besuche je Stunde (bis 7 Tage) oder je Tag, Anteil über Anzeigen in Violett */
+    const reihe = an && an.verlauf ? an.verlauf.reihe : (st.reihe || []).map((x) => ({ start: x.tag, besuche: x.besuche, anzeigen: null }));
+    const jeStunde = an && an.verlauf && an.verlauf.einheit === 'stunde';
+    const max = Math.max(1, ...reihe.map((x) => x.besuche || 0));
+    const beschrift = (x) => { const d = new Date(x.start); return jeStunde ? d.toLocaleString('de-DE', { weekday: 'short', hour: '2-digit', timeZone: 'Europe/Berlin' }) : d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', timeZone: 'Europe/Berlin' }); };
+    const balken = h('div', { class: 'a-saeulen' + (reihe.length > 60 ? ' dicht' : ''), role: 'img', 'aria-label': 'Besuche ' + (jeStunde ? 'je Stunde' : 'je Tag') + ', höchstens ' + max },
+      reihe.map((x) => h('span', { class: 'a-vl-saeule', title: beschrift(x) + ': ' + (x.besuche || 0) + ' Besuche' + (x.anzeigen ? ', ' + x.anzeigen + ' über Anzeigen' : '') },
+        h('i', { style: 'height:' + Math.round(((x.besuche || 0) / max) * 100) + '%' }, x.anzeigen ? h('em', { style: 'height:' + Math.round((x.anzeigen / Math.max(1, x.besuche)) * 100) + '%' }) : null))));
+    const verlauf = U.kachel([h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Besuche ' + (jeStunde ? 'je Stunde' : 'je Tag') }), h('small', { text: 'höchstens ' + max })), balken,
+      reihe.length ? h('div', { class: 'a-vl-achse' }, h('span', { text: beschrift(reihe[0]) }), h('span', { text: beschrift(reihe[reihe.length - 1]) })) : null,
+      h('p', { class: 'a-vl-legende' }, h('i', { class: 'a-vl-punkt' }), 'Besuche', h('i', { class: 'a-vl-punkt anzeige' }), 'davon über Anzeigen')]);
+
+    /* Ranglisten */
+    const rang = (titel, liste, leer) => U.karte(titel, null, liste && liste.length ? h('ol', { class: 'a-rang' }, liste.slice(0, 8).map((x) => h('li', null, h('span', { text: x.name || '–' }), h('b', { text: zahlText(x.n) })))) : h('p', { class: 'a-leer', text: leer || 'Noch nichts gezählt.' }));
+    const listen = h('div', { class: 'a-raenge' },
+      rang('Herkunft', st.herkunft, 'Noch keine Besuche von außen.'),
+      rang('Anzeigen und Kampagnen', (st.kampagnen || []).length ? st.kampagnen : st.anzeigen, 'Keine Besuche mit Anzeigen-Link (?utm_… oder Klick-Kennung).'),
+      rang('Einstiegsseiten', st.einstiege), rang('Seiten', st.seiten),
+      rang('Geräte', st.geraet), rang('Browser', st.browser));
+
+    seite({ frage: U.frage('Statistik. *Ohne Cookies.*', 'Gezählt wird auf dem Server, ohne Kennung. Bots, „Do Not Track“ und Ihre eigenen Aufrufe, solange Sie hier angemeldet sind, zählen nicht.'),
+      inhalt: [wahl, zahlen, weg, verlauf, fb, listen], stehen: o && o.stehen });
+  }
+
   /* ---------- Weiche ---------- */
   async function route() {
     if (!S.stand || !S.stand.angemeldet) { anmeldung(); return; }
+    if (location.hash === '#statistik') { if (!S.liste) await eingangLaden().catch(() => null); statistik(); return; }
     const m = /^#auftrag\/([0-9a-z-]{8,})$/i.exec(location.hash);
     if (m) {
       try { zeigen(await auftragLaden(m[1])); } catch (e) { if (e.status === 401) { S.stand.angemeldet = false; anmeldung(); return; } U.toast(e.message); history.replaceState(null, '', location.pathname); eingang(); }

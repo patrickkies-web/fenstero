@@ -496,3 +496,36 @@ a.a-platz-wahl { text-decoration: none; color: inherit; }
 .a-blatt p.a-ki-kern { color: var(--weiss); font-weight: 500; }
 .a-ki-liste { margin: 14px 0 0; padding: 12px 0 0; border-top: 1px solid rgba(255,255,255,.08); list-style: none; display: grid; gap: 6px; font: 400 14px/1.4 var(--font-sans); color: var(--silbergrau); }
 .a-ki-liste b { font-weight: 500; color: var(--weiss); }
+
+/* ---------- Statistik (#statistik in der Zentrale) ----------
+   Weg der Hauseigentümer als Stufen mit Balken (Violett = erreicht, Rest dunkel), Besuche je Stunde oder Tag als Säulen (Anteil über
+   Anzeigen in Violett), Ranglisten als weiße Karten. Keine neuen Farben; Zahlen dünn und tabellarisch. */
+.a-r-inhalt > .a-segment { margin-bottom: 12px; }
+.a-trichter { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 14px; }
+.a-trichter li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: end; }
+.a-tr-text { display: grid; gap: 2px; min-width: 0; }
+.a-tr-text b { font: 500 15px/1.3 var(--font-sans); color: var(--weiss); }
+.a-tr-text small { font: 400 13px/1.35 var(--font-sans); color: var(--silbergrau); }
+.a-tr-zahl { font: 300 28px/1 var(--font-sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.a-tr-balken { grid-column: 1 / -1; display: block; height: 8px; border-radius: var(--rund-pille); background: var(--schwarz); overflow: hidden; }
+.a-tr-balken i { display: block; height: 100%; min-width: 4px; border-radius: inherit; background: var(--violett); }
+.a-saeulen { display: flex; align-items: flex-end; gap: 2px; height: 140px; margin-top: 14px; }
+.a-vl-saeule { flex: 1 1 0; min-width: 0; height: 100%; display: flex; align-items: flex-end; }
+.a-vl-saeule i { position: relative; display: flex; align-items: flex-end; width: 100%; min-height: 2px; border-radius: 4px 4px 1px 1px; background: var(--silbergrau); overflow: hidden; }
+.a-vl-saeule em { display: block; width: 100%; background: var(--violett); }
+.a-saeulen.dicht { gap: 0; }
+.a-saeulen.dicht .a-vl-saeule i { border-radius: 1px 1px 0 0; }
+.a-vl-achse { display: flex; justify-content: space-between; margin-top: 8px; font: 400 13px/1 var(--font-sans); color: var(--silbergrau); }
+.a-vl-legende { display: flex; align-items: center; gap: 8px; margin: 12px 0 0 !important; font: 400 13px/1 var(--font-sans) !important; }
+.a-vl-punkt { width: 8px; height: 8px; border-radius: 50%; background: var(--silbergrau); }
+.a-vl-punkt.anzeige { margin-left: 10px; background: var(--violett); }
+.a-zahlen-drei { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (min-width: 760px) { .a-zahlen-drei { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; } }
+.a-raenge { display: grid; gap: 12px; margin-top: 12px; }
+.a-raenge > .a-karte + .a-karte { margin-top: 0; }
+@media (min-width: 760px) { .a-raenge { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.a-rang { list-style: none; margin: 0; padding: 4px 0 12px; }
+.a-rang li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--linie-fein); font: 400 14px/1.4 var(--font-sans); }
+.a-rang li:first-child { border-top: 0; }
+.a-rang li span { min-width: 0; overflow-wrap: anywhere; color: var(--tinte); }
+.a-rang li b { font-weight: 500; font-variant-numeric: tabular-nums; }

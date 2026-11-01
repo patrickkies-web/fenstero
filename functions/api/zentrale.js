@@ -392,6 +392,30 @@ function anzeigenAuswerten(zr, stunden, ersteStunde, kaeufe, rows, jetzt) {
 }
 const stundeVon = (t) => { const p = {}; WAND.formatToParts(new Date(t)).forEach((x) => { p[x.type] = x.value; }); return p.hour; };
 
+/* Statistik und Anzeigen ohne eigene Anmeldung: die Routen der alten Zentrale prüfen zugang(), die neue Zentrale (functions/auftrag/,
+   /api/inhaber/statistik und /api/inhaber/anzeigen) ihre Inhaber-Sitzung; beide liefern dieselben Daten */
+export async function statistikDaten(ctx) {
+  const sp = daten(ctx);
+  const anfang = ctx.url.searchParams.get('von') === 'anfang' && sp.statistikErsterTag ? await sp.statistikErsterTag().catch(() => null) : null, zr = zeitraum(ctx.url, anfang);
+  return Object.assign(await auswerten(sp, zr), { zeitraum: zrAus(zr) });
+}
+export async function anzeigenDaten(ctx) {
+  const sp = daten(ctx), jetzt = Date.now();
+  const zr = zeitraum(ctx.url, ctx.url.searchParams.get('von') === 'anfang' && sp.statistikErsterTag ? await sp.statistikErsterTag().catch(() => null) : null);
+  const mitStunden = zr.tage <= STUNDEN_MAX && !!sp.statistikStunden;
+  const [web, rows, kaeufe, stundenRoh, ab] = await Promise.all([auswerten(sp, zr).catch(() => null), sp.betriebeAlle().then(altbestand), sp.zahlungenAlle().catch(() => []), mitStunden ? sp.statistikStunden(tagPlus(zr.von, -8), zr.bis).catch(() => null) : null, sp.statistikStundenAb ? sp.statistikStundenAb().catch(() => null) : null]);
+  if (!web || web.tabelle === false) return { ok: true, tabelle: false, zeitraum: zrAus(zr) };
+  const ersteStunde = ab ? berlinMs(ab.slice(0, 10), ab.slice(11, 13) + ':00') : null;
+  const a = anzeigenAuswerten(zr, stundenListe(stundenRoh), ersteStunde, kaeufe, rows, jetzt);
+  if (!mitStunden) {
+    /* länger als 31 Tage: Besuche und Vorgänge aus den Tageszählern, ohne Vergleich */
+    const tagWert = { besuch: web.summe.besuche, aufruf: web.summe.aufrufe, anzeige: web.anzeigen.reduce((s, x) => s + x.n, 0) };
+    a.kennzahlen.forEach((k2) => { const schl = (VERGLEICH.find((v) => v[0] === k2.id) || [])[2]; if (schl) { k2.wert = schl in tagWert ? tagWert[schl] : web.ereignisse[schl.slice(9)] || 0; k2.vorher = null; k2.kopien = 0; } });
+    a.werbung = web.werbung; a.verlauf.reihe.forEach((x) => { const r = web.reihe.find((y) => y.tag === tagAus(x.start)); x.besuche = r ? r.besuche : 0; x.anzeigen = null; x.schritte = null; });
+  }
+  return Object.assign({ ok: true, tabelle: true, zeitraum: zrAus(zr), stundenAb: ersteStunde ? new Date(ersteStunde).toISOString() : null, stundenwerte: mitStunden, summe: web.summe, anzeigen: web.anzeigen, kampagnen: web.kampagnen, anzeigeseiten: web.anzeigeseiten, herkunft: web.herkunft.slice(0, 10) }, a);
+}
+
 export const ZENTRALE = {
   /* Ohne Anmeldung: ob die Zentrale eingerichtet ist, ob ein zweiter Faktor gebraucht wird, ob schon eine Sitzung besteht */
   'GET /api/zentrale/status': async (ctx) => {
@@ -654,28 +678,9 @@ export const ZENTRALE = {
   },
 
   /* Statistik der Website im Zeitraum; „von Anfang an“ beginnt beim ersten gezählten Tag */
-  'GET /api/zentrale/statistik': async (ctx) => {
-    await zugang(ctx); const sp = daten(ctx);
-    const anfang = ctx.url.searchParams.get('von') === 'anfang' && sp.statistikErsterTag ? await sp.statistikErsterTag().catch(() => null) : null, zr = zeitraum(ctx.url, anfang);
-    return Object.assign(await auswerten(sp, zr), { zeitraum: zrAus(zr) });
-  },
+  'GET /api/zentrale/statistik': async (ctx) => { await zugang(ctx); return statistikDaten(ctx); },
   /* Anzeigen: Wirkung von Werbeanzeigen im Zeitraum (mit Uhrzeit), Herkunft der Besuche aus Anzeigen, Vergleich mit den Tagen davor */
-  'GET /api/zentrale/anzeigen': async (ctx) => {
-    await zugang(ctx); const sp = daten(ctx), jetzt = Date.now();
-    const zr = zeitraum(ctx.url, ctx.url.searchParams.get('von') === 'anfang' && sp.statistikErsterTag ? await sp.statistikErsterTag().catch(() => null) : null);
-    const mitStunden = zr.tage <= STUNDEN_MAX && !!sp.statistikStunden;
-    const [web, rows, kaeufe, stundenRoh, ab] = await Promise.all([auswerten(sp, zr).catch(() => null), sp.betriebeAlle().then(altbestand), sp.zahlungenAlle().catch(() => []), mitStunden ? sp.statistikStunden(tagPlus(zr.von, -8), zr.bis).catch(() => null) : null, sp.statistikStundenAb ? sp.statistikStundenAb().catch(() => null) : null]);
-    if (!web || web.tabelle === false) return { ok: true, tabelle: false, zeitraum: zrAus(zr) };
-    const ersteStunde = ab ? berlinMs(ab.slice(0, 10), ab.slice(11, 13) + ':00') : null;
-    const a = anzeigenAuswerten(zr, stundenListe(stundenRoh), ersteStunde, kaeufe, rows, jetzt);
-    if (!mitStunden) {
-      /* länger als 31 Tage: Besuche und Vorgänge aus den Tageszählern, ohne Vergleich */
-      const tagWert = { besuch: web.summe.besuche, aufruf: web.summe.aufrufe, anzeige: web.anzeigen.reduce((s, x) => s + x.n, 0) };
-      a.kennzahlen.forEach((k2) => { const schl = (VERGLEICH.find((v) => v[0] === k2.id) || [])[2]; if (schl) { k2.wert = schl in tagWert ? tagWert[schl] : web.ereignisse[schl.slice(9)] || 0; k2.vorher = null; k2.kopien = 0; } });
-      a.werbung = web.werbung; a.verlauf.reihe.forEach((x) => { const r = web.reihe.find((y) => y.tag === tagAus(x.start)); x.besuche = r ? r.besuche : 0; x.anzeigen = null; x.schritte = null; });
-    }
-    return Object.assign({ ok: true, tabelle: true, zeitraum: zrAus(zr), stundenAb: ersteStunde ? new Date(ersteStunde).toISOString() : null, stundenwerte: mitStunden, summe: web.summe, anzeigen: web.anzeigen, kampagnen: web.kampagnen, anzeigeseiten: web.anzeigeseiten, herkunft: web.herkunft.slice(0, 10) }, a);
-  },
+  'GET /api/zentrale/anzeigen': async (ctx) => { await zugang(ctx); return anzeigenDaten(ctx); },
   'GET /api/zentrale/protokoll': async (ctx) => {
     await zugang(ctx); const sp = daten(ctx), von = Math.max(0, parseInt(ctx.url.searchParams.get('von'), 10) || 0), art = str(ctx.url.searchParams.get('art'), 40);
     const liste = await sp.protokollLesen({ von: von, anzahl: 100, art: /^[a-z_]+$/.test(art) ? art : '' });

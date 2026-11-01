@@ -26,6 +26,8 @@
      GET  /api/inhaber/stand · POST /api/inhaber/anmelden { passwort, code } · POST /api/inhaber/abmelden
      GET  /api/inhaber/auftraege · GET /api/inhaber/auftraege/:id · GET /api/inhaber/auftraege/:id/datei/:did
      POST /api/inhaber/auftraege/:id/stand { stand, link?, text? } · …/nachricht { text } · …/notiz { text } · …/gesehen
+     GET  /api/inhaber/statistik · GET /api/inhaber/anzeigen   eigene Statistik ohne Cookies (Besuche, Herkunft, Vorgänge), Zeitraum per
+          ?tage=n, ?von=anfang oder ?von=…&bis=… (wie die frühere Zentrale, Daten aus functions/api/zentrale.js)
    Webhook (über /api/zahlung/webhook): istAuftragEreignis(ev), auftragEreignis(ctx, ev). Tageslauf: auftraegeLauf(k, sp, env) mit der Monatsabrechnung der KI-Auswertungen über dem Kontingent.
    KI-Kontingent: GET/POST /api/auftrag/:id/ki (Stand, weitere freischalten), POST /api/inhaber/auftraege/:id/instanz (Konfigurator
    verknüpfen; beim Live-Schalten geschieht das über die Adresse der Seite). */
@@ -46,6 +48,7 @@ import { instanzVon } from '../instanz/mandant.js';
 import { speicher } from '../api/speicher.js';
 import { instanzStatus } from '../instanz/verwalten.js';
 import { alarmMail } from '../api/ki.js';
+import { statistikDaten, anzeigenDaten } from '../api/zentrale.js';
 
 const P = () => globalThis.Pakete;
 const AU = () => globalThis.Auftrag;
@@ -572,6 +575,8 @@ const INHABER = {
     return new Response(JSON.stringify({ ok: true }), { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'set-cookie': await sitzungSetzen(ctx, 'inhaber', { sub: 'inhaber', mail: '' }, 8) } });
   },
   'POST /api/inhaber/abmelden': async (ctx) => new Response(JSON.stringify({ ok: true }), { headers: { 'content-type': 'application/json; charset=utf-8', 'set-cookie': sitzungLoeschen(ctx, 'inhaber') } }),
+  'GET /api/inhaber/statistik': async (ctx) => { await inhaberPflicht(ctx); return statistikDaten(ctx); },
+  'GET /api/inhaber/anzeigen': async (ctx) => { await inhaberPflicht(ctx); return anzeigenDaten(ctx); },
   'GET /api/inhaber/auftraege': async (ctx) => {
     await inhaberPflicht(ctx);
     const d = db(ctx), l = await d.auftraegeAlle(), ung = await d.ungelesen('kunde').catch(() => ({}));
