@@ -2225,7 +2225,7 @@ function w3dFokus(stage, w, o, weich) {
   const reg = W3DS[stage.id]; if (!reg || !o.fokus || !document.body.contains(stage)) return;
   /* Die Fahrt ist für eine Bühne von etwa 262 px Höhe ausgelegt; auf kleineren Bühnen (Abschnittsleiste und Notiz darüber) fährt sie
      entsprechend näher heran, damit der Griff gleich groß zu sehen ist */
-  const zm = w3dZoomZustand(stage), H = stage.clientHeight || 262, zz = Math.min(ZOOM_MAX, (o.fokus === 'rc' ? 1.9 : 2.6) * Math.max(1, 262 / H));
+  const zm = w3dZoomZustand(stage), H = stage.clientHeight || 262, zz = Math.min(ZOOM_MAX, (o.fokus === 'rc' ? 1.35 : 2.4) * Math.max(1, 262 / H)); // etwas weiter weg als bisher (2,6), der Griff bleibt gut zu sehen; Inhaber 2.11.2026
   const vorher = { z: zm.z, x: zm.x, y: zm.y };
   zm.z = zz; zm.x = 0; zm.y = 0;
   w3dLayout(stage, reg.w, reg.o);
@@ -2972,7 +2972,9 @@ function model(w, o) {
 /* Knöpfe Hoch-/Herunterfahren und Wenden bei allen Fragen zum Sonnenschutz außen (auch den Detailangaben), Fahrt der Kamera zum Griff
    bei allen Fragen zum Griff */
 const W3D_SONNE_FRAGEN = ['sart', 'einbau', 'blende', 'sfarbe', 'antrieb', 'sfTeile', 'sfK', 'sfS', 'lamelle', 'fuehrung', 'panzer', 'schlitz', 'transp', 'bedien', 'sensor'];
-const W3D_GRIFF_FRAGEN = ['griff', 'gf', 'rc', 'griffM', 'griffPos', 'kinder', 'stulpBed', 'stulp', 'hstPlus'];
+/* Ohne „stulp“, „stulpBed“ und „rc“ (Inhaber, 2.11.2026: zu nah): welcher Flügel zuerst öffnet und ob das Fenster leicht erreichbar ist,
+   sieht man am ganzen Fenster; bei den Griff-Fragen fährt die Kamera etwas weniger nah heran */
+const W3D_GRIFF_FRAGEN = ['griff', 'gf', 'griffM', 'griffPos', 'kinder', 'hstPlus']; // „Leicht erreichbar?“ zeigt das ganze Fenster
 function w3dFrage(q, w, o) {
   const r = {};
   if (o.sonne == null) { if (W3D_SONNE_FRAGEN.indexOf(q) >= 0 && sonneAktiv(w)) r.sonne = 'aussen'; else if ((q === 'iart' || q === 'ifarbe') && innenAktiv(w)) r.sonne = 'innen'; }

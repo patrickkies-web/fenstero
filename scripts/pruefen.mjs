@@ -981,7 +981,7 @@ if (teil(6)) {
   ok(tuer7 && Math.abs(tuer7.ueber - 1050) <= 15 && fen7 && Math.abs(fen7.ueber - fen7.mitte) <= 15, 'Griffhöhe: an der Tür etwa 1.050 mm über dem Fußboden, am Fenster mittig im Flügel');
   await frage7('griff', { griff: 'standard', teilung: '2p' }); await p7.waitForTimeout(1200);
   const fokus7 = await p7.evaluate(() => { const st = document.getElementById('w3d'), r = st.getBoundingClientRect(), h = st.querySelector('[data-r="handle-0"]').getBoundingClientRect(); return { z: W3DZ.w3d.z, dx: Math.abs(h.left + h.width / 2 - r.left - r.width / 2) / r.width, dy: Math.abs(h.top - r.top - r.height / 2) / r.height, breit: h.width }; });
-  ok(fokus7.z > 2.4 && fokus7.dx < 0.2 && fokus7.dy < 0.3 && fokus7.breit >= 6, 'Frage nach dem Griff: die Kamera fährt auf den Griff, er ist gut zu sehen');
+  ok(fokus7.z > 2.2 && fokus7.dx < 0.2 && fokus7.dy < 0.3 && fokus7.breit >= 6, 'Frage nach dem Griff: die Kamera fährt auf den Griff, er ist gut zu sehen');
   await frage7('sart', { sart: 'raffstore', roll: 'aufsatz' });
   const lam7 = () => p7.evaluate(() => ({ t0: document.querySelector('[data-r="lam-0"]').style.transform, u: parseFloat(document.querySelector('[data-r="behang-u"]').style.transform.split(',')[1]), fahren: document.querySelector('[data-w3d="fahren"]').textContent, wenden: document.querySelector('[data-w3d="wenden"]').getAttribute('aria-pressed'), hoch: Math.min.apply(null, Array.from(document.querySelectorAll('#w3d .w3d-knopf')).filter((b) => !b.hidden).map((b) => b.getBoundingClientRect().height)) }));
   const l07 = await lam7();
@@ -4584,7 +4584,7 @@ if (teil(20)) {
   for (let k = 1; k <= 8; k++) { await finger20('touchMove', [[px20 - 30 - k * 8, py20], [px20 + 30 + k * 8, py20]]); await g5.waitForTimeout(16); }
   await finger20('touchEnd', []); await g5.waitForTimeout(1500);
   const pinch20 = await g5.evaluate(() => ({ z: W3DZ.w3d.z, gl: document.getElementById('w3d').classList.contains('gl') }));
-  ok(fok20 && fok20.z > 2.4 && fok20.dx < 0.2 && fok20.dy < 0.3 && pinch20.z > 2 && pinch20.gl, 'WebGL: bei der Frage nach dem Griff fährt die Kamera auf den Griff, zwei Finger zoomen (' + JSON.stringify(fok20) + ', ' + pinch20.z.toFixed(2) + ')');
+  ok(fok20 && fok20.z > 2.2 && fok20.dx < 0.2 && fok20.dy < 0.3 && pinch20.z > 2 && pinch20.gl, 'WebGL: bei der Frage nach dem Griff fährt die Kamera auf den Griff, zwei Finger zoomen (' + JSON.stringify(fok20) + ', ' + pinch20.z.toFixed(2) + ')');
   sauber(g5, 'S3 in der WebGL-Bühne ohne Fehler'); await c20e.close();
   /* Dieselben Teile im CSS-Modell (Rückfall): Druckknopf und Schließzylinder in der Nabe, Stopfen, Schlitz, Wippe und Funk-Punkt als
      Flächen; Fahren 1,8 s mit 12 ms je Lamelle, Wenden 0,6 s */
@@ -5038,7 +5038,7 @@ if (teil(22)) {
   const fs8c = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, schlitz: /^radial-gradient\(/.test(b.style.background) && /repeating-linear-gradient\(/.test(b.style.background) }; });
   ok(!fs1.tasten && /^Zurück/.test(fs1.zur) && fs1.zurH >= 44 && fs1.ok >= 44 && fs1.breit && fs1.stage >= 400 && fs1.feld >= 44 && fs1.frei, 'Messen: die Bühne über die ganze Breite (' + fs1.stage + ' px hoch), keine Zifferntasten, das Feld (' + fs1.feld + ' px) über dem Fuß, runder Pfeil zurück neben der Pille (' + fs1.ok + ' px) (' + JSON.stringify(fs1) + ')');
   ok(fs2a === 0 && fs2.top > 40 && fs2.sicht, 'Feinschliff, Dock rollt nach der Wahl „Ja, leicht“ nach: Empfehlung und Einbruchschutz-Stufen stehen im Blick (' + fs2.top + ' px)');
-  ok(fs3a.z > 2.4 && fs3b.q === 'gf' && fs3b.z === fs3a.z && fs3b.x === fs3a.x && fs3b.y === fs3a.y && fs3c.z > 2.4, 'Feinschliff, Kamera bleibt am Griff: von „Griff“ zur Griff-Farbe kein Zoom auf 1:1 und zurück (' + JSON.stringify([fs3a, fs3b, fs3c]) + ')');
+  ok(fs3a.z > 2.2 && fs3b.q === 'gf' && fs3b.z === fs3a.z && fs3b.x === fs3a.x && fs3b.y === fs3a.y && fs3c.z > 2.2, 'Feinschliff, Kamera bleibt am Griff: von „Griff“ zur Griff-Farbe kein Zoom auf 1:1 und zurück (' + JSON.stringify([fs3a, fs3b, fs3c]) + ')');
   ok(fs4.raff === 230 && fs4.kasten === 230 && fs4.roll === 200 && fs4.vorbau < 100 && fs4.blende, 'Feinschliff, Aufsatzkasten: das Element endet 230 mm (Raffstore) bzw. 200 mm (Rollladen) unter der Öffnung, beim Vorbau nicht; die Blende ist eine Detailangabe nur beim Aufsatzkasten');
   ok(fs5a.regler === 1 && fs5a.werte === 2 && fs5a.f === 'teil:0' && fs5a.gleich && fs5b.anteile === '[35,65]' && +fs5b.sw.split('/')[0] < +fs5b.sw.split('/')[1] && /35 \/ 65 %/.test(fs5b.text) && fs5b.gleichChip && fs5c.sw0 === 600 && fs5c.summe === 100 && fs5c.mass && fs5c.wert === '600 mm' && fs5d.weg && fs5d.gleich,
     'Feinschliff, Aufteilung: Regler je Pfosten mit Breiten in mm und Prozent, Ziehen setzt 35 / 65 (Modell und Blatt folgen), Eintippen von 600 mm stellt den Flügel, „Gleich verteilen“ setzt zurück (' + fs5b.sw + ')');
