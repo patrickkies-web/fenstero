@@ -3570,29 +3570,29 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
    weiße Fläche läuft bis ganz nach unten. Die Bausteine bekommen dort ihre Farben auf Weiß (wie die Wünsche). Am Laptop bleibt die
    Spalte rechts, ebenfalls weiß. */
 @media (max-width: 1023px) {
-  .scr.dna:is(.ft, .er, .fg, .zn) .dna-links { display: block; position: relative; z-index: 2; margin: 0 -16px; padding: 0 16px 26px; background: var(--schwarz); border-radius: 0 0 36px 36px }
-  .scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts { display: flex; flex-direction: column; flex: 1 0 auto; margin: -36px -16px 0; padding: 50px 16px 0; background: var(--weiss) }
+  .scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-links { display: block; position: relative; z-index: 2; margin: 0 -16px; padding: 0 16px 26px; background: var(--schwarz); border-radius: 0 0 36px 36px }
+  .scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts { display: flex; flex-direction: column; flex: 1 0 auto; margin: -36px -16px 0; padding: 50px 16px 0; background: var(--weiss) }
 }
 @media (min-width: 1024px) {
   .scr.dna.dt:is(.ft) .dna-rechts { background: var(--weiss); border-radius: 28px 0 0 0 }
 }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts { color: var(--schwarz); --grund: var(--weiss); --flaeche: #f6f6f8; --flaeche-hoch: var(--weiss); --tinte: var(--schwarz); --tinte-2: var(--textgrau); --linie: #dcdbe1; --linie-fein: #e6e5ea; --fokus: var(--schwarz); --handlung: var(--schwarz); --auf-handlung: var(--weiss) }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-frage h1 { color: var(--schwarz) }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-frage h1 em { color: var(--textgrau) }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-karte, .scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-karte.lg-hell { background: #f6f6f8; box-shadow: none }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-karte::before, .scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-karte::after { content: none }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts { color: var(--schwarz); --grund: var(--weiss); --flaeche: #f6f6f8; --flaeche-hoch: var(--weiss); --tinte: var(--schwarz); --tinte-2: var(--textgrau); --linie: #dcdbe1; --linie-fein: #e6e5ea; --fokus: var(--schwarz); --handlung: var(--schwarz); --auf-handlung: var(--weiss) }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-frage h1 { color: var(--schwarz) }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-frage h1 em { color: var(--textgrau) }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-karte, .scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-karte.lg-hell { background: #f6f6f8; box-shadow: none }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-karte::before, .scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-karte::after { content: none }
 .scr.dna.ft .dna-rechts .ft-tipp { background: #f6f6f8; box-shadow: none; color: var(--textgrau) }
 .scr.dna.ft .dna-rechts .ft-tipp b { color: var(--schwarz) }
 .scr.dna.ft .dna-rechts .ft-tipp svg { color: var(--textgrau) }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-i { color: var(--textgrau) }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-i::before { box-shadow: inset 0 0 0 1.5px #dcdbe1 }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-notiz-knopf, .scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .ez-notizknopf { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-fuss { background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--weiss) 16px) }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-fuss .dna-pille:not(.dna-pille--leise) { background: var(--schwarz); color: var(--weiss) }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-fuss .dna-pille:not(.dna-pille--leise) .dna-pille__pfeil { background: var(--weiss); color: var(--schwarz) }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .foot-links.recht, .scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .foot-links.recht a { color: var(--textgrau) }
-.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-i::before, .scr.dna.wz .lg-i::before { background: var(--weiss) }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-i { color: var(--textgrau) }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-i::before { box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-notiz-knopf, .scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .ez-notizknopf { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-fuss { background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--weiss) 16px) }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-fuss .dna-pille:not(.dna-pille--leise) { background: var(--schwarz); color: var(--weiss) }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-fuss .dna-pille:not(.dna-pille--leise) .dna-pille__pfeil { background: var(--weiss); color: var(--schwarz) }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .foot-links.recht, .scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .foot-links.recht a { color: var(--textgrau) }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab) .dna-rechts .lg-i::before, .scr.dna.wz .lg-i::before { background: var(--weiss) }
 /* Ergebnis und Gespeichert: die Bühne rundet unten über der weißen Fläche (Telefon); am Laptop die rechte Spalte weiß */
 .scr.dna.er .er-buehne, .scr.dna.fg .fg-buehne { z-index: 2; border-radius: 0 0 36px 36px }
 .scr.dna.fg .fg-buehne { overflow: hidden; background: var(--schwarz) }
@@ -3691,3 +3691,45 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
   .scr.dna.zn .dna-links { padding: 0; background: var(--schwarz) }
   .scr.dna.zn .dna-links > .zn-buehne { margin: 0; width: 100%; border-radius: 0 0 36px 36px }
 }
+/* Hinweis vor dem Speichern und Frage nach dem Gebäude (Blätter, 2.11.2026) */
+.exb-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px }
+.exb-chips .chip { min-height: 44px }
+.exb-mehr { align-self: center; font: 400 14px/1.3 var(--font-sans); color: var(--tinte-2, var(--silbergrau)) }
+.geb-liste { display: grid; gap: 10px; margin: 14px 0 6px; padding: 0; list-style: none }
+.geb-liste li { display: grid; gap: 2px; padding-left: 18px; position: relative }
+.geb-liste li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 7px; height: 7px; border-radius: 50%; background: var(--violett) }
+.geb-liste b { font: 500 15px/1.3 var(--font-sans) }
+.geb-liste small { font: 400 13px/1.4 var(--font-sans); color: var(--tinte-2, var(--silbergrau)) }
+/* ---------- Angaben, Aufmaßblatt, Weg (kostenlos oder bezahlen), Betriebe, Kasse, Freigeschaltet im neuen Bild (Inhaber, 2.11.2026) ----------
+   Bühne oben bleibt, die rechte Seite (am Telefon unten) ist weiß: Überschriften schwarz mit grauer zweiter Stimme, Karten hellgrau ohne
+   Schatten, die gewählte Karte weiß mit Rand, Umriss-Knöpfe schwarz, Texte grau. Die Gratis-Karte behält ihren violetten Ring. */
+.scr.dna.ab .dna-rechts :is(h1, h2) { color: var(--schwarz) }
+.scr.dna.ab .dna-rechts h1 :is(.ak:not(.ak-ganz), em) { color: var(--textgrau) }
+.scr.dna.ab .dna-rechts .ak-ganz { color: var(--schwarz) }
+.scr.dna.ab .dna-rechts :is(.card, .vm-karte:not([aria-pressed="true"]), .vm-garantie, .vm-gratis-hinweis, .vm-falls, .er-falls, .qlist, .rows) { background: #f6f6f8; box-shadow: none; color: var(--schwarz) }
+.scr.dna.ab .dna-rechts .vm-karte--gratis:not([aria-pressed="true"]), .scr.dna.ab .dna-rechts .vm-gratis-hinweis { box-shadow: inset 0 0 0 1.5px var(--violett) }
+.scr.dna.ab .dna-rechts .vm-karte[aria-pressed="true"] { background: var(--weiss); box-shadow: 0 0 0 1.5px #dcdbe1, 0 18px 32px -26px rgba(7, 9, 10, .35) }
+.scr.dna.ab .dna-rechts .vm-karte--gratis[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--violett), 0 18px 32px -26px rgba(7, 9, 10, .35) }
+.scr.dna.ab .dna-rechts :is(.card, .vm-karte, .vm-garantie, .vm-gratis-hinweis, .vm-falls) :is(b, strong, .vm-karte-titel, h3) { color: var(--schwarz) }
+.scr.dna.ab .dna-rechts :is(.vm-vertrauen, .vm-warum, .vm-garantie p, .vm-falls .fold-body p, .vm-falls summary small, .vm-gratis-hinweis p, .vm-preis small, .vm-preis s, small.einf, .card small, .card p, .ab-klein) { color: var(--textgrau) }
+.scr.dna.ab .dna-rechts :is(.vm-vertrauen b, .vm-warum b, .vm-garantie b, .vm-gratis-hinweis b, .card p b) { color: var(--schwarz) }
+.scr.dna.ab .dna-rechts .vm-garantie-chip { background: var(--schwarz); color: var(--weiss) }
+.scr.dna.ab .dna-rechts .vm-karte-etikett--leise { color: var(--textgrau); box-shadow: inset 0 0 0 1px #dcdbe1 }
+.scr.dna.ab .dna-rechts .btn.ghost { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.scr.dna.ab .dna-rechts .card .chip:not([aria-pressed="true"]):not(.on) { background: var(--weiss); color: var(--schwarz); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.scr.dna.ab .dna-rechts .datei-card .dc-ic { background: var(--schwarz); color: var(--weiss) }
+.scr.dna.ab .dna-rechts .vm-falls summary b { color: var(--schwarz) }
+.scr.dna.ab .dna-rechts small.einf, .scr.dna.ab .dna-rechts .einf { color: var(--schwarz) }
+.scr.dna.ab .dna-rechts .card .chip { background: var(--weiss); color: var(--schwarz); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.scr.dna.ab .dna-rechts .card .chip b { color: var(--schwarz) }
+.scr.dna.ab .dna-rechts .card .chip:is([aria-pressed="true"], .on) { box-shadow: inset 0 0 0 2px var(--schwarz) }
+.scr.dna.ab.ab2 .dna-rechts :is(.price-row, .order) small.einf { color: var(--schwarz) !important }
+/* Zahlungsarten auf Weiß: hell mit Rand, gewählt schwarz; Gebäude-Chips in hellgrauer Fläche; Eingaben als hellgraue Pillen */
+.scr.dna.ab .dna-rechts .pay .chip { background: var(--weiss); color: var(--schwarz); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.scr.dna.ab .dna-rechts .pay .chip[aria-pressed="true"] { background: var(--schwarz); color: var(--weiss); box-shadow: none }
+.scr.dna.ab .dna-rechts .qchips { background: #f6f6f8; box-shadow: none }
+.scr.dna.ab .dna-rechts .qchips .chip { color: var(--schwarz) }
+.scr.dna.ab .dna-rechts .qchips .chip[aria-pressed="true"] { background: var(--schwarz); color: var(--weiss) }
+.scr.dna.ab .dna-rechts .ab-eingabe { background: #f6f6f8; box-shadow: inset 0 0 0 1px #e6e5ea }
+.scr.dna.ab .dna-rechts .ab-eingabe:focus-within { box-shadow: inset 0 0 0 2px var(--schwarz) }
+.scr.dna.ab .dna-rechts .ab-eingabe input::placeholder { color: var(--textgrau) }

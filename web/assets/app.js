@@ -4996,6 +4996,8 @@ function qStep(delta) {
      Neuladen eines Entwurfs) */
   if (c.q.id !== 'extras' && !qHaupt(c.q)) { S.q = 'extras'; S.dir = 'back'; S.selBar = null; S.openSash = -1; return render(true); }
   if (c.q.id === 'extras' && delta < 0) S.ausListe = false;
+  /* „Fenster speichern“ auf der Liste: einmal je Fenster ein Hinweis auf die noch offenen Möglichkeiten (Inhaber, 2.11.2026) */
+  if (c.q.id === 'extras' && delta > 0 && S.extrasGezeigt !== S.win && extrasOffen().length >= 3) { S.extrasGezeigt = S.win; S.extrasHinweis = true; return render(); }
   const nx = c.list[c.i + delta];
   if (!nx) { if (delta > 0) return saveWin(); if (einstiegHier()) return zumEinstieg(); return go('ergebnis', 'back'); }
   S.q = nx.id; S.dir = delta < 0 ? 'back' : 'fwd'; S.selBar = null; S.qWunsch = false;
@@ -5887,6 +5889,28 @@ function qMassweg() {
   }
   return h;
 }
+/* Hinweis vor dem Speichern: was in der Liste noch offen ist, die ersten sechs als Abkürzung; „Ansehen“ bleibt auf der Liste */
+/* zuerst, was Kunden am häufigsten nachträglich wünschen, dann die übrigen in der Reihenfolge der Liste */
+const EXTRA_ZUERST = ['insekt', 'iart', 'griff', 'glasfn', 'kvd', 'kinder', 'luefter', 'ol', 'gf', 'oeffner'];
+const extrasOffen = () => { const L = qExtras(qList(S.win)).filter((q) => !extraWert(q).an && String(q.id).split('-')[0] !== 'notiz'), r = (q) => { const i = EXTRA_ZUERST.indexOf(String(q.id).split('-')[0]); return i < 0 ? 99 : i; }; return L.map((q, i) => [q, i]).sort((a, b) => r(a[0]) - r(b[0]) || a[1] - b[1]).map((x) => x[0]); };
+function extrasBlatt() {
+  const offen = extrasOffen(), bn = fbName() || 'dein Fensterbauer', name = (q) => q.kurz || QKURZ[String(q.id).split('-')[0]] || q.title;
+  const elN = istTuer(S.win) ? 'Tür' : S.win.art === 'fest' ? 'Verglasung' : 'Fenster';
+  return '<button type="button" class="sheet-bg" aria-label="Zurück zur Liste" data-act="extras-ansehen"></button><div class="sheet verlassen ex-blatt" role="alertdialog" aria-modal="true" aria-labelledby="exb-t" aria-describedby="exb-s"><div class="grip"></div>' +
+    '<p class="eyebrow kicker" style="margin-top: 6px">Bevor du speicherst</p><h2 id="exb-t" tabindex="-1">Noch ' + offen.length + ' Möglichkeiten <span class="ak">offen</span></h2>' +
+    '<p class="vl-sub" id="exb-s">' + esc('Das Wichtigste hast du gewählt. Diese Dinge kannst du noch einstellen, wenn sie dir wichtig sind; sonst plant ' + bn + ' sie nach seinem Standard.') + '</p>' +
+    '<div class="exb-chips">' + offen.slice(0, 6).map((q) => '<button type="button" class="chip" data-act="extras-oeffnen" data-v="' + esc(q.id) + '">' + esc(name(q)) + '</button>').join('') + (offen.length > 6 ? '<span class="exb-mehr">und ' + (offen.length - 6) + ' weitere</span>' : '') + '</div>' +
+    '<div class="vl-knoepfe"><button type="button" class="btn primary" data-act="extras-ansehen">Möglichkeiten ansehen</button><button type="button" class="btn ghost" data-act="extras-speichern">' + esc(elN + ' so speichern') + '</button></div></div>';
+}
+/* „Zum Aufmaßblatt“: vorher die Frage nach den Angaben zum Gebäude (Inhaber, 2.11.2026), mit Zahl der Fragen und warum sie zählen */
+function gebFrageBlatt() {
+  const lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'dein Fensterbauer') : 'deinem Fensterbauer';
+  return '<button type="button" class="sheet-bg" aria-label="Abbrechen" data-act="geb-zu"></button><div class="sheet verlassen geb-blatt" role="alertdialog" aria-modal="true" aria-labelledby="gb-t" aria-describedby="gb-s"><div class="grip"></div>' +
+    '<p class="eyebrow kicker" style="margin-top: 6px">Fürs Angebot</p><h2 id="gb-t" tabindex="-1">Infos zu deinem <span class="ak">Gebäude</span> mitschicken?</h2>' +
+    '<p class="vl-sub" id="gb-s">' + esc('Möchtest du in deinem Aufmaßblatt ' + bn + ' Informationen zu deinem Gebäude übermitteln? 6 kurze Fragen auf 2 Folien, etwa eine Minute.') + '</p>' +
+    '<ul class="geb-liste"><li><b>Gebäude und Baujahr</b><small>entscheiden über Förderung und Vorgaben, etwa beim Denkmalschutz</small></li><li><b>Fenster im ganzen Haus</b><small>ab einem Drittel getauschter Fenster ist ein Lüftungskonzept Pflicht</small></li><li><b>Zeitraum, Budget, Förderung</b><small>damit das Angebot passt</small></li></ul>' +
+    '<div class="vl-knoepfe"><button type="button" class="btn primary" data-act="geb-ja">Ja, 6 Fragen beantworten</button><button type="button" class="btn ghost" data-act="geb-nein">Nein, direkt weiter</button></div></div>';
+}
 /* ---------- Freiwillige Liste am Ende (Inhaber, 2.11.2026) ----------
    Was Kunden erst beim zweiten oder dritten Nachdenken einstellen: alle Fragen außerhalb des Hauptwegs, nach Themen; jede Zeile zeigt den
    Stand (Standard oder die Wahl). Antippen öffnet die Frage am Modell, „Fertig“ führt hierher zurück (S.ausListe) */
@@ -6208,6 +6232,8 @@ function sheetsHTML() {
   if (S.glossIndex) return glossIndexBlatt();
   if (S.wohin) return wohinBlatt();
   if (S.ohneFotoFrage && S.screen === 'fotos') return ohneFotoBlatt();
+  if (S.extrasHinweis && S.screen === 'frage') return extrasBlatt();
+  if (S.gebFrage) return gebFrageBlatt();
   return '';
 }
 
@@ -6468,6 +6494,8 @@ function zurueckTaste() {
   if (S.sendeFrage) { S.sendeFrage = false; render(); return true; }
   if (S.gloss || S.glossIndex) { S.gloss = null; S.glossIndex = false; render(); return true; }
   if (S.wohin) { S.wohin = false; render(); return true; }
+  if (S.extrasHinweis) { S.extrasHinweis = false; render(); return true; }
+  if (S.gebFrage) { S.gebFrage = false; render(); return true; }
   if (S.wzKap) { S.wzKap = false; render(); const b = document.querySelector('.wz-band'); if (b) b.focus({ preventScroll: true }); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
   if (S.qMass && S.screen === 'frage') { S.qMass = null; render(); return true; } // Zifferntasten in den Wünschen
@@ -7606,7 +7634,16 @@ function act(name, el) {
       if (v === 'keiner' || v === 'behalten') w.roll = v; else if (v === 'klappladen') w.roll = 'keiner'; else { if (w.roll !== 'vorbau' && w.roll !== 'unterputz') w.roll = 'aufsatz'; if (!vorher) w.offen = Object.assign({}, w.offen || {}, { einbau: true }); }
       return render();
     }
-    case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; return go(v);
+    case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return;
+      /* Zu den Angaben (Aufmaßblatt, Absenden): erst fragen, ob Infos zum Gebäude mit sollen, solange keine gemacht sind */
+      if (v === 'anfrage' && ['fertig', 'liste', 'home'].indexOf(S.screen) >= 0 && S.proj && !S.proj.gebaeude && !S.proj.baujahr && !num(S.proj.total) && !S.proj.zeit && !S.proj.budget && !S.gebGefragt) { S.gebFrage = true; return render(); }
+      return go(v);
+    case 'geb-ja': S.gebFrage = false; S.gebGefragt = true; return go('anfrage');
+    case 'geb-nein': S.gebFrage = false; S.gebGefragt = true; return go('anfrage3');
+    case 'geb-zu': S.gebFrage = false; return render();
+    case 'extras-ansehen': { S.extrasHinweis = false; render(); const d = document.querySelector('.ex-liste'); if (d && d.scrollIntoView) d.scrollIntoView({ block: 'start', behavior: ruhig() ? 'auto' : 'smooth' }); return; }
+    case 'extras-speichern': S.extrasHinweis = false; return saveWin();
+    case 'extras-oeffnen': S.extrasHinweis = false; S.ausListe = true; S.q = v; S.dir = 'fwd'; S.openSash = -1; S.qDock = null; return render(true);
     /* Übersicht aller Fenster aus den Wünschen (Knopf oben links): bei ungespeicherten Änderungen erst das Blatt „Noch nicht gespeichert“ */
     case 'liste': { S.qMass = null; return verlassen({ art: 'home' }); }
     case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'md-zurueck') return window.MessenDna.zurueck(); if (b === 'mess-back') { S.mess.step = 3; S.mess.pad = false; S.mess.msg = null; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }

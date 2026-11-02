@@ -525,6 +525,8 @@ if (teil(4)) {
   await page.evaluate((code) => { localStorage.setItem('aufmass.k.' + code, JSON.stringify({ windows: demoProject(), proj: {}, name: '' })); }, link.code);
   await page.reload({ waitUntil: 'networkidle' });
   await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); // Weiter zum Absenden
+  /* vorher die Frage nach den Angaben zum Gebäude (2.11.2026): Ja, sechs Fragen */
+  await page.waitForSelector('[data-act="geb-ja"]'); ok(/6 kurze Fragen/.test(await page.evaluate(() => document.querySelector('.geb-blatt').textContent)), 'Vor den Angaben: Frage nach den Infos zum Gebäude mit Zahl der Fragen'); await page.click('[data-act="geb-ja"]');
   await page.waitForSelector('[data-screen="anfrage"]');
   await page.click('.bb .btn.primary, .scr.dna .lg-weiter');
   await page.waitForSelector('[data-screen="anfrage2"]');
@@ -1328,7 +1330,7 @@ if (teil(8)) {
   ok(st1.ok && st1.status === 'geoeffnet' && st1.betrieb === firma && st1.kunde === 'Familie Server', 'Server weiß, dass der Kunde den Link geöffnet hat');
   await kp.evaluate((code) => { localStorage.setItem('aufmass.k.' + code, JSON.stringify({ windows: demoProject(), proj: {}, name: '' })); }, l1.code);
   await kp.reload({ waitUntil: 'networkidle' }); await kp.waitForTimeout(500);
-  await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="anfrage"]'); await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="anfrage2"]'); await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="blatt"]');
+  await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-act="geb-ja"]'); await kp.click('[data-act="geb-ja"]'); await kp.waitForSelector('[data-screen="anfrage"]'); await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="anfrage2"]'); await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="blatt"]');
   ok(/mit allen Maßen und Wünschen, dazu die Auswertung der Fotos/.test(await kp.evaluate(() => document.body.innerText)), 'Prüfen-Seite verspricht Maße, Wünsche und Fotoauswertung');
   await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="gesendet"]'); await kp.waitForTimeout(500);
   const ges = await kp.evaluate(() => ({ txt: document.body.innerText, sent: S.sent, code: !!document.getElementById('code-box'), feier: (function () { const e = document.querySelector('.okmark-l[data-lottie="fertig"]'); return e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0 ? 1 : 0; })() }));
@@ -5080,6 +5082,21 @@ if (teil(32)) {
   const l3 = await p.evaluate(() => ({ q: S.q, an: document.querySelector('.ex-zeile[data-v="kvd"]').classList.contains('an'), wert: document.querySelector('.ex-zeile[data-v="kvd"] small').textContent }));
   ok(l1.zeilen >= 20 && l1.gruppen >= 4 && /speichern/.test(l1.pille) && l2.q === 'kvd' && l2.pille === 'Fertig' && /^Freiwillig/.test(l2.kopf) && l3.q === 'extras' && l3.an && /Kipp vor Dreh/i.test(l3.wert),
     'Liste: Zeilen nach Themen, Antippen öffnet die Frage am Modell mit „Fertig“, danach steht die Wahl in der Zeile; unten „Fenster speichern“ (' + JSON.stringify([l1, l2, l3]) + ')');
+  /* c2) „Fenster speichern“ auf der Liste: einmal je Fenster ein Hinweis auf die offenen Möglichkeiten; „Ansehen“ bleibt, danach speichert es */
+  await p.tap('.lg-weiter'); await p.waitForTimeout(400);
+  const h1 = await p.evaluate(() => ({ blatt: !!document.querySelector('.ex-blatt'), text: (document.querySelector('.ex-blatt h2') || {}).textContent || '', chips: document.querySelectorAll('.ex-blatt .exb-chips .chip').length, erste: (document.querySelector('.ex-blatt .exb-chips .chip') || {}).textContent || '' }));
+  await p.tap('[data-act="extras-ansehen"]'); await p.waitForTimeout(300);
+  const h2 = await p.evaluate(() => ({ blatt: !!document.querySelector('.ex-blatt'), q: S.q, screen: S.screen }));
+  await p.tap('.lg-weiter'); await p.waitForTimeout(600);
+  const h3 = await p.evaluate(() => ({ screen: S.screen, n: S.windows.length }));
+  ok(h1.blatt && /^Noch \d+ Möglichkeiten offen/.test(h1.text) && h1.chips === 6 && /Insektenschutz|Sicht|Griff/.test(h1.erste) && !h2.blatt && h2.q === 'extras' && h3.screen === 'fertig' && h3.n >= 1,
+    'Speichern auf der Liste: einmal ein Hinweis auf die offenen Möglichkeiten (die häufigsten zuerst), „Ansehen“ bleibt auf der Liste, danach wird gespeichert (' + JSON.stringify([h1, h2, h3]) + ')');
+  /* c3) „Zum Aufmaßblatt“: erst die Frage nach dem Gebäude; Nein führt zu den Kontaktangaben */
+  await p.tap('.fg-fuss .lg-weiter'); await p.waitForTimeout(400);
+  const g1 = await p.evaluate(() => ({ blatt: !!document.querySelector('.geb-blatt'), text: (document.querySelector('.geb-blatt') || {}).textContent || '' }));
+  await p.tap('[data-act="geb-nein"]'); await p.waitForTimeout(400);
+  const g2 = await p.evaluate(() => S.screen);
+  ok(g1.blatt && /Gebäude/.test(g1.text) && /6 kurze Fragen/.test(g1.text) && g2 === 'anfrage3', 'Zum Aufmaßblatt: zuerst die Frage, ob Infos zum Gebäude mit sollen (6 Fragen, warum es zählt); Nein führt direkt zu den Kontaktangaben (' + g2 + ')');
   /* d) Weg zu den Maßen: ohne Maße gleich weiter; eingeben über die Zifferntasten; geführt über Fotos, zurück auf den Weg, nach dem Ergebnis weiter bei „wie viele und wo“ */
   await p.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.windows = []; S.q = 'massweg'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(400);
   const m0 = await p.evaluate(() => ({ zeilen: Array.from(document.querySelectorAll('.mw-zeile')).map((b) => b.getAttribute('data-v')).join(), h: Math.round(document.querySelector('.mw-kreis').getBoundingClientRect().height) }));
