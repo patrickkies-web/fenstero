@@ -198,8 +198,10 @@
   var lottieDaten = {}, lottieIO = null, lottieHalt = false;
   /* Ablage der Dateien neben dieser Datei (assets/lottie/), damit es auch unter einem anderen Pfad läuft */
   var LOTTIE_BASE = (function () { try { var sc = document.currentScript; return sc && sc.src ? new URL('lottie/', sc.src).href : '/assets/lottie/'; } catch (e) { return '/assets/lottie/'; } })();
-  /* Tokens am Ziel lesen (erben vom Dokument): so kann eine Fläche die Farben für ihr Bewegtbild umstellen, etwa Weiß unter Schwarz */
+  /* Tokens am Ziel lesen, wenn das Ziel es per CSS verlangt (--lottie-eigen: 1): so kann eine Fläche die Farben für ihr Bewegtbild
+     umstellen, etwa der Flieger auf Weiß; sonst wie bisher die Tokens des Dokuments */
   function tokenFarbe(name, el) {
+    if (el && getComputedStyle(el).getPropertyValue('--lottie-eigen').trim() !== '1') el = null;
     var v = getComputedStyle(el || document.documentElement).getPropertyValue('--' + name).trim(), m = /^#([0-9a-f]{6})$/i.exec(v);
     if (!m) return null;
     return [parseInt(m[1].slice(0, 2), 16) / 255, parseInt(m[1].slice(2, 4), 16) / 255, parseInt(m[1].slice(4, 6), 16) / 255];

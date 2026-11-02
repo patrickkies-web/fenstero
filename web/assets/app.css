@@ -3706,13 +3706,13 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna.ab .dna-rechts :is(h1, h2) { color: var(--schwarz) }
 .scr.dna.ab .dna-rechts h1 :is(.ak:not(.ak-ganz), em) { color: var(--textgrau) }
 .scr.dna.ab .dna-rechts .ak-ganz { color: var(--schwarz) }
-.scr.dna.ab .dna-rechts :is(.card, .vm-karte:not([aria-pressed="true"]), .vm-garantie, .vm-gratis-hinweis, .vm-falls, .er-falls, .qlist, .rows) { background: #f6f6f8; box-shadow: none; color: var(--schwarz) }
-.scr.dna.ab .dna-rechts .vm-karte--gratis:not([aria-pressed="true"]), .scr.dna.ab .dna-rechts .vm-gratis-hinweis { box-shadow: inset 0 0 0 1.5px var(--violett) }
+.scr.dna.ab .dna-rechts :is(.card, .vm-karte:not([aria-pressed="true"]), .vm-garantie, .vm-falls, .er-falls, .qlist, .rows) { background: #f6f6f8; box-shadow: none; color: var(--schwarz) }
+.scr.dna.ab .dna-rechts .vm-karte--gratis:not([aria-pressed="true"]) { box-shadow: inset 0 0 0 1.5px var(--violett) }
 .scr.dna.ab .dna-rechts .vm-karte[aria-pressed="true"] { background: var(--weiss); box-shadow: 0 0 0 1.5px #dcdbe1, 0 18px 32px -26px rgba(7, 9, 10, .35) }
 .scr.dna.ab .dna-rechts .vm-karte--gratis[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--violett), 0 18px 32px -26px rgba(7, 9, 10, .35) }
-.scr.dna.ab .dna-rechts :is(.card, .vm-karte, .vm-garantie, .vm-gratis-hinweis, .vm-falls) :is(b, strong, .vm-karte-titel, h3) { color: var(--schwarz) }
-.scr.dna.ab .dna-rechts :is(.vm-vertrauen, .vm-warum, .vm-garantie p, .vm-falls .fold-body p, .vm-falls summary small, .vm-gratis-hinweis p, .vm-preis small, .vm-preis s, small.einf, .card small, .card p, .ab-klein) { color: var(--textgrau) }
-.scr.dna.ab .dna-rechts :is(.vm-vertrauen b, .vm-warum b, .vm-garantie b, .vm-gratis-hinweis b, .card p b) { color: var(--schwarz) }
+.scr.dna.ab .dna-rechts :is(.card, .vm-karte, .vm-garantie, .vm-falls) :is(b, strong, .vm-karte-titel, h3) { color: var(--schwarz) }
+.scr.dna.ab .dna-rechts :is(.vm-vertrauen, .vm-warum, .vm-garantie p, .vm-falls .fold-body p, .vm-falls summary small, .vm-preis small, .vm-preis s, small.einf, .card small, .card p, .ab-klein) { color: var(--textgrau) }
+.scr.dna.ab .dna-rechts :is(.vm-vertrauen b, .vm-warum b, .vm-garantie b, .card p b) { color: var(--schwarz) }
 .scr.dna.ab .dna-rechts .vm-garantie-chip { background: var(--schwarz); color: var(--weiss) }
 .scr.dna.ab .dna-rechts .vm-karte-etikett--leise { color: var(--textgrau); box-shadow: inset 0 0 0 1px #dcdbe1 }
 .scr.dna.ab .dna-rechts .btn.ghost { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
@@ -3733,6 +3733,8 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna.ab .dna-rechts .ab-eingabe { background: #f6f6f8; box-shadow: inset 0 0 0 1px #e6e5ea }
 .scr.dna.ab .dna-rechts .ab-eingabe:focus-within { box-shadow: inset 0 0 0 2px var(--schwarz) }
 .scr.dna.ab .dna-rechts .ab-eingabe input::placeholder { color: var(--textgrau) }
+/* Gratis-Weg über dem Preis bleibt die dunkle Karte mit weißer Schrift (Inhaber, 29.10.2026: „dass man das gut lesen kann“), auch auf Weiß */
+.scr.dna.ab .dna-rechts .vm-gratis-hinweis { --tinte: var(--weiss); --tinte-2: var(--silbergrau); --linie: #3a3b40; --fokus: var(--weiss) }
 /* ---------- Deine Fenster auf Weiß (Inhaber, 2.11.2026: „die nächsten ganzen Folien … im neuen Look“) ----------
    Bühne mit den Fenstern bleibt schwarz, darunter die weiße Fläche wie bei Angaben, Aufmaßblatt und Kasse: Titel schwarz mit zweiter Stimme
    in Textgrau, Fensterkarten und Karten hellgrau ohne Schatten, Symbole weiß auf schwarzer Kachel wie in der Bühne, „Weiteres Fenster“ als Umriss-Pille, die Pille
@@ -3766,4 +3768,4 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna.li .dna-rechts .gs-kontakt :is(.gs-ap b, .gs-k) { color: var(--schwarz) }
 .scr.dna.li .dna-rechts .gs-kontakt .gs-k-rund { box-shadow: inset 0 0 0 1.5px #dcdbe1; background: var(--weiss) }
 /* Abschicken auf Weiß: der Flieger groß genug zum Sehen (seine Bahn ist 320 × 200), schwarz mit grauer Bahn, der Ring am Ziel violett */
-.scr.dna .dna-rechts .okmark-l[data-lottie="senden"] { width: 168px; height: 105px; --ink: #a8a4a9; --paper: #07090a; --ok: #897efc }
+.scr.dna .dna-rechts .okmark-l[data-lottie="senden"] { width: 168px; height: 105px; --lottie-eigen: 1; --ink: #a8a4a9; --paper: #07090a; --ok: #897efc }
