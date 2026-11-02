@@ -26,6 +26,8 @@
   },
   // Variablen aus dem Dashboard (z. B. KI_MODELL_GENAU, PREIS_AUFMASS_CENT, MWST) bei jedem Deployment behalten
   "keep_vars": true,
+  // Workers AI (vorübergehend für den KI-Test in der Zentrale, functions/api/kitest.js; danach wieder entfernen)
+  "ai": { "binding": "AI" },
   // Sammelrechnungen für Betriebe am 1. und 15. jeden Monats um 3 Uhr UTC; Aufräumen (Protokoll nach Frist, liegengebliebene Kassen,
   // Anmeldungen ohne Betrieb, Zwischenstände erledigter Kundenlinks) und die Tagesläufe der Konfigurator-Instanzen jeden Tag um 4:17 Uhr UTC;
   // alle 10 Minuten das Nachholen des Versands eingegangener Anfragen der Instanzen (worker.js → scheduled → geplant, Weiche in functions/api/router.js)

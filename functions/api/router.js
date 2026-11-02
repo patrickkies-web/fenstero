@@ -25,6 +25,7 @@ import { zahlungsdienst } from './stripe.js';
 import { KONTO, abrechnungslauf } from './konten.js';
 import { ZAHLUNG } from './zahlung.js';
 import { ZENTRALE, aufraeumen } from './zentrale.js';
+import { KI_TEST } from './kitest.js'; // vorübergehend: KI-Test in der Zentrale (kitest.js)
 import { ENTWURF } from './entwurf.js';
 import { EIGENE, kontenDa } from './eigene.js';
 import { WIDERRUF, widerrufeNachholen } from './widerruf.js';
@@ -45,7 +46,7 @@ import '../../web/assets/instanzregeln.js'; // Zustände, Fristen, Grenzen der I
 import { indexnow } from '../seo.js';
 
 /* Die bestehenden Routen stehen zuletzt und haben damit Vorrang, falls ein neues Modul dieselbe Adresse nennt (Altbestand bleibt) */
-const ROUTEN = Object.assign({}, AUFTRAG, VERMITTLUNG, INSTANZ_API, EINGANG, DASHBOARD, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE, WIDERRUF, FOTOS);
+const ROUTEN = Object.assign({}, AUFTRAG, VERMITTLUNG, INSTANZ_API, EINGANG, DASHBOARD, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE, KI_TEST, WIDERRUF, FOTOS);
 const MAX_BODY = 1500000, MAX_DATEI = 6000000; // Dateien der Aufträge (Fotos für die Landingpage) als Base64
 /* Anfrage der Vermittlung mit dem Aufmaßblatt (bis 10 MB) als Base64: eigener Grenzwert nur für diesen Pfad (vermittlung.js) */
 
