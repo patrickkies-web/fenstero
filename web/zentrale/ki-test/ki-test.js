@@ -55,7 +55,7 @@
     TESTS.forEach(function (t, i) { kette = kette.then(function () { return rechnen(t, karten[i]); }); });
     kette.then(function () { start.disabled = false; start.textContent = 'Nochmal rechnen'; });
   });
-  fetch('/api/zentrale/status', { credentials: 'same-origin', headers: { 'x-zentrale': '1' } })
+  fetch('/api/inhaber/stand', { credentials: 'same-origin', headers: { accept: 'application/json' } })
     .then(function (r) { return r.json(); })
     .then(function (j) {
       if (j && j.angemeldet) { anm.textContent = 'Angemeldet. Drei Tests, je etwa 10 bis 20 Sekunden.'; start.disabled = false; }

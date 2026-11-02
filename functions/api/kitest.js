@@ -1,10 +1,10 @@
 /* eeziframes · KI-Test in der Zentrale (vorübergehend, Wunsch des Inhabers 2.11.2026): Rechnet das Beispielhaus des Inhabers mit
    FLUX.2 klein über Cloudflare Workers AI, damit er die echten Ergebnisse von Cloudflare neben „An meinem Haus ansehen“ (FLUX 3 bei
-   Black Forest Labs) sieht. Oberfläche: /zentrale/ki-test/ (web/zentrale/ki-test/). Nur nach der Anmeldung in der Zentrale (zugang),
+   Black Forest Labs) sieht. Oberfläche: /zentrale/ki-test/ (web/zentrale/ki-test/). Nur nach der Anmeldung in der Zentrale (Sitzung „inhaber“),
    nur mit den festen Testbildern aus web/zentrale/ki-test/, keine Kundenfotos. Nach dem Test wieder entfernen (diese Datei, die Zeile in
    router.js, den Ordner web/zentrale/ki-test/ und "ai" in wrangler.jsonc). Vergleich: docs/profis/2026-11-02-hausbild.md. */
 import { ApiFehler, erlaubt } from './umgebung.js';
-import { zugang } from './zentrale.js';
+import { sitzungPflicht } from './sitzung.js';
 
 const MODELLE = { '9b': '@cf/black-forest-labs/flux-2-klein-9b', '4b': '@cf/black-forest-labs/flux-2-klein-4b' };
 const EINBAU = 'installed by a professional window fitter: each frame is set back inside its masonry opening, recessed behind the facade surface, ' +
@@ -29,7 +29,7 @@ const base64 = (buf) => { const b = new Uint8Array(buf); let s = ''; for (let i 
 
 export const KI_TEST = {
   'POST /api/zentrale/ki-test': async (ctx) => {
-    await zugang(ctx);
+    await sitzungPflicht(ctx, 'inhaber'); // dieselbe Anmeldung wie die Zentrale unter /zentrale/ (functions/auftrag/index.js)
     if (!ctx.env || !ctx.env.AI) throw new ApiFehler('Workers AI ist nicht verbunden („ai“ in wrangler.jsonc).', 503);
     if (!erlaubt('kitest', 30, 3600 * 1000)) throw new ApiFehler('Genug Tests für diese Stunde.', 429);
     const b = ctx.body || {}, modell = MODELLE[b.modell], auftrag = AUFTRAG[b.art];
