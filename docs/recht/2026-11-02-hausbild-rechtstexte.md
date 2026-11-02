@@ -24,7 +24,8 @@ die diese Seiten zitieren. Vor dem Einsetzen bitte im Original prüfen.
 
 ## Sperre in der App
 
-Die Einladung erscheint erst, wenn **beides** stimmt: `HAUSBILD_FREI=1` bei Cloudflare **und** kein Platzhalter mehr in
+Ausgeschaltet im Server: `FREIGEGEBEN = false` in `functions/api/hausbild.js` (Wunsch des Inhabers, 2.11.2026). Danach erscheint
+die Einladung erst, wenn **beides** stimmt: `HAUSBILD_FREI=1` bei Cloudflare **und** kein Platzhalter mehr in
 `HB_EINW_TEXT` (web/assets/hausbild.js: `sitz`, `frist`, `ohneTraining`). Wird der Schalter versehentlich zu früh gesetzt, bleibt die
 Funktion trotzdem aus.
 
@@ -41,7 +42,9 @@ Funktion trotzdem aus.
      zweimal „Stand:“), `AGB_STAND` in `functions/api/recht.js` und `functions/seo.js` (`/agb/`) auf das neue Datum.
    - `web/cookies/index.html`: Zeile nach `aufmass.ki.einwilligung`; Stand der Seite und `functions/seo.js` (`/cookies/`).
 4. Prüfsuite: `PW_PFAD=/opt/node-tools NUR=3,17 node scripts/pruefen.mjs` (Kasse mit dem neuen AGB-Stand, Rechtstexte).
-5. Bei Cloudflare (Workers & Pages → fenstero → Settings → Variables and Secrets) die Variable `HAUSBILD_FREI` mit dem Wert `1` anlegen
+5. In `functions/api/hausbild.js` `FREIGEGEBEN` auf `true` setzen (seit 2.11.2026 auf Wunsch des Inhabers `false`: Der Server lehnt
+   jede Vorschau ab und schickt nichts an Black Forest Labs, gleich was bei Cloudflare steht).
+6. Bei Cloudflare (Workers & Pages → fenstero → Settings → Variables and Secrets) die Variable `HAUSBILD_FREI` mit dem Wert `1` anlegen
    (`BFL_API_KEY` steht schon). Ab dann erscheint die Einladung in „Gespeichert“.
 
 ## Datenschutzerklärung, Abschnitt 2 (Satz am Ende des Absatzes zur Zählung)

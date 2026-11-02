@@ -19,9 +19,12 @@ import { erlaubt, quelle, konfig } from './umgebung.js';
 import { speicher } from './speicher.js';
 import { budget } from './bremse.js';
 
-/* Eingeschaltet erst mit BFL_API_KEY und HAUSBILD_FREI=1 (Cloudflare): Der Schlüssel darf schon stehen, freigeschaltet wird nach dem
-   Vertrag zur Auftragsverarbeitung und den Rechtstexten (docs/recht/2026-11-02-hausbild-rechtstexte.md). Lokal mit KI_ATTRAPPE=1 immer an. */
-export const hausbildFrei = (env) => !!(env && env.BFL_API_KEY && (env.HAUSBILD_FREI === '1' || env.BFL_API_KEY === 'attrappe'));
+/* Eingeschaltet erst mit FREIGEGEBEN = true hier im Code UND BFL_API_KEY und HAUSBILD_FREI=1 (Cloudflare). Aus auf Wunsch des Inhabers
+   (2.11.2026) bis zum Vertrag zur Auftragsverarbeitung mit Black Forest Labs, der Bestätigung „kein Training“ und den Rechtstexten
+   (docs/recht/2026-11-02-hausbild-rechtstexte.md): Solange FREIGEGEBEN false ist, geht kein Bild an Black Forest Labs, gleich was bei
+   Cloudflare steht. Lokal mit KI_ATTRAPPE=1 immer an (rechnet nicht, schickt nichts). */
+const FREIGEGEBEN = false;
+export const hausbildFrei = (env) => !!(env && env.BFL_API_KEY && (env.BFL_API_KEY === 'attrappe' || (FREIGEGEBEN && env.HAUSBILD_FREI === '1')));
 
 /* Nur der EU-Zugang (Datenschutzerklärung 5a, Prüfung 2.11.2026): Ist er gestört, gibt es keine KI-Vorschau; auf den weltweiten
    Zugang (Rechenzentren auch in den USA) weichen wir nicht aus. */

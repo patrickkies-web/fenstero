@@ -714,7 +714,8 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
   KI-Vorschau, Widerruf im Editor und in der Fußleiste, Datenschutzerklärung 5a, AGB § 2 Abs. 5 und § 11 Abs. 2, nur EU-Zugang. Werbung mit
   solchen Bildern nur mit Hinweis „KI-Visualisierung mit eeziframes, kein Foto eines Einbaus. Ergebnisse können abweichen.“ und nie mit
   Bildern von Kunden ohne eigene Freigabe.
-- **Schalter:** Online seit 2.11.2026, aber aus: Einladung und KI-Vorschau erscheinen erst mit `BFL_API_KEY` **und** `HAUSBILD_FREI=1`
+- **Schalter:** Online seit 2.11.2026, aber aus (`FREIGEGEBEN = false` in functions/api/hausbild.js, Wunsch des Inhabers bis zum
+  Vertrag mit Black Forest Labs): Einladung und KI-Vorschau erscheinen erst damit, mit `BFL_API_KEY` **und** `HAUSBILD_FREI=1`
   (`hausbildFrei` in functions/api/hausbild.js, `/api/status` meldet `hausbild`). Die Rechtstexte (Datenschutz 5a, AGB § 2 Abs. 5 und
   § 11 Abs. 2, Cookie-Zeile) liegen fertig in docs/recht/2026-11-02-hausbild-rechtstexte.md und kommen beim Freischalten auf die Seiten.
   Zweite Sperre in der App: ohne vollständige Angaben in `HB_EINW_TEXT` (Sitz, Frist, Bestätigung „kein Training“) bleibt die

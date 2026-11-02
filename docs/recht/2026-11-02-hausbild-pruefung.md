@@ -41,5 +41,6 @@ Befunde sind begründete Hinweise für den Anwalt des Inhabers, der sie prüft. 
    `EINW_STAND` in functions/api/hausbild.js gemeinsam hochzählen.
 3. Rechtsgrundlage bestätigen (B5: Einwilligung wie umgesetzt oder Vertrag).
 4. AGB § 2 Abs. 5 und § 11 Abs. 2 freigeben (neuer Stand 2.11.2026; die Kasse zeigt ihn).
-5. Stand 2.11.2026: Der Code ist online, `BFL_API_KEY` steht bei Cloudflare, die Funktion ist aber aus. Die Rechtstexte liegen fertig in
+5. Stand 2.11.2026: Der Code ist online, `BFL_API_KEY` steht bei Cloudflare, die Funktion ist aber aus, auch im Server
+   (`FREIGEGEBEN = false` in functions/api/hausbild.js, Wunsch des Inhabers). Die Rechtstexte liegen fertig in
    docs/recht/2026-11-02-hausbild-rechtstexte.md (dort auch die Schritte); nach dem Einsetzen `HAUSBILD_FREI=1` bei Cloudflare.
