@@ -694,11 +694,15 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
      dem nächsten Bestätigen ist es wieder aus (Wunsch des Inhabers: nichts aus Versehen verschieben). **Duplizieren** setzt eine Kopie
      daneben, **Entfernen** nimmt das gewählte heraus. Bis hier keine KI.
   4. **Echte Vorschau** (erst mit mindestens einem bestätigten Element): Die App schickt nur den Ausschnitt um alle Elemente (mit Rand,
-     höchstens 1.600 px): das Foto, dasselbe mit den eingesetzten Fenstern in Lage und Winkel und je Fenster ein Bild aus dem 3-D-Modell
-     (gerade von außen, `VIEWS.aussenGerade`). Der Server schreibt den Auftrag für FLUX 3 Image Klein (je Element ein Feld nach
-     docs.bfl.ai „Bounding boxes“: Fenster einbauen, altes ganz ersetzen bzw. Öffnung mit Laibung und Fensterbank, Perspektive, Licht,
-     Ausführung genau wie die Vorlage, übrige Fassade unverändert). Das Ergebnis setzt die App nur innerhalb der Elementflächen (16 %
-     größer, weich auslaufend) ins Originalfoto; außerhalb bleibt jedes Pixel das Foto des Kunden. Danach Vorher/Nachher, „Bild
+     höchstens 1.600 px) als sauberes Foto und je Fenster ein Bild aus dem 3-D-Modell (gerade von außen, `VIEWS.aussenGerade`) mit
+     seinen Daten (Farbe, Flügel, Oberlicht, Sprossen, Sonnenschutz, Glas). Der Server schreibt den Auftrag für FLUX 3 Image Klein: je
+     Element ein Feld nach docs.bfl.ai „Bounding boxes“, Quelle ist die Vorlage, Ziel die markierte Öffnung; eingebaut wie vom Monteur
+     (Rahmen zurückgesetzt in der Öffnung, Laibungen sichtbar, Fensterbank mit Tropfkante, Schatten von Sturz und Laibung, Glas spiegelt
+     Himmel und Umgebung des Fotos, altes Fenster ganz weg bzw. neue Öffnung), übrige Fassade unverändert. Nie das Foto mit den flach
+     eingesetzten Fenstern als Quelle eines Feldes: dann übernimmt die KI die flachen Fenster (erste Fassung, Urteil des Inhabers:
+     „einfach nur schräg eingesetzt, nicht implementiert in den Gesamtkontext“). Der Server gibt nur die Adresse zum Abholen zurück, die
+     App fragt bis zu 3 Minuten nach (GET /api/hausbild). Das Ergebnis setzt die App nur innerhalb der Elementflächen (24 % größer, unten
+     mit Platz für die Fensterbank, weich auslaufend) ins Originalfoto; außerhalb bleibt jedes Pixel das Foto des Kunden. Danach Vorher/Nachher, „Bild
      speichern“, „Weiter bearbeiten“. Unter dem Bild: „Eine Visualisierung, keine Maßgrundlage.“
 - **Kosten und Grenzen:** 0,9 Cent je Vorschau (Black Forest Labs, Stand 1.11.2026). Server: 10 je 10 Minuten und Anschluss, 20 je
   Anschluss und Tag, `HAUSBILD_TAG_MAX` (Vorgabe 500) am Tag insgesamt. Gespeichert wird nichts.

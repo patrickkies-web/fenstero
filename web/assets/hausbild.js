@@ -10,8 +10,8 @@
    3. „Bearbeiten“ macht die Elemente wieder antippbar; nach „Bestätigen“ ist der Modus wieder aus, damit nichts aus Versehen
       verrutscht. Duplizieren und Entfernen gelten für das gewählte Element.
    4. „Echte Vorschau“: bis dahin keine KI. Die App schickt nur den Ausschnitt um alle Elemente: das Foto, dasselbe mit den eingesetzten
-      Fenstern (Lage und Winkel) und je Fenster ein Bild aus dem 3-D-Modell, von außen (functions/api/hausbild.js, FLUX 3 Image
-      Klein). Das Ergebnis setzt die App nur innerhalb der Elementflächen (weich auslaufend) ins Originalfoto zurück, der Rest bleibt
+      Fenstern (nur für die lokale Attrappe) und je Fenster ein Bild aus dem 3-D-Modell, von außen, mit seinen Daten (Farbe, Flügel,
+      Sprossen, Sonnenschutz, Glas; functions/api/hausbild.js, FLUX 3 Image Klein). Ergebnis abholen mit GET, bis 3 Minuten. Das Ergebnis setzt die App nur innerhalb der Elementflächen (weich auslaufend) ins Originalfoto zurück, der Rest bleibt
       das Foto des Kunden. Vorher/Nachher zum Vergleichen, Bild speichern.
    Bild der Elemente: dieselbe WebGL-Bühne wie in den Wünschen (buehne.js, Buehne3D.foto), frei ohne Wand, gerade von außen. Ohne
    WebGL zeichnet hausbild.js eine einfache Ansicht (Rahmenfarbe, Flügel, Glas). Nur im eigenen Aufmaß (nicht im Kundenlink und nicht in
@@ -113,6 +113,14 @@ function hbZeichnung(w) {
   return { src: cv.toDataURL('image/png'), w: W, h: H, zeichnung: true };
 }
 
+/* Daten des Fensters für den Auftrag an den Bilddienst (functions/api/hausbild.js, beschreibung) */
+function hbDaten(w) {
+  if (!w) return {};
+  const f = rahmenFarbe(w, 'aussen'), farbe = String((f && (f.solid || f.bg)) || '').match(/#[0-9a-f]{6}/i);
+  return { farbe: farbe ? farbe[0] : '', fluegel: (w.sashes || []).length || 1, oberlicht: !!w.ol, sprossen: (w.bars || []).length > 0, tuer: istTuer(w),
+    sonne: typeof sonneAktiv === 'function' && sonneAktiv(w) ? w.sart : '', glas: (w.glasfn || []).indexOf('sicht') >= 0 ? 'ornament' : 'klar' };
+}
+
 /* ---------- Geometrie ---------- */
 /* Rechteck (0..w, 0..h) → Viereck q (oben links, oben rechts, unten rechts, unten links), als matrix3d (Heckbert) */
 function hbMatrix(w, h, q) {
@@ -129,7 +137,7 @@ const hbPx = (q, W, H) => q.map((p) => [p[0] * W, p[1] * H]);
 
 /* ---------- Bildschirm ---------- */
 function hbTitel() {
-  if (HB.laedt) return ['Dein Haus wird <em>gerechnet.</em>', 'Das dauert etwa 10 bis 20 Sekunden.'];
+  if (HB.laedt) return ['Dein Haus wird <em>gerechnet.</em>', 'Das dauert meist 10 bis 30 Sekunden.'];
   if (HB.ergebnis) return ['So sieht es <em>aus.</em>', 'Eine Visualisierung, keine Maßgrundlage. Gemessen und bestellt wird wie gehabt mit deinem Aufmaß.'];
   if (!HB.foto) return ['Dein Fenster <em>am Haus.</em>', 'Wähle ein Foto deines Hauses, am besten gerade von vorn und bei Tageslicht.'];
   const ak = HB.el.find((e) => e.id === HB.aktiv);
@@ -152,7 +160,7 @@ function hbBuehne() {
   }).join('');
   const ecken = HB.ergebnis ? '' : (HB.el.find((e) => e.id === HB.aktiv) ? [0, 1, 2, 3].map((i) => '<span class="hb-ecke" data-i="' + i + '" aria-hidden="true"></span>').join('') : '');
   const vergleich = HB.ergebnis ? '<div class="hb-vergleich" role="group" aria-label="Vergleich"><button type="button" data-act="hb-zeige" data-v="vor" aria-pressed="' + (HB.zeige === 'vor') + '">Vorher</button><button type="button" data-act="hb-zeige" data-v="nach" aria-pressed="' + (HB.zeige === 'nach') + '">Nachher</button></div>' : '';
-  const laedt = HB.laedt ? '<div class="hb-laedt" role="status"><span class="spin"></span><span>Licht, Schatten und Laibung werden gerechnet</span></div>' : '';
+  const laedt = HB.laedt ? '<div class="hb-laedt" role="status"><span class="spin"></span><span>' + (HB.langsam ? 'Der Bilddienst hat gerade viel zu tun. Es dauert etwas länger.' : 'Licht, Schatten und Laibung werden gerechnet') + '</span></div>' : '';
   const lupe = HB.ergebnis || HB.laedt ? '' : '<div class="hb-lupe" role="group" aria-label="Lupe"><button type="button" class="hb-rund" data-act="hb-zoom" data-v="1" aria-label="Näher"' + (HB.z >= 3.99 ? ' disabled' : '') + '>' + hbZ('naeher') + '</button>' +
     '<button type="button" class="hb-rund" data-act="hb-zoom" data-v="-1" aria-label="Weiter weg"' + (HB.z <= 1 ? ' disabled' : '') + '>' + hbZ('weiter') + '</button></div>';
   const bedienen = !HB.ergebnis && (HB.aktiv || HB.bearbeiten || HB.z > 1);
@@ -437,26 +445,41 @@ async function hbVorschau() {
       const p = hbPx(e.q, W, H); let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
       p.forEach((pt) => { bx0 = Math.min(bx0, pt[0]); by0 = Math.min(by0, pt[1]); bx1 = Math.max(bx1, pt[0]); by1 = Math.max(by1, pt[1]); });
       const g = (v, a, l) => Math.round((v - a) / l * 1000);
-      return { box: [g(by0, ay, ch), g(bx0, ax, cw), g(by1, ay, ch), g(bx1, ax, cw)], vorlage: vIdx[e.win] || 0, art: e.art, name: e.name };
+      return { box: [g(by0, ay, ch), g(bx0, ax, cw), g(by1, ay, ch), g(bx1, ax, cw)], vorlage: vIdx[e.win] || 0, art: e.art, daten: hbDaten(S.windows[e.win]) };
     });
+    const meldung = (j) => j && j.fehler === 'nicht_eingerichtet' ? 'Die echte Vorschau ist noch nicht eingeschaltet.' : j && j.fehler === 'rate_limited' ? 'Für heute sind genug Vorschauen gerechnet. Morgen geht es weiter.' : j && j.fehler === 'abgelehnt' ? 'Der Bilddienst hat das Foto abgelehnt. Bitte ein anderes Foto versuchen.' : 'Die Vorschau hat nicht geklappt. Bitte gleich noch einmal.';
     const r = await fetch('/api/hausbild', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ bild: bild, lage: lage, vorlagen: vorlagen, elemente: elemente }) });
-    const j = await r.json().catch(() => null);
-    if (!r.ok || !j || !j.ok) throw new Error(j && j.fehler === 'nicht_eingerichtet' ? 'Die echte Vorschau ist noch nicht eingeschaltet.' : j && j.fehler === 'rate_limited' ? 'Für heute sind genug Vorschauen gerechnet. Morgen geht es weiter.' : j && j.fehler === 'abgelehnt' ? 'Der Bilddienst hat das Foto abgelehnt. Bitte ein anderes Foto versuchen.' : 'Die Vorschau hat nicht geklappt. Bitte gleich noch einmal.');
+    let j = await r.json().catch(() => null);
+    if (!r.ok || !j || !j.ok) throw new Error(meldung(j));
+    const kosten = j.kosten;
+    /* abholen: alle 1,5 s nachfragen, höchstens 3 Minuten; nach 25 s sagt die Bühne, dass es länger dauert */
+    if (j.warten) {
+      const start = Date.now();
+      for (;;) {
+        await new Promise((ok) => setTimeout(ok, 1500));
+        if (Date.now() - start > 25000 && !HB.langsam) { HB.langsam = true; render(); }
+        const g = await fetch('/api/hausbild?u=' + encodeURIComponent(j.warten), { headers: { 'x-hausbild': '1' } }).catch(() => null);
+        const k = g ? await g.json().catch(() => null) : null;
+        if (g && (!g.ok || !k || !k.ok)) throw new Error(meldung(k));
+        if (k && k.fertig) { j = k; break; }
+        if (Date.now() - start > 180000) throw new Error('Der Bilddienst ist gerade sehr langsam. Bitte später noch einmal.');
+      }
+    }
     /* Ergebnis nur innerhalb der Elementflächen ins Originalfoto, weich auslaufend */
     const neu = await hbLadeBild(j.bild), voll = document.createElement('canvas'); voll.width = W; voll.height = H; const vc = voll.getContext('2d'); vc.drawImage(foto, 0, 0, W, H);
     const schicht = document.createElement('canvas'); schicht.width = W; schicht.height = H; const sc = schicht.getContext('2d'); sc.drawImage(neu, ax, ay, cw, ch);
     const maske = document.createElement('canvas'); maske.width = W; maske.height = H; const mc = maske.getContext('2d'), weit = W * 3;
     els.forEach((e) => {
       const p = hbPx(e.q, W, H), m = hbMitte(p), gr = Math.max(Math.hypot(p[1][0] - p[0][0], p[1][1] - p[0][1]), Math.hypot(p[3][0] - p[0][0], p[3][1] - p[0][1]));
-      const r2 = Math.max(6, gr * 0.05), q2 = p.map((pt) => [m[0] + (pt[0] - m[0]) * 1.16, m[1] + (pt[1] - m[1]) * 1.16]);
+      const r2 = Math.max(6, gr * 0.06), q2 = p.map((pt) => [m[0] + (pt[0] - m[0]) * 1.24, m[1] + (pt[1] - m[1]) * 1.24 + (pt[1] > m[1] ? gr * 0.06 : 0)]); // mit Laibung, Schatten und Fensterbank
       mc.save(); mc.shadowColor = '#000'; mc.shadowBlur = r2; mc.shadowOffsetX = -weit; mc.fillStyle = '#000'; mc.beginPath();
       q2.forEach((pt, i) => (i ? mc.lineTo(pt[0] + weit, pt[1]) : mc.moveTo(pt[0] + weit, pt[1]))); mc.closePath(); mc.fill(); mc.restore();
     });
     sc.globalCompositeOperation = 'destination-in'; sc.drawImage(maske, 0, 0); vc.drawImage(schicht, 0, 0);
-    HB.ergebnis = hbJpeg(voll, 0.92); HB.zeige = 'nach'; HB.kosten = j.kosten; HB.z = 1; HB.tx = 0; HB.ty = 0;
+    HB.ergebnis = hbJpeg(voll, 0.92); HB.zeige = 'nach'; HB.kosten = kosten; HB.z = 1; HB.tx = 0; HB.ty = 0;
   } catch (e) {
     HB.fehler = (e && e.message && !/fetch|network/i.test(e.message)) ? e.message : 'Keine Verbindung. Bitte gleich noch einmal.';
   }
-  HB.laedt = false; render();
+  HB.laedt = false; HB.langsam = false; render();
 }
 window.addEventListener('resize', () => { if (S.screen === 'hausbild') hbLayout(); });
