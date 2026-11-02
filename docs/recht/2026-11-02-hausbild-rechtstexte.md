@@ -1,6 +1,12 @@
 # Rechtstexte „An meinem Haus ansehen“: zum Einsetzen beim Freischalten
 
-Stand 2.11.2026. Diese Texte stehen **noch nicht** online: Die KI-Vorschau bleibt aus, bis der Vertrag zur Auftragsverarbeitung mit
+**Nachtrag 2.11.2026, spät:** Die KI-Vorschau rechnet jetzt Cloudflare Workers AI (Wunsch des Inhabers). Online stehen die Fassungen
+für Cloudflare: Datenschutz 5a, der Satz zum Prüfwert in Abschnitt 2, AGB § 2 Abs. 5 und § 11 Abs. 2 (Stand 2.11.2026) und die
+Cookie-Zeile; Einwilligung Stand `2026-11-02c` (web/assets/hausbild.js). Die Entwürfe unten mit Black Forest Labs gelten nur, falls der
+Weg über Black Forest Labs direkt je eingeschaltet wird (`FREIGEGEBEN` in functions/api/hausbild.js); dann 5a und Einwilligung neu
+fassen und den Stand hochzählen.
+
+Stand 2.11.2026 (Fassung Black Forest Labs). Diese Texte standen nicht online: Die KI-Vorschau über Black Forest Labs bleibt aus, bis der Vertrag zur Auftragsverarbeitung mit
 Black Forest Labs da ist (Prüfung: docs/recht/2026-11-02-hausbild-pruefung.md, Anfrage: docs/recht/2026-11-02-black-forest-labs-anfrage.md).
 
 ## Was öffentlich über Black Forest Labs bekannt ist (Recherche 2.11.2026)

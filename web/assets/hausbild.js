@@ -33,33 +33,29 @@ const HB_Z = {
 const hbZ = (k) => '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + HB_Z[k] + '</svg>';
 const hbPfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
 /* nur im eigenen Aufmaß, wenn der Server den Bilddienst eingerichtet hat (/api/status: hausbild), nicht in der Führung und nicht in der Vorschau */
-const hbDa = () => typeof SERVER !== 'undefined' && !!SERVER.hausbild && (hbTexteFertig() || SERVER.hausbild === 'probe') && !S.betrieb && !INST && !S.tour && !(typeof vorschau === 'function' && vorschau());
+const hbDa = () => typeof SERVER !== 'undefined' && !!SERVER.hausbild && !S.betrieb && !INST && !S.tour && !(typeof vorschau === 'function' && vorschau());
 
 /* ---------- Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, Datenschutzerklärung Abschnitt 5a) ----------
    Vor der ersten KI-Vorschau fragt der Editor; Zustimmung und Stand des Textes liegen im Browser. Widerruf so einfach wie die
    Zustimmung: im Editor unter dem Hinweis und in der Fußleiste der App („Vorschau-Einwilligung widerrufen“), danach fragt die App
    beim nächsten Mal wieder. Das Blatt zeigt den Ausschnitt, der tatsächlich übermittelt wird. Der Server nimmt nur Anfragen mit dem
-   aktuellen Stand des Textes an. Textfassungen: docs/recht/2026-11-02-hausbild-einwilligung.md. */
-const HB_EINW = 'aufmass.hausbild.einwilligung', HB_EINW_STAND = '2026-11-02b'; // Stand wie EINW_STAND in functions/api/hausbild.js; ändert sich der Text, beide hochzählen
+   aktuellen Stand des Textes an. Textfassungen: docs/recht/2026-11-02-hausbild-rechtstexte.md. */
+const HB_EINW = 'aufmass.hausbild.einwilligung', HB_EINW_STAND = '2026-11-02c'; // c: Cloudflare. Stand wie EINW_STAND in functions/api/hausbild.js; ändert sich der Text, beide hochzählen
 const hbEinwDa = () => { try { const v = JSON.parse(localStorage.getItem(HB_EINW) || 'null'); return !!(v && v.stand === HB_EINW_STAND); } catch (e) { return false; } };
 const hbEinwSetzen = (an) => { try { if (an) localStorage.setItem(HB_EINW, JSON.stringify({ stand: HB_EINW_STAND, am: new Date().toISOString() })); else localStorage.removeItem(HB_EINW); } catch (e) { /* ohne Speicher: fragt jedes Mal */ } };
-/* Text des Blatts (Stand HB_EINW_STAND); [bitte ergänzen: …] füllt der Inhaber nach dem Vertrag mit Black Forest Labs, wie in Abschnitt 5a.
-   ohneTraining: Datum der schriftlichen Bestätigung, dass Black Forest Labs Bilder unseres Kontos nicht zum Training nutzt (laut deren
-   API-Bedingungen ist Training sonst erlaubt, Abbestellen per E-Mail, docs/recht/2026-11-02-black-forest-labs-anfrage.md). Erscheint nicht
-   im Blatt, ist aber Bedingung: Solange hier ein Platzhalter steht, bleibt die Einladung aus, auch wenn HAUSBILD_FREI gesetzt ist
-   (lokal mit KI_ATTRAPPE=1 meldet /api/status „probe“, dann erscheint sie zum Prüfen). */
-const HB_EINW_TEXT = {
-  sitz: '[bitte ergänzen: Sitz laut Vertrag]', frist: '[bitte ergänzen: Frist laut Vertrag]',
-  ohneTraining: '[bitte ergänzen: Datum der Bestätigung, dass nicht trainiert wird]'
-};
-const hbTexteFertig = () => !Object.values(HB_EINW_TEXT).some(t => /\[bitte/.test(t));
+/* Text des Blatts (Stand HB_EINW_STAND, 2.11.2026 c): Die KI rechnet bei Cloudflare (Workers AI, Modell FLUX.2 [klein] auf Servern von
+   Cloudflare), wie Datenschutzerklärung 5a. Belege: developers.cloudflare.com/workers-ai/platform/privacy/ (kein Training, Speicherung
+   nur mit eigenem Speicherdienst), Modellseite flux-2-klein-9b („Cloudflare-hosted“). Der Weg über Black Forest Labs direkt ist aus
+   (functions/api/hausbild.js, FREIGEGEBEN); wird er je eingeschaltet, braucht er einen eigenen Text und einen neuen Stand. */
 function hbEinwBlatt() {
   if (!HB.einwFrage) return '';
-  const aus = HB.paket ? '<figure class="hb-einw-bild"><img src="' + HB.paket.bild + '" alt="Der Ausschnitt deines Fotos, der übermittelt wird"><figcaption>Das geht an Black Forest Labs</figcaption></figure>' : '';
+  const bilder = HB.paket ? (HB.paket.teile ? HB.paket.teile.map((t) => t.lage) : [HB.paket.bild]) : [];
+  const aus = bilder.length ? '<figure class="hb-einw-bild' + (bilder.length > 1 ? ' mehr' : '') + '">' + bilder.map((b) => '<img src="' + b + '" alt="Ausschnitt deines Fotos, der übermittelt wird">').join('') +
+    '<figcaption>' + (bilder.length > 1 ? 'Diese Ausschnitte gehen' : 'Das geht') + ' an Cloudflare, je Fenster einer</figcaption></figure>' : '';
   return '<div class="hb-wahl" role="dialog" aria-modal="true" aria-labelledby="hb-einw-t"><div class="hb-wahl-blatt hb-einw"><div class="hb-wahl-kopf"><h2 id="hb-einw-t">Einwilligung zur KI-Vorschau</h2>' +
     '<button type="button" class="hb-rund" data-act="hb-einw-nein" aria-label="Abbrechen">' + hbZ('zu') + '</button></div>' + aus +
-    '<p>Für die KI-Vorschau schicken wir diesen <b>Ausschnitt deines Fotos</b> und Bilder deiner geplanten Fenster über unseren Server an unseren Dienstleister <b>Black Forest Labs</b> (' + HB_EINW_TEXT.sitz + '). Dessen KI (FLUX) berechnet daraus das Bild, auf Servern in der EU. Name, Adresse, E-Mail und Maße gehen nicht mit.</p>' +
-    '<p>Wir speichern weder dein Foto noch das Ergebnis. Black Forest Labs löscht beides nach ' + HB_EINW_TEXT.frist + ' und trainiert seine KI nicht damit. Bitte achte darauf, dass keine Personen und keine Kfz-Kennzeichen zu erkennen sind.</p>' +
+    '<p>Für die KI-Vorschau schicken wir <b>Ausschnitte deines Fotos</b> mit deinen Fenstern und Bilder der geplanten Fenster an die KI unseres Dienstleisters <b>Cloudflare</b> (Cloudflare, Inc., San Francisco, USA), der auch unsere Website betreibt. Die KI (FLUX.2 von Black Forest Labs, gerechnet auf Servern von Cloudflare) berechnet daraus das Bild. Name, Adresse, E-Mail und Maße gehen nicht mit.</p>' +
+    '<p>Wir speichern weder dein Foto noch das Ergebnis. Cloudflare speichert beides nach eigenen Angaben nicht und trainiert keine KI damit. Cloudflare kann auch außerhalb der EU rechnen, etwa in den USA, und ist dafür nach dem EU-US Data Privacy Framework zertifiziert. Bitte achte darauf, dass keine Personen und keine Kfz-Kennzeichen zu erkennen sind.</p>' +
     '<p>Du kannst die Einwilligung jederzeit widerrufen, im Editor oder unten in der App. Mehr in der <a class="ulink" href="/datenschutz/#p5a-vorschau-am-eigenen-haus" target="_blank" rel="noopener">Datenschutzerklärung, Abschnitt 5a</a>.</p>' +
     '<div class="hb-einw-knoepfe"><button type="button" class="hb-einw-knopf" data-act="hb-einw-ja">Einwilligen und rechnen</button><button type="button" class="hb-einw-knopf" data-act="hb-einw-nein">Nicht einwilligen</button></div></div></div>';
 }
@@ -221,10 +217,11 @@ SCREENS.hausbild = function () {
   if (!hbDa()) { setTimeout(() => go('fertig'), 0); return { html: '', dna: true, cls: 'dna' }; }
   const t = hbTitel();
   const kopf = '<div class="hb-kopf"><h1 tabindex="-1">' + t[0] + '</h1><p class="wz-sub">' + t[1] + '</p></div>';
-  const fehler = HB.fehler ? '<p class="note warn hb-fehler" role="alert">' + esc(HB.fehler) + '</p>' : '';
+  const fehler = HB.fehler ? '<p class="note warn hb-fehler" role="alert">' + esc(HB.fehler) + '</p>'
+    : HB.ergebnis && !HB.laedt && HB.fehlt > 0 ? '<p class="note warn hb-fehler" role="status">' + (HB.fehlt === 1 ? 'Ein Fenster' : HB.fehlt + ' Fenster') + ' konnte die KI gerade nicht berechnen und fehlt im Bild. Tippe auf „Weiter bearbeiten“ und rechne noch einmal.</p>' : '';
   const ergebnis = HB.ergebnis && !HB.laedt ? '<div class="hb-ergebnis-knoepfe"><a class="hb-werk" href="' + HB.ergebnis + '" download="mein-haus-ki-visualisierung.jpg"><span class="hb-werk-rund">' + hbZ('sichern') + '</span><span>Bild speichern</span></a>' +
     '<button type="button" class="hb-werk" data-act="hb-weiter-bearbeiten"><span class="hb-werk-rund">' + hbZ('stift') + '</span><span>Weiter bearbeiten</span></button></div>' : '';
-  const hinweis = '<p class="hb-klein">Für die KI-Vorschau geht nur ein Ausschnitt rund um deine Elemente an unseren Dienstleister Black Forest Labs, und erst nach deiner Zustimmung. Gespeichert wird dein Foto nicht, es bleibt in diesem Browser.' +
+  const hinweis = '<p class="hb-klein">Für die KI-Vorschau gehen nur Ausschnitte rund um deine Elemente an die KI unseres Dienstleisters Cloudflare, und erst nach deiner Zustimmung. Gespeichert wird dein Foto nicht, es bleibt in diesem Browser.' +
     (hbEinwDa() ? ' <button type="button" class="hb-textknopf" data-act="hb-einw-weg">Vorschau-Einwilligung widerrufen</button>' : '') + '</p>';
   const ak = HB.el.find((e) => e.id === HB.aktiv), fest = HB.el.filter((e) => e.fest).length;
   const pille = !HB.foto ? '<label class="dna-pille lg-weiter" for="hb-datei">Foto wählen' + hbPfeil + '</label>'
@@ -455,9 +452,10 @@ async function hbVorschau() {
   HB.laedt = true; HB.fehler = ''; render();
   try {
     const P = HB.paket || await hbPaket(els); HB.paket = null;
-    const { bild, lage, vorlagen, elemente, ax, ay, cw, ch, W, H, foto } = P;
-    const meldung = (j) => j && j.fehler === 'nicht_eingerichtet' ? 'Die KI-Vorschau ist noch nicht eingeschaltet.' : j && j.fehler === 'rate_limited' ? 'Für heute sind genug Vorschauen gerechnet. Morgen geht es weiter.' : j && j.fehler === 'abgelehnt' ? 'Der Bilddienst hat das Foto abgelehnt. Bitte ein anderes Foto versuchen.' : j && j.fehler === 'einwilligung' ? 'Bitte lade die Seite neu und willige noch einmal ein.' : 'Die Vorschau hat nicht geklappt. Bitte gleich noch einmal.';
-    const r = await fetch('/api/hausbild', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ bild: bild, lage: lage, vorlagen: vorlagen, elemente: elemente, einwilligung: HB_EINW_STAND }) });
+    const meldung = (j) => j && j.fehler === 'nicht_eingerichtet' ? 'Die KI-Vorschau ist noch nicht eingeschaltet.' : j && j.fehler === 'rate_limited' ? 'Für heute sind genug Vorschauen gerechnet. Morgen geht es weiter.' : j && j.fehler === 'abgelehnt' ? 'Der Bilddienst hat das Foto abgelehnt. Bitte ein anderes Foto versuchen.' : j && j.fehler === 'einwilligung' ? 'Bitte lade die Seite neu und willige noch einmal ein.' : j && j.fehler === 'neu_laden' ? 'Bitte lade die Seite neu, die App hat sich aktualisiert.' : 'Die Vorschau hat nicht geklappt. Bitte gleich noch einmal.';
+    const senden = P.teile ? { teile: P.teile.map((t) => ({ lage: t.lage, vorlagen: t.vorlagen, elemente: t.elemente, format: t.format })), einwilligung: HB_EINW_STAND }
+      : { bild: P.bild, lage: P.lage, vorlagen: P.vorlagen, elemente: P.elemente, einwilligung: HB_EINW_STAND };
+    const r = await fetch('/api/hausbild', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(senden) });
     let j = await r.json().catch(() => null);
     if (!r.ok || !j || !j.ok) throw new Error(meldung(j));
     const kosten = j.kosten;
@@ -474,7 +472,12 @@ async function hbVorschau() {
         if (Date.now() - start > 180000) throw new Error('Der Bilddienst ist gerade sehr langsam. Bitte später noch einmal.');
       }
     }
-    await hbEinsetzenErgebnis(j.bild, els, { ax: ax, ay: ay, cw: cw, ch: ch, W: W, H: H, foto: foto });
+    if (P.teile) {
+      const da = P.teile.map((t, i) => Object.assign({}, t, { bild: j.bilder && j.bilder[i] })).filter((t) => t.bild);
+      if (!da.length) throw new Error(meldung(null));
+      await hbEinsetzenTeile(da, P.teile[0]);
+      HB.fehlt = P.teile.length - da.length;
+    } else { await hbEinsetzenErgebnis(j.bild, els, P); HB.fehlt = 0; }
     HB.kosten = kosten;
   } catch (e) {
     HB.fehler = (e && e.message && !/fetch|network/i.test(e.message)) ? e.message : 'Keine Verbindung. Bitte gleich noch einmal.';
@@ -494,8 +497,8 @@ function hbMitXmp(dataUrl) {
   try {
     const xmp = '<?xpacket begin="\ufeff" id="W5M0MpCehiHzreSzNTczkc9d"?><x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">' +
       '<rdf:Description rdf:about="" xmlns:Iptc4xmpExt="http://iptc.org/std/Iptc4xmpExt/2008-02-29/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xmp="http://ns.adobe.com/xap/1.0/" ' +
-      'Iptc4xmpExt:DigitalSourceType="http://cv.iptc.org/newscodes/digitalsourcetype/compositeWithTrainedAlgorithmicMedia" xmp:CreatorTool="eeziframes.com (FLUX, Black Forest Labs)">' +
-      '<dc:description><rdf:Alt><rdf:li xml:lang="x-default">KI-Visualisierung mit eeziframes.com (FLUX, Black Forest Labs), kein Foto</rdf:li></rdf:Alt></dc:description>' +
+      'Iptc4xmpExt:DigitalSourceType="http://cv.iptc.org/newscodes/digitalsourcetype/compositeWithTrainedAlgorithmicMedia" xmp:CreatorTool="eeziframes.com (FLUX.2 auf Cloudflare Workers AI)">' +
+      '<dc:description><rdf:Alt><rdf:li xml:lang="x-default">KI-Visualisierung mit eeziframes.com (FLUX.2 auf Cloudflare Workers AI), kein Foto</rdf:li></rdf:Alt></dc:description>' +
       '</rdf:Description></rdf:RDF></x:xmpmeta><?xpacket end="w"?>';
     const inhalt = new TextEncoder().encode('http://ns.adobe.com/xap/1.0/\0' + xmp), laenge = inhalt.length + 2;
     if (laenge > 65535) return dataUrl;
@@ -508,8 +511,15 @@ function hbMitXmp(dataUrl) {
     return 'data:image/jpeg;base64,' + btoa(s);
   } catch (e) { return dataUrl; }
 }
-/* Ausschnitt, Lage, Vorlagen und Elemente für den Auftrag (ohne Netz) */
+/* Ausschnitt, Lage, Vorlagen und Elemente für den Auftrag (ohne Netz). Cloudflare (/api/status hausbildMax, 508): je Fenster ein Teil mit
+   eigenem Ausschnitt unter 512 Pixeln; so hält sich FLUX.2 [klein] an Flügel und Farbe (Vergleich am Beispielhaus, 2.11.2026) */
 async function hbPaket(els) {
+  const max = typeof SERVER !== 'undefined' && SERVER.hausbildMax > 0 ? SERVER.hausbildMax : 0;
+  if (!max) return hbAusschnitt(els, 1600, 900);
+  const teile = []; for (const e of els) teile.push(await hbAusschnitt([e], max, max));
+  return { teile: teile };
+}
+async function hbAusschnitt(els, groesse, vgroesse) {
     const W = HB.foto.w, H = HB.foto.h, foto = await hbLadeBild(HB.foto.src);
     /* Ausschnitt: alle Elemente mit Rand, mindestens 384 px, höchstens das ganze Foto */
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -519,7 +529,7 @@ async function hbPaket(els) {
     const mind = Math.min(384, W, H);
     if (bx - ax < mind) { const m = (ax + bx) / 2; ax = Math.max(0, Math.round(m - mind / 2)); bx = Math.min(W, ax + mind); ax = bx - mind; }
     if (by - ay < mind) { const m = (ay + by) / 2; ay = Math.max(0, Math.round(m - mind / 2)); by = Math.min(H, ay + mind); ay = by - mind; }
-    const cw = bx - ax, ch = by - ay, k = Math.min(1, 1600 / Math.max(cw, ch)), ow = Math.round(cw * k), oh = Math.round(ch * k);
+    const cw = bx - ax, ch = by - ay, k = Math.min(1, groesse / Math.max(cw, ch)), ow = Math.round(cw * k), oh = Math.round(ch * k);
     const aus = document.createElement('canvas'); aus.width = ow; aus.height = oh; const ac = aus.getContext('2d'); ac.drawImage(foto, ax, ay, cw, ch, 0, 0, ow, oh);
     const bild = hbJpeg(aus);
     /* Lage: derselbe Ausschnitt mit den eingesetzten Fenstern */
@@ -531,20 +541,25 @@ async function hbPaket(els) {
       hbVerziehen(ac, im, q);
     }
     const lage = hbJpeg(aus);
-    /* Vorlagen höchstens 900 px, auf hellem Grund (der Dienst sieht so die Kanten des Rahmens) */
-    const vorlagen = await Promise.all(vorl.map(async (b) => { const im = await hbLadeBild(b.src), s = Math.min(1, 900 / Math.max(b.w, b.h)), cv = document.createElement('canvas'); cv.width = Math.round(b.w * s) + 40; cv.height = Math.round(b.h * s) + 40; const c = cv.getContext('2d'); c.fillStyle = '#e2e2e0'; c.fillRect(0, 0, cv.width, cv.height); c.drawImage(im, 20, 20, cv.width - 40, cv.height - 40); return hbJpeg(cv, 0.9); }));
+    /* Vorlagen höchstens vgroesse (mit Rand), auf hellem Grund (der Dienst sieht so die Kanten des Rahmens) */
+    const vorlagen = await Promise.all(vorl.map(async (b) => { const im = await hbLadeBild(b.src), s = Math.min(1, (vgroesse - 40) / Math.max(b.w, b.h)), cv = document.createElement('canvas'); cv.width = Math.round(b.w * s) + 40; cv.height = Math.round(b.h * s) + 40; const c = cv.getContext('2d'); c.fillStyle = '#e2e2e0'; c.fillRect(0, 0, cv.width, cv.height); c.drawImage(im, 20, 20, cv.width - 40, cv.height - 40); return hbJpeg(cv, 0.9); }));
     const elemente = els.map((e) => {
       const p = hbPx(e.q, W, H); let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
       p.forEach((pt) => { bx0 = Math.min(bx0, pt[0]); by0 = Math.min(by0, pt[1]); bx1 = Math.max(bx1, pt[0]); by1 = Math.max(by1, pt[1]); });
       const g = (v, a, l) => Math.round((v - a) / l * 1000);
       return { box: [g(by0, ay, ch), g(bx0, ax, cw), g(by1, ay, ch), g(bx1, ax, cw)], vorlage: vIdx[e.win] || 0, art: e.art, daten: hbDaten(S.windows[e.win]) };
     });
-    return { bild: bild, lage: lage, vorlagen: vorlagen, elemente: elemente, ax: ax, ay: ay, cw: cw, ch: ch, W: W, H: H, foto: foto };
+    return { bild: bild, lage: lage, vorlagen: vorlagen, elemente: elemente, format: [ow, oh], els: els, ax: ax, ay: ay, cw: cw, ch: ch, W: W, H: H, foto: foto };
 }
-/* Ergebnis nur innerhalb der Elementflächen ins Originalfoto, weich auslaufend */
-async function hbEinsetzenErgebnis(ergebnis, els, P) {
-    const { ax, ay, cw, ch, W, H, foto } = P;
-    const neu = await hbLadeBild(ergebnis), voll = document.createElement('canvas'); voll.width = W; voll.height = H; const vc = voll.getContext('2d'); vc.drawImage(foto, 0, 0, W, H);
+/* Ergebnis nur innerhalb der Elementflächen ins Originalfoto, weich auslaufend; teile: [{ bild, els, ax, ay, cw, ch }] (Cloudflare: je Fenster
+   ein Teil mit eigenem Ausschnitt), alle auf demselben Foto */
+async function hbEinsetzenErgebnis(ergebnis, els, P) { return hbEinsetzenTeile([Object.assign({}, P, { bild: ergebnis, els: els })], P); }
+async function hbEinsetzenTeile(teile, P) {
+    const { W, H, foto } = P;
+    const voll = document.createElement('canvas'); voll.width = W; voll.height = H; const vc = voll.getContext('2d'); vc.drawImage(foto, 0, 0, W, H);
+    for (const t of teile) {
+    const { ax, ay, cw, ch, els } = t;
+    const neu = await hbLadeBild(t.bild);
     const schicht = document.createElement('canvas'); schicht.width = W; schicht.height = H; const sc = schicht.getContext('2d'); sc.drawImage(neu, ax, ay, cw, ch);
     const maske = document.createElement('canvas'); maske.width = W; maske.height = H; const mc = maske.getContext('2d'), weit = W * 3;
     els.forEach((e) => {
@@ -554,6 +569,7 @@ async function hbEinsetzenErgebnis(ergebnis, els, P) {
       q2.forEach((pt, i) => (i ? mc.lineTo(pt[0] + weit, pt[1]) : mc.moveTo(pt[0] + weit, pt[1]))); mc.closePath(); mc.fill(); mc.restore();
     });
     sc.globalCompositeOperation = 'destination-in'; sc.drawImage(maske, 0, 0); vc.drawImage(schicht, 0, 0);
+    }
     hbKennzeichnen(vc, W, H);
     HB.ergebnis = hbMitXmp(hbJpeg(voll, 0.92)); HB.zeige = 'nach'; HB.z = 1; HB.tx = 0; HB.ty = 0;
 }

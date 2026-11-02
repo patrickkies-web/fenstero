@@ -32,6 +32,17 @@ Befunde sind begründete Hinweise für den Anwalt des Inhabers, der sie prüft. 
 | F8 | Kann | Auftrag an die KI: keine Personen, Texte, Kennzeichen | Ergänzt in `auftrag()` |
 | F9 | Kann | Nutzungsbedingungen | Keine Änderung nötig (Funktion nur im eigenen Aufmaß) |
 
+## Nachtrag 2.11.2026, spät: Wechsel zu Cloudflare Workers AI
+
+Der Inhaber hat sich für Cloudflare entschieden. Damit ändert sich die Lage der Befunde:
+
+| Nr. | Stand mit Cloudflare |
+| --- | --- |
+| B1, B7 | Empfänger (Cloudflare, Inc., San Francisco; Workers AI), Speicherung (nach Angaben von Cloudflare keine ohne eigenen Speicherdienst) und Training (nein) stehen in 5a und im Einwilligungsblatt; Belege: developers.cloudflare.com/workers-ai/platform/privacy/, Modellseite flux-2-klein-9b („Cloudflare-hosted“) |
+| B3, B4 | Kein reiner EU-Weg mehr: Cloudflare kann außerhalb der EU rechnen. Grundlage wie für die Website (Abschnitt 2): EU-US Data Privacy Framework (Art. 45 DSGVO), ergänzend Standardvertragsklauseln; so in 5a und im Blatt. **Bitte vom Anwalt bestätigen lassen.** |
+| B11 | Entfällt für Cloudflare: Cloudflare nutzt Inhalte von Workers AI nicht zum Training; an Black Forest Labs geht nichts |
+| Art. 28 | Cloudflare ist schon Auftragsverarbeiter der Website (Datenschutzerklärung Abschnitt 2); Workers AI ist ein Dienst desselben Kontos |
+
 ## Offen vor dem Start (Reihenfolge)
 
 1. Anfrage an Black Forest Labs schicken (`docs/recht/2026-11-02-black-forest-labs-anfrage.md`), DPA abschließen, Training

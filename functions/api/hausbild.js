@@ -6,6 +6,9 @@
      vorlagen je Fenster ein Bild aus dem 3-D-Modell, von außen (PNG oder JPEG), höchstens 8
      elemente [{ box: [oben, links, unten, rechts] auf 0–1000, vorlage: Index, art: 'ersetzen' | 'neu',
                daten: { farbe: '#rrggbb', fluegel, oberlicht, sprossen, tuer, sonne: 'raffstore' | 'rollladen' | 'screen' | '', glas: 'klar' | 'ornament' } }]
+     format  [Breite, Höhe] des Ausschnitts in Pixeln (für das Seitenverhältnis des Ergebnisses)
+   AKTUELL (Inhaber, 2.11.2026 abends): Cloudflare Workers AI mit FLUX.2 [klein] 9B, siehe cloudflare() unten. Das Folgende beschreibt den
+   Weg über Black Forest Labs direkt, der im Code bleibt, aber aus ist (FREIGEGEBEN):
    Der Server schreibt daraus den Auftrag für FLUX 3 Image Klein bei Black Forest Labs (europäischer Zugang, Felder je Element nach
    docs.bfl.ai „Bounding boxes“) und gibt die Adresse zum Abholen zurück; die App fragt mit GET /api/hausbild?u=… nach, bis das Bild da
    ist (der Server holt es beim Dienst und gibt es als data-URL weiter). Die App setzt es nur innerhalb der
@@ -19,18 +22,27 @@ import { erlaubt, quelle, konfig } from './umgebung.js';
 import { speicher } from './speicher.js';
 import { budget } from './bremse.js';
 
-/* Eingeschaltet erst mit FREIGEGEBEN = true hier im Code UND BFL_API_KEY und HAUSBILD_FREI=1 (Cloudflare). Aus auf Wunsch des Inhabers
-   (2.11.2026) bis zum Vertrag zur Auftragsverarbeitung mit Black Forest Labs, der Bestätigung „kein Training“ und den Rechtstexten
-   (docs/recht/2026-11-02-hausbild-rechtstexte.md): Solange FREIGEGEBEN false ist, geht kein Bild an Black Forest Labs, gleich was bei
-   Cloudflare steht. Lokal mit KI_ATTRAPPE=1 immer an (rechnet nicht, schickt nichts). */
+/* Welcher Weg rechnet (Inhaber, 2.11.2026 abends: „bau mir das auf meine Website“, über Cloudflare):
+   - 'cloudflare': Workers AI (Binding AI in wrangler.jsonc), FLUX.2 [klein] 9B, laut Cloudflare „Cloudflare-hosted“: gerechnet auf
+     Servern von Cloudflare, Black Forest Labs erhält nichts; Cloudflare nutzt Inhalte von Workers AI nicht zum Training
+     (developers.cloudflare.com/workers-ai/platform/privacy/) und ist schon unser Auftragsverarbeiter (Datenschutzerklärung 2 und 5a).
+     An, sobald das Binding besteht; HAUSBILD_FREI=0 bei Cloudflare schaltet die Vorschau ab.
+   - 'bfl': Black Forest Labs direkt (FLUX 3, Felder je Fenster). Aus (FREIGEGEBEN), bis der Vertrag zur Auftragsverarbeitung und die
+     Bestätigung „kein Training“ vorliegen (docs/recht/2026-11-02-black-forest-labs-anfrage.md); dann auch neue Rechtstexte.
+   - 'attrappe': lokal mit KI_ATTRAPPE=1 (rechnet nicht, schickt nichts). */
 const FREIGEGEBEN = false;
-export const hausbildFrei = (env) => !!(env && env.BFL_API_KEY && (env.BFL_API_KEY === 'attrappe' || (FREIGEGEBEN && env.HAUSBILD_FREI === '1')));
+export const hausbildWeg = (env) => !env || env.HAUSBILD_FREI === '0' ? '' : env.BFL_API_KEY === 'attrappe' ? 'attrappe' : env.AI ? 'cloudflare'
+  : FREIGEGEBEN && env.BFL_API_KEY && env.HAUSBILD_FREI === '1' ? 'bfl' : '';
+export const hausbildFrei = (env) => !!hausbildWeg(env);
+/* Cloudflare nimmt nur Eingabebilder unter 512 × 512 Pixel: Die App verkleinert darauf (/api/status meldet hausbildMax) */
+export const CF_MAX = 508;
+const CF_MODELL = '@cf/black-forest-labs/flux-2-klein-9b';
 
 /* Nur der EU-Zugang (Datenschutzerklärung 5a, Prüfung 2.11.2026): Ist er gestört, gibt es keine KI-Vorschau; auf den weltweiten
    Zugang (Rechenzentren auch in den USA) weichen wir nicht aus. */
 const ZUGANG = 'https://api.eu.bfl.ai/v1/';
 /* Stand des Einwilligungstextes in der App (web/assets/hausbild.js, HB_EINW_STAND): ohne ihn keine Übermittlung (Nachweis Art. 7 Abs. 1) */
-export const EINW_STAND = '2026-11-02b';
+export const EINW_STAND = '2026-11-02c'; // c: Text für Cloudflare
 const MODELL = 'flux-3-image-klein'; // HAUSBILD_MODELL=flux-3-image nimmt das große Modell (etwa 5 Cent statt 0,9)
 const MAX_BYTES = 6 * 1024 * 1024; // je Bild als base64
 const antwort = (obj, status) => new Response(JSON.stringify(obj), { status: status || 200, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
@@ -51,7 +63,7 @@ const farbName = (hex) => {
 };
 export function beschreibung(e) {
   const d = e.daten || {}, teile = [];
-  teile.push((d.tuer ? 'door' : 'window') + ' with a ' + farbName(d.farbe) + ' frame');
+  teile.push((d.tuer ? 'door' : 'window') + ' with a frame in ' + farbName(d.farbe));
   if (d.fluegel > 1) teile.push(d.fluegel + ' sashes side by side'); else teile.push('one sash');
   if (d.oberlicht) teile.push('a transom light on top');
   if (d.sprossen) teile.push('glazing bars dividing the glass');
@@ -80,6 +92,70 @@ export function auftrag(elemente) {
   return text + ' ' + JSON.stringify(zeilen);
 }
 
+/* Auftrag für FLUX.2 [klein] bei Cloudflare: Das Modell kennt keine Felder je Fenster. Bild 1 ist deshalb der Ausschnitt mit den flach
+   eingesetzten Fenstern (lage) als Platzhalter, ab Bild 2 bis zu drei Vorlagen; je Fenster nennt der Text Lage im Bild und Merkmale aus den
+   Daten (Flügel, Farbe usw.), weil das Modell im Vergleich am Beispielhaus sonst die Teilung rät (docs/profis/2026-11-02-hausbild.md). */
+const EINBAU = 'Set each frame back inside its masonry opening, recessed behind the facade surface, so the plastered reveals stay visible on the sides and on top, ' +
+  'seen in exactly the perspective, angle and vanishing lines of this wall and this camera. Below each window a window sill with a small overhang. ' +
+  'Soft shadows of the lintel and the reveals fall onto the frame and the glass, following the direction of the sunlight in the photo. ' +
+  'The glass reflects the real sky and surroundings of this photo; the frames have the same light, colour temperature, sharpness and noise as the rest of the image. ';
+function lageWort(b) {
+  const cy = (b[0] + b[2]) / 2, cx = (b[1] + b[3]) / 2, v = cy < 380 ? 'upper' : cy > 620 ? 'lower' : '', h = cx < 380 ? 'left' : cx > 620 ? 'right' : '';
+  return v && h ? 'at the ' + v + ' ' + h : v ? 'in the ' + v + ' part' : h ? 'on the ' + h : 'in the centre';
+}
+export function auftragCf(elemente, vorlagenZahl) {
+  const neu = elemente.some((e) => e.art === 'neu'), alt = elemente.some((e) => e.art !== 'neu'), mehr = elemente.length > 1;
+  const je = elemente.map((e, i) => 'Window ' + (i + 1) + ' ' + lageWort(e.box) + ' of image 1: new ' + beschreibung(e) +
+    (e.vorlage < vorlagenZahl ? ', looking exactly like the window in image ' + (e.vorlage + 2) : '') + '.').join(' ');
+  return 'Photorealistic architectural edit of image 1, a photo of a house. ' + (mehr ? 'New windows were' : 'A new window was') +
+    ' pasted flat into the photo as a rough placement guide. Make ' + (mehr ? 'each of them' : 'it') + ' look really built in by a professional window fitter. ' +
+    (alt ? 'If there was an old window, the new one replaces it completely; no part of an old frame remains. ' : '') +
+    (neu ? 'Where the wall is closed, cut a clean rectangular opening with plastered reveals and a lintel that match the facade. ' : '') +
+    EINBAU + je + ' Keep the number of sashes, the division and the frame colour of every window exactly as described; do not add or remove sashes, mullions or bars. ' +
+    'Every other opening, window or door in the photo stays exactly as it is, even if it is empty. Do not add, remove or change people, faces, text, logos or licence plates. ' +
+    'Do not change anything else: facade, roof, plants and sky stay exactly as they are.';
+}
+const zuBytes = (dataUrl) => { const t = atob(roh(dataUrl)), b = new Uint8Array(t.length); for (let i = 0; i < t.length; i++) b[i] = t.charCodeAt(i); return b; };
+/* Breite und Höhe eines JPEG oder PNG ohne Dekodieren (Cloudflare lehnt Bilder ab 512 Pixel ab; etwa von einer alten App-Fassung) */
+export function masse(b) {
+  if (b[0] === 0x89 && b[1] === 0x50) return [(b[16] << 24 | b[17] << 16 | b[18] << 8 | b[19]) >>> 0, (b[20] << 24 | b[21] << 16 | b[22] << 8 | b[23]) >>> 0];
+  for (let i = 2; i + 9 < b.length;) {
+    if (b[i] !== 0xff) { i++; continue; }
+    const m = b[i + 1], l = b[i + 2] << 8 | b[i + 3];
+    if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return [b[i + 7] << 8 | b[i + 8], b[i + 5] << 8 | b[i + 6]];
+    i += 2 + l;
+  }
+  return [0, 0];
+}
+async function cloudflare(env, t) {
+  const { elemente, vorlagen } = t, bilder = [t.lage || t.bild].concat(vorlagen.slice(0, 3)).map(zuBytes);
+  if (bilder.some((b) => { const [w, h] = masse(b); return !w || !h || w > 511 || h > 511; })) return { ok: false, fehler: 'neu_laden', status: 400 }; // Cloudflare: kleiner als 512
+  const f = Array.isArray(t.format) ? t.format.map((x) => Math.max(1, parseInt(x, 10) || 1)) : [1, 1], r = f[0] / f[1];
+  const r16 = (x) => Math.max(256, Math.min(1024, Math.round(x / 16) * 16));
+  const breite = r >= 1 ? 1024 : r16(1024 * r), hoehe = r >= 1 ? r16(1024 / r) : 1024;
+  const form = new FormData();
+  form.append('prompt', auftragCf(elemente, Math.min(3, vorlagen.length)));
+  bilder.forEach((b, i) => { const png = b[0] === 0x89; form.append('input_image_' + i, new Blob([b], { type: png ? 'image/png' : 'image/jpeg' }), 'bild-' + i + (png ? '.png' : '.jpg')); });
+  form.append('width', String(breite));
+  form.append('height', String(hoehe));
+  const paket = new Response(form);
+  let aus;
+  try {
+    aus = await env.AI.run(CF_MODELL, { multipart: { body: paket.body, contentType: paket.headers.get('content-type') } });
+  } catch (e) {
+    const t = String((e && e.message) || e);
+    console.log('Hausbild Cloudflare: ' + t.slice(0, 200)); // nur die Meldung, keine Bilder, keine IP-Adresse
+    if (/nsfw|safety|moderat|flagged|policy/i.test(t)) return { ok: false, fehler: 'abgelehnt', status: 502 };
+    if (/capacity|rate.?limit|too many|429/i.test(t)) return { ok: false, fehler: 'rate_limited', status: 429 };
+    return { ok: false, fehler: 'dienst', status: 502 };
+  }
+  let bild = aus && aus.image;
+  if (!bild && aus instanceof ReadableStream) { const b = new Uint8Array(await new Response(aus).arrayBuffer()); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); bild = btoa(s); }
+  if (!bild || typeof bild !== 'string') { console.log('Hausbild Cloudflare: kein Bild'); return { ok: false, fehler: 'dienst', status: 502 }; }
+  const typ = bild.startsWith('/9j/') ? 'image/jpeg' : bild.startsWith('UklGR') ? 'image/webp' : 'image/png';
+  return { ok: true, bild: 'data:' + typ + ';base64,' + bild };
+}
+
 /* Anschluss als gekürzter Prüfwert mit dem Geheimnis des Servers, wie konten.js (anschlussWert) */
 async function pruefwert(k, q) {
   const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String((k && k.geheimnis) || '') + '|hausbild|' + q));
@@ -91,27 +167,53 @@ async function bfl(env, pfad, daten) {
   return { status: r.status, j: j };
 }
 
+const zahl = (v, max) => Math.max(0, Math.min(max, parseInt(v, 10) || 0));
+const daten = (x) => { x = x || {}; return { farbe: /^#[0-9a-f]{6}$/i.test(String(x.farbe || '')) ? x.farbe : '', fluegel: zahl(x.fluegel, 6), oberlicht: !!x.oberlicht, sprossen: !!x.sprossen, tuer: !!x.tuer, sonne: ['raffstore', 'rollladen', 'screen'].indexOf(x.sonne) >= 0 ? x.sonne : '', glas: x.glas === 'ornament' ? 'ornament' : 'klar' }; };
+/* Ein Paket lesen: Ausschnitt (bild und/oder lage), Vorlagen, Elemente, Format; null, wenn etwas fehlt oder nicht passt */
+function paketLesen(p, mitBild) {
+  if (!p || typeof p !== 'object') return null;
+  const vorlagen = Array.isArray(p.vorlagen) ? p.vorlagen.slice(0, 8) : [];
+  const elemente = (Array.isArray(p.elemente) ? p.elemente : []).slice(0, 8).map((e) => ({ box: box(e && e.box), vorlage: Math.max(0, Math.min(vorlagen.length - 1, parseInt(e && e.vorlage, 10) || 0)), art: e && e.art === 'neu' ? 'neu' : 'ersetzen', daten: daten(e && e.daten) }));
+  if ((mitBild ? !bildOk(p.bild) : !bildOk(p.lage)) || !vorlagen.length || !vorlagen.every(bildOk) || !elemente.length || elemente.some((e) => !e.box)) return null;
+  return { bild: bildOk(p.bild) ? p.bild : null, lage: bildOk(p.lage) ? p.lage : null, vorlagen: vorlagen, elemente: elemente, format: p.format };
+}
+/* höchstens drei Aufträge gleichzeitig an Workers AI */
+async function nacheinander(liste, fn, n) {
+  const aus = new Array(liste.length); let i = 0;
+  await Promise.all(Array.from({ length: Math.min(n, liste.length) }, async () => { while (i < liste.length) { const j = i++; aus[j] = await fn(liste[j]); } }));
+  return aus;
+}
+/* POST /api/hausbild. Cloudflare: { teile: [{ lage, vorlagen, elemente, format }], einwilligung } mit je einem Fenster je Teil (so hält
+   sich FLUX.2 [klein] an Flügel und Farbe, Vergleich 2.11.2026) → { ok, bilder: [data-URL | null] }. Black Forest Labs (aus): ein Paket
+   { bild, lage, vorlagen, elemente } → { ok, warten }. */
 export async function onRequestPost({ request, env }) {
-  if (!hausbildFrei(env)) return antwort({ ok: false, fehler: 'nicht_eingerichtet' }, 503);
+  const weg = hausbildWeg(env);
+  if (!weg) return antwort({ ok: false, fehler: 'nicht_eingerichtet' }, 503);
   const url = new URL(request.url);
   if (request.headers.get('Origin') !== url.origin) return antwort({ ok: false, fehler: 'forbidden' }, 403);
   const q = quelle(request);
   if (!erlaubt('hausbild:' + q, 10, 10 * 60 * 1000)) return antwort({ ok: false, fehler: 'rate_limited' }, 429);
   let d; try { d = await request.json(); } catch (e) { return antwort({ ok: false, fehler: 'bad_request' }, 400); }
-  const vorlagen = Array.isArray(d && d.vorlagen) ? d.vorlagen.slice(0, 8) : [];
-  const zahl = (v, max) => Math.max(0, Math.min(max, parseInt(v, 10) || 0));
-  const daten = (x) => { x = x || {}; return { farbe: /^#[0-9a-f]{6}$/i.test(String(x.farbe || '')) ? x.farbe : '', fluegel: zahl(x.fluegel, 6), oberlicht: !!x.oberlicht, sprossen: !!x.sprossen, tuer: !!x.tuer, sonne: ['raffstore', 'rollladen', 'screen'].indexOf(x.sonne) >= 0 ? x.sonne : '', glas: x.glas === 'ornament' ? 'ornament' : 'klar' }; };
-  const elemente = (Array.isArray(d && d.elemente) ? d.elemente : []).slice(0, 8).map((e) => ({ box: box(e && e.box), vorlage: Math.max(0, Math.min(vorlagen.length - 1, parseInt(e && e.vorlage, 10) || 0)), art: e && e.art === 'neu' ? 'neu' : 'ersetzen', daten: daten(e && e.daten) }));
-  if (!bildOk(d && d.bild) || !vorlagen.length || !vorlagen.every(bildOk) || !elemente.length || elemente.some((e) => !e.box)) return antwort({ ok: false, fehler: 'bad_request' }, 400);
+  const teile = Array.isArray(d && d.teile) ? d.teile.slice(0, 9).map((t) => paketLesen(t, false)) : null, eins = teile ? null : paketLesen(d, true);
+  if (teile ? !teile.length || teile.length > 8 || teile.some((t) => !t) : !eins) return antwort({ ok: false, fehler: 'bad_request' }, 400);
   if (!d || d.einwilligung !== EINW_STAND) return antwort({ ok: false, fehler: 'einwilligung' }, 400);
   /* Tagesgrenzen: je Anschluss als gekürzter Prüfwert mit Geheimnis (keine IP-Adresse in der Datenbank, nach zwei Tagen gelöscht:
-     eingang.js) und über alle Kunden (Datenbank, sonst Arbeitsspeicher) */
+     eingang.js) und über alle Kunden (Datenbank, sonst Arbeitsspeicher); eine Vorschau zählt einmal, gleich wie viele Fenster */
   const ctx = { env: env, sp: null }; let k = {}; try { k = konfig(env); ctx.sp = speicher(k); } catch (e) { /* ohne Datenbank */ }
   const max = Math.max(1, parseInt(env.HAUSBILD_TAG_MAX, 10) || 500);
   if (!(await budget(ctx, 'hbanschluss:' + (await pruefwert(k, q)), 20)).ok || !(await budget(ctx, 'hausbild:tag', max)).ok) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'tag' }, 429);
-  if (env.BFL_API_KEY === 'attrappe') return antwort({ ok: true, bild: bildOk(d.lage) ? d.lage : d.bild, attrappe: true, kosten: 0 }); // lokal: das Bild mit den eingesetzten Fenstern
+  if (teile) {
+    if (weg === 'attrappe') return antwort({ ok: true, bilder: teile.map((t) => t.lage), attrappe: true, kosten: 0 }); // lokal: die eingesetzten Fenster
+    if (weg !== 'cloudflare') return antwort({ ok: false, fehler: 'bad_request' }, 400);
+    const erg = await nacheinander(teile, (t) => cloudflare(env, t), 3);
+    if (erg.every((e) => !e.ok)) return antwort({ ok: false, fehler: erg[0].fehler }, erg[0].status);
+    return antwort({ ok: true, bilder: erg.map((e) => (e.ok ? e.bild : null)), kosten: null });
+  }
+  if (weg === 'attrappe') return antwort({ ok: true, bild: eins.lage || eins.bild, attrappe: true, kosten: 0 }); // lokal: das Bild mit den eingesetzten Fenstern
+  if (weg === 'cloudflare') { const e = await cloudflare(env, eins); return e.ok ? antwort({ ok: true, bild: e.bild, kosten: null }) : antwort({ ok: false, fehler: e.fehler }, e.status); }
+  const { elemente, vorlagen } = eins;
   const modell = /^flux-3-image(-klein)?$/.test(String(env.HAUSBILD_MODELL || '')) ? env.HAUSBILD_MODELL : MODELL;
-  const nutzlast = { prompt: auftrag(elemente), images: [roh(d.bild)].concat(vorlagen.map(roh)), resolution: '1k', output_format: 'jpeg' };
+  const nutzlast = { prompt: auftrag(elemente), images: [roh(eins.bild)].concat(vorlagen.map(roh)), resolution: '1k', output_format: 'jpeg' };
   let a;
   try { a = await bfl(env, modell, nutzlast); } catch (e) { a = { status: 502, j: null }; }
   if (a.status === 429) return antwort({ ok: false, fehler: 'rate_limited' }, 429);

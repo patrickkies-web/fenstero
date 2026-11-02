@@ -707,20 +707,27 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
      speichern“ (Datei `mein-haus-ki-visualisierung.jpg`), „Weiter bearbeiten“; Titel „So *könnte* es aussehen.“ Das Ergebnis trägt unten
      rechts sichtbar „KI-Visualisierung · kein Foto · eeziframes.com“ und in den Bilddaten XMP (IPTC DigitalSourceType
      „compositeWithTrainedAlgorithmicMedia“), Art. 50 Abs. 2 KI-Verordnung.
-- **Kosten und Grenzen:** 0,9 Cent je Vorschau (Black Forest Labs, Stand 1.11.2026). Server: 10 je 10 Minuten und Anschluss, 20 je
-  Anschluss und Tag, `HAUSBILD_TAG_MAX` (Vorgabe 500) am Tag insgesamt. Gespeichert wird nichts.
+- **KI über Cloudflare (seit 2.11.2026 abends, Wunsch des Inhabers):** Die Vorschau rechnet Cloudflare Workers AI mit FLUX.2 [klein] 9B
+  auf eigenen Servern (kein Vertrag mit Black Forest Labs nötig, Cloudflare ist schon Auftragsverarbeiter, kein Training). Das Modell kennt
+  keine Felder je Fenster: Die App schickt deshalb **je Fenster einen eigenen Ausschnitt** (unter 512 Pixel, mit dem flach eingesetzten
+  Fenster als Platzhalter) samt Vorlage, und der Auftrag nennt Lage, Flügel und Farbe. Alle Fenster in einem Bild verwechselte im
+  Vergleich die Teilung (unten zwei statt ein Flügel); einzeln hält sich das Modell daran (docs/profis/2026-11-02-hausbild.md,
+  `docs/profis/bilder/2026-11-02-hausbild-cloudflare-ablauf.jpg`). Der Weg über Black Forest Labs direkt (FLUX 3, oben beschrieben) bleibt
+  im Code, ist aber aus (`FREIGEGEBEN`).
+- **Kosten und Grenzen:** rund 1,7 Cent je Fenster (Cloudflare: 1,5 US-Cent je Bild bis 1 Megapixel plus 0,2 Cent je Megapixel Eingabe).
+  Server: 10 Vorschauen je 10 Minuten und Anschluss, 20 je Anschluss und Tag, `HAUSBILD_TAG_MAX` (Vorgabe 500) am Tag insgesamt; eine
+  Vorschau zählt einmal, mit höchstens 8 Fenstern. Gespeichert wird nichts.
 - **Ohne WebGL** zeichnet hausbild.js eine einfache Ansicht des Elements (Rahmenfarbe, Flügel, Glas, Kasten).
 - **Recht (Prüfung 2.11.2026, docs/recht/2026-11-02-hausbild-pruefung.md):** Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) vor der ersten
   KI-Vorschau, Widerruf im Editor und in der Fußleiste, Datenschutzerklärung 5a, AGB § 2 Abs. 5 und § 11 Abs. 2, nur EU-Zugang. Werbung mit
   solchen Bildern nur mit Hinweis „KI-Visualisierung mit eeziframes, kein Foto eines Einbaus. Ergebnisse können abweichen.“ und nie mit
   Bildern von Kunden ohne eigene Freigabe.
-- **Schalter:** Online seit 2.11.2026, aber aus (`FREIGEGEBEN = false` in functions/api/hausbild.js, Wunsch des Inhabers bis zum
-  Vertrag mit Black Forest Labs): Einladung und KI-Vorschau erscheinen erst damit, mit `BFL_API_KEY` **und** `HAUSBILD_FREI=1`
-  (`hausbildFrei` in functions/api/hausbild.js, `/api/status` meldet `hausbild`). Die Rechtstexte (Datenschutz 5a, AGB § 2 Abs. 5 und
-  § 11 Abs. 2, Cookie-Zeile) liegen fertig in docs/recht/2026-11-02-hausbild-rechtstexte.md und kommen beim Freischalten auf die Seiten.
-  Zweite Sperre in der App: ohne vollständige Angaben in `HB_EINW_TEXT` (Sitz, Frist, Bestätigung „kein Training“) bleibt die
-  Einladung aus, auch mit dem Schalter.
-- **Offen:** Vertrag zur Auftragsverarbeitung mit Black Forest Labs und die Platzhalter in den Rechtstexten und im Einwilligungsblatt; Zählung in der Statistik (Editor geöffnet, Vorschau, danach gekauft oder angefragt).
+- **Schalter:** An, sobald Workers AI gebunden ist (`"ai"` in wrangler.jsonc); `HAUSBILD_FREI=0` bei Cloudflare schaltet die Vorschau
+  ab (`hausbildWeg` in functions/api/hausbild.js, `/api/status` meldet `hausbild` und `hausbildMax`). Lokal mit `KI_ATTRAPPE=1`.
+- **Rechtstexte online (2.11.2026):** Datenschutz 5a (Cloudflare), Satz zum Prüfwert in Abschnitt 2, AGB § 2 Abs. 5 und § 11 Abs. 2
+  (Stand 2.11.2026), Cookie-Zeile `aufmass.hausbild.einwilligung`; Einwilligungstext Stand `2026-11-02c`.
+- **Offen:** Blick des Anwalts auf 5a in der Fassung für Cloudflare; Zählung in der Statistik (Editor geöffnet, Vorschau, danach
+  gekauft oder angefragt).
 
 ## Entscheidungen
 

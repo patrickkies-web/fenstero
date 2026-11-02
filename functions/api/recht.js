@@ -9,7 +9,7 @@
      Konten laufen und in den Rechtstexten keine Platzhalter mehr stehen (E-Mail-Adresse, Telefonnummer). /api/status zeigt das. */
 import { VORLAGE } from '../instanz/recht.js';
 
-export const AGB_STAND = '2026-10-30'; // 30.10.2026: § 4a Vermittlung, § 2 Abs. 3 angepasst (Entwurf § 2 Abs. 5, § 11 Abs. 2 für „An meinem Haus ansehen“: docs/recht/2026-11-02-hausbild-rechtstexte.md)
+export const AGB_STAND = '2026-11-02'; // 2.11.2026: § 2 Abs. 5 und § 11 Abs. 2 für „An meinem Haus ansehen“ (KI-Vorschau über Cloudflare); 30.10.2026: § 4a Vermittlung, § 2 Abs. 3
 /* Paketbedingungen der Konfigurator-Pakete mit Anlage AV-Vertrag (/konfigurator-bedingungen/, Strang F), Fassung beim Bestellen: Das
    Bestellformular zeigt sie, der Server nimmt nur Bestellungen mit genau diesem Stand an und speichert ihn an der Bestellung
    (bestellungen.zustimmung, Metadaten der Stripe-Kasse). Die Fassung als PDF liegt unter /konfigurator-bedingungen/paketbedingungen-<STAND>.pdf
