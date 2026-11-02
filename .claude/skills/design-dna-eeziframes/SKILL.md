@@ -342,6 +342,19 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   dasselbe Element, steht dort dieselbe Bühne in derselben Größe und auf demselben Grund, nur ohne Bedienleiste; Überschrift und Text
   stehen darunter, nicht über dem Modell. Kein verkleinertes Freisteller-Bild. Vorschlag für seine DNA (Abschnitt 9): „Das Element bleibt
   beim Weitergehen, wie es war; nur die Werkzeuge gehen.“
+- Systematik hinten (Korrektur des Inhabers, 2.11.2026: „Nein“ übersprang auch die Wahl kostenlos/bezahlen; AGB-Text und Links weiß auf
+  Weiß): „Nein“ im Gebäude-Bogen überspringt nur die beiden Angaben-Folien und landet dort, wo „Weiter“ nach „Zeit und Budget“ hinführt
+  (eine Funktion, `nachAngaben()`). Der Bogen gehört zum eigenen Ablauf, nicht in den Kundenlink eines Betriebs. Auf der weißen Fläche
+  bekommt jede Farbe, die für Schwarz gedacht war, ihre Entsprechung: Silbergrau als Schrift → Textgrau (Token), Weiß als Schrift →
+  Schwarz, Koralle als Schrift → #c0502a; Karten, Hinweise, Kästchen und Umschalter hell; dunkel bleiben nur Inseln mit Absicht
+  (Gratis-Karte, schwarze Pillen und Knöpfe, Symbolkacheln). Die Prüfsuite misst den Kontrast jedes Textes auf 20 Folien (Abschnitt 32).
+  Vorschlag für seine DNA: „Wer die Fläche wechselt, wechselt alle Farben mit; geprüft wird gemessen, nicht geschaut.“
+- Maße vor dem Speichern (Inhaber, 2.11.2026): Hat jemand Breite und Höhe nur eingetippt (nicht geführt gemessen), steht im Bogen
+  „Bevor du speicherst“ vor den offenen Möglichkeiten eine orange Kachel (Koralle als Fläche, auf seinen Wunsch; Schrift schwarz):
+  „Vorsicht: deine Maße“, die beiden Maße zum Antippen, ein Häkchen „Ja, so sollen sie ins Aufmaß“, dazu „Maße korrigieren“ und
+  „Geführt neu messen“. Ohne Häkchen wird nicht gespeichert; geänderte Maße wollen neu bestätigt werden. Ohne Maße steht dieselbe Kachel
+  einmal als Hinweis und sperrt nicht. Die Speichern-Knöpfe bleiben unten im Bogen stehen.
+- Start-Folie (Inhaber, 2.11.2026): Balkontür (zweiflügelig) und Hebe-Schiebe-Tür als seine Fotos in Anthrazit, wie das Fenster.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

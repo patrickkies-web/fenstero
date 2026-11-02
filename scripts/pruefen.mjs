@@ -525,9 +525,8 @@ if (teil(4)) {
   await page.evaluate((code) => { localStorage.setItem('aufmass.k.' + code, JSON.stringify({ windows: demoProject(), proj: {}, name: '' })); }, link.code);
   await page.reload({ waitUntil: 'networkidle' });
   await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); // Weiter zum Absenden
-  /* vorher die Frage nach den Angaben zum Gebäude (2.11.2026): Ja, sechs Fragen */
-  await page.waitForSelector('[data-act="geb-ja"]'); ok(/6 kurze Fragen/.test(await page.evaluate(() => document.querySelector('.geb-blatt').textContent)), 'Vor den Angaben: Frage nach den Infos zum Gebäude mit Zahl der Fragen'); await page.click('[data-act="geb-ja"]');
-  await page.waitForSelector('[data-screen="anfrage"]');
+  /* im Kundenlink keine Frage nach dem Gebäude (sie gehört zum eigenen Ablauf „Zum Aufmaßblatt“): direkt zu den Angaben */
+  await page.waitForSelector('[data-screen="anfrage"]'); ok(await page.locator('.geb-blatt').count() === 0, 'Kundenlink: „Weiter zum Absenden“ führt ohne Bogen direkt zu den Angaben (mit der Nachricht an den Betrieb)');
   await page.click('.bb .btn.primary, .scr.dna .lg-weiter');
   await page.waitForSelector('[data-screen="anfrage2"]');
   await page.click('.bb .btn.primary, .scr.dna .lg-weiter'); // Prüfen und senden
@@ -1330,7 +1329,7 @@ if (teil(8)) {
   ok(st1.ok && st1.status === 'geoeffnet' && st1.betrieb === firma && st1.kunde === 'Familie Server', 'Server weiß, dass der Kunde den Link geöffnet hat');
   await kp.evaluate((code) => { localStorage.setItem('aufmass.k.' + code, JSON.stringify({ windows: demoProject(), proj: {}, name: '' })); }, l1.code);
   await kp.reload({ waitUntil: 'networkidle' }); await kp.waitForTimeout(500);
-  await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-act="geb-ja"]'); await kp.click('[data-act="geb-ja"]'); await kp.waitForSelector('[data-screen="anfrage"]'); await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="anfrage2"]'); await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="blatt"]');
+  await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="anfrage"]'); await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="anfrage2"]'); await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="blatt"]');
   ok(/mit allen Maßen und Wünschen, dazu die Auswertung der Fotos/.test(await kp.evaluate(() => document.body.innerText)), 'Prüfen-Seite verspricht Maße, Wünsche und Fotoauswertung');
   await kp.click('.bb .btn.primary, .scr.dna .lg-weiter'); await kp.waitForSelector('[data-screen="gesendet"]'); await kp.waitForTimeout(500);
   const ges = await kp.evaluate(() => ({ txt: document.body.innerText, sent: S.sent, code: !!document.getElementById('code-box'), feier: (function () { const e = document.querySelector('.okmark-l[data-lottie="fertig"]'); return e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0 ? 1 : 0; })() }));
@@ -5091,12 +5090,72 @@ if (teil(32)) {
   const h3 = await p.evaluate(() => ({ screen: S.screen, n: S.windows.length }));
   ok(h1.blatt && /^Noch \d+ Möglichkeiten offen/.test(h1.text) && h1.chips === 6 && /Insektenschutz|Sicht|Griff/.test(h1.erste) && !h2.blatt && h2.q === 'extras' && h3.screen === 'fertig' && h3.n >= 1,
     'Speichern auf der Liste: einmal ein Hinweis auf die offenen Möglichkeiten (die häufigsten zuerst), „Ansehen“ bleibt auf der Liste, danach wird gespeichert (' + JSON.stringify([h1, h2, h3]) + ')');
-  /* c3) „Zum Aufmaßblatt“: erst die Frage nach dem Gebäude; Nein führt zu den Kontaktangaben */
+  /* c3) „Zum Aufmaßblatt“: erst die Frage nach dem Gebäude; Nein überspringt nur die Angaben und führt dorthin, wohin „Weiter“ nach „Zeit
+     und Budget“ führt (mit Vermittlung zur Wahl „kostenlos oder bezahlen“, sonst zum Kontakt; Inhaber, 2.11.2026) */
   await p.tap('.fg-fuss .lg-weiter'); await p.waitForTimeout(400);
   const g1 = await p.evaluate(() => ({ blatt: !!document.querySelector('.geb-blatt'), text: (document.querySelector('.geb-blatt') || {}).textContent || '' }));
   await p.tap('[data-act="geb-nein"]'); await p.waitForTimeout(400);
-  const g2 = await p.evaluate(() => S.screen);
-  ok(g1.blatt && /Gebäude/.test(g1.text) && /6 kurze Fragen/.test(g1.text) && g2 === 'anfrage3', 'Zum Aufmaßblatt: zuerst die Frage, ob Infos zum Gebäude mit sollen (6 Fragen, warum es zählt); Nein führt direkt zu den Kontaktangaben (' + g2 + ')');
+  const g2 = await p.evaluate(() => { const v = SERVER.vermittlung, screen = S.screen, ziel = vermAn() ? 'weg' : 'anfrage3'; SERVER.vermittlung = Object.assign({}, v || {}, { an: true }); const mitVerm = nachAngaben(); SERVER.vermittlung = v; return { screen: screen, ziel: ziel, mitVerm: mitVerm }; });
+  ok(g1.blatt && /Gebäude/.test(g1.text) && /6 kurze Fragen/.test(g1.text) && g2.screen === g2.ziel && g2.mitVerm === 'weg', 'Zum Aufmaßblatt: zuerst die Frage, ob Infos zum Gebäude mit sollen (6 Fragen, warum es zählt); Nein überspringt nur die Angaben, mit Vermittlung geht es zur Wahl „kostenlos oder bezahlen“ (' + JSON.stringify(g2) + ')');
+  /* c4) Weiße Fläche mit System (Inhaber, 2.11.2026: Links und AGB-Text weiß auf Weiß): auf jeder Folie mit weißer Fläche hat jeder
+     sichtbare Text dort mindestens 4,5 : 1 (ab 24 px 3 : 1) gegen seinen tatsächlichen Hintergrund, auch mit Vermittlung und mit
+     Fehlermeldungen; Telefon und Laptop */
+  const kontrastWeiss = () => {
+    const lum = (c) => { let m = c.match(/[\d.]+/g); if (!m) return null; if (/^color\(/.test(c)) m = m.map((v, i) => (i < 3 ? v * 255 : v)); const [r, g, bb, a] = m.map(Number); const f = (v) => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return { L: .2126 * f(r) + .7152 * f(g) + .0722 * f(bb), a: a == null ? 1 : a }; };
+    const grund = (el) => { for (let e = el; e && e !== document.documentElement; e = e.parentElement) { const s = getComputedStyle(e); if (s.backgroundImage !== 'none') { if (/url\(/.test(s.backgroundImage)) return null; const m = s.backgroundImage.match(/rgba?\([^)]+\)/g); if (m) return m[Math.floor(m.length / 2)]; } const l = lum(s.backgroundColor); if (l && l.a > .5) return s.backgroundColor; } return null; };
+    const raus = [], flaeche = document.querySelector('.scr .dna-rechts, .scr .er-rechts, .scr .fg-rechts');
+    if (!flaeche) return raus;
+    for (const e of flaeche.querySelectorAll('*')) {
+      if (![...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) continue;
+      const r = e.getBoundingClientRect(), s = getComputedStyle(e);
+      if (!r.width || !r.height || s.visibility === 'hidden' || +s.opacity === 0 || e.closest('[aria-hidden="true"], .ez-unsichtbar, .sr-only')) continue;
+      const h = grund(e), a = lum(s.color), c = h && lum(h); if (!a || !c) continue;
+      const k = (Math.max(a.L, c.L) + .05) / (Math.min(a.L, c.L) + .05);
+      if (k < 4.5 && !(parseFloat(s.fontSize) >= 24 && k >= 3)) raus.push(S.screen + ': ' + k.toFixed(2) + ' ' + e.textContent.trim().slice(0, 30));
+    }
+    return raus;
+  };
+  const kw = [];
+  await p.evaluate(() => { window.__vmVorher = SERVER.vermittlung; });
+  for (const breite of [390, 1280]) {
+    await p.setViewportSize({ width: breite, height: breite > 500 ? 800 : 844 });
+    for (const z of ['fertig', 'liste', 'anfrage', 'anfrage2', 'weg', 'betriebe', 'anfrage3', 'vcode', 'angefragt', 'blatt', 'teilen', 'sichern', 'konto', 'kasse', 'gekauft', 'gesendet', 'datei', 'fotos', 'ergebnis', 'planmasse']) {
+      await p.evaluate((z) => { const ws = demoProject(); S.windows = ws; S.win = ws[0]; S.editIdx = -1; S.proj = Object.assign({}, PROJ0); S.gebFrage = false; S.extrasHinweis = false;
+        SERVER.vermittlung = Object.assign({}, SERVER.vermittlung || {}, { an: ['weg', 'betriebe', 'anfrage3', 'vcode', 'angefragt', 'blatt'].includes(z) });
+        S.verm = { weg: 'A', wahl: [], suchen: z === 'anfrage3', einw: false, gesendet: null };
+        S.kauf = Object.assign({}, S.kauf || {}, { mail: 'pruef@beispiel.de', paid: ['gekauft', 'gesendet', 'datei'].includes(z) }); go(z); }, z);
+      await p.waitForTimeout(250);
+      kw.push(...await p.evaluate(kontrastWeiss));
+      const pille = p.locator('.scr .lg-weiter:not([disabled])').first();
+      if (await pille.count() && ['betriebe', 'anfrage3', 'vcode', 'sichern', 'konto', 'kasse'].includes(z)) { await pille.click().catch(() => {}); await p.waitForTimeout(250); if (await p.evaluate((z) => S.screen === z, z)) kw.push(...await p.evaluate(kontrastWeiss)); }
+    }
+  }
+  await p.evaluate(() => { SERVER.vermittlung = window.__vmVorher; S.verm = null; });
+  await p.setViewportSize(telefon.viewport);
+  ok(kw.length === 0, 'Weiße Fläche: auf 20 Folien (mit Vermittlung und Fehlermeldungen, Telefon und Laptop) jeder Text mindestens 4,5 : 1 (' + [...new Set(kw)].slice(0, 6).join(' · ') + ')');
+  /* c5) Maße vor dem Speichern (Inhaber, 2.11.2026): eingetippte Maße erst bestätigen (orange Kachel vor den offenen Möglichkeiten),
+     korrigieren über die Zifferntasten mit Rückkehr in den Bogen; ohne Maße ein Hinweis, der nicht sperrt; geführt gemessen keine Kachel */
+  const mStart = async (art) => { await p.evaluate((art) => { const w = art === 'gemessen' ? Object.assign({}, demoProject()[0]) : baseWin(); if (art === 'eingeben') { w.massWeg = 'eingeben'; w.el = { w: 1230, h: 1410 }; } if (art === 'ohne') w.massWeg = 'ohne'; w.name = 'Prüf ' + art; S.win = w; S.editIdx = -1; S.windows = []; S.extrasGezeigt = null; S.masseGezeigt = null; S.q = 'extras'; S.screen = 'frage'; render(true); }, art); await p.waitForTimeout(300); await p.tap('.lg-weiter'); await p.waitForTimeout(400); };
+  await mStart('eingeben');
+  const ms1 = await p.evaluate(() => ({ kachel: !!document.querySelector('.ex-blatt .ex-masse'), vorListe: !!document.querySelector('.ex-masse + .exb-zwischen'), werte: (document.querySelector('.ex-masse-werte') || {}).textContent || '', farbe: getComputedStyle(document.querySelector('.ex-masse') || document.body).backgroundColor }));
+  await p.tap('.ex-blatt [data-act="extras-speichern"]'); await p.waitForTimeout(300);
+  const ms2 = await p.evaluate(() => ({ screen: S.screen, bad: !!document.querySelector('.ex-masse.ist-bad') }));
+  await p.tap('[data-act="masse-korr"]'); await p.waitForTimeout(300);
+  for (const k of '1250') await p.tap('.keypad [data-v="' + k + '"]');
+  await p.tap('.keypad [data-v="ok"]'); await p.waitForTimeout(250); await p.tap('.keypad [data-v="ok"]'); await p.waitForTimeout(300);
+  const ms3 = await p.evaluate(() => ({ blatt: !!document.querySelector('.ex-masse'), w: S.win.el.w, h: S.win.el.h }));
+  await p.tap('[data-act="masse-ok"]'); await p.waitForTimeout(200); await p.tap('.ex-blatt [data-act="extras-speichern"]'); await p.waitForTimeout(500);
+  const ms4 = await p.evaluate(() => ({ screen: S.screen, ok: !!(S.windows[0] && S.windows[0].masseOk), w: S.windows[0] && S.windows[0].el.w }));
+  ok(ms1.kachel && ms1.vorListe && /1\.230/.test(ms1.werte) && /1\.410/.test(ms1.werte) && ms1.farbe === 'rgb(248, 137, 98)' && ms2.screen === 'frage' && ms2.bad && ms3.blatt && ms3.w === 1250 && ms3.h === 1410 && ms4.screen === 'fertig' && ms4.ok && ms4.w === 1250,
+    'Eingetippte Maße: orange Kachel vor den offenen Möglichkeiten, ohne Bestätigung kein Speichern, „Maße korrigieren“ über Breite und Höhe zurück in den Bogen, mit Häkchen gespeichert (' + JSON.stringify([ms1.werte, ms2, ms3, ms4]) + ')');
+  await mStart('ohne');
+  const ms5 = await p.evaluate(() => (document.querySelector('.ex-masse-kopf') || {}).textContent || '');
+  await p.tap('.ex-blatt [data-act="extras-speichern"]'); await p.waitForTimeout(500);
+  const ms6 = await p.evaluate(() => S.screen);
+  await mStart('gemessen');
+  const ms7 = await p.evaluate(() => !document.querySelector('.ex-masse'));
+  await p.evaluate(() => { S.extrasHinweis = false; S.exMasse = ''; S.masseFehler = false; render(); });
+  ok(/noch keine Maße/.test(ms5) && ms6 === 'fertig' && ms7, 'Ohne Maße: Hinweis in Orange, Speichern geht trotzdem; geführt gemessen: keine Kachel (' + JSON.stringify([ms5, ms6, ms7]) + ')');
   /* d) Weg zu den Maßen: ohne Maße gleich weiter; eingeben über die Zifferntasten; geführt über Fotos, zurück auf den Weg, nach dem Ergebnis weiter bei „wie viele und wo“ */
   await p.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.windows = []; S.q = 'massweg'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(400);
   const m0 = await p.evaluate(() => ({ zeilen: Array.from(document.querySelectorAll('.mw-zeile')).map((b) => b.getAttribute('data-v')).join(), h: Math.round(document.querySelector('.mw-kreis').getBoundingClientRect().height) }));

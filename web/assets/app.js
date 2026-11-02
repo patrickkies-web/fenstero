@@ -3196,9 +3196,10 @@ let stZuletzt = '', stNeuZuletzt = false, stRichtung = 0, stSofort = false;
 const stIdx = (k) => Math.max(0, OPT.art.findIndex((x) => x.k === k));
 const stNachbar = (k, d) => OPT.art[(stIdx(k) + d + OPT.art.length) % OPT.art.length].k;
 /* Bilder des Inhabers (web/bilder/konfigurator/element/), Breite und Höhe in px */
-const ST_BILD = { fenster: [879, 1194], balkon: [536, 1200], fest: [1179, 996], hst: [1188, 993], psk: [908, 1079], fsw: [1200, 754] };
-/* Datei je Element, wo sie anders heißt: das Fenster in Anthrazit mit Raffstore (Bild des Inhabers, 2.11.2026) */
-const ST_DATEI = { fenster: 'fenster-anthrazit' };
+const ST_BILD = { fenster: [879, 1194], balkon: [853, 1200], fest: [1179, 996], hst: [1200, 652], psk: [908, 1079], fsw: [1200, 754] };
+/* Datei je Element, wo sie anders heißt: Fenster in Anthrazit mit Raffstore, zweiflügelige Balkontür und Hebe-Schiebe-Tür in Anthrazit
+   (Fotos des Inhabers, 2.11.2026; die Schiebetür vom hellen Grund freigestellt) */
+const ST_DATEI = { fenster: 'fenster-anthrazit', balkon: 'balkon-anthrazit', hst: 'hst-anthrazit' };
 /* Feine Zeichen der runden Knöpfe (2.11.2026, Vorlage des Inhabers): 28 × 28, Strich 1,6 in currentColor */
 const ST_ICON = {
   fenster: '<rect x="5" y="4" width="18" height="20" rx="1.5"/><path d="M14 4v20M11.5 13v2.5M16.5 13v2.5"/>',
@@ -3998,6 +3999,9 @@ function abZeitBuehne(pr, schritt) {
     OPT.zeit.map((o) => '<span class="ab-station' + (o.k === pr.zeit ? ' ist-dran' : '') + '"><i></i><b>' + esc(o.label).replace(/ (\d) bis (\d)/, ' $1&nbsp;bis&nbsp;$2') + '</b></span>').join('') + '</div></div>' +
     '<div class="ab-budget" aria-hidden="true"><span class="dna-label">Budget</span><span class="ab-budget-reihe">' + [0, 1, 2, 3].map((i) => '<i class="' + (i === bi ? 'ist-dran' : i < bi ? 'ist-voll' : '') + '"></i>').join('') + '</span><b>' + esc(lab('budget', pr.budget) || 'Weiß ich noch nicht') + '</b></div>');
 }
+/* Wohin es nach den Angaben (Haus, Zeit und Budget) geht: im Kundenlink zum Prüfen und Senden, mit Vermittlung zur Wahl „kostenlos oder
+   bezahlen“, sonst zum Kontakt. Eine Stelle für „Weiter“ und für „Nein“ im Bogen zur Gebäude-Frage */
+function nachAngaben() { return S.betrieb && !instWebsite() ? 'blatt' : vermAn() ? 'weg' : 'anfrage3'; }
 function anfrage2Dna() {
   const pr = S.proj, lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'dein Fensterbauer') : '';
   const web = instWebsite(); // Instanz, Website: der Betrieb kennt den Kunden noch nicht, danach kommt der Kontakt
@@ -4011,7 +4015,7 @@ function anfrage2Dna() {
   if (FOERD_HINWEIS[fw]) karte += noteBox(FOERD_HINWEIS[fw], null, 'ab-note');
   if (lk) karte += '<div class="ab-teil">' + abKopf('Nachricht an ' + bn) + '<p class="ab-klein">' + (web ? anr('Freiwillig, zum Beispiel was Ihnen wichtig ist.', 'Freiwillig, zum Beispiel was dir wichtig ist.') : 'Freiwillig, zum Beispiel wann du erreichbar bist.') + '</p><div class="rows">' + textRow('Nachricht', 'notiz', 'z. B. Rollladen im Bad klemmt', 'text', 'p') + '</div></div>';
   karte += '</div>';
-  const weiter = lk && !web ? ['go', 'blatt', 'Prüfen und senden'] : vermAn() ? ['go', 'weg', 'Weiter'] : ['go', 'anfrage3', 'Weiter'];
+  const weiter = ['go', nachAngaben(), lk && !web ? 'Prüfen und senden' : 'Weiter'];
   return { html: lgKopf(['back', 'Zurück: Haus']) + dnaTisch(abZeitBuehne(pr, anfrageHead(2, lk)), frage + karte + abFuss('Zurück: Haus', weiter[0], weiter[1], weiter[2])), back: ['Haus', 'anfrage'], dna: true, cls: 'dna ab dt', voll: true };
 }
 /* Kontakt: das Aufmaßblatt als Objekt im Fensterlicht; was getippt wird, steht sofort oben auf dem Blatt (abLive), Maße als Punkte */
@@ -5001,7 +5005,15 @@ function qStep(delta) {
   if (c.q.id !== 'extras' && !qHaupt(c.q)) { S.q = 'extras'; S.dir = 'back'; S.selBar = null; S.openSash = -1; return render(true); }
   if (c.q.id === 'extras' && delta < 0) S.ausListe = false;
   /* „Fenster speichern“ auf der Liste: einmal je Fenster ein Hinweis auf die noch offenen Möglichkeiten (Inhaber, 2.11.2026) */
-  if (c.q.id === 'extras' && delta > 0 && S.extrasGezeigt !== S.win && extrasOffen().length >= 3) { S.extrasGezeigt = S.win; S.extrasHinweis = true; return render(); }
+  /* … und davor die Maße: selbst eingetragene erst bestätigen (bis dahin bei jedem Speichern), ohne Maße einmal ein Hinweis */
+  if (c.q.id === 'extras' && delta > 0) {
+    const ml = masseLage(S.win), exOffen = S.extrasGezeigt !== S.win && extrasOffen().length >= 3, mZeigen = ml === 'eingegeben' || (ml === 'ohne' && S.masseGezeigt !== S.win);
+    if (mZeigen || exOffen) {
+      if (exOffen) S.extrasGezeigt = S.win;
+      if (ml === 'ohne') S.masseGezeigt = S.win;
+      S.exListe = exOffen; S.exMasse = mZeigen ? ml : ''; S.masseFehler = false; S.extrasHinweis = true; return render();
+    }
+  }
   const nx = c.list[c.i + delta];
   if (!nx) { if (delta > 0) return saveWin(); if (einstiegHier()) return zumEinstieg(); return go('ergebnis', 'back'); }
   S.q = nx.id; S.dir = delta < 0 ? 'back' : 'fwd'; S.selBar = null; S.qWunsch = false;
@@ -5228,13 +5240,17 @@ function massTasten(f) {
 }
 function massKey(k) {
   const st = S.qMass, m = massCfg(st.f), w = S.win;
-  if (!m || k === 'zurueck') { S.qMass = null; return render(); } // Pfeil zurück: ohne Änderung zurück zur Frage
+  /* aus dem Bogen vor dem Speichern: nach der Breite die Höhe, danach zurück in den Bogen */
+  const zumBlatt = () => { if (st.weiter) { S.qMass = { f: st.weiter, q: st.q, cur: '', msg: '', blatt: true }; render(); nachBild(() => { const e = document.getElementById('qm-ein'); if (e) e.focus({ preventScroll: true }); }); return; } S.qMass = null; S.exMasse = masseLage(w) || S.exMasse; S.masseFehler = false; S.extrasHinweis = true; render(); };
+  if (!m || k === 'zurueck') { if (st && st.blatt) { st.weiter = null; return zumBlatt(); } S.qMass = null; return render(); } // Pfeil zurück: ohne Änderung zurück zur Frage
   if (k === 'ok') {
-    if (!st.cur) { S.qMass = null; return render(); }
+    if (!st.cur) { if (st.blatt) return zumBlatt(); S.qMass = null; return render(); }
     const v = num(st.cur);
     if (v < m.min || v > m.max) { st.msg = 'Bitte zwischen ' + thousand(m.min) + ' und ' + thousand(m.max) + ' mm.'; if (window.Haptik) window.Haptik.fehler(); return render(); }
-    if (/^teil:\d+$/.test(st.f)) teilMm(w, +st.f.slice(5), v); else if (MW_CFG[st.f]) { w.el[st.f === 'elW' ? 'w' : 'h'] = v; w.massWeg = 'eingeben'; } else w[st.f] = v;
-    S.qMass = null; if (window.Haptik) window.Haptik.ok(); return render();
+    if (/^teil:\d+$/.test(st.f)) teilMm(w, +st.f.slice(5), v); else if (MW_CFG[st.f]) { const vorher = num(w.el[st.f === 'elW' ? 'w' : 'h']); w.el[st.f === 'elW' ? 'w' : 'h'] = v; w.massWeg = 'eingeben'; if (vorher !== v) w.masseOk = false; } else w[st.f] = v;
+    if (window.Haptik) window.Haptik.ok();
+    if (st.blatt) return zumBlatt();
+    S.qMass = null; return render();
   }
   let cur = st.cur || '';
   if (k === 'del') cur = cur.slice(0, -1); else if (/^\d$/.test(k)) { if (cur.length >= 4 || (!cur && k === '0')) return; cur += k; } else return;
@@ -5897,14 +5913,46 @@ function qMassweg() {
 /* zuerst, was Kunden am häufigsten nachträglich wünschen, dann die übrigen in der Reihenfolge der Liste */
 const EXTRA_ZUERST = ['insekt', 'iart', 'griff', 'glasfn', 'kvd', 'kinder', 'luefter', 'ol', 'gf', 'oeffner'];
 const extrasOffen = () => { const L = qExtras(qList(S.win)).filter((q) => !extraWert(q).an && String(q.id).split('-')[0] !== 'notiz'), r = (q) => { const i = EXTRA_ZUERST.indexOf(String(q.id).split('-')[0]); return i < 0 ? 99 : i; }; return L.map((q, i) => [q, i]).sort((a, b) => r(a[0]) - r(b[0]) || a[1] - b[1]).map((x) => x[0]); };
+/* Maße vor dem Speichern (Inhaber, 2.11.2026: „wenn man Maße eingegeben hat, die man selber halt nicht gemessen hat …“): Selbst
+   eingetragene Maße bestätigt man, bevor das Fenster gespeichert wird, oder korrigiert sie bzw. misst geführt neu. Ohne Maße steht dieselbe
+   Kachel als Hinweis, ohne zu sperren. 'eingegeben' = Breite und Höhe eingetippt und noch nicht bestätigt, 'ohne' = keine vollständigen
+   Maße, '' = geführt gemessen oder bestätigt */
+function masseLage(w) {
+  const d = derive(w);
+  if (d.complete) return '';
+  if (w.massWeg === 'eingeben' && d.elW && d.elH) return w.masseOk ? '' : 'eingegeben';
+  return 'ohne';
+}
+const WARN_IC = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.2 17.6 16.4H2.4Z"/><path d="M10 8.2v3.8M10 14.3v.1"/></svg>';
+function masseKachel() {
+  const w = S.win, d = derive(w), art = S.exMasse, ok = !!w.masseOk;
+  if (!art) return '';
+  if (art === 'ohne') {
+    return '<div class="ex-masse" role="group" aria-labelledby="exm-t"><p class="ex-masse-kopf" id="exm-t">' + WARN_IC + 'Vorsicht: noch keine Maße</p>' +
+      '<p>Für dieses Fenster hast du noch keine Breite und Höhe. Ohne Maße kann dein Fensterbauer kein genaues Angebot machen. Speichern geht trotzdem, messen kannst du später.</p>' +
+      '<div class="ex-masse-wege"><button type="button" data-act="masse-korr">Maße eintragen</button><button type="button" data-act="masse-neu">Geführt messen</button></div></div>';
+  }
+  const wert = (k, n, v) => '<button type="button" class="ex-masse-wert" data-act="masse-feld" data-f="' + k + '" aria-label="' + esc(n + ': ' + thousand(v) + ' mm. Antippen zum Ändern') + '"><small>' + n + '</small><b>' + thousand(v) + '<span>mm</span></b></button>';
+  return '<div class="ex-masse' + (S.masseFehler && !ok ? ' ist-bad' : '') + '" role="group" aria-labelledby="exm-t"><p class="ex-masse-kopf" id="exm-t">' + WARN_IC + 'Vorsicht: deine Maße</p>' +
+    '<p>Bestätige, dass die Maße, die du eingetragen hast, den Maßen entsprechen, die du dir vom Fensterbauer wünschst.</p>' +
+    '<div class="ex-masse-werte">' + wert('elW', 'Breite', d.elW) + '<span aria-hidden="true">×</span>' + wert('elH', 'Höhe', d.elH) + '</div>' +
+    '<button type="button" class="ex-masse-ok" role="checkbox" aria-checked="' + ok + '" data-act="masse-ok"><span class="ex-masse-box" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span>Ja, so sollen sie ins Aufmaß: Breite und Höhe mit Rahmen.</span></button>' +
+    (S.masseFehler && !ok ? '<p class="ex-masse-fehler" role="alert">Bitte bestätige die Maße, korrigiere sie oder miss geführt neu.</p>' : '') +
+    '<div class="ex-masse-wege"><button type="button" data-act="masse-korr">Maße korrigieren</button><button type="button" data-act="masse-neu">Geführt neu messen</button></div></div>';
+}
 function extrasBlatt() {
   const offen = extrasOffen(), bn = fbName() || 'dein Fensterbauer', name = (q) => q.kurz || QKURZ[String(q.id).split('-')[0]] || q.title;
   const elN = istTuer(S.win) ? 'Tür' : S.win.art === 'fest' ? 'Verglasung' : 'Fenster';
-  return '<button type="button" class="sheet-bg" aria-label="Zurück zur Liste" data-act="extras-ansehen"></button><div class="sheet verlassen ex-blatt" role="alertdialog" aria-modal="true" aria-labelledby="exb-t" aria-describedby="exb-s"><div class="grip"></div>' +
-    '<p class="eyebrow kicker" style="margin-top: 6px">Bevor du speicherst</p><h2 id="exb-t" tabindex="-1">Noch ' + offen.length + ' Möglichkeiten <span class="ak">offen</span></h2>' +
+  const liste = S.exListe !== false && offen.length > 0, kachel = masseKachel();
+  const titel = liste ? 'Noch ' + offen.length + ' Möglichkeiten <span class="ak">offen</span>' : 'Stimmen deine <span class="ak">Maße?</span>';
+  const teilListe = liste ? (kachel ? '<h3 class="exb-zwischen">' + titel + '</h3>' : '') +
     '<p class="vl-sub" id="exb-s">' + esc('Das Wichtigste hast du gewählt. Diese Dinge kannst du noch einstellen, wenn sie dir wichtig sind; sonst plant ' + bn + ' sie nach seinem Standard.') + '</p>' +
-    '<div class="exb-chips">' + offen.slice(0, 6).map((q) => '<button type="button" class="chip" data-act="extras-oeffnen" data-v="' + esc(q.id) + '">' + esc(name(q)) + '</button>').join('') + (offen.length > 6 ? '<span class="exb-mehr">und ' + (offen.length - 6) + ' weitere</span>' : '') + '</div>' +
-    '<div class="vl-knoepfe"><button type="button" class="btn primary" data-act="extras-ansehen">Möglichkeiten ansehen</button><button type="button" class="btn ghost" data-act="extras-speichern">' + esc(elN + ' so speichern') + '</button></div></div>';
+    '<div class="exb-chips">' + offen.slice(0, 6).map((q) => '<button type="button" class="chip" data-act="extras-oeffnen" data-v="' + esc(q.id) + '">' + esc(name(q)) + '</button>').join('') + (offen.length > 6 ? '<span class="exb-mehr">und ' + (offen.length - 6) + ' weitere</span>' : '') + '</div>' : '';
+  const knoepfe = liste ? '<button type="button" class="btn primary" data-act="extras-ansehen">Möglichkeiten ansehen</button><button type="button" class="btn ghost" data-act="extras-speichern">' + esc(elN + ' so speichern') + '</button>'
+    : '<button type="button" class="btn primary" data-act="extras-speichern">' + esc(elN + ' speichern') + '</button><button type="button" class="btn ghost" data-act="extras-ansehen">Zurück zur Liste</button>';
+  return '<button type="button" class="sheet-bg" aria-label="Zurück zur Liste" data-act="extras-ansehen"></button><div class="sheet verlassen ex-blatt" role="alertdialog" aria-modal="true" aria-labelledby="exb-t"' + (liste ? ' aria-describedby="exb-s"' : '') + '><div class="grip"></div>' +
+    '<p class="eyebrow kicker" style="margin-top: 6px">Bevor du speicherst</p>' + (kachel ? '<h2 id="exb-t" tabindex="-1" class="ex-blatt-titel">' + (liste ? 'Zwei Dinge vor dem <span class="ak">Speichern</span>' : titel) + '</h2>' + kachel : '<h2 id="exb-t" tabindex="-1">' + titel + '</h2>') +
+    teilListe + '<div class="vl-knoepfe">' + knoepfe + '</div></div>';
 }
 /* „Zum Aufmaßblatt“: vorher die Frage nach den Angaben zum Gebäude (Inhaber, 2.11.2026), mit Zahl der Fragen und warum sie zählen */
 function gebFrageBlatt() {
@@ -7642,13 +7690,29 @@ function act(name, el) {
     }
     case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return;
       /* Zu den Angaben (Aufmaßblatt, Absenden): erst fragen, ob Infos zum Gebäude mit sollen, solange keine gemacht sind */
-      if (v === 'anfrage' && ['fertig', 'liste', 'home'].indexOf(S.screen) >= 0 && S.proj && !S.proj.gebaeude && !S.proj.baujahr && !num(S.proj.total) && !S.proj.zeit && !S.proj.budget && !S.gebGefragt) { S.gebFrage = true; return render(); }
+      /* nur im eigenen Ablauf („Zum Aufmaßblatt“); im Kundenlink eines Betriebs steht auf den Angaben auch die Nachricht an ihn, die ein
+         „Nein“ sonst mit überspringen würde */
+      if (v === 'anfrage' && !S.betrieb && ['fertig', 'liste', 'home'].indexOf(S.screen) >= 0 && S.proj && !S.proj.gebaeude && !S.proj.baujahr && !num(S.proj.total) && !S.proj.zeit && !S.proj.budget && !S.gebGefragt) { S.gebFrage = true; return render(); }
       return go(v);
     case 'geb-ja': S.gebFrage = false; S.gebGefragt = true; return go('anfrage');
-    case 'geb-nein': S.gebFrage = false; S.gebGefragt = true; return go('anfrage3');
+    /* „Nein“ überspringt nur die beiden Folien mit den Angaben und geht dorthin, wohin „Weiter“ nach „Zeit und Budget“ führt: zur Wahl
+       „kostenlos oder bezahlen“ bzw. zum Kontakt (Inhaber, 2.11.2026: vorher übersprang es auch die Wahl) */
+    case 'geb-nein': S.gebFrage = false; S.gebGefragt = true; return go(nachAngaben());
     case 'geb-zu': S.gebFrage = false; return render();
     case 'extras-ansehen': { S.extrasHinweis = false; render(); const d = document.querySelector('.ex-liste'); if (d && d.scrollIntoView) d.scrollIntoView({ block: 'start', behavior: ruhig() ? 'auto' : 'smooth' }); return; }
-    case 'extras-speichern': S.extrasHinweis = false; return saveWin();
+    case 'extras-speichern': {
+      if (S.exMasse === 'eingegeben' && !w.masseOk) { S.masseFehler = true; render(); nachBild(() => { const k = document.querySelector('.ex-masse'); if (k && k.scrollIntoView) k.scrollIntoView({ block: 'nearest', behavior: ruhig() ? 'auto' : 'smooth' }); }); return; }
+      S.extrasHinweis = false; S.exMasse = ''; return saveWin();
+    }
+    /* orange Kachel im Bogen vor dem Speichern: bestätigen, korrigieren (Zifferntasten, danach zurück in den Bogen), geführt neu messen */
+    case 'masse-ok': w.masseOk = !w.masseOk; S.masseFehler = false; persist(); return render();
+    case 'masse-korr': case 'masse-feld': {
+      S.extrasHinweis = false;
+      const f = name === 'masse-feld' ? el.getAttribute('data-f') : 'elW';
+      massTasten(f); if (S.qMass) { S.qMass.blatt = true; if (name === 'masse-korr') S.qMass.weiter = 'elH'; }
+      return;
+    }
+    case 'masse-neu': S.extrasHinweis = false; S.exMasse = ''; w.massWeg = 'messen'; w.masseOk = false; return go('fotos');
     case 'extras-oeffnen': S.extrasHinweis = false; S.ausListe = true; S.q = v; S.dir = 'fwd'; S.openSash = -1; S.qDock = null; return render(true);
     /* Übersicht aller Fenster aus den Wünschen (Knopf oben links): bei ungespeicherten Änderungen erst das Blatt „Noch nicht gespeichert“ */
     case 'liste': { S.qMass = null; return verlassen({ art: 'home' }); }
