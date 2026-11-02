@@ -36,3 +36,29 @@ Could you please send us:
 
 Thank you and kind regards
 Patrick Kies, eeziframes
+
+---
+
+## Zweite E-Mail: Training abbestellen
+
+Laut Datenschutzerklärung von Black Forest Labs (bfl.ai/legal/privacy-policy) widerspricht man dem Training per E-Mail an
+**privacy@blackforestlabs.ai** mit dem Betreff **„Training Opt Out“** und den Kontodaten. Bitte vor dem Freischalten senden und die
+Bestätigung aufheben; ihr Datum gehört in `HB_EINW_TEXT.ohneTraining` (web/assets/hausbild.js).
+
+**To:** privacy@blackforestlabs.ai
+**Subject:** Training Opt Out
+
+Hello,
+
+please exclude all inputs and outputs of our API account from training and improving your models, with effect for all
+future requests:
+
+- Account e-mail: [E-Mail Ihres Kontos bei Black Forest Labs]
+- Organisation: eeziframes ([Firma und Anschrift laut Impressum von eeziframes.com])
+- Usage: FLUX API, EU endpoint api.eu.bfl.ai
+
+Our requests contain photos of our users' houses, which may be personal data. Please confirm the opt-out in writing, and tell us
+from which date it applies and whether it also covers images that are already stored.
+
+Thank you and kind regards
+Patrick Kies, eeziframes

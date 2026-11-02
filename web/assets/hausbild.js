@@ -33,7 +33,7 @@ const HB_Z = {
 const hbZ = (k) => '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + HB_Z[k] + '</svg>';
 const hbPfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
 /* nur im eigenen Aufmaß, wenn der Server den Bilddienst eingerichtet hat (/api/status: hausbild), nicht in der Führung und nicht in der Vorschau */
-const hbDa = () => typeof SERVER !== 'undefined' && !!SERVER.hausbild && !S.betrieb && !INST && !S.tour && !(typeof vorschau === 'function' && vorschau());
+const hbDa = () => typeof SERVER !== 'undefined' && !!SERVER.hausbild && (hbTexteFertig() || SERVER.hausbild === 'probe') && !S.betrieb && !INST && !S.tour && !(typeof vorschau === 'function' && vorschau());
 
 /* ---------- Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, Datenschutzerklärung Abschnitt 5a) ----------
    Vor der ersten KI-Vorschau fragt der Editor; Zustimmung und Stand des Textes liegen im Browser. Widerruf so einfach wie die
@@ -43,10 +43,16 @@ const hbDa = () => typeof SERVER !== 'undefined' && !!SERVER.hausbild && !S.betr
 const HB_EINW = 'aufmass.hausbild.einwilligung', HB_EINW_STAND = '2026-11-02b'; // Stand wie EINW_STAND in functions/api/hausbild.js; ändert sich der Text, beide hochzählen
 const hbEinwDa = () => { try { const v = JSON.parse(localStorage.getItem(HB_EINW) || 'null'); return !!(v && v.stand === HB_EINW_STAND); } catch (e) { return false; } };
 const hbEinwSetzen = (an) => { try { if (an) localStorage.setItem(HB_EINW, JSON.stringify({ stand: HB_EINW_STAND, am: new Date().toISOString() })); else localStorage.removeItem(HB_EINW); } catch (e) { /* ohne Speicher: fragt jedes Mal */ } };
-/* Text des Blatts (Stand HB_EINW_STAND); [bitte ergänzen: …] füllt der Inhaber nach dem Vertrag mit Black Forest Labs, wie in Abschnitt 5a */
+/* Text des Blatts (Stand HB_EINW_STAND); [bitte ergänzen: …] füllt der Inhaber nach dem Vertrag mit Black Forest Labs, wie in Abschnitt 5a.
+   ohneTraining: Datum der schriftlichen Bestätigung, dass Black Forest Labs Bilder unseres Kontos nicht zum Training nutzt (laut deren
+   API-Bedingungen ist Training sonst erlaubt, Abbestellen per E-Mail, docs/recht/2026-11-02-black-forest-labs-anfrage.md). Erscheint nicht
+   im Blatt, ist aber Bedingung: Solange hier ein Platzhalter steht, bleibt die Einladung aus, auch wenn HAUSBILD_FREI gesetzt ist
+   (lokal mit KI_ATTRAPPE=1 meldet /api/status „probe“, dann erscheint sie zum Prüfen). */
 const HB_EINW_TEXT = {
-  sitz: '[bitte ergänzen: Sitz laut Vertrag]', frist: '[bitte ergänzen: Frist laut Vertrag]'
+  sitz: '[bitte ergänzen: Sitz laut Vertrag]', frist: '[bitte ergänzen: Frist laut Vertrag]',
+  ohneTraining: '[bitte ergänzen: Datum der Bestätigung, dass nicht trainiert wird]'
 };
+const hbTexteFertig = () => !Object.values(HB_EINW_TEXT).some(t => /\[bitte/.test(t));
 function hbEinwBlatt() {
   if (!HB.einwFrage) return '';
   const aus = HB.paket ? '<figure class="hb-einw-bild"><img src="' + HB.paket.bild + '" alt="Der Ausschnitt deines Fotos, der übermittelt wird"><figcaption>Das geht an Black Forest Labs</figcaption></figure>' : '';

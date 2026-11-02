@@ -21,6 +21,7 @@ Befunde sind begründete Hinweise für den Anwalt des Inhabers, der sie prüft. 
 | B8 | Soll | Einwilligung fehlt auf der Cookie-Seite; Nachweis | Eintrag `aufmass.hausbild.einwilligung` auf /cookies/; Server nimmt nur Anfragen mit dem aktuellen Stand des Textes an (`EINW_STAND`) |
 | B9 | Soll | Widerruf nur im Editor | Zusätzlich in der Fußleiste der App („Vorschau-Einwilligung widerrufen“); Satz zur Löschung bereits übermittelter Bilder |
 | B10 | Kann | Verständlichkeit, Inhaltsverzeichnis, Linkfrist, GPS und IP | 5a im Inhaltsverzeichnis, „Link verfällt nach 10 Minuten“, GPS und IP genannt, „Pixel“ |
+| B11 | Muss | Nachtrag 2.11.2026 nach Recherche: Laut FLUX API Service Terms darf Black Forest Labs Eingaben und Ergebnisse zum Training nutzen (Widerspruch per E-Mail „Training Opt Out“). Dann wäre „trainiert nicht“ falsch und BFL kein reiner Auftragsverarbeiter | Widerspruch vorbereitet (Anfrage-Datei); Sperre in der App: Einladung erst ohne Platzhalter in `HB_EINW_TEXT`, darunter `ohneTraining` (Datum der Bestätigung); **offen bis zur Bestätigung** |
 | F1 | Muss | KI-Verordnung Art. 50 Abs. 2 (seit 2.8.2026): gespeichertes Bild ungekennzeichnet | Sichtbarer Hinweis „KI-Visualisierung · kein Foto · eeziframes.com“ im Bild, XMP mit IPTC DigitalSourceType, Dateiname `mein-haus-ki-visualisierung.jpg`, Chip „KI-Bild“ |
 | F2 | Muss | Einwilligung uninformiert solange Platzhalter, EU-Zusage durch Ausweichweg gebrochen, „KI“ fehlt | Wie B1, B3, B7 |
 | F3 | Muss | Irreführung (§ 5, § 5a UWG): „in echt“, „Echte Vorschau“, „So sieht es aus“ | „Sieh dein Fenster an deinem Haus.“, Pille „KI-Vorschau“, Titel „So könnte es aussehen.“, Unterzeile mit möglichen Abweichungen |
@@ -33,7 +34,8 @@ Befunde sind begründete Hinweise für den Anwalt des Inhabers, der sie prüft. 
 
 ## Offen vor dem Start (Reihenfolge)
 
-1. Anfrage an Black Forest Labs schicken (`docs/recht/2026-11-02-black-forest-labs-anfrage.md`), DPA abschließen.
+1. Anfrage an Black Forest Labs schicken (`docs/recht/2026-11-02-black-forest-labs-anfrage.md`), DPA abschließen, Training
+   abbestellen (zweite E-Mail in derselben Datei) und die Bestätigung aufheben.
 2. Die Platzhalter füllen: Datenschutzerklärung 5a (Firma und Anschrift, Drittland-Satz, Frist, Training) und Einwilligungsblatt
    (`HB_EINW_TEXT` in `web/assets/hausbild.js`: Sitz, Frist). Ändert sich der Text des Blatts, `HB_EINW_STAND` in hausbild.js und
    `EINW_STAND` in functions/api/hausbild.js gemeinsam hochzählen.

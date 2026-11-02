@@ -3,11 +3,36 @@
 Stand 2.11.2026. Diese Texte stehen **noch nicht** online: Die KI-Vorschau bleibt aus, bis der Vertrag zur Auftragsverarbeitung mit
 Black Forest Labs da ist (Prüfung: docs/recht/2026-11-02-hausbild-pruefung.md, Anfrage: docs/recht/2026-11-02-black-forest-labs-anfrage.md).
 
+## Was öffentlich über Black Forest Labs bekannt ist (Recherche 2.11.2026)
+
+Von hier aus ließen sich die Seiten von bfl.ai nicht direkt öffnen (Netz der Arbeitsumgebung). Die Angaben stammen aus Suchergebnissen,
+die diese Seiten zitieren. Vor dem Einsetzen bitte im Original prüfen.
+
+- **Firma laut Impressum** (bfl.ai/legal/imprint): BFL GmbH, Ingeborg-Krummer-Schroth-Straße 18, 79106 Freiburg im Breisgau,
+  Amtsgericht München HRB 291820. Laut Datenschutzerklärung von BFL (bfl.ai/legal/privacy-policy) ist für Nutzer im EWR die BFL GmbH
+  verantwortlich; Übermittlungen außerhalb des EWR stützt sie auf EU-Standardvertragsklauseln. Es gibt eigene „EU Developer Terms of
+  Service“ (bfl.ai/legal/eu-developer-terms-of-service). Wer im Vertrag zur Auftragsverarbeitung Vertragspartner ist, steht damit
+  noch nicht fest.
+- **Training:** Laut den FLUX API Service Terms (bfl.ai/legal/flux-api-service-terms) darf BFL Eingaben und Ergebnisse zum Training
+  und zur Verbesserung seiner Modelle nutzen. Laut Datenschutzerklärung kann man dem per E-Mail an privacy@blackforestlabs.ai mit dem
+  Betreff „Training Opt Out“ und den Kontodaten widersprechen. **Ohne diesen Widerspruch und eine Bestätigung wäre der Satz
+  „trainiert seine KI nicht damit“ falsch**; außerdem nutzte BFL die Fotos dann für eigene Zwecke, was mit einer Auftragsverarbeitung
+  nicht vereinbar ist. Die E-Mail liegt fertig in docs/recht/2026-11-02-black-forest-labs-anfrage.md.
+- **Vertrag zur Auftragsverarbeitung:** Einen öffentlich abrufbaren DPA von BFL haben wir nicht gefunden. Er muss angefragt werden
+  (Anfrage wie oben).
+- **Speicherdauer:** öffentlich nicht gefunden; Frage 4 der Anfrage.
+
+## Sperre in der App
+
+Die Einladung erscheint erst, wenn **beides** stimmt: `HAUSBILD_FREI=1` bei Cloudflare **und** kein Platzhalter mehr in
+`HB_EINW_TEXT` (web/assets/hausbild.js: `sitz`, `frist`, `ohneTraining`). Wird der Schalter versehentlich zu früh gesetzt, bleibt die
+Funktion trotzdem aus.
+
 ## Freischalten, Schritt für Schritt
 
-1. Vertrag mit Black Forest Labs abschließen, Antworten auf die Anfrage einholen.
+1. Vertrag mit Black Forest Labs abschließen, Antworten auf die Anfrage einholen, Training abbestellen und die Bestätigung aufheben.
 2. Die Platzhalter „[bitte ergänzen …]“ unten füllen (Firma und Anschrift, Drittland-Satz, Frist, Training) und dieselben Angaben im
-   Einwilligungsblatt eintragen: `HB_EINW_TEXT` in `web/assets/hausbild.js` (Sitz, Frist). Ändert sich der Text des Blatts, zählen
+   Einwilligungsblatt eintragen: `HB_EINW_TEXT` in `web/assets/hausbild.js` (Sitz, Frist, Datum der Bestätigung zum Training). Ändert sich der Text des Blatts, zählen
    `HB_EINW_STAND` (web/assets/hausbild.js) und `EINW_STAND` (functions/api/hausbild.js) gemeinsam hoch.
 3. Texte einsetzen:
    - `web/datenschutz/index.html`: Abschnitt 5a vor Abschnitt 6, Eintrag im Inhaltsverzeichnis, Satz in Abschnitt 2 (Ende des Absatzes
