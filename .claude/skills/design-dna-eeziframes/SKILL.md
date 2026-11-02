@@ -337,6 +337,13 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   zum Gebäude mitgehen sollen (Ja/Nein, Zahl der Fragen, warum es zählt). Die Folien danach (Angaben, Liste der Fenster, Aufmaßblatt,
   Weg kostenlos oder bezahlen, Betriebe, Code, Kasse, Freigeschaltet, Senden) stehen alle auf der weißen Fläche, am Laptop mit weißer
   rechter Spalte.
+- Systematik hinten (Korrektur des Inhabers, 2.11.2026: „Nein“ übersprang auch die Wahl kostenlos/bezahlen; AGB-Text und Links weiß auf
+  Weiß): „Nein“ im Gebäude-Bogen überspringt nur die beiden Angaben-Folien und landet dort, wo „Weiter“ nach „Zeit und Budget“ hinführt
+  (eine Funktion, `nachAngaben()`). Der Bogen gehört zum eigenen Ablauf, nicht in den Kundenlink eines Betriebs. Auf der weißen Fläche
+  bekommt jede Farbe, die für Schwarz gedacht war, ihre Entsprechung: Silbergrau als Schrift → Textgrau (Token), Weiß als Schrift →
+  Schwarz, Koralle als Schrift → #c0502a; Karten, Hinweise, Kästchen und Umschalter hell; dunkel bleiben nur Inseln mit Absicht
+  (Gratis-Karte, schwarze Pillen und Knöpfe, Symbolkacheln). Die Prüfsuite misst den Kontrast jedes Textes auf 20 Folien (Abschnitt 32).
+  Vorschlag für seine DNA: „Wer die Fläche wechselt, wechselt alle Farben mit; geprüft wird gemessen, nicht geschaut.“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

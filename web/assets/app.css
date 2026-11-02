@@ -3417,7 +3417,7 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 }
 /* Fuß und Rechtslinks auf Weiß, über die ganze Breite */
 .scr.dna.wz .lg-fuss { background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--weiss) 16px); --handlung: var(--schwarz); --auf-handlung: var(--weiss); --tinte: var(--schwarz) }
-.scr.dna.wz .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.scr.dna.wz .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #a8a4a9 }
 .scr.dna.wz .lg-fuss .dna-pille--leise { color: var(--schwarz) }
 .scr.dna.wz .foot-links.recht { margin: 0 -16px; padding: 20px 16px 40px; background: var(--weiss) }
 .scr.dna.wz .foot-links.recht, .scr.dna.wz .foot-links.recht a { color: var(--textgrau) }
@@ -3588,7 +3588,7 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts .lg-i::before { box-shadow: inset 0 0 0 1.5px #dcdbe1 }
 .scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts .lg-notiz-knopf, .scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts .ez-notizknopf { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
 .scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts .lg-fuss { background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--weiss) 16px) }
-.scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #a8a4a9 }
 .scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts .lg-fuss .dna-pille:not(.dna-pille--leise) { background: var(--schwarz); color: var(--weiss) }
 .scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts .lg-fuss .dna-pille:not(.dna-pille--leise) .dna-pille__pfeil { background: var(--weiss); color: var(--schwarz) }
 .scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts .foot-links.recht, .scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts .foot-links.recht a { color: var(--textgrau) }
@@ -3602,7 +3602,7 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts) :is(.er-karte, .fg-karte, .lg-karte) { background: #f6f6f8; box-shadow: none; color: var(--schwarz) }
 .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts) :is(.lg-notiz-knopf, .ez-notizknopf) { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
 .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts) .lg-fuss { background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--weiss) 16px) }
-.scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts) .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts) .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #a8a4a9 }
 .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts) .lg-fuss .dna-pille:not(.dna-pille--leise) { background: var(--schwarz); color: var(--weiss) }
 .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts) .lg-fuss .dna-pille:not(.dna-pille--leise) .dna-pille__pfeil { background: var(--weiss); color: var(--schwarz) }
 .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts) .foot-links.recht, .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts) .foot-links.recht a { color: var(--textgrau) }
@@ -3666,7 +3666,7 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna.md .ez-karte--passt::before { content: none }
 .scr.dna.md .lg-fuss { background: var(--weiss); --handlung: var(--schwarz); --auf-handlung: var(--weiss) }
 .scr.dna.md .lg-fuss::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 24px; pointer-events: none; background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--weiss)) }
-.scr.dna.md .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.scr.dna.md .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #a8a4a9 }
 .scr.dna.md .lg-fuss .dna-pille:not(.dna-pille--leise) { background: var(--schwarz); color: var(--weiss) }
 .scr.dna.md .lg-fuss .dna-pille:not(.dna-pille--leise) .dna-pille__pfeil { background: var(--weiss); color: var(--schwarz) }
 .scr.dna.md .foot-links.recht, .scr.dna.md .foot-links.recht a { color: var(--textgrau) }
@@ -3769,3 +3769,47 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna.li .dna-rechts .gs-kontakt .gs-k-rund { box-shadow: inset 0 0 0 1.5px #dcdbe1; background: var(--weiss) }
 /* Abschicken auf Weiß: der Flieger groß genug zum Sehen (seine Bahn ist 320 × 200), schwarz mit grauer Bahn, der Ring am Ziel violett */
 .scr.dna .dna-rechts .okmark-l[data-lottie="senden"] { width: 168px; height: 105px; --lottie-eigen: 1; --ink: #a8a4a9; --paper: #07090a; --ok: #897efc }
+/* ---------- Weiße Fläche, Farben mit System (Inhaber, 2.11.2026: „mit der Systematik … noch mal drüber arbeiten“; AGB-Text und Links
+   waren weiß auf Weiß) ----------
+   Was für den schwarzen Grund eingefärbt war, bekommt auf Weiß seine Entsprechung, für alle Folien mit weißer Fläche auf einmal:
+   Silbergrau als Schrift wird Textgrau (über das Token, so stimmen auch Bausteine, die später dazukommen), Weiß als Schrift wird
+   Schwarz, Koralle als Schrift wird ihr dunkler Ton (#c0502a, 4,75 : 1). Dunkle Inseln (Gratis-Karte, schwarze Knöpfe und Pillen,
+   Symbolkacheln, gewählte Chips) behalten ihre Farben. Linien und Ringe in Silbergrau bleiben hell (#dcdbe1 bzw. #a8a4a9). */
+:is(.scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts, .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts)) { --silbergrau: var(--textgrau); --koralle-schrift: #c0502a }
+:is(.scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts, .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts)) :is(.vm-gratis-hinweis, .dna-pille:not(.dna-pille--leise), .btn.primary, .ic, .dc-ic, .fg-rund, .vm-garantie-chip, .chip[aria-pressed="true"], .ab-rund) { --silbergrau: #a8a4a9 }
+/* Weiß als Schrift → Schwarz (Links, Schritte, Zahlen, Umriss-Knöpfe, Hinweise) */
+.scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts :is(.ulink, .vm-grund, .ab-weg b, .steps .n, .card .pill:not(.danger), .pill-row .pill:not(.danger)):not(:where(.vm-gratis-hinweis *)) { color: var(--schwarz) }
+.scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts .card .pill:not(.danger) { background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+/* Koralle als Schrift → dunkler Ton */
+.scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts :is(.vm-feldfehler, .pill.danger, .kf small, .kerr, .ab-drittel span, .feld-fehler, .err) { color: var(--koralle-schrift) }
+.scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts) :is(.fg-loeschen, .danger, .pill.danger) { color: var(--koralle-schrift) }
+/* Hinweis „angefangen und nicht gespeichert“ auf dem Aufmaßblatt: hell wie die anderen Karten, mit Koralle-Punkt */
+.scr.dna.ab .dna-rechts .msg.warn { background: #f6f6f8; box-shadow: none; color: var(--schwarz) }
+.scr.dna.ab .dna-rechts .msg.warn .pill { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+/* „Angefragt“: Schritte schwarz, Punkte als helle Ringe, der aktuelle violett mit hellem Hof */
+.scr.dna.ab .dna-rechts .vm-schritte b { color: var(--schwarz) }
+.scr.dna.ab .dna-rechts .vm-schritte i { background: var(--weiss); box-shadow: inset 0 0 0 1.5px #a8a4a9 }
+.scr.dna.ab .dna-rechts .vm-schritte li.ist-dran i { background: var(--violett); box-shadow: 0 0 0 4px color-mix(in srgb, var(--violett) 22%, var(--weiss)) }
+.scr.dna.ab .dna-rechts .vm-schritte li::before { background: #dcdbe1 }
+/* Gespeichert: die Zahl in der schwarzen Pille hell */
+.scr.dna.fg .dna-pille:not(.dna-pille--leise) .fg-zahl { color: #a8a4a9 }
+/* Start: „Vertrag widerrufen“ auf Weiß ebenfalls Textgrau (die Regel für Links mit .widerruf war stärker) */
+.dna .st-weiss .foot-links.recht .link.widerruf { color: var(--textgrau) }
+/* Betriebe: „Sucht ihr passende für mich aus“ als helle Zeile wie die übrigen Karten; gewählt mit schwarzem Rand und Haken */
+.scr.dna.ab .dna-rechts .vm-selbst { background: #f6f6f8; box-shadow: none; color: var(--schwarz) }
+.scr.dna.ab .dna-rechts .vm-selbst .vm-tx small { color: var(--textgrau) }
+.scr.dna.ab .dna-rechts .vm-selbst[aria-pressed="true"] { background: var(--weiss); box-shadow: inset 0 0 0 2px var(--schwarz) }
+/* Einverständnis: Kästchen sichtbar wie bei den AGB (weiß mit schwarzem Rand, angehakt schwarz), Text Textgrau, angehakt Schwarz */
+.scr.dna.ab .dna-rechts .vm-einw { color: var(--textgrau); background: var(--weiss); box-shadow: inset 0 0 0 1px #dcdbe1 }
+.scr.dna.ab .dna-rechts .vm-einw[aria-checked="true"] { color: var(--schwarz); box-shadow: inset 0 0 0 1.5px var(--schwarz) }
+.scr.dna.ab .dna-rechts .vm-einw.ist-bad { box-shadow: inset 0 0 0 1.5px var(--koralle-schrift) }
+.scr.dna.ab .dna-rechts .vm-box { background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--schwarz) }
+.scr.dna.ab .dna-rechts .vm-einw[aria-checked="true"] .vm-box { background: var(--schwarz) }
+.scr.dna.ab .dna-rechts .vm-einw[aria-checked="true"] .vm-box svg path { stroke: var(--weiss) }
+/* Umschalter (Vormittags, Nachmittags, Abends und andere) auf den Angaben flach hellgrau wie in den Wünschen, ohne weißen Ring und Schatten */
+.scr.dna.ab .dna-rechts .qpanel :is(.qseg, .qchips) { background: #f6f6f8; box-shadow: none }
+/* Hervorhebungen im Text (b, strong) auf Weiß schwarz, außer in dunklen Inseln (z. B. „Pilotphase: Testkauf.“ war weiß auf Weiß) */
+:is(.scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts, .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts)) :is(p, .sub, small, li, label, .note, .msg) :is(b, strong):not(:where(.vm-gratis-hinweis *, .dna-pille:not(.dna-pille--leise) *, .btn.primary *, [aria-pressed="true"] *, [aria-checked="true"].chip *)) { color: var(--schwarz) }
+/* Hinweise (ab-note, msg, note) auf Weiß hell wie die übrigen Karten, mit Punkt (Grau, Warnung Koralle) und schwarzem Text */
+:is(.scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts, .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts)) :is(.ab-note, .msg, .note:not(.fg-grenze):not(.grenze)) { background: #f6f6f8; box-shadow: none; color: var(--schwarz) }
+.scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts) .ulink:not(:where(.vm-gratis-hinweis *)) { color: var(--schwarz) }

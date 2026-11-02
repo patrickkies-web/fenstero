@@ -3994,6 +3994,9 @@ function abZeitBuehne(pr, schritt) {
     OPT.zeit.map((o) => '<span class="ab-station' + (o.k === pr.zeit ? ' ist-dran' : '') + '"><i></i><b>' + esc(o.label).replace(/ (\d) bis (\d)/, ' $1&nbsp;bis&nbsp;$2') + '</b></span>').join('') + '</div></div>' +
     '<div class="ab-budget" aria-hidden="true"><span class="dna-label">Budget</span><span class="ab-budget-reihe">' + [0, 1, 2, 3].map((i) => '<i class="' + (i === bi ? 'ist-dran' : i < bi ? 'ist-voll' : '') + '"></i>').join('') + '</span><b>' + esc(lab('budget', pr.budget) || 'Weiß ich noch nicht') + '</b></div>');
 }
+/* Wohin es nach den Angaben (Haus, Zeit und Budget) geht: im Kundenlink zum Prüfen und Senden, mit Vermittlung zur Wahl „kostenlos oder
+   bezahlen“, sonst zum Kontakt. Eine Stelle für „Weiter“ und für „Nein“ im Bogen zur Gebäude-Frage */
+function nachAngaben() { return S.betrieb && !instWebsite() ? 'blatt' : vermAn() ? 'weg' : 'anfrage3'; }
 function anfrage2Dna() {
   const pr = S.proj, lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'dein Fensterbauer') : '';
   const web = instWebsite(); // Instanz, Website: der Betrieb kennt den Kunden noch nicht, danach kommt der Kontakt
@@ -4007,7 +4010,7 @@ function anfrage2Dna() {
   if (FOERD_HINWEIS[fw]) karte += noteBox(FOERD_HINWEIS[fw], null, 'ab-note');
   if (lk) karte += '<div class="ab-teil">' + abKopf('Nachricht an ' + bn) + '<p class="ab-klein">' + (web ? anr('Freiwillig, zum Beispiel was Ihnen wichtig ist.', 'Freiwillig, zum Beispiel was dir wichtig ist.') : 'Freiwillig, zum Beispiel wann du erreichbar bist.') + '</p><div class="rows">' + textRow('Nachricht', 'notiz', 'z. B. Rollladen im Bad klemmt', 'text', 'p') + '</div></div>';
   karte += '</div>';
-  const weiter = lk && !web ? ['go', 'blatt', 'Prüfen und senden'] : vermAn() ? ['go', 'weg', 'Weiter'] : ['go', 'anfrage3', 'Weiter'];
+  const weiter = ['go', nachAngaben(), lk && !web ? 'Prüfen und senden' : 'Weiter'];
   return { html: lgKopf(['back', 'Zurück: Haus']) + dnaTisch(abZeitBuehne(pr, anfrageHead(2, lk)), frage + karte + abFuss('Zurück: Haus', weiter[0], weiter[1], weiter[2])), back: ['Haus', 'anfrage'], dna: true, cls: 'dna ab dt', voll: true };
 }
 /* Kontakt: das Aufmaßblatt als Objekt im Fensterlicht; was getippt wird, steht sofort oben auf dem Blatt (abLive), Maße als Punkte */
@@ -7637,10 +7640,14 @@ function act(name, el) {
     }
     case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return;
       /* Zu den Angaben (Aufmaßblatt, Absenden): erst fragen, ob Infos zum Gebäude mit sollen, solange keine gemacht sind */
-      if (v === 'anfrage' && ['fertig', 'liste', 'home'].indexOf(S.screen) >= 0 && S.proj && !S.proj.gebaeude && !S.proj.baujahr && !num(S.proj.total) && !S.proj.zeit && !S.proj.budget && !S.gebGefragt) { S.gebFrage = true; return render(); }
+      /* nur im eigenen Ablauf („Zum Aufmaßblatt“); im Kundenlink eines Betriebs steht auf den Angaben auch die Nachricht an ihn, die ein
+         „Nein“ sonst mit überspringen würde */
+      if (v === 'anfrage' && !S.betrieb && ['fertig', 'liste', 'home'].indexOf(S.screen) >= 0 && S.proj && !S.proj.gebaeude && !S.proj.baujahr && !num(S.proj.total) && !S.proj.zeit && !S.proj.budget && !S.gebGefragt) { S.gebFrage = true; return render(); }
       return go(v);
     case 'geb-ja': S.gebFrage = false; S.gebGefragt = true; return go('anfrage');
-    case 'geb-nein': S.gebFrage = false; S.gebGefragt = true; return go('anfrage3');
+    /* „Nein“ überspringt nur die beiden Folien mit den Angaben und geht dorthin, wohin „Weiter“ nach „Zeit und Budget“ führt: zur Wahl
+       „kostenlos oder bezahlen“ bzw. zum Kontakt (Inhaber, 2.11.2026: vorher übersprang es auch die Wahl) */
+    case 'geb-nein': S.gebFrage = false; S.gebGefragt = true; return go(nachAngaben());
     case 'geb-zu': S.gebFrage = false; return render();
     case 'extras-ansehen': { S.extrasHinweis = false; render(); const d = document.querySelector('.ex-liste'); if (d && d.scrollIntoView) d.scrollIntoView({ block: 'start', behavior: ruhig() ? 'auto' : 'smooth' }); return; }
     case 'extras-speichern': S.extrasHinweis = false; return saveWin();
