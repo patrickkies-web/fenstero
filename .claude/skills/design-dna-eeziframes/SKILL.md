@@ -332,6 +332,11 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
 - Feinschliff der weißen Fläche (Inhaber, 2.11.2026, am Telefon): Eingabefelder sind als Ganzes eine Pille (kein eckiges Feld in runder
   Kontur); das Seitenende bleibt weiß, die Pille steht über den rechtlichen Verweisen, nicht auf ihnen, ohne schwarzen Streifen; die
   schwarze Bühne reicht etwa 15 % tiefer (bis gut zur Hälfte des Bildschirms), das Element steht darin etwas weiter weg.
+- Hinweise vor dem nächsten Schritt (Inhaber, 2.11.2026): Wer bei „Möchtest du noch etwas einstellen?“ speichert, obwohl Möglichkeiten
+  offen sind, bekommt einen Bogen „Noch n Möglichkeiten offen“ mit den wichtigsten als Chips; vor den Angaben fragt ein Bogen, ob Infos
+  zum Gebäude mitgehen sollen (Ja/Nein, Zahl der Fragen, warum es zählt). Die Folien danach (Angaben, Liste der Fenster, Aufmaßblatt,
+  Weg kostenlos oder bezahlen, Betriebe, Code, Kasse, Freigeschaltet, Senden) stehen alle auf der weißen Fläche, am Laptop mit weißer
+  rechter Spalte.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

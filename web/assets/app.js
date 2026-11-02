@@ -5904,10 +5904,11 @@ function extrasBlatt() {
 }
 /* „Zum Aufmaßblatt“: vorher die Frage nach den Angaben zum Gebäude (Inhaber, 2.11.2026), mit Zahl der Fragen und warum sie zählen */
 function gebFrageBlatt() {
-  const lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'dein Fensterbauer') : 'deinem Fensterbauer';
+  /* Im Kundenlink eines Betriebs in seiner Anrede (Sie/du) und „Anfrage“ statt „Aufmaßblatt“, wie die Folien danach */
+  const lk = !!S.betrieb, bn = lk && S.betrieb.name ? S.betrieb.name : anr('Ihrem Fensterbauer', 'deinem Fensterbauer');
   return '<button type="button" class="sheet-bg" aria-label="Abbrechen" data-act="geb-zu"></button><div class="sheet verlassen geb-blatt" role="alertdialog" aria-modal="true" aria-labelledby="gb-t" aria-describedby="gb-s"><div class="grip"></div>' +
-    '<p class="eyebrow kicker" style="margin-top: 6px">Fürs Angebot</p><h2 id="gb-t" tabindex="-1">Infos zu deinem <span class="ak">Gebäude</span> mitschicken?</h2>' +
-    '<p class="vl-sub" id="gb-s">' + esc('Möchtest du in deinem Aufmaßblatt ' + bn + ' Informationen zu deinem Gebäude übermitteln? 6 kurze Fragen auf 2 Folien, etwa eine Minute.') + '</p>' +
+    '<p class="eyebrow kicker" style="margin-top: 6px">Fürs Angebot</p><h2 id="gb-t" tabindex="-1">Infos zu ' + anr('Ihrem', 'deinem') + ' <span class="ak">Gebäude</span> mitschicken?</h2>' +
+    '<p class="vl-sub" id="gb-s">' + esc(anr('Möchten Sie in Ihrer Anfrage ' + bn + ' Informationen zu Ihrem Gebäude übermitteln?', 'Möchtest du in ' + (INST ? 'deiner Anfrage ' : 'deinem Aufmaßblatt ') + bn + ' Informationen zu deinem Gebäude übermitteln?') + ' 6 kurze Fragen auf 2 Folien, etwa eine Minute.') + '</p>' +
     '<ul class="geb-liste"><li><b>Gebäude und Baujahr</b><small>entscheiden über Förderung und Vorgaben, etwa beim Denkmalschutz</small></li><li><b>Fenster im ganzen Haus</b><small>ab einem Drittel getauschter Fenster ist ein Lüftungskonzept Pflicht</small></li><li><b>Zeitraum, Budget, Förderung</b><small>damit das Angebot passt</small></li></ul>' +
     '<div class="vl-knoepfe"><button type="button" class="btn primary" data-act="geb-ja">Ja, 6 Fragen beantworten</button><button type="button" class="btn ghost" data-act="geb-nein">Nein, direkt weiter</button></div></div>';
 }

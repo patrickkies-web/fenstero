@@ -5085,7 +5085,7 @@ if (teil(32)) {
   /* c2) „Fenster speichern“ auf der Liste: einmal je Fenster ein Hinweis auf die offenen Möglichkeiten; „Ansehen“ bleibt, danach speichert es */
   await p.tap('.lg-weiter'); await p.waitForTimeout(400);
   const h1 = await p.evaluate(() => ({ blatt: !!document.querySelector('.ex-blatt'), text: (document.querySelector('.ex-blatt h2') || {}).textContent || '', chips: document.querySelectorAll('.ex-blatt .exb-chips .chip').length, erste: (document.querySelector('.ex-blatt .exb-chips .chip') || {}).textContent || '' }));
-  await p.tap('[data-act="extras-ansehen"]'); await p.waitForTimeout(300);
+  await p.tap('.ex-blatt [data-act="extras-ansehen"]'); await p.waitForTimeout(300);
   const h2 = await p.evaluate(() => ({ blatt: !!document.querySelector('.ex-blatt'), q: S.q, screen: S.screen }));
   await p.tap('.lg-weiter'); await p.waitForTimeout(600);
   const h3 = await p.evaluate(() => ({ screen: S.screen, n: S.windows.length }));

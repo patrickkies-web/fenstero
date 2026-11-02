@@ -198,14 +198,15 @@
   var lottieDaten = {}, lottieIO = null, lottieHalt = false;
   /* Ablage der Dateien neben dieser Datei (assets/lottie/), damit es auch unter einem anderen Pfad läuft */
   var LOTTIE_BASE = (function () { try { var sc = document.currentScript; return sc && sc.src ? new URL('lottie/', sc.src).href : '/assets/lottie/'; } catch (e) { return '/assets/lottie/'; } })();
-  function tokenFarbe(name) {
-    var v = getComputedStyle(document.documentElement).getPropertyValue('--' + name).trim(), m = /^#([0-9a-f]{6})$/i.exec(v);
+  /* Tokens am Ziel lesen (erben vom Dokument): so kann eine Fläche die Farben für ihr Bewegtbild umstellen, etwa Weiß unter Schwarz */
+  function tokenFarbe(name, el) {
+    var v = getComputedStyle(el || document.documentElement).getPropertyValue('--' + name).trim(), m = /^#([0-9a-f]{6})$/i.exec(v);
     if (!m) return null;
     return [parseInt(m[1].slice(0, 2), 16) / 255, parseInt(m[1].slice(2, 4), 16) / 255, parseInt(m[1].slice(4, 6), 16) / 255];
   }
-  function lottieEinfaerben(daten) {
+  function lottieEinfaerben(daten, el) {
     var tausch = [];
-    Object.keys(LOTTIE_MARKER).forEach(function (k) { var zu = tokenFarbe(k); if (zu) tausch.push([LOTTIE_MARKER[k].map(function (c) { return c / 255; }), zu]); });
+    Object.keys(LOTTIE_MARKER).forEach(function (k) { var zu = tokenFarbe(k, el); if (zu) tausch.push([LOTTIE_MARKER[k].map(function (c) { return c / 255; }), zu]); });
     function nah(a, b) { return Math.abs(a[0] - b[0]) < 0.004 && Math.abs(a[1] - b[1]) < 0.004 && Math.abs(a[2] - b[2]) < 0.004; }
     (function geh(o) {
       if (!o || typeof o !== 'object') return;
@@ -234,7 +235,7 @@
     ziel.setAttribute('data-lottie-an', '1');
     return lottieLaden(name).then(function (roh) {
       if (!document.body.contains(ziel)) return null;
-      var daten = lottieEinfaerben(JSON.parse(JSON.stringify(roh)));
+      var daten = lottieEinfaerben(JSON.parse(JSON.stringify(roh)), ziel);
       var still = ziel.querySelector('.lottie-still'); if (still) still.remove();
       ziel.classList.add('lottie');
       var an = window.lottie.loadAnimation({ container: ziel, renderer: 'svg', loop: !!o.loop, autoplay: false, animationData: daten, rendererSettings: { progressiveLoad: false, hideOnTransparent: true } });
