@@ -714,8 +714,10 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
   KI-Vorschau, Widerruf im Editor und in der Fußleiste, Datenschutzerklärung 5a, AGB § 2 Abs. 5 und § 11 Abs. 2, nur EU-Zugang. Werbung mit
   solchen Bildern nur mit Hinweis „KI-Visualisierung mit eeziframes, kein Foto eines Einbaus. Ergebnisse können abweichen.“ und nie mit
   Bildern von Kunden ohne eigene Freigabe.
-- **Offen:** Vertrag zur Auftragsverarbeitung mit Black Forest Labs und die Platzhalter in 5a und im Einwilligungsblatt, bevor `BFL_API_KEY`
-  online gesetzt wird; Zählung in der Statistik (Editor geöffnet, Vorschau, danach gekauft oder angefragt).
+- **Schalter:** Online seit 2.11.2026, aber aus: Einladung und KI-Vorschau erscheinen erst mit `BFL_API_KEY` **und** `HAUSBILD_FREI=1`
+  (`hausbildFrei` in functions/api/hausbild.js, `/api/status` meldet `hausbild`). Die Rechtstexte (Datenschutz 5a, AGB § 2 Abs. 5 und
+  § 11 Abs. 2, Cookie-Zeile) liegen fertig in docs/recht/2026-11-02-hausbild-rechtstexte.md und kommen beim Freischalten auf die Seiten.
+- **Offen:** Vertrag zur Auftragsverarbeitung mit Black Forest Labs und die Platzhalter in den Rechtstexten und im Einwilligungsblatt; Zählung in der Statistik (Editor geöffnet, Vorschau, danach gekauft oder angefragt).
 
 ## Entscheidungen
 

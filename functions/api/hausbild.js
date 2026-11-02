@@ -19,6 +19,10 @@ import { erlaubt, quelle, konfig } from './umgebung.js';
 import { speicher } from './speicher.js';
 import { budget } from './bremse.js';
 
+/* Eingeschaltet erst mit BFL_API_KEY und HAUSBILD_FREI=1 (Cloudflare): Der Schlüssel darf schon stehen, freigeschaltet wird nach dem
+   Vertrag zur Auftragsverarbeitung und den Rechtstexten (docs/recht/2026-11-02-hausbild-rechtstexte.md). Lokal mit KI_ATTRAPPE=1 immer an. */
+export const hausbildFrei = (env) => !!(env && env.BFL_API_KEY && (env.HAUSBILD_FREI === '1' || env.BFL_API_KEY === 'attrappe'));
+
 /* Nur der EU-Zugang (Datenschutzerklärung 5a, Prüfung 2.11.2026): Ist er gestört, gibt es keine KI-Vorschau; auf den weltweiten
    Zugang (Rechenzentren auch in den USA) weichen wir nicht aus. */
 const ZUGANG = 'https://api.eu.bfl.ai/v1/';
@@ -85,7 +89,7 @@ async function bfl(env, pfad, daten) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!env.BFL_API_KEY) return antwort({ ok: false, fehler: 'nicht_eingerichtet' }, 503);
+  if (!hausbildFrei(env)) return antwort({ ok: false, fehler: 'nicht_eingerichtet' }, 503);
   const url = new URL(request.url);
   if (request.headers.get('Origin') !== url.origin) return antwort({ ok: false, fehler: 'forbidden' }, 403);
   const q = quelle(request);
@@ -118,7 +122,7 @@ export async function onRequestPost({ request, env }) {
 const ABHOLEN = /^https:\/\/api\.eu[0-9]*\.bfl\.ai\/v1\/get_result\?id=[0-9a-f-]{36}$/; // nur EU-Rechenzentren
 const LIEFERUNG = /^https:\/\/[a-z0-9.-]+\.bfl\.ai\//; // das fertige Bild nur vom Dienst selbst
 export async function onRequestGet({ request, env }) {
-  if (!env.BFL_API_KEY) return antwort({ ok: false, fehler: 'nicht_eingerichtet' }, 503);
+  if (!hausbildFrei(env)) return antwort({ ok: false, fehler: 'nicht_eingerichtet' }, 503);
   const url = new URL(request.url), u = url.searchParams.get('u') || '';
   if (request.headers.get('x-hausbild') !== '1' || (request.headers.get('sec-fetch-site') && request.headers.get('sec-fetch-site') !== 'same-origin')) return antwort({ ok: false, fehler: 'forbidden' }, 403);
   if (!ABHOLEN.test(u)) return antwort({ ok: false, fehler: 'bad_request' }, 400);
