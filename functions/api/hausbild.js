@@ -146,7 +146,8 @@ async function cloudflare(env, t) {
     const t = String((e && e.message) || e);
     console.log('Hausbild Cloudflare: ' + t.slice(0, 200)); // nur die Meldung, keine Bilder, keine IP-Adresse
     if (/nsfw|safety|moderat|flagged|policy/i.test(t)) return { ok: false, fehler: 'abgelehnt', status: 502 };
-    if (/capacity|rate.?limit|too many|429/i.test(t)) return { ok: false, fehler: 'rate_limited', status: 429 };
+    /* Tagesfreikontingent von Workers AI aufgebraucht (Plan Workers Free: danach Fehler bis 0 Uhr UTC) oder Last bei Cloudflare */
+    if (/capacity|rate.?limit|too many|429|allocation|neurons|4006|upgrade/i.test(t)) return { ok: false, fehler: 'rate_limited', status: 429 };
     return { ok: false, fehler: 'dienst', status: 502 };
   }
   let bild = aus && aus.image;
