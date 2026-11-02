@@ -137,6 +137,12 @@
 .dna .hb-wahl-text small { font: 400 13px/1.2 var(--font-sans); color: var(--textgrau) }
 .dna .hb-plus-rund { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--schwarz); color: var(--weiss) }
 .dna .hb-plus-rund svg { width: 18px; height: 18px }
+.dna .hb-einw p { margin: 0 0 12px; font: 400 15px/1.5 var(--font-sans); color: var(--textgrau) }
+.dna .hb-einw p b { color: var(--schwarz); font-weight: 500 }
+.dna .hb-einw-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px }
+.dna .hb-einw-knoepfe .dna-pille { min-height: 52px; background: var(--schwarz); color: var(--weiss) }
+.dna .hb-einw-knoepfe .dna-pille--leise { background: transparent; color: var(--schwarz); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna.hb .hb-textknopf { display: inline; min-height: 44px; padding: 0; border: 0; background: none; color: var(--schwarz); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
 @keyframes hb-grund { from { opacity: 0 } }
 @keyframes hb-blatt { from { transform: translateY(100%) } }
 

@@ -65,7 +65,7 @@ export const SEITEN = [
   { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-29' },
   { pfad: '/redaktion/', prio: '0.4', stand: '2026-10-30' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-28' },
-  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-30' },
+  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-11-02' },
   { pfad: '/agb/', prio: '0.2', stand: '2026-10-30' },
   { pfad: '/partnerbedingungen/', prio: '0.3', stand: '2026-10-30' },
   { pfad: '/cookies/', prio: '0.1', stand: '2026-10-28' },
