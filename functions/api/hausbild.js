@@ -62,6 +62,7 @@ export function auftrag(elemente) {
     'Below the window a window sill with a small overhang and a drip edge. Cast the soft shadows of the lintel and the reveals onto the frame and the glass, following the direction of the sunlight in the photo. ' +
     'The glass reflects the real sky and the surroundings of this photo; the frame has the same light, colour temperature, sharpness and camera noise as the rest of the image. ' +
     'Keep the design of each window exactly as in its reference image: frame colour, number and division of sashes, glazing bars, handles and blind box. ' +
+    'Only the marked boxes get new windows: every other opening, window or door in the photo stays exactly as it is, even if it is empty. ' +
     'Do not change anything outside the boxes: facade <facade_1>, roof, plants and sky stay exactly as they are.';
   const zeilen = elemente.map((e, i) => ({ id: 'window_' + (i + 1), from: 'ref_image_' + (e.vorlage + 1), src_bbox: [0, 0, 1000, 1000], tgt_bbox: e.box, desc: 'new ' + beschreibung(e) + ', built into the opening' }));
   zeilen.push({ id: 'facade_1', from: 'ref_image_0', src_bbox: [0, 0, 1000, 1000], tgt_bbox: [0, 0, 1000, 1000], desc: 'the existing house facade, unchanged outside the windows' });
