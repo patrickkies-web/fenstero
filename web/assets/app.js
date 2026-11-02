@@ -575,7 +575,7 @@ const GLOSS = {
   insektgewebe: { s: 'Gewebe Insektenschutz', t: 'Welche Gewebe gibt es für den Insektenschutz?', x: ['Das Standardgewebe ist grau und kaum zu sehen. Klarsichtgewebe ist noch feiner und fast durchsichtig.', 'Pollenschutz hält auch Blütenstaub ab, lässt aber etwas weniger Luft durch. Reißfestes Gewebe hält Krallen von Haustieren aus.'], tipp: 'Mit Allergie im Haus lohnt sich Pollenschutz im Schlafzimmer; mit Katze reißfestes Gewebe an der Tür, durch die sie geht.', ico: () => ICO.insekt('spann'), see: ['insekt'] },
   endkappen: { s: 'Endkappen und Überstand', t: 'Was sind Endkappen und Überstand?', x: ['Endkappen schließen die Fensterbank außen seitlich ab. An gedämmten Fassaden braucht es Gleitabschlüsse, damit die Bank sich bei Wärme dehnen kann, ohne den Putz zu reißen.', 'Der Überstand ist, wie weit die Bank vor der Fassade steht. 30 bis 40 mm leiten das Regenwasser von der Wand weg.'], tipp: 'Bei Wärmedämmverbundsystem nach Gleitabschlüssen fragen: Starre Kappen reißen dort oft schon im ersten Sommer den Putz.', ico: () => ICO.bank('aussen'), see: ['fensterbank'] },
   abdeckleiste: { s: 'Abdeckleisten', t: 'Was sind Abdeckleisten?', x: ['Schmale Leisten, die die Fuge zwischen Fensterrahmen und Wand abdecken. Das geht schneller als Verputzen und ist sauber, man sieht aber eine Kante.', 'Innen gibt es sie meist in der Farbe des Rahmens.'], tipp: 'Leisten sparen den Maler nach dem Einbau; wer eine glatte Laibung will, lässt lieber beiputzen.', ico: () => ICO.anschlag('ohne'), see: ['ralmontage', 'laibung'] },
-  tiefe: { s: 'Planungstiefe und Standard', t: 'Wie genau planen, und was heißt „Standard“?', x: ['Du entscheidest, wie tief du planst: das Wichtigste, die üblichen Wünsche oder alles im Detail. Je tiefer, desto mehr Fragen, etwa zu Bändern, Dichtungen oder Endkappen.', 'Was du nicht beantwortest, nimmt dein Fensterbauer so, wie er es üblicherweise verbaut. Es landet nicht als offene Frage bei ihm, und du kannst die Tiefe jederzeit ändern.'], tipp: 'Für ein erstes Angebot reichen die üblichen Wünsche. Details wie Griffmodell oder Dichtungsfarbe klärst du gut auch später beim Feinaufmaß.', ico: frageIco, see: ['offen', 'aufmassblatt'] }
+  tiefe: { s: 'Planungstiefe und Standard', t: 'Was ist freiwillig, und was heißt „Standard“?', x: ['Erst fragt die App das Wesentliche: Form, Flügel, Maße, Material, Farben, Glas, Sprossen, Sonnenschutz und Fensterbänke. Alles Weitere steht am Ende in einer Liste, etwa Bänder, Dichtungen oder Endkappen. Dort wählst du nur, was dir wichtig ist.', 'Was du nicht wählst, nimmt dein Fensterbauer so, wie er es üblicherweise verbaut. Es landet nicht als offene Frage bei ihm, und du kannst die Liste jederzeit wieder öffnen.'], tipp: 'Für ein erstes Angebot reicht der Hauptweg. Details wie Griffmodell oder Dichtungsfarbe klärst du gut auch später beim Feinaufmaß.', ico: frageIco, see: ['offen', 'aufmassblatt'] }
 };
 /* Verzeichnis „Begriffe“: nach Themen gruppiert, darin alphabetisch; jeder Eintrag steht genau einmal */
 const GLOSS_GRUPPEN = [
@@ -2799,7 +2799,7 @@ function go(screen, dir) {
   if (screen === 'planmasse') planVorgabe(S.win);
   /* Gemessen (Ergebnis) oder vom Fotos-Schritt zurück: beim Ergebnis geht es hinter dem Weg zu den Maßen weiter, sonst auf ihm */
   if (screen === 'frage' && S.screen === 'ergebnis' && (!S.q || S.q === 'massweg')) { const L = qSichtbar(S.win), i = L.findIndex((q) => q.id === 'massweg'); if (i >= 0 && L[i + 1]) S.q = L[i + 1].id; }
-  if (screen === 'frage' && (S.screen === 'fotos' || S.screen === 'zeichnen')) S.q = 'massweg';
+  if (screen === 'frage' && dir === 'back' && (S.screen === 'fotos' || S.screen === 'zeichnen')) S.q = 'massweg';
   if (screen !== 'frage' || !S.q) S.ausListe = false;
   /* Die Tiefe wird nicht mehr gefragt: Hauptweg plus freiwillige Liste heißt fürs Blatt „das Wichtigste, den Rest nach Standard“, solange
      das Projekt keine eigene Tiefe hat (ältere Aufmaße, Vorgabe des Betriebs) */
@@ -4783,7 +4783,7 @@ function detailFrage(w, dd) {
 }
 /* Erklärung je Frage (i-Knopf am Titel). Q_G_STATT ersetzt eine unpassende Zuordnung, Q_G füllt, wo eine Frage noch keine hat */
 const Q_G_STATT = { typ: 'oeffnungsart', richtung: 'aussen', teilung: 'blendrahmen', glas: 'uwert', glasfn: 'glasextras', sart: 'sonnenschutz', griff: 'griff', fswg: 'faltpaket', felder: 'festverglasung' };
-const Q_G = { lage: 'lage', absturz: 'absturz', design: 'design', din: 'dinlr', material: 'material', ol: 'oberlicht', ul: 'unterlicht', form: 'form', hsts: 'hst', hstr: 'schiebeseite', pskS: 'psk', pskR: 'schiebeseite', schwelle: 'schwelle', boden: 'fussboden', fswn: 'fsw', fsws: 'faltpaket', sprossen: 'sprossen', spross: 'sprossen', aufseite: 'auf', breite: 'sprossenbreite', fa: 'ral', fi: 'ral', orn: 'ornament', griffA: 'ziehgriff', gf: 'grifffarbe', rc: 'rc2', einbau: 'rollladen', sfarbe: 'ral', antrieb: 'antrieb', insekt: 'insekt', iart: 'innenschutz', ifarbe: 'innenschutz', fbi: 'fensterbank', fba: 'fensterbank', montage: 'montage', notiz: 'notizen', tiefe: 'tiefe' };
+const Q_G = { massweg: 'rahmenmass', extras: 'tiefe', lage: 'lage', absturz: 'absturz', design: 'design', din: 'dinlr', material: 'material', ol: 'oberlicht', ul: 'unterlicht', form: 'form', hsts: 'hst', hstr: 'schiebeseite', pskS: 'psk', pskR: 'schiebeseite', schwelle: 'schwelle', boden: 'fussboden', fswn: 'fsw', fsws: 'faltpaket', sprossen: 'sprossen', spross: 'sprossen', aufseite: 'auf', breite: 'sprossenbreite', fa: 'ral', fi: 'ral', orn: 'ornament', griffA: 'ziehgriff', gf: 'grifffarbe', rc: 'rc2', einbau: 'rollladen', sfarbe: 'ral', antrieb: 'antrieb', insekt: 'insekt', iart: 'innenschutz', ifarbe: 'innenschutz', fbi: 'fensterbank', fba: 'fensterbank', montage: 'montage', notiz: 'notizen', tiefe: 'tiefe' };
 /* Erklärung je Option (i in Karten und Chips): OPT_G vor dem g in OPT, damit Fachbegriffe ihren eigenen Eintrag bekommen */
 const OPT_G = { art: { fenster: 'oeffnungsart', fest: 'festverglasung', fsw: 'fsw' }, situation: { ersatz: 'ersatz', neu: 'neuoeffnung' }, typ: { F: 'fest', D: 'dreh', K: 'kipp', DK: 'dk' }, teilung: { '3': 'fest', '4': 'fest' }, material: { kunststoff: 'kunststoff', kunststoffalu: 'kunststoffalu', holz: 'holz', holzalu: 'holzalu', alu: 'alu' }, glasfn: { sonne: 'sonnenschutzglas', extraklar: 'glasarten', vogel: 'glasarten', selbstr: 'glasarten' }, sart: { rollladen: 'rollladen', raffstore: 'raffstore', screen: 'screen', klappladen: 'klappladen' }, einbau: { aufsatz: 'aufsatz', vorbau: 'vorbau', unterputz: 'unterputz' }, antrieb: { solar: 'antrieb' }, insekt: { rollo: 'insekt', pendel: 'insekt', schiebe: 'insekt' }, pskSchema: { C: 'psk' }, fbi: { werzalit: 'werzalit' }, rc: { basis: 'basisschutz', rc1: 'rc1n', rc2n: 'rcstufen', rc2: 'rc2', rc3: 'rcstufen' } };
 const optG = (group, o) => ((OPT_G[group] || {})[o.k] || o.g || '');
@@ -4990,8 +4990,9 @@ function qStep(delta) {
     }
     c = qCurrent();
   }
-  /* Aus der Liste geöffnet: Weiter („Fertig“) und Zurück führen zur Liste, nicht in den Hauptweg */
-  if (S.ausListe && c.q.id !== 'extras' && !qHaupt(c.q)) { S.q = 'extras'; S.dir = 'back'; S.selBar = null; S.openSash = -1; return render(true); }
+  /* Freiwillige Fragen öffnet nur die Liste: Weiter („Fertig“) und Zurück führen zu ihr zurück, nicht in den Hauptweg (auch nach dem
+     Neuladen eines Entwurfs) */
+  if (c.q.id !== 'extras' && !qHaupt(c.q)) { S.q = 'extras'; S.dir = 'back'; S.selBar = null; S.openSash = -1; return render(true); }
   if (c.q.id === 'extras' && delta < 0) S.ausListe = false;
   const nx = c.list[c.i + delta];
   if (!nx) { if (delta > 0) return saveWin(); if (einstiegHier()) return zumEinstieg(); return go('ergebnis', 'back'); }
@@ -5833,7 +5834,7 @@ function frageDna(c, q, panel, stage, designFertig, tasten) {
   const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
   const fuss = rechtLinks() + '<div class="lg-fuss qnav"><button type="button" class="lg-zurueck" data-act="qprev" aria-label="Zurück">' + LG_PFEIL_L + '</button>' +
     (designFertig ? '<button type="button" class="dna-pille dna-pille--leise wz-anpassen" data-act="qnext">Anpassen</button><button type="button" class="dna-pille lg-weiter btn primary" data-act="save">Speichern' + pfeil + '</button>'
-      : '<button type="button" class="dna-pille lg-weiter btn primary" data-act="qnext">' + (S.ausListe && !qHaupt(q) ? 'Fertig' : last ? sichern : 'Weiter') + pfeil + '</button>') + '</div>';
+      : '<button type="button" class="dna-pille lg-weiter btn primary" data-act="qnext">' + (!qHaupt(q) ? 'Fertig' : last ? sichern : 'Weiter') + pfeil + '</button>') + '</div>';
   if (tasten) return { html: lgKopf() + wzBand(c) + buehne + tasten, back: ['Zurück', 'qprev'], dna: true, cls: 'dna wz wz-tasten', qpos: (c.i + 1) / n };
   return { html: lgKopf() + dnaTisch(wzBand(c) + buehne, '<div class="qdock wz-dock">' + kopf + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div></div>' + fuss) + wzKapitel(c),
     back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna wz dt', voll: true, qpos: (c.i + 1) / n };

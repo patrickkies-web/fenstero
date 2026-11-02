@@ -102,6 +102,12 @@ const foto = async (page, name) => { if (BILDER) await page.screenshot({ path: B
 /* Aufmaß-Code im Kundenlink (Pilot): steht nicht mehr sichtbar auf der Seite, nur in der vorbereiteten Nachricht (WhatsApp, E-Mail) */
 const codeAusNachricht = async (page) => { const h = await page.getAttribute('a[href^="https://wa.me/"]', 'href'); const m = /(AM1\.[A-Za-z0-9_-]+)/.exec(decodeURIComponent(h || '')); return m ? m[1] : ''; };
 const telefon = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'de-DE' };
+/* Neuer Ablauf (Inhaber, 2.11.2026): Start → Form am Modell → Weg zu den Maßen; „Geführt messen“ führt zu den Fotos */
+async function zuDenFotos(pg) {
+  await pg.click('.scr[data-screen="start"] .lg-weiter'); await pg.waitForSelector('.scr[data-screen="frage"]');
+  await pg.evaluate(() => { S.q = 'massweg'; render(true); }); await pg.waitForSelector('.mw-zeile[data-v="messen"]');
+  await pg.click('.mw-zeile[data-v="messen"]'); await pg.waitForSelector('.scr[data-screen="fotos"]');
+}
 const b64u = (s) => Buffer.from(s, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 /* Betriebe für die Prüfung: die früheren Beispielkonten Fensterbau Brandt (c1) und Glaserei Vogt (c7). Die Website hat keine
    Demo-Konten mehr; hier entstehen sie im Browser als eigene Betriebe (myCompanies) und werden angemeldet. */
@@ -365,7 +371,7 @@ if (teil(3)) {
   await page.click('[data-act="new"]');
   await page.waitForSelector('.scr[data-screen="start"]');
   ok(await page.locator('.st-stelle [role="radio"][data-act="situation"]').count() === 2 && await page.locator('.st-bento [role="radio"][data-act="art"]').count() === 6 && /Schritt\s1\svon\s6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen oder neu) und das Element (Fenster, Balkon- oder Terrassentür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand) zur Wahl');
-  await page.click('.lg-weiter');
+  await zuDenFotos(page);
   await page.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
   const kiPosts = [], kiUrls = [];
   page.on('response', (r) => { if (r.url().includes('/api/ki?') && r.request().method() === 'POST') { kiPosts.push(r.status()); kiUrls.push(r.url()); } });
@@ -482,7 +488,7 @@ if (teil(3)) {
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   const posts2 = [];
   p2.on('request', (r) => { if (r.url().includes('/api/ki?')) posts2.push(r.url()); });
-  await p2.click('[data-act="new"]'); await p2.waitForSelector('.scr[data-screen="start"]'); await p2.click('.lg-weiter');
+  await p2.click('[data-act="new"]'); await p2.waitForSelector('.scr[data-screen="start"]'); await zuDenFotos(p2);
   await p2.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpeg });
   await p2.waitForSelector('.fx-dialog');
   await p2.click('.fx-nein');
@@ -797,7 +803,7 @@ if (teil(6)) {
   await frage('form');
   /* Formen als runde Knöpfe in einer Reihe zum Wischen (Vorlage des Inhabers, 2.11.2026), das Modell schwebt frei auf der schwarzen Bühne */
   const kacheln = await p4.evaluate(() => { const k = Array.from(document.querySelectorAll('.qformen .qf')), r = k.map((e) => e.getBoundingClientRect()), kr = k.map((e) => e.querySelector('svg').getBoundingClientRect()), reihe = document.querySelector('.qformen'); return { n: k.length, eineReihe: r.every((x) => Math.abs(x.top - r[0].top) < 1), rund: kr.every((x) => Math.abs(x.width - 64) < 1 && Math.abs(x.height - 64) < 1) && getComputedStyle(k[0].querySelector('svg')).borderRadius === '50%', wisch: getComputedStyle(reihe).overflowX === 'auto', namen: k.map((e) => getComputedStyle(e, '::after').content).join('|'), name: (document.querySelector('.qformen + .qcur') || {}).textContent, frei: !!document.querySelector('.wz-buehne.wz-frei'), wand: !!document.querySelector('#w3d [data-r="wall-in"]'), weiss: getComputedStyle(document.querySelector('.wz-dock')).backgroundColor }; });
-  ok(kacheln.n === 5 && kacheln.eineReihe && kacheln.rund && kacheln.wisch && /Rechteck/.test(kacheln.namen) && /Rechteck/.test(kacheln.name) && kacheln.frei && !kacheln.wand && kacheln.weiss === 'rgb(255, 255, 255)', 'Formen: fünf runde Knöpfe (64 px) mit Zeichnung und Namen in einer Reihe zum Wischen, Name der gewählten darunter; Modell frei auf schwarzer Bühne, Fragen auf Weiß ' + JSON.stringify(kacheln));
+  ok(kacheln.n === 7 && kacheln.eineReihe && kacheln.rund && kacheln.wisch && /Rechteck/.test(kacheln.namen) && /Rechteck/.test(kacheln.name) && kacheln.frei && !kacheln.wand && kacheln.weiss === 'rgb(255, 255, 255)', 'Formen: sieben runde Knöpfe (64 px, seit dem Hauptweg alle Formen) mit Zeichnung und Namen in einer Reihe zum Wischen, Name der gewählten darunter; Modell frei auf schwarzer Bühne, Fragen auf Weiß ' + JSON.stringify(kacheln));
   const loch = () => p4.evaluate(() => { const st = document.getElementById('w3d'); return { struct: st.getAttribute('data-struct'), glas: st.querySelector('[data-r="glass-0"]').style.clipPath || '' }; });
   const l0 = await loch();
   await p4.click('.qformen [data-v="rundbogen"]'); await p4.waitForTimeout(800);
@@ -830,7 +836,7 @@ if (teil(6)) {
   await p4.click('.qpanel [data-act="glasfn"][data-v="sonne"]'); await p4.waitForTimeout(300);
   await p4.click('.qpanel [data-act="glasfn"][data-v="vsg"]'); await p4.waitForTimeout(300);
   const fn = await p4.evaluate(() => ({ sonne: document.getElementById('w3d').classList.contains('glas-sonne'), folie: /#2fa57f/i.test(document.querySelector('.w3d-lupe').innerHTML), ico: document.querySelectorAll('.qpanel .chip .ci svg, .qpanel .qlist .ci svg').length })); // mit i als Zeilen, wenn die Chips zu schmal sind
-  ok(fn.sonne && fn.folie && fn.ico === 4, 'Glas-Extras: Symbole in der Auswahl, Sonnenschutz tönt das Glas, Sicherheitsglas zeigt die Folie in der Lupe');
+  ok(fn.sonne && fn.folie && fn.ico === 7, 'Glas-Extras: Symbole in der Auswahl, Sonnenschutz tönt das Glas, Sicherheitsglas zeigt die Folie in der Lupe');
   await frage('rc', { rc: 'basis' });
   const pilz = () => p4.evaluate(() => document.querySelectorAll('.w3d-pilz.is-on').length);
   const r0 = await pilz(), ohneRc1 = await p4.locator('.qpanel [data-act="setw"][data-v="rc1"]').count() === 0;
@@ -924,7 +930,7 @@ if (teil(6)) {
   await p5.click('[data-act="situation"][data-v="neu"]'); await p5.waitForTimeout(300);
   await p5.click('[data-act="art"][data-v="fenster"]'); await p5.waitForTimeout(200);
   const startNeu = await p5.evaluate(() => ({ neu: S.win.neu, note: !!document.querySelector('.scr[data-screen="start"] .st-stelle-text .st-punkt') && !!document.querySelector('.st-rahmen'), bar: document.querySelector('.lg-weiter').textContent }));
-  await p5.click('.lg-weiter'); await p5.waitForTimeout(300);
+  await zuDenFotos(p5); await p5.waitForTimeout(300);
   const fotosNeu = await p5.evaluate(() => ({ h1: document.querySelector('.lg-frage h1').textContent, bar: Array.from(document.querySelectorAll('.lg-fuss .lg-weiter')).map((b) => b.getAttribute('data-act') + ':' + b.textContent).join('|'), steps: stepsFor(S.win).join(',') }));
   await p5.evaluate(() => useDemo()); await p5.waitForTimeout(1800);
   fotosNeu.weiter = await p5.evaluate(() => document.querySelector('.lg-weiter').getAttribute('data-act') + ':' + document.querySelector('.lg-weiter').textContent);
@@ -937,7 +943,7 @@ if (teil(6)) {
   const z1 = await p5.evaluate(() => ({ e: JSON.stringify(S.win.plan.ecken[2]), lupe: document.querySelector('[data-r="zlupe"]').hidden }));
   await p5.click('[data-act="plan-rect"]'); await p5.waitForTimeout(200);
   const z2 = await p5.evaluate(() => { const P = S.win.plan.ecken; return Math.abs(P[0][1] - P[1][1]) < 1e-9 && Math.abs(P[1][0] - P[2][0]) < 1e-9; });
-  ok(startNeu.neu && startNeu.note && /Fotos/.test(startNeu.bar) && /Stelle/.test(fotosNeu.h1) && fotosNeu.bar === 'ohne-foto:Weiter zum Einzeichnen' && /^go:Weiter zum Einzeichnen/.test(fotosNeu.weiter) && fotosNeu.steps === 'start,fotos,zeichnen,planmasse,ergebnis,frage' && z0.screen === 'zeichnen' && z0.ecken === 4 && z0.raster === 4 && z0.dim && z0.e !== z1.e && lupe && z1.lupe && z2, 'Neue Öffnung: eigener Weg mit Einzeichnen, vier Ecken mit Raster, Lupe beim Ziehen, „Rechteck ausrichten“');
+  ok(startNeu.neu && startNeu.note && /Weiter/.test(startNeu.bar) && /Stelle/.test(fotosNeu.h1) && fotosNeu.bar === 'ohne-foto:Weiter zum Einzeichnen' && /^go:Weiter zum Einzeichnen/.test(fotosNeu.weiter) && fotosNeu.steps === 'start,frage,fotos,zeichnen,planmasse,ergebnis' && z0.screen === 'zeichnen' && z0.ecken === 4 && z0.raster === 4 && z0.dim && z0.e !== z1.e && lupe && z1.lupe && z2, 'Neue Öffnung: eigener Weg mit Einzeichnen, vier Ecken mit Raster, Lupe beim Ziehen, „Rechteck ausrichten“');
   await p5.click('.qnav .btn.primary, .scr.dna.zn .lg-weiter'); await p5.waitForTimeout(900);
   const pm = await p5.evaluate(() => ({ screen: S.screen, d: derive(S.win), bild: (S.win.plan.bild || '').length, rows: document.querySelectorAll('input[data-in="plan"]').length }));
   await p5.click('[data-act="plan-bump"][data-f="h"][data-v="50"]'); await p5.waitForTimeout(300);
@@ -3438,7 +3444,7 @@ if (teil(16)) {
     S.windows = a.map((x, i) => Object.assign(x, { wid: 'wd' + i, t0: zeit(), aend: 0, ts: zeit() })); S.editIdx = -1; S.angelegt = 2;
     const w = Object.assign(baseWin(), { name: 'Kinderzimmer', etage: 'eg', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = w; S.designVorher = null; S.q = null; S.screen = 'frage'; render(true);
   }, MO(1230, 1410));
-  const d0 = await a16.evaluate(() => ({ ids: qList(S.win).map((q) => q.id).slice(0, 3), karten: designListe().map((d) => d.label) }));
+  const d0 = await a16.evaluate(() => ({ ids: qList(S.win).map((q) => q.id), karten: designListe().map((d) => d.label) }));
   await a16.evaluate(() => { S.q = 'design'; render(true); }); await a16.waitForTimeout(250);
   await a16.click('.qpanel [data-act="design"][data-v="0"]'); await a16.waitForTimeout(400);
   const d1 = await a16.evaluate(() => ({ fa: S.win.fa, offen: S.win.offen, bars: S.win.bars.length, preset: S.win.preset, sart: S.win.sart, sfarbe: S.win.sfarbe, nav: Array.from(document.querySelectorAll('.qnav button')).map((b) => b.textContent.trim()).filter(Boolean), gedrueckt: document.querySelector('.qpanel [data-act="design"][data-v="0"]').getAttribute('aria-pressed'), name: S.win.name, mo: S.win.mo.wm }));
@@ -3451,7 +3457,7 @@ if (teil(16)) {
   const d4 = await a16.evaluate(() => designListe().map((d) => d.label).join('|'));
   await a16.evaluate(() => { const w = Object.assign(baseWin(), { name: 'Terrasse', w: 2600, h: 2200, mo: { hm: 2260, hl: 2260, hr: 2260, wm: 2660, wt: 2660, wb: 2660 }, el: { w: 2600, h: 2200 } }); artSetzen(w, 'hst'); S.win = w; S.editIdx = -1; S.windows[1].griff = 'druckknopf'; designAnwenden(S.win, S.windows[1]); });
   const d5 = await a16.evaluate(() => ({ griff: S.win.griff, bars: S.win.bars.length }));
-  ok(d0.ids[0] === 'lage' && d0.ids[1] === 'design' && d0.karten.length === 2 && /Wie Wohnzimmer/.test(d0.karten.join()) && d1.fa === '7016' && !d1.offen.fa && d1.offen.fba && d1.bars === 4 && d1.preset === 'eigene' && d1.sart === 'raffstore' && d1.sfarbe === 'anthrazit' && d1.gedrueckt === 'true' && d1.nav.join() === 'Anpassen,Speichern' && d1.name === 'Kinderzimmer' && d1.mo === 1290 &&
+  ok(d0.ids[d0.ids.indexOf('lage') + 1] === 'design' && d0.ids.indexOf('massweg') < d0.ids.indexOf('lage') && d0.karten.length === 2 && /Wie Wohnzimmer/.test(d0.karten.join()) && d1.fa === '7016' && !d1.offen.fa && d1.offen.fba && d1.bars === 4 && d1.preset === 'eigene' && d1.sart === 'raffstore' && d1.sfarbe === 'anthrazit' && d1.gedrueckt === 'true' && d1.nav.join() === 'Anpassen,Speichern' && d1.name === 'Kinderzimmer' && d1.mo === 1290 &&
     d2.offen.fa && d2.bars === 0 && d2.sart === 'keiner' && d3.n === 3 && d3.screen === 'fertig' && d3.name === 'Kinderzimmer' && d3.fa === '7016' && d3.sart === 'raffstore' && d3.bars === 4 && !/Wohnzimmer/.test(d4) && d5.griff === 'standard' && d5.bars === 0,
   'Gestaltung übernehmen: nach der Lage die gespeicherten Gestaltungen (gleiche zusammengefasst); Antippen übernimmt Farben, Sprossen, Raffstore und offene Punkte, Maße und Name bleiben; „Doch neu gestalten“ nimmt es zurück; „Speichern“ legt das Fenster gleich an; beim Ändern fehlt die eigene, bei Türen passt sich der Griff an');
 
@@ -3522,23 +3528,23 @@ if (teil(16)) {
   ok(lage16.bru === 860 && /= 860 mm/.test(lage16.mm) && !lage16.warn && lage16b.bru === 750 && lage16b.warn && lage16b.frage && lage16c.bru === 0 && lage16c.tief === 'true' && lage16c.feld === '' && /Bodentief/.test(lage16c.mm) && /Bodentief im OG: Unter 80 cm \(über 12 m Höhe 90 cm\)/.test(sub0) && !/laut Foto/i.test(sub0), 'Lage im OG: Brüstung in cm, gespeichert in mm („= 860 mm“), der Satz zur Absturzsicherung erst unter 80 cm, „bodentief“ heißt 0 mm und leert das Feld; Regel 80 cm, ab 12 m 90 cm');
   // Lage im Look der Design-DNA: ein Kopf mit Logo, kein Querscrollen, OG-Nummer im Blatt, Brüstung im OG Pflicht, doppelte Namen
   await d16.evaluate((MO) => { const k = Object.assign(baseWin(), { name: 'Küche', etage: 'eg', mo: MO, el: { w: 1230, h: 1410 } }); S.windows = [k]; const w = Object.assign(baseWin(), { name: '', etage: 'eg', bru: '', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 } }); S.win = w; S.editIdx = -1; S.q = 'lage'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
-  const dna0 = await d16.evaluate(() => ({ koepfe: document.querySelectorAll('header.hdr, .lg-kopf').length, logo: !!document.querySelector('.lg-kopf .lg-marke .fi-logo'), quer: document.querySelector('.scroll').scrollWidth > document.querySelector('.scroll').clientWidth + 1 || document.documentElement.scrollWidth > innerWidth + 1, schrift: getComputedStyle(document.querySelector('.lg-frage h1')).fontFamily, weiter: !document.querySelector('.lg-weiter').disabled }));
-  /* Haus als Körper statt Strichzeichnung (Inhaber, 30.10.2026: „komische Linien vom Haus“, „Leuchten wie Neonlicht“): keine gestrichelten
-     Linien, kein Weichzeichner auf der Bühne, das gewählte Stockwerk innen erleuchtet, die anderen dunkel */
-  const haus16 = await d16.evaluate(() => { const b = document.querySelector('.scr.dna .lg-buehne'), alle = [b].concat(Array.from(b.querySelectorAll('*'))); return { gestrichelt: Array.from(b.querySelectorAll('svg *')).filter((e) => { const d = getComputedStyle(e).strokeDasharray; return d && d !== 'none'; }).length + (getComputedStyle(b.querySelector('.lg-strich')).borderTopStyle === 'dashed' ? 1 : 0), blur: alle.concat(alle.map((e) => [e, '::before']), alle.map((e) => [e, '::after'])).filter((x) => { const f = Array.isArray(x) ? getComputedStyle(x[0], x[1]).filter : getComputedStyle(x).filter; return /blur/.test(f || ''); }).length, koerper: b.querySelectorAll('.lg-haus .fassade, .lg-haus .dach, .lg-haus .keller').length, an: Array.from(b.querySelectorAll('.lg-haus .schnitt')).filter((g) => getComputedStyle(g).opacity === '1').map((g) => g.getAttribute('data-s')).join(), hell: b.querySelectorAll('.lg-haus .schnitt.frei .glas-an').length, soll: lgStock(S.win) }; });
-  ok(haus16.gestrichelt === 0 && haus16.blur === 0 && haus16.koerper >= 4 && haus16.an === haus16.soll && haus16.hell >= 1, 'Lage: das Haus als Körper (Fassade, Dach mit Gaube, Keller), ohne gestrichelte Linien und ohne Weichzeichner; nur das gewählte Stockwerk ist innen erleuchtet ' + JSON.stringify(haus16));
+  const dna0 = await d16.evaluate(() => ({ koepfe: document.querySelectorAll('header.hdr, .lg-kopf').length, logo: !!document.querySelector('.lg-kopf .lg-marke .fi-logo'), quer: document.querySelector('.scroll').scrollWidth > document.querySelector('.scroll').clientWidth + 1 || document.documentElement.scrollWidth > innerWidth + 1, schrift: getComputedStyle(document.querySelector('.scr.dna h1')).fontFamily, weiter: !document.querySelector('.lg-weiter').disabled }));
+  /* „Wie viele und wo?“ (Inhaber, 2.11.2026: modern minimalistisch, ohne Lila und Unschärfe): schwarze Bühne mit dem Element, Stockwerke als
+     Skala, Stückzahl als Zahl; kein Weichzeichner, kein Violett auf der Bühne */
+  const haus16 = await d16.evaluate(() => { const b = document.querySelector('.scr.dna .lw-buehne'), alle = [b].concat(Array.from(b.querySelectorAll('*:not(.w3d-stage *)'))); return { blur: alle.filter((e) => /blur/.test(getComputedStyle(e).filter + getComputedStyle(e).backdropFilter + getComputedStyle(e, '::before').filter + getComputedStyle(e, '::after').filter)).length, violett: /137, 126, 252|60, 58, 102/.test(getComputedStyle(b).backgroundImage), skala: document.querySelectorAll('.lw-skala span').length, ist: (document.querySelector('.lw-skala .ist') || {}).textContent, zahl: document.querySelector('.lw-n').textContent, knoepfe: document.querySelectorAll('.lw-stockknopf').length }; });
+  ok(haus16.blur === 0 && !haus16.violett && haus16.skala === 4 && /EG/.test(haus16.ist) && haus16.zahl === '1' && haus16.knoepfe === 4, 'Wie viele und wo: schwarze Bühne mit dem Element, Stockwerke als Skala (das gewählte hervorgehoben), die Stückzahl als Zahl; ohne Weichzeichner und ohne Violett, Stockwerk als vier runde Knöpfe ' + JSON.stringify(haus16));
   await d16.click('.lg-vorschlaege [data-v="Küche"]'); await d16.waitForTimeout(150);
   const dna1 = await d16.evaluate(() => ({ name: S.win.name, doppelt: !document.querySelector('.lg-doppelt').hidden, wahl: Array.from(document.querySelectorAll('.lg-doppelt-wahl button')).map((b) => b.textContent).join('|'), etikett: document.querySelector('.lg-et-name').textContent }));
-  await d16.click('.lg-doppelt-wahl button'); await d16.click('.lg-stockwahl [data-v="og"]'); await d16.click('[data-act="lg-og"][data-v="2"]'); await d16.waitForTimeout(150);
+  await d16.click('.lg-doppelt-wahl button'); await d16.click('.lw-stock [data-v="og"]'); await d16.click('[data-act="lg-og"][data-v="2"]'); await d16.waitForTimeout(150);
   await d16.click('.lg-weiter'); await d16.waitForTimeout(450);
-  const dna2 = await d16.evaluate(() => ({ q: S.q, name: S.win.name, og: S.win.ogNr, grund: document.getElementById('lg-grund').textContent, zeile: !document.getElementById('lg-grund').hidden, markiert: !!document.querySelector('.lg-bru-feld.lg-markiert'), fokus: document.activeElement && document.activeElement.id, haus: document.querySelector('.lg-haus text[data-t="og"]').textContent, text: document.querySelector('.lg-stocktext').textContent, blatt: (specRows(S.win).find((r) => r.k === 'Lage') || {}).v }));
+  const dna2 = await d16.evaluate(() => ({ q: S.q, name: S.win.name, og: S.win.ogNr, grund: document.getElementById('lg-grund').textContent, zeile: !document.getElementById('lg-grund').hidden, markiert: !!document.querySelector('.lg-bru-feld.lg-markiert'), fokus: document.activeElement && document.activeElement.id, haus: document.querySelector('.lw-skala .ist').getAttribute('data-s'), text: document.querySelector('.lg-stocktext').textContent, blatt: (specRows(S.win).find((r) => r.k === 'Lage') || {}).v }));
   await d16.click('.lg-vorschlaege [data-v="Bad"]'); await d16.waitForTimeout(100);
   const dna3 = await d16.evaluate(() => S.win.name);
   await d16.fill('#f-bru', '90'); await d16.waitForTimeout(150);
   const dna4 = await d16.evaluate(() => ({ zeile: !document.getElementById('lg-grund').hidden, markiert: !!document.querySelector('.lg-markiert') }));
   await d16.click('.lg-weiter'); await d16.waitForTimeout(300);
   const dna5 = await d16.evaluate(() => S.q);
-  ok(dna0.koepfe === 1 && dna0.logo && !dna0.quer && /Outfit/.test(dna0.schrift) && dna0.weiter && dna1.name === 'Küche' && dna1.doppelt && dna1.wahl === 'Küche links|Küche rechts|Küche 2' && dna1.etikett === 'Küche' && dna2.q === 'lage' && dna2.name === 'Küche links' && dna2.og === 2 && /Brüstung/.test(dna2.grund) && dna2.zeile && dna2.markiert && dna2.fokus === 'f-bru' && dna2.haus === '2. OG' && dna2.text === '2. Obergeschoss' && /Küche links, 2\. OG/.test(dna2.blatt) && dna3 === 'Bad links' && !dna4.zeile && !dna4.markiert && dna5 !== 'lage', 'Lage (Design-DNA): ein Kopf mit Logo, Outfit, kein Querscrollen; Vorschlag ergänzt den Namen, doppelter Name mit Vorschlägen; im OG 1./2./3. OG („2. OG“ im Haus und im Blatt); ohne Brüstung kein Weiter (Zeile, Feld markiert, Fokus); danach geht es weiter');
+  ok(dna0.koepfe === 1 && dna0.logo && !dna0.quer && /Outfit/.test(dna0.schrift) && dna0.weiter && dna1.name === 'Küche' && dna1.doppelt && dna1.wahl === 'Küche links|Küche rechts|Küche 2' && dna1.etikett === 'Küche' && dna2.q === 'lage' && dna2.name === 'Küche links' && dna2.og === 2 && /Brüstung/.test(dna2.grund) && dna2.zeile && dna2.markiert && dna2.fokus === 'f-bru' && dna2.haus === 'og' && dna2.text === '2. Obergeschoss' && /Küche links, 2\. OG/.test(dna2.blatt) && dna3 === 'Bad links' && !dna4.zeile && !dna4.markiert && dna5 !== 'lage', 'Lage (Design-DNA): ein Kopf mit Logo, Outfit, kein Querscrollen; Vorschlag ergänzt den Namen, doppelter Name mit Vorschlägen; im OG 1./2./3. OG („2. OG“ im Haus und im Blatt); ohne Brüstung kein Weiter (Zeile, Feld markiert, Fokus); danach geht es weiter');
   /* Gestaltung: nichts vorgewählt bei gleichen Vorgaben; „Doch neu gestalten“ nach dem Speichern nimmt keine gespeicherten Änderungen zurück */
   await d16.evaluate((MO) => { S.windows = []; S.editIdx = -1; S.angelegt = 0; const a = Object.assign(baseWin(), { name: 'Flur', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = a; saveWin(); const b = Object.assign(baseWin(), { name: 'Gast', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = b; S.editIdx = -1; S.designVorher = null; S.q = 'design'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
   const vorgewaehlt = await d16.evaluate(() => ({ gedrueckt: document.querySelectorAll('.qpanel .qopt[aria-pressed="true"]').length, nav: Array.from(document.querySelectorAll('.qnav button')).map((b) => b.textContent.trim()).filter(Boolean).join() }));
@@ -3711,7 +3717,7 @@ if (teil(16)) {
       const verweis = [].concat(Object.values(Q_G), Object.values(Q_G_STATT), MESS.map((m) => m.g), [].concat.apply([], Object.values(SCHRITT_G)), [].concat.apply([], Object.values(OPT_G).map((o) => Object.values(o))), [].concat.apply([], k.map((x) => GLOSS[x].see))).filter((x) => !GLOSS[x]);
       return { ohne: ohne, duenn: duenn, doppelt: doppelt, fehlend: k.filter((x) => GLOSS_ORDER.indexOf(x) < 0), verweis: verweis, n: k.length, offen: !!(S.gloss || S.glossIndex) };
     });
-    ok(optI === 4 && /glasextras/.test(gi0.bezug) && /schall/.test(gi0.bezug) && gi0.gruppen === 10 && gi1.length >= 1 && gi1.indexOf('raffstore') >= 0 && gi1.every((x) => /raffstore|sonnenschutz|aufsatz|vorbau|antrieb|screen|innenschutz|rollladen|sensor/.test(x)) && gi2 && !gi3.offen &&
+    ok(optI === 7 && /glasextras/.test(gi0.bezug) && /schall/.test(gi0.bezug) && gi0.gruppen === 10 && gi1.length >= 1 && gi1.indexOf('raffstore') >= 0 && gi1.every((x) => /raffstore|sonnenschutz|aufsatz|vorbau|antrieb|screen|innenschutz|rollladen|sensor/.test(x)) && gi2 && !gi3.offen &&
       !gi3.ohne.length && !gi3.duenn.length && !gi3.doppelt.length && !gi3.fehlend.length && !gi3.verweis.length && gi3.n >= 90,
     'Begriffe: ' + gi3.n + ' Einträge in zehn Gruppen, jeder mit Praxis-Tipp und mindestens zwei Absätzen, keiner doppelt; Suche filtert, ohne Treffer ein Hinweis, Esc schließt; „Zu diesem Schritt“ nennt Frage und Optionen; jede Frage aller Elementarten hat ein i, Fachbegriffe in Optionen auch, alle Verweise gibt es' + (gi3.ohne.length + gi3.duenn.length + gi3.verweis.length ? ' (' + gi3.ohne.concat(gi3.duenn, gi3.verweis).slice(0, 8).join(', ') + ')' : ''));
     sauber(sk, 'Konfigurator S1 ohne Fehler'); await ck.close();
@@ -3877,13 +3883,13 @@ if (teil(16)) {
   const g46Kz16 = voll({ offen: { fa: true, fba: true, einbau: true }, sart: 'rollladen', roll: 'aufsatz' }), g46Wk16 = AW16.wuensche(g46Kz16, { tiefe: 'kurz' }), g46Wn16 = AW16.wuensche(g46Kz16, { tiefe: 'normal' });
   const g46Klk16 = AW16.klaerung([g46Kz16], { total: 9, tiefe: 'kurz' }), g46Kln16 = AW16.klaerung([g46Kz16], { total: 9, tiefe: 'normal' });
   const g46Zk16 = (W, id) => W.gruppen.find((g) => g.id === id).zeilen;
-  ok(g46Wk16.offen.join() === 'Farbe außen' && !g46Klk16.some((r) => /Fensterbank außen|Rollladenkasten/.test(r.v)) && g46Kln16.some((r) => /Rollladenkasten, Fensterbank außen: offen/.test(r.v)) && g46Zk16(g46Wk16, 'bank')[0].std && g46Zk16(g46Wk16, 'beschlag')[0].std && /Kasten nach Standard des Fensterbauers, silber/.test(g46Zk16(g46Wk16, 'sonne')[0].t) && g46Zk16(g46Wk16, 'montage')[0].std && !g46Zk16(g46Wn16, 'bank')[0].std,
-    '„Das Wichtigste“: Fensterbank, Kasten, Griff und Montage „nach Standard des Fensterbauers“, nicht offen und ohne Klärungspunkt, die Farbe des Rollladens gefragt (seit 28.10.2026 bei jeder Tiefe); bei „Die üblichen Wünsche“ bleibt das Startwert-„offen“');
+  ok(g46Wk16.offen.join() === 'Farbe außen,Fensterbank außen' && !g46Klk16.some((r) => /Rollladenkasten/.test(r.v)) && g46Klk16.some((r) => /Fensterbank außen: offen/.test(r.v)) && g46Kln16.some((r) => /Rollladenkasten, Fensterbank außen: offen/.test(r.v)) && !g46Zk16(g46Wk16, 'bank')[0].std && g46Zk16(g46Wk16, 'beschlag')[0].std && /Kasten nach Standard des Fensterbauers, silber/.test(g46Zk16(g46Wk16, 'sonne')[0].t) && g46Zk16(g46Wk16, 'montage')[0].std && !g46Zk16(g46Wn16, 'bank')[0].std,
+    '„Das Wichtigste“ (seit 2.11.2026 der Hauptweg): Kasten, Griff und Montage „nach Standard des Fensterbauers“, nicht offen und ohne Klärungspunkt; die Fensterbänke sind im Hauptweg gefragt (offen bleibt offen), die Farbe des Rollladens gefragt (seit 28.10.2026 bei jeder Tiefe); bei „Die üblichen Wünsche“ bleibt das Startwert-„offen“');
   ok(AW16.wuensche(voll({ offen: { griff: true } }), { tiefe: 'kurz' }).offen.join() === 'Griff' && !g46Zk16(AW16.wuensche(voll({ griffM: 'design' }), { tiefe: 'kurz' }), 'beschlag')[0].std && g46Wk16.standard.indexOf('Oberfläche') >= 0 && g46Zk16(g46Wk16, 'fenster').length && g46Wk16.gruppen.find((g) => g.id === 'fenster').standard.join() === 'Oberfläche,Profilform,Rahmenansicht,Dichtung' && !g46Wk16.standard.some((x) => /Gitter|Lüfter|Kindersicherung/.test(x)) && AW16.wuensche(g46Kz16, {}).standard.length === 0,
     'Standard je Gruppe: geltende, nicht gewählte Angaben mit eigener Ausführung (nicht Gitter oder Lüfter); ein selbst getipptes „Weiß ich noch nicht“ bleibt offen; ohne Tiefe (ältere Aufmaße) keine Standard-Zeile');
   const gew16 = AW16.mk({ offen: { fba: true }, offenWahl: { fba: 1 } });
   ok(AW16.wuensche(gew16, { tiefe: 'kurz' }).offen.join() === 'Fensterbank außen' && AW16.klaerung([gew16], { total: 9, tiefe: 'kurz' }).some((r) => r.art === 'offen') && /offenWahl = Object\.assign/.test(fs16.readFileSync(new URL('../web/assets/app.js', import.meta.url), 'utf8')), '„Weiß ich noch nicht“ zur Fensterbank außen, selbst getippt (w.offenWahl), bleibt offen, auch wenn der Kunde danach „Das Wichtigste“ wählt');
-  ok(AW16.FRAGE.stufe.fba === 2 && AW16.FRAGE.kap.fba === 'bank' && /const QSTUFE = AW\.FRAGE\.stufe/.test(fs16.readFileSync(new URL('../web/assets/app.js', import.meta.url), 'utf8')) && AW16.tiefeText('kurz', true) === 'Das Wichtigste, alles Weitere nach Ihrem Standard' && /Standard des Fensterbauers$/.test(AW16.tiefeText('normal')) && AW16.tiefeText('') === '',
+  ok(!AW16.FRAGE.stufe.fba && AW16.FRAGE.stufe.einbau === 2 && AW16.FRAGE.kap.fba === 'bank' && /const QSTUFE = AW\.FRAGE\.stufe/.test(fs16.readFileSync(new URL('../web/assets/app.js', import.meta.url), 'utf8')) && AW16.tiefeText('kurz', true) === 'Das Wichtigste, alles Weitere nach Ihrem Standard' && /Standard des Fensterbauers$/.test(AW16.tiefeText('normal')) && AW16.tiefeText('') === '',
     'Kapitel und Stufe der Fragen an einer Stelle (AW.FRAGE, die App liest von dort); „Geplant: Das Wichtigste, alles Weitere nach Ihrem Standard“');
   /* Zeichnung: Dreieck fest, Seitenteile mit Pfosten, zweiter Griff am Stulp, Kasten und Klappläden im kleinen Bild */
   const g46Pl16 = (o) => AW16.plan(voll(o), { b: 420, fs: 13 }), g46F16 = (p) => p.teile.filter((t) => t.t === 'text' && t.s === 'F').length, g46G16 = (p) => p.teile.filter((t) => t.t === 'poly' && t.r).length;
@@ -3911,8 +3917,8 @@ if (teil(16)) {
   const g46Woerter16 = Array.from(g46Box16.matchAll(/<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">([^<]*)<\/word>/g)).map((m) => ({ x1: +m[3], y0: +m[2], y1: +m[4], t: m[5] }));
   const g46Ueber16 = g46Woerter16.filter((x) => (x.y1 > 799 && x.y0 < 808) || (x.x1 > 560 && x.y0 > 85 && x.y0 < 800)).map((x) => x.t); // Kopfband und Fuß ausgenommen
   ok(/Fenstergitter/.test(g46Txt16) && /Abdeckleisten/.test(g46Txt16) && /Geplant\s+Alles im Detail/.test(g46Txt16) && /Farbe Geländer/.test(g46Txt16) && !/Weitere Ausstattung/.test(g46Txt16) && g46Woerter16.length > 200 && !g46Ueber16.length, 'PDF des Betriebs mit allen Detailangaben: Zeilen in den Gruppen, „Geplant“ in den Eckdaten, keine eigene Karte „Weitere Ausstattung“, nichts läuft über den Rand oder in den Fuß' + (g46Ueber16.length ? ' (' + g46Ueber16.slice(0, 6).join(' ') + ')' : ''));
-  const g46Kurz16 = await g46SL.evaluate(() => { const l = A().links.find((x) => x.id === 'l1'); l.aufmass.proj.tiefe = 'kurz'; const w = l.aufmass.windows[1]; w.offen = { fba: true }; w.fbi = 'behalten'; go('link', 'l1'); const d = document.getElementById('pos-1'); return { bank: d.querySelector('.am-g-bank').textContent, std: d.querySelectorAll('.am-std').length, grau: !!d.querySelector('.am-dl dd.std'), klaer: amKlaer(l).map((r) => r.v).join('|'), kopf: document.querySelector('.amhead').textContent }; });
-  ok(/nach Ihrem Standard/.test(g46Kurz16.bank) && g46Kurz16.std >= 2 && g46Kurz16.grau && !/Fensterbank außen: offen|Fensterbank außen, Rollladenkasten/.test(g46Kurz16.klaer) && /Das Wichtigste, alles Weitere nach Ihrem Standard/.test(g46Kurz16.kopf), 'Betriebsbereich bei „Das Wichtigste“: grau „nach Ihrem Standard“ statt Startwerten, „Nach Ihrem Standard: …“ je Gruppe, keine offenen Punkte für Ungefragtes');
+  const g46Kurz16 = await g46SL.evaluate(() => { const l = A().links.find((x) => x.id === 'l1'); l.aufmass.proj.tiefe = 'kurz'; const w = l.aufmass.windows[1]; w.offen = { einbau: true }; w.sart = 'rollladen'; w.roll = 'aufsatz'; delete w.griffM; delete w.griffPos; delete w.kinder; w.griff = 'standard'; w.gf = 'weiss'; go('link', 'l1'); const d = document.getElementById('pos-1'); return { bank: (d.querySelector('.am-g-beschlag') || {}).textContent || '', std: d.querySelectorAll('.am-std').length, grau: !!d.querySelector('.am-dl dd.std'), klaer: amKlaer(l).map((r) => r.k + ': ' + r.v).join('|'), kopf: document.querySelector('.amhead').textContent }; });
+  ok(/nach Ihrem Standard/.test(g46Kurz16.bank) && g46Kurz16.std >= 2 && g46Kurz16.grau && !/Pos\. 2[^|]*Rollladenkasten/.test(g46Kurz16.klaer) && /Das Wichtigste, alles Weitere nach Ihrem Standard/.test(g46Kurz16.kopf), 'Betriebsbereich bei „Das Wichtigste“: grau „nach Ihrem Standard“ statt Startwerten (Griff, Kasten), „Nach Ihrem Standard: …“ je Gruppe, keine offenen Punkte für Ungefragtes (' + JSON.stringify(g46Kurz16).slice(0, 900) + ')');
   await g46SL.evaluate(() => go('einladung')); await g46SL.waitForTimeout(300);
   await g46SL.click('[data-ein="tiefe"][data-v="kurz"]'); await g46SL.waitForTimeout(300);
   const g46Ei16 = await g46SL.evaluate(() => ({ t: (A().einladung || {}).tiefe, vor: !!document.querySelector('#ein-vor .ein-planung'), ziele: Array.from(document.querySelectorAll('[data-ein="tiefe"]')).every((b) => b.getBoundingClientRect().height >= 44), gedrueckt: (document.querySelector('[data-ein="tiefe"][aria-pressed="true"]') || {}).textContent, gruppe: (() => { const g = document.querySelector('[data-ein="tiefe"]').closest('[role="group"]'); return !!(g && document.getElementById(g.getAttribute('aria-labelledby'))); })(), link: linkURL(A().links.find((x) => x.id === 'l2')) }));
@@ -4153,7 +4159,7 @@ if (teil(18)) {
   try {
     const fotosMachen = async (s) => {
       const jpg = Buffer.from(await s.evaluate(() => { const c = document.createElement('canvas'); c.width = 900; c.height = 1200; const g = c.getContext('2d'); g.fillStyle = '#e9e3da'; g.fillRect(0, 0, 900, 1200); g.fillStyle = '#fff'; g.fillRect(220, 200, 460, 760); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; }), 'base64');
-      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await s.click('.lg-weiter');
+      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await zuDenFotos(s);
       await s.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
       await s.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg });
       if (await s.waitForSelector('.fx-dialog', { timeout: 3000 }).then(() => true, () => false)) await s.click('.fx-ja');
@@ -4316,7 +4322,7 @@ if (teil(19)) {
     const bis = async (s, fn, ms, arg) => { const ende = Date.now() + (ms || 10000); while (Date.now() < ende) { if (await s.evaluate(fn, arg)) return true; await new Promise((r) => setTimeout(r, 200)); } return false; };
     const jpg = Buffer.from(jpegs[0], 'base64');
     const fotosMachen = async (s) => {
-      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await s.click('.lg-weiter');
+      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await zuDenFotos(s);
       await s.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
       await s.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg });
       if (await s.waitForSelector('.fx-dialog', { timeout: 2500 }).then(() => true, () => false)) await s.click('.fx-ja');
@@ -4637,38 +4643,22 @@ if (teil(21)) {
   ok(!AW21.detailGilt(AW21.mk({ sart: 'rollladen', roll: 'aufsatz' }), 'lamelle') && AW21.detailGilt(AW21.mk({ art: 'balkon' }), 'paneel') && !AW21.detailGilt(AW21.mk({}), 'paneel') && AW21.detailGilt(AW21.mk({ art: 'hst' }), 'hstEck') && !AW21.detailGilt(AW21.mk({ form: 'rund' }), 'seiten'), 'Geltung: Lamellen nur beim Raffstore, Paneel nur an der Balkontür, Ecklösung nur bei der Hebe-Schiebe-Tür, Seitenteile nur bei Rechtecken');
   ok(AW21.rcAb({ rc: 'rc3' }, 'rc2') && AW21.rcAb({ rc: 'rc2' }, 'rc2n') && !AW21.rcAb({ rc: 'rc2n' }, 'rc2') && AW21.rcAb({ rc: 'rc2n' }, 'rc1') && !AW21.rcAb({}, 'rc1') && AW21.uwZiel(AW21.mk({ rc: 'rc3' }), { foerdweg: 'bafa' }).wert === 1.1, 'RC-Stufen der Reihe nach (Basis, RC1, RC2N, RC2, RC3), RC3 zählt wie RC2 beim Förderziel');
 
-  /* b) App: Register gleich, Fragenzahl je Tiefe, Kapitel, „Mehr zu …“, Code */
+  /* b) App: Register gleich; seit 2.11.2026 Hauptweg und freiwillige Liste statt Tiefe und „Mehr zu …“ (Abschnitt 32 prüft die Folien) */
   const ctx21 = await browser.newContext(telefon), a21 = await neueSeite(ctx21);
   await a21.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' });
   const zahl21 = await a21.evaluate(() => {
-    const w = demoProject()[0], n = {}; S.win = w;
+    const w = demoProject()[0], n = {}; S.win = w; S.q = null;
     const fehlt = AW.DETAIL.filter((d) => !DETAIL_UI[d.k] || (!d.mm && !(OPT[d.g || d.k] || []).length)).map((d) => d.k);
     ['kurz', 'normal', 'genau'].forEach((t) => { S.proj.tiefe = t; n[t] = qSichtbar(w).length; });
-    S.proj.tiefe = 'kurz'; const vorher = qSichtbar(w).length; MEHR.set(w, { material: true }); const mehr = qSichtbar(w).filter((q) => q.kap === 'material').length, ohne = qList(w).filter((q) => q.kap === 'material').length; MEHR.delete(w);
-    delete S.proj.tiefe; const ids = qSichtbar(w).map((q) => q.id), alle = qList(w).map((q) => q.id);
-    S.proj.tiefe = 'genau'; const genau = qSichtbar(w).map((q) => q.id);
-    return { fehlt: fehlt, n: n, vorher: vorher, mehr: mehr, ohne: ohne, tiefeNach: ids.indexOf('tiefe') > 0 && ids.slice(0, ids.indexOf('tiefe')).every((id) => ['lage', 'absturz', 'design'].indexOf(id) >= 0) && qSichtbar(w)[ids.indexOf('tiefe') + 1].kap === 'aufbau', kapitel: Array.from(new Set(qList(w).map((q) => q.kap))).join(','), gitter: genau.indexOf('gitter') >= 0, alleDetails: AW.DETAIL.filter((d) => AW.detailGilt(w, d.k)).every((d) => alle.indexOf(d.k) >= 0) };
+    const alle = qList(w).map((q) => q.id), haupt = qSichtbar(w).map((q) => q.id), extra = qExtras(qList(w)).map((q) => q.id);
+    return { fehlt: fehlt, n: n, ganz: haupt.length + extra.length === alle.length && alle.every((id) => haupt.includes(id) || extra.includes(id)), tiefeWeg: alle.indexOf('tiefe') < 0, kapitel: Array.from(new Set(qList(w).map((q) => q.kap))).join(','), gitter: extra.indexOf('gitter') >= 0, alleDetails: AW.DETAIL.filter((d) => AW.detailGilt(w, d.k)).every((d) => alle.indexOf(d.k) >= 0) };
   });
   ok(zahl21.fehlt.length === 0, 'App und Modell haben dieselben Detailangaben, jede mit Frage und Auswahl' + (zahl21.fehlt.length ? ' (fehlt: ' + zahl21.fehlt.join(', ') + ')' : ''));
-  ok(zahl21.n.kurz < zahl21.n.normal && zahl21.n.normal < zahl21.n.genau && zahl21.n.kurz <= 20, 'Drei Tiefen: „Das Wichtigste“ ' + zahl21.n.kurz + ', „Die üblichen Wünsche“ ' + zahl21.n.normal + ', „Alles im Detail“ ' + zahl21.n.genau + ' Fragen');
-  ok(zahl21.tiefeNach && zahl21.kapitel === 'vorweg,aufbau,material,glas,bedienung,sonne,bank', 'Die Frage nach der Tiefe kommt nach Lage und Gestaltung; Kapitel in fester Reihenfolge (' + zahl21.kapitel + ')');
-  ok(zahl21.mehr === zahl21.ohne && zahl21.mehr > 3, '„Mehr zu Material & Farbe“ zeigt bei „Das Wichtigste“ alle Fragen des Kapitels (' + zahl21.mehr + ')');
-  ok(zahl21.gitter && zahl21.alleDetails, 'Bei „Alles im Detail“ kommen die neuen Angaben (z. B. Fenstergitter); jede geltende Detailangabe hat ihre Frage');
-  /* Tiefe wählen per Antippen, Pille im Kopf führt zurück */
-  await a21.evaluate(() => { const w = demoProject()[0]; S.win = w; delete S.proj.tiefe; S.q = 'tiefe'; S.screen = 'frage'; render(true); }); await a21.waitForTimeout(300);
-  const tw = await a21.evaluate(() => Array.from(document.querySelectorAll('[data-act="tiefe"]')).map((b) => b.getAttribute('data-v')).join(','));
-  /* Bühne ohne Neonflecken (Inhaber, 30.10.2026): ein ruhiges violettes Licht aus der Ecke, radial ohne Weichzeichner, kein Korallen-Fleck,
-     und es steht still (Zustand zeigen die Punkte, nicht ein Leuchten) */
-  const lpLicht = () => a21.evaluate(() => { const g = document.querySelector('.scr.dna .lp-glut'); return { da: !!g, blur: g ? getComputedStyle(g).filter : '', sonne: document.querySelectorAll('.scr.dna .lp-sonne').length, t: g ? g.style.transform : '' }; });
-  await a21.click('[data-act="tiefe"][data-v="kurz"]'); await a21.waitForTimeout(400); const lpK = await lpLicht();
-  await a21.click('[data-act="tiefe"][data-v="genau"]'); await a21.waitForTimeout(400); const lpG = await lpLicht();
-  ok(lpK.da && lpK.blur === 'none' && lpK.sonne === 0 && !lpK.t && !lpG.t, 'Wie genau planen: ein ruhiges violettes Licht ohne Weichzeichner und ohne Korallen-Fleck, es steht still');
-  await a21.click('[data-act="tiefe"][data-v="kurz"]'); await a21.waitForTimeout(300);
-  const tk = await a21.evaluate(() => ({ t: S.proj.tiefe, pille: !!document.querySelector('.qtiefe') }));
-  const tk2 = await a21.evaluate(() => ({ n: document.querySelector('.scr.dna .lp-n').textContent, rest: document.querySelector('.scr.dna .lp-rest').textContent, ja: document.querySelectorAll('.scr.dna .lp-punkte i.ja').length, alle: document.querySelectorAll('.scr.dna .lp-punkte i').length, gedrueckt: (document.querySelector('.scr.dna [data-act="tiefe"][aria-pressed="true"]') || {}).textContent, zahl: qSichtbar(S.win).filter((q) => q.id !== 'tiefe').length, modell: !!document.querySelector('.scr.dna #w3d') }));
-  ok(tw === 'kurz,normal,genau' && tk.t === 'kurz' && tk2.gedrueckt === 'Kurz' && +tk2.n === tk2.ja && +tk2.n + +tk2.rest === tk2.alle && +tk2.n > 0 && +tk2.rest > 0 && !tk2.modell, 'Tiefe wählen (Design-DNA): Kurz · Üblich · Alles, „Kurz“ setzt die Tiefe; Punktraster je Kapitel, Zahl „wählst du“ und „plant dein Fensterbauer“ ergeben alle Fragen, kein 3-D-Modell (' + tw + '; ' + tk2.n + ' + ' + tk2.rest + ')');
+  ok(zahl21.n.kurz === zahl21.n.normal && zahl21.n.normal === zahl21.n.genau && zahl21.n.kurz <= 20 && zahl21.tiefeWeg && zahl21.ganz, 'Hauptweg statt Tiefe: ' + zahl21.n.kurz + ' Fragen bei jeder Tiefe, keine Frage nach der Tiefe; Hauptweg und Liste ergeben zusammen alle Fragen');
+  ok(zahl21.kapitel === 'aufbau,vorweg,oeffnung,material,glas,bedienung,sonne,bank,extras', 'Kapitel in fester Reihenfolge: Aufbau, Lage, Öffnung, Material, Glas, Griff, Sonnenschutz, Fensterbank, Extras (' + zahl21.kapitel + ')');
+  ok(zahl21.gitter && zahl21.alleDetails, 'Die Detailangaben (z. B. Fenstergitter) stehen in der Liste; jede geltende Detailangabe hat ihre Frage');
   /* Standard des Fensterbauers in der Frage, Wahl und Zurücknehmen */
-  await a21.evaluate(() => { S.proj.tiefe = 'genau'; S.q = 'gitter'; render(true); }); await a21.waitForTimeout(300);
+  await a21.evaluate(() => { S.win = demoProject()[0]; S.editIdx = -1; S.proj.tiefe = 'genau'; S.q = 'gitter'; S.screen = 'frage'; render(true); }); await a21.waitForTimeout(300);
   const st21 = await a21.evaluate(() => ({ std: !!document.querySelector('.qstd'), wahl: Array.from(document.querySelectorAll('[data-act="detail"]')).map((b) => b.getAttribute('data-v')).join(',') }));
   await a21.click('[data-act="detail"][data-v="stab"]'); await a21.waitForTimeout(400);
   const gz = await a21.evaluate(() => ({ v: S.win.gitter, flaeche: !!document.querySelector('#w3d [data-r="gitter"]'), zeile: specRows(S.win).some((r) => r.k === 'Fenstergitter') }));
@@ -4708,8 +4698,8 @@ if (teil(21)) {
   /* Tiefe je Fenster: Pos. 1 im Wichtigsten gespeichert, danach Pos. 2 mit „Alles im Detail“. Pos. 1 behält ihre Tiefe: die nicht gefragte
      Fensterbank außen ist kein „Weiß ich noch nicht“ und kein offener Punkt, der Kopf nennt beide Tiefen; eine andere Tiefe zählt nicht als Änderung */
   const tj21 = await a21.evaluate(() => {
-    S.windows = []; S.proj.tiefe = 'kurz'; newWin(); Object.assign(S.win, { name: 'Küche', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, w: 1230, h: 1410 }); saveWin();
-    S.proj.tiefe = 'genau'; newWin(); Object.assign(S.win, { name: 'Bad', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, w: 1230, h: 1410 }); saveWin();
+    S.windows = []; S.proj.tiefe = 'kurz'; newWin(); Object.assign(S.win, { sart: 'rollladen', roll: 'aufsatz', offen: Object.assign({}, S.win.offen, { einbau: true }) }); Object.assign(S.win, { name: 'Küche', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, w: 1230, h: 1410 }); saveWin();
+    S.proj.tiefe = 'genau'; newWin(); Object.assign(S.win, { sart: 'rollladen', roll: 'aufsatz', offen: Object.assign({}, S.win.offen, { einbau: true }) }); Object.assign(S.win, { name: 'Bad', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, w: 1230, h: 1410 }); saveWin();
     const ws = S.windows, kl = AW.klaerung(ws, S.proj).map((r) => r.k + ':' + r.v).join('|');
     const k1 = AW.wuensche(ws[0], S.proj), k2 = AW.wuensche(ws[1], S.proj);
     const fp = aenderungFp(Object.assign({}, ws[0], { tiefe: 'genau' })) === aenderungFp(ws[0]);
@@ -4717,8 +4707,8 @@ if (teil(21)) {
     S.editIdx = 0; S.win = kopie(ws[0]); saveWin(); // Pos. 1 mit „Alles im Detail“ erneut gespeichert: die tiefste Tiefe zählt, keine Änderung
     return Object.assign(vor, { nach: S.windows[0].tiefe, aend: S.windows[0].aend });
   });
-  const tjOk21 = tj21.t === 'kurz,genau' && !/Fensterbank außen/.test(tj21.offen1) && /Fensterbank außen/.test(tj21.offen2) && tj21.tiefe1 === 'kurz' && tj21.tiefe2 === 'genau' && !/Küche[^|]*Fensterbank außen/.test(tj21.kl) && tj21.kopf === 'Das Wichtigste (Pos. 1), Alles im Detail (Pos. 2); Weiteres nach Ihrem Standard' && /Standard des Fensterbauers$/.test(tj21.kunde) && tj21.fp && tj21.nach === 'genau' && !tj21.aend;
-  ok(tjOk21, 'Tiefe je Fenster: ein Fenster im Wichtigsten gespeichert behält seine Tiefe, wenn die nächste „Alles im Detail“ ist (keine ungefragte Fensterbank als „Weiß ich noch nicht“), der Kopf nennt beide Tiefen, erneut gespeichert zählt die tiefste, ohne Änderung' + (tjOk21 ? '' : ' (' + JSON.stringify(tj21) + ')'));
+  const tjOk21 = tj21.t === 'kurz,genau' && !/Rollladenkasten/.test(tj21.offen1) && /Rollladenkasten/.test(tj21.offen2) && tj21.tiefe1 === 'kurz' && tj21.tiefe2 === 'genau' && !/Küche[^|]*Rollladenkasten/.test(tj21.kl) && tj21.kopf === 'Das Wichtigste (Pos. 1), Alles im Detail (Pos. 2); Weiteres nach Ihrem Standard' && /Standard des Fensterbauers$/.test(tj21.kunde) && tj21.fp && tj21.nach === 'genau' && !tj21.aend;
+  ok(tjOk21, 'Tiefe je Fenster: ein Fenster im Wichtigsten gespeichert behält seine Tiefe, wenn die nächste „Alles im Detail“ ist (kein ungefragter Rollladenkasten als „Weiß ich noch nicht“; die Fensterbänke sind seit 2.11.2026 im Hauptweg), der Kopf nennt beide Tiefen, erneut gespeichert zählt die tiefste, ohne Änderung' + (tjOk21 ? '' : ' (' + JSON.stringify(tj21) + ')'));
   sauber(a21, 'Detailtiefe ohne Fehler'); await ctx21.close();
 }
 
@@ -4731,7 +4721,7 @@ if (teil(22)) {
   // Erster Tipp zählt: Feld fokussieren, tippen, EIN tap() auf den Hauptknopf (vorher tauschte das Neuzeichnen beim Verlassen den Knopf aus)
   await frage20('notiz', { name: 'Küche' });
   await p.tap('#t-notiz'); await p.keyboard.type('Bitte vor dem Termin anrufen.'); await p.tap('.qnav .btn.primary'); await p.waitForTimeout(600);
-  const t1 = await p.evaluate(() => ({ screen: S.screen, notiz: (S.windows[S.windows.length - 1] || {}).notiz }));
+  const t1 = await p.evaluate(() => ({ screen: S.screen, q: S.q, notiz: S.win.notiz })); // die Notiz steht in der freiwilligen Liste: „Fertig“ führt dorthin zurück
   await frage20('fa', { name: 'Küche' });
   await p.tap('#t-wunschA'); await p.keyboard.type('wie Garagentor'); await p.tap('.qnav .btn.primary'); await p.waitForTimeout(600);
   const t2 = await p.evaluate(() => ({ q: S.q, wunschA: S.win.wunschA }));
@@ -4741,8 +4731,8 @@ if (teil(22)) {
   await p.evaluate(() => go('planmasse')); await p.waitForTimeout(300);
   await p.tap('#p-w'); await p.fill('#p-w', ''); await p.keyboard.type('2100'); await p.tap('#p-h'); await p.waitForTimeout(300);
   const t3b = await p.evaluate(() => ({ fokus: document.activeElement && document.activeElement.id, wm: S.win.mo.wm }));
-  ok(t1.screen === 'fertig' && /Termin/.test(t1.notiz || '') && t2.q !== 'fa' && t2.wunschA === 'wie Garagentor' && t3.screen === 'ergebnis' && t3.wm === 2000 && t3b.fokus === 'p-h' && t3b.wm === 2100,
-    'Erster Tipp zählt nach einem Textfeld: Fenster speichern, Weiter (eigene Farbe), Maße ansehen; das nächste Feld behält den Fokus (' + JSON.stringify([t1.screen, t2.q, t3.screen, t3b.fokus]) + ')');
+  ok(t1.screen === 'frage' && t1.q === 'extras' && /Termin/.test(t1.notiz || '') && t2.q !== 'fa' && t2.wunschA === 'wie Garagentor' && t3.screen === 'ergebnis' && t3.wm === 2000 && t3b.fokus === 'p-h' && t3b.wm === 2100,
+    'Erster Tipp zählt nach einem Textfeld: Fertig (Notiz), Weiter (eigene Farbe), Maße ansehen; das nächste Feld behält den Fokus (' + JSON.stringify([t1.screen, t2.q, t3.screen, t3b.fokus]) + ')');
   // Maßschilder in der Bühne (mind. 8 px Rand), auch bei breiten Elementen; Zoom in der Übersicht unten rechts, nichts überdeckt sich
   const buehne = () => p.evaluate(() => {
     const st = document.getElementById('w3d'); if (!st) return { fehlt: 1 };
@@ -4851,17 +4841,11 @@ if (teil(22)) {
   const kb = await p.evaluate(() => { const b = Array.from(document.querySelectorAll('.wz-kapitel .ql')); return { namen: b.map((x) => x.childNodes[1].textContent).join('|'), jetzt: b.filter((x) => x.getAttribute('aria-current') === 'step').map((x) => x.childNodes[1].textContent).join(), fokus: document.activeElement.classList.contains('wz-rund') }; });
   await p.click('.wz-kapitel .ql[data-kap="sonne"]'); await p.waitForTimeout(500);
   const kl2 = await p.evaluate(() => { const c = qCurrent(), kicker = document.querySelector('.qdock .hd .eyebrow').textContent, jetzt = document.querySelector('.wz-band b').textContent, bogen = !!document.querySelector('.wz-bogen'); S.wohin = true; render(); const wo = Array.from(document.querySelectorAll('.wo-abschnitte .chip')).map((x) => x.textContent).join('|'); S.wohin = false; render(); return { q: S.q, erste: c.list.find((q) => q.kap === 'sonne').id, kicker: kicker, jetzt: jetzt, bogen: bogen, wohin: wo }; });
-  ok(/^Kapitel 3 von 7: Material und Farbe\. Direkt zu einem Thema$/.test(kl.label) && kl.jetzt === 'Material & Farbe' && kl.stationen === 7 && kl.haken === 2 && /^Frage 1 von \d+$/.test(kl.kicker) && kl.tools === 'qtiefe,nz-knopf' &&
-    kb.namen === 'Lage|Aufbau|Material & Farbe|Glas & Sprossen|Griff & Schutz|Sonnenschutz|Einbau' && kb.jetzt === 'Material & Farbe' && kb.fokus &&
+  ok(/^Kapitel 4 von 9: Material und Farbe\. Direkt zu einem Thema$/.test(kl.label) && kl.jetzt === 'Material & Farbe' && kl.stationen === 9 && kl.haken === 3 && /^Frage 1 von \d+$/.test(kl.kicker) && kl.tools === 'nz-knopf' &&
+    kb.namen === 'Aufbau|Lage|Öffnung|Material & Farbe|Glas & Sprossen|Griff & Schutz|Sonnenschutz|Fensterbank|Extras' && kb.jetzt === 'Material & Farbe' && kb.fokus &&
     kl2.q === kl2.erste && /^Frage 1 von \d+$/.test(kl2.kicker) && kl2.jetzt === 'Sonnenschutz' && !kl2.bogen && kl2.wohin === kb.namen,
-    'Ein Kapitelkonzept (Design-DNA): Band mit sieben Stationen, erledigte gefüllt, das laufende benannt; Antippen öffnet „Direkt zu einem Thema“ mit denselben Kapiteln und springt auf die erste sichtbare Frage; Kicker „Frage i von n“ mit Tiefe und Notiz daneben (' + kl.kicker + ' → ' + kl2.kicker + ')');
-  // Tiefe-Pille: Wahl öffnen, Tiefe ändern, mit der Zurück-Taste des Browsers zurück zur Frage
-  await p.click('.qdock .qtiefe'); await p.waitForTimeout(400);
-  const tp1 = await p.evaluate(() => ({ q: S.q, sub: (document.querySelector('.qdock .hd > p, .scr.dna .lg-frage > p') || {}).textContent || '' })); // Design-DNA: Unterzeile der Frage
-  await p.click('[data-act="tiefe"][data-v="genau"]'); await p.waitForTimeout(300);
-  await p.evaluate(() => history.back()); await p.waitForTimeout(500);
-  const tp2 = await p.evaluate(() => ({ q: S.q, tiefe: S.proj.tiefe, screen: S.screen }));
-  ok(tp1.q === 'tiefe' && /nach seinem Standard/.test(tp1.sub) && tp2.q === kl2.q && tp2.tiefe === 'genau' && tp2.screen === 'frage', 'Tiefe-Pille: öffnet die Wahl, die Zurück-Taste des Browsers führt zur Frage zurück, die neue Tiefe bleibt');
+    'Ein Kapitelkonzept (Design-DNA): Band mit neun Stationen, erledigte gefüllt, das laufende benannt; Antippen öffnet „Direkt zu einem Thema“ mit denselben Kapiteln und springt auf die erste sichtbare Frage; Kicker „Frage i von n“ mit Notiz daneben, ohne Tiefe (' + kl.kicker + ' → ' + kl2.kicker + ')');
+  // Die Tiefe-Pille entfällt mit dem Hauptweg (2.11.2026); geprüft in Abschnitt 32 und oben (kl.tools)
   // Notiz an einer Detailfrage (Griffmodell) und Beschriftung jeder Detailangabe beim Betrieb
   await frageB('griffM', {}, 'genau');
   await p.click('.qdock .nz-knopf'); await p.waitForSelector('#nz-text');
@@ -4876,7 +4860,7 @@ if (teil(22)) {
     const varianten = [['fenster', {}], ['fenster', { sart: 'raffstore', roll: 'vorbau', antrieb: 'motor', etage: 'og', bru: 500, absturz: 'gelaender', insekt: 'spann', glasfn: ['sicht'], material: 'holz', fba: 'alu', fbi: 'werzalit', bars: 1 }], ['fenster', { sart: 'rollladen', roll: 'vorbau', sfTeile: 'eigen' }], ['fenster', { sart: 'screen', roll: 'aufsatz' }], ['fenster', { sart: 'klappladen' }], ['fenster', { teilung: '2s', seiten: 'beide' }], ['balkon', { etage: 'og', absturz: 'glas' }], ['hst', {}], ['psk', {}], ['fsw', {}], ['fest', {}]];
     varianten.forEach(([art, set]) => {
       const w = baseWin(); artSetzen(w, art); Object.assign(w, set, { name: 'X', offen: {} }); if (set.bars) { w.bars = []; barCount(w, 'v', 1); } if (w.teilung === '2s') w.sashes = sashesFor('2s'); if (w.seiten) seitenAnwenden(w); S.win = w;
-      qSichtbar(w).forEach((q) => { S.q = q.id; render(true); const b = document.querySelector('.qdock .hd h1 .qg, .scr.dna .lg-frage h1 .lg-i'), k = b && b.getAttribute('data-k'); /* Design-DNA (Lage): i am Titel */ gesehen.add(q.id); if (!k || !GLOSS[k] || !(/^Erklärung: /.test(b.getAttribute('aria-label') || '') || (b.matches('.lg-i') && b.getAttribute('aria-label') === GLOSS[k].t))) ohne.push(art + ':' + q.id); });
+      qList(w).forEach((q) => { S.q = q.id; render(true); const b = document.querySelector('.qdock .hd h1 .qg, .qdock .hd h1 .lg-i, .scr.dna .lg-frage h1 .lg-i'), k = b && b.getAttribute('data-k'); /* Design-DNA (Lage): i am Titel */ gesehen.add(q.id); if (!k || !GLOSS[k] || !(/^Erklärung: /.test(b.getAttribute('aria-label') || '') || (b.matches('.lg-i') && b.getAttribute('aria-label') === GLOSS[k].t))) ohne.push(art + ':' + q.id); });
     });
     return { ohne: ohne, fehlt: AW.DETAIL.map((d) => d.k).filter((k) => !gesehen.has(k)), n: gesehen.size, gloss: Object.keys(GLOSS).length, optG: [].concat.apply([], Object.keys(OPT_G).map((g) => Object.keys(OPT_G[g]).map((k) => OPT_G[g][k]))).filter((x) => !GLOSS[x]) };
   });
@@ -4896,8 +4880,8 @@ if (teil(22)) {
     return Object.keys(out).map((k) => k + out[k]).join(' ');
   });
   ok(rz1.v === '7016' && rz1.wahl === 'Anthrazitgrau' && rz1.ton === rz1.hex && /Anthrazitgrau/.test(rz1.text) && rz1.std && !rz2.blatt && rz2.gedrueckt === 'RAL 7016' && rz2.std === 'false' &&
-    rz3 === 'sfKn+ sfSn+ gelFarben+ insFarben+ fbaFarben+ dichtn ahFarben sprFarben fbiFarben klFarben+',
-    'RAL-Farbwahl bei den Detailfarben: Kasten über „Alle Farben“ in RAL 7016, so im Modell und im Blatt; Kasten, Schienen, Klappläden, Geländer, Insektenschutz und Fensterbank außen mit Farbblatt, alle Farben mit Namen (' + rz3 + ')');
+    rz3 === 'sfKn+ sfSn+ gelFarben+ insFarben+ fbaFarben+ dichtn ahFarben sprFarben+ fbiFarben klFarben+',
+    'RAL-Farbwahl bei den Detailfarben: Kasten über „Alle Farben“ in RAL 7016, so im Modell und im Blatt; Kasten, Schienen, Klappläden, Geländer, Insektenschutz, Fensterbank außen und Sprossen (seit 2.11.2026) mit Farbblatt, alle Farben mit Namen (' + rz3 + ')');
   // Zifferntasten für die neuen Maße: Ausladung der Fensterbank (dazu Seitenteile, Paneel, Unterlicht)
   await frageB('fbaTiefe', { fba: 'alu', offen: {} }, 'genau');
   const zt0 = await p.evaluate(() => { const r = document.getElementById('w3d').getBoundingClientRect(); return { top: Math.round(r.top), h: Math.round(r.height), wert: document.querySelector('.qpanel .st-wert').textContent }; });
@@ -4922,25 +4906,24 @@ if (teil(22)) {
   await p.click('[data-act="stulp"][data-v="L"]'); await p.waitForTimeout(400);
   const st1 = await p.evaluate(() => { const w = S.win; return { folge: w.sashes.map((x) => (x.st ? 'S' : x.steh ? 'H' : x.t)).join(''), geh: gehFluegel(w), steh: w.sashes.map((x, i) => (stehFluegel(w, i) ? i : -1)).filter((i) => i >= 0).join(), felder: new Set(w.bars.map((b) => b.s)).size }; });
   const st2 = await p.evaluate(() => { const src = kopie(S.win); src.wunschGf = 'Messing matt'; src.wunschSf = 'DB 703'; const w = baseWin(); Object.assign(w, { teilung: '2s', sashes: sashesFor('2s') }); designAnwenden(w, src); return w.sashes.map((x) => (x.steh ? 'H' : x.t)).join('') + '|' + w.wunschGf + '|' + w.wunschSf; });
-  ok(st0.kap === 'aufbau' && st0.s === 1 && st0.kicker === 'Aufbau' && st0.bed && st1.folge === 'SDKHS' && st1.geh === 1 && st1.steh === '2' && st1.felder === 4 && st2 === 'DKH|Messing matt|DB 703',
-    'Stulp mit Seitenteilen: „Welcher Flügel geht zuerst auf?“ im Kapitel Aufbau (Stufe 1), „Wie öffnet der zweite Flügel?“ danach; die Wahl lässt die Seitenteile außen, Sprossen in allen Feldern; „Gestaltung übernehmen“ nimmt Gehflügel und Wunschfarben mit (' + st1.folge + ', ' + st2 + ')');
+  ok(st0.kap === 'oeffnung' && st0.s === 1 && st0.kicker === 'Öffnung' && st0.bed && st1.folge === 'SDKHS' && st1.geh === 1 && st1.steh === '2' && st1.felder === 4 && st2 === 'DKH|Messing matt|DB 703',
+    'Stulp mit Seitenteilen: „Welcher Flügel geht zuerst auf?“ im Kapitel Öffnung (Hauptweg), „Wie öffnet der zweite Flügel?“ danach; die Wahl lässt die Seitenteile außen, Sprossen in allen Feldern; „Gestaltung übernehmen“ nimmt Gehflügel und Wunschfarben mit (' + st1.folge + ', ' + st2 + ')');
   // Standard mit dem Namen des Betriebs im Kundenlink
-  const stdB = await p.evaluate(() => { const alt = S.betrieb; S.betrieb = { name: 'Fensterbau Brandt' }; S.proj.tiefe = 'genau'; const w = baseWin(); w.name = 'X'; S.win = w; S.q = 'griffM'; S.screen = 'frage'; render(true); const zeile = document.querySelector('.qpanel .qstd b').textContent; S.q = 'tiefe'; render(true); const sub = document.querySelector('.qdock .hd > p, .scr.dna .lg-frage > p').textContent; S.betrieb = alt; S.q = 'griffM'; render(true); return { zeile: zeile, sub: sub, eigen: document.querySelector('.qpanel .qstd b').textContent }; });
-  ok(stdB.zeile === 'Standard von Fensterbau Brandt' && /plant Fensterbau Brandt nach seinem Standard/.test(stdB.sub) && stdB.eigen === 'Standard des Fensterbauers', 'Im Kundenlink heißt der Standard nach dem Betrieb („Standard von Fensterbau Brandt“), die Tiefe-Frage sagt, wer den Rest macht');
+  const stdB = await p.evaluate(() => { const alt = S.betrieb; S.betrieb = { name: 'Fensterbau Brandt' }; S.proj.tiefe = 'genau'; const w = baseWin(); w.name = 'X'; S.win = w; S.q = 'griffM'; S.screen = 'frage'; render(true); const zeile = document.querySelector('.qpanel .qstd b').textContent; S.q = 'extras'; render(true); const sub = document.querySelector('.qdock .hd .wz-sub, .qdock .hd > p').textContent; S.betrieb = alt; S.q = 'griffM'; render(true); return { zeile: zeile, sub: sub, eigen: document.querySelector('.qpanel .qstd b').textContent }; });
+  ok(stdB.zeile === 'Standard von Fensterbau Brandt' && /plant Fensterbau Brandt nach seinem Standard/.test(stdB.sub) && stdB.eigen === 'Standard des Fensterbauers', 'Im Kundenlink heißt der Standard nach dem Betrieb („Standard von Fensterbau Brandt“), die freiwillige Liste sagt, wer den Rest macht');
   // Keine Gesamtübersicht: Detailangaben nur im bezahlten Blatt, nicht nach dem Speichern, im Ergebnis oder in der Liste
   const kgB = await p.evaluate(() => { const w = demoProject()[0]; Object.assign(w, { name: 'Bad', gitter: 'zier', profil: 'stil', oeffner: 'kette', dicht: 'beige', griffM: 'stil', leiste: 'beide' }); S.windows = [w]; S.win = kopie(w); S.editIdx = 0; const t = []; ['fertig', 'ergebnis', 'home'].forEach((sc) => { go(sc); t.push(document.querySelector('.scr').textContent); }); return { t: t.join(' '), blatt: specRows(w).some((r) => r.k === 'Fenstergitter') }; });
   ok(!/Ziergitter|Stilprofil|Kettenantrieb|Beige|Stilgriff|Abdeckleisten/.test(kgB.t) && kgB.blatt, 'Keine Gesamtübersicht: Detailangaben stehen weder nach dem Speichern noch im Ergebnis noch in der Liste, nur im Aufmaßblatt');
-  // Entwurf: „Mehr zu …“ und der Rückweg von der Tiefe überstehen das Neuladen
-  await p.evaluate(() => { S.windows = [demoProject()[1]]; S.proj.tiefe = 'kurz'; persist(); const w = demoProject()[0]; w.name = 'Flur'; S.win = w; S.editIdx = -1; S.q = 'fi'; go('frage'); }); await p.waitForTimeout(400);
-  await p.click('.qpanel .qmehr'); await p.waitForTimeout(400);
-  const eM0 = await p.evaluate(() => ({ q: S.q, kap: qCurrent().q.kap }));
-  await p.click('.qdock .qtiefe'); await p.waitForTimeout(900);
+  // Entwurf: eine Wahl in der freiwilligen Liste übersteht das Neuladen; „Fertig“ führt danach zur Liste zurück
+  await p.evaluate(() => { S.windows = [demoProject()[1]]; persist(); const w = demoProject()[0]; w.name = 'Flur'; S.win = w; S.editIdx = -1; S.q = 'extras'; go('frage'); }); await p.waitForTimeout(400);
+  await p.click('.ex-zeile[data-v="kvd"]'); await p.waitForTimeout(400); await p.click('.qpanel [data-f="kvd"][data-v="kvd"]'); await p.waitForTimeout(900);
+  const eM0 = await p.evaluate(() => ({ q: S.q, kvd: S.win.kvd }));
   await p.reload({ waitUntil: 'networkidle' }); await p.waitForTimeout(400);
   await p.click('[data-act="entwurf-weiter"]'); await p.waitForTimeout(400);
-  const eM1 = await p.evaluate(() => ({ q: S.q, mehr: !!(MEHR.get(S.win) || {}).material, tiefe: S.proj.tiefe }));
+  const eM1 = await p.evaluate(() => ({ q: S.q, kvd: S.win.kvd, pille: document.querySelector('.lg-weiter').textContent.trim() }));
   await p.click('.qnav .btn.primary, .lg-weiter'); await p.waitForTimeout(400);
-  const eM2 = await p.evaluate(() => ({ q: S.q, sichtbar: qSichtbar(S.win).filter((q) => q.kap === 'material').length, alle: qList(S.win).filter((q) => q.kap === 'material').length }));
-  ok(eM0.kap === 'material' && eM0.q !== 'fi' && eM1.q === 'tiefe' && eM1.mehr && eM1.tiefe === 'kurz' && eM2.q === eM0.q && eM2.sichtbar === eM2.alle, 'Entwurf: aufgeklappte Kapitel („Mehr zu …“) und der Rückweg von der Tiefe überstehen das Neuladen; Weiter führt zurück zur Frage (' + eM0.q + ')');
+  const eM2 = await p.evaluate(() => S.q);
+  ok(eM0.q === 'kvd' && eM0.kvd === 'kvd' && eM1.kvd === 'kvd' && eM2 === 'extras' && (eM1.q !== 'kvd' || eM1.pille === 'Fertig'), 'Entwurf: die Wahl aus der freiwilligen Liste übersteht das Neuladen; „Fertig“ führt zur Liste zurück (' + JSON.stringify([eM0, eM1, eM2]) + ')');
   /* Nacharbeit nach dem Merge von #46 (Prüfbefunde app): Zeilen und Chips mit i, „Mehr zu …“, Tiefe-Pille mitten in den Detailfragen,
      angefangenes Fenster beim Senden, letzter Schritt der Führung, Zurück-Taste bei der KI-Einwilligung */
   // Glas-Extras mit Symbol und i: jede Zeile 44 px (vorher 341 px je Option mit riesigen Symbolen), Haken untereinander
@@ -4949,7 +4932,7 @@ if (teil(22)) {
     await frageB('glasfn', { glasfn: ['sicht'] }, t);
     gx[t] = await p.evaluate(() => { const d = document.querySelector('.qdock'); return { zeilen: Array.from(d.querySelectorAll('.qlist > .qli')).map((x) => Math.round(x.getBoundingClientRect().height)), ci: Array.from(d.querySelectorAll('.qlist .ci')).map((x) => Math.round(x.getBoundingClientRect().width)), sh: d.scrollHeight, haken: new Set(Array.from(d.querySelectorAll('.qlist .mark')).map((x) => Math.round(x.getBoundingClientRect().left))).size, i: d.querySelectorAll('.qlist .qci-i[data-act="gloss"]').length }; });
   }
-  ok(gx.genau.zeilen.length === 7 && gx.normal.zeilen.length === 4 && gx.genau.zeilen.concat(gx.normal.zeilen).every((h) => h >= 44 && h <= 56) && gx.genau.ci.concat(gx.normal.ci).every((w) => w === 20) && gx.genau.sh < 600 && gx.genau.haken === 1 && gx.genau.i === 7,
+  ok(gx.genau.zeilen.length === 7 && gx.normal.zeilen.length === 7 && gx.genau.zeilen.concat(gx.normal.zeilen).every((h) => h >= 44 && h <= 56) && gx.genau.ci.concat(gx.normal.ci).every((w) => w === 20) && gx.genau.sh < 600 && gx.genau.haken === 1 && gx.genau.i === 7,
     'Glas-Extras mit Symbol und i („Alles im Detail“ und „Die üblichen Wünsche“): Zeilen 44 bis 56 px, Symbole 20 px, Haken untereinander, Dock ' + gx.genau.sh + ' px statt 2.500 (' + gx.genau.zeilen.join('/') + ')');
   // Chips mit i: Beschriftung ganz vor dem i (sonst Zeilen), das i auf dem gedrückten Chip hell mit dunklem Zeichen; 390 und 360 px
   const chipsI = [];
@@ -4972,24 +4955,7 @@ if (teil(22)) {
   }
   await p.setViewportSize({ width: 390, height: 844 });
   ok(!chipsI.length, 'Chips mit i bei 390 und 360 px: Beschriftung ganz vor dem i (Glas-Extras, Fensterbank innen, Einbruchschutz, Antrieb), das i auf dem gedrückten Chip lesbar' + (chipsI.length ? ' (' + chipsI.join(' | ') + ')' : ''));
-  // „Mehr zu …“ bei „Das Wichtigste“: weiter bei der ersten dazugeholten Frage des Kapitels, nicht dahinter
-  const mz = await p.evaluate(() => {
-    const out = [], mk = () => { S.verlassen = null; S.wohin = false; const w = baseWin(); Object.assign(w, { name: 'X', e_teilung: true }); S.win = w; S.editIdx = -1; S.proj.tiefe = 'kurz'; S.qMass = null; S.screen = 'frage'; };
-    mk(); S.q = 'lage'; const ids = qCurrent().list.map((q) => q.id);
-    ids.forEach((id) => { mk(); S.q = id; render(true); const b = document.querySelector('.qmehr'); if (!b) return; const kap = qCurrent().q.kap, vorher = qSichtbar(S.win).map((q) => q.id); b.click(); const neu = qCurrent().list.filter((q) => q.kap === kap && vorher.indexOf(q.id) < 0).map((q) => q.id); out.push({ id: id, q: S.q, erste: neu[0], n: neu.length }); });
-    return out;
-  });
-  ok(mz.length >= 5 && mz.every((x) => x.n > 0 && x.q === x.erste), '„Mehr zu …“ führt zur ersten dazugeholten Frage des Kapitels, „Weiter“ dann der Reihe nach (' + mz.map((x) => x.id + ' → ' + x.q).join(', ') + ')');
-  // Tiefe-Pille auf einer Frage, die es in der niedrigeren Tiefe nicht gibt: weiter hinter der Stelle, nicht bei „Welche Form?“
-  const tzW = [];
-  for (const [von, t0, t1, weg] of [['griffM', 'genau', 'kurz', 'weiter'], ['oberfl', 'genau', 'normal', 'browser'], ['griff', 'normal', 'kurz', 'zurueck']]) {
-    await frageB(von, {}, t0); await p.click('.qdock .qtiefe'); await p.waitForTimeout(300);
-    await p.click('[data-act="tiefe"][data-v="' + t1 + '"]'); await p.waitForTimeout(200);
-    if (weg === 'weiter') await p.click('.qnav .btn.primary, .lg-weiter'); else if (weg === 'zurueck') await p.click('.qnav [data-act="qprev"], .lg-zurueck'); else await p.evaluate(() => history.back());
-    await p.waitForTimeout(450);
-    tzW.push(await p.evaluate((v) => { const alle = qList(S.win).map((q) => q.id), sicht = qSichtbar(S.win).map((q) => q.id).filter((x) => x !== 'tiefe'), j = alle.indexOf(v); return { von: v, q: S.q, soll: sicht.find((x) => alle.indexOf(x) > j), screen: S.screen }; }, von));
-  }
-  ok(tzW.every((x) => x.screen === 'frage' && x.q === x.soll && x.q !== 'form'), 'Tiefe-Pille auf einer Frage, die es dann nicht mehr gibt: Weiter, Zurück und die Zurück-Taste führen zur nächsten sichtbaren Frage dahinter (' + tzW.map((x) => x.von + ' → ' + x.q).join(', ') + ')');
+  // „Mehr zu …“ und die Tiefe-Pille entfallen mit dem Hauptweg und der freiwilligen Liste (2.11.2026, Abschnitt 32)
   // Angefangenes Fenster beim Senden (Kundenlink): Hinweis auf „Prüfen“, Rückfrage statt stillem Senden, Zurück-Taste schließt sie
   const ctxE = await browser.newContext(telefon), pE = await neueSeite(ctxE);
   await pE.goto(BASE + '/app/#k-nach22-Fensterbau_Elster.' + b64u('Fensterbau Elster') + '.' + b64u('Familie Star'), { waitUntil: 'networkidle' }); await pE.waitForTimeout(300);
@@ -5018,7 +4984,7 @@ if (teil(22)) {
   const ctxK = await browser.newContext(telefon), pK = await neueSeite(ctxK);
   await pK.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   const jpegK = Buffer.from(await pK.evaluate(() => { const c = document.createElement('canvas'); c.width = 600; c.height = 800; const g = c.getContext('2d'); g.fillStyle = '#e9e3da'; g.fillRect(0, 0, 600, 800); g.fillStyle = '#a9c8e8'; g.fillRect(150, 150, 300, 500); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; }), 'base64');
-  await pK.click('[data-act="new"]'); await pK.waitForSelector('.scr[data-screen="start"]'); await pK.click('.lg-weiter');
+  await pK.click('[data-act="new"]'); await pK.waitForSelector('.scr[data-screen="start"]'); await zuDenFotos(pK);
   await pK.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
   await pK.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpegK });
   const kiOffen = await pK.waitForSelector('.fx-dialog', { timeout: 5000 }).then(() => true, () => false);
@@ -5036,7 +5002,7 @@ if (teil(22)) {
   const fs2 = await p.evaluate(() => { const d = document.querySelector('.scroll'), b = document.querySelector('.qpanel .qlabel'), f = document.querySelector('.lg-fuss'); return { top: Math.round(d.scrollTop), sicht: !!b && b.getBoundingClientRect().top < (f ? f.getBoundingClientRect().top : innerHeight) - 20 }; });
   await frageB('griff', { griff: 'standard', teilung: '2p', sashes: [{ t: 'DK', din: 'L' }, { t: 'DK', din: 'R' }] }, 'normal'); await p.waitForTimeout(1300);
   const fs3a = await p.evaluate(() => ({ z: W3DZ.w3d.z, x: Math.round(W3DZ.w3d.x), y: Math.round(W3DZ.w3d.y) }));
-  await p.click('.qnav [data-act="qnext"]'); await p.waitForTimeout(150);
+  await p.evaluate(() => { S.q = 'gf'; S.dir = 'fwd'; render(true); }); await p.waitForTimeout(150); // Griff und Griff-Farbe stehen in der Liste; der Wechsel wie von Frage zu Frage
   const fs3b = await p.evaluate(() => ({ q: S.q, z: W3DZ.w3d.z, x: Math.round(W3DZ.w3d.x), y: Math.round(W3DZ.w3d.y) })); await p.waitForTimeout(900);
   const fs3c = await p.evaluate(() => ({ q: S.q, z: W3DZ.w3d.z }));
   const fs4 = await p.evaluate(() => { const w = demoProject()[0]; w.sart = 'raffstore'; w.roll = 'aufsatz'; const V = w3dCalc(w, {}); w.sart = 'rollladen'; const V2 = w3dCalc(w, {}); w.roll = 'vorbau'; const V3 = w3dCalc(w, {}); return { raff: V.moH - V.elH, kasten: V.kastenH, roll: V2.moH - V2.elH, vorbau: V3.moH - V3.elH, blende: AW.DETAIL.some((d) => d.k === 'blende') && AW.detailGilt(Object.assign(w, { roll: 'aufsatz' }), 'blende') && !AW.detailGilt(Object.assign(w, { roll: 'vorbau' }), 'blende') }; });

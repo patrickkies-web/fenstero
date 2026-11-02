@@ -66,7 +66,9 @@ export default async (h) => {
   const gesehen = [];
   const merken = async (s, wo) => { gesehen.push({ wo: wo, html: await html(s), text: await text(s), quer: await waagrecht(s) }); };
   const fotosMachen = async (s) => {
-    await s.click('.lg-weiter'); // Start (Design-DNA): „Weiter zu den Fotos“
+    /* Start → Form am Modell → Weg zu den Maßen → „Geführt messen“ (neuer Ablauf, 2.11.2026) */
+    await s.click('.scr[data-screen="start"] .lg-weiter'); await s.waitForSelector('.scr[data-screen="frage"]');
+    await s.evaluate(() => { S.q = 'massweg'; render(true); }); await s.click('.mw-zeile[data-v="messen"]');
     await s.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
     await s.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(bild.fotos[0], 'base64') });
     if (await s.waitForSelector('.fx-dialog', { timeout: 3000 }).then(() => true, () => false)) { await merken(s, 'KI-Einwilligung'); await s.click('.fx-ja'); }
