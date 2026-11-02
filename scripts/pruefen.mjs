@@ -4693,7 +4693,7 @@ if (teil(21)) {
     out.balkon = await zeige({ etage: 'og', absturz: 'gelaender', paneel: 'paneel' }, 'balkon', ['gel', 'gel-h', 'pan-i-0', 'riegel-i-0']);
     out.psk = await zeige({}, 'psk', ['sash-3'], 'C');
     /* Festverglasung ohne Griff-Frage: die App spränge auf „Lage“ (Design-DNA, ohne Modell), deshalb die Glas-Frage */
-    out.form = await zeige({ form: 'dreieck' }, '', ['rs-0', 'el-front'], '', 'glas');
+    out.form = await zeige({ form: 'dreieck' }, '', ['rs-0', 'el-front'], '', 'montage');
     out.pskT = S.win.sashes.map((x) => x.t).join();
     return out;
   });
