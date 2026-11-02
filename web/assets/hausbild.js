@@ -163,7 +163,7 @@ const hbPx = (q, W, H) => q.map((p) => [p[0] * W, p[1] * H]);
 /* ---------- Bildschirm ---------- */
 function hbTitel() {
   if (HB.laedt) return ['Dein Haus wird <em>gerechnet.</em>', 'Das dauert meist 10 bis 30 Sekunden.'];
-  if (HB.ergebnis) return ['So <em>könnte</em> es aussehen.', 'Von einer KI berechnet, kein Foto. Farbe, Teilung und Details wie Fensterbank und Laibung können abweichen. Gemessen und bestellt wird mit deinem Aufmaß.'];
+  if (HB.ergebnis) return ['So <em>könnte</em> es aussehen.', 'Von einer KI berechnet, kein Foto. Farbe, Teilung und Details wie Fensterbank und Laibung können abweichen. Gemessen und bestellt wird mit deinem Aufmaß. ' + (matchMedia('(pointer: coarse)').matches ? 'Mit zwei Fingern zoomst du heran.' : 'Mit dem Mausrad zoomst du heran.')];
   if (!HB.foto) return ['Dein Fenster <em>am Haus.</em>', 'Wähle ein Foto deines Hauses, am besten gerade von vorn und bei Tageslicht.'];
   const ak = HB.el.find((e) => e.id === HB.aktiv);
   if (ak) return ['Zieh es an <em>seinen Platz.</em>', 'Mit dem Finger verschieben, die vier Ecken auf die Öffnung ziehen. Mit zwei Fingern drehen und vergrößern, am Rechner mit dem Mausrad.'];
@@ -188,7 +188,7 @@ function hbBuehne() {
   const laedt = HB.laedt ? '<div class="hb-laedt" role="status"><span class="spin"></span><span>' + (HB.langsam ? 'Der Bilddienst hat gerade viel zu tun. Es dauert etwas länger.' : 'Licht, Schatten und Laibung werden gerechnet') + '</span></div>' : '';
   const lupe = HB.ergebnis || HB.laedt ? '' : '<div class="hb-lupe" role="group" aria-label="Lupe"><button type="button" class="hb-rund" data-act="hb-zoom" data-v="1" aria-label="Näher"' + (HB.z >= 3.99 ? ' disabled' : '') + '>' + hbZ('naeher') + '</button>' +
     '<button type="button" class="hb-rund" data-act="hb-zoom" data-v="-1" aria-label="Weiter weg"' + (HB.z <= 1 ? ' disabled' : '') + '>' + hbZ('weiter') + '</button></div>';
-  const bedienen = !HB.ergebnis && (HB.aktiv || HB.bearbeiten || HB.z > 1);
+  const bedienen = HB.z > 1.001 || (!HB.ergebnis && (HB.aktiv || HB.bearbeiten));
   return '<div class="fg-buehne hb-buehne' + (HB.bearbeiten && !HB.aktiv ? ' waehlen' : '') + '"><div class="hb-rahmen' + (bedienen ? ' bedienen' : '') + '" style="aspect-ratio: ' + HB.foto.w + ' / ' + HB.foto.h + '">' +
     '<div class="hb-zoom"><img class="hb-foto" src="' + src + '" alt="' + (HB.ergebnis && HB.zeige === 'nach' ? 'KI-Visualisierung: dein Haus mit den neuen Elementen, kein Foto' : 'Dein Foto') + '" draggable="false">' +
     '<div class="hb-ebene">' + els + ecken + '</div></div>' + lupe + laedt + (HB.ergebnis && HB.zeige === 'nach' ? '<span class="wz-chip hb-ki-chip" aria-hidden="true">KI-Bild</span>' : '') + '</div>' + vergleich + '</div>';
@@ -289,29 +289,72 @@ function hbEckenSetzen() {
   const p = hbEckpunkte(e);
   document.querySelectorAll('.hb-ecke').forEach((c) => { const i = +c.getAttribute('data-i'); c.style.transform = 'translate(' + p[i][0] + 'px,' + p[i][1] + 'px) scale(' + (1 / HB.z) + ')'; });
 }
+/* Klasse „bedienen“ (touch-action: none) ohne neues Zeichnen: vergrößert oder beim Setzen der Elemente */
+function hbBedienenSetzen() { const r = document.querySelector('.hb-rahmen'); if (r) r.classList.toggle('bedienen', HB.z > 1.001 || (!HB.ergebnis && (!!HB.aktiv || HB.bearbeiten))); }
+/* Lupenknöpfe nach einer Geste auf den neuen Zoom bringen */
+function hbLupeSetzen() {
+  const n = document.querySelector('.hb-lupe [data-v="1"]'), w = document.querySelector('.hb-lupe [data-v="-1"]');
+  if (n) n.disabled = HB.z >= 3.99; if (w) w.disabled = HB.z <= 1;
+}
+/* Doppeltipp: auf z um den Punkt p (im Rahmen) zoomen, kurz und weich (ease-out, 260 ms; ohne bei reduzierter Bewegung) */
+function hbZoomAuf(z, p) {
+  const zoom = document.querySelector('.hb-zoom'), alt = HB.z; if (!zoom || !HB.anzeige) return;
+  HB.tx = p[0] - (p[0] - HB.tx) / alt * z; HB.ty = p[1] - (p[1] - HB.ty) / alt * z; HB.z = z;
+  const ruhig = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!ruhig) { zoom.style.transition = 'transform 260ms cubic-bezier(0.23, 1, 0.32, 1)'; clearTimeout(zoom._t); zoom._t = setTimeout(() => { zoom.style.transition = ''; }, 300); }
+  hbZoomSetzen(); hbEckenSetzen(); hbBedienenSetzen(); hbLupeSetzen();
+}
 function hbGesten(ebene) {
-  const zeiger = new Map(); let geste = null;
+  /* zeiger: Finger am gewählten Element (verschieben, Ecken, zwei Finger drehen und vergrößern); blick: Finger daneben oder auf der
+     fertigen Vorschau (Inhaber, 2.11.2026: „mit den Fingern zoomen und dann verschieben“): zwei Finger zoomen um ihre Mitte, ein Finger
+     verschiebt, sobald vergrößert ist; Doppeltipp springt heran und zurück. Während der Geste folgt das Bild dem Finger ohne Animation. */
+  const zeiger = new Map(), blick = new Map(); let geste = null, tipp = null;
   const lokal = (ev) => { const r = ebene.getBoundingClientRect(); return [(ev.clientX - r.left) / r.width, (ev.clientY - r.top) / r.height]; };
+  const rahmenPunkt = (x, y) => { const r = ebene.closest('.hb-rahmen').getBoundingClientRect(); return [x - r.left, y - r.top]; };
+  const aufAktiv = (ev, e) => { const el = ev.target.closest('.hb-el'); return !!e && (!!ev.target.closest('.hb-ecke') || (!!el && +el.getAttribute('data-id') === e.id)); };
+  const blickStart = () => {
+    const p = Array.from(blick.values());
+    if (p.length >= 2) geste = { art: 'blick', z0: HB.z, tx0: HB.tx, ty0: HB.ty, a0: p[0].slice(), b0: p[1].slice() };
+    else if (p.length === 1 && HB.z > 1.001) geste = { art: 'schwenk', x: p[0][0], y: p[0][1], tx: HB.tx, ty: HB.ty };
+    else geste = null;
+  };
   ebene.addEventListener('pointerdown', (ev) => {
-    const ecke = ev.target.closest('.hb-ecke'), el = ev.target.closest('.hb-el');
-    if (HB.bearbeiten && !HB.aktiv && el) { HB.aktiv = +el.getAttribute('data-id'); render(); return; } // im Bearbeiten-Modus: antippen wählt aus
-    const e = HB.el.find((x) => x.id === HB.aktiv);
-    /* neben dem Element: mit der Lupe den Ausschnitt verschieben */
-    if ((!e || (!ecke && !(el && +el.getAttribute('data-id') === e.id))) && HB.z > 1) {
-      ev.preventDefault(); ebene.setPointerCapture(ev.pointerId); zeiger.set(ev.pointerId, lokal(ev));
-      geste = { art: 'schwenk', x: ev.clientX, y: ev.clientY, tx: HB.tx, ty: HB.ty }; ebene.classList.add('zieht'); return;
+    const el = ev.target.closest('.hb-el');
+    if (HB.bearbeiten && !HB.aktiv && el && !blick.size) { HB.aktiv = +el.getAttribute('data-id'); render(); return; } // im Bearbeiten-Modus: antippen wählt aus
+    const e = HB.ergebnis ? null : HB.el.find((x) => x.id === HB.aktiv);
+    if (zeiger.size && !aufAktiv(ev, e)) return; // ein Finger zieht schon am Element: daneben nichts anderes anfangen
+    if (!aufAktiv(ev, e) || blick.size) {
+      /* Bild: zoomen und verschieben (liegt schon ein Finger neben dem Element, zoomt auch ein zweiter auf dem Element das Bild) */
+      blick.set(ev.pointerId, [ev.clientX, ev.clientY]); ebene.setPointerCapture(ev.pointerId);
+      if (blick.size >= 2 || HB.z > 1.001) ev.preventDefault();
+      tipp = blick.size === 1 ? { x: ev.clientX, y: ev.clientY, t: Date.now(), vorher: tipp && { x: tipp.x, y: tipp.y, t: tipp.t } } : null;
+      blickStart(); if (geste) ebene.classList.add('zieht');
+      return;
     }
-    if (!e) return;
-    if (!ecke && !(el && +el.getAttribute('data-id') === e.id)) return;
     ev.preventDefault(); ebene.setPointerCapture(ev.pointerId); zeiger.set(ev.pointerId, lokal(ev));
+    const ecke = ev.target.closest('.hb-ecke');
     if (zeiger.size === 2) geste = { art: 'zwei', q0: e.q.map((p) => p.slice()), p0: Array.from(zeiger.values()).map((p) => p.slice()) };
     else if (ecke) { const i = +ecke.getAttribute('data-i'), l = lokal(ev); geste = { art: 'ecke', i: i, d: [l[0] - e.q[i][0], l[1] - e.q[i][1]] }; } // Abstand Finger zur Ecke bleibt
     else geste = { art: 'ziehen', q0: e.q.map((p) => p.slice()), s: lokal(ev) };
     ebene.classList.add('zieht');
   });
   ebene.addEventListener('pointermove', (ev) => {
+    if (blick.has(ev.pointerId)) {
+      blick.set(ev.pointerId, [ev.clientX, ev.clientY]);
+      if (tipp && Math.hypot(ev.clientX - tipp.x, ev.clientY - tipp.y) > 10) tipp = null;
+      if (!geste) return;
+      if (geste.art === 'schwenk') { HB.tx = geste.tx + ev.clientX - geste.x; HB.ty = geste.ty + ev.clientY - geste.y; hbZoomSetzen(); return; }
+      if (geste.art === 'blick' && blick.size >= 2) {
+        const [a, b] = Array.from(blick.values()), d0 = Math.hypot(geste.b0[0] - geste.a0[0], geste.b0[1] - geste.a0[1]), d1 = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        const z = Math.max(1, Math.min(4, geste.z0 * d1 / Math.max(10, d0)));
+        const m0 = rahmenPunkt((geste.a0[0] + geste.b0[0]) / 2, (geste.a0[1] + geste.b0[1]) / 2), m1 = rahmenPunkt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+        /* der Bildpunkt unter der Mitte der Finger bleibt unter ihr */
+        HB.z = z; HB.tx = m1[0] - (m0[0] - geste.tx0) / geste.z0 * z; HB.ty = m1[1] - (m0[1] - geste.ty0) / geste.z0 * z;
+        hbZoomSetzen(); hbEckenSetzen();
+      }
+      return;
+    }
     if (!geste || !zeiger.has(ev.pointerId)) return;
-    if (geste.art === 'schwenk') { HB.tx = geste.tx + ev.clientX - geste.x; HB.ty = geste.ty + ev.clientY - geste.y; hbZoomSetzen(); return; }
     const e = HB.el.find((x) => x.id === HB.aktiv); if (!e) return;
     const p = lokal(ev); zeiger.set(ev.pointerId, p);
     const k = (v) => Math.max(-0.5, Math.min(1.5, v));
@@ -327,12 +370,37 @@ function hbGesten(ebene) {
     }
     const d = ebene.querySelector('.hb-el.aktiv'); if (d) hbSetzen(d); hbEckenSetzen();
   });
-  const ende = (ev) => { zeiger.delete(ev.pointerId); if (!zeiger.size) { geste = null; ebene.classList.remove('zieht'); } else if (geste && geste.art === 'zwei') { const e = HB.el.find((x) => x.id === HB.aktiv); geste = e ? { art: 'ziehen', q0: e.q.map((p) => p.slice()), s: Array.from(zeiger.values())[0] } : null; } };
+  const ende = (ev) => {
+    if (blick.has(ev.pointerId)) {
+      blick.delete(ev.pointerId);
+      const war = geste && geste.art;
+      blickStart();
+      if (!blick.size) {
+        ebene.classList.remove('zieht');
+        if (HB.z < 1.02) { HB.z = 1; hbZoomSetzen(); }
+        /* Doppeltipp: heran an die Stelle, bei Zoom zurück aufs ganze Bild */
+        if (ev.type === 'pointerup' && tipp && tipp.vorher && tipp.t - tipp.vorher.t < 320 && Math.hypot(tipp.x - tipp.vorher.x, tipp.y - tipp.vorher.y) < 30) { const p = rahmenPunkt(tipp.x, tipp.y); tipp = null; return hbZoomAuf(HB.z > 1.001 ? 1 : 2.5, p); }
+        if (war === 'blick' || war === 'schwenk') { hbBedienenSetzen(); hbLupeSetzen(); }
+      }
+      return;
+    }
+    zeiger.delete(ev.pointerId);
+    if (!zeiger.size) { geste = null; ebene.classList.remove('zieht'); } else if (geste && geste.art === 'zwei') { const e = HB.el.find((x) => x.id === HB.aktiv); geste = e ? { art: 'ziehen', q0: e.q.map((p) => p.slice()), s: Array.from(zeiger.values())[0] } : null; }
+  };
   ebene.addEventListener('pointerup', ende); ebene.addEventListener('pointercancel', ende);
-  /* Mausrad: vergrößern, mit Umschalt drehen */
+  /* Zwei Finger auf dem Bild: Die Seite soll dabei nicht scrollen (bei touch-action: pan-y entscheidet der Browser sonst selbst) */
+  ebene.addEventListener('touchstart', (ev) => { if (ev.touches.length > 1 && !ev.target.closest('.hb-el.aktiv, .hb-ecke')) ev.preventDefault(); }, { passive: false });
+  ebene.addEventListener('touchmove', (ev) => { if (ev.touches.length > 1 && blick.size > 1) ev.preventDefault(); }, { passive: false });
+  /* Mausrad: am gewählten Element vergrößern (mit Umschalt drehen), sonst das Bild um den Mauszeiger zoomen (auch Trackpad mit zwei Fingern) */
   ebene.addEventListener('wheel', (ev) => {
-    const e = HB.el.find((x) => x.id === HB.aktiv); if (!e || !ev.target.closest('.hb-el.aktiv, .hb-ecke')) return;
-    ev.preventDefault(); hbDrehenSkalieren(e, ev.shiftKey ? Math.sign(ev.deltaY) * 0.03 : 0, ev.shiftKey ? 1 : Math.exp(-ev.deltaY * 0.0015));
+    const e = HB.ergebnis ? null : HB.el.find((x) => x.id === HB.aktiv);
+    if (e && ev.target.closest('.hb-el.aktiv, .hb-ecke')) { ev.preventDefault(); return hbDrehenSkalieren(e, ev.shiftKey ? Math.sign(ev.deltaY) * 0.03 : 0, ev.shiftKey ? 1 : Math.exp(-ev.deltaY * 0.0015)); }
+    if (ev.shiftKey) return;
+    ev.preventDefault();
+    const p = rahmenPunkt(ev.clientX, ev.clientY), alt = HB.z, z = Math.max(1, Math.min(4, alt * Math.exp(-ev.deltaY * (ev.ctrlKey ? 0.01 : 0.0015))));
+    HB.tx = p[0] - (p[0] - HB.tx) / alt * z; HB.ty = p[1] - (p[1] - HB.ty) / alt * z; HB.z = z < 1.02 ? 1 : z;
+    hbZoomSetzen(); hbEckenSetzen(); hbBedienenSetzen();
+    clearTimeout(ebene._rad); ebene._rad = setTimeout(hbLupeSetzen, 120);
   }, { passive: false });
   /* Tastatur: Pfeile verschieben, + und − vergrößern, Q und E drehen */
   ebene.addEventListener('keydown', (ev) => {

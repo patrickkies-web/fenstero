@@ -690,6 +690,11 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
      Fingern drehen und vergrößern, am Rechner Mausrad (Umschalt: drehen) und Pfeiltasten. Die **Lupe** (Näher, Weiter) vergrößert bis
      vierfach um das gewählte Element, höchstens so weit, dass es mit seinen Eckpunkten im Bild bleibt; Ziehen neben dem Element verschiebt
      dann den Ausschnitt.
+     **Zoomen mit den Fingern** (Wunsch des Inhabers, 2.11.2026): Zwei Finger neben dem Element (oder auf der fertigen Vorschau) zoomen
+     das Bild bis vierfach um ihre Mitte, ein Finger verschiebt, sobald vergrößert ist; Doppeltipp springt auf 2,5-fach an die Stelle und
+     wieder zurück (260 ms, ease-out, ohne bei reduzierter Bewegung); am Rechner Mausrad und Trackpad um den Zeiger, Doppelklick. Zwei
+     Finger auf dem gewählten Element drehen und vergrößern weiter das Element. Bei 1-fach scrollt ein Finger die Seite. Vorher/Nachher
+     behält den Ausschnitt, damit man dieselbe Stelle vergleicht.
   3. **Bestätigen** verankert das Element. Danach sind die Elemente nicht mehr antippbar; **Bearbeiten** schaltet das Antippen ein, nach
      dem nächsten Bestätigen ist es wieder aus (Wunsch des Inhabers: nichts aus Versehen verschieben). **Duplizieren** setzt eine Kopie
      daneben, **Entfernen** nimmt das gewählte heraus. Bis hier keine KI.
