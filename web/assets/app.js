@@ -5755,7 +5755,8 @@ function zuStrich(svg) {
 }
 const WZ_FREI = { aufbau: 1, material: 1, glas: 1, bedienung: 1 };
 /* Türen bis zum Boden behalten Wand und Boden: Schwelle und Boden innen und außen gehören zu ihrer Planung */
-const wzFrei = (q) => !!WZ_FREI[q.kap || 'aufbau'] && !istTuer(S.win);
+/* Farbe außen steht in der Fassade: die Außenfarbe beurteilt man vor der Hauswand, dort bleibt auch der Knopf für die Fassade */
+const wzFrei = (q) => !!WZ_FREI[q.kap || 'aufbau'] && !istTuer(S.win) && q.id !== 'fa';
 function frageDna(c, q, panel, stage, designFertig, tasten) {
   panel = wzStrich(panel);
   const w = S.win, n = c.list.length, last = c.i === n - 1, ab = qAbschnitte(c).find((g) => g.jetzt) || { i0: 0, i1: n - 1 };

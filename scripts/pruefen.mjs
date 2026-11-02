@@ -4415,16 +4415,16 @@ if (teil(20)) {
   const frage20 = async (pg, id, set, art) => { await pg.evaluate(([id, set, art]) => { const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set || {}); if (art === 'hst') w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); S.win = w; S.q = id; S.selSash = 0; S.screen = 'frage'; render(true); }, [id, set || {}, art || '']); await pg.waitForTimeout(900); };
   const c20 = await browser.newContext(ctx20), g = await neueSeite(c20);
   await g.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' }); await g.waitForTimeout(400);
-  await frage20(g, 'material');
+  await frage20(g, 'montage');
   const an = await g.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), cv: !!st.querySelector('canvas.w3d-gl'), flaeche: getComputedStyle(st.querySelector('[data-r="wall-in"]')).display, rollen: Buehne3D.pruef.rollen(st).length }; });
   ok(an.gl && an.cv && an.flaeche === 'none' && an.rollen > 20, 'WebGL-Bühne: die Leinwand zeichnet das Modell, die Flächen bleiben unsichtbar als Beschreibung im DOM (' + an.rollen + ' Flächen)');
   /* Glas von innen (Inhaber, 30.10.2026: die Scheiben sahen „ausgegraut“ aus): Klarglas zeigt die Aussicht, oben Himmel, unten Rasen,
      deckend (das Gerät malt nichts Graues darunter); Sonnenschutzglas getönt, Ornamentglas bleibt gemalt */
   const glasBlick = (pg) => pg.evaluate(() => { const st = document.getElementById('w3d'); st.classList.add('is-drag'); st.style.setProperty('--rx', '-6deg'); st.style.setProperty('--ry', '0deg'); const P = Buehne3D.pruef.pixel(st), G = Buehne3D.pruef.glas(st), f = (q) => { const x = Math.round(q[0] * P.k), y = Math.round(q[1] * P.k), i = ((P.h - 1 - y) * P.w + x) * 4; return Array.from(P.px.slice(i, i + 4)); }; st.classList.remove('is-drag'); return G.map((x) => ({ art: x.art, oben: f(x.oben), unten: f(x.unten) })); });
   const gl20 = await glasBlick(g), hell = (c) => 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2];
-  await frage20(g, 'material', { glasfn: ['sonne'] }); const gs20 = await glasBlick(g);
-  await frage20(g, 'material', { glasfn: ['sicht'] }); const go20 = await glasBlick(g);
-  await frage20(g, 'material');
+  await frage20(g, 'montage', { glasfn: ['sonne'] }); const gs20 = await glasBlick(g);
+  await frage20(g, 'montage', { glasfn: ['sicht'] }); const go20 = await glasBlick(g);
+  await frage20(g, 'montage');
   ok(gl20.length >= 2 && gl20.every((x) => x.art === 2 && x.oben[3] === 255 && x.unten[3] === 255 && x.oben[2] > x.oben[0] + 12 && x.unten[1] > x.unten[2] + 6 && hell(x.oben) > hell(x.unten)) && gs20.every((x) => x.art === 3) && hell(gs20[0].oben) < hell(gl20[0].oben) - 25 && go20.every((x) => x.art === 1), 'Glas von innen: Klarglas zeigt die Aussicht (oben Himmel, unten Rasen, deckend), Sonnenschutzglas getönt, Ornamentglas wie gemalt ' + JSON.stringify({ klar: gl20[0], sonne: gs20[0] && gs20[0].oben, ornament: go20.map((x) => x.art) }));
   /* Nahtlinien: außerhalb der Öffnung (samt Fensterbank) ist nur Wand, ihr Helligkeitsverlauf hat keine Knicke */
   const WINKEL = [[-9, -27], [-30, -74], [-30, 6], [10, -74], [10, 6], [-20, -50], [-28, 112], [-8, 152]];
@@ -4489,25 +4489,26 @@ if (teil(20)) {
   const sel = await g.evaluate(() => ({ s: S.selSash, q: S.q }));
   ok(sel.s === 1 && sel.q === 'typ-1', 'Flügel antippen: die WebGL-Bühne trifft den angetippten Flügel und springt zu seiner Frage');
   /* Verlust des WebGL-Zusammenhangs: zurück zum CSS-Modell, Kamera wieder per CSS */
+  await frage20(g, 'montage');
   const verlust = await g.evaluate(async () => { const st = document.getElementById('w3d'), cv = st.querySelector('canvas.w3d-gl'); cv.getContext('webgl2').getExtension('WEBGL_lose_context').loseContext(); await new Promise((r) => setTimeout(r, 150)); return { gl: st.classList.contains('gl'), cam: st.querySelector('.w3d-cam').style.transform, flaeche: getComputedStyle(st.querySelector('[data-r="wall-in"]')).display }; });
   ok(!verlust.gl && !verlust.cam && verlust.flaeche !== 'none', 'Verliert der Browser den WebGL-Zusammenhang, zeichnet sofort das CSS-Modell');
   sauber(g, 'WebGL-Bühne ohne Fehler'); await c20.close();
   /* ohne WebGL 2 */
   const c20b = await browser.newContext(ctx20);
   await c20b.addInitScript(() => { const o = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function (t, a) { return t === 'webgl2' ? null : o.call(this, t, a); }; });
-  const g2 = await neueSeite(c20b); await g2.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' }); await frage20(g2, 'material');
+  const g2 = await neueSeite(c20b); await g2.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' }); await frage20(g2, 'montage');
   const ohne = await g2.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), cv: !!st.querySelector('canvas'), flaeche: getComputedStyle(st.querySelector('[data-r="wall-in"]')).display }; });
   ok(!ohne.gl && !ohne.cv && ohne.flaeche !== 'none', 'Ohne WebGL 2 zeichnet das CSS-Modell wie bisher');
   sauber(g2, 'Ohne WebGL 2 ohne Fehler'); await c20b.close();
   /* ohne Grafikchip: CSS-Modell (ohne ?gl=voll); mit Grafikchip: WebGL */
   const c20c = await browser.newContext(ctx20), g3 = await neueSeite(c20c);
-  await g3.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await frage20(g3, 'material');
+  await g3.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await frage20(g3, 'montage');
   const soft = await g3.evaluate(() => { const c = document.createElement('canvas').getContext('webgl2'); const x = c && c.getExtension('WEBGL_debug_renderer_info'); const r = c ? String(x ? c.getParameter(x.UNMASKED_RENDERER_WEBGL) : c.getParameter(c.RENDERER)) : ''; return { software: !c || /swiftshader|llvmpipe|softpipe|software|basic render/i.test(r), gl: document.getElementById('w3d').classList.contains('gl') }; });
   ok(soft.gl === !soft.software, soft.software ? 'Ohne Grafikchip (Software-WebGL) bleibt das CSS-Modell, damit nichts ruckelt' : 'Mit Grafikchip zeichnet die WebGL-Bühne');
   sauber(g3, 'Bühnenwahl ohne Fehler'); await c20c.close();
   /* weniger Bewegung: kein Schwingen */
   const c20d = await browser.newContext(Object.assign({ reducedMotion: 'reduce' }, ctx20)), g4 = await neueSeite(c20d);
-  await g4.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' }); await frage20(g4, 'material');
+  await g4.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' }); await frage20(g4, 'montage');
   const t1 = await g4.evaluate(() => document.querySelector('#w3d .w3d-sway').style.transform); await g4.waitForTimeout(700);
   const t2 = await g4.evaluate(() => document.querySelector('#w3d .w3d-sway').style.transform);
   ok(t1 === t2 && /rotateY\(0(\.0+)?deg\)/.test(t1), 'Weniger Bewegung: die WebGL-Bühne steht still (' + t1 + ')');
@@ -4685,7 +4686,7 @@ if (teil(21)) {
   const teile21 = await a21.evaluate(async () => {
     const warte = (ms) => new Promise((f) => setTimeout(f, ms)), out = {};
     const zeige = async (set, art, rollen, psk, frage) => { const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set); if (psk) { w.psk.schema = psk; w.sashes = pskFluegel(psk, w.psk.richtung); } S.win = w; S.q = frage || 'griff'; S.screen = 'frage'; render(true); await warte(250); const st = document.getElementById('w3d'); return rollen.map((r) => { const el = st.querySelector('[data-r="' + r + '"]'); return r + ':' + (el && ((el._f && el._f.W > 0.5 && el._f.H > 0.5) || (el._s && el._s.w > 0.5 && el._s.h > 0.5)) ? 1 : 0); }).join(' '); };
-    out.fenster = await zeige({ leiste: 'beide', oeffner: 'kette', luefter: 'schall', baender: 'sichtbar', gitter: 'stab', fba: 'alu', fbaKappe: 'kunststoff' }, '', ['li-t', 'la-l', 'oeff', 'luef', 'bd-o-0', 'gitter', 'sa-l', 'sa-r']);
+    out.fenster = await zeige({ leiste: 'beide', oeffner: 'kette', luefter: 'schall', baender: 'sichtbar', gitter: 'stab', fba: 'alu', fbaKappe: 'kunststoff' }, '', ['li-t', 'la-l', 'oeff', 'luef', 'bd-o-0', 'gitter', 'sa-l', 'sa-r'], '', 'montage');
     /* Sonnenschutz aus dem CSS-Modell (S3): Führungsschienen fs-*, beim Raffstore einzelne Lamellen und Aufzugbänder */
     out.sonne = await zeige({ sart: 'raffstore', roll: 'vorbau', antrieb: 'solar' }, '', ['fs-l', 'fs-r', 'solar', 'lam-0', 'band-l']);
     out.klapp = await zeige({ sart: 'klappladen', roll: 'keiner' }, '', ['kl-l', 'kl-r']);
