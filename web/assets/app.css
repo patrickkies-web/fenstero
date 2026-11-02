@@ -3570,29 +3570,29 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
    weiße Fläche läuft bis ganz nach unten. Die Bausteine bekommen dort ihre Farben auf Weiß (wie die Wünsche). Am Laptop bleibt die
    Spalte rechts, ebenfalls weiß. */
 @media (max-width: 1023px) {
-  .scr.dna:is(.ft, .er, .fg) .dna-links { display: block; position: relative; z-index: 2; margin: 0 -16px; padding: 0 16px 26px; background: var(--schwarz); border-radius: 0 0 36px 36px }
-  .scr.dna:is(.ft, .er, .fg) .dna-rechts { display: flex; flex-direction: column; flex: 1 0 auto; margin: -36px -16px 0; padding: 50px 16px 0; background: var(--weiss) }
+  .scr.dna:is(.ft, .er, .fg, .zn) .dna-links { display: block; position: relative; z-index: 2; margin: 0 -16px; padding: 0 16px 26px; background: var(--schwarz); border-radius: 0 0 36px 36px }
+  .scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts { display: flex; flex-direction: column; flex: 1 0 auto; margin: -36px -16px 0; padding: 50px 16px 0; background: var(--weiss) }
 }
 @media (min-width: 1024px) {
   .scr.dna.dt:is(.ft) .dna-rechts { background: var(--weiss); border-radius: 28px 0 0 0 }
 }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts { color: var(--schwarz); --grund: var(--weiss); --flaeche: #f6f6f8; --flaeche-hoch: var(--weiss); --tinte: var(--schwarz); --tinte-2: var(--textgrau); --linie: #dcdbe1; --linie-fein: #e6e5ea; --fokus: var(--schwarz); --handlung: var(--schwarz); --auf-handlung: var(--weiss) }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-frage h1 { color: var(--schwarz) }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-frage h1 em { color: var(--textgrau) }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-karte, .scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-karte.lg-hell { background: #f6f6f8; box-shadow: none }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-karte::before, .scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-karte::after { content: none }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts { color: var(--schwarz); --grund: var(--weiss); --flaeche: #f6f6f8; --flaeche-hoch: var(--weiss); --tinte: var(--schwarz); --tinte-2: var(--textgrau); --linie: #dcdbe1; --linie-fein: #e6e5ea; --fokus: var(--schwarz); --handlung: var(--schwarz); --auf-handlung: var(--weiss) }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-frage h1 { color: var(--schwarz) }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-frage h1 em { color: var(--textgrau) }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-karte, .scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-karte.lg-hell { background: #f6f6f8; box-shadow: none }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-karte::before, .scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-karte::after { content: none }
 .scr.dna.ft .dna-rechts .ft-tipp { background: #f6f6f8; box-shadow: none; color: var(--textgrau) }
 .scr.dna.ft .dna-rechts .ft-tipp b { color: var(--schwarz) }
 .scr.dna.ft .dna-rechts .ft-tipp svg { color: var(--textgrau) }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-i { color: var(--textgrau) }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-i::before { box-shadow: inset 0 0 0 1.5px #dcdbe1 }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-notiz-knopf, .scr.dna:is(.ft, .er, .fg) .dna-rechts .ez-notizknopf { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-fuss { background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--weiss) 16px) }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-fuss .dna-pille:not(.dna-pille--leise) { background: var(--schwarz); color: var(--weiss) }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-fuss .dna-pille:not(.dna-pille--leise) .dna-pille__pfeil { background: var(--weiss); color: var(--schwarz) }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .foot-links.recht, .scr.dna:is(.ft, .er, .fg) .dna-rechts .foot-links.recht a { color: var(--textgrau) }
-.scr.dna:is(.ft, .er, .fg) .dna-rechts .lg-i::before, .scr.dna.wz .lg-i::before { background: var(--weiss) }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-i { color: var(--textgrau) }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-i::before { box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-notiz-knopf, .scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .ez-notizknopf { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-fuss { background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--weiss) 16px) }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-fuss .dna-pille:not(.dna-pille--leise) { background: var(--schwarz); color: var(--weiss) }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-fuss .dna-pille:not(.dna-pille--leise) .dna-pille__pfeil { background: var(--weiss); color: var(--schwarz) }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .foot-links.recht, .scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .foot-links.recht a { color: var(--textgrau) }
+.scr.dna:is(.ft, .er, .fg, .zn) .dna-rechts .lg-i::before, .scr.dna.wz .lg-i::before { background: var(--weiss) }
 /* Ergebnis und Gespeichert: die Bühne rundet unten über der weißen Fläche (Telefon); am Laptop die rechte Spalte weiß */
 .scr.dna.er .er-buehne, .scr.dna.fg .fg-buehne { z-index: 2; border-radius: 0 0 36px 36px }
 .scr.dna.fg .fg-buehne { overflow: hidden; background: var(--schwarz) }
@@ -3651,3 +3651,43 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 /* „Weiß ich noch nicht“ steht auf Weiß an seinem Platz unter den Antworten, statt über den Kacheln zu schweben (die höhere Bühne lässt
    dafür keinen Platz) */
 .scr.dna.wz .qpanel .qoffen:not(.qstd) { position: static !important; box-shadow: inset 0 0 0 1px #dcdbe1 !important }
+/* ---------- Messen, Ränder und „Passt.“ im neuen Bild (Inhaber, 2.11.2026: „die Folien mit den Maßen zum Eingeben auch im neuen Design,
+   Beispiel die online stehenden Folien“) ----------
+   Oben der Kopf in Schwarz und die Bühne mit dem Raum, unten 36 px gerundet über der weißen Fläche; darauf Unterzeile, Notiz, die Karte
+   (hellgrau statt weiß mit Schatten), die Pille über den Verweisen. „Passt.“ ohne violetten Lichtfleck. Funktionen und Bewegung bleiben. */
+.scr.dna.md { background: var(--weiss) }
+.scr.dna.md .lg-kopf { background: var(--schwarz); box-shadow: -16px 0 0 var(--schwarz), 16px 0 0 var(--schwarz), 0 -40px 0 var(--schwarz) }
+.scr.dna.md .ez-buehne--mess { position: relative; z-index: 2; border-radius: 0 0 36px 36px }
+.scr.dna.md .ez.md-insel > .ez-folie > :is(.md-unter, .ez-karte, .lg-fuss, .foot-links) { --tinte: var(--schwarz); --tinte-2: var(--textgrau); --fokus: var(--schwarz); --handlung: var(--schwarz); --auf-handlung: var(--weiss) }
+.scr.dna.md .md-unter { padding-top: 14px }
+.scr.dna.md .ez-unterzeile { color: var(--textgrau) }
+.scr.dna.md .md-unter .ez-notizknopf { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.scr.dna.md .ez-karte, .scr.dna.md .ez-karte--tasten, .scr.dna.md .ez-karte--passt { background: #f6f6f8; box-shadow: none; color: var(--schwarz) }
+.scr.dna.md .ez-karte--passt::before { content: none }
+.scr.dna.md .lg-fuss { background: var(--weiss); --handlung: var(--schwarz); --auf-handlung: var(--weiss) }
+.scr.dna.md .lg-fuss::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 24px; pointer-events: none; background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--weiss)) }
+.scr.dna.md .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.scr.dna.md .lg-fuss .dna-pille:not(.dna-pille--leise) { background: var(--schwarz); color: var(--weiss) }
+.scr.dna.md .lg-fuss .dna-pille:not(.dna-pille--leise) .dna-pille__pfeil { background: var(--weiss); color: var(--schwarz) }
+.scr.dna.md .foot-links.recht, .scr.dna.md .foot-links.recht a { color: var(--textgrau) }
+@media (min-width: 1024px) {
+  .scr.dna.md .lg-kopf { box-shadow: none }
+  .scr.dna.md .ez-buehne--mess { border-radius: 0 }
+  .scr.dna.md .ez.md-insel > .ez-folie[data-folie="messen"]::before { content: ""; grid-column: 2; grid-row: 2 / 7; z-index: 0; background: var(--weiss); border-radius: 28px 0 0 0 }
+  .scr.dna.md { background: var(--schwarz) }
+  .scr.dna.md .ez.md-insel > .ez-folie[data-folie="messen"] > :is(.md-unter, .ez-karte, .lg-fuss, .foot-links) { position: relative; z-index: 1 }
+  .scr.dna.md .lg-fuss { background: none }
+  .scr.dna.md .lg-fuss::before { content: none }
+}
+/* Wunschmaße auf Weiß: Karte hellgrau ohne Schatten, Felder als weiße Pillen mit feinem Rand, beim Tippen schwarzer Rand */
+.scr.dna.er .pm-karte { background: #f6f6f8; box-shadow: none }
+.scr.dna.er .pm-karte .row .val { background: var(--weiss); box-shadow: inset 0 0 0 1px #e6e5ea }
+.scr.dna.er .pm-karte .row .val:focus-within { box-shadow: inset 0 0 0 2px var(--schwarz) }
+.scr.dna.er .pm-karte .row + .row { border-top: 1px solid #e6e5ea }
+/* Einzeichnen auf Weiß: Werkzeuge als Umriss-Pillen mit schwarzer Schrift */
+.scr.dna.zn .dna-rechts .zn-werkzeuge .chip { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+@media (max-width: 1023px) {
+  /* Einzeichnen: das Foto füllt die schwarze Bühne bis an die Ränder, unten gerundet wie die Bühne */
+  .scr.dna.zn .dna-links { padding: 0; background: var(--schwarz) }
+  .scr.dna.zn .dna-links > .zn-buehne { margin: 0; width: 100%; border-radius: 0 0 36px 36px }
+}
