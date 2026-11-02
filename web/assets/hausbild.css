@@ -5,13 +5,25 @@
    Licht von oben links und feinem Punktraster (neue Folien bekommen ihr eigenes Material, Skill design-dna-eeziframes Abschnitt 4).
    Ziele ab 44 px, Bewegung nur als Rückmeldung (Druck 0,97, 160 ms), bei weniger Bewegung nichts. Präfix hb-. */
 
-/* ---------- Gespeichert: Element aus der 3-D-Bühne ---------- */
-.dna .fg-modell { position: absolute; z-index: 2; left: 0; right: 0; top: 104px; bottom: 58px; pointer-events: none }
+/* ---------- Gespeichert: Bühne wie in den Wünschen ----------
+   Inhaber, 2.11.2026: „die originale Ansicht“, das Element groß wie im Editor, ohne Bearbeiten-Leiste, Grund wie in den Wünschen.
+   Bühne in Höhe und Grund wie .wz-buehne.wz-frei (app.css), Modell füllt sie; Überschrift darunter auf Weiß wie die Frage der Wünsche. */
+.scr.dna.fg .fg-tisch::before { display: none }
+.scr.dna.fg .fg-buehne.wz-frei { height: clamp(288px, calc(100svh - 370px), 437px);
+  background: radial-gradient(50% 46% at 50% 52%, var(--indigo) 0, color-mix(in srgb, var(--indigo) 50%, var(--schwarz)) 34%, color-mix(in srgb, var(--anthrazit) 45%, var(--schwarz)) 58%, var(--schwarz) 80%) }
+.scr.dna.fg .fg-buehne.wz-frei::before { display: none }
+.dna .fg-modell { position: absolute; z-index: 2; inset: 0; pointer-events: none }
 .dna .fg-modell > .w3d-stage { position: absolute !important; inset: 0; width: 100% !important; height: 100% !important; min-height: 0; max-height: none; margin: 0 !important; border-radius: 0 !important;
   background: transparent !important; box-shadow: none !important; animation: none !important; opacity: 1 !important; transform: none !important }
-.dna .fg-modell::after { content: ""; position: absolute; left: 50%; bottom: 2px; width: 46%; height: 26px; transform: translateX(-50%); border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(7, 9, 10, .55), rgba(7, 9, 10, 0)); pointer-events: none }
-@media (min-width: 900px) { .dna .fg-modell { top: 130px; bottom: 84px; left: 8%; right: 8% } }
+.dna .fg-modell .w3d-zoom, .dna .fg-modell .w3d-haus, .dna .fg-modell .w3d-sonne-knoepfe { display: none !important }
+.dna .fg-kopf { padding: 0 0 14px }
+.dna .fg-kopf h1 { margin: 0; font: 500 28px/1.1 var(--font-sans); letter-spacing: -.025em; color: var(--schwarz); text-wrap: balance; outline: none }
+.dna .fg-kopf h1 em { font-style: normal; color: var(--textgrau) }
+@media (min-width: 900px) {
+  .scr.dna.fg .fg-buehne.wz-frei { height: max(560px, calc(100svh - 60px)) }
+  .dna .fg-kopf { padding-top: 8px }
+  .dna .fg-kopf h1 { font-size: 32px }
+}
 
 /* ---------- Einladung (hellblau) ---------- */
 .dna .hb-einladung { --hb-tinte: #0d2440; --hb-tinte-2: #3b5470; --hb-blau: #1d4f8c;

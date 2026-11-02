@@ -337,6 +337,11 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   zum Gebäude mitgehen sollen (Ja/Nein, Zahl der Fragen, warum es zählt). Die Folien danach (Angaben, Liste der Fenster, Aufmaßblatt,
   Weg kostenlos oder bezahlen, Betriebe, Code, Kasse, Freigeschaltet, Senden) stehen alle auf der weißen Fläche, am Laptop mit weißer
   rechter Spalte.
+- Gespeichert zeigt das Element wie die Wünsche (Inhaber, 2.11.2026: „du brauchst dich da jetzt nicht zu quälen … die Daten darüber zu
+  schieben … ich hab ja eine Folie vorher noch die originale Ansicht gehabt“): Folgt auf eine Folie mit dem 3-D-Modell eine Folie über
+  dasselbe Element, steht dort dieselbe Bühne in derselben Größe und auf demselben Grund, nur ohne Bedienleiste; Überschrift und Text
+  stehen darunter, nicht über dem Modell. Kein verkleinertes Freisteller-Bild. Vorschlag für seine DNA (Abschnitt 9): „Das Element bleibt
+  beim Weitergehen, wie es war; nur die Werkzeuge gehen.“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

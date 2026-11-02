@@ -3846,9 +3846,9 @@ SCREENS.fertig = () => {
 };
 /* ---------- Gespeichert im Look der Design-DNA (28.10.2026, Wunsch des Inhabers: „intuitive Ansicht und einfache Bedienbarkeit, die
    Menüführung der vorherigen Folien als Anlehnung“) ----------
-   Kopf, Chip, Überschrift und Fuß wie in den Folien davor; die Bühne ist der Boden im Fensterlicht vom Start mit dem gestalteten Element
-   aus dem 3-D-Modell, frei im Raum (Inhaber, 2.11.2026: „das tatsächliche Bild von dem erstellten Element“, statt des Symbols; weiter
-   ohne Maße und ohne Liste der Wünsche). Darunter die hellblaue Einladung „An meinem Haus ansehen“ (hausbild.js), dann „Wie geht
+   Kopf, Chip und Fuß wie in den Folien davor; die Bühne zeigt das gestaltete Element wie in den Wünschen (Inhaber, 2.11.2026: „das
+   tatsächliche Bild von dem erstellten Element“ statt des Symbols, „die originale Ansicht“ ohne Bearbeiten-Leiste; weiter ohne Maße und
+   ohne Liste der Wünsche). Darunter auf Weiß die Überschrift, die hellblaue Einladung „An meinem Haus ansehen“ (hausbild.js), dann „Wie geht
    es weiter?“ als zwei Zeilen (weiteres Fenster, alle Fenster), dann „Dieses Fenster“ als vier Kacheln (Maße, Wünsche, Kopieren,
    Löschen) mit der Änderungsgrenze, „Direkt zu einem Thema“ als Chips; unten zurück zur Liste und die Pille zum Aufmaßblatt. */
 const FG_Z = {
@@ -3870,12 +3870,12 @@ function fertigDna() {
   const teile = ['Maße', 'Wünsche'].concat(nz ? ['deine ' + (nz === 1 ? 'Notiz' : nz + ' Notizen')] : [], bilderVon(w).length || num(w.fotos) > 0 ? ['die Auswertung der Fotos'] : []);
   const angaben = teile.slice(0, -1).join(', ') + ' und ' + teile[teile.length - 1];
   const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
-  /* Bühne: Boden im Fensterlicht, Chip mit Haken, der Name als Überschrift, das gespeicherte Element aus dem 3-D-Modell (dieselbe Bühne
-     wie in den Wünschen, frei ohne Wand, schwingt leicht), darunter Art und Stand */
-  const buehne = '<div class="fg-buehne">' +
+  /* Bühne wie in den Wünschen (Inhaber, 2.11.2026: „die originale Ansicht … eine ganz gesunde Ansicht“, „der Editor einfach da oben
+     ohne die Bearbeiten-Leiste“): dasselbe Modell in derselben Größe und auf demselben Grund, ohne Zoom, Zahnrad und Kapitelleiste;
+     oben der Chip, unten Art und Stand. Die Überschrift steht darunter auf Weiß wie die Frage in den Wünschen */
+  const buehne = '<div class="fg-buehne wz-frei">' +
     '<span class="wz-chip fg-chip" aria-hidden="true"><i class="fg-chip-haken">' + fgZ('haken') + '</i>Gespeichert · Position ' + (S.editIdx + 1) + '</span>' +
-    '<div class="fg-titel"><h1 tabindex="-1"><span class="fg-name">' + esc(w.name || ding) + '</span> <em>gespeichert.</em></h1></div>' +
-    '<div class="fg-modell" aria-hidden="true">' + model(gespeichert, { id: 'w3d', view: 'inside', frei: true, haus: false, sway: true, noZoom: true }) + '</div>' +
+    '<div class="fg-modell" aria-hidden="true">' + model(gespeichert, { id: 'w3d', view: 'inside', frei: !istTuer(w), haus: false, sway: true, noZoom: true }) + '</div>' +
     '<p class="fg-stand fertig-stand"><i class="' + (ganz ? 'ganz' : 'offen') + '" aria-hidden="true">' + (ganz ? fgZ('haken') : '') + '</i><b>' + esc(lab('art', w.art || 'fenster')) + '</b><small>' + esc(((num(w.anzahl) || 1) > 1 ? ' · ' + w.anzahl + ' Stück' : '') + ' · ' + status) + '</small></p></div>';
   const ki = kiLaeuftFuer(gespeichert) || kiLaeuftFuer(w) ? '<p class="fg-ki ki-laeuft" role="status"><span class="spin"></span><span>Die KI liest noch die Einbausituation. Die Auswertung kommt von selbst zu diesem Fenster.</span></p>' : '';
   /* Wie geht es weiter: zwei Zeilen, die Pille unten führt zum Aufmaßblatt bzw. zum Absenden */
@@ -3902,7 +3902,8 @@ function fertigDna() {
   /* an der Pille die Frage nach dem ganzen Haus und die Zahl der Fenster (Gremium: sonst kommen halbe Häuser als Anfrage) */
   const fuss = '<div class="lg-fuss fg-fuss"><p class="fg-fuss-frage">Alle Fenster im Haus erfasst?</p><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Fenster">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="anfrage">' + (lk ? 'Zum Absenden' : 'Zum Aufmaßblatt') + '<span class="fg-zahl"> · ' + S.windows.length + ' Fenster</span>' + pfeil + '</button></div>';
   const einladung = window.hbEinladung ? hbEinladung() : '';
-  const html = lgKopf(['back', 'Zurück: Fenster']) + '<div class="fg-tisch">' + buehne + '<div class="fg-rechts">' + ki + einladung + weiter + dieses + themen + spaeter + rechtLinks() + fuss + '</div></div>';
+  const titel = '<div class="fg-kopf"><h1 tabindex="-1"><span class="fg-name">' + esc(w.name || ding) + '</span> <em>gespeichert.</em></h1></div>';
+  const html = lgKopf(['back', 'Zurück: Fenster']) + '<div class="fg-tisch">' + buehne + '<div class="fg-rechts">' + titel + ki + einladung + weiter + dieses + themen + spaeter + rechtLinks() + fuss + '</div></div>';
   return { html: html, back: ['Fenster', 'home'], dna: true, cls: 'dna fg', voll: true };
 }
 SCREENS.fertigAlt = SCREENS.fertig;
