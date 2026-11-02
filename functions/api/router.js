@@ -1,6 +1,7 @@
 /* eeziframes · Verteiler für /api/… (Cloudflare Worker und lokaler Testserver nutzen denselben Code)
    GET  /api/status                 was eingerichtet ist (KI, Zahlung, Daten, Stripe im Testmodus, Webhook) und die Preise
    GET/POST /api/ki                 KI-Auswertung der Fotos (ki.js)
+   POST     /api/hausbild           echte Vorschau der Fenster am Foto des Hauses (hausbild.js, Black Forest Labs)
    /api/zahlung/…                   Aufmaßblatt kaufen (zahlung.js)
    /api/konto/…, /api/link/…, /api/aufmass   Betriebe, Links, Eingang (konten.js)
    /api/link/:code/entwurf          Zwischenstand eines Kundenlinks mit Zählern gegen Mehrfachnutzung (entwurf.js)
@@ -18,6 +19,7 @@ import { konfig, json, ApiFehler } from './umgebung.js';
 import { AGB_STAND, NB_STAND, ZUSTIMMUNG, verkaufStand } from './recht.js';
 import { bestaetigungenNachholen } from './bestaetigung.js';
 import { onRequestGet as kiGet, onRequestPost as kiPost } from './ki.js';
+import { onRequestPost as hausbildPost } from './hausbild.js';
 import { speicher } from './speicher.js';
 import { zahlungsdienst } from './stripe.js';
 import { KONTO, abrechnungslauf } from './konten.js';
@@ -69,12 +71,14 @@ export async function api(request, env, ctx0, inst) {
   try {
     /* verkauf: was vor dem Verkauf mit echtem Geld fehlt (recht.js); recht: Stand der AGB und der Nutzungsbedingungen und der Wortlaut
        der Zustimmung an der Kasse, so wie die App sie zeigt und der Server sie annimmt */
-    if (pfad === '/api/status') { const konten = k.daten ? !!(await kontenDa(speicher(k))) : false; return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, konten: konten, betriebskonto: !!k.betriebskonto, preise: k.preise, einfuehrung: k.einfuehrung, zahlarten: k.zahlarten, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), post: !!k.post, verkauf: await verkaufStand(k, env, url.origin, konten), recht: { agb: AGB_STAND, nb: NB_STAND, zustimmung: ZUSTIMMUNG }, vermittlung: vermittlungStatus(k, env), hinweise: k.hinweise.length ? k.hinweise : undefined }); }
+    if (pfad === '/api/status') { const konten = k.daten ? !!(await kontenDa(speicher(k))) : false; return json({ ok: true, ki: k.ki, hausbild: !!env.BFL_API_KEY, zahlung: k.zahlung, daten: k.daten, konten: konten, betriebskonto: !!k.betriebskonto, preise: k.preise, einfuehrung: k.einfuehrung, zahlarten: k.zahlarten, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), post: !!k.post, verkauf: await verkaufStand(k, env, url.origin, konten), recht: { agb: AGB_STAND, nb: NB_STAND, zustimmung: ZUSTIMMUNG }, vermittlung: vermittlungStatus(k, env), hinweise: k.hinweise.length ? k.hinweise : undefined }); }
     /* nur lokal mit MAIL_ATTRAPPE=1: die zuletzt „verschickten“ Mails, damit die Prüfung sie lesen kann; ?stoerung=1 bzw. 0 stellt
        eine Störung des Mailversands nach bzw. beendet sie */
     if (pfad === '/api/test/post' && k.post && k.post.attrappe) { const st = url.searchParams.get('stoerung'); if (st !== null) attrappeAus.an = st === '1'; const mitAnhang = url.searchParams.get('anhaenge') === '1'; return json({ ok: true, post: mitAnhang ? attrappePost : attrappePost.map((m) => { const x = Object.assign({}, m); delete x.anhangDaten; return x; }), stoerung: attrappeAus.an }); } // ?anhaenge=1: mit den Anhängen (Base64)
     /* nur lokal mit DATEN_ATTRAPPE=1 und MAIL_ATTRAPPE=1: das Nachholen des täglichen Laufs sofort ausführen */
     if (pfad === '/api/test/nachholen' && k.datenAttrappe && k.post && k.post.attrappe) { const sp0 = speicher(k); return json({ ok: true, vertrag: await bestaetigungenNachholen(k, sp0, env), widerruf: await widerrufeNachholen(k, sp0), erinnerung: await erinnerungenSenden(k, sp0, env) }); }
+    /* Hausbild: echte Vorschau der Fenster am Foto des Hauses (hausbild.js, Black Forest Labs) */
+    if (pfad === '/api/hausbild') return request.method === 'POST' ? hausbildPost({ request, env }) : new Response(null, { status: 405, headers: { allow: 'POST' } });
     if (pfad === '/api/ki') {
       if (request.method === 'GET' || request.method === 'HEAD') return kiGet({ request, env });
       if (request.method === 'POST') { const r = await kiPost({ request, env }); if (r.status === 200) warte(zaehlen(k, speicher(k), mitWerbung(['ereignis:ki_foto'], werbungAus(request))).catch(() => false)); return r; }

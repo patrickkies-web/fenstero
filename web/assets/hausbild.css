@@ -1,0 +1,143 @@
+/* eeziframes · An meinem Haus ansehen (hausbild.js, Inhaber, 2.11.2026)
+   Gespeichert: das gestaltete Element aus der 3-D-Bühne statt des Symbols, darunter die hellblaue Einladung (Wunsch des Inhabers:
+   „eine schöne hellblaue Farbe, die einladend wirkt“; eine Blaufamilie, nur auf dieser Karte). Editor: Rahmen der Folie „Gespeichert“
+   (schwarze Bühne mit runder Unterkante, weißes Blatt, Fuß mit Rundknopf und einer vollen Pille), eigene Bühne aus Anthrazit mit
+   Licht von oben links und feinem Punktraster (neue Folien bekommen ihr eigenes Material, Skill design-dna-eeziframes Abschnitt 4).
+   Ziele ab 44 px, Bewegung nur als Rückmeldung (Druck 0,97, 160 ms), bei weniger Bewegung nichts. Präfix hb-. */
+
+/* ---------- Gespeichert: Element aus der 3-D-Bühne ---------- */
+.dna .fg-modell { position: absolute; z-index: 2; left: 0; right: 0; top: 104px; bottom: 58px; pointer-events: none }
+.dna .fg-modell > .w3d-stage { position: absolute !important; inset: 0; width: 100% !important; height: 100% !important; min-height: 0; max-height: none; margin: 0 !important; border-radius: 0 !important;
+  background: transparent !important; box-shadow: none !important; animation: none !important; opacity: 1 !important; transform: none !important }
+.dna .fg-modell::after { content: ""; position: absolute; left: 50%; bottom: 2px; width: 46%; height: 26px; transform: translateX(-50%); border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(7, 9, 10, .55), rgba(7, 9, 10, 0)); pointer-events: none }
+@media (min-width: 900px) { .dna .fg-modell { top: 130px; bottom: 84px; left: 8%; right: 8% } }
+
+/* ---------- Einladung (hellblau) ---------- */
+.dna .hb-einladung { --hb-tinte: #0d2440; --hb-tinte-2: #3b5470; --hb-blau: #1d4f8c;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; margin: 4px 0 14px; padding: 18px 16px 16px; border-radius: var(--rund-l);
+  background: radial-gradient(120% 120% at 0% 0%, #eef6ff 0, #dcebfc 46%, #cbe1f8 100%); color: var(--hb-tinte);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 0 0 1px rgba(29, 79, 140, .10), 0 14px 28px -20px rgba(29, 79, 140, .55) }
+.dna .hb-ein-zeichen { flex: none; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 20px; background: rgba(255, 255, 255, .78); box-shadow: inset 0 0 0 1px rgba(29, 79, 140, .12) }
+.dna .hb-ein-zeichen svg { width: 46px; height: 46px }
+.dna .hb-ein-text { min-width: 0 }
+.dna .hb-einladung h2 { margin: 2px 0 0; font: 600 22px/1.15 var(--font-sans); letter-spacing: -.02em; color: var(--hb-tinte) }
+.dna .hb-einladung h2 em { font-style: normal; color: var(--hb-blau) }
+.dna .hb-einladung p { margin: 8px 0 0; font: 400 15px/1.45 var(--font-sans); color: var(--hb-tinte-2); max-width: 36ch }
+.dna .hb-ein-knopf { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; margin-top: 2px; padding: 0 6px 0 16px; border: 0; border-radius: 999px; cursor: pointer;
+  background: rgba(255, 255, 255, .7); color: var(--hb-tinte); font: 500 15px/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--hb-blau);
+  transition: transform .16s cubic-bezier(.2, .7, .2, 1), background-color .16s ease }
+.dna .hb-ein-knopf > svg { width: 20px; height: 20px; color: var(--hb-blau) }
+.dna .hb-ein-knopf > span:not(.hb-ein-pfeil) { flex: 1; text-align: left }
+.dna .hb-ein-pfeil { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--hb-blau); color: #fff }
+.dna .hb-ein-pfeil svg { width: 16px; height: 16px }
+.dna .hb-ein-knopf:active { transform: scale(.97) }
+@media (hover: hover) { .dna .hb-ein-knopf:hover { background: #fff } }
+.dna .hb-ein-knopf:focus-visible { outline: 2px solid var(--hb-blau); outline-offset: 3px }
+
+/* ---------- Editor ---------- */
+.dna.hb .hb-tisch { --bh: clamp(340px, calc(100svh - 330px), 560px) }
+.dna.hb .hb-tisch::before { display: none }
+.dna.hb .hb-buehne { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 14px; overflow: hidden;
+  background: radial-gradient(90% 70% at 18% 0%, #2a2a2e 0, #17171a 52%, var(--schwarz) 100%) }
+.dna.hb .hb-buehne::before { height: 100%; background: radial-gradient(rgba(255, 255, 255, .07) 1px, transparent 1.4px) 0 0 / 14px 14px; -webkit-mask-image: radial-gradient(80% 70% at 50% 40%, #000, transparent); mask-image: radial-gradient(80% 70% at 50% 40%, #000, transparent) }
+.dna.hb .hb-rahmen { --hbz: 1; position: relative; z-index: 2; flex: none; border-radius: 14px; overflow: hidden; background: #111; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 22px 40px -24px rgba(0, 0, 0, .9) }
+.dna.hb .hb-zoom { position: absolute; inset: 0; transform-origin: 0 0 }
+.dna.hb .hb-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-select: none }
+.dna.hb .hb-ebene { position: absolute; inset: 0; touch-action: pan-y }
+.dna.hb .bedienen .hb-ebene { touch-action: none }
+.dna.hb .bedienen .hb-ebene { cursor: grab }
+.dna.hb .hb-el { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; outline: none }
+.dna.hb .hb-el img { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; pointer-events: none }
+.dna.hb .hb-el.aktiv { pointer-events: auto; cursor: move }
+.dna.hb .hb-el.aktiv::after { content: ""; position: absolute; inset: 0; box-shadow: 0 0 0 calc(1.5px / var(--hbz)) rgba(255, 255, 255, .95), 0 0 0 calc(4px / var(--hbz)) rgba(137, 126, 252, .55) }
+.dna.hb .waehlen .hb-el { pointer-events: auto; cursor: pointer }
+.dna.hb .waehlen .hb-el::after { content: ""; position: absolute; inset: 0; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .75); animation: hb-puls 1.6s ease-in-out 2 }
+@keyframes hb-puls { 50% { box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .75), 0 0 0 7px rgba(137, 126, 252, .35) } }
+.dna.hb .hb-ecke { position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%; cursor: grab; touch-action: none; transform-origin: 22px 22px }
+.dna.hb .hb-ecke::before { content: ""; position: absolute; left: 14px; top: 14px; width: 16px; height: 16px; border-radius: 50%; background: var(--weiss); box-shadow: 0 0 0 3px var(--violett), 0 4px 10px rgba(0, 0, 0, .5) }
+.dna.hb .zieht .hb-ecke { cursor: grabbing }
+.dna.hb .hb-vergleich { position: relative; z-index: 3; display: flex; gap: 4px; margin-top: 14px; padding: 4px; border-radius: 999px; background: rgba(32, 32, 34, .9); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08) }
+.dna.hb .hb-vergleich button { min-width: 104px; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--silbergrau); font: 500 15px/1 var(--font-sans); cursor: pointer }
+.dna.hb .hb-vergleich button[aria-pressed="true"] { background: var(--weiss); color: var(--schwarz) }
+.dna.hb .hb-laedt { position: absolute; inset: 0; z-index: 4; display: flex; align-items: flex-end; justify-content: center; gap: 10px; padding-bottom: 18px;
+  background: linear-gradient(rgba(7, 9, 10, .1), rgba(7, 9, 10, .62)); color: var(--weiss); font: 500 14px/1.3 var(--font-sans) }
+.dna.hb .hb-leer { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; height: 100%; padding: 0 24px 24px; text-align: center }
+.dna.hb .hb-leer-zeichen { display: grid; place-items: center; width: 84px; height: 84px; border-radius: 26px; color: var(--weiss);
+  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+.dna.hb .hb-leer-zeichen svg { width: 40px; height: 40px }
+.dna.hb .hb-leer-satz { margin: 0; font: 500 20px/1.2 var(--font-sans); color: var(--weiss) }
+.dna.hb .hb-leer-knopf { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 20px; border-radius: 999px; cursor: pointer; color: var(--weiss); font: 500 15px/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna.hb .hb-leer-knopf svg { width: 20px; height: 20px }
+.dna.hb .hb-datei { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none }
+
+.dna.hb .hb-lupe { position: absolute; z-index: 5; right: 8px; top: 8px; display: flex; flex-direction: column; gap: 6px }
+.dna.hb .hb-lupe .hb-rund { width: 44px; height: 44px; background: rgba(7, 9, 10, .72); color: var(--weiss); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px) }
+.dna.hb .hb-lupe .hb-rund[disabled] { opacity: .35; cursor: default }
+.dna.hb .hb-lupe svg { width: 20px; height: 20px }
+@media (max-width: 899px) {
+  .dna.hb .hb-buehne { height: auto; min-height: 360px; padding-bottom: 34px }
+  .dna.hb .hb-buehne:has(.hb-rahmen) { min-height: 0 }
+  /* das weiße Blatt reicht bis zum unteren Rand, auch wenn wenig darauf steht */
+  .scr.dna.hb { min-height: 100svh; display: flex; flex-direction: column }
+  .scr.dna.hb .hb-tisch { flex: 1 0 auto; display: flex; flex-direction: column }
+  .scr.dna.hb .hb-rechts { flex: 1 0 auto }
+}
+/* Blatt */
+.dna.hb .hb-kopf h1 { margin: 0; font: 600 28px/1.12 var(--font-sans); letter-spacing: -.025em; color: var(--schwarz); text-wrap: balance; outline: none }
+.dna.hb .hb-kopf h1 em { font-style: normal; color: var(--textgrau) }
+.dna.hb .hb-kopf .wz-sub { margin: 10px 0 0; font: 400 15px/1.45 var(--font-sans); color: var(--textgrau); max-width: 40ch }
+.dna.hb .hb-fehler { margin: 14px 0 0 }
+.dna.hb .hb-werkzeuge, .dna.hb .hb-ergebnis-knoepfe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 22px }
+.dna.hb .hb-ergebnis-knoepfe { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+.dna.hb .hb-werk { display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 84px; padding: 12px 6px 10px; border: 0; border-radius: var(--rund-m); cursor: pointer;
+  background: #f4f4f6; color: var(--schwarz); font: 500 14px/1.2 var(--font-sans); text-align: center; text-decoration: none; transition: transform .16s cubic-bezier(.2, .7, .2, 1), background-color .16s ease }
+.dna.hb .hb-werk:active { transform: scale(.97) }
+.dna.hb .hb-werk[disabled] { opacity: .4; cursor: default; transform: none }
+.dna.hb .hb-werk-rund { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.dna.hb .hb-werk-rund svg { width: 20px; height: 20px }
+.dna.hb .hb-werk.an { background: var(--schwarz); color: var(--weiss) }
+.dna.hb .hb-werk.an .hb-werk-rund { background: var(--violett); color: var(--schwarz); box-shadow: none }
+@media (hover: hover) { .dna.hb .hb-werk:not([disabled]):hover { background: #ececf0 } .dna.hb .hb-werk.an:hover { background: #1b1b1e } }
+.dna.hb .hb-liste { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 0 }
+.dna.hb .hb-liste span { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; background: #f4f4f6; color: var(--textgrau); font: 400 13px/1 var(--font-sans) }
+.dna.hb .hb-liste span.ok { color: var(--schwarz) }
+.dna.hb .hb-liste span.ak { background: var(--indigo); color: var(--weiss) }
+.dna.hb .hb-liste svg { width: 14px; height: 14px; stroke-width: 2.4 }
+.dna.hb .hb-klein { margin: 18px 0 0; font: 400 13px/1.45 var(--font-sans); color: var(--textgrau); max-width: 46ch }
+.dna.hb .lg-fuss .dna-pille .spin { margin-right: 8px }
+.dna.hb label.dna-pille { cursor: pointer }
+
+/* Auswahl des Elements */
+.dna .hb-wahl { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-end; justify-content: center; background: rgba(7, 9, 10, .55); animation: hb-grund .22s ease-out }
+.dna .hb-wahl-blatt { width: min(560px, 100%); max-height: 82svh; overflow: auto; padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px)); border-radius: 28px 28px 0 0; background: var(--weiss); color: var(--schwarz); animation: hb-blatt .32s cubic-bezier(.16, 1, .3, 1) }
+.dna .hb-wahl-kopf { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px }
+.dna .hb-wahl-kopf h2 { margin: 0; font: 600 22px/1.2 var(--font-sans); letter-spacing: -.02em }
+.dna .hb-rund { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #f4f4f6; color: var(--schwarz); cursor: pointer }
+.dna .hb-rund svg { width: 18px; height: 18px }
+.dna .hb-wahl-liste { display: grid; gap: 8px }
+.dna .hb-wahl-zeile { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 76px; padding: 8px 10px 8px 8px; border: 0; border-radius: var(--rund-m); background: #f4f4f6; color: var(--schwarz); text-align: left; cursor: pointer; transition: transform .16s cubic-bezier(.2, .7, .2, 1) }
+.dna .hb-wahl-zeile:active { transform: scale(.98) }
+.dna .hb-wahl-bild { flex: none; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 16px; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e) }
+.dna .hb-wahl-bild img { max-width: 52px; max-height: 52px }
+.dna .hb-wahl-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px }
+.dna .hb-wahl-text b { font: 500 16px/1.2 var(--font-sans) }
+.dna .hb-wahl-text small { font: 400 13px/1.2 var(--font-sans); color: var(--textgrau) }
+.dna .hb-plus-rund { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--schwarz); color: var(--weiss) }
+.dna .hb-plus-rund svg { width: 18px; height: 18px }
+@keyframes hb-grund { from { opacity: 0 } }
+@keyframes hb-blatt { from { transform: translateY(100%) } }
+
+/* Standbild des Elements: unsichtbare Bühne, gerade von außen (hausbild.js) */
+#hb-studio { position: fixed; left: 0; top: 0; width: 520px; height: 640px; opacity: 0; pointer-events: none; z-index: -1 }
+#hb-studio > .w3d-stage { position: absolute; inset: 0; width: 100%; height: 100%; background: transparent !important; box-shadow: none !important; border-radius: 0 }
+
+@media (min-width: 900px) {
+  .dna.hb .hb-tisch { --bh: calc(100svh - 60px) }
+  .dna.hb .hb-buehne { justify-content: center; padding-top: 0 }
+  .dna.hb .hb-kopf h1 { font-size: 32px }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dna .hb-ein-knopf, .dna.hb .hb-werk, .dna .hb-wahl-zeile { transition: none }
+  .dna .hb-wahl, .dna .hb-wahl-blatt, .dna.hb .waehlen .hb-el::after { animation: none }
+}

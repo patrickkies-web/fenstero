@@ -220,7 +220,7 @@ Die öffentlichen Seiten haben zwei Ansichten, nie gemischt: Wer auf „Starten�
 
 - **Fortsetzen statt starten:** Mit erfassten Fenstern zeigt die App-Startseite kein Startbild mehr, sondern die Übersicht „Deine Fenster.“ (Stand in einem Satz, Balken, „+ Fenster“, siehe „Übersicht aller Fenster“ im Abschnitt Feinschliff) und gleich darunter die Karten mit „Weiteres Fenster“; Erklärung, Führung und Fußlinks folgen darunter. Beim Kundenlink genauso, unter der Liste die Karte „Jederzeit weitermachen“ (über den Link, auch auf einem anderen Gerät, sobald der Abgleich mit dem Server geklappt hat; die Fotos sieht der Betrieb erst nach dem Senden; gültig bis …). An der Grenze ohne Fenster bleibt diese Ansicht mit der Erklärung statt des Startbilds.
 - **Rückweg zur Liste:** Der Knopf oben links heißt „Fenster“ und führt zur Übersicht; ein gespeichertes Fenster hat zusätzlich „Alle Fenster ansehen (n)“ als volle Pille.
-- **Keine Gesamtübersicht, nie (Entscheidung des Inhabers):** Ein gespeichertes Fenster zeigt seine Aufteilung als Symbol (seit 28.10.2026 groß als Strichzeichnung auf einer Anthrazit-Kachel; nie das gestaltete Fenster, keine Farben), „Gespeichert · Position n“, den Namen, die Elementart und den Stand („Vollständig“, „Maße offen“, „2 Wünsche offen“), darunter „Wie geht es weiter?“ (weiteres Fenster oder Absenden bzw. Aufmaßblatt) und die Aktionen. Eine Karte „Alle Angaben“, Maße in der Faktenzeile oder Listen aller Wünsche gibt es in keinem Zustand, auch nicht nach dem Freischalten und nicht im Kundenlink: Sonst ersetzt ein Bildschirmfoto das Blatt. Karten in Listen und auf „Prüfen“ sagen nur den Stand und zählen offene Wünsche, ohne sie zu nennen. Das Ergebnis zeigt im Modell nur die vier Hauptmaße zum Prüfen beim Messen, aus den Fotos nur die Zahl der Angaben. Das freigeschaltete Aufmaßblatt gibt es als PDF (Herunterladen, Teilen); eine HTML-Fassung in der App gibt es nicht mehr. Die Vorschau des Blatts vor dem Freischalten zeigt Positionen und Räume, die Maße als Punkte.
+- **Keine Gesamtübersicht, nie (Entscheidung des Inhabers):** Ein gespeichertes Fenster zeigt seit 2.11.2026 das gestaltete Element aus dem 3-D-Modell (Wunsch des Inhabers: „das tatsächliche Bild von dem erstellten Element“; vorher seit 28.10.2026 die Aufteilung als Strichzeichnung), weiter ohne Maße und ohne Liste der Wünsche, „Gespeichert · Position n“, den Namen, die Elementart und den Stand („Vollständig“, „Maße offen“, „2 Wünsche offen“), darunter „Wie geht es weiter?“ (weiteres Fenster oder Absenden bzw. Aufmaßblatt) und die Aktionen. Eine Karte „Alle Angaben“, Maße in der Faktenzeile oder Listen aller Wünsche gibt es in keinem Zustand, auch nicht nach dem Freischalten und nicht im Kundenlink: Sonst ersetzt ein Bildschirmfoto das Blatt. Karten in Listen und auf „Prüfen“ sagen nur den Stand und zählen offene Wünsche, ohne sie zu nennen. Das Ergebnis zeigt im Modell nur die vier Hauptmaße zum Prüfen beim Messen, aus den Fotos nur die Zahl der Angaben. Das freigeschaltete Aufmaßblatt gibt es als PDF (Herunterladen, Teilen); eine HTML-Fassung in der App gibt es nicht mehr. Die Vorschau des Blatts vor dem Freischalten zeigt Positionen und Räume, die Maße als Punkte.
 - **Grenzen sichtbar machen, bevor sie greifen:** Unter einem Fenster steht, bis wann es frei änderbar ist; danach ein Hinweis in Warnfarbe mit den übrigen Änderungen („noch dreimal“), nach jeder gezählten Änderung eine kurze Meldung. Feste Fenster tragen in der Liste „fest“, „Maße ändern“ und „Wünsche ändern“ sind blass (`aria-disabled`), antippen erklärt den Grund. Ab zehn freien Plätzen steht unter „Weiteres Fenster“, wie viele noch gehen; an der Grenze ersetzt ein Hinweis den Knopf.
 - **Link zu:** Abgelaufen oder deaktiviert zeigt der Kundenlink „Hier geht es gerade nicht weiter.“ mit dem Grund, die Liste ohne Knöpfe und keine untere Leiste.
 - **Nachbesserung:** Unter einem Fenster steht dann „Während der Nachbesserung kannst du dieses Fenster frei ändern, darum hat … gebeten.“, nichts ist blass.
@@ -670,6 +670,41 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
   mm gespeichert; „bodentief“ ist 0 mm; der Satz zur Absturzsicherung erscheint unter 80 cm.
 - **Schmale Telefone (320 px):** „Übersicht“ im Kopf nur als Zeichen, Zurück und Pille bleiben in einer Zeile; jedes Ziel 44 px.
 - **Prüfsuite:** die Prüfungen der Schriftrollen nehmen `.dna` aus; Lage und Tiefe haben eigene Prüfungen (Abschnitte 3, 16 und 22).
+
+## An meinem Haus ansehen (seit 2.11.2026, Wunsch des Inhabers)
+
+Ziel: Der Kunde sieht sein geplantes Fenster an seinem eigenen Haus, bevor er das Aufmaßblatt kauft oder die Anfrage an Betriebe schickt.
+Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbild.js` (Route `POST /api/hausbild`), Standbild aus der
+3-D-Bühne `Buehne3D.foto` (`web/assets/buehne.js`).
+
+- **Einladung in „Gespeichert“:** unter der schwarzen Bühne mit dem gestalteten Element eine hellblaue Karte (eigene Blaufamilie nur auf
+  dieser Karte, Wunsch des Inhabers): kleines Haus-Zeichen, „Sieh dein Fenster *in echt.*“, ein Satz, Knopf „An meinem Haus ansehen“ über
+  die ganze Breite. Nur im eigenen Aufmaß (nicht im Kundenlink, nicht in den Konfiguratoren der Fensterbauer, nicht in der Führung) und
+  nur, wenn der Server den Bilddienst eingerichtet hat (`/api/status` meldet `hausbild`).
+- **Editor (Bildschirm `hausbild`):** Rahmen wie „Gespeichert“ (schwarze Bühne, weißes Blatt, Fuß mit Rundknopf und einer vollen Pille),
+  Bühne aus Anthrazit mit Licht von oben links und Punktraster. Ablauf:
+  1. Foto wählen (im Browser auf höchstens 2.000 px verkleinert, bleibt im Browser).
+  2. **Plus** öffnet die Liste der gespeicherten Elemente mit Bild; das gewählte erscheint mittig, in der Größe passend zu schon gesetzten
+     Elementen (echte Maße in mm), sonst ein Viertel der Bildbreite. Verschieben mit dem Finger, die **vier Eckpunkte** auf die Öffnung
+     ziehen (Winkel und Perspektive; die Punkte stehen 18 px außerhalb der Ecken, damit sie kleine Fenster nicht verdecken), mit zwei
+     Fingern drehen und vergrößern, am Rechner Mausrad (Umschalt: drehen) und Pfeiltasten. Die **Lupe** (Näher, Weiter) vergrößert bis
+     vierfach um das gewählte Element, höchstens so weit, dass es mit seinen Eckpunkten im Bild bleibt; Ziehen neben dem Element verschiebt
+     dann den Ausschnitt.
+  3. **Bestätigen** verankert das Element. Danach sind die Elemente nicht mehr antippbar; **Bearbeiten** schaltet das Antippen ein, nach
+     dem nächsten Bestätigen ist es wieder aus (Wunsch des Inhabers: nichts aus Versehen verschieben). **Duplizieren** setzt eine Kopie
+     daneben, **Entfernen** nimmt das gewählte heraus. Bis hier keine KI.
+  4. **Echte Vorschau** (erst mit mindestens einem bestätigten Element): Die App schickt nur den Ausschnitt um alle Elemente (mit Rand,
+     höchstens 1.600 px): das Foto, dasselbe mit den eingesetzten Fenstern in Lage und Winkel und je Fenster ein Bild aus dem 3-D-Modell
+     (gerade von außen, `VIEWS.aussenGerade`). Der Server schreibt den Auftrag für FLUX 3 Image Klein (je Element ein Feld nach
+     docs.bfl.ai „Bounding boxes“: Fenster einbauen, altes ganz ersetzen bzw. Öffnung mit Laibung und Fensterbank, Perspektive, Licht,
+     Ausführung genau wie die Vorlage, übrige Fassade unverändert). Das Ergebnis setzt die App nur innerhalb der Elementflächen (16 %
+     größer, weich auslaufend) ins Originalfoto; außerhalb bleibt jedes Pixel das Foto des Kunden. Danach Vorher/Nachher, „Bild
+     speichern“, „Weiter bearbeiten“. Unter dem Bild: „Eine Visualisierung, keine Maßgrundlage.“
+- **Kosten und Grenzen:** 0,9 Cent je Vorschau (Black Forest Labs, Stand 1.11.2026). Server: 10 je 10 Minuten und Anschluss, 20 je
+  Anschluss und Tag, `HAUSBILD_TAG_MAX` (Vorgabe 500) am Tag insgesamt. Gespeichert wird nichts.
+- **Ohne WebGL** zeichnet hausbild.js eine einfache Ansicht des Elements (Rahmenfarbe, Flügel, Glas, Kasten).
+- **Offen:** die Datenschutzerklärung (Black Forest Labs als Empfänger der Ausschnitte) und ein Vertrag zur Auftragsverarbeitung mit dem
+  Anbieter, bevor `BFL_API_KEY` online gesetzt wird; Zählung in der Statistik (Editor geöffnet, Vorschau, danach gekauft oder angefragt).
 
 ## Entscheidungen
 
