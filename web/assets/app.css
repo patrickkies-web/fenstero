@@ -3620,3 +3620,16 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 @media (hover: hover) {
   .scr.dna .lg-fuss .dna-pille.btn.primary:hover:not([disabled]) { background: color-mix(in srgb, var(--handlung) 88%, var(--auf-handlung)) }
 }
+/* Ergebnis auf Weiß: Prüfhinweise, Lage auf dem Foto und „Falls zur Hand“ hellgrau mit schwarzer Schrift, KI-Zeile grau */
+.scr.dna.er .er-rechts :is(.er-pruef, .er-plan, .er-falls) { background: #f6f6f8; box-shadow: none; color: var(--schwarz) }
+.scr.dna.er .er-rechts :is(.er-pruef p b, .er-falls summary b, .er-ki b) { color: var(--schwarz) }
+.scr.dna.er .er-rechts :is(.er-pruef p, .er-falls summary small, .er-ki) { color: var(--textgrau) }
+.scr.dna.er .er-rechts .er-ki svg { color: var(--schwarz) }
+.scr.dna.er .er-rechts .er-knopf { color: var(--schwarz); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.scr.dna.er .er-rechts .er-falls :is(.rows, .trow, .row) { background: transparent; color: var(--schwarz) }
+/* „Falls zur Hand“ auf Weiß: Feld in einer Zeile, runde Knöpfe hell mit Rand statt dunkler Kacheln */
+.scr.dna.er .er-rechts .er-falls .row > label { box-shadow: inset 0 0 0 1px #e6e5ea; padding-left: 16px }
+.scr.dna.er .er-rechts .er-falls .row input { width: 4.4em }
+.scr.dna.er .er-rechts .er-falls .row .rnd { flex: 0 0 44px; width: 44px; height: 44px; padding: 0; border-radius: 50%; display: grid; place-items: center; background: var(--weiss); color: var(--schwarz); box-shadow: inset 0 0 0 1.5px #dcdbe1; font-size: 20px; transition: transform 160ms var(--dna-druck) }
+.scr.dna.er .er-rechts .er-falls .row .rnd:active { transform: scale(.94); transition-duration: 0s }
+.scr.dna.er .er-rechts .er-falls .row .ibtn { color: var(--textgrau) }

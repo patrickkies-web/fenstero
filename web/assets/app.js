@@ -953,7 +953,7 @@ function w3dCalc(w, o) {
       if (frei < links(s0)) dimX = links(s0) - frei;
     }
     if (ws.length) {
-      const unten = ungleich(ws), tuer0 = istTuer(w), oben = (sk) => off(sk) + 8 + hoch + rand + 6, ab = (sk) => (unten ? off(sk) + (tuer0 ? 0 : 30 * sk) + 8 + hoch + 42 : 0) + rand; // unten zusätzlich Platz für die Beschriftung der Ansicht
+      const unten = ungleich(ws), tuer0 = istTuer(w), oben = (sk) => off(sk) + 8 + hoch + rand + 6 + (o.kopf || 0), ab = (sk) => (unten ? off(sk) + (tuer0 ? 0 : 30 * sk) + 8 + hoch + 42 : 0) + rand + (o.fuss || 0); // unten zusätzlich Platz für die Beschriftung der Ansicht
       for (let i = 0; i < 3 && moH * s0 + oben(s0) + ab(s0) > sh; i++) s0 = Math.max(20, sh - oben(s0) - ab(s0)) / moH;
       const frei = (sh - moH * s0) / 2;
       dimY = frei < oben(s0) ? oben(s0) - frei : frei < ab(s0) ? frei - ab(s0) : 0; // nach unten bzw. oben rücken
@@ -3780,7 +3780,7 @@ function ergebnisDna() {
   const tMo = neu ? 'Wunschmaß Rohbau' : 'kleinstes von 3', tEl = neu ? 'rechnerisch, mit Rahmen' : 'sichtbar mit Rahmen';
   const g = GLOSS.rahmenmass ? '<button type="button" class="lg-i" data-act="gloss" data-k="rahmenmass" aria-label="' + esc(GLOSS.rahmenmass.t) + '">' + LG_I + '</button>' : '';
   /* Bühne: das Modell der App füllt sie (Schilder an den vier Hauptmaßen), oben Chip und Überschrift */
-  const buehne = '<div class="er-buehne">' + model(w, { id: 'w3d', view: 'result', sway: true, dims: ['hm', 'wm', 'eh', 'ew'], labels: ergebnisLabels(w, d), stageH: 'auto', fitW: 0.6, fitH: 0.56, cls: 'dims-all', bg: photoBg(), hint: 'Zum Drehen ziehen' }) +
+  const buehne = '<div class="er-buehne">' + model(w, { id: 'w3d', view: 'result', sway: true, dims: ['hm', 'wm', 'eh', 'ew'], labels: ergebnisLabels(w, d), stageH: 'auto', kopf: window.matchMedia && matchMedia('(min-width: 1024px)').matches ? 100 : 76, fuss: 84, /* Platz für Chip und Überschrift oben und die Knöpfe unten (samt Schild der Elementbreite) in der Bühne: die Maßschilder stehen dazwischen */ fitW: 0.6, fitH: 0.56, cls: 'dims-all', bg: photoBg(), hint: 'Zum Drehen ziehen' }) +
     '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / steps.length).toFixed(4) + '"></i>Schritt ' + nr + ' von ' + steps.length + '</span>' +
     '<div class="md-titel er-titel"><h1 tabindex="-1">' + (neu ? 'Dein Wunsch <em>steht.</em>' : 'Dein Aufmaß <em>steht.</em>') + '</h1>' + g + '</div></div>';
   const sub = neu ? 'Rohbauöffnung und Element als Wunschmaße' + (w.plan && w.plan.bild ? ', die Lage auf deinem Foto' : '') + '. Das endgültige Maß legt der Fachbetrieb nach der Statik fest.' : 'Maueröffnung und ' + elName() + ', so wie der Fensterbauer sie fürs Angebot braucht.';
