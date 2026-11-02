@@ -172,7 +172,24 @@ Acht Stellen, an denen Nutzer gestolpert sind, jede mit derselben Bühne gelöst
 - **Fensterbauer-Seite, neu nach Vorgabe des Inhabers (Bausteine 1 bis 4):** Startbild mit dem Foto `fb-sessel` (Astronaut im Sessel am Bullauge), oben im Bild die Meldungen als Stapel, darunter die Überschrift, die zum Teil im Bild steht, und die Haken-Chips; darunter zwei Leisten, deren Einträge in Dauerschleife waagerecht schweben (die erste von links nach rechts, die zweite in Cream gegenläufig, Scrollen schiebt beide mit); die Pakete am Telefon als Reihe zum Wischen, Karte und Beispielseite als ein Stück. „Auf dieser Seite“ und der Kennzahlen-Streifen mit Ringen entfallen (die Kennzahlen stehen jetzt in der zweiten Leiste), die Bühne aus Ebenen (Station, Erde, schwebender Astronaut, Papierflieger) ebenso. Die übrigen Abschnitte sind unverändert und werden nach und nach ersetzt. Einzelheiten unter „Konfigurator-Pakete: Verkaufsseite“.
 - **Fensterbauer-Seite:** Das große Bewegtbild nach den Kennzahlen (Zeichen `konfigurator` im Band, Unterschrift „Vom Foto zum Aufmaßblatt, so sieht es Ihr Kunde.“) ist entfernt, die Kennzahlen gehen direkt in „Die Idee“ über.
 
-## Detailtiefe: so tief, wie der Kunde will
+## Hauptweg und freiwillige Liste (seit 2.11.2026, Wunsch des Inhabers)
+
+„Den Benutzer gerade in den ersten Schritten nicht langweilen, sondern die wesentlichen Dinge konfigurieren, bevor man ins Detail geht.“
+Die Frage nach der Tiefe entfällt; an ihre Stelle treten ein fester Hauptweg und eine freiwillige Liste am Ende (`Q_HAUPT`, `qExtras` in
+app.js; `AW.FRAGE.stufe`: 1 Hauptweg, 2 Liste).
+
+- **Ablauf:** Start (Elementart, neu oder ersetzen) → am 3-D-Modell Form und Flügel (bei Türen Schema, Teile, Flügelzahl), ohne „Weiter“
+  nach der Form → **Weg zu den Maßen** (geführt messen: Fotos, Messen, Ränder, Ergebnis und zurück; Maße eingeben: Breite und Höhe mit
+  Rahmen, Status „Maße offen“; ohne Maße weiter: das Modell zeigt ein übliches Maß) → **Wie viele und wo?** (Stückzahl, Stockwerk, Raum,
+  Brüstung im OG und DG) → Öffnung je Flügel → Material → Farbe außen und innen → Glas → Sprossen, dann Dicke und Farbe → Erreichbarkeit
+  → Sonnenschutz (Farbe, Bedienung) → Fensterbank innen und außen → **„Möchtest du noch etwas einstellen?“**.
+- **Die Liste:** alles außerhalb des Hauptwegs nach Themen (Aufbau und Öffnung, Rahmen, Glas und Sprossen, Griff und Technik, Sonnen- und
+  Insektenschutz, Fensterbank und Einbau); jede Zeile mit Stand („Standard“ oder die Wahl, gewählt mit violettem Punkt). Antippen öffnet
+  die Frage am Modell, „Fertig“ führt zurück. Unten „Fenster speichern“.
+- **Fürs Blatt:** Neue Projekte haben die Tiefe „kurz“: Was der Kunde in der Liste nicht wählt, steht beim Fensterbauer als „nach
+  Standard“. Ältere Aufmaße behalten ihre Tiefe.
+
+## Detailtiefe (bis 1.11.2026): so tief, wie der Kunde will
 
 Die App fragt inzwischen rund 90 Dinge ab (dazu 2026 noch Sicherheitsstufen, Sonderformen, Seitenteile, Beschläge, Oberflächen, Technik und Zubehör). Wer alles auf einmal sieht, wird schwindelig; wer nur die Hälfte sieht, kann vieles nicht sagen. Darum entscheidet der Kunde selbst, wie tief er geht, und alles, was er nicht beantwortet, ist trotzdem geregelt.
 

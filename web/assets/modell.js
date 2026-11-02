@@ -163,7 +163,9 @@
       kap: { lage: 'vorweg', absturz: 'vorweg', design: 'vorweg', tiefe: 'vorweg', form: 'aufbau', teilung: 'aufbau', typ: 'aufbau', din: 'aufbau', stulp: 'aufbau', felder: 'aufbau', hsts: 'aufbau', hstr: 'aufbau', pskS: 'aufbau', pskR: 'aufbau', fswn: 'aufbau', fsws: 'aufbau', fswg: 'aufbau', ol: 'aufbau', ul: 'aufbau', richtung: 'aufbau', schwelle: 'aufbau', boden: 'aufbau',
         material: 'material', fa: 'material', fi: 'material', glas: 'glas', glasfn: 'glas', orn: 'glas', sprossen: 'glas', spross: 'glas', aufseite: 'glas', breite: 'glas', griff: 'bedienung', griffA: 'bedienung', gf: 'bedienung', rc: 'bedienung',
         sart: 'sonne', einbau: 'sonne', sfarbe: 'sonne', antrieb: 'sonne', insekt: 'sonne', iart: 'sonne', ifarbe: 'sonne', fbi: 'bank', fba: 'bank', montage: 'bank', notiz: 'bank' },
-      stufe: { ul: 2, richtung: 2, boden: 2, glasfn: 2, orn: 2, sprossen: 2, spross: 2, aufseite: 2, breite: 2, griff: 2, griffA: 2, gf: 2, einbau: 2, iart: 2, fbi: 2, fba: 2, montage: 2 }
+      /* Seit 2.11.2026 (Inhaber): Stufe 1 ist der Hauptweg der App, Stufe 2 die freiwillige Liste am Ende (Sprossen samt Breite und
+         Fensterbänke im Hauptweg, Oberlicht und Insektenschutz in der Liste) */
+      stufe: { ol: 2, ul: 2, richtung: 2, boden: 2, glasfn: 2, orn: 2, spross: 2, aufseite: 2, griff: 2, griffA: 2, gf: 2, einbau: 2, insekt: 2, iart: 2, montage: 2 }
     };
     /* Detailtiefe des Projekts (p.tiefe: kurz 1, normal 2, genau 3): Was bei dieser Tiefe nicht gefragt wurde, macht der Fensterbauer
        nach seinem Standard. nachTiefe(w, p) gibt dafür eine Kopie des Fensters zurück:
@@ -235,7 +237,7 @@
       { k: 'dicht', s: 3, kap: 'material', n: 'Dichtung', design: true },
       { k: 'sichtZone', s: 3, kap: 'glas', n: 'Sichtschutz', gilt: (w) => (w.glasfn || []).indexOf('sicht') >= 0 && !istOffen(w, 'glasfn'), design: true },
       { k: 'ahFarbe', s: 3, kap: 'glas', n: 'Abstandhalter', design: true },
-      { k: 'sprFarbe', s: 3, kap: 'glas', wg: 'fenster', n: 'Sprossenfarbe', gilt: (w) => (w.bars || []).length > 0, design: true },
+      { k: 'sprFarbe', s: 1, kap: 'glas', wg: 'fenster', n: 'Sprossenfarbe', gilt: (w) => (w.bars || []).length > 0, design: true },
       { k: 'griffM', s: 3, kap: 'bedienung', n: 'Griffmodell', gilt: (w) => mitGriff(w) && w.art !== 'hst', design: true },
       { k: 'griffPos', s: 3, kap: 'bedienung', n: 'Griffhöhe', gilt: (w) => fenOderTuer(w) && mitGriff(w) && mitDreh(w) },
       { k: 'kinder', s: 3, kap: 'bedienung', n: 'Kindersicherung', gilt: (w) => fenOderTuer(w) && mitDreh(w) },
@@ -839,6 +841,8 @@
       return o.concat(u);
     }
     const SPR_HEX = { weiss: '#f4f4f2', anthrazit: '#383e42', messing: '#b8964e' };
+    /* Sprossenfarbe: Messing und die früheren Töne aus SPR_HEX, sonst jede Farbe aus dem Farbblatt (RAL, Dekore) wie beim Rahmen */
+    const sprHex = (w) => (detailGilt(w, 'sprFarbe') && w.sprFarbe && w.sprFarbe !== 'rahmen' ? SPR_HEX[w.sprFarbe] || (ralEintrag(w.sprFarbe) || {}).hex || '' : '');
     const hell = (hex) => { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return true; const v = parseInt(m[1], 16); return ((v >> 16) * 299 + ((v >> 8) & 255) * 587 + (v & 255) * 114) / 1000 > 200; };
     function plan(w, o) {
       o = o || {};
@@ -887,7 +891,7 @@
       /* gestrichelt öffnet nach außen: Fenster mit Öffnung nach außen, Faltwand mit Faltrichtung außen (Detailangabe fswAuf) */
       const fc = farbe(w, 'innen')[2], gEl = formFn(form, ex, ey, ew, eh), dash = (w.richtung === 'aussen' && !tuer && art !== 'fest') || (art === 'fsw' && w.fswAuf === 'aussen' && detailGilt(w, 'fswAuf'));
       /* Sprossen in ihrer Farbe (Detailangabe sprFarbe), sonst wie der Rahmen; zu helle Töne bekommen einen sichtbaren Grauton */
-      const sprossFarbe = detailGilt(w, 'sprFarbe') && SPR_HEX[w.sprFarbe] ? SPR_HEX[w.sprFarbe] : hell(fc) ? '#b9b4a8' : fc;
+      const sprossFarbe = sprHex(w) || (hell(fc) ? '#b9b4a8' : fc);
       poly(schnitt(gEl, ex, ey, ew, eh), fc, ZF.ink, lw * 1.2);
       /* schmale Rahmenansicht (Detailangabe schmal): Rahmen und Flügel etwa ein Viertel schlanker */
       const sm = detailGilt(w, 'schmal') && w.schmal === 'schmal' ? 0.76 : 1;
@@ -1058,7 +1062,7 @@
       const S = w.sashes || sashesFor(w.teilung), n = S.length, gap = tuer ? f * 0.2 : w.teilung === '2s' ? f * 0.25 : f * 0.8;
       /* Seitenteile so breit wie gewählt (seitenB im Verhältnis zur Elementbreite), die Flügel teilen sich den Rest */
       const nSt = S.filter((x) => x.st).length, frei = iw - gap * (n - 1), stB = nSt ? Math.max(frei * 0.12, Math.min(frei * (num(w.seitenB) || 400) / (d.elW || 1600), (frei - (n - nSt) * frei * 0.18) / nSt)) : 0, flB = n - nSt ? (frei - stB * nSt) / (n - nSt) : 0;
-      const spr = detailGilt(w, 'sprFarbe') && SPR_HEX[w.sprFarbe] ? SPR_HEX[w.sprFarbe] : fc === '#f1f0ea' ? '#b9b4a8' : fc;
+      const spr = sprHex(w) || (fc === '#f1f0ea' ? '#b9b4a8' : fc);
       const pan = art === 'balkon' && w.paneel === 'paneel' && detailGilt(w, 'paneel') ? Math.min(ih * 0.45, ih * (num(w.paneelH) || 400) / (d.elH || 2100)) : 0;
       let sx = ix;
       const ant = anteileGueltig(w, n - nSt) ? w.anteile : null; let kA = 0;

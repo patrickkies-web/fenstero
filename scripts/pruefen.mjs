@@ -5085,6 +5085,79 @@ if (teil(22)) {
   await ctx.close();
 }
 
+/* ---------- 32. Hauptweg und freiwillige Liste (Inhaber, 2.11.2026) ----------
+   Erst das Wesentliche (Form, Flügel, Weg zu den Maßen, wie viele und wo, Öffnung, Material, Farbe, Glas, Sprossen mit Dicke und Farbe,
+   Erreichbarkeit, Sonnenschutz, Fensterbänke), dann „Möchtest du noch etwas einstellen?“ mit allem anderen; neue Folien im Bild der
+   Start- und Wünsche-Folie, Strichzeichen in den Antworten */
+if (teil(32)) {
+  console.log('32. Hauptweg und freiwillige Liste');
+  const c32 = await browser.newContext(telefon), p = await neueSeite(c32);
+  await p.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await p.waitForTimeout(300);
+  /* a) Start → Weiter: gleich das Modell mit der Form; der Hauptweg je Elementart */
+  await p.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.windows = []; go('start'); }); await p.waitForTimeout(400);
+  await p.tap('.st-weiss .lg-weiter'); await p.waitForTimeout(700);
+  const a32 = await p.evaluate(() => ({ screen: S.screen, q: S.q, weg: qSichtbar(S.win).map((q) => q.id).join(' '), tiefe: S.proj.tiefe }));
+  ok(a32.screen === 'frage' && a32.q === 'form' && a32.weg === 'form teilung massweg lage typ-0 din-0 typ-1 din-1 material fa fi glas sprossen rc sart fbi fba extras' && a32.tiefe === 'kurz',
+    'Start → „Weiter“ führt direkt zur Form am Modell; Hauptweg eines Fensters: Form, Flügel, Maße, wie viele und wo, Öffnung, Material, Farben, Glas, Sprossen, Erreichbarkeit, Sonnenschutz, Fensterbänke, Liste (' + a32.weg + ')');
+  const arten = await p.evaluate(() => ['balkon', 'fest', 'hst', 'psk', 'fsw'].map((art) => { const w = baseWin(); artSetzen(w, art); if (art === 'hst') w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); S.win = w; const ids = qSichtbar(w).map((q) => q.id), i = ids.indexOf('massweg'); return { art: art, ids: ids.join(' '), ok: i > 0 && i <= 2 && ids[i + 1] === 'lage' && ids[ids.length - 1] === 'extras' && ids.every((x) => qHaupt({ id: x })) }; }));
+  ok(arten.every((x) => x.ok), 'Alle Elementarten: erst Aufbau (Schema, Teile, Flügel, Felder), dann der Weg zu den Maßen und wie viele und wo, am Ende die Liste (' + arten.filter((x) => !x.ok).map((x) => x.art + ': ' + x.ids).join(' | ') + ')');
+  /* b) Was der Inhaber aus dem Hauptweg genommen hat, steht in der Liste */
+  const ex32 = await p.evaluate(() => { const w = demoProject()[0]; S.win = w; return qExtras(qList(w)).map((q) => q.id); });
+  const soll32 = ['kvd', 'profil', 'schmal', 'dicht', 'ahFarbe', 'oberfl', 'griffM', 'griffPos', 'kinder', 'baender', 'luefter', 'oeffner', 'kontakt', 'gitter', 'leiste'];
+  ok(soll32.every((k) => ex32.includes(k)) && !ex32.includes('fbi') && !ex32.includes('material'), 'Kipp vor Dreh, Profil, Rahmenansicht, Dichtung, Abstandhalter, Oberfläche, Griffmodell und -höhe, Kindersicherung, Bänder, Lüfter, Öffner, Alarmkontakt, Gitter und Abdeckleisten stehen in der freiwilligen Liste (fehlt: ' + soll32.filter((k) => !ex32.includes(k)).join(', ') + ')');
+  /* c) Liste: Zeile öffnet die Frage mit „Fertig“, Fertig führt zurück, die Wahl steht in der Zeile */
+  await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Küche'; S.win = w; S.editIdx = -1; S.q = 'extras'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(500);
+  const l1 = await p.evaluate(() => ({ zeilen: document.querySelectorAll('.ex-zeile').length, gruppen: document.querySelectorAll('.ex-gruppe').length, pille: document.querySelector('.lg-weiter').textContent.trim() }));
+  await p.tap('.ex-zeile[data-v="kvd"]'); await p.waitForTimeout(500);
+  const l2 = await p.evaluate(() => ({ q: S.q, pille: document.querySelector('.lg-weiter').textContent.trim(), kopf: document.getElementById('wz-pos').textContent }));
+  await p.tap('.qpanel [data-f="kvd"][data-v="kvd"]'); await p.waitForTimeout(300); await p.tap('.lg-weiter'); await p.waitForTimeout(500);
+  const l3 = await p.evaluate(() => ({ q: S.q, an: document.querySelector('.ex-zeile[data-v="kvd"]').classList.contains('an'), wert: document.querySelector('.ex-zeile[data-v="kvd"] small').textContent }));
+  ok(l1.zeilen >= 20 && l1.gruppen >= 4 && /speichern/.test(l1.pille) && l2.q === 'kvd' && l2.pille === 'Fertig' && /^Freiwillig/.test(l2.kopf) && l3.q === 'extras' && l3.an && /Kipp vor Dreh/i.test(l3.wert),
+    'Liste: Zeilen nach Themen, Antippen öffnet die Frage am Modell mit „Fertig“, danach steht die Wahl in der Zeile; unten „Fenster speichern“ (' + JSON.stringify([l1, l2, l3]) + ')');
+  /* d) Weg zu den Maßen: ohne Maße gleich weiter; eingeben über die Zifferntasten; geführt über Fotos, zurück auf den Weg, nach dem Ergebnis weiter bei „wie viele und wo“ */
+  await p.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.windows = []; S.q = 'massweg'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(400);
+  const m0 = await p.evaluate(() => ({ zeilen: Array.from(document.querySelectorAll('.mw-zeile')).map((b) => b.getAttribute('data-v')).join(), h: Math.round(document.querySelector('.mw-kreis').getBoundingClientRect().height) }));
+  await p.tap('.mw-zeile[data-v="ohne"]'); await p.waitForTimeout(1500);
+  const m1 = await p.evaluate(() => ({ q: S.q, weg: S.win.massWeg }));
+  await p.evaluate(() => { S.q = 'massweg'; render(true); }); await p.waitForTimeout(300);
+  await p.tap('.mw-zeile[data-v="eingeben"]'); await p.waitForTimeout(300); await p.tap('.mw-wert[data-f="elW"]'); await p.waitForTimeout(300);
+  for (const z of ['1', '2', '3', '0']) await p.tap('.keypad [data-v="' + z + '"]');
+  await p.tap('.keypad [data-v="ok"]'); await p.waitForTimeout(300);
+  const m2 = await p.evaluate(() => ({ el: S.win.el.w, wert: document.querySelector('.mw-wert[data-f="elW"] b').textContent, stand: fensterStand(S.win).k }));
+  await p.tap('.mw-zeile[data-v="messen"]'); await p.waitForTimeout(400);
+  const m3 = await p.evaluate(() => S.screen);
+  await p.tap('.lg-fuss .lg-zurueck'); await p.waitForTimeout(400);
+  const m4 = await p.evaluate(() => ({ screen: S.screen, q: S.q }));
+  await p.evaluate(() => { const w = demoProject()[0]; w.name = ''; S.win = w; S.q = 'massweg'; go('ergebnis'); }); await p.waitForTimeout(400);
+  await p.evaluate(() => go('frage')); await p.waitForTimeout(400);
+  const m5 = await p.evaluate(() => S.q);
+  ok(m0.zeilen === 'messen,eingeben,ohne' && m0.h === 64 && m1.q === 'lage' && m1.weg === 'ohne' && m2.el === 1230 && m2.wert === '1.230' && m2.stand === 'masse' && m3 === 'fotos' && m4.screen === 'frage' && m4.q === 'massweg' && m5 === 'lage',
+    'Weg zu den Maßen: geführt, eingeben, ohne; ohne Maße geht es von selbst weiter, Breite über die Zifferntasten, geführt über Fotos und zurück, nach dem Ergebnis weiter bei „wie viele und wo“ (' + JSON.stringify([m0, m1, m2, m3, m4, m5]) + ')');
+  /* e) Wie viele und wo: runde Knöpfe, Zahl auf der Bühne, kein Violett und keine Unschärfe auf der Bühne, Pflichtfelder bleiben */
+  await p.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.q = 'lage'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(500);
+  await p.tap('[data-act="lg-anzahl"][data-v="1"]'); await p.tap('.lw-stockknopf[data-v="og"]'); await p.waitForTimeout(300);
+  const w5 = await p.evaluate(() => { const b = document.querySelector('.lw-buehne'), cs = getComputedStyle(b), og = document.querySelector('.lg-ogwahl'); return { kreis: Math.round(document.querySelector('.lw-kreis').getBoundingClientRect().width), n: document.querySelector('.lw-n').textContent, anzahl: S.win.anzahl, etage: S.win.etage, og: getComputedStyle(og).display, skala: document.querySelector('.lw-skala .ist').getAttribute('data-s'), filter: cs.filter + cs.backdropFilter, violett: /137, 126, 252|60, 58, 102/.test(cs.backgroundImage + cs.backgroundColor), bru: getComputedStyle(document.querySelector('.lg-bru-karte')).display }; });
+  await p.tap('.lg-weiter'); await p.waitForTimeout(400);
+  const w6 = await p.evaluate(() => ({ q: S.q, grund: document.getElementById('lg-grund').textContent }));
+  ok(w5.kreis === 64 && w5.n === '2' && w5.anzahl === 2 && w5.etage === 'og' && w5.og !== 'none' && w5.skala === 'og' && !/blur/.test(w5.filter) && !w5.violett && w5.bru !== 'none' && w6.q === 'lage' && /Namen/.test(w6.grund),
+    'Wie viele und wo: Stückzahl und Stockwerk mit runden Knöpfen, die Zahl auf der Bühne, kein Violett und keine Unschärfe, im OG Brüstung; ohne Raum kein Weiter (' + JSON.stringify([w5, w6]) + ')');
+  /* f) Sprossen: nach der Wahl Dicke und Farbe im Hauptweg, Farbwahl wie beim Rahmen, das Modell folgt (auch im Scheibenzwischenraum) */
+  const s0 = await p.evaluate(() => { const w = demoProject()[0]; w.bars = [{ id: 'b1', d: 'v', p: 0.5, s: 0 }]; S.win = w; const ids = qSichtbar(w).map((q) => q.id); return ids.slice(ids.indexOf('sprossen'), ids.indexOf('sprossen') + 3).join(); });
+  await p.evaluate(() => { S.q = 'sprFarbe'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(500);
+  const s1 = await p.evaluate(() => ({ tupfen: document.querySelectorAll('.qpanel .qsw').length, alle: !!document.querySelector('.qpanel [data-farbblatt="sprFarbe"]'), holz: !!document.querySelector('.qpanel [data-farbblatt="sprFarbe"][data-familie="holz"]'), kopf: (document.querySelector('.qpanel .fw-cur b') || {}).textContent }));
+  await p.tap('.qpanel .qsw[data-v="7016"]'); await p.waitForTimeout(400);
+  const s2 = await p.evaluate(() => ({ v: S.win.sprFarbe, bi: document.querySelector('#w3d .w3d-bar')._bi, kopf: document.querySelector('.qpanel .fw-cur b').textContent }));
+  await p.evaluate(() => { S.win.spross = 'szr'; S.win.sprFarbe = ''; delete S.win.sprFarbe; S.win.fi = '7016'; render(true); }); await p.waitForTimeout(400);
+  const s3 = await p.evaluate(() => document.querySelector('#w3d .w3d-bar')._bi);
+  ok(s0 === 'sprossen,breite,sprFarbe' && s1.tupfen >= 10 && s1.alle && s1.holz && s1.kopf === 'Wie der Rahmen' && s2.v === '7016' && /#3/i.test(s2.bi) && s2.kopf !== 'Wie der Rahmen' && !/d9d9d6/.test(s3),
+    'Sprossen: danach Dicke und Farbe; Farbwahl wie beim Rahmen (beliebte Töne, alle Farben, Holzdekore), das Modell zeigt die Farbe, im Scheibenzwischenraum folgt „wie der Rahmen“ dem Rahmen (' + JSON.stringify([s0, s1, s2, s3]) + ')');
+  /* g) Strichzeichen in den Antworten */
+  await p.evaluate(() => { S.q = 'material'; render(true); }); await p.waitForTimeout(400);
+  const z32 = await p.evaluate(() => { const svgs = Array.from(document.querySelectorAll('.qpanel .qopt > svg')); return { n: svgs.length, strich: svgs.every((s) => s.classList.contains('strich')), fuellung: svgs.flatMap((s) => Array.from(s.querySelectorAll('path')).map((x) => x.getAttribute('fill'))).filter((f) => f !== 'none' && f !== 'currentColor') }; });
+  ok(z32.n >= 4 && z32.strich && !z32.fuellung.length, 'Antworten mit Strichzeichen: feine Linien in der Textfarbe, keine bunten Flächen (' + JSON.stringify(z32) + ')');
+  sauber(p, 'Hauptweg und Liste ohne Fehler'); await c32.close();
+}
+
 /* ---------- 23–29. Konfigurator-Instanzen (docs/INSTANZEN.md) und Aufträge (26, docs/BESTELLUNG.md) ----------
    Je Abschnitt ein Modul scripts/pruefen-instanzen/<n>.mjs (dazu <n>-<name>.mjs, die vorher laufen): export default async (h) => {}.
    h (scripts/pruefen-instanzen/hilfe.mjs) bringt einen eigenen Testserver mit Attrappen und den Instanzen essential.localhost,

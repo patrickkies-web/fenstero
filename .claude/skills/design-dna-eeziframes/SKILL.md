@@ -317,6 +317,18 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Wischen): auf Schwarz Anthrazit, gewählt weiß mit violettem Ring; auf Weiß hellgrau, gewählt schwarz mit violettem Ring. In den
   Wünschen schwebt das 3-D-Modell bei Aufbau, Material, Glas und Griff frei im Licht, ab Sonnenschutz steht es in seiner Wand. Nach
   der Form wechselt die Folie ohne „Weiter“ zur Flügelzahl. Fenster auf der Start-Folie: das Bild des Inhabers (Anthrazit mit Raffstore).
+- Das Wesentliche zuerst, Details freiwillig am Ende (Inhaber, 2.11.2026): Den Kunden in den ersten Schritten nicht langweilen. Der
+  Hauptweg fragt, was man sieht und was den Preis macht: Elementart und Stelle, Form, Flügel, der Weg zu den Maßen (geführt messen,
+  Maße eingeben oder ohne Maße weiter), wie viele und wo (Stückzahl, Stockwerk, Raum, Brüstung), Öffnung, Material, Farben, Glas,
+  Sprossen mit Dicke und Farbe, Erreichbarkeit, Sonnenschutz, Fensterbänke; die Pflichtthemen (Absturz, Erreichbarkeit) bleiben im
+  Hauptweg. Alles, was Kunden erst beim zweiten oder dritten Nachdenken einstellen, steht in der Liste „Möchtest du noch etwas
+  einstellen?“ nach den Fensterbänken: freiwillig, nach Themen, jede Zeile mit Stand, „Fertig“ führt zurück. Die Frage nach der Tiefe
+  entfällt. Gilt für alle Elementarten und für neue Fragen: erst entscheiden, ob sie in den Hauptweg gehören.
+- Alle Folien im Bild der Start- und Wünsche-Folie (Inhaber, 2.11.2026): Was neu entsteht oder überarbeitet wird, bekommt die schwarze
+  Bühne mit der weißen Fläche darunter, runde Knöpfe und kein Violett als Fläche, keine Unschärfe („modern minimalistisch ohne diese Lila
+  Farben oder Blur“). Symbole überall als feine Strichzeichen in der Textfarbe wie auf Folie 1, keine bunten Flächen in Zeichen.
+- Sprossen (Inhaber, 2.11.2026): Nach der Wahl der Sprossen direkt die Dicke, dann die Farbe; die Farbe wählt man wie die Rahmenfarbe
+  (beliebte Töne, alle Farben, Holzdekore, dazu Messing und „wie der Rahmen“), und das Modell zeigt sie immer.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
