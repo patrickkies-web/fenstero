@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
-<title>KI-Test | Zentrale</title>
+<title>Cloudflare-KI | Zentrale</title>
 <meta name="theme-color" content="#07090a">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/fonts/fonts.css">
@@ -36,18 +36,19 @@
 <body>
 <main>
   <p><a href="/zentrale/">← Zentrale</a></p>
-  <h1>KI-Test: Cloudflare</h1>
-  <p>Dein Beispielhaus, dieselben zwei Fenster wie im Vergleich: oben zwei Flügel, unten einer. Cloudflare rechnet mit FLUX.2 klein, die
-    Ergebnisse stehen danach neben dem bisherigen Weg. Es gehen nur diese festen Testbilder raus, keine Kundenfotos.</p>
+  <h1>Cloudflare-KI am Beispielhaus</h1>
+  <p>Alle vier Tests rechnet Cloudflare auf seinen eigenen Servern, abgerechnet über dein Cloudflare-Konto. Cloudflare hat keine eigene
+    Bild-KI, sondern stellt Modelle anderer Hersteller bereit; deren Namen stehen klein unter jedem Test. Dein Beispielhaus, dieselben zwei
+    Fenster: oben zwei Flügel, unten einer. Es gehen nur diese festen Testbilder raus, keine Kundenfotos.</p>
   <p id="anmeldung" class="hinweis">Prüfe die Anmeldung …</p>
   <button class="knopf" id="start" type="button" disabled>Test starten</button>
   <div id="ergebnisse"></div>
-  <section class="karte">
-    <h2>Zum Vergleich: bisher</h2>
-    <p class="unter">FLUX 3 Image Klein bei Black Forest Labs · 0,9 Cent · beide Fenster wie geplant</p>
+  <section class="karte" id="vergleich" hidden>
+    <h2>Zum Vergleich: der bisherige Weg (nicht Cloudflare)</h2>
+    <p class="unter">FLUX 3 Image Klein direkt bei Black Forest Labs · 0,9 Cent · beide Fenster wie geplant</p>
     <img src="bisher.jpg" alt="Beispielhaus mit den Fenstern von FLUX 3 Image Klein" width="650" height="650">
   </section>
 </main>
-<script src="ki-test.js?v=2"></script>
+<script src="ki-test.js?v=4"></script>
 </body>
 </html>

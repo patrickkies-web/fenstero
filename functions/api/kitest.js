@@ -6,7 +6,9 @@
 import { ApiFehler, erlaubt } from './umgebung.js';
 import { sitzungPflicht } from './sitzung.js';
 
-const MODELLE = { '9b': '@cf/black-forest-labs/flux-2-klein-9b', '4b': '@cf/black-forest-labs/flux-2-klein-4b' };
+const MODELLE = { '9b': '@cf/black-forest-labs/flux-2-klein-9b', '4b': '@cf/black-forest-labs/flux-2-klein-4b', sd: '@cf/runwayml/stable-diffusion-v1-5-inpainting' };
+/* Stable Diffusion (kein FLUX): malt nur in den weißen Flächen der Maske neu, ohne Vorlage der Fenster, 512 × 512 Pixel */
+const SD_TEXT = 'photo of a new modern anthracite grey window built into the masonry opening of a house, recessed frame, glass reflecting the sky, window sill, photorealistic, same light as the photo';
 const EINBAU = 'installed by a professional window fitter: each frame is set back inside its masonry opening, recessed behind the facade surface, ' +
   'so the plastered reveals stay visible on the sides and on top, seen in exactly the perspective, angle and vanishing lines of this wall and this camera. ' +
   'Below each window a window sill with a small overhang. Soft shadows of the lintel and the reveals fall onto the frame and the glass, following the direction of the sunlight in the photo. ' +
@@ -33,7 +35,18 @@ export const KI_TEST = {
     if (!ctx.env || !ctx.env.AI) throw new ApiFehler('Workers AI ist nicht verbunden („ai“ in wrangler.jsonc).', 503);
     if (!erlaubt('kitest', 30, 3600 * 1000)) throw new ApiFehler('Genug Tests für diese Stunde.', 429);
     const b = ctx.body || {}, modell = MODELLE[b.modell], auftrag = AUFTRAG[b.art];
-    if (!modell || !auftrag) throw new ApiFehler('Unbekannter Test.', 400);
+    if (!modell || (!auftrag && b.modell !== 'sd')) throw new ApiFehler('Unbekannter Test.', 400);
+    const t0 = Date.now();
+    let aus;
+    if (b.modell === 'sd') {
+      const zahlen = async (name) => Array.from(new Uint8Array(await (await bild(ctx, name)).arrayBuffer()));
+      try {
+        aus = await ctx.env.AI.run(modell, { prompt: SD_TEXT, image: await zahlen('sd-haus.png'), mask: await zahlen('sd-maske.png'), num_steps: 20, strength: 1, guidance: 7.5 });
+      } catch (e) {
+        throw new ApiFehler('Cloudflare meldet: ' + String((e && e.message) || e).slice(0, 300), 502);
+      }
+      return ergebnis(aus, modell, b.art, t0);
+    }
     const form = new FormData();
     form.append('prompt', auftrag.text);
     form.append('input_image_0', await bild(ctx, auftrag.haus), 'haus.jpg');
@@ -41,18 +54,22 @@ export const KI_TEST = {
     form.append('input_image_2', await bild(ctx, 'ein-fenster-2.jpg'), 'fenster-2.jpg');
     form.append('width', '1024');
     form.append('height', '1024');
-    const paket = new Response(form), t0 = Date.now();
-    let aus;
+    const paket = new Response(form);
     try {
       aus = await ctx.env.AI.run(modell, { multipart: { body: paket.body, contentType: paket.headers.get('content-type') } });
     } catch (e) {
       throw new ApiFehler('Cloudflare meldet: ' + String((e && e.message) || e).slice(0, 300), 502);
     }
-    let roh = aus && aus.image;
-    if (!roh && aus instanceof ReadableStream) roh = base64(await new Response(aus).arrayBuffer());
-    if (!roh && aus instanceof ArrayBuffer) roh = base64(aus);
-    if (!roh) throw new ApiFehler('Cloudflare hat kein Bild geliefert: ' + JSON.stringify(aus || null).slice(0, 300), 502);
-    const typ = roh.startsWith('/9j/') ? 'image/jpeg' : roh.startsWith('UklGR') ? 'image/webp' : 'image/png';
-    return { ok: true, modell: modell, art: b.art, sekunden: Math.round((Date.now() - t0) / 100) / 10, bild: 'data:' + typ + ';base64,' + roh };
+    return ergebnis(aus, modell, b.art, t0);
   }
 };
+
+async function ergebnis(aus, modell, art, t0) {
+  let roh = aus && aus.image;
+  if (!roh && aus instanceof ReadableStream) roh = base64(await new Response(aus).arrayBuffer());
+  if (!roh && aus instanceof ArrayBuffer) roh = base64(aus);
+  if (!roh && aus instanceof Uint8Array) roh = base64(aus);
+  if (!roh) throw new ApiFehler('Cloudflare hat kein Bild geliefert: ' + JSON.stringify(aus || null).slice(0, 300), 502);
+  const typ = roh.startsWith('/9j/') ? 'image/jpeg' : roh.startsWith('UklGR') ? 'image/webp' : 'image/png';
+  return { ok: true, modell: modell, art: art || '', sekunden: Math.round((Date.now() - t0) / 100) / 10, bild: 'data:' + typ + ';base64,' + roh };
+}

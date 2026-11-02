@@ -3,9 +3,10 @@
 (function () {
   'use strict';
   var TESTS = [
-    { modell: '9b', art: 'montage', titel: 'FLUX.2 klein 9B · Montage als Vorlage', unter: 'bei Cloudflare rund 1,7 Cent' },
-    { modell: '9b', art: 'markiert', titel: 'FLUX.2 klein 9B · Öffnungen markiert', unter: 'bei Cloudflare rund 1,7 Cent' },
-    { modell: '4b', art: 'markiert', titel: 'FLUX.2 klein 4B · Öffnungen markiert', unter: 'bei Cloudflare, günstiger als 9B' }
+    { modell: '9b', art: 'montage', titel: 'Cloudflare-KI 1: großes Modell, Fenster grob eingesetzt als Vorlage', unter: 'Modell bei Cloudflare: FLUX.2 klein 9B · rund 1,7 Cent' },
+    { modell: '9b', art: 'markiert', titel: 'Cloudflare-KI 2: großes Modell, Öffnungen nur markiert', unter: 'Modell bei Cloudflare: FLUX.2 klein 9B · rund 1,7 Cent' },
+    { modell: '4b', art: 'markiert', titel: 'Cloudflare-KI 3: kleines Modell, Öffnungen nur markiert', unter: 'Modell bei Cloudflare: FLUX.2 klein 4B · günstiger' },
+    { modell: 'sd', art: 'maske', titel: 'Cloudflare-KI 4: Stable Diffusion (kein FLUX)', unter: 'älteres Modell bei Cloudflare, malt die Öffnungen ohne Vorlage der Fenster neu' }
   ];
   var A = { x: 600, y: 250, s: 650 };
   var BOXEN = [[1050, 405, 1120, 542], [738, 643, 852, 807]];
@@ -53,12 +54,12 @@
     start.disabled = true; liste.innerHTML = '';
     var karten = TESTS.map(karte), kette = Promise.resolve();
     TESTS.forEach(function (t, i) { kette = kette.then(function () { return rechnen(t, karten[i]); }); });
-    kette.then(function () { start.disabled = false; start.textContent = 'Nochmal rechnen'; });
+    kette.then(function () { start.disabled = false; start.textContent = 'Nochmal rechnen'; document.getElementById('vergleich').hidden = false; });
   });
   fetch('/api/inhaber/stand', { credentials: 'same-origin', headers: { accept: 'application/json' } })
     .then(function (r) { return r.json(); })
     .then(function (j) {
-      if (j && j.angemeldet) { anm.textContent = 'Angemeldet. Drei Tests, je etwa 10 bis 20 Sekunden.'; start.disabled = false; }
+      if (j && j.angemeldet) { anm.textContent = 'Angemeldet. Vier Tests, je etwa 10 bis 20 Sekunden.'; start.disabled = false; }
       else { anm.innerHTML = 'Bitte zuerst in der <a href="/zentrale/">Zentrale anmelden</a> und dann diese Seite neu laden.'; }
     })
     .catch(function () { anm.textContent = 'Die Anmeldung ließ sich nicht prüfen. Seite neu laden.'; });
