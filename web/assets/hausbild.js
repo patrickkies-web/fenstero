@@ -9,7 +9,7 @@
       Die Eckpunkte stehen etwas außerhalb der Ecken, damit sie auch kleine Fenster nicht verdecken.
    3. „Bearbeiten“ macht die Elemente wieder antippbar; nach „Bestätigen“ ist der Modus wieder aus, damit nichts aus Versehen
       verrutscht. Duplizieren und Entfernen gelten für das gewählte Element.
-   4. „Echte Vorschau“: bis dahin keine KI. Die App schickt nur den Ausschnitt um alle Elemente: das Foto, dasselbe mit den eingesetzten
+   4. „KI-Vorschau“: bis dahin keine KI. Die App schickt nur den Ausschnitt um alle Elemente: das Foto, dasselbe mit den eingesetzten
       Fenstern (nur für die lokale Attrappe) und je Fenster ein Bild aus dem 3-D-Modell, von außen, mit seinen Daten (Farbe, Flügel,
       Sprossen, Sonnenschutz, Glas; functions/api/hausbild.js, FLUX 3 Image Klein). Ergebnis abholen mit GET, bis 3 Minuten. Das Ergebnis setzt die App nur innerhalb der Elementflächen (weich auslaufend) ins Originalfoto zurück, der Rest bleibt
       das Foto des Kunden. Vorher/Nachher zum Vergleichen, Bild speichern.
@@ -36,18 +36,26 @@ const hbPfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox=
 const hbDa = () => typeof SERVER !== 'undefined' && !!SERVER.hausbild && !S.betrieb && !INST && !S.tour && !(typeof vorschau === 'function' && vorschau());
 
 /* ---------- Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, Datenschutzerklärung Abschnitt 5a) ----------
-   Vor der ersten echten Vorschau fragt der Editor; Zustimmung und Stand des Textes liegen im Browser. Widerruf so einfach wie die
-   Zustimmung: im Editor unter dem Hinweis („Einwilligung widerrufen“), danach fragt die App beim nächsten Mal wieder. */
-const HB_EINW = 'ez.hausbild.einwilligung', HB_EINW_STAND = '2026-11-02';
+   Vor der ersten KI-Vorschau fragt der Editor; Zustimmung und Stand des Textes liegen im Browser. Widerruf so einfach wie die
+   Zustimmung: im Editor unter dem Hinweis und in der Fußleiste der App („Vorschau-Einwilligung widerrufen“), danach fragt die App
+   beim nächsten Mal wieder. Das Blatt zeigt den Ausschnitt, der tatsächlich übermittelt wird. Der Server nimmt nur Anfragen mit dem
+   aktuellen Stand des Textes an. Textfassungen: docs/recht/2026-11-02-hausbild-einwilligung.md. */
+const HB_EINW = 'aufmass.hausbild.einwilligung', HB_EINW_STAND = '2026-11-02b'; // Stand wie EINW_STAND in functions/api/hausbild.js; ändert sich der Text, beide hochzählen
 const hbEinwDa = () => { try { const v = JSON.parse(localStorage.getItem(HB_EINW) || 'null'); return !!(v && v.stand === HB_EINW_STAND); } catch (e) { return false; } };
 const hbEinwSetzen = (an) => { try { if (an) localStorage.setItem(HB_EINW, JSON.stringify({ stand: HB_EINW_STAND, am: new Date().toISOString() })); else localStorage.removeItem(HB_EINW); } catch (e) { /* ohne Speicher: fragt jedes Mal */ } };
+/* Text des Blatts (Stand HB_EINW_STAND); [bitte ergänzen: …] füllt der Inhaber nach dem Vertrag mit Black Forest Labs, wie in Abschnitt 5a */
+const HB_EINW_TEXT = {
+  sitz: '[bitte ergänzen: Sitz laut Vertrag]', frist: '[bitte ergänzen: Frist laut Vertrag]'
+};
 function hbEinwBlatt() {
   if (!HB.einwFrage) return '';
-  return '<div class="hb-wahl" role="dialog" aria-modal="true" aria-labelledby="hb-einw-t"><div class="hb-wahl-blatt hb-einw"><div class="hb-wahl-kopf"><h2 id="hb-einw-t">Kurz zustimmen</h2>' +
-    '<button type="button" class="hb-rund" data-act="hb-einw-nein" aria-label="Abbrechen">' + hbZ('zu') + '</button></div>' +
-    '<p>Für die echte Vorschau schicken wir einen <b>Ausschnitt deines Fotos</b> rund um die gesetzten Fenster und Bilder deiner geplanten Fenster über unseren Server an unseren Dienstleister <b>Black Forest Labs</b>. Er berechnet daraus das Bild, auf Servern in der EU. Name, Adresse, E-Mail und Maße gehen nicht mit, und wir speichern weder dein Foto noch das Ergebnis.</p>' +
-    '<p>Bitte achte darauf, dass keine Personen und keine Kennzeichen auf dem Foto zu erkennen sind. Du kannst die Einwilligung jederzeit hier im Editor widerrufen. Mehr in der <a class="ulink" href="/datenschutz/#p5a-vorschau-am-eigenen-haus" target="_blank" rel="noopener">Datenschutzerklärung, Abschnitt 5a</a>.</p>' +
-    '<div class="hb-einw-knoepfe"><button type="button" class="dna-pille" data-act="hb-einw-ja">Zustimmen und rechnen' + hbPfeil + '</button><button type="button" class="dna-pille dna-pille--leise" data-act="hb-einw-nein">Abbrechen</button></div></div></div>';
+  const aus = HB.paket ? '<figure class="hb-einw-bild"><img src="' + HB.paket.bild + '" alt="Der Ausschnitt deines Fotos, der übermittelt wird"><figcaption>Das geht an Black Forest Labs</figcaption></figure>' : '';
+  return '<div class="hb-wahl" role="dialog" aria-modal="true" aria-labelledby="hb-einw-t"><div class="hb-wahl-blatt hb-einw"><div class="hb-wahl-kopf"><h2 id="hb-einw-t">Einwilligung zur KI-Vorschau</h2>' +
+    '<button type="button" class="hb-rund" data-act="hb-einw-nein" aria-label="Abbrechen">' + hbZ('zu') + '</button></div>' + aus +
+    '<p>Für die KI-Vorschau schicken wir diesen <b>Ausschnitt deines Fotos</b> und Bilder deiner geplanten Fenster über unseren Server an unseren Dienstleister <b>Black Forest Labs</b> (' + HB_EINW_TEXT.sitz + '). Dessen KI (FLUX) berechnet daraus das Bild, auf Servern in der EU. Name, Adresse, E-Mail und Maße gehen nicht mit.</p>' +
+    '<p>Wir speichern weder dein Foto noch das Ergebnis. Black Forest Labs löscht beides nach ' + HB_EINW_TEXT.frist + ' und trainiert seine KI nicht damit. Bitte achte darauf, dass keine Personen und keine Kfz-Kennzeichen zu erkennen sind.</p>' +
+    '<p>Du kannst die Einwilligung jederzeit widerrufen, im Editor oder unten in der App. Mehr in der <a class="ulink" href="/datenschutz/#p5a-vorschau-am-eigenen-haus" target="_blank" rel="noopener">Datenschutzerklärung, Abschnitt 5a</a>.</p>' +
+    '<div class="hb-einw-knoepfe"><button type="button" class="hb-einw-knopf" data-act="hb-einw-ja">Einwilligen und rechnen</button><button type="button" class="hb-einw-knopf" data-act="hb-einw-nein">Nicht einwilligen</button></div></div></div>';
 }
 
 /* ---------- Einladung in „Gespeichert“ ---------- */
@@ -55,8 +63,8 @@ function hbEinladung() {
   if (!hbDa()) return '';
   const tuer = istTuer(S.win), ding = tuer ? 'deine Tür' : S.win.art === 'fest' ? 'deine Verglasung' : 'dein Fenster';
   return '<section class="hb-einladung" aria-labelledby="hb-ein-t"><span class="hb-ein-zeichen" aria-hidden="true">' + hbHausZeichen() + '</span>' +
-    '<div class="hb-ein-text"><h2 id="hb-ein-t">Sieh ' + ding + ' <em>in echt.</em></h2>' +
-    '<p>Foto von deinem Haus wählen, ' + ding + ' an seine Stelle ziehen, und die Vorschau zeigt dein Haus mit dem neuen Element.</p></div>' +
+    '<div class="hb-ein-text"><h2 id="hb-ein-t">Sieh ' + ding + ' <em>an deinem Haus.</em></h2>' +
+    '<p>Foto von deinem Haus wählen, ' + ding + ' an seine Stelle ziehen, und eine KI berechnet, wie dein Haus mit dem neuen Element aussehen könnte.</p></div>' +
     '<button type="button" class="hb-ein-knopf" data-act="hb-auf">' + hbZ('foto') + '<span>An meinem Haus ansehen</span><span class="hb-ein-pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></button></section>';
 }
 /* kleines Haus mit leuchtendem Fenster, in den Tönen der Karte */
@@ -153,13 +161,13 @@ const hbPx = (q, W, H) => q.map((p) => [p[0] * W, p[1] * H]);
 /* ---------- Bildschirm ---------- */
 function hbTitel() {
   if (HB.laedt) return ['Dein Haus wird <em>gerechnet.</em>', 'Das dauert meist 10 bis 30 Sekunden.'];
-  if (HB.ergebnis) return ['So sieht es <em>aus.</em>', 'Von einer KI berechnet: eine Visualisierung, keine Maßgrundlage. Gemessen und bestellt wird wie gehabt mit deinem Aufmaß.'];
+  if (HB.ergebnis) return ['So <em>könnte</em> es aussehen.', 'Von einer KI berechnet, kein Foto. Farbe, Teilung und Details wie Fensterbank und Laibung können abweichen. Gemessen und bestellt wird mit deinem Aufmaß.'];
   if (!HB.foto) return ['Dein Fenster <em>am Haus.</em>', 'Wähle ein Foto deines Hauses, am besten gerade von vorn und bei Tageslicht.'];
   const ak = HB.el.find((e) => e.id === HB.aktiv);
   if (ak) return ['Zieh es an <em>seinen Platz.</em>', 'Mit dem Finger verschieben, die vier Ecken auf die Öffnung ziehen. Mit zwei Fingern drehen und vergrößern, am Rechner mit dem Mausrad.'];
   if (HB.bearbeiten) return ['Welches Element <em>ändern?</em>', 'Tippe im Bild auf das Element, das du verschieben möchtest.'];
   if (!HB.el.length) return ['Setz dein Fenster <em>ein.</em>', 'Tippe auf Plus und wähle ein gespeichertes Element.'];
-  return ['Alles an seinem <em>Platz?</em>', 'Weitere Elemente mit Plus. Dann zeigt dir die echte Vorschau dein Haus mit den neuen Fenstern.'];
+  return ['Alles an seinem <em>Platz?</em>', 'Weitere Elemente mit Plus. Dann berechnet die KI-Vorschau, wie dein Haus mit den neuen Fenstern aussehen könnte.'];
 }
 function hbBuehne() {
   if (!HB.foto) {
@@ -180,8 +188,8 @@ function hbBuehne() {
     '<button type="button" class="hb-rund" data-act="hb-zoom" data-v="-1" aria-label="Weiter weg"' + (HB.z <= 1 ? ' disabled' : '') + '>' + hbZ('weiter') + '</button></div>';
   const bedienen = !HB.ergebnis && (HB.aktiv || HB.bearbeiten || HB.z > 1);
   return '<div class="fg-buehne hb-buehne' + (HB.bearbeiten && !HB.aktiv ? ' waehlen' : '') + '"><div class="hb-rahmen' + (bedienen ? ' bedienen' : '') + '" style="aspect-ratio: ' + HB.foto.w + ' / ' + HB.foto.h + '">' +
-    '<div class="hb-zoom"><img class="hb-foto" src="' + src + '" alt="' + (HB.ergebnis && HB.zeige === 'nach' ? 'Dein Haus mit den neuen Elementen, berechnete Vorschau' : 'Dein Foto') + '" draggable="false">' +
-    '<div class="hb-ebene">' + els + ecken + '</div></div>' + lupe + laedt + '</div>' + vergleich + '</div>';
+    '<div class="hb-zoom"><img class="hb-foto" src="' + src + '" alt="' + (HB.ergebnis && HB.zeige === 'nach' ? 'KI-Visualisierung: dein Haus mit den neuen Elementen, kein Foto' : 'Dein Foto') + '" draggable="false">' +
+    '<div class="hb-ebene">' + els + ecken + '</div></div>' + lupe + laedt + (HB.ergebnis && HB.zeige === 'nach' ? '<span class="wz-chip hb-ki-chip" aria-hidden="true">KI-Bild</span>' : '') + '</div>' + vergleich + '</div>';
 }
 function hbWahl() {
   if (!HB.wahl) return '';
@@ -208,16 +216,16 @@ SCREENS.hausbild = function () {
   const t = hbTitel();
   const kopf = '<div class="hb-kopf"><h1 tabindex="-1">' + t[0] + '</h1><p class="wz-sub">' + t[1] + '</p></div>';
   const fehler = HB.fehler ? '<p class="note warn hb-fehler" role="alert">' + esc(HB.fehler) + '</p>' : '';
-  const ergebnis = HB.ergebnis && !HB.laedt ? '<div class="hb-ergebnis-knoepfe"><a class="hb-werk" href="' + HB.ergebnis + '" download="mein-haus-eeziframes.jpg"><span class="hb-werk-rund">' + hbZ('sichern') + '</span><span>Bild speichern</span></a>' +
+  const ergebnis = HB.ergebnis && !HB.laedt ? '<div class="hb-ergebnis-knoepfe"><a class="hb-werk" href="' + HB.ergebnis + '" download="mein-haus-ki-visualisierung.jpg"><span class="hb-werk-rund">' + hbZ('sichern') + '</span><span>Bild speichern</span></a>' +
     '<button type="button" class="hb-werk" data-act="hb-weiter-bearbeiten"><span class="hb-werk-rund">' + hbZ('stift') + '</span><span>Weiter bearbeiten</span></button></div>' : '';
-  const hinweis = '<p class="hb-klein">Für die echte Vorschau geht nur ein Ausschnitt rund um deine Elemente an unseren Dienstleister Black Forest Labs, und erst nach deiner Zustimmung. Gespeichert wird dein Foto nicht, es bleibt in diesem Browser.' +
-    (hbEinwDa() ? ' <button type="button" class="hb-textknopf" data-act="hb-einw-weg">Einwilligung widerrufen</button>' : '') + '</p>';
+  const hinweis = '<p class="hb-klein">Für die KI-Vorschau geht nur ein Ausschnitt rund um deine Elemente an unseren Dienstleister Black Forest Labs, und erst nach deiner Zustimmung. Gespeichert wird dein Foto nicht, es bleibt in diesem Browser.' +
+    (hbEinwDa() ? ' <button type="button" class="hb-textknopf" data-act="hb-einw-weg">Vorschau-Einwilligung widerrufen</button>' : '') + '</p>';
   const ak = HB.el.find((e) => e.id === HB.aktiv), fest = HB.el.filter((e) => e.fest).length;
   const pille = !HB.foto ? '<label class="dna-pille lg-weiter" for="hb-datei">Foto wählen' + hbPfeil + '</label>'
     : HB.laedt ? '<button type="button" class="dna-pille lg-weiter" disabled><span class="spin"></span> Wird gerechnet</button>'
     : HB.ergebnis ? '<button type="button" class="dna-pille lg-weiter" data-act="hb-fertig">Fertig' + hbPfeil + '</button>'
     : ak ? '<button type="button" class="dna-pille lg-weiter" data-act="hb-ok">Bestätigen' + hbPfeil + '</button>'
-    : '<button type="button" class="dna-pille lg-weiter" data-act="hb-vorschau"' + (fest ? '' : ' disabled') + '>Echte Vorschau' + hbPfeil + '</button>';
+    : '<button type="button" class="dna-pille lg-weiter" data-act="hb-vorschau"' + (fest ? '' : ' disabled') + '>KI-Vorschau' + hbPfeil + '</button>';
   const fuss = '<div class="lg-fuss fg-fuss"><button type="button" class="lg-zurueck" data-act="hb-zurueck" aria-label="Zurück">' + LG_PFEIL_L + '</button>' + pille + '</div>';
   const datei = '<input type="file" id="hb-datei" class="hb-datei" accept="image/*">';
   const html = lgKopf(['hb-zurueck', 'Zurück']) + '<div class="fg-tisch hb-tisch">' + hbBuehne() + '<div class="fg-rechts hb-rechts">' + kopf + fehler + hbWerkzeuge() + ergebnis + hinweis + fuss + '</div></div>' + datei + hbWahl() + hbEinwBlatt();
@@ -401,9 +409,9 @@ function hbAct(name, el, v) {
       HB.aktiv = id; return render();
     }
     case 'hb-weg': { HB.el = HB.el.filter((x) => x.id !== HB.aktiv); HB.aktiv = null; HB.bearbeiten = false; return render(); }
-    case 'hb-vorschau': if (!hbEinwDa()) { HB.einwFrage = true; return render(); } return hbVorschau();
+    case 'hb-vorschau': return hbVorschau();
     case 'hb-einw-ja': hbEinwSetzen(true); HB.einwFrage = false; return hbVorschau();
-    case 'hb-einw-nein': HB.einwFrage = false; return render();
+    case 'hb-einw-nein': HB.einwFrage = false; HB.paket = null; return render();
     case 'hb-einw-weg': hbEinwSetzen(false); return toast('Einwilligung widerrufen. Vor der nächsten Vorschau fragen wir wieder.');
     case 'hb-zeige': HB.zeige = v === 'vor' ? 'vor' : 'nach'; return render();
     case 'hb-zoom': return hbZoom(parseInt(v, 10) || 0);
@@ -412,7 +420,7 @@ function hbAct(name, el, v) {
   }
 }
 
-/* ---------- Echte Vorschau ---------- */
+/* ---------- KI-Vorschau ---------- */
 const hbLadeBild = (src) => new Promise((ok, nein) => { const im = new Image(); im.onload = () => ok(im); im.onerror = nein; im.src = src; });
 /* Bild auf ein Viereck verziehen: Raster aus Dreiecken, je Dreieck eine affine Abbildung */
 function hbVerziehen(c, im, q, n) {
@@ -436,8 +444,66 @@ function hbDreieck(c, im, s0, s1, s2, d0, d1, d2) {
 const hbJpeg = (cv, q) => cv.toDataURL('image/jpeg', q || 0.9);
 async function hbVorschau() {
   const els = HB.el.filter((e) => e.fest); if (!HB.foto || !els.length || HB.laedt) return;
+  /* ohne Einwilligung: erst den Ausschnitt bauen und im Blatt zeigen, was übermittelt würde */
+  if (!hbEinwDa()) { try { HB.paket = await hbPaket(els); } catch (e) { HB.paket = null; } HB.einwFrage = true; return render(); }
   HB.laedt = true; HB.fehler = ''; render();
   try {
+    const P = HB.paket || await hbPaket(els); HB.paket = null;
+    const { bild, lage, vorlagen, elemente, ax, ay, cw, ch, W, H, foto } = P;
+    const meldung = (j) => j && j.fehler === 'nicht_eingerichtet' ? 'Die KI-Vorschau ist noch nicht eingeschaltet.' : j && j.fehler === 'rate_limited' ? 'Für heute sind genug Vorschauen gerechnet. Morgen geht es weiter.' : j && j.fehler === 'abgelehnt' ? 'Der Bilddienst hat das Foto abgelehnt. Bitte ein anderes Foto versuchen.' : j && j.fehler === 'einwilligung' ? 'Bitte lade die Seite neu und willige noch einmal ein.' : 'Die Vorschau hat nicht geklappt. Bitte gleich noch einmal.';
+    const r = await fetch('/api/hausbild', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ bild: bild, lage: lage, vorlagen: vorlagen, elemente: elemente, einwilligung: HB_EINW_STAND }) });
+    let j = await r.json().catch(() => null);
+    if (!r.ok || !j || !j.ok) throw new Error(meldung(j));
+    const kosten = j.kosten;
+    /* abholen: alle 1,5 s nachfragen, höchstens 3 Minuten; nach 25 s sagt die Bühne, dass es länger dauert */
+    if (j.warten) {
+      const start = Date.now();
+      for (;;) {
+        await new Promise((ok) => setTimeout(ok, 1500));
+        if (Date.now() - start > 25000 && !HB.langsam) { HB.langsam = true; render(); }
+        const g = await fetch('/api/hausbild?u=' + encodeURIComponent(j.warten), { headers: { 'x-hausbild': '1' } }).catch(() => null);
+        const k = g ? await g.json().catch(() => null) : null;
+        if (g && (!g.ok || !k || !k.ok)) throw new Error(meldung(k));
+        if (k && k.fertig) { j = k; break; }
+        if (Date.now() - start > 180000) throw new Error('Der Bilddienst ist gerade sehr langsam. Bitte später noch einmal.');
+      }
+    }
+    await hbEinsetzenErgebnis(j.bild, els, { ax: ax, ay: ay, cw: cw, ch: ch, W: W, H: H, foto: foto });
+    HB.kosten = kosten;
+  } catch (e) {
+    HB.fehler = (e && e.message && !/fetch|network/i.test(e.message)) ? e.message : 'Keine Verbindung. Bitte gleich noch einmal.';
+  }
+  HB.laedt = false; HB.langsam = false; render();
+}
+/* Kennzeichnung als KI-Bild (Art. 50 Abs. 2 KI-Verordnung, Prüfung 2.11.2026): sichtbar unten rechts im Bild, damit sie auch bleibt, wenn
+   ein Messenger die Metadaten entfernt, und maschinenlesbar als XMP (IPTC DigitalSourceType „compositeWithTrainedAlgorithmicMedia“) */
+function hbKennzeichnen(c, W, H) {
+  const t = 'KI-Visualisierung · kein Foto · eeziframes.com', g = Math.max(14, Math.round(W * 0.022));
+  c.save(); c.font = '500 ' + g + 'px Outfit, "Avenir Next", "Segoe UI", system-ui, sans-serif';
+  const b = c.measureText(t).width, pad = Math.round(g * 0.6), h = Math.round(g * 1.7), x = W - b - pad * 2 - Math.round(g * 0.8), y = H - h - Math.round(g * 0.8);
+  c.fillStyle = 'rgba(7, 9, 10, .72)'; c.beginPath(); if (c.roundRect) c.roundRect(x, y, b + pad * 2, h, h / 2); else c.rect(x, y, b + pad * 2, h); c.fill();
+  c.fillStyle = '#ffffff'; c.textBaseline = 'middle'; c.fillText(t, x + pad, y + h / 2 + 1); c.restore();
+}
+function hbMitXmp(dataUrl) {
+  try {
+    const xmp = '<?xpacket begin="\ufeff" id="W5M0MpCehiHzreSzNTczkc9d"?><x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">' +
+      '<rdf:Description rdf:about="" xmlns:Iptc4xmpExt="http://iptc.org/std/Iptc4xmpExt/2008-02-29/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xmp="http://ns.adobe.com/xap/1.0/" ' +
+      'Iptc4xmpExt:DigitalSourceType="http://cv.iptc.org/newscodes/digitalsourcetype/compositeWithTrainedAlgorithmicMedia" xmp:CreatorTool="eeziframes.com (FLUX, Black Forest Labs)">' +
+      '<dc:description><rdf:Alt><rdf:li xml:lang="x-default">KI-Visualisierung mit eeziframes.com (FLUX, Black Forest Labs), kein Foto</rdf:li></rdf:Alt></dc:description>' +
+      '</rdf:Description></rdf:RDF></x:xmpmeta><?xpacket end="w"?>';
+    const inhalt = new TextEncoder().encode('http://ns.adobe.com/xap/1.0/\0' + xmp), laenge = inhalt.length + 2;
+    if (laenge > 65535) return dataUrl;
+    const roh = atob(dataUrl.split(',')[1]), b = new Uint8Array(roh.length); for (let i = 0; i < roh.length; i++) b[i] = roh.charCodeAt(i);
+    if (b[0] !== 0xff || b[1] !== 0xd8) return dataUrl;
+    /* APP1-Segment mit dem XMP direkt hinter den Anfang der Datei (SOI) */
+    const neu = new Uint8Array(b.length + 4 + inhalt.length);
+    neu.set(b.subarray(0, 2), 0); neu.set([0xff, 0xe1, laenge >> 8, laenge & 255], 2); neu.set(inhalt, 6); neu.set(b.subarray(2), 6 + inhalt.length);
+    let s = ''; for (let i = 0; i < neu.length; i += 0x8000) s += String.fromCharCode.apply(null, neu.subarray(i, i + 0x8000));
+    return 'data:image/jpeg;base64,' + btoa(s);
+  } catch (e) { return dataUrl; }
+}
+/* Ausschnitt, Lage, Vorlagen und Elemente für den Auftrag (ohne Netz) */
+async function hbPaket(els) {
     const W = HB.foto.w, H = HB.foto.h, foto = await hbLadeBild(HB.foto.src);
     /* Ausschnitt: alle Elemente mit Rand, mindestens 384 px, höchstens das ganze Foto */
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -467,26 +533,12 @@ async function hbVorschau() {
       const g = (v, a, l) => Math.round((v - a) / l * 1000);
       return { box: [g(by0, ay, ch), g(bx0, ax, cw), g(by1, ay, ch), g(bx1, ax, cw)], vorlage: vIdx[e.win] || 0, art: e.art, daten: hbDaten(S.windows[e.win]) };
     });
-    const meldung = (j) => j && j.fehler === 'nicht_eingerichtet' ? 'Die echte Vorschau ist noch nicht eingeschaltet.' : j && j.fehler === 'rate_limited' ? 'Für heute sind genug Vorschauen gerechnet. Morgen geht es weiter.' : j && j.fehler === 'abgelehnt' ? 'Der Bilddienst hat das Foto abgelehnt. Bitte ein anderes Foto versuchen.' : 'Die Vorschau hat nicht geklappt. Bitte gleich noch einmal.';
-    const r = await fetch('/api/hausbild', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ bild: bild, lage: lage, vorlagen: vorlagen, elemente: elemente }) });
-    let j = await r.json().catch(() => null);
-    if (!r.ok || !j || !j.ok) throw new Error(meldung(j));
-    const kosten = j.kosten;
-    /* abholen: alle 1,5 s nachfragen, höchstens 3 Minuten; nach 25 s sagt die Bühne, dass es länger dauert */
-    if (j.warten) {
-      const start = Date.now();
-      for (;;) {
-        await new Promise((ok) => setTimeout(ok, 1500));
-        if (Date.now() - start > 25000 && !HB.langsam) { HB.langsam = true; render(); }
-        const g = await fetch('/api/hausbild?u=' + encodeURIComponent(j.warten), { headers: { 'x-hausbild': '1' } }).catch(() => null);
-        const k = g ? await g.json().catch(() => null) : null;
-        if (g && (!g.ok || !k || !k.ok)) throw new Error(meldung(k));
-        if (k && k.fertig) { j = k; break; }
-        if (Date.now() - start > 180000) throw new Error('Der Bilddienst ist gerade sehr langsam. Bitte später noch einmal.');
-      }
-    }
-    /* Ergebnis nur innerhalb der Elementflächen ins Originalfoto, weich auslaufend */
-    const neu = await hbLadeBild(j.bild), voll = document.createElement('canvas'); voll.width = W; voll.height = H; const vc = voll.getContext('2d'); vc.drawImage(foto, 0, 0, W, H);
+    return { bild: bild, lage: lage, vorlagen: vorlagen, elemente: elemente, ax: ax, ay: ay, cw: cw, ch: ch, W: W, H: H, foto: foto };
+}
+/* Ergebnis nur innerhalb der Elementflächen ins Originalfoto, weich auslaufend */
+async function hbEinsetzenErgebnis(ergebnis, els, P) {
+    const { ax, ay, cw, ch, W, H, foto } = P;
+    const neu = await hbLadeBild(ergebnis), voll = document.createElement('canvas'); voll.width = W; voll.height = H; const vc = voll.getContext('2d'); vc.drawImage(foto, 0, 0, W, H);
     const schicht = document.createElement('canvas'); schicht.width = W; schicht.height = H; const sc = schicht.getContext('2d'); sc.drawImage(neu, ax, ay, cw, ch);
     const maske = document.createElement('canvas'); maske.width = W; maske.height = H; const mc = maske.getContext('2d'), weit = W * 3;
     els.forEach((e) => {
@@ -496,10 +548,7 @@ async function hbVorschau() {
       q2.forEach((pt, i) => (i ? mc.lineTo(pt[0] + weit, pt[1]) : mc.moveTo(pt[0] + weit, pt[1]))); mc.closePath(); mc.fill(); mc.restore();
     });
     sc.globalCompositeOperation = 'destination-in'; sc.drawImage(maske, 0, 0); vc.drawImage(schicht, 0, 0);
-    HB.ergebnis = hbJpeg(voll, 0.92); HB.zeige = 'nach'; HB.kosten = kosten; HB.z = 1; HB.tx = 0; HB.ty = 0;
-  } catch (e) {
-    HB.fehler = (e && e.message && !/fetch|network/i.test(e.message)) ? e.message : 'Keine Verbindung. Bitte gleich noch einmal.';
-  }
-  HB.laedt = false; HB.langsam = false; render();
+    hbKennzeichnen(vc, W, H);
+    HB.ergebnis = hbMitXmp(hbJpeg(voll, 0.92)); HB.zeige = 'nach'; HB.z = 1; HB.tx = 0; HB.ty = 0;
 }
 window.addEventListener('resize', () => { if (S.screen === 'hausbild') hbLayout(); });

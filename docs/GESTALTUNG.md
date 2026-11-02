@@ -678,7 +678,7 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
 3-D-Bühne `Buehne3D.foto` (`web/assets/buehne.js`).
 
 - **Einladung in „Gespeichert“:** unter der schwarzen Bühne mit dem gestalteten Element eine hellblaue Karte (eigene Blaufamilie nur auf
-  dieser Karte, Wunsch des Inhabers): kleines Haus-Zeichen, „Sieh dein Fenster *in echt.*“, ein Satz, Knopf „An meinem Haus ansehen“ über
+  dieser Karte, Wunsch des Inhabers): kleines Haus-Zeichen, „Sieh dein Fenster *an deinem Haus.*“ (vorher „in echt“, nach der Prüfung irreführend für ein KI-Bild), ein Satz, Knopf „An meinem Haus ansehen“ über
   die ganze Breite. Nur im eigenen Aufmaß (nicht im Kundenlink, nicht in den Konfiguratoren der Fensterbauer, nicht in der Führung) und
   nur, wenn der Server den Bilddienst eingerichtet hat (`/api/status` meldet `hausbild`).
 - **Editor (Bildschirm `hausbild`):** Rahmen wie „Gespeichert“ (schwarze Bühne, weißes Blatt, Fuß mit Rundknopf und einer vollen Pille),
@@ -693,7 +693,8 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
   3. **Bestätigen** verankert das Element. Danach sind die Elemente nicht mehr antippbar; **Bearbeiten** schaltet das Antippen ein, nach
      dem nächsten Bestätigen ist es wieder aus (Wunsch des Inhabers: nichts aus Versehen verschieben). **Duplizieren** setzt eine Kopie
      daneben, **Entfernen** nimmt das gewählte heraus. Bis hier keine KI.
-  4. **Echte Vorschau** (erst mit mindestens einem bestätigten Element): Die App schickt nur den Ausschnitt um alle Elemente (mit Rand,
+  4. **KI-Vorschau** (früher „Echte Vorschau“; erst mit mindestens einem bestätigten Element, vor der ersten mit Einwilligung, die den
+     übermittelten Ausschnitt zeigt): Die App schickt nur den Ausschnitt um alle Elemente (mit Rand,
      höchstens 1.600 px) als sauberes Foto und je Fenster ein Bild aus dem 3-D-Modell (gerade von außen, `VIEWS.aussenGerade`) mit
      seinen Daten (Farbe, Flügel, Oberlicht, Sprossen, Sonnenschutz, Glas). Der Server schreibt den Auftrag für FLUX 3 Image Klein: je
      Element ein Feld nach docs.bfl.ai „Bounding boxes“, Quelle ist die Vorlage, Ziel die markierte Öffnung; eingebaut wie vom Monteur
@@ -702,13 +703,19 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
      eingesetzten Fenstern als Quelle eines Feldes: dann übernimmt die KI die flachen Fenster (erste Fassung, Urteil des Inhabers:
      „einfach nur schräg eingesetzt, nicht implementiert in den Gesamtkontext“). Der Server gibt nur die Adresse zum Abholen zurück, die
      App fragt bis zu 3 Minuten nach (GET /api/hausbild). Das Ergebnis setzt die App nur innerhalb der Elementflächen (24 % größer, unten
-     mit Platz für die Fensterbank, weich auslaufend) ins Originalfoto; außerhalb bleibt jedes Pixel das Foto des Kunden. Danach Vorher/Nachher, „Bild
-     speichern“, „Weiter bearbeiten“. Unter dem Bild: „Eine Visualisierung, keine Maßgrundlage.“
+     mit Platz für die Fensterbank, weich auslaufend) ins Originalfoto; außerhalb bleibt jedes Pixel das Foto des Kunden. Danach Vorher/Nachher mit Chip „KI-Bild“, „Bild
+     speichern“ (Datei `mein-haus-ki-visualisierung.jpg`), „Weiter bearbeiten“; Titel „So *könnte* es aussehen.“ Das Ergebnis trägt unten
+     rechts sichtbar „KI-Visualisierung · kein Foto · eeziframes.com“ und in den Bilddaten XMP (IPTC DigitalSourceType
+     „compositeWithTrainedAlgorithmicMedia“), Art. 50 Abs. 2 KI-Verordnung.
 - **Kosten und Grenzen:** 0,9 Cent je Vorschau (Black Forest Labs, Stand 1.11.2026). Server: 10 je 10 Minuten und Anschluss, 20 je
   Anschluss und Tag, `HAUSBILD_TAG_MAX` (Vorgabe 500) am Tag insgesamt. Gespeichert wird nichts.
 - **Ohne WebGL** zeichnet hausbild.js eine einfache Ansicht des Elements (Rahmenfarbe, Flügel, Glas, Kasten).
-- **Offen:** die Datenschutzerklärung (Black Forest Labs als Empfänger der Ausschnitte) und ein Vertrag zur Auftragsverarbeitung mit dem
-  Anbieter, bevor `BFL_API_KEY` online gesetzt wird; Zählung in der Statistik (Editor geöffnet, Vorschau, danach gekauft oder angefragt).
+- **Recht (Prüfung 2.11.2026, docs/recht/2026-11-02-hausbild-pruefung.md):** Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) vor der ersten
+  KI-Vorschau, Widerruf im Editor und in der Fußleiste, Datenschutzerklärung 5a, AGB § 2 Abs. 5 und § 11 Abs. 2, nur EU-Zugang. Werbung mit
+  solchen Bildern nur mit Hinweis „KI-Visualisierung mit eeziframes, kein Foto eines Einbaus. Ergebnisse können abweichen.“ und nie mit
+  Bildern von Kunden ohne eigene Freigabe.
+- **Offen:** Vertrag zur Auftragsverarbeitung mit Black Forest Labs und die Platzhalter in 5a und im Einwilligungsblatt, bevor `BFL_API_KEY`
+  online gesetzt wird; Zählung in der Statistik (Editor geöffnet, Vorschau, danach gekauft oder angefragt).
 
 ## Entscheidungen
 

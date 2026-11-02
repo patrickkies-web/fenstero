@@ -329,6 +329,8 @@ export async function anfragenAufraeumen(k, sp) {
   try { if (sp.zaehlerAltLoeschen) out.anmeldeFehler = await sp.zaehlerAltLoeschen(tagBerlin(new Date(jetzt - 2 * TAG)), 'budget:otpfehl:'); } catch (e) { out.ok = false; }
   /* Anfragen je Anschluss (Prüfwert, konten.js aufmassInstanz): ebenfalls nach 2 Tagen weg */
   try { if (sp.zaehlerAltLoeschen) out.anschluesse = await sp.zaehlerAltLoeschen(tagBerlin(new Date(jetzt - 2 * TAG)), 'budget:anf:'); } catch (e) { out.ok = false; }
+  /* Vorschauen am Haus je Anschluss (Prüfwert, hausbild.js): ebenfalls nach 2 Tagen weg (Datenschutzerklärung Abschnitt 2) */
+  try { if (sp.zaehlerAltLoeschen) out.hausbild = await sp.zaehlerAltLoeschen(tagBerlin(new Date(jetzt - 2 * TAG)), 'budget:hbanschluss:'); } catch (e) { out.ok = false; }
   return out;
 }
 

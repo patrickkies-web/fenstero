@@ -26,6 +26,13 @@ Could you please send us:
 5. Whether input or output images are used to train or improve your models, and how we can opt out for our account.
 6. Your list of sub-processors and your technical and organisational measures (Art. 32 GDPR).
 7. Whether we may use the generated images commercially (shown to our users, used in our advertising).
+8. Whether input images, prompts and outputs are reviewed by humans (e.g. for moderation), and whether a zero-retention option exists.
+9. Whether, with the EU endpoint, computing, storage, moderation, delivery (delivery.*.bfl.ai) and support access stay entirely within
+   the EU/EEA.
+10. Whether your terms forbid removing provenance information (C2PA, watermarks) from outputs. We composite the result into the
+    user's photo and add our own visible and XMP label "AI visualisation".
+11. Whether we must bind our end users to your usage policy, and whether you give any warranty or indemnity regarding the outputs.
+12. Your technical and organisational measures (e.g. ISO 27001 or SOC 2) and how quickly you notify us of a personal data breach.
 
 Thank you and kind regards
 Patrick Kies, eeziframes

@@ -83,6 +83,7 @@
 .dna.hb .hb-leer-knopf svg { width: 20px; height: 20px }
 .dna.hb .hb-datei { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none }
 
+.dna.hb .hb-ki-chip { left: auto; right: 10px; top: 10px; z-index: 5; background: rgba(7, 9, 10, .78) }
 .dna.hb .hb-lupe { position: absolute; z-index: 5; right: 8px; top: 8px; display: flex; flex-direction: column; gap: 6px }
 .dna.hb .hb-lupe .hb-rund { width: 44px; height: 44px; background: rgba(7, 9, 10, .72); color: var(--weiss); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px) }
 .dna.hb .hb-lupe .hb-rund[disabled] { opacity: .35; cursor: default }
@@ -139,9 +140,15 @@
 .dna .hb-plus-rund svg { width: 18px; height: 18px }
 .dna .hb-einw p { margin: 0 0 12px; font: 400 15px/1.5 var(--font-sans); color: var(--textgrau) }
 .dna .hb-einw p b { color: var(--schwarz); font-weight: 500 }
-.dna .hb-einw-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px }
-.dna .hb-einw-knoepfe .dna-pille { min-height: 52px; background: var(--schwarz); color: var(--weiss) }
-.dna .hb-einw-knoepfe .dna-pille--leise { background: transparent; color: var(--schwarz); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .hb-einw .ulink { color: var(--schwarz); text-decoration: underline; text-underline-offset: 3px }
+.dna .hb-einw-bild { margin: 0 0 14px }
+.dna .hb-einw-bild img { display: block; width: 100%; max-height: 220px; object-fit: contain; border-radius: 14px; background: #f4f4f6 }
+.dna .hb-einw-bild figcaption { margin-top: 6px; font: 400 13px/1.3 var(--font-sans); color: var(--textgrau) }
+/* beide Antworten gleich gewichtet (Einwilligung nach Art. 7 DSGVO, Prüfung 2.11.2026) */
+.dna .hb-einw-knoepfe { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px }
+.dna .hb-einw-knopf { min-height: 52px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--weiss); color: var(--schwarz); font: 500 15px/1.2 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; transition: transform .16s cubic-bezier(.2, .7, .2, 1) }
+.dna .hb-einw-knopf:active { transform: scale(.97) }
+@media (max-width: 380px) { .dna .hb-einw-knoepfe { grid-template-columns: 1fr } }
 .dna.hb .hb-textknopf { display: inline; min-height: 44px; padding: 0; border: 0; background: none; color: var(--schwarz); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
 @keyframes hb-grund { from { opacity: 0 } }
 @keyframes hb-blatt { from { transform: translateY(100%) } }

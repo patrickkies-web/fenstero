@@ -66,9 +66,9 @@ export const SEITEN = [
   { pfad: '/redaktion/', prio: '0.4', stand: '2026-10-30' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-28' },
   { pfad: '/datenschutz/', prio: '0.2', stand: '2026-11-02' },
-  { pfad: '/agb/', prio: '0.2', stand: '2026-10-30' },
+  { pfad: '/agb/', prio: '0.2', stand: '2026-11-02' },
   { pfad: '/partnerbedingungen/', prio: '0.3', stand: '2026-10-30' },
-  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-28' },
+  { pfad: '/cookies/', prio: '0.1', stand: '2026-11-02' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
 ].concat(PAKETE_SEITEN);
 
