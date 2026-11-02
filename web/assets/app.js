@@ -5754,7 +5754,8 @@ function zuStrich(svg) {
   return svg;
 }
 const WZ_FREI = { aufbau: 1, material: 1, glas: 1, bedienung: 1 };
-const wzFrei = (q) => !!WZ_FREI[q.kap || 'aufbau'];
+/* Türen bis zum Boden behalten Wand und Boden: Schwelle und Boden innen und außen gehören zu ihrer Planung */
+const wzFrei = (q) => !!WZ_FREI[q.kap || 'aufbau'] && !istTuer(S.win);
 function frageDna(c, q, panel, stage, designFertig, tasten) {
   panel = wzStrich(panel);
   const w = S.win, n = c.list.length, last = c.i === n - 1, ab = qAbschnitte(c).find((g) => g.jetzt) || { i0: 0, i1: n - 1 };
