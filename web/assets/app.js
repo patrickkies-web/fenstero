@@ -5637,7 +5637,8 @@ function lageDna(c) {
     '<div class="lg-bru-zeile"><div class="lg-mm lg-bru-feld"><input type="text" id="f-bru" data-in="lg-bru" inputmode="numeric" value="' + bruCm + '" placeholder="z. B. 90" maxlength="3" autocomplete="off" aria-describedby="lg-bru-mm"><span>cm</span></div><button type="button" class="lg-boden" data-act="lg-boden" aria-pressed="false">bodentief</button></div>' +
     '<p class="lg-hilfe" id="lg-bru-mm" aria-live="polite"></p><p class="lg-warn" hidden>Unter 80 cm braucht es meist eine Absturzsicherung. Dein Fensterbauer klärt das mit dir.</p></div></div>';
   const dock = '<div class="qdock wz-dock lw-dock">' + kopf + '<div class="qpanel lw-panel" data-q="lage">' + anzahl + stock + name + bru + '</div></div>';
-  return { html: lgKopf() + dnaTisch(lgBand(c) + buehne, dock + lgFuss(c)), back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna wz dt lw', voll: true, qpos: (c.i + 1) / c.list.length };
+  const fussLw = lgFuss(c), rl = rechtLinks(); // die Verweise unter die Pille (wie bei den Wünschen)
+  return { html: lgKopf() + dnaTisch(lgBand(c) + buehne, dock + fussLw.replace(rl, '') + rl), back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna wz dt lw', voll: true, qpos: (c.i + 1) / c.list.length };
 }
 /* Maßstab links: Strichmarken alle 5 px, lang an Decke und Boden jedes Stockwerks */
 function lgSkala() {
@@ -5832,9 +5833,9 @@ function frageDna(c, q, panel, stage, designFertig, tasten) {
     '<h1 tabindex="-1" aria-describedby="wz-pos">' + wzTitel(q) + '</h1>' + (q.sub ? '<p class="wz-sub">' + esc(q.sub) + '</p>' : '') + '</div>';
   const sichern = istTuer(w) ? 'Tür speichern' : w.art === 'fest' ? 'Verglasung speichern' : 'Fenster speichern';
   const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
-  const fuss = rechtLinks() + '<div class="lg-fuss qnav"><button type="button" class="lg-zurueck" data-act="qprev" aria-label="Zurück">' + LG_PFEIL_L + '</button>' +
+  const fuss = '<div class="lg-fuss qnav"><button type="button" class="lg-zurueck" data-act="qprev" aria-label="Zurück">' + LG_PFEIL_L + '</button>' +
     (designFertig ? '<button type="button" class="dna-pille dna-pille--leise wz-anpassen" data-act="qnext">Anpassen</button><button type="button" class="dna-pille lg-weiter btn primary" data-act="save">Speichern' + pfeil + '</button>'
-      : '<button type="button" class="dna-pille lg-weiter btn primary" data-act="qnext">' + (!qHaupt(q) ? 'Fertig' : last ? sichern : 'Weiter') + pfeil + '</button>') + '</div>';
+      : '<button type="button" class="dna-pille lg-weiter btn primary" data-act="qnext">' + (!qHaupt(q) ? 'Fertig' : last ? sichern : 'Weiter') + pfeil + '</button>') + '</div>' + rechtLinks(); // die Verweise unter der Pille (Inhaber, 2.11.2026)
   if (tasten) return { html: lgKopf() + wzBand(c) + buehne + tasten, back: ['Zurück', 'qprev'], dna: true, cls: 'dna wz wz-tasten', qpos: (c.i + 1) / n };
   return { html: lgKopf() + dnaTisch(wzBand(c) + buehne, '<div class="qdock wz-dock">' + kopf + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div></div>' + fuss) + wzKapitel(c),
     back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna wz dt', voll: true, qpos: (c.i + 1) / n };
@@ -5993,7 +5994,7 @@ SCREENS.frage = () => {
   /* Aufbau, Material, Glas, Griff: das Element schwebt frei auf der schwarzen Bühne (Vorlage des Inhabers, 2.11.2026); ab Sonnenschutz,
      Fensterbank und Montage steht es wieder in seiner Wand */
   const frei = wzFrei(q);
-  const stage = model(w, Object.assign(frei ? { frei: true, haus: false } : {}, { id: 'w3d', view: view, sway: !isSash && q.kind !== 'bars', selectable: isSash, selSash: selIdx, openSash: isSash ? S.openSash : -1, symbols: isSash || q.id === 'richtung', rails: q.kind === 'bars', selBar: S.selBar, formen: q.id === 'form', lupe: !!q.lupe, stageH: 'auto', fitW: q.kind === 'bars' ? 0.76 : view === 'front' ? 0.9 : 0.8, fitH: q.kind === 'bars' ? 0.7 : view === 'front' ? 0.84 : 0.76, hint: q.kind === 'bars' ? '' : (q.hint || '') }));
+  const stage = model(w, Object.assign(frei ? { frei: true, haus: false } : {}, { id: 'w3d', view: view, sway: !isSash && q.kind !== 'bars', selectable: isSash, selSash: selIdx, openSash: isSash ? S.openSash : -1, symbols: isSash || q.id === 'richtung', rails: q.kind === 'bars', selBar: S.selBar, formen: q.id === 'form', lupe: !!q.lupe, stageH: 'auto', fitW: q.kind === 'bars' ? 0.7 : view === 'front' ? 0.8 : 0.68, fitH: q.kind === 'bars' ? 0.62 : view === 'front' ? 0.72 : 0.62, /* etwas weiter weg (Inhaber, 2.11.2026) */ hint: q.kind === 'bars' ? '' : (q.hint || '') }));
   /* Das Modell zuerst und immer gleich groß; Frage und Eingabe teilen sich darunter das Dock, das bei Bedarf in sich scrollt.
      Antippen zeichnet neu: dieselbe Frage behält die Stelle im Dock (gemerkt in S.qDock), eine neue Frage beginnt oben. */
   if (S.qDock && (S.qDock.q !== q.id || S.qDock.w !== w)) S.qDock = null;

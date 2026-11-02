@@ -3362,7 +3362,8 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
    Oben die Bühne in Schwarz, im Aufbau, bei Material, Glas und Griff schwebt das 3-D-Modell frei im Licht (wz-frei), danach steht es
    wieder in seiner Wand; unten gerundet über der weißen Fläche mit Frage, Antworten und Pille. Form und Flügelzahl als runde Knöpfe wie
    die Elemente auf der Start-Folie. Die Antworten bleiben die Bausteine der Fragen; hier bekommen sie ihre Farben auf Weiß. */
-.scr.dna.wz .wz-buehne { z-index: 2; height: clamp(250px, calc(100svh - 440px), 380px); border-radius: 0 0 36px 36px }
+/* Bühne 15 % tiefer (Inhaber, 2.11.2026: „Das schwarze Feld kann ruhig noch 15 % weiter runter“) */
+.scr.dna.wz .wz-buehne { z-index: 2; height: clamp(288px, calc(100svh - 370px), 437px); border-radius: 0 0 36px 36px }
 .scr.dna.wz .wz-buehne.wz-frei { background: radial-gradient(50% 46% at 50% 52%, var(--indigo) 0, color-mix(in srgb, var(--indigo) 50%, var(--schwarz)) 34%, color-mix(in srgb, var(--anthrazit) 45%, var(--schwarz)) 58%, var(--schwarz) 80%) }
 .scr.dna.wz .wz-buehne.wz-frei::after { box-shadow: none }
 .scr.dna.wz .wz-dock { position: relative; z-index: 1; flex: 1 0 auto; margin: -36px -16px 0; padding: 56px 16px 12px; background: var(--weiss); color: var(--schwarz);
@@ -3548,7 +3549,12 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna.wz.lw .lg-karte { margin: 0; padding: 0; background: none; box-shadow: none; border-radius: 0 }
 .scr.dna.wz.lw .lg-karte::before, .scr.dna.wz.lw .lg-karte::after { content: none }
 .scr.dna.wz.lw .lg-feld { padding: 0; display: grid; gap: 12px }
-.scr.dna.wz.lw .dna-eingabe input, .scr.dna.wz.lw .lg-mm { background: #f6f6f8; color: var(--schwarz); box-shadow: inset 0 0 0 1px #e6e5ea; border: 0 }
+/* Eingabefelder auf Weiß: die ganze Pille ist das Feld (hellgrau, feiner Rand, beim Tippen schwarzer Rand), das Textfeld darin ohne
+   eigene Fläche; vorher stand ein eckiges graues Feld in einer runden Kontur (Inhaber, 2.11.2026: „eckig in runder Form“) */
+.scr.dna.wz.lw .dna-eingabe, .scr.dna.wz.lw .lg-mm { background: #f6f6f8; color: var(--schwarz); box-shadow: inset 0 0 0 1px #e6e5ea; border: 0; border-radius: 999px }
+.scr.dna.wz.lw .dna-eingabe input, .scr.dna.wz.lw .lg-mm input { background: transparent; box-shadow: none; border-radius: 999px; color: var(--schwarz) }
+.scr.dna.wz.lw .dna-eingabe:focus-within, .scr.dna.wz.lw .lg-mm:focus-within { box-shadow: inset 0 0 0 2px var(--schwarz) }
+.scr.dna.wz.lw .dna-eingabe input::placeholder, .scr.dna.wz.lw .lg-mm input::placeholder { color: var(--textgrau) }
 .scr.dna.wz.lw .lg-mm input { background: transparent; box-shadow: none; color: var(--schwarz) }
 .scr.dna.wz.lw .lg-mm span { color: var(--textgrau) }
 .scr.dna.wz.lw .lg-vorschlaege button, .scr.dna.wz.lw .lg-ogwahl button, .scr.dna.wz.lw .lg-boden { background: var(--weiss); color: var(--schwarz); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
@@ -3633,3 +3639,15 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna.er .er-rechts .er-falls .row .rnd { flex: 0 0 44px; width: 44px; height: 44px; padding: 0; border-radius: 50%; display: grid; place-items: center; background: var(--weiss); color: var(--schwarz); box-shadow: inset 0 0 0 1.5px #dcdbe1; font-size: 20px; transition: transform 160ms var(--dna-druck) }
 .scr.dna.er .er-rechts .er-falls .row .rnd:active { transform: scale(.94); transition-duration: 0s }
 .scr.dna.er .er-rechts .er-falls .row .ibtn { color: var(--textgrau) }
+
+/* Unteres Ende auf Weiß (Inhaber, 2.11.2026: „sieht abgehackt aus, der Knopf liegt über dem Fuß“): die Pille steht auf einer weißen
+   Fläche mit weichem Übergang nach oben, die rechtlichen Verweise kommen erst darunter; kein schwarzer Streifen mehr am Seitenende */
+@media (max-width: 1023px) {
+  .scr.dna.wz .lg-fuss { background: var(--weiss); margin-top: 0; padding-top: 10px }
+  .scr.dna.wz .foot-links.recht { padding-top: 8px }
+  .scr.dna.wz::after { content: ""; display: block; flex: 1 0 0; min-height: 0; margin: 0 -16px; background: var(--weiss) }
+}
+.scr.dna.wz .lg-fuss::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 28px; pointer-events: none; background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--weiss)) }
+/* „Weiß ich noch nicht“ steht auf Weiß an seinem Platz unter den Antworten, statt über den Kacheln zu schweben (die höhere Bühne lässt
+   dafür keinen Platz) */
+.scr.dna.wz .qpanel .qoffen:not(.qstd) { position: static !important; box-shadow: inset 0 0 0 1px #dcdbe1 !important }

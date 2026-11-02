@@ -329,6 +329,9 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Farben oder Blur“). Symbole überall als feine Strichzeichen in der Textfarbe wie auf Folie 1, keine bunten Flächen in Zeichen.
 - Sprossen (Inhaber, 2.11.2026): Nach der Wahl der Sprossen direkt die Dicke, dann die Farbe; die Farbe wählt man wie die Rahmenfarbe
   (beliebte Töne, alle Farben, Holzdekore, dazu Messing und „wie der Rahmen“), und das Modell zeigt sie immer.
+- Feinschliff der weißen Fläche (Inhaber, 2.11.2026, am Telefon): Eingabefelder sind als Ganzes eine Pille (kein eckiges Feld in runder
+  Kontur); das Seitenende bleibt weiß, die Pille steht über den rechtlichen Verweisen, nicht auf ihnen, ohne schwarzen Streifen; die
+  schwarze Bühne reicht etwa 15 % tiefer (bis gut zur Hälfte des Bildschirms), das Element steht darin etwas weiter weg.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
