@@ -5133,6 +5133,29 @@ if (teil(32)) {
   await p.evaluate(() => { SERVER.vermittlung = window.__vmVorher; S.verm = null; });
   await p.setViewportSize(telefon.viewport);
   ok(kw.length === 0, 'Weiße Fläche: auf 20 Folien (mit Vermittlung und Fehlermeldungen, Telefon und Laptop) jeder Text mindestens 4,5 : 1 (' + [...new Set(kw)].slice(0, 6).join(' · ') + ')');
+  /* c5) Maße vor dem Speichern (Inhaber, 2.11.2026): eingetippte Maße erst bestätigen (orange Kachel vor den offenen Möglichkeiten),
+     korrigieren über die Zifferntasten mit Rückkehr in den Bogen; ohne Maße ein Hinweis, der nicht sperrt; geführt gemessen keine Kachel */
+  const mStart = async (art) => { await p.evaluate((art) => { const w = art === 'gemessen' ? Object.assign({}, demoProject()[0]) : baseWin(); if (art === 'eingeben') { w.massWeg = 'eingeben'; w.el = { w: 1230, h: 1410 }; } if (art === 'ohne') w.massWeg = 'ohne'; w.name = 'Prüf ' + art; S.win = w; S.editIdx = -1; S.windows = []; S.extrasGezeigt = null; S.masseGezeigt = null; S.q = 'extras'; S.screen = 'frage'; render(true); }, art); await p.waitForTimeout(300); await p.tap('.lg-weiter'); await p.waitForTimeout(400); };
+  await mStart('eingeben');
+  const ms1 = await p.evaluate(() => ({ kachel: !!document.querySelector('.ex-blatt .ex-masse'), vorListe: !!document.querySelector('.ex-masse + .exb-zwischen'), werte: (document.querySelector('.ex-masse-werte') || {}).textContent || '', farbe: getComputedStyle(document.querySelector('.ex-masse') || document.body).backgroundColor }));
+  await p.tap('.ex-blatt [data-act="extras-speichern"]'); await p.waitForTimeout(300);
+  const ms2 = await p.evaluate(() => ({ screen: S.screen, bad: !!document.querySelector('.ex-masse.ist-bad') }));
+  await p.tap('[data-act="masse-korr"]'); await p.waitForTimeout(300);
+  for (const k of '1250') await p.tap('.keypad [data-v="' + k + '"]');
+  await p.tap('.keypad [data-v="ok"]'); await p.waitForTimeout(250); await p.tap('.keypad [data-v="ok"]'); await p.waitForTimeout(300);
+  const ms3 = await p.evaluate(() => ({ blatt: !!document.querySelector('.ex-masse'), w: S.win.el.w, h: S.win.el.h }));
+  await p.tap('[data-act="masse-ok"]'); await p.waitForTimeout(200); await p.tap('.ex-blatt [data-act="extras-speichern"]'); await p.waitForTimeout(500);
+  const ms4 = await p.evaluate(() => ({ screen: S.screen, ok: !!(S.windows[0] && S.windows[0].masseOk), w: S.windows[0] && S.windows[0].el.w }));
+  ok(ms1.kachel && ms1.vorListe && /1\.230/.test(ms1.werte) && /1\.410/.test(ms1.werte) && ms1.farbe === 'rgb(248, 137, 98)' && ms2.screen === 'frage' && ms2.bad && ms3.blatt && ms3.w === 1250 && ms3.h === 1410 && ms4.screen === 'fertig' && ms4.ok && ms4.w === 1250,
+    'Eingetippte Maße: orange Kachel vor den offenen Möglichkeiten, ohne Bestätigung kein Speichern, „Maße korrigieren“ über Breite und Höhe zurück in den Bogen, mit Häkchen gespeichert (' + JSON.stringify([ms1.werte, ms2, ms3, ms4]) + ')');
+  await mStart('ohne');
+  const ms5 = await p.evaluate(() => (document.querySelector('.ex-masse-kopf') || {}).textContent || '');
+  await p.tap('.ex-blatt [data-act="extras-speichern"]'); await p.waitForTimeout(500);
+  const ms6 = await p.evaluate(() => S.screen);
+  await mStart('gemessen');
+  const ms7 = await p.evaluate(() => !document.querySelector('.ex-masse'));
+  await p.evaluate(() => { S.extrasHinweis = false; S.exMasse = ''; S.masseFehler = false; render(); });
+  ok(/noch keine Maße/.test(ms5) && ms6 === 'fertig' && ms7, 'Ohne Maße: Hinweis in Orange, Speichern geht trotzdem; geführt gemessen: keine Kachel (' + JSON.stringify([ms5, ms6, ms7]) + ')');
   /* d) Weg zu den Maßen: ohne Maße gleich weiter; eingeben über die Zifferntasten; geführt über Fotos, zurück auf den Weg, nach dem Ergebnis weiter bei „wie viele und wo“ */
   await p.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.windows = []; S.q = 'massweg'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(400);
   const m0 = await p.evaluate(() => ({ zeilen: Array.from(document.querySelectorAll('.mw-zeile')).map((b) => b.getAttribute('data-v')).join(), h: Math.round(document.querySelector('.mw-kreis').getBoundingClientRect().height) }));

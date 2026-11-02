@@ -3813,3 +3813,35 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 /* Hinweise (ab-note, msg, note) auf Weiß hell wie die übrigen Karten, mit Punkt (Grau, Warnung Koralle) und schwarzem Text */
 :is(.scr.dna:is(.ft, .er, .fg, .zn, .ab, .li) .dna-rechts, .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts)) :is(.ab-note, .msg, .note:not(.fg-grenze):not(.grenze)) { background: #f6f6f8; box-shadow: none; color: var(--schwarz) }
 .scr.dna:is(.er, .fg) :is(.er-rechts, .fg-rechts) .ulink:not(:where(.vm-gratis-hinweis *)) { color: var(--schwarz) }
+/* ---------- Maße vor dem Speichern: orange Kachel im Bogen „Bevor du speicherst“ (Inhaber, 2.11.2026) ----------
+   Koralle als Fläche nur hier, auf ausdrücklichen Wunsch („eine orangene Kachel“): Warnung vor selbst eingetragenen Maßen. Schrift schwarz
+   (8 : 1), die beiden Maße als weiße Felder zum Antippen, das Häkchen wie bei den AGB, zwei Wege als schwarze Umriss-Pillen. */
+html.dna-voll .sheet .ex-blatt-titel { margin-bottom: 14px }
+html.dna-voll .sheet .ex-masse { display: grid; gap: 12px; margin: 0 0 6px; padding: 16px; border-radius: 22px; background: var(--koralle); color: var(--schwarz); transition: box-shadow 220ms var(--dna-druck) }
+html.dna-voll .sheet .ex-masse.ist-bad { box-shadow: 0 0 0 2px var(--anthrazit), 0 0 0 4px var(--weiss) }
+html.dna-voll .sheet .ex-masse p { margin: 0; font: 400 15px/1.45 var(--font-sans); color: var(--schwarz) }
+html.dna-voll .sheet .ex-masse .ex-masse-kopf { display: flex; align-items: center; gap: 8px; font: 600 16px/1.2 var(--font-sans); letter-spacing: -.01em }
+html.dna-voll .sheet .ex-masse-kopf svg { flex: none; width: 20px; height: 20px }
+html.dna-voll .sheet .ex-masse-werte { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; font: 300 20px/1 var(--font-sans) }
+html.dna-voll .sheet .ex-masse-wert { display: grid; gap: 2px; justify-items: start; min-height: 60px; padding: 8px 14px; border: 0; border-radius: 16px; background: var(--weiss); color: var(--schwarz); text-align: left; cursor: pointer; transition: transform 160ms var(--dna-druck) }
+html.dna-voll .sheet .ex-masse-wert:active { transform: scale(.97); transition-duration: 0s }
+html.dna-voll .sheet .ex-masse-wert small { font: 400 12px/1.2 var(--font-sans); letter-spacing: .03em; color: var(--textgrau) }
+html.dna-voll .sheet .ex-masse-wert b { font: 300 26px/1.05 var(--font-sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums }
+html.dna-voll .sheet .ex-masse-wert b span { margin-left: 4px; font: 400 13px/1 var(--font-sans); letter-spacing: 0; color: var(--textgrau) }
+html.dna-voll .sheet .ex-masse-ok { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 12px; align-items: start; width: 100%; min-height: 44px; padding: 4px 0; border: 0; background: none; color: var(--schwarz); font: 500 15px/1.4 var(--font-sans); text-align: left; cursor: pointer }
+html.dna-voll .sheet .ex-masse-box { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--schwarz) }
+html.dna-voll .sheet .ex-masse-box svg { width: 15px; height: 15px; opacity: 0; color: var(--weiss) }
+html.dna-voll .sheet .ex-masse-ok[aria-checked="true"] .ex-masse-box { background: var(--schwarz) }
+html.dna-voll .sheet .ex-masse-ok[aria-checked="true"] .ex-masse-box svg { opacity: 1 }
+html.dna-voll .sheet .ex-masse .ex-masse-fehler { font-weight: 600 }
+html.dna-voll .sheet .ex-masse-wege { display: flex; flex-wrap: wrap; gap: 8px }
+html.dna-voll .sheet .ex-masse-wege button { min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--schwarz); font: 500 14px/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; transition: transform 160ms var(--dna-druck) }
+html.dna-voll .sheet .ex-masse-wege button:active { transform: scale(.97); transition-duration: 0s }
+html.dna-voll .sheet .ex-masse :is(button):focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px }
+html.dna-voll .sheet .exb-zwischen { margin: 18px 0 0; font: 500 20px/1.2 var(--font-sans); letter-spacing: -.02em; color: var(--weiss) }
+html.dna-voll .sheet .exb-zwischen .ak { color: var(--silbergrau) }
+@media (prefers-reduced-motion: reduce) { html.dna-voll .sheet :is(.ex-masse, .ex-masse-wert, .ex-masse-wege button) { transition: none } }
+/* Die zwei Wege nebeneinander; die Knöpfe zum Speichern bleiben unten im Bogen stehen (der Bogen ist mit der Kachel länger als der Bildschirm) */
+html.dna-voll .sheet .ex-masse-wege { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) }
+html.dna-voll .sheet .ex-masse-wege button { padding: 0 8px; font-size: 14px }
+html.dna-voll .sheet.ex-blatt .vl-knoepfe { position: sticky; bottom: 0; z-index: 2; margin: 0 -22px; padding: 18px 22px 12px; background: linear-gradient(180deg, rgba(22, 22, 24, 0), #161618 18px) }

@@ -344,6 +344,12 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Schwarz, Koralle als Schrift → #c0502a; Karten, Hinweise, Kästchen und Umschalter hell; dunkel bleiben nur Inseln mit Absicht
   (Gratis-Karte, schwarze Pillen und Knöpfe, Symbolkacheln). Die Prüfsuite misst den Kontrast jedes Textes auf 20 Folien (Abschnitt 32).
   Vorschlag für seine DNA: „Wer die Fläche wechselt, wechselt alle Farben mit; geprüft wird gemessen, nicht geschaut.“
+- Maße vor dem Speichern (Inhaber, 2.11.2026): Hat jemand Breite und Höhe nur eingetippt (nicht geführt gemessen), steht im Bogen
+  „Bevor du speicherst“ vor den offenen Möglichkeiten eine orange Kachel (Koralle als Fläche, auf seinen Wunsch; Schrift schwarz):
+  „Vorsicht: deine Maße“, die beiden Maße zum Antippen, ein Häkchen „Ja, so sollen sie ins Aufmaß“, dazu „Maße korrigieren“ und
+  „Geführt neu messen“. Ohne Häkchen wird nicht gespeichert; geänderte Maße wollen neu bestätigt werden. Ohne Maße steht dieselbe Kachel
+  einmal als Hinweis und sperrt nicht. Die Speichern-Knöpfe bleiben unten im Bogen stehen.
+- Start-Folie (Inhaber, 2.11.2026): Balkontür (zweiflügelig) und Hebe-Schiebe-Tür als seine Fotos in Anthrazit, wie das Fenster.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
