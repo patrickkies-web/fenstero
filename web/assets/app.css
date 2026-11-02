@@ -2046,17 +2046,16 @@ html.dna-voll body { background: #07090a }
 .stz-l.stz-dick { stroke-width: 1.6 }
 .stz-k, .stz-b { fill: var(--z-strich) }
 .dna .st-tisch { position: relative; --bh: clamp(400px, calc(100svh - 358px), 486px) }
-.dna .st-tisch::before { content: ""; position: absolute; z-index: 0; left: -16px; right: -16px; top: 0; height: calc(var(--bh) + 268px); pointer-events: none;
-  background: url(/bilder/konfigurator/buehne.webp) 42% 30% / cover no-repeat; transform: scaleX(-1);
-  -webkit-mask-image: linear-gradient(#000 0, #000 74%, rgba(0, 0, 0, .35) 88%, transparent 100%); mask-image: linear-gradient(#000 0, #000 74%, rgba(0, 0, 0, .35) 88%, transparent 100%) }
+.dna .st-tisch::before { content: ""; position: absolute; z-index: 0; left: -16px; right: -16px; top: 0; height: var(--bh); pointer-events: none;
+  background: radial-gradient(52% 42% at 50% 58%, var(--indigo) 0, color-mix(in srgb, var(--indigo) 50%, transparent) 32%, color-mix(in srgb, var(--anthrazit) 55%, transparent) 54%, transparent 76%) }
 .dna .st-buehne-dna { position: relative; z-index: 1; height: var(--bh); margin: 0 -16px; touch-action: pan-y; user-select: none; -webkit-user-select: none }
 .dna .st-buehne-dna .wz-chip { left: 12px; top: 12px; background: var(--schwarz); border-color: var(--anthrazit); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16) }
 .dna .st-buehne-dna .wz-ring { background: conic-gradient(var(--weiss) calc(var(--anteil) * 360deg), rgba(255, 255, 255, .22) 0) }
 /* Frage, Erklärung und Notiz auf dem Boden; der Text trägt einen weichen Schatten statt einer Abdunklung */
 .dna .st-buehne-dna .lg-frage { position: absolute; z-index: 3; left: 16px; right: 16px; top: 50px; padding: 0 }
-.dna.st .lg-frage h1 { font: 500 30px/1.1 var(--font-sans); letter-spacing: -.025em; color: var(--weiss); text-shadow: 0 1px 2px rgba(7, 9, 10, .55), 0 0 18px rgba(7, 9, 10, .55) }
-.dna.st .lg-frage h1 em { color: #cfcbd0 }
-.dna.st .lg-frage p { margin: 8px 0 0; max-width: 280px; font: 400 14px/1.4 var(--font-sans); color: #e2dfe3; text-shadow: 0 1px 2px rgba(7, 9, 10, .55), 0 0 18px rgba(7, 9, 10, .55) }
+.dna.st .lg-frage h1 { font: 600 36px/1 var(--font-sans); letter-spacing: -.035em; color: var(--weiss) }
+.dna.st .lg-frage h1 em { color: var(--weiss) }
+.dna.st .lg-frage p { margin: 8px 0 0; max-width: 300px; font: 400 15px/1.4 var(--font-sans); color: var(--silbergrau) }
 .dna.st .lg-frage .lg-i { margin-left: 0; vertical-align: middle; position: relative; top: -3px; color: var(--silbergrau) }
 .dna.st .lg-i::before { background: transparent }
 .dna.st .lg-notiz-knopf { position: relative; height: 36px; padding: 0 13px; font-size: 13px; color: var(--weiss); background: rgba(7, 9, 10, .35); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .7) }
@@ -2078,18 +2077,38 @@ html.dna-voll body { background: #07090a }
 .dna .st-name .lg-i::before { inset: 10px }
 /* sechs Elemente: kleine Glas-Kacheln über dem Boden, gewählt mit weißem Ring */
 .dna .st-rechts { position: relative; z-index: 1; display: flex; flex-direction: column }
-.dna .st-bento { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 12px }
-.dna .st-kachel { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; height: 64px; min-width: 0; padding: 0 6px; border: 0; border-radius: 16px; cursor: pointer; text-align: center; color: var(--silbergrau); font: 500 12px/1.1 var(--font-sans);
-  background: rgba(14, 14, 16, .55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10), inset 0 1px 0 rgba(255, 255, 255, .08);
-  transition: box-shadow 150ms var(--dna-druck), color 150ms var(--dna-druck), background-color 150ms var(--dna-druck), transform 160ms var(--dna-druck) }
-.dna .st-kachel:active { transform: scale(.97); transition-duration: 0s }
-.dna .st-zeichen { flex: none; display: block; width: 24px; height: 24px; --z-rahmen: var(--anthrazit); --z-strich: var(--silbergrau); --z-glas: #3a393c }
-.dna .st-kachel-name { display: block; max-width: 100%; hyphens: manual; overflow-wrap: anywhere }
-.dna .st-kachel[aria-checked="true"] { color: var(--weiss); background: rgba(14, 14, 16, .7); box-shadow: inset 0 0 0 1.5px var(--weiss) }
-.dna .st-kachel[aria-checked="true"] .st-zeichen { --z-strich: var(--weiss); --z-glas: #4a494c }
-.dna .st-kachel:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px }
+.dna .st-bento { display: flex; gap: 8px; margin: 14px -16px 0; padding: 6px 16px 4px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch }
+.dna .st-bento::-webkit-scrollbar { display: none }
+.dna .st-kachel { flex: none; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 74px; min-width: 0; padding: 0 0 4px; border: 0; border-radius: 16px; background: none; cursor: pointer; text-align: center; color: var(--silbergrau); font: 400 13px/1.15 var(--font-sans);
+  transition: color 150ms var(--dna-druck) }
+.dna .st-kreis { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; color: var(--silbergrau);
+  background: radial-gradient(120% 90% at 30% 0%, #363638, var(--anthrazit) 60%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .05);
+  transition: background-color 150ms var(--dna-druck), color 150ms var(--dna-druck), box-shadow 150ms var(--dna-druck), transform 160ms var(--dna-druck) }
+.dna .st-kachel:active .st-kreis { transform: scale(.94); transition-duration: 0s }
+.dna .st-zeichen { flex: none; display: block; width: 28px; height: 28px }
+.dna .st-kachel-name { display: block; max-width: 100%; white-space: nowrap }
+.dna .st-kachel[aria-checked="true"] { color: var(--weiss); font-weight: 500 }
+.dna .st-kachel[aria-checked="true"] .st-kreis { background: var(--weiss); color: var(--schwarz); box-shadow: 0 0 0 3px var(--schwarz), 0 0 0 4.5px var(--violett) }
+.dna .st-kachel:focus-visible { outline: none }
+.dna .st-kachel:focus-visible .st-kreis { outline: 2px solid var(--weiss); outline-offset: 6px }
+/* Weiße Fläche unter der Bühne: oben die gerundete Unterkante des Schwarz, darin die Stelle, die Pille und die Rechtslinks */
+.dna .st-weiss { position: relative; flex: 1; display: flex; flex-direction: column; margin: 18px -16px 0; padding: 60px 20px 0; background: var(--weiss); color: var(--schwarz);
+  --tinte: var(--schwarz); --tinte-2: var(--textgrau); --handlung: var(--schwarz); --auf-handlung: var(--weiss); --fokus: var(--schwarz) }
+.dna .st-weiss::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 36px; border-radius: 0 0 36px 36px; background: var(--schwarz) }
+.dna .st-weiss .st-stelle-karte { margin: 0; padding: 0; background: none; box-shadow: none; border-radius: 0 }
+.dna .st-weiss .st-stelle-karte .dna-label { display: flex; align-items: center; gap: 9px; font-size: 13px }
+.dna .st-weiss .st-stelle-karte .dna-label::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 4px #ece9fe }
+.dna .st-weiss-titel { margin: 2px 0 8px; font: 600 26px/1.08 var(--font-sans); letter-spacing: -.025em; color: var(--schwarz); text-wrap: balance }
+.dna .st-weiss-titel span { color: var(--textgrau) }
+.dna .st-weiss .st-stelle { background: #f2f2f4 }
+.dna .st-weiss .st-stelle button { min-height: 48px; font-size: 15px }
+.dna .st-weiss .st-stelle-text { font-size: 15px; margin-top: 4px }
+.dna .st-weiss .lg-fuss { margin: auto -20px 0; padding-top: 22px; background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--weiss) 16px) }
+.dna .st-weiss .lg-zurueck { color: var(--schwarz); box-shadow: inset 0 0 0 1.5px var(--silbergrau); background: var(--weiss) }
+.dna .st-weiss .foot-links.recht a, .dna .st-weiss .foot-links.recht { color: var(--textgrau) }
 /* die Stelle auf weißer Karte: Umschalter mit Füllung und Punkt, darunter ein Satz */
 .dna .st-stelle-karte { position: relative; margin-top: 12px; padding: 12px 16px 14px }
+.dna .st-weiss .st-stelle-karte { margin-top: 0 }
 .dna .st-stelle-karte .lg-feld { padding: 0; gap: 8px }
 .dna .st-stelle-karte .dna-label { font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--textgrau) }
 .dna .st-stelle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 999px; background: color-mix(in srgb, var(--silbergrau) 22%, var(--weiss)) }
@@ -2113,8 +2132,7 @@ html.dna-voll body { background: #07090a }
   .scr.dna.st { max-width: none; padding-inline: 0 }
   .dna.st .lg-kopf { height: 60px; padding: 0 28px }
   .dna .st-tisch { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 380px }
-  .dna .st-tisch::before { left: 0; right: 0; height: 100%; background-size: auto 150%; background-position: 72% 30%;
-    -webkit-mask-image: linear-gradient(#000 0, #000 62%, rgba(0, 0, 0, .35) 84%, transparent 100%); mask-image: linear-gradient(#000 0, #000 62%, rgba(0, 0, 0, .35) 84%, transparent 100%) }
+  .dna .st-tisch::before { left: 0; right: 380px; height: 100% }
   .dna .st-buehne-dna { height: auto; min-height: 560px; margin: 0 }
   .dna .st-buehne-dna .wz-chip { left: 16px; top: 16px }
   .dna .st-buehne-dna .lg-frage { left: 24px; right: 24px; top: 58px }
@@ -2123,13 +2141,16 @@ html.dna-voll body { background: #07090a }
   .dna .st-objekt { top: 53%; width: min(720px, 68%, calc(64vh * var(--asp))); transform: translate(-50%, -46%) }
   .dna .st-name { bottom: 22px }
   .dna .st-rechts { padding: 16px 32px 24px 24px }
-  .dna .st-bento { grid-template-columns: 1fr 1fr; margin-top: 0 }
-  .dna .st-kachel { background: rgba(14, 14, 16, .72) }
+  .dna .st-bento { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 6px; margin: 0; padding: 4px 0 0; overflow: visible }
+  .dna .st-kachel { width: auto }
+  .dna .st-weiss { margin: 18px 0 0; padding: 24px 22px 0; border-radius: 28px }
+  .dna .st-weiss::before { display: none }
+  .dna .st-weiss .lg-fuss { margin: auto 0 0; padding: 18px 0 20px }
   .dna .st-rechts .lg-fuss { position: static; order: 1; margin: auto 0 0; padding: 16px 0 0; background: none; justify-content: stretch }
   .dna .st-rechts .lg-fuss .dna-pille { flex: 1 }
-  .dna.st .st-rechts .foot-links.recht { order: 2; margin: 12px 0 0 }
+  .dna.st .st-rechts .foot-links.recht { order: 2; margin: 0 0 18px }
 }
-@media (prefers-reduced-motion: reduce) { .dna .st-kachel, .dna .st-stelle button, .dna .st-objekt img, .dna .st-name, .dna .st-rahmen { transition: none !important } }
+@media (prefers-reduced-motion: reduce) { .dna .st-kachel, .dna .st-kreis, .dna .st-stelle button, .dna .st-objekt img, .dna .st-name, .dna .st-rahmen { transition: none !important } }
 
 /* ---------- Fotos im Look der Design-DNA (27.10.2026; Vorschau docs/profis/konfigurator-start-vorschau/, Folie „Fotografiere das Fenster.“) ----------
    Bühne: Beispielfoto mit Sucherecken und Waage (antippen öffnet die Kamera), mit Foto das Foto mit Stand der KI; Tipp in einer Zeile;
@@ -3299,7 +3320,6 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .dna .lg-stockwahl button { font-size: 14px }
 .dna .lg-stocktext, .dna .lg-hilfe { font-size: 14px }
 .dna .lg-knoepfe button { width: 44px; height: 44px }
-.dna .st-kachel { height: 58px; gap: 4px }
 .dna .st-stelle button { font-size: 13px }
 .dna .ft-leer b { font-size: 14px }
 .dna .ft-leer small { font-size: 12px }
@@ -3337,3 +3357,112 @@ html.dna-voll .sheet:not(.ofoto-dna) .btn.ghost { font-size: 14px }
 .scr.dna:is(.wz, .ab, .tr) .qpanel .qsw[aria-pressed="true"] .c { box-shadow: 0 0 0 2px var(--anthrazit), 0 0 0 3.8px var(--weiss), inset 0 2px 4px rgba(255, 255, 255, .18), inset 0 -3px 6px rgba(7, 9, 10, .35) }
 html.dna-voll .fb .fw-raster .qsw[aria-pressed="true"] .c { box-shadow: 0 0 0 3px #161618, 0 0 0 5px var(--weiss) }
 html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px var(--weiss) }
+
+/* ---------- Wünsche mit schwarzer Bühne und weißer Fläche (Vorlage des Inhabers, 2.11.2026: „Was planst du?“ und „Welche Form?“) ----------
+   Oben die Bühne in Schwarz, im Aufbau, bei Material, Glas und Griff schwebt das 3-D-Modell frei im Licht (wz-frei), danach steht es
+   wieder in seiner Wand; unten gerundet über der weißen Fläche mit Frage, Antworten und Pille. Form und Flügelzahl als runde Knöpfe wie
+   die Elemente auf der Start-Folie. Die Antworten bleiben die Bausteine der Fragen; hier bekommen sie ihre Farben auf Weiß. */
+.scr.dna.wz .wz-buehne { z-index: 2; height: clamp(250px, calc(100svh - 440px), 380px); border-radius: 0 0 36px 36px }
+.scr.dna.wz .wz-buehne.wz-frei { background: radial-gradient(50% 46% at 50% 52%, var(--indigo) 0, color-mix(in srgb, var(--indigo) 50%, var(--schwarz)) 34%, color-mix(in srgb, var(--anthrazit) 45%, var(--schwarz)) 58%, var(--schwarz) 80%) }
+.scr.dna.wz .wz-buehne.wz-frei::after { box-shadow: none }
+.scr.dna.wz .wz-dock { position: relative; z-index: 1; flex: 1 0 auto; margin: -36px -16px 0; padding: 56px 16px 12px; background: var(--weiss); color: var(--schwarz);
+  --tinte: var(--schwarz); --tinte-2: var(--textgrau); --fokus: var(--schwarz) }
+.scr.dna.wz .wz-frage::before { content: none }
+.scr.dna.wz .wz-frage .eyebrow { color: var(--textgrau) }
+.scr.dna.wz .wz-frage h1 { color: var(--textgrau) }
+.scr.dna.wz .wz-frage h1:not(:has(em)), .scr.dna.wz .wz-frage h1 em { color: var(--schwarz) }
+.scr.dna.wz .wz-frage .lg-i { color: var(--textgrau) }
+.scr.dna.wz .wz-frage .lg-i::before { box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.scr.dna.wz .wz-sub { color: var(--textgrau) }
+.scr.dna.wz .wz-frage .qtiefe { background: none; color: var(--indigo); box-shadow: none }
+.scr.dna.wz .wz-frage .nz-knopf { color: var(--schwarz); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.scr.dna.wz .wz-frage .nz-knopf.da { color: var(--schwarz); box-shadow: inset 0 0 0 1.5px var(--violett) }
+/* Texte zwischen den Antworten */
+.scr.dna.wz .qpanel .qcur, .scr.dna.wz .qpanel .fw-hinweis, .scr.dna.wz .qpanel .qrow, .scr.dna.wz .qpanel .ff-info, .scr.dna.wz .qpanel .qrow .sub, .scr.dna.wz .qpanel .qlabel { color: var(--textgrau) }
+.scr.dna.wz .qpanel .qcur b { color: var(--schwarz) }
+/* Kacheln (Karten und Formen) auf Weiß: hellgrau, gewählt schwarz mit violettem Punkt */
+.scr.dna.wz .qpanel .qopt, .scr.dna.wz .qpanel .qformen .qf { color: var(--schwarz); background: #f4f4f6; box-shadow: inset 0 0 0 1px #e6e5ea }
+.scr.dna.wz .qpanel .qopt::before, .scr.dna.wz .qpanel .qformen .qf::before { content: none }
+.scr.dna.wz .qpanel .qopt > svg, .scr.dna.wz .qpanel .qformen .qf > svg { color: var(--textgrau) }
+.scr.dna.wz .qpanel .qopt .lbl, .scr.dna.wz .qpanel .qformen .qf::after { color: var(--schwarz) }
+.scr.dna.wz .qpanel .qopt .sb, .scr.dna.wz .qpanel .qopt .pr { color: var(--textgrau) }
+.scr.dna.wz .qpanel .qopt[aria-pressed="true"], .scr.dna.wz .qpanel .qformen .qf[aria-pressed="true"] { background: var(--schwarz); box-shadow: none }
+.scr.dna.wz .qpanel .qopt[aria-pressed="true"] > svg, .scr.dna.wz .qpanel .qformen .qf[aria-pressed="true"] > svg, .scr.dna.wz .qpanel .qopt[aria-pressed="true"] .lbl { color: var(--weiss) }
+.scr.dna.wz .qpanel .qopt[aria-pressed="true"] .sb, .scr.dna.wz .qpanel .qopt[aria-pressed="true"] .pr { color: var(--silbergrau) }
+.scr.dna.wz .qpanel .qopt[aria-pressed="true"] > svg [fill-opacity=".12"] { fill: #3a393c; fill-opacity: 1 }
+.scr.dna.wz .qpanel .qopt:focus-visible, .scr.dna.wz .qpanel .qformen .qf:focus-visible { outline-color: var(--schwarz) }
+.scr.dna.wz .qpanel .qinfo, .scr.dna.wz .qpanel .qci-i, .scr.dna.wz .qpanel .ibtn { color: var(--textgrau) }
+.scr.dna.wz .qpanel .qinfo::before, .scr.dna.wz .qpanel .ibtn::before { box-shadow: inset 0 0 0 1.5px #c9c8ce }
+.scr.dna.wz .qpanel .qo:has(.qopt[aria-pressed="true"]) .qinfo { color: var(--weiss) }
+.scr.dna.wz .qpanel .qo:has(.qopt[aria-pressed="true"]) .qinfo::before { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .5) }
+/* Umschalter, Listen, Zähler, Aufteilung: auf Weiß ohne eigene weiße Karte, sondern hellgrau ohne Schatten */
+.scr.dna.wz .qpanel .qseg, .scr.dna.wz .qpanel .qchips { background: #f2f2f4; box-shadow: none }
+.scr.dna.wz .qpanel .qlist, .scr.dna.wz .qpanel .qsteps, .scr.dna.wz .qpanel .rows, .scr.dna.wz .qpanel .qteile { background: #f6f6f8; box-shadow: none }
+.scr.dna.wz .qpanel .qlist > button + button, .scr.dna.wz .qpanel .qlist .qli + .qli, .scr.dna.wz .qpanel .qstep + .qstep, .scr.dna.wz .qpanel .sw-row + .sw-row { border-top-color: #e6e5ea }
+/* Farben: die Tupfen bleiben auf ihrer dunklen Innenkarte (G8); „Alle Farben“ und Wunschfarbe als Zeilen auf Weiß */
+.scr.dna.wz .qpanel .fw-mehr .chip { color: var(--schwarz); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+/* „Weiß ich noch nicht“ und „Mehr zu …“: leise Zeilen auf Weiß, gewählt hell schraffiert */
+.scr.dna.wz .qpanel .qoffen, .scr.dna.wz .qpanel .qmehr { background: var(--weiss); box-shadow: inset 0 0 0 1px #dcdbe1 }
+.scr.dna.wz .qpanel .qoffen .tx b, .scr.dna.wz .qpanel .qmehr .tx b { color: var(--schwarz) }
+.scr.dna.wz .qpanel .qoffen .tx small, .scr.dna.wz .qpanel .qmehr .tx small { color: var(--textgrau) }
+.scr.dna.wz .qpanel .qoffen .mark { color: var(--schwarz); box-shadow: inset 0 0 0 1.5px #a8a4a9 }
+.scr.dna.wz .qpanel .qoffen[aria-pressed="true"] { background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(107, 103, 108, .12) 6px 7.4px), #f6f6f8; box-shadow: inset 0 0 0 1.5px #a8a4a9 }
+.scr.dna.wz .qpanel .qoffen[aria-pressed="true"] .mark { background: repeating-linear-gradient(135deg, transparent 0 3px, rgba(107, 103, 108, .6) 3px 4.4px) }
+.scr.dna.wz .qpanel .qmehr .plus { color: var(--schwarz); box-shadow: inset 0 0 0 1.5px #a8a4a9; background: repeating-linear-gradient(135deg, transparent 0 3px, rgba(107, 103, 108, .25) 3px 4.4px) }
+.scr.dna.wz .qpanel .qoffen:focus-visible, .scr.dna.wz .qpanel .qmehr:focus-visible { outline-color: var(--schwarz) }
+@media (min-height: 740px) {
+  .scr.dna.wz .qpanel .qoffen:not(.qstd) { background: var(--weiss); box-shadow: inset 0 0 0 1px #dcdbe1, 0 -10px 18px -6px rgba(255, 255, 255, .95) }
+  .scr.dna.wz .qpanel .qoffen:not(.qstd)[aria-pressed="true"] { background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(107, 103, 108, .12) 6px 7.4px), #f6f6f8; box-shadow: inset 0 0 0 1.5px #a8a4a9 }
+}
+/* Fuß und Rechtslinks auf Weiß, über die ganze Breite */
+.scr.dna.wz .lg-fuss { background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--weiss) 16px); --handlung: var(--schwarz); --auf-handlung: var(--weiss); --tinte: var(--schwarz) }
+.scr.dna.wz .lg-fuss .lg-zurueck { color: var(--schwarz); background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.scr.dna.wz .lg-fuss .dna-pille--leise { color: var(--schwarz) }
+.scr.dna.wz .foot-links.recht { margin: 0 -16px; padding: 20px 16px 40px; background: var(--weiss) }
+.scr.dna.wz .foot-links.recht, .scr.dna.wz .foot-links.recht a { color: var(--textgrau) }
+/* Form und Flügelzahl: runde Knöpfe in einer Reihe zum Wischen, Name darunter (wie die Elemente auf der Start-Folie) */
+.scr.dna.wz .qpanel .qformen { display: flex !important; gap: 8px; margin: 0 -16px; padding: 6px 16px 4px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none }
+.scr.dna.wz .qpanel .qformen::-webkit-scrollbar { display: none }
+.scr.dna.wz .qpanel .qformen .qf { flex: none; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 78px; min-height: 0; height: auto; padding: 0 0 4px; background: none; box-shadow: none; border-radius: 16px; overflow: visible }
+.scr.dna.wz .qpanel .qformen .qf > svg { width: 64px !important; height: 64px !important; margin: 0; padding: 16px; box-sizing: border-box; border-radius: 50%; background: #f2f2f4; color: var(--schwarz);
+  transition: background-color 150ms var(--dna-druck), color 150ms var(--dna-druck), box-shadow 150ms var(--dna-druck), transform 160ms var(--dna-druck) }
+.scr.dna.wz .qpanel .qformen .qf::after { justify-self: center; max-width: 100%; font: 400 13px/1.15 var(--font-sans); color: var(--textgrau); text-align: center }
+.scr.dna.wz .qpanel .qformen .qf:active { transform: none }
+.scr.dna.wz .qpanel .qformen .qf:active > svg { transform: scale(.94); transition-duration: 0s }
+.scr.dna.wz .qpanel .qformen .qf[aria-pressed="true"] { background: none }
+.scr.dna.wz .qpanel .qformen .qf[aria-pressed="true"] > svg { background: var(--schwarz); color: var(--weiss); box-shadow: 0 0 0 3px var(--weiss), 0 0 0 4.5px var(--violett) }
+.scr.dna.wz .qpanel .qformen .qf[aria-pressed="true"]::after { color: var(--schwarz); font-weight: 500 }
+.scr.dna.wz .qpanel[data-q="teilung"] .qcards { display: flex !important; gap: 8px; margin: 0 -16px; padding: 6px 16px 4px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none }
+.scr.dna.wz .qpanel[data-q="teilung"] .qcards::-webkit-scrollbar { display: none }
+.scr.dna.wz .qpanel[data-q="teilung"] .qcards .qo { flex: none; scroll-snap-align: start; width: 84px }
+.scr.dna.wz .qpanel[data-q="teilung"] .qopt { display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 0; height: auto; padding: 0 0 4px !important; background: none; box-shadow: none; overflow: visible; text-align: center }
+.scr.dna.wz .qpanel[data-q="teilung"] .qopt > svg { width: 64px !important; height: 64px !important; margin: 0; padding: 14px; box-sizing: border-box; border-radius: 50%; background: #f2f2f4; color: var(--schwarz);
+  transition: background-color 150ms var(--dna-druck), color 150ms var(--dna-druck), box-shadow 150ms var(--dna-druck), transform 160ms var(--dna-druck) }
+.scr.dna.wz .qpanel[data-q="teilung"] .qopt:active { transform: none }
+.scr.dna.wz .qpanel[data-q="teilung"] .qopt:active > svg { transform: scale(.94); transition-duration: 0s }
+.scr.dna.wz .qpanel[data-q="teilung"] .qopt .tx { justify-items: center; text-align: center; gap: 1px }
+.scr.dna.wz .qpanel[data-q="teilung"] .qopt .lbl { justify-self: center; max-width: 100%; font: 400 13px/1.15 var(--font-sans); color: var(--schwarz) }
+.scr.dna.wz .qpanel[data-q="teilung"] .qopt .lbl::after { content: none }
+.scr.dna.wz .qpanel[data-q="teilung"] .qopt .sb { font: 400 12px/1.2 var(--font-sans); color: var(--textgrau) }
+.scr.dna.wz .qpanel[data-q="teilung"] .qopt[aria-pressed="true"] { background: none }
+.scr.dna.wz .qpanel[data-q="teilung"] .qopt[aria-pressed="true"] > svg { background: var(--schwarz); color: var(--weiss); box-shadow: 0 0 0 3px var(--weiss), 0 0 0 4.5px var(--violett) }
+.scr.dna.wz .qpanel[data-q="teilung"] .qopt[aria-pressed="true"] .lbl { color: var(--schwarz); font-weight: 500 }
+.scr.dna.wz .qpanel[data-q="teilung"] .qopt[aria-pressed="true"] .sb { color: var(--textgrau) }
+.scr.dna.wz .qpanel[data-q="teilung"] .qo .qinfo { top: -4px; right: 0; color: var(--textgrau) }
+.scr.dna.wz .qpanel[data-q="teilung"] .qo:has(.qopt[aria-pressed="true"]) .qinfo { color: var(--textgrau) }
+.scr.dna.wz .qpanel[data-q="teilung"] .qo:has(.qopt[aria-pressed="true"]) .qinfo::before { box-shadow: inset 0 0 0 1.5px #c9c8ce }
+.scr.dna.wz .qpanel[data-q="teilung"] .qcards .qo:has(.qinfo) .qopt { padding-right: 0 !important }
+/* Laptop: rechts die weiße Fläche als Spalte bis zum Rand, die Bühne links bleibt schwarz */
+@media (min-width: 1024px) {
+  .scr.dna.wz .wz-buehne { height: auto; border-radius: 0 }
+  .scr.dna.wz .dna-rechts { background: var(--weiss); border-radius: 28px 0 0 0; padding-top: 24px }
+  .scr.dna.wz .wz-dock { margin: 0; padding: 0; flex: none; background: none }
+  .scr.dna.wz .dna-rechts .lg-fuss { background: linear-gradient(rgba(255, 255, 255, 0), var(--weiss) 34%) }
+  .scr.dna.wz .foot-links.recht { margin: 4px 0 20px; padding: 0; background: none }
+  .scr.dna.wz .qpanel .qformen, .scr.dna.wz .qpanel[data-q="teilung"] .qcards { margin: 0; padding: 6px 0 4px; flex-wrap: wrap; overflow: visible }
+}
+@media (prefers-reduced-motion: reduce) { .scr.dna.wz .qpanel .qformen .qf > svg, .scr.dna.wz .qpanel[data-q="teilung"] .qopt > svg { transition: none } }
+.scr.dna.wz .wz-frei .w3d-stage { background: transparent !important }
+.scr.dna.wz .wz-frage .qtiefe span { background: #ece9fe; color: var(--indigo) }
+.scr.dna.wz .wz-frage .lg-i::before { background: transparent }
+.scr.dna.wz .qpanel .qformen .qf { width: 88px }

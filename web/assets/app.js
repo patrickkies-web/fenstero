@@ -3156,10 +3156,21 @@ let stZuletzt = '', stNeuZuletzt = false, stRichtung = 0, stSofort = false;
 const stIdx = (k) => Math.max(0, OPT.art.findIndex((x) => x.k === k));
 const stNachbar = (k, d) => OPT.art[(stIdx(k) + d + OPT.art.length) % OPT.art.length].k;
 /* Bilder des Inhabers (web/bilder/konfigurator/element/), Breite und Höhe in px */
-const ST_BILD = { fenster: [879, 1057], balkon: [536, 1200], fest: [1179, 996], hst: [1188, 993], psk: [908, 1079], fsw: [1200, 754] };
+const ST_BILD = { fenster: [879, 1194], balkon: [536, 1200], fest: [1179, 996], hst: [1188, 993], psk: [908, 1079], fsw: [1200, 754] };
+/* Datei je Element, wo sie anders heißt: das Fenster in Anthrazit mit Raffstore (Bild des Inhabers, 2.11.2026) */
+const ST_DATEI = { fenster: 'fenster-anthrazit' };
+/* Feine Zeichen der runden Knöpfe (2.11.2026, Vorlage des Inhabers): 28 × 28, Strich 1,6 in currentColor */
+const ST_ICON = {
+  fenster: '<rect x="5" y="4" width="18" height="20" rx="1.5"/><path d="M14 4v20M11.5 13v2.5M16.5 13v2.5"/>',
+  balkon: '<rect x="8.5" y="2.5" width="11" height="23" rx="1.5"/><path d="M17 13v2.5"/>',
+  fest: '<rect x="4.5" y="4.5" width="19" height="19" rx="1.5"/><path d="M9 16l5-5M10.5 19.5l7-7"/>',
+  hst: '<rect x="2.5" y="6.5" width="23" height="15" rx="1.5"/><path d="M14 6.5v15M17.5 14h5M20.5 12l2 2-2 2"/>',
+  psk: '<rect x="2.5" y="6.5" width="23" height="15" rx="1.5"/><path d="M14 6.5v15"/><rect x="5" y="9" width="7" height="10" rx="1"/>',
+  fsw: '<rect x="2.5" y="6.5" width="23" height="15" rx="1.5"/><path d="M6 9.5l4 9 4-9 4 9 4-9"/>'
+};
 /* Name unter dem Element; die Balkon- oder Terrassentür kurz, damit Name, Zusatz und Erklärung auf einer Zeile bleiben */
 const ST_NAME = { balkon: 'Balkontür' };
-const ST_KURZ = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Fest&shy;verglasung', hst: 'Hebe-Schiebe', psk: 'PSK-Tür', fsw: 'Falt&shy;schiebewand' };
+const ST_KURZ = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Festglas', hst: 'Hebe-Schiebe', psk: 'PSK-Tür', fsw: 'Faltwand' };
 const ST_STELLE = {
   ersatz: '<b>Dort ist schon eins.</b> Das neue kommt in dieselbe Öffnung. Soll sie größer werden, etwa für eine Tür, wähle „Neue Öffnung“.',
   neu: '<span class="st-punkt" aria-hidden="true"></span><b>Dort war noch keins, oder die Öffnung wird größer.</b> Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.'
@@ -3179,17 +3190,17 @@ function startDna() {
   const buehne = '<div class="st-buehne-dna">' +
     '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / steps.length).toFixed(4) + '"></i>Schritt ' + nr + ' von ' + steps.length + ' · Start</span>' +
     lgFrage('Was planst <em>du?</em>', 'elementart', 'Unsicher? Nimm, was heute eingebaut ist.') +
-    '<div class="st-objekt' + wl + '" style="--d: ' + d + '; --asp: ' + (b[0] / b[1]).toFixed(3) + '" aria-hidden="true"><span class="st-schatten"></span><img src="/bilder/konfigurator/element/' + art + '.webp" width="' + b[0] + '" height="' + b[1] + '" alt="" decoding="async" draggable="false">' +
+    '<div class="st-objekt' + wl + '" style="--d: ' + d + '; --asp: ' + (b[0] / b[1]).toFixed(3) + '" aria-hidden="true"><span class="st-schatten"></span><img src="/bilder/konfigurator/element/' + (ST_DATEI[art] || art) + '.webp" width="' + b[0] + '" height="' + b[1] + '" alt="" decoding="async" draggable="false">' +
     (neu ? '<span class="st-rahmen' + (kommt ? ' kommt' : '') + '"></span>' : '') + '</div>' +
     '<p class="st-name' + wl + '"><b>' + esc(ST_NAME[art] || o.label) + '</b><small>' + esc(o.sub || '') + '</small>' +
     (g ? '<button type="button" class="lg-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc('Was ist das: ' + o.label + '?') + '">' + LG_I + '</button>' : '') + '</p></div>';
-  const bento = '<div class="st-bento" role="radiogroup" aria-label="Element">' + OPT.art.map((x) => { const an = x.k === art; return '<button type="button" class="st-kachel" role="radio" data-act="art" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '" aria-label="' + esc(x.label) + '"><svg class="st-zeichen" viewBox="0 0 64 64" aria-hidden="true"><use href="#z-' + x.k + '"/></svg><span class="st-kachel-name" aria-hidden="true">' + ST_KURZ[x.k] + '</span></button>'; }).join('') + '</div>';
-  const stelle = '<div class="lg-karte lg-hell st-stelle-karte"><div class="lg-feld"><span class="dna-label" id="st-stelle-l">Die Stelle</span><div class="st-stelle" role="radiogroup" aria-labelledby="st-stelle-l">' +
+  const bento = '<div class="st-bento" role="radiogroup" aria-label="Element">' + OPT.art.map((x) => { const an = x.k === art; return '<button type="button" class="st-kachel" role="radio" data-act="art" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '" aria-label="' + esc(x.label) + '"><span class="st-kreis" aria-hidden="true"><svg class="st-zeichen" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + ST_ICON[x.k] + '</svg></span><span class="st-kachel-name" aria-hidden="true">' + ST_KURZ[x.k] + '</span></button>'; }).join('') + '</div>';
+  const stelle = '<div class="lg-karte lg-hell st-stelle-karte"><div class="lg-feld"><span class="dna-label" id="st-stelle-l">Die Stelle</span><h2 class="st-weiss-titel">Neu oder ersetzen? <span>Danach geht es zu den Fotos.</span></h2><div class="st-stelle" role="radiogroup" aria-labelledby="st-stelle-l">' +
     OPT.situation.map((x) => { const an = (x.k === 'neu') === neu; return '<button type="button" role="radio" data-act="situation" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '">' + esc(x.label) + '</button>'; }).join('') + '</div>' +
     '<p class="st-stelle-text" aria-live="polite">' + ST_STELLE[neu ? 'neu' : 'ersatz'] + (neu ? ' <button type="button" class="ulink" data-act="gloss" data-k="neuoeffnung">Mehr erfahren</button>' : '') + '</p></div></div>';
   const zurLanding = PROBE && PROBE_LANDING && !S.windows.length, zur = zurLanding ? ['probe-landing', PROBE_DIREKT ? 'Zurück zur Seite für Fensterbauer' : 'Zurück zur Website von Fensterbau Brandt'] : ['back', 'Zurück: Aufmaß']; // Testansicht: die Beispielseite ist die Website des Betriebs
   const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="' + zur[0] + '" aria-label="' + zur[1] + '">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="fotos">Weiter zu den Fotos' + pfeil + '</button></div>';
-  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(zur) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + probeInfo() + bento + stelle + rechtLinks() + fuss + '</div></div>', back: ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
+  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(zur) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + probeInfo() + bento + '<div class="st-weiss">' + stelle + fuss + rechtLinks() + '</div></div></div>', back: ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
 }
 /* Nach dem Zeichnen: Wechsel erst einblenden, wenn das neue Bild bereit ist; Wischen an die Bühne binden */
 function stZeigen() {
@@ -4896,6 +4907,12 @@ function qCurrent() {
 /* Name des Fensters: Pflichtfeld in der Frage „Wo ist das Fenster?“ */
 const nameDa = (w) => !!String((w && w.name) || '').trim();
 function nameVerlangen() { return lgVerlangen('name'); }
+/* Nach der Form ohne „Weiter“ zur nächsten Frage, sobald das Modell die Form gezeigt hat; nicht, wenn inzwischen etwas anderes offen ist */
+let wzAutoT = 0;
+function wzAutoWeiter(q) {
+  clearTimeout(wzAutoT);
+  wzAutoT = setTimeout(() => { if (S.screen === 'frage' && S.q === q && !S.qMass && !S.wzKap && !document.querySelector('.sheet')) qStep(1); }, ruhig() ? 300 : 900);
+}
 function qStep(delta) {
   S.qMass = null;
   let c = qCurrent();
@@ -5736,11 +5753,13 @@ function zuStrich(svg) {
   if (!/stroke-width="1\.8"/.test(svg)) { let k = 0; svg = svg.replace(/stroke-width="1\.2"/g, (m) => (++k <= 3 ? 'stroke-width="1.8"' : m)); }
   return svg;
 }
+const WZ_FREI = { aufbau: 1, material: 1, glas: 1, bedienung: 1 };
+const wzFrei = (q) => !!WZ_FREI[q.kap || 'aufbau'];
 function frageDna(c, q, panel, stage, designFertig, tasten) {
   panel = wzStrich(panel);
   const w = S.win, n = c.list.length, last = c.i === n - 1, ab = qAbschnitte(c).find((g) => g.jetzt) || { i0: 0, i1: n - 1 };
   const steps = stepsFor(w), nr = steps.indexOf('frage') + 1;
-  const buehne = '<div class="wz-buehne">' + stage + '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + Math.max(0.04, (c.i + 1) / n).toFixed(3) + '"></i>Schritt ' + nr + ' · Wünsche</span></div>';
+  const buehne = '<div class="wz-buehne' + (wzFrei(q) ? ' wz-frei' : '') + '">' + stage + '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + Math.max(0.04, (c.i + 1) / n).toFixed(3) + '"></i>Schritt ' + nr + ' · Wünsche</span></div>';
   const kopf = '<div class="hd wz-frage"><div class="hd-zeile"><p class="eyebrow" id="wz-pos">Frage ' + (c.i - ab.i0 + 1) + ' von ' + (ab.i1 - ab.i0 + 1) + '</p><span class="hd-tools">' + tiefeKnopf(q) + (q.id === 'notiz' ? '' : notizKnopf(notizOrt())) + '</span></div>' +
     '<h1 tabindex="-1" aria-describedby="wz-pos">' + wzTitel(q) + '</h1>' + (q.sub ? '<p class="wz-sub">' + esc(q.sub) + '</p>' : '') + '</div>';
   const sichern = istTuer(w) ? 'Tür speichern' : w.art === 'fest' ? 'Verglasung speichern' : 'Fenster speichern';
@@ -5840,7 +5859,10 @@ SCREENS.frage = () => {
   const designFertig = q.kind === 'design' && /aria-pressed="true"/.test(panel);
   const isSash = q.sash != null, selIdx = isSash ? q.sash : Math.min(S.selSash, w.sashes.length - 1);
   const view = q.id === 'sprossen' || q.kind === 'bars' ? 'front' : q.view;
-  const stage = model(w, { id: 'w3d', view: view, sway: !isSash && q.kind !== 'bars', selectable: isSash, selSash: selIdx, openSash: isSash ? S.openSash : -1, symbols: isSash || q.id === 'richtung', rails: q.kind === 'bars', selBar: S.selBar, formen: q.id === 'form', lupe: !!q.lupe, stageH: 'auto', fitW: q.kind === 'bars' ? 0.76 : view === 'front' ? 0.9 : 0.8, fitH: q.kind === 'bars' ? 0.7 : view === 'front' ? 0.84 : 0.76, hint: q.kind === 'bars' ? '' : (q.hint || '') });
+  /* Aufbau, Material, Glas, Griff: das Element schwebt frei auf der schwarzen Bühne (Vorlage des Inhabers, 2.11.2026); ab Sonnenschutz,
+     Fensterbank und Montage steht es wieder in seiner Wand */
+  const frei = wzFrei(q);
+  const stage = model(w, Object.assign(frei ? { frei: true, haus: false } : {}, { id: 'w3d', view: view, sway: !isSash && q.kind !== 'bars', selectable: isSash, selSash: selIdx, openSash: isSash ? S.openSash : -1, symbols: isSash || q.id === 'richtung', rails: q.kind === 'bars', selBar: S.selBar, formen: q.id === 'form', lupe: !!q.lupe, stageH: 'auto', fitW: q.kind === 'bars' ? 0.76 : view === 'front' ? 0.9 : 0.8, fitH: q.kind === 'bars' ? 0.7 : view === 'front' ? 0.84 : 0.76, hint: q.kind === 'bars' ? '' : (q.hint || '') }));
   /* Das Modell zuerst und immer gleich groß; Frage und Eingabe teilen sich darunter das Dock, das bei Bedarf in sich scrollt.
      Antippen zeichnet neu: dieselbe Frage behält die Stelle im Dock (gemerkt in S.qDock), eine neue Frage beginnt oben. */
   if (S.qDock && (S.qDock.q !== q.id || S.qDock.w !== w)) S.qDock = null;
@@ -7581,6 +7603,7 @@ function act(name, el) {
     case 'teil-gleich': { delete w.anteile; return render(); }
     case 'teilung': { w.e_teilung = true; const sashes = sashesFor(v); w.teilung = v; w.sashes = sashes; delete w.anteile; if (w.seiten) seitenAnwenden(w); mirrorBars(w); S.selSash = 0; S.selBar = null; S.openSash = -1; return render(); }
     case 'form': {
+      wzAutoWeiter('form'); // Form gewählt: das Modell zeigt sie, dann geht es von selbst zur Flügelzahl (Wunsch des Inhabers, 2.11.2026)
       if (v === w.form) return render();
       if (v !== 'rechteck' && w.seiten) { delete w.seiten; seitenAnwenden(w); }
       if (festForm(v)) {

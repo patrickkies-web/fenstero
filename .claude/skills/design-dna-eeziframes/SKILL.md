@@ -311,6 +311,12 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Bereitschaft, Echtheit der Nummer, Konfigurator-Pakete). Partner stehen in der App auf Platz 1 und 2 mit Etikett „Partner“ in Indigo
   und einem Satz zur Reihenfolge. „Anmelden“ im Kopf der Ansicht Fensterbauer. In der Zentrale ein Lexikon der Betriebe und ein
   Abschnitt Kunde mit Nachricht. Protokoll docs/profis/2026-10-30-partner-bereich.md, Doku docs/VERMITTLUNG.md Abschnitt 13.
+- Schwarze Bühne, weiße Fläche (Inhaber, 2.11.2026, nach dem Beispiel https://claude.ai/artifact/SxUczHkG2scRkzjpmxSJvL: „Meega geil“,
+  „Ja mach online“): Start-Folie und Wünsche-Folie haben oben eine schwarze Bühne, die weit in den Bildschirm reicht, unten gerundet
+  (36 px) über einer weißen Fläche mit Frage und Antworten. Auswahl als runde Knöpfe (64 px, feines Zeichen 28 px, Name darunter, zum
+  Wischen): auf Schwarz Anthrazit, gewählt weiß mit violettem Ring; auf Weiß hellgrau, gewählt schwarz mit violettem Ring. In den
+  Wünschen schwebt das 3-D-Modell bei Aufbau, Material, Glas und Griff frei im Licht, ab Sonnenschutz steht es in seiner Wand. Nach
+  der Form wechselt die Folie ohne „Weiter“ zur Flügelzahl. Fenster auf der Start-Folie: das Bild des Inhabers (Anthrazit mit Raffstore).
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
