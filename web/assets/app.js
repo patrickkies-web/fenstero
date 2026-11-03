@@ -4038,9 +4038,10 @@ function fertigDna() {
   /* Bühne wie in den Wünschen (Inhaber, 2.11.2026: „die originale Ansicht … eine ganz gesunde Ansicht“, „der Editor einfach da oben
      ohne die Bearbeiten-Leiste“): dasselbe Modell in derselben Größe und auf demselben Grund, ohne Zoom, Zahnrad und Kapitelleiste;
      oben der Chip, unten Art und Stand. Die Überschrift steht darunter auf Weiß wie die Frage in den Wünschen */
-  const buehne = '<div class="fg-buehne wz-frei">' +
+  /* seit 4.11.2026 in seiner Wand wie in den Wünschen (Inhaber: kein schwarzer Hintergrund mehr) */
+  const buehne = '<div class="fg-buehne fg-wand">' +
     '<span class="wz-chip fg-chip" aria-hidden="true"><i class="fg-chip-haken">' + fgZ('haken') + '</i>Gespeichert · Position ' + (S.editIdx + 1) + '</span>' +
-    '<div class="fg-modell" aria-hidden="true">' + model(gespeichert, { id: 'w3d', view: 'inside', frei: !istTuer(w), haus: false, sway: true, noZoom: true }) + '</div>' +
+    '<div class="fg-modell" aria-hidden="true">' + model(gespeichert, { id: 'w3d', view: 'inside', sway: true, noZoom: true }) + '</div>' +
     '<p class="fg-stand fertig-stand"><i class="' + (ganz ? 'ganz' : 'offen') + '" aria-hidden="true">' + (ganz ? fgZ('haken') : '') + '</i><b>' + esc(lab('art', w.art || 'fenster')) + '</b><small>' + esc(((num(w.anzahl) || 1) > 1 ? ' · ' + w.anzahl + ' Stück' : '') + ' · ' + status) + '</small></p></div>';
   const ki = kiLaeuftFuer(gespeichert) || kiLaeuftFuer(w) ? '<p class="fg-ki ki-laeuft" role="status"><span class="spin"></span><span>Die KI liest noch die Einbausituation. Die Auswertung kommt von selbst zu diesem Fenster.</span></p>' : '';
   /* Wie geht es weiter: zwei Zeilen, die Pille unten führt zum Aufmaßblatt bzw. zum Absenden */

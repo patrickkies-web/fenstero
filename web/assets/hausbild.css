@@ -9,6 +9,7 @@
    Inhaber, 2.11.2026: „die originale Ansicht“, das Element groß wie im Editor, ohne Bearbeiten-Leiste, Grund wie in den Wünschen.
    Bühne in Höhe und Grund wie .wz-buehne.wz-frei (app.css), Modell füllt sie; Überschrift darunter auf Weiß wie die Frage der Wünsche. */
 .scr.dna.fg .fg-tisch::before { display: none }
+.scr.dna.fg .fg-buehne.fg-wand { height: clamp(288px, calc(100svh - 370px), 437px); background: #e9e2d7 }
 .scr.dna.fg .fg-buehne.wz-frei { height: clamp(288px, calc(100svh - 370px), 437px);
   background: radial-gradient(50% 46% at 50% 52%, var(--indigo) 0, color-mix(in srgb, var(--indigo) 50%, var(--schwarz)) 34%, color-mix(in srgb, var(--anthrazit) 45%, var(--schwarz)) 58%, var(--schwarz) 80%) }
 .scr.dna.fg .fg-buehne.wz-frei::before { display: none }
@@ -20,7 +21,7 @@
 .dna .fg-kopf h1 { margin: 0; font: 500 28px/1.1 var(--font-sans); letter-spacing: -.025em; color: var(--schwarz); text-wrap: balance; outline: none }
 .dna .fg-kopf h1 em { font-style: normal; color: var(--textgrau) }
 @media (min-width: 900px) {
-  .scr.dna.fg .fg-buehne.wz-frei { height: max(560px, calc(100svh - 60px)) }
+  .scr.dna.fg .fg-buehne.wz-frei, .scr.dna.fg .fg-buehne.fg-wand { height: max(560px, calc(100svh - 60px)) }
   .dna .fg-kopf { padding-top: 8px }
   .dna .fg-kopf h1 { font-size: 32px }
 }
