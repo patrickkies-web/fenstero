@@ -351,6 +351,7 @@ const OPT = {
   htGriffA: [{ k: 'stange', label: 'Stoßgriff', sub: 'Stange außen' }, { k: 'knauf', label: 'Knauf', sub: 'feststehend' }, { k: 'druecker', label: 'Drücker', sub: 'beidseitig' }],
   htSchloss: [{ k: 'mehrfach', label: 'Mehrfach', sub: 'Standard' }, { k: 'automatik', label: 'Automatik', sub: 'beim Zuziehen' }, { k: 'elektronik', label: 'Elektronisch', sub: 'Finger, Code' }],
   htExtra: [{ k: 'brief', label: 'Briefschlitz' }, { k: 'spion', label: 'Türspion' }, { k: 'schliesser', label: 'Türschließer' }],
+  olTeil: [{ k: '', label: 'Durchgehend', sub: 'ein Feld' }, { k: 'ja', label: 'Geteilt', sub: 'über jedem Flügel' }],
   kombiSeite: [{ k: 'L', label: 'Links der Tür' }, { k: 'R', label: 'Rechts der Tür' }],
   kombiBru: [{ k: '500', label: '50 cm' }, { k: '700', label: '70 cm' }, { k: '850', label: '85 cm' }, { k: '1000', label: '1 m' }],
   kombiFeld: [{ k: 'paneel', label: 'Paneel', sub: 'geschlossen' }, { k: 'glas', label: 'Glas', sub: 'fest verglast' }],
@@ -629,6 +630,9 @@ function sashesFor(k) {
    Fensterflügel, darunter Riegel und festes Feld (Paneel oder Glas) bis zur Unterkante; seite = wo das Fenster sitzt, von innen gesehen */
 const kombiFluegel = (seite) => (seite === 'L' ? [{ t: 'DK', din: 'L', fe: true }, { t: 'D', din: 'R' }] : [{ t: 'D', din: 'L' }, { t: 'DK', din: 'R', fe: true }]);
 const KOMBI_BRU = 850;
+/* Geteiltes Oberlicht (Lückenprüfung Fenster 3.11.2026, Altbau): über jedem Flügel ein eigenes Oberlicht, der Pfosten läuft durch;
+   nur bei Rechteck, Oberlicht und mindestens zwei Flügeln */
+const olGeteilt = (w) => !!(w && w.ol && w.olTeil === 'ja' && (w.form || 'rechteck') === 'rechteck' && (w.sashes || []).filter((x) => !x.st).length >= 2);
 /* Festverglasung: nur Felder, ohne Flügelrahmen und Griff */
 const festFelder = (n) => Array.from({ length: Math.max(1, Math.min(4, num(n) || 1)) }, (x, i) => ({ t: 'F', din: i % 2 ? 'R' : 'L' }));
 /* Hebe-Schiebe-Tür nach Schema: A = 1 Schiebeflügel vor 1 Festteil, A3 = 1 vor 2 Festteilen, C = 2 Schiebeflügel mittig vor 2 Festteilen,
@@ -884,7 +888,7 @@ const stepsFor = (w) => (w && w.neu ? STEPS_NEU : STEPS_ERSATZ);
 const STEPNAME = { start: 'Start', zeichnen: 'Einzeichnen', planmasse: 'Maße', fotos: 'Fotos', messen: 'Messen', rest: 'Ränder', ergebnis: 'Ergebnis', typ: 'Fenster', sprossen: 'Sprossen', farbe: 'Farbe & Glas', extras: 'Extras' };
 /* Die vier geführten Messungen, dann die vier restlichen am Foto */
 const MESS = [
-  { k: 'hm', g: 'oeffnung-hoehe', who: 'mo', dir: 'v', title: 'Maueröffnung senkrecht', short: 'Öffnung · Höhe Mitte', text: 'Miss die sichtbare Maueröffnung senkrecht in der Mitte: von der Oberkante der Öffnung bis zur Fensterbank. Den Zollstock an die Laibung halten, nicht an den Rahmen.', sub: 'Von innen, senkrecht in der Mitte: von der Oberkante der Öffnung bis zur Fensterbank.', subTuer: 'Von innen, senkrecht in der Mitte: von der Oberkante der Öffnung bis zum fertigen Fußboden.', enden: ['Oberkante der Öffnung', 'Fensterbank innen'], endenTuer: ['Oberkante der Öffnung', 'Fußboden innen'], chip: 'nicht' },
+  { k: 'hm', g: 'oeffnung-hoehe', who: 'mo', dir: 'v', title: 'Maueröffnung senkrecht', short: 'Öffnung · Höhe Mitte', text: 'Miss die sichtbare Maueröffnung senkrecht in der Mitte: von der Oberkante der Öffnung bis zur Fensterbank, bei bodentiefen Fenstern bis zum Fußboden. Den Zollstock an die Laibung halten, nicht an den Rahmen.', sub: 'Von innen, senkrecht in der Mitte: von der Oberkante der Öffnung bis zur Fensterbank. Bodentief: bis zum Fußboden.', subTuer: 'Von innen, senkrecht in der Mitte: von der Oberkante der Öffnung bis zum fertigen Fußboden.', enden: ['Oberkante der Öffnung', 'Fensterbank innen'], endenTuer: ['Oberkante der Öffnung', 'Fußboden innen'], chip: 'nicht' },
   { k: 'h', g: 'element-hoehe', who: 'el', dir: 'v', title: 'Fensterelement senkrecht', short: 'Fenster · Höhe Mitte', text: 'Jetzt das Fenster selbst, senkrecht in der Mitte: alles, was vom Fenster samt Rahmen zu sehen ist, von Oberkante bis Unterkante.', sub: 'Senkrecht in der Mitte: der feste Rahmen, von seiner Außenkante oben bis unten.', subTuer: 'Senkrecht in der Mitte: der feste Rahmen samt Schwelle, von Außenkante oben bis unten.', enden: ['Rahmen außen', 'Rahmen außen'], endenTuer: ['Rahmen außen', 'Unterkante Schwelle'], chip: 'samt' },
   { k: 'wm', g: 'oeffnung-breite', who: 'mo', dir: 'h', title: 'Maueröffnung waagerecht', short: 'Öffnung · Breite Mitte', text: 'Die Maueröffnung waagerecht in der Mitte: von Laibung zu Laibung, auf halber Höhe.', sub: 'Von innen, waagerecht auf halber Höhe: von Mauer zu Mauer.', enden: ['Mauer', 'Mauer'], chip: 'nicht' },
   { k: 'w', g: 'element-breite', who: 'el', dir: 'h', title: 'Fensterelement waagerecht', short: 'Fenster · Breite Mitte', text: 'Das Fenster samt Rahmen waagerecht in der Mitte: von der linken bis zur rechten sichtbaren Rahmenkante.', sub: 'Waagerecht auf halber Höhe: der feste Rahmen, von Außenkante zu Außenkante.', enden: ['Rahmen außen', 'Rahmen außen'], chip: 'samt' }
@@ -893,7 +897,7 @@ const REST = [
   { k: 'hl', edge: 'l', title: 'Höhe links', text: 'Maueröffnung senkrecht, dicht an der linken Laibung. Alte Häuser sind selten im Winkel, deshalb lohnt der Blick.', sub: 'Senkrecht, dicht an der linken Mauer. Alte Häuser sind selten im Winkel.', enden: ['Oberkante der Öffnung', 'Fensterbank innen'], endenTuer: ['Oberkante der Öffnung', 'Fußboden innen'] },
   { k: 'hr', edge: 'r', title: 'Höhe rechts', text: 'Maueröffnung senkrecht, dicht an der rechten Laibung.', sub: 'Senkrecht, dicht an der rechten Mauer.', enden: ['Oberkante der Öffnung', 'Fensterbank innen'], endenTuer: ['Oberkante der Öffnung', 'Fußboden innen'] },
   { k: 'wt', edge: 't', title: 'Breite oben', text: 'Maueröffnung waagerecht, dicht unter der Oberkante der Öffnung.', sub: 'Waagerecht, dicht unter der Oberkante der Öffnung.', enden: ['Mauer', 'Mauer'] },
-  { k: 'wb', edge: 'b', title: 'Breite unten', text: 'Maueröffnung waagerecht, dicht über der Fensterbank.', sub: 'Waagerecht, dicht über der Fensterbank.', enden: ['Mauer', 'Mauer'] }
+  { k: 'wb', edge: 'b', title: 'Breite unten', text: 'Maueröffnung waagerecht, dicht über der Fensterbank, bei bodentiefen Fenstern dicht über dem Fußboden.', sub: 'Waagerecht, dicht über der Fensterbank. Bodentief: dicht über dem Fußboden.', enden: ['Mauer', 'Mauer'] }
 ];
 /* Prüfungen beim Eintippen */
 function checkValue(mm, step, vals) {
@@ -1357,6 +1361,8 @@ function w3dHTML(w, o) {
   /* Schwelle: das untere Profil der Tür, Aluminium, mit Trittfläche */
   if (V.tuer) h += faceEl('schw', 'w3d-schw') + faceEl('schw-t', 'w3d-schw w3d-schw-t');
   for (let i = 0; i < V.n - 1; i++) h += faceEl('mul-' + i, 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('mulb-' + i, 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
+  /* Geteiltes Oberlicht: der Pfosten läuft durchs Oberlicht */
+  if (olGeteilt(w)) for (let i = 0; i < V.n - 1; i++) h += faceEl('olm-' + i, 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('olmb-' + i, 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
   /* Fenster-Tür-Kombination: unter dem Fensterflügel Riegel und festes Feld (Glas oder Paneel) im Blendrahmen */
   w.sashes.forEach((x, i) => { if (x.fe) h += faceEl('fe-front-' + i, 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('fe-glass-' + i, 'w3d-glass w3d-ul') + faceEl('fe-pan-b-' + i, 'w3d-paneel w3d-back') + faceEl('fe-back-' + i, 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"') + faceEl('fe-k-' + i, 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('fe-kb-' + i, 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"'); });
   w.sashes.forEach((x, i) => {
@@ -1521,7 +1527,7 @@ function glasLupe(w) {
 const glasLupeKey = (w) => [w.glas, (w.glasfn || []).join(','), w.rc, dg(w, 'ahFarbe') ? w.ahFarbe : '', dg(w, 'dicht') ? w.dicht : ''].join('|');
 const glasText = (w) => (w.glas === '2' ? '2 Scheiben · Ug ≈ 1,1' : '3 Scheiben · Ug ≈ 0,5 bis 0,7');
 /* Struktur-Signatur: solange sie gleich bleibt, wird die Bühne weiterverwendet und alles morpht mit Übergängen */
-function w3dSig(w, o) { o = o || {}; const V = w3dCalc(w, o); return [o.id || 'w3d', w.art || 'fenster', w.sashes.map((x) => (x.fe ? 'e' : '-')).join(''), o.frei ? 'frei' : '', w3dGeformt(w, o) ? 'g' : 'e', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0, V.tuer ? 't' : 'f', V.ulH ? 1 : 0, sonneAktiv(w) ? w.sart : 0, innenAktiv(w) ? 1 : 0, zubehoerSig(w)].join('|'); }
+function w3dSig(w, o) { o = o || {}; const V = w3dCalc(w, o); return [o.id || 'w3d', w.art || 'fenster', w.sashes.map((x) => (x.fe ? 'e' : '-')).join(''), olGeteilt(w) ? 'olt' : '', o.frei ? 'frei' : '', w3dGeformt(w, o) ? 'g' : 'e', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0, V.tuer ? 't' : 'f', V.ulH ? 1 : 0, sonneAktiv(w) ? w.sart : 0, innenAktiv(w) ? 1 : 0, zubehoerSig(w)].join('|'); }
 /* Farben und Materialien auf die Flächen schreiben (mit Übergang, wenn sich etwas ändert) */
 function w3dPaint(stage, w) {
   /* Nur schreiben, was sich geändert hat (der Vergleich mit dem gelesenen Stil schlägt bei Verläufen immer fehl) */
@@ -1548,6 +1554,7 @@ function w3dPaint(stage, w) {
   bg('solar', SOLAR_BG); Object.keys(TEIL_BG).forEach((r) => bg(r, TEIL_BG[r]));
   bg('el-front', fin.bg); bg('el-back', fout.bg); bgc('el-side-l', fout.solid); bgc('el-side-r', fout.solid); bgc('el-side-t', fin.solid); bgc('el-side-b', fin.solid);
   bg('ol-front', fin.bg); bg('ol-back', fout.bg); bg('kf', fin.bg); bg('kfb', fout.bg);
+  w.sashes.forEach((x, i) => { bg('olm-' + i, fin.bg); bg('olmb-' + i, fout.bg); });
   bg('ul-front', fin.bg); bg('ul-back', fout.bg); bg('kfu', fin.bg); bg('kfub', fout.bg);
   w.sashes.forEach((x, i) => {
     if (!x.fe) return;
@@ -1610,7 +1617,7 @@ function w3dOberflaeche(stage, w, fin, fout) {
   ['el-front', 'ol-front', 'kf', 'ul-front', 'kfu', 'el-side-t', 'el-side-b'].forEach((r) => setz(r, hi, fin.solid, oi));
   ['el-back', 'ol-back', 'kfb', 'ul-back', 'kfub', 'el-side-l', 'el-side-r', 'ul-pan-b'].forEach((r) => setz(r, ha, fout.solid, oa));
   setz('ul-glass', w.ul && w.ulA === 'paneel' ? hi : '');
-  w.sashes.forEach((x, i) => { ['mul-', 'sf-in-', 'sfe-t-', 'sfe-b-', 'pan-i-', 'riegel-i-', 'fe-front-', 'fe-k-'].forEach((r) => setz(r + i, hi, fin.solid, oi)); ['mulb-', 'sf-out-', 'sfe-l-', 'sfe-r-', 'pan-o-', 'riegel-o-', 'fe-back-', 'fe-kb-', 'fe-pan-b-'].forEach((r) => setz(r + i, ha, fout.solid, oa)); if (x.fe) setz('fe-glass-' + i, w.kombiFeld !== 'glas' ? hi : ''); });
+  w.sashes.forEach((x, i) => { ['mul-', 'sf-in-', 'sfe-t-', 'sfe-b-', 'pan-i-', 'riegel-i-', 'fe-front-', 'fe-k-', 'olm-'].forEach((r) => setz(r + i, hi, fin.solid, oi)); ['mulb-', 'sf-out-', 'sfe-l-', 'sfe-r-', 'pan-o-', 'riegel-o-', 'fe-back-', 'fe-kb-', 'fe-pan-b-', 'olmb-'].forEach((r) => setz(r + i, ha, fout.solid, oa)); if (x.fe) setz('fe-glass-' + i, w.kombiFeld !== 'glas' ? hi : ''); });
   ['t', 'l', 'r'].forEach((k) => { setz('li-' + k, hi, fin.solid, oi); setz('la-' + k, ha, fout.solid, oa); });
   /* Fensterbank innen: die gewählte Farbe bestimmt das Material (Marmor und Granit als Stein, Holzdekor als Holz) */
   const fF = dg(w, 'fbiFarbe') ? w.fbiFarbe : '', bi = fF === 'granit' ? 'granit' : fF === 'holz' ? 'holz' : fF === 'weiss' || fF === 'marmor' ? '' : BANK_ART[w.fbi] || '', ba = w.fba === 'alu' ? 'alu' : '';
@@ -1804,6 +1811,7 @@ function w3dLayout(stage, w, o, gr) {
     const mx = ix + (V.sx[i] + V.sw[i]) * s, mw = (V.mulL ? V.mulL[i] : V.mul) * s, c = G ? formSchnitt(gI, mx, sashTop, mw, sashH, 3) : null;
     face(q('mul-' + i), mw, sashH, mx, sashTop, z0, '', '0 0', c ? polyClip(c, mx, sashTop, mw, sashH) : null);
     face(q('mulb-' + i), mw, sashH, mx, sashTop, z0 - fd, 'rotateY(180deg)', '50% 50%', c ? polyClip(c, mx, sashTop, mw, sashH, mw) : null);
+    const om = q('olm-' + i); if (om && olH) { const ow = V.mul * s, ox = mx + mw / 2 - ow / 2; face(om, ow, olH, ox, iy, z0, '', '0 0'); face(q('olmb-' + i), ow, olH, ox, iy, z0 - fd, 'rotateY(180deg)', '50% 50%'); }
   }
   const griffe = [], rand = barBezug(w, V, sf);
   stage._bez = { rand: rand, sashH: sashH }; // fürs Ziehen der Sprossen (bindRails)
@@ -4811,10 +4819,10 @@ async function saveDatei(variante) {
    Öffnung, Material und Farbe, Glas und Sprossen, Schutz, Sonnenschutz, Fensterbank; am Ende die freiwillige Liste (Extras) */
 const KAPITEL = [{ k: 'aufbau', n: 'Aufbau' }, { k: 'vorweg', n: 'Lage' }, { k: 'oeffnung', n: 'Öffnung' }, { k: 'material', n: 'Material & Farbe' }, { k: 'glas', n: 'Glas & Sprossen' }, { k: 'bedienung', n: 'Griff & Schutz' }, { k: 'sonne', n: 'Sonnenschutz' }, { k: 'bank', n: 'Fensterbank' }, { k: 'extras', n: 'Extras' }];
 /* Kapitel in der App, wo sie von AW.FRAGE.kap abweichen (die Klärungsliste von Blatt und Betrieb bleibt bei AW.FRAGE) */
-const KAP_APP = { typ: 'oeffnung', din: 'oeffnung', stulp: 'oeffnung', hstr: 'oeffnung', pskR: 'oeffnung', fsws: 'oeffnung', fswg: 'oeffnung', schwelle: 'oeffnung', boden: 'oeffnung', ol: 'oeffnung', ul: 'oeffnung', richtung: 'oeffnung', massweg: 'aufbau', extras: 'extras' };
+const KAP_APP = { olTeil: 'oeffnung', typ: 'oeffnung', din: 'oeffnung', stulp: 'oeffnung', hstr: 'oeffnung', pskR: 'oeffnung', fsws: 'oeffnung', fswg: 'oeffnung', schwelle: 'oeffnung', boden: 'oeffnung', ol: 'oeffnung', ul: 'oeffnung', richtung: 'oeffnung', massweg: 'aufbau', extras: 'extras' };
 /* Der Hauptweg: was jeder Kunde gefragt wird (das Wesentliche, das man sieht und das den Preis macht, dazu die Pflichtthemen Absturz und
    Erreichbarkeit). Alles andere steht in der Liste „Möchtest du noch etwas einstellen?“ nach den Fensterbänken und ist freiwillig */
-const Q_HAUPT = { kombiSeite: 1, kombiBru: 1, htModell: 1, htSeiten: 1, htGlas: 1, htGriff: 1, htSchloss: 1, form: 1, teilung: 1, stulpLage: 1, felder: 1, hsts: 1, pskS: 1, fswn: 1, massweg: 1, lage: 1, absturz: 1, design: 1, stulp: 1, typ: 1, din: 1, hstr: 1, pskR: 1, fsws: 1, fswg: 1, schwelle: 1, material: 1, fa: 1, fi: 1, glas: 1, sprossen: 1, breite: 1, sprFarbe: 1, rc: 1, sart: 1, sfarbe: 1, antrieb: 1, klFarbe: 1, fbi: 1, fba: 1, extras: 1 };
+const Q_HAUPT = { olTeil: 1, kombiSeite: 1, kombiBru: 1, htModell: 1, htSeiten: 1, htGlas: 1, htGriff: 1, htSchloss: 1, form: 1, teilung: 1, stulpLage: 1, felder: 1, hsts: 1, pskS: 1, fswn: 1, massweg: 1, lage: 1, absturz: 1, design: 1, stulp: 1, typ: 1, din: 1, hstr: 1, pskR: 1, fsws: 1, fswg: 1, schwelle: 1, material: 1, fa: 1, fi: 1, glas: 1, sprossen: 1, breite: 1, sprFarbe: 1, rc: 1, sart: 1, sfarbe: 1, antrieb: 1, klFarbe: 1, fbi: 1, fba: 1, extras: 1 };
 const qHaupt = (q) => !!(q.haupt || Q_HAUPT[String(q.id).split('-')[0]]);
 const KAP_I = {}; KAPITEL.forEach((k, i) => { KAP_I[k.k] = i; });
 /* Kapitel und Stufe je Frage stehen in modell.js (AW.FRAGE), damit Klärungsliste, Betrieb und Blatt wissen, was bei welcher Tiefe
@@ -4899,7 +4907,7 @@ function detailFrage(w, dd) {
 }
 /* Erklärung je Frage (i-Knopf am Titel). Q_G_STATT ersetzt eine unpassende Zuordnung, Q_G füllt, wo eine Frage noch keine hat */
 const Q_G_STATT = { typ: 'oeffnungsart', richtung: 'aussen', teilung: 'blendrahmen', glas: 'uwert', glasfn: 'glasextras', sart: 'sonnenschutz', griff: 'griff', fswg: 'faltpaket', felder: 'festverglasung' };
-const Q_G = { massweg: 'rahmenmass', extras: 'tiefe', lage: 'lage', absturz: 'absturz', design: 'design', din: 'dinlr', material: 'material', ol: 'oberlicht', ul: 'unterlicht', form: 'form', hsts: 'hst', hstr: 'schiebeseite', pskS: 'psk', pskR: 'schiebeseite', schwelle: 'schwelle', boden: 'fussboden', fswn: 'fsw', fsws: 'faltpaket', sprossen: 'sprossen', spross: 'sprossen', aufseite: 'auf', breite: 'sprossenbreite', fa: 'ral', fi: 'ral', orn: 'ornament', griffA: 'ziehgriff', gf: 'grifffarbe', rc: 'rc2', einbau: 'rollladen', sfarbe: 'ral', antrieb: 'antrieb', insekt: 'insekt', iart: 'innenschutz', ifarbe: 'innenschutz', fbi: 'fensterbank', fba: 'fensterbank', montage: 'montage', notiz: 'notizen', tiefe: 'tiefe', htModell: 'haustuer', htSeiten: 'seitenteil', htGlas: 'haustuer', htGriff: 'haustuer', htSchloss: 'haustuer', htExtra: 'haustuer', kombiSeite: 'kombi', kombiBru: 'kombi', kombiFeld: 'kombi' };
+const Q_G = { massweg: 'rahmenmass', extras: 'tiefe', lage: 'lage', absturz: 'absturz', design: 'design', din: 'dinlr', material: 'material', ol: 'oberlicht', ul: 'unterlicht', form: 'form', hsts: 'hst', hstr: 'schiebeseite', pskS: 'psk', pskR: 'schiebeseite', schwelle: 'schwelle', boden: 'fussboden', fswn: 'fsw', fsws: 'faltpaket', sprossen: 'sprossen', spross: 'sprossen', aufseite: 'auf', breite: 'sprossenbreite', fa: 'ral', fi: 'ral', orn: 'ornament', griffA: 'ziehgriff', gf: 'grifffarbe', rc: 'rc2', einbau: 'rollladen', sfarbe: 'ral', antrieb: 'antrieb', insekt: 'insekt', iart: 'innenschutz', ifarbe: 'innenschutz', fbi: 'fensterbank', fba: 'fensterbank', montage: 'montage', notiz: 'notizen', tiefe: 'tiefe', htModell: 'haustuer', htSeiten: 'seitenteil', htGlas: 'haustuer', htGriff: 'haustuer', htSchloss: 'haustuer', htExtra: 'haustuer', olTeil: 'oberlicht', kombiSeite: 'kombi', kombiBru: 'kombi', kombiFeld: 'kombi' };
 /* Erklärung je Option (i in Karten und Chips): OPT_G vor dem g in OPT, damit Fachbegriffe ihren eigenen Eintrag bekommen */
 const OPT_G = { art: { fenster: 'oeffnungsart', fest: 'festverglasung', fsw: 'fsw' }, situation: { ersatz: 'ersatz', neu: 'neuoeffnung' }, typ: { F: 'fest', D: 'dreh', K: 'kipp', DK: 'dk' }, teilung: { '3': 'fest', '4': 'fest', '3s': 'stulp', '4s': 'stulp' }, material: { kunststoff: 'kunststoff', kunststoffalu: 'kunststoffalu', holz: 'holz', holzalu: 'holzalu', alu: 'alu' }, glasfn: { sonne: 'sonnenschutzglas', extraklar: 'glasarten', vogel: 'glasarten', selbstr: 'glasarten' }, sart: { rollladen: 'rollladen', raffstore: 'raffstore', screen: 'screen', klappladen: 'klappladen' }, einbau: { aufsatz: 'aufsatz', vorbau: 'vorbau', unterputz: 'unterputz' }, antrieb: { solar: 'antrieb' }, insekt: { rollo: 'insekt', pendel: 'insekt', schiebe: 'insekt' }, pskSchema: { C: 'psk' }, fbi: { werzalit: 'werzalit' }, rc: { basis: 'basisschutz', rc1: 'rc1n', rc2n: 'rcstufen', rc2: 'rc2', rc3: 'rcstufen' } };
 const optG = (group, o) => ((OPT_G[group] || {})[o.k] || o.g || '');
@@ -4963,7 +4971,7 @@ function qList(w) {
       L.push({ id: 'teilung', title: 'Wie viele Flügel?', sub: w.e_teilung || !d.elW ? '' : 'Vorschlag nach deiner Breite von ' + thousand(d.elW) + ' mm.', kind: 'cards', group: 'teilung', opts: OPT.teilung.filter((o) => o.k !== '4' || tief >= 2 || w.teilung === '4'), val: w.teilung, act: 'teilung', ico: ICO.teil, view: 'inside', g: 'pfosten', hint: 'Zum Drehen ziehen' });
       zwischen();
       fluegel(OPT.typ);
-      L.push(oberlicht('Ein extra Feld über dem Fenster.'));
+      L.push(Object.assign(oberlicht('Ein extra Feld über dem Fenster.'), { haupt: true })); // Lückenprüfung Fenster 3.11.2026: sichtbar, macht den Preis
       L.push({ id: 'ul', title: 'Ein Unterlicht?', sub: 'Ein festes Feld unten, typisch hinter der Küchenzeile.', kind: 'ul', view: 'inside', g: 'unterlicht', hint: w.ul ? lab('ul', w.ulA) + ' · ' + thousand(w.ulH) + ' mm hoch' : 'Flügel bis zur Fensterbank' });
       L.push({ id: 'richtung', title: 'Öffnet nach innen oder außen?', kind: 'chips', group: 'richtung', val: w.richtung, act: 'setw', f: 'richtung', view: 'inside', g: 'symbol' });
     }
@@ -4976,7 +4984,7 @@ function qList(w) {
     zwischen();
     fluegel(OPT.typ.filter((o) => o.k !== 'K' && (o.k !== 'F' || echt > 1))); // eine Tür muss aufgehen: „fest“ nur neben einem zweiten Flügel
     if (w.kombi) L.push({ id: 'kombiFeld', title: 'Was ist unter dem Fenster?', sub: 'Das feste Feld zwischen Riegel und Boden.', kind: 'chips', group: 'kombiFeld', val: w.kombiFeld || 'paneel', act: 'kombi', f: 'feld', view: 'inside', g: 'kombi' });
-    L.push(oberlicht('Ein extra Feld über der Tür.'));
+    L.push(Object.assign(oberlicht('Ein extra Feld über der Tür.'), { haupt: true }));
     L.push(schwelle(w.bt, 'bt'));
     L.push({ id: 'boden', title: 'Und der Fußboden?', sub: 'Davon hängt ab, wie hoch die Schwelle sitzt.', kind: 'chips', group: 'boden', val: w.bt.boden, act: 'bt', f: 'boden', view: 'bankInnen', hint: lab('boden', w.bt.boden) });
   } else if (art === 'haustuer') {
@@ -5022,9 +5030,10 @@ function qList(w) {
   } else {
   L.push({ id: 'glas', title: 'Welche Verglasung?', sub: 'Je kleiner der U-Wert, desto weniger Wärme geht verloren.', kind: 'cards', group: 'glas', val: w.glas, act: 'setw', f: 'glas', ico: ICO.glas, view: 'inside', g: 'uwert', lupe: true, hint: glasText(w), offen: 'glas' });
   /* Weißglas, Vogelschutz und selbstreinigendes Glas erst bei „Alles im Detail“ (oder wenn schon gewählt) */
-  L.push({ id: 'glasfn', title: 'Extras fürs Glas?', sub: 'Mehrfachauswahl möglich.', kind: 'multi', group: 'glasfn', opts: OPT.glasfn.filter((o) => !o.detail || tief >= 3 || w.glasfn.indexOf(o.k) >= 0), vals: w.glasfn, act: 'glasfn', view: 'inside', lupe: true, hint: w.glasfn.length ? w.glasfn.map((g) => lab('glasfn', g)).join(' · ') : 'Ohne Extras', offen: 'glasfn' });
+  /* Glas-Extras im Hauptweg (Lückenprüfung Fenster 3.11.2026): Milchglas fürs Bad, Schall- und Sicherheitsglas suchen Kunden beim Glas */
+  L.push({ haupt: true, id: 'glasfn', title: 'Extras fürs Glas?', sub: 'Milchglas, Schallschutz, Sicherheitsglas. Mehrfachauswahl möglich.', kind: 'multi', group: 'glasfn', opts: OPT.glasfn.filter((o) => !o.detail || tief >= 3 || w.glasfn.indexOf(o.k) >= 0), vals: w.glasfn, act: 'glasfn', view: 'inside', lupe: true, hint: w.glasfn.length ? w.glasfn.map((g) => lab('glasfn', g)).join(' · ') : 'Ohne Extras', offen: 'glasfn' });
   }
-  if (art !== 'haustuer' && w.glasfn.indexOf('sicht') >= 0) L.push({ id: 'orn', title: 'Welches Ornamentglas?', kind: 'orn', view: 'inside', g: 'ornament', hint: 'Sichtschutz: ' + (ORN.find((o) => o.k === w.orn) || ORN[0]).label });
+  if (art !== 'haustuer' && w.glasfn.indexOf('sicht') >= 0) L.push({ haupt: true, id: 'orn', title: 'Welches Ornamentglas?', kind: 'orn', view: 'inside', g: 'ornament', hint: 'Sichtschutz: ' + (ORN.find((o) => o.k === w.orn) || ORN[0]).label });
   if (!tuer || art === 'balkon') {
     L.push({ id: 'sprossen', title: 'Sprossen?', sub: 'Mit + und − dazu, an den Reglern verschieben.', kind: 'bars', view: 'front' });
     if (w.bars.length) {
@@ -5061,7 +5070,8 @@ function qList(w) {
   }
   /* Insektenschutz je Element: Fenster mit Spann- oder Drehrahmen, Türen mit Pendeltür oder Schiebeanlage; Festverglasung braucht keinen */
   const insektOpts = art === 'fenster' ? ['keiner', 'spann', 'dreh', 'plissee', 'rollo'] : art === 'balkon' ? ['keiner', 'dreh', 'pendel', 'plissee', 'rollo'] : art === 'haustuer' ? ['keiner', 'dreh', 'pendel', 'plissee'] : ['keiner', 'plissee', 'schiebe'];
-  if (art !== 'fest') L.push({ id: 'insekt', title: 'Insektenschutz?', kind: 'cards', group: 'insekt', opts: OPT.insekt.filter((o) => insektOpts.indexOf(o.k) >= 0 || o.k === w.insekt), val: w.insekt, act: 'setw', f: 'insekt', ico: ICO.insekt, view: 'outside', g: 'insekt', hint: 'Ansicht von außen', offen: 'insekt' });
+  /* Insektenschutz im Hauptweg (Lückenprüfung Fenster 3.11.2026), außer an der Haustür */
+  if (art !== 'fest') L.push({ haupt: art !== 'haustuer', id: 'insekt', title: 'Insektenschutz?', kind: 'cards', group: 'insekt', opts: OPT.insekt.filter((o) => insektOpts.indexOf(o.k) >= 0 || o.k === w.insekt), val: w.insekt, act: 'setw', f: 'insekt', ico: ICO.insekt, view: 'outside', g: 'insekt', hint: 'Ansicht von außen', offen: 'insekt' });
   if (art !== 'haustuer') L.push({ id: 'iart', title: 'Sicht- und Blendschutz innen?', sub: 'Rollo, Plissee oder Jalousie, gleich mitbestellt.', kind: 'cards', group: 'iart', val: w.iart, act: 'setw', f: 'iart', ico: ICO.innen, view: 'inside', g: 'innenschutz', hint: 'Ansicht von innen', offen: 'iart' });
   if (w.iart && w.iart !== 'keiner') L.push({ id: 'ifarbe', title: 'Welche Farbe innen?', kind: 'swatch', group: 'ifarbe', f: 'ifarbe', val: w.ifarbe, view: 'inside', hint: lab('iart', w.iart) + ' · ' + innenName(w) });
   /* Fensterbank & Einbau */
@@ -5088,6 +5098,8 @@ function qList(w) {
   });
   /* Haustür: Seitenteile stehen im Hauptweg (htSeiten), nicht noch einmal in der Liste */
   if (art === 'haustuer') { const k = L.findIndex((q) => q.id === 'seiten'); if (k >= 0) L.splice(k, 1); }
+  /* Geteiltes Oberlicht: gleich nach „Ein Oberlicht?“, nur wo es gehen kann */
+  { const k = L.findIndex((q) => q.id === 'ol'); if (k >= 0 && w.ol && (art === 'fenster' || art === 'balkon') && (w.form || 'rechteck') === 'rechteck' && echt >= 2) L.splice(k + 1, 0, { id: 'olTeil', kap: L[k].kap, s: 1, title: 'Ist das Oberlicht geteilt?', sub: 'Wie bei vielen Altbaufenstern: über jedem Flügel ein eigenes Oberlicht.', kind: 'chips', group: 'olTeil', val: w.olTeil || '', act: 'setw', f: 'olTeil', view: 'inside', g: 'oberlicht' }); }
   /* Nur nachrüsten (Lückenprüfung 3.11.2026): Das Element bleibt; gefragt werden Maße, Lage und was dazukommt (Sonnenschutz außen mit
      Kasten, Farbe und Antrieb, Insektenschutz, Sicht- und Blendschutz innen), alles im Hauptweg. Ein Aufsatzkasten geht nur mit neuem Element */
   if (w.nachruest && !neu) {

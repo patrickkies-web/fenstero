@@ -324,6 +324,8 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Hauptweg. Alles, was Kunden erst beim zweiten oder dritten Nachdenken einstellen, steht in der Liste „Möchtest du noch etwas
   einstellen?“ nach den Fensterbänken: freiwillig, nach Themen, jede Zeile mit Stand, „Fertig“ führt zurück. Die Frage nach der Tiefe
   entfällt. Gilt für alle Elementarten und für neue Fragen: erst entscheiden, ob sie in den Hauptweg gehören.
+  Nach dieser Regel stehen seit der Lückenprüfung vom 3.11.2026 auch Oberlicht (Fenster, Balkontür), Extras fürs Glas (Milchglas,
+  Schall- und Sicherheitsglas) und Insektenschutz im Hauptweg: sichtbar, preisrelevant, und Kunden suchen sie an ihrer Stelle.
 - Alle Folien im Bild der Start- und Wünsche-Folie (Inhaber, 2.11.2026): Was neu entsteht oder überarbeitet wird, bekommt die schwarze
   Bühne mit der weißen Fläche darunter, runde Knöpfe und kein Violett als Fläche, keine Unschärfe („modern minimalistisch ohne diese Lila
   Farben oder Blur“). Symbole überall als feine Strichzeichen in der Textfarbe wie auf Folie 1, keine bunten Flächen in Zeichen.

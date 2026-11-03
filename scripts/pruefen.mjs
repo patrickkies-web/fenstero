@@ -4655,7 +4655,7 @@ if (teil(21)) {
     return { fehlt: fehlt, n: n, ganz: haupt.length + extra.length === alle.length && alle.every((id) => haupt.includes(id) || extra.includes(id)), tiefeWeg: alle.indexOf('tiefe') < 0, kapitel: Array.from(new Set(qList(w).map((q) => q.kap))).join(','), gitter: extra.indexOf('gitter') >= 0, alleDetails: AW.DETAIL.filter((d) => AW.detailGilt(w, d.k)).every((d) => alle.indexOf(d.k) >= 0) };
   });
   ok(zahl21.fehlt.length === 0, 'App und Modell haben dieselben Detailangaben, jede mit Frage und Auswahl' + (zahl21.fehlt.length ? ' (fehlt: ' + zahl21.fehlt.join(', ') + ')' : ''));
-  ok(zahl21.n.kurz === zahl21.n.normal && zahl21.n.normal === zahl21.n.genau && zahl21.n.kurz <= 20 && zahl21.tiefeWeg && zahl21.ganz, 'Hauptweg statt Tiefe: ' + zahl21.n.kurz + ' Fragen bei jeder Tiefe, keine Frage nach der Tiefe; Hauptweg und Liste ergeben zusammen alle Fragen');
+  ok(zahl21.n.kurz === zahl21.n.normal && zahl21.n.normal === zahl21.n.genau && zahl21.n.kurz <= 22 && zahl21.tiefeWeg && zahl21.ganz, 'Hauptweg statt Tiefe: ' + zahl21.n.kurz + ' Fragen bei jeder Tiefe (höchstens 22: seit der Lückenprüfung vom 3.11.2026 mit Oberlicht, Glas-Extras und Insektenschutz), keine Frage nach der Tiefe; Hauptweg und Liste ergeben zusammen alle Fragen');
   ok(zahl21.kapitel === 'aufbau,vorweg,oeffnung,material,glas,bedienung,sonne,bank,extras', 'Kapitel in fester Reihenfolge: Aufbau, Lage, Öffnung, Material, Glas, Griff, Sonnenschutz, Fensterbank, Extras (' + zahl21.kapitel + ')');
   ok(zahl21.gitter && zahl21.alleDetails, 'Die Detailangaben (z. B. Fenstergitter) stehen in der Liste; jede geltende Detailangabe hat ihre Frage');
   /* Standard des Fensterbauers in der Frage, Wahl und Zurücknehmen */
@@ -5064,9 +5064,9 @@ if (teil(32)) {
   await p.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.windows = []; go('start'); }); await p.waitForTimeout(400);
   await p.tap('.st-weiss .lg-weiter'); await p.waitForTimeout(700);
   const a32 = await p.evaluate(() => ({ screen: S.screen, q: S.q, weg: qSichtbar(S.win).map((q) => q.id).join(' '), tiefe: S.proj.tiefe }));
-  ok(a32.screen === 'frage' && a32.q === 'form' && a32.weg === 'form teilung massweg lage typ-0 din-0 typ-1 din-1 material fa fi glas sprossen rc sart fbi fba extras' && a32.tiefe === 'kurz',
-    'Start → „Weiter“ führt direkt zur Form am Modell; Hauptweg eines Fensters: Form, Flügel, Maße, wie viele und wo, Öffnung, Material, Farben, Glas, Sprossen, Erreichbarkeit, Sonnenschutz, Fensterbänke, Liste (' + a32.weg + ')');
-  const arten = await p.evaluate(() => ['balkon', 'haustuer', 'fest', 'hst', 'psk', 'fsw'].map((art) => { const w = baseWin(); artSetzen(w, art); if (art === 'hst') w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); S.win = w; const ids = qSichtbar(w).map((q) => q.id), i = ids.indexOf('massweg'); return { art: art, ids: ids.join(' '), ok: i > 0 && i <= 2 && ids[i + 1] === 'lage' && ids[ids.length - 1] === 'extras' && ids.every((x) => qHaupt({ id: x })) }; }));
+  ok(a32.screen === 'frage' && a32.q === 'form' && a32.weg === 'form teilung massweg lage typ-0 din-0 typ-1 din-1 ol material fa fi glas glasfn sprossen rc sart insekt fbi fba extras' && a32.tiefe === 'kurz',
+    'Start → „Weiter“ führt direkt zur Form am Modell; Hauptweg eines Fensters: Form, Flügel, Maße, wie viele und wo, Öffnung, Oberlicht, Material, Farben, Glas, Glas-Extras, Sprossen, Erreichbarkeit, Sonnenschutz, Insektenschutz, Fensterbänke, Liste (' + a32.weg + ')');
+  const arten = await p.evaluate(() => ['balkon', 'haustuer', 'fest', 'hst', 'psk', 'fsw'].map((art) => { const w = baseWin(); artSetzen(w, art); if (art === 'hst') w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); S.win = w; const qs = qSichtbar(w), ids = qs.map((q) => q.id), i = ids.indexOf('massweg'); return { art: art, ids: ids.join(' '), ok: i > 0 && i <= 2 && ids[i + 1] === 'lage' && ids[ids.length - 1] === 'extras' && qs.every(qHaupt) }; }));
   ok(arten.every((x) => x.ok), 'Alle Elementarten: erst Aufbau (Schema, Teile, Flügel, Felder), dann der Weg zu den Maßen und wie viele und wo, am Ende die Liste (' + arten.filter((x) => !x.ok).map((x) => x.art + ': ' + x.ids).join(' | ') + ')');
   /* Haustür (Lückenprüfung 3.11.2026): eigene Elementart mit Füllung, Seitenteilen, Bändern, Schwelle, Glas im Ausschnitt, Griff außen,
      Schloss und Extras; kein Fenster-Sonnenschutz, keine Sprossen; Text, Zeichnung und Bilder für Start und Messen */
@@ -5121,6 +5121,22 @@ if (teil(32)) {
   ok(/^teilung kombiSeite kombiBru massweg lage typ-0 din-0 typ-1 din-1 /.test(ko32.ids) && ko32.feld && ko32.fe && ko32.verh > 0.4 && ko32.verh < 0.7 && ko32.typ === 'F,D,K,DK' && ko32.links &&
     /^Fenster-Tür-Kombination, Fenster links der Tür: Tür Dreh DIN rechts, Fenster Dreh-Kipp DIN links über 850 mm Brüstung, darunter Paneel/.test(ko32.text) && /Fensterflügel/.test(ko32.kurz) && ko32.svg >= 8 && ko32.weg,
     'Fenster-Tür-Kombination: vierte Karte bei der Balkontür, Seite und Brüstung im Hauptweg, Feld darunter in der Liste; Fensterflügel kürzer mit Riegel und Feld im Rahmen, darf kippen; Seite wechselt das Modell; Text, Zeichnung; anderes Element setzt zurück (' + JSON.stringify(ko32).slice(0, 500) + ')');
+  /* Fensterbereich (Lückenprüfung 3.11.2026): Oberlicht, Glas-Extras (mit Milchglas im Untertitel) und Insektenschutz im Hauptweg, bei
+     Sichtschutz das Ornament; geteiltes Oberlicht bei zwei und mehr Flügeln (Pfosten läuft durch, Text, Zeichnung); Messtexte nennen bodentief */
+  const fe32 = await p.evaluate(() => {
+    const w = baseWin(); w.el = { w: 1230, h: 1600 }; S.win = w; S.editIdx = -1; S.windows = [];
+    const ids = qSichtbar(w).map((q) => q.id), gf = qList(w).find((q) => q.id === 'glasfn');
+    w.glasfn = ['sicht']; const orn = qSichtbar(w).some((q) => q.id === 'orn'); w.glasfn = [];
+    w.ol = true; w.olT = 'K'; const mitOl = qSichtbar(w).map((q) => q.id);
+    w.olTeil = 'ja'; S.q = 'olTeil'; S.screen = 'frage'; render(true);
+    const olm = !!document.querySelector('#w3d [data-r="olm-0"]'), text = AW.opening(w), svg = (AW.svg(w, 64).match(/<path/g) || []).length;
+    const w1 = baseWin(); w1.teilung = '1'; w1.sashes = sashesFor('1'); w1.ol = true; const einfl = qSichtbar(w1).some((q) => q.id === 'olTeil');
+    const mess = typeof MESS !== 'undefined' ? MESS.find((m) => m.k === 'hm').sub : '';
+    return { ids: ids.join(' '), gfSub: gf && gf.sub, orn: orn, olTeil: mitOl.indexOf('olTeil') === mitOl.indexOf('ol') + 1, olm: olm, text: text, svg: svg, einfl: einfl, mess: mess };
+  });
+  ok(/ ol material /.test(' ' + fe32.ids + ' ') && / glas glasfn sprossen /.test(' ' + fe32.ids + ' ') && / sart insekt fbi /.test(' ' + fe32.ids + ' ') && /Milchglas/.test(fe32.gfSub) && fe32.orn && fe32.olTeil && fe32.olm &&
+    /^Oberlicht kippbar, geteilt über jedem Flügel · /.test(fe32.text) && fe32.svg >= 10 && !fe32.einfl && /Bodentief: bis zum Fußboden/.test(fe32.mess),
+    'Fenster: Oberlicht, Glas-Extras (Milchglas) und Insektenschutz im Hauptweg, Ornament nach Sichtschutz; geteiltes Oberlicht ab zwei Flügeln mit durchlaufendem Pfosten, Text und Zeichnung; Messtext nennt bodentief (' + JSON.stringify(fe32).slice(0, 400) + ')');
   /* b) Was der Inhaber aus dem Hauptweg genommen hat, steht in der Liste */
   const ex32 = await p.evaluate(() => { const w = demoProject()[0]; S.win = w; return qExtras(qList(w)).map((q) => q.id); });
   const soll32 = ['kvd', 'profil', 'schmal', 'dicht', 'ahFarbe', 'oberfl', 'griffM', 'griffPos', 'kinder', 'baender', 'luefter', 'oeffner', 'kontakt', 'gitter', 'leiste'];

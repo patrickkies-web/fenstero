@@ -181,8 +181,11 @@ app.js; `AW.FRAGE.stufe`: 1 Hauptweg, 2 Liste).
 - **Ablauf:** Start (Elementart, neu oder ersetzen) → am 3-D-Modell Form und Flügel (bei Türen Schema, Teile, Flügelzahl), ohne „Weiter“
   nach der Form → **Weg zu den Maßen** (geführt messen: Fotos, Messen, Ränder, Ergebnis und zurück; Maße eingeben: Breite und Höhe mit
   Rahmen, Status „Maße offen“; ohne Maße weiter: das Modell zeigt ein übliches Maß) → **Wie viele und wo?** (Stückzahl, Stockwerk, Raum,
-  Brüstung im OG und DG) → Öffnung je Flügel → Material → Farbe außen und innen → Glas → Sprossen, dann Dicke und Farbe → Erreichbarkeit
-  → Sonnenschutz (Farbe, Bedienung) → Fensterbank innen und außen → **„Möchtest du noch etwas einstellen?“**.
+  Brüstung im OG und DG) → Öffnung je Flügel → Oberlicht (Fenster, Balkontür) → Material → Farbe außen und innen → Glas → Extras fürs
+  Glas (Milchglas, Schall- und Sicherheitsglas; bei Sichtschutz das Ornament) → Sprossen, dann Dicke und Farbe → Erreichbarkeit
+  → Sonnenschutz (Farbe, Bedienung) → Insektenschutz → Fensterbank innen und außen → **„Möchtest du noch etwas einstellen?“**.
+  Oberlicht, Glas-Extras und Insektenschutz kamen mit der Lückenprüfung vom 3.11.2026 in den Hauptweg: man sieht sie, sie machen den
+  Preis, und Kunden suchen sie an ihrer Stelle (Altbaufenster mit Oberlicht, Milchglas im Bad, Fliegengitter).
 - **Die Liste:** alles außerhalb des Hauptwegs nach Themen (Aufbau und Öffnung, Rahmen, Glas und Sprossen, Griff und Technik, Sonnen- und
   Insektenschutz, Fensterbank und Einbau); jede Zeile mit Stand („Standard“ oder die Wahl, gewählt mit violettem Punkt). Antippen öffnet
   die Frage am Modell, „Fertig“ führt zurück. Unten „Fenster speichern“.
