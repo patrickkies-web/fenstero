@@ -370,7 +370,7 @@ if (teil(3)) {
 
   await page.click('[data-act="new"]');
   await page.waitForSelector('.scr[data-screen="start"]');
-  ok(await page.locator('.st-stelle [role="radio"][data-act="situation"]').count() === 2 && await page.locator('.st-bento [role="radio"][data-act="art"]').count() === 7 && /Schritt\s1\svon\s6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen oder neu) und das Element (Fenster, Balkon- oder Terrassentür, Haustür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand) zur Wahl');
+  ok(await page.locator('.st-stelle [role="radio"][data-act="situation"]').count() === 3 && await page.locator('.st-bento [role="radio"][data-act="art"]').count() === 7 && /Schritt\s1\svon\s6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen, neu oder nachrüsten) und das Element (Fenster, Balkon- oder Terrassentür, Haustür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand) zur Wahl');
   await zuDenFotos(page);
   await page.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
   const kiPosts = [], kiUrls = [];
@@ -5082,8 +5082,27 @@ if (teil(32)) {
     return { ids: ids.join(' '), ok: ['htModell', 'htSeiten', 'massweg', 'lage', 'din-0', 'schwelle', 'material', 'fa', 'fi', 'htGlas', 'htGriff', 'htSchloss', 'extras'].every((x) => ids.indexOf(x) >= 0) && ['sart', 'iart', 'sprossen', 'glas', 'griff', 'seiten'].every((x) => alle.indexOf(x) < 0) && alle.indexOf('htExtra') >= 0,
       ohneGlas: ohneGlas, text: text, svg: (svg.match(/<path/g) || []).length, ersetzen: ersetzen, bilder: bilder, tuer: istTuer(w) && AW.istTuer(w) };
   });
-  ok(ht32.ok && ht32.ohneGlas && /^Haustür, Bänder links \(DIN links\)/.test(ht32.text) && /Füllung mit Glasstreifen/.test(ht32.text) && ht32.svg >= 6 && ht32.ersetzen[0] === 'Tür ersetzen' && ht32.bilder.every(Boolean) && ht32.tuer,
-    'Haustür: Füllung, Seitenteile, Maße, Lage, Bänder, Schwelle, Material, Farben, Glas nur mit Ausschnitt, Griff außen, Schloss, Extras in der Liste; kein Fenster-Sonnenschutz und keine Sprossen; Text fürs Aufmaß, Zeichnung, Bilder für Start und Messen, „Tür ersetzen“ (' + JSON.stringify(ht32).slice(0, 400) + ')');
+  ok(ht32.ok && ht32.ohneGlas && /^Haustür, Bänder links \(DIN links\)/.test(ht32.text) && /Füllung mit Glasstreifen/.test(ht32.text) && ht32.svg >= 6 && ht32.ersetzen.join('|') === 'Ersetzen|Neue Öffnung|Nachrüsten' && ht32.bilder.every(Boolean) && ht32.tuer,
+    'Haustür: Füllung, Seitenteile, Maße, Lage, Bänder, Schwelle, Material, Farben, Glas nur mit Ausschnitt, Griff außen, Schloss, Extras in der Liste; kein Fenster-Sonnenschutz und keine Sprossen; Text fürs Aufmaß, Zeichnung, Bilder für Start und Messen; die Stelle mit Ersetzen, Neue Öffnung, Nachrüsten (' + JSON.stringify(ht32).slice(0, 400) + ')');
+  /* Nur nachrüsten (Lückenprüfung 3.11.2026): Das Element bleibt; gefragt werden Maße, Lage, Sonnenschutz außen (Vorbau oder Unterputz,
+     kein Aufsatz), Insektenschutz und Sichtschutz innen, alles im Hauptweg. Kein Richtmaß, keine Absturzfrage; Aufmaß mit „Umfang“ */
+  const na32 = await p.evaluate(() => {
+    const w = baseWin(); S.win = w; S.editIdx = -1; S.windows = []; w.neu = false; S.screen = 'start'; render(true);
+    document.querySelector('.st-stelle [data-act="situation"][data-v="nachruest"]').click();
+    const an = !!S.win.nachruest && S.win.demontage === false && document.querySelector('.st-stelle [data-v="nachruest"]').getAttribute('aria-checked') === 'true';
+    const ids0 = qSichtbar(S.win).map((q) => q.id).join(' ');
+    S.q = 'sart'; S.screen = 'frage'; render(true); document.querySelector('[data-act="sart"][data-v="rollladen"]').click();
+    const ids1 = qSichtbar(S.win).map((q) => q.id).join(' '), eb = qList(S.win).find((q) => q.id === 'einbau');
+    S.win.mo = { hm: 1400, wm: 1250, hl: 1400, hr: 1398, wt: 1250, wb: 1248 }; S.win.el = { w: 1230, h: 1380 }; S.win.insekt = 'spann'; S.win.etage = 'og'; S.win.bru = 300;
+    const rows = AW.rows(S.win).map((r) => r[0]), wu = AW.wuensche(S.win);
+    const x = { an: an, ids0: ids0, ids1: ids1, roll: S.win.roll, einbau: (eb && eb.opts || []).map((o) => o.k).join(','), rows: rows.join('|'), b: AW.bestellmass(S.win), abs: AW.absturzFrage(S.win), satz: wu.satz, gruppen: wu.gruppen.map((g) => g.titel).join('|') };
+    S.screen = 'start'; render(true); document.querySelector('.st-stelle [data-act="situation"][data-v="ersatz"]').click();
+    x.zurueck = !S.win.nachruest && S.win.demontage === true;
+    return x;
+  });
+  ok(na32.an && na32.ids0 === 'massweg lage sart insekt iart extras' && na32.ids1 === 'massweg lage sart einbau sfarbe antrieb insekt iart extras' && na32.roll === 'vorbau' && na32.einbau === 'vorbau,unterputz' &&
+    /Umfang/.test(na32.rows) && !/Glas|Griff|Material|Fensterbank|Montage/.test(na32.rows) && na32.b === null && na32.abs === false && /^Bestehendes Fenster bleibt, nur nachrüsten: Rollladen, .*Insektenschutz Spannrahmen$/.test(na32.satz) && na32.gruppen === 'Umfang|Sonnenschutz|Insektenschutz' && na32.zurueck,
+    'Nur nachrüsten: dritte Wahl bei der Stelle, Hauptweg Maße, Lage, Sonnenschutz außen (Vorbau oder Unterputz), Insektenschutz, Sichtschutz innen; Aufmaß mit Umfang, ohne Richtmaß und Absturzfrage; zurück auf Ersetzen (' + JSON.stringify(na32).slice(0, 500) + ')');
   /* b) Was der Inhaber aus dem Hauptweg genommen hat, steht in der Liste */
   const ex32 = await p.evaluate(() => { const w = demoProject()[0]; S.win = w; return qExtras(qList(w)).map((q) => q.id); });
   const soll32 = ['kvd', 'profil', 'schmal', 'dicht', 'ahFarbe', 'oberfl', 'griffM', 'griffPos', 'kinder', 'baender', 'luefter', 'oeffner', 'kontakt', 'gitter', 'leiste'];

@@ -510,7 +510,7 @@
     /* Kennzahlen (ab zwei Positionen): Fenster und Türen, Geschosse, Sonnenschutz, offene Punkte (Koralle mit Prüfzeichen, führt zur
        Klärungsliste); rechts die Vollständigkeit der Maße als Kapselreihe */
     const klOffen = kl.filter((r) => !geklaert(r)), nPflicht = klOffen.filter((r) => r.gruppe === 'pflicht').length;
-    const flaecheP = wins.reduce((a, x) => { const d = AW.derive(x); return a + (d.elW && d.elH ? d.elW * d.elH / 1e6 * (num(x.anzahl) || 1) : 0); }, 0);
+    const flaecheP = wins.reduce((a, x) => { const d = AW.derive(x); return a + (d.elW && d.elH && !AW.nachruest(x) ? d.elW * d.elH / 1e6 * (num(x.anzahl) || 1) : 0); }, 0);
     const m2 = (v) => v.toFixed(1).replace('.', ',');
     if (wins.length > 1 && BEST) {
       /* Beim Betrieb: was er zuerst wissen will (Gremium F): Elemente, offene Pflichtpunkte groß, alle offenen Punkte, Fensterfläche */
@@ -643,7 +643,7 @@
         band(false);
         b.idx.forEach((i) => {
           const w = wins[i], d = AW.derive(w), bm = BEST ? AW.bestellmass(w, ab) : null, aus = AUS[i], n = num(w.anzahl) || 1;
-          const fl = (w.art || 'fenster') === 'fenster' || w.art === 'balkon' ? AW.oeffnungKurz(w).split(' · ').filter((x) => /Flügel|Seitenteil|Oberlicht|Festfeld/.test(x)).join(' · ') : '';
+          const fl = AW.nachruest(w) ? 'nur nachrüsten' : (w.art || 'fenster') === 'fenster' || w.art === 'balkon' ? AW.oeffnungKurz(w).split(' · ').filter((x) => /Flügel|Seitenteil|Oberlicht|Festfeld/.test(x)).join(' · ') : '';
           const zeile2 = [ARTNAME[w.art] || 'Fenster', fl, n > 1 ? n + ' Stück' : ''].filter(Boolean).join(' · ');
           let ausZ = []; if (ANF || TXT) { font('normal', 7.2); ausZ = wrap(ANF ? (aus.length ? aus.map((a) => a.t).join(' · ') : 'ohne Sonnen- und Insektenschutz') : ausWort(w, i) || '–', cA - 2).slice(0, 3); }
           const rh = Math.max(rowH0, ausZ.length * 3.1 + 5);
@@ -694,7 +694,9 @@
         const detail = (id, ohne) => Wg(id).filter((z) => ohne.indexOf(z.k) < 0 && !z.std && !z.offen && z.t && z.t !== 'keiner').map((z) => z.k + ' ' + z.t).join(', ');
         /* Holzart, Profil, Oberfläche usw. gehören zur Zeile des Elements (Prüfung 2.11.2026: Holzart fehlte); Sprossen stehen eigens */
         const fzus = detail('fenster', ['Element', 'Öffnung', 'Material', 'Form', 'Farbe', 'Sprossen', 'Sprossenfarbe', 'Aufteilung', 'Oberlicht', 'Unterlicht']);
-        dazu('Fenster und Türen', (ARTNAME[w.art] || 'Fenster') + ', ' + mat + ', ' + fa + ', ' + fi + (fzus ? ', ' + fzus : ''), i, n);
+        /* Nur nachrüsten: das Element bleibt, in der Liste steht es ohne Material und Farben (Fläche zählt nicht mit) */
+        if (AW.nachruest(w)) dazu('Fenster und Türen', (ARTNAME[w.art] || 'Fenster') + ' bleibt, nur nachrüsten', i, n);
+        else dazu('Fenster und Türen', (ARTNAME[w.art] || 'Fenster') + ', ' + mat + ', ' + fa + ', ' + fi + (fzus ? ', ' + fzus : ''), i, n);
         AUS[i].forEach((a) => {
           const g = a.k === 'aussen' ? 'Sonnenschutz außen' : a.k === 'innen' ? 'Sicht- und Blendschutz innen' : 'Insektenschutz';
           const zus = a.z === 'offen' ? '' : a.k === 'aussen' ? detail('sonne', ['außen', 'innen']) : a.k === 'insekt' ? detail('insekt', ['Insektenschutz']) : '';
@@ -881,8 +883,8 @@
       let datenZ = '';
       [ARTNAME[w.art] || 'Fenster', AW.oeffnungKurz(w), n + ' Stück', w.fotos ? w.fotos + (w.bilder && /^bmuster/.test(String(w.bilder.in || '')) ? (w.fotos === 1 ? ' Beispielbild' : ' Beispielbilder') : w.fotos === 1 ? ' Foto' : ' Fotos') : 'ohne Fotos'].forEach((teil) => { const z = datenZ ? datenZ + ' · ' + teil : teil; if (tw(z) <= tB) datenZ = z; }); // passt ein Teil nicht (lange Öffnung einer Tür), fehlt nur er
       txt(datenZ, tx0, y + 12);
-      if (BEST) {
-        /* Richtmaß fürs Angebot (nie „Bestellmaß“: bestellt wird nach dem Feinaufmaß). Hell mit Rand statt schwarzer Fläche; die Zahl fett
+      if (BEST && !AW.nachruest(w)) {
+        /* Bei „nur nachrüsten“ kein Richtmaß (das Element bleibt, es zählt die Maueröffnung). Richtmaß fürs Angebot (nie „Bestellmaß“: bestellt wird nach dem Feinaufmaß). Hell mit Rand statt schwarzer Fläche; die Zahl fett
            nur, wenn nichts sie verändert; mit Anschlag laut Foto steht statt der Zahl „Feinaufmaß nötig“; was sie verändert, steht darunter */
         const sicher = b && b.sicher, vor = b && b.warn.length ? (b.anschlag ? b.warn[0] : b.warn.join(' · ')) : '';
         karteRand(XR - boxW, y - 2, boxW, 19, { rand: sicher ? INK : WARN, dick: 0.6 });
@@ -1109,7 +1111,7 @@
 
     /* ---------- Ende (ab zwei Positionen): Ausstattung, Zahlen, alle Elemente im selben Maßstab ---------- */
     function ausstattung() {
-      const flaeche = wins.reduce((a, x) => { const d = AW.derive(x); return a + (d.elW && d.elH ? d.elW * d.elH / 1e6 * (num(x.anzahl) || 1) : 0); }, 0);
+      const flaeche = wins.reduce((a, x) => { const d = AW.derive(x); return a + (d.elW && d.elH && !AW.nachruest(x) ? d.elW * d.elH / 1e6 * (num(x.anzahl) || 1) : 0); }, 0);
       const groesste = ORDER.reduce((best, i) => { const d = AW.derive(wins[i]); return !best || d.elW * d.elH > best.a ? { a: d.elW * d.elH, n: posLabel(i), d: d } : best; }, null);
       const zahlen = [['Positionen', String(wins.length)], ['Elemente', String(nE)], ['Geschosse', BEREICHE.map((b) => b.name).join(', ')]]
         .concat(ANF ? [] : [['Fensterfläche', flaeche ? 'etwa ' + flaeche.toFixed(1).replace('.', ',') + ' m² (Element, alle Stück)' : '–'], ['Größtes Element', groesste && groesste.d.elW ? groesste.n + ', ' + th(groesste.d.elW) + ' × ' + th(groesste.d.elH) + ' mm' : '–']],

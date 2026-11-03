@@ -358,7 +358,7 @@ const OPT = {
   roll: [{ k: 'keiner', label: 'Keiner' }, { k: 'behalten', label: 'Bestehender', sub: 'bleibt drin' }, { k: 'aufsatz', label: 'Aufsatz', sub: 'neu, auf dem Fenster', g: 'aufsatz' }, { k: 'vorbau', label: 'Vorbau', sub: 'neu, außen davor', g: 'vorbau' }, { k: 'unterputz', label: 'Unterputz', sub: 'neu, in der Wand', g: 'unterputz' }],
   antrieb: [{ k: 'gurt', label: 'Gurt' }, { k: 'kurbel', label: 'Kurbel' }, { k: 'motor', label: 'Elektrisch' }, { k: 'smart', label: 'Smart Home' }, { k: 'solar', label: 'Solar' }],
   art: [{ k: 'fenster', label: 'Fenster', sub: 'Dreh, Kipp, fest' }, { k: 'balkon', label: 'Balkon- oder Terrassentür', sub: 'geht auf wie ein Fenster', g: 'balkon' }, { k: 'haustuer', label: 'Haustür', sub: 'auch Nebentür', g: 'haustuer' }, { k: 'fest', label: 'Festverglasung', sub: 'großflächig, ohne Griff' }, { k: 'hst', label: 'Hebe-Schiebe-Tür', sub: 'bodentief, schiebt', g: 'hst' }, { k: 'psk', label: 'PSK-Tür', sub: 'schiebt und kippt, meist günstiger', g: 'psk' }, { k: 'fsw', label: 'Faltschiebewand', sub: 'ganz zu öffnen' }],
-  situation: [{ k: 'ersatz', label: 'Fenster ersetzen', sub: 'Dort ist schon eins' }, { k: 'neu', label: 'Neue Öffnung', sub: 'Dort war noch keins' }],
+  situation: [{ k: 'ersatz', label: 'Fenster ersetzen', sub: 'Dort ist schon eins' }, { k: 'neu', label: 'Neue Öffnung', sub: 'Dort war noch keins' }, { k: 'nachruest', label: 'Nachrüsten', sub: 'Das Element bleibt' }],
   felder: [{ k: '1', label: '1 Feld' }, { k: '2p', label: '2 Felder' }, { k: '3', label: '3 Felder' }, { k: '4', label: '4 Felder' }],
   ul: [{ k: 'nein', label: 'Kein Unterlicht' }, { k: 'glas', label: 'Unterlicht aus Glas', sub: 'fest verglast' }, { k: 'paneel', label: 'Unterlicht als Paneel', sub: 'geschlossen, gedämmt' }],
   hstSchema: [{ k: 'A', label: 'Schema A', sub: '1 schiebt vor 1 festem' }, { k: 'A3', label: '3-teilig', sub: '1 schiebt vor 2 festen' }, { k: 'C', label: 'Schema C', sub: '2 schieben mittig' }, { k: 'D', label: 'Schema D', sub: '2 schieben, Mitte zu' }],
@@ -3059,7 +3059,7 @@ function winCard(x, i, live, hide) { const d = derive(x), tag = live ? 'button' 
   if (hide) { const anderswo = !!(S.sent && S.sent.anderswo); return '<div class="wincard sent"><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (anderswo ? 'Auf diesem Gerät' : PILOT ? 'Abgeschlossen' : 'Übermittelt') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '') + '</span><span class="me">' + (anderswo ? 'Maßgeblich ist das Aufmaß, das angekommen ist' : 'Maße und Angaben stehen im Aufmaßblatt') + '</span></span></div>'; }
   /* Karte in der Übersicht: Nummer der Position am Bild, Name, Zeile mit Art, Geschoss, Stückzahl, Fotos und Notiz, darunter der Stand
      als Punkt mit Text (vollständig, Maße offen, Zahl der offenen Wünsche); Maße und Wünsche stehen nie in Listen, auch nicht ihre Namen */
-  const st = fensterStand(x), di = [lab('art', x.art || 'fenster'), x.etage ? AW.etageText(x) : '', x.anzahl > 1 ? x.anzahl + ' Stück' : '', x.fotos ? x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '', Object.keys(x.notizen || {}).length ? 'mit Notiz' : '', fest ? 'fest' : ''].filter(Boolean).join(' · ');
+  const st = fensterStand(x), di = [lab('art', x.art || 'fenster') + (AW.nachruest(x) ? ', nur nachrüsten' : ''), x.etage ? AW.etageText(x) : '', x.anzahl > 1 ? x.anzahl + ' Stück' : '', x.fotos ? x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '', Object.keys(x.notizen || {}).length ? 'mit Notiz' : '', fest ? 'fest' : ''].filter(Boolean).join(' · ');
   return '<' + tag + (live ? ' type="button"' : '') + ' class="wincard"' + (live ? ' data-act="open" data-i="' + i + '"' : '') + '><span class="ic"><b class="pos" aria-label="Position ' + (i + 1) + '">' + (i + 1) + '</b>' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + esc(di) + '</span><span class="st ' + st.k + '"><i aria-hidden="true"></i>' + esc(st.text) + '</span></span>' + (live ? CHEV : '') + '</' + tag + '>'; }
 /* Startbild der App: Foto ohne Rahmen, das weich in den Grund ausläuft (app.css .hero-foto), mit den drei Schritten als Chips;
    das Foto liegt in web/bilder/foto/ (docs/BILDER.md) */
@@ -3286,6 +3286,7 @@ const ST_NAME = { balkon: 'Balkontür' };
 const ST_KURZ = { fenster: 'Fenster', balkon: 'Balkontür', haustuer: 'Haustür', fest: 'Festglas', hst: 'Hebe-Schiebe', psk: 'PSK-Tür', fsw: 'Faltwand' };
 const ST_STELLE = {
   ersatz: '<b>Dort ist schon eins.</b> Das neue kommt in dieselbe Öffnung. Soll sie größer werden, etwa für eine Tür, wähle „Neue Öffnung“.',
+  nachruest: '<b>Das Element bleibt, wie es ist.</b> Du planst nur dazu, was fehlt: Rollladen, Raffstore, Insektenschutz oder Sichtschutz innen. Gemessen wird trotzdem, damit alles passt.',
   neu: '<span class="st-punkt" aria-hidden="true"></span><b>Dort war noch keins, oder die Öffnung wird größer.</b> Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.'
 };
 /* Strichzeichnungen der sechs Elemente (aus der App abgeleitet, Vorschau „Was planst du?“); Farben über --z-* aus app.css (Klassen stz-*
@@ -3293,7 +3294,7 @@ const ST_STELLE = {
 const ST_ZEICHEN = '<symbol id="z-fenster" viewBox="0 0 64 64"><path class="stz-r" d="M11.4 7h41.2a1.2 1.2 0 0 1 1.2 1.2v47.6a1.2 1.2 0 0 1-1.2 1.2H11.4a1.2 1.2 0 0 1-1.2-1.2V8.2a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-f" d="M12.8 9.6h18.1v44.8H12.8Z"/><path class="stz-g" d="M14.4 11.3h14.9v41.5H14.4Z"/><path class="stz-l" d="M14.4 11.3 29.3 32 14.4 52.7"/><path class="stz-f" d="M33 9.6h18.1v44.8H33Z"/><path class="stz-g" d="M34.7 11.3h14.9v41.5H34.7Z"/><path class="stz-l" d="M49.6 11.3 34.7 32l14.9 20.7"/><path class="stz-l" d="M34.7 52.7 42.1 11.3l7.5 41.4"/></symbol><symbol id="z-balkon" viewBox="0 0 64 64"><path class="stz-r" d="M21.6 7h20.8a1.2 1.2 0 0 1 1.2 1.2v47.6a1.2 1.2 0 0 1-1.2 1.2H21.6a1.2 1.2 0 0 1-1.2-1.2V8.2a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-f" d="M22.4 9h19.2v46H22.4Z"/><path class="stz-g" d="M24.1 10.7h15.7v42.6H24.1Z"/><path class="stz-l" d="M24.1 10.7 39.9 32 24.1 53.3"/><path class="stz-b" d="M19.4 56.5h25.2v2.4H19.4Z"/></symbol><symbol id="z-fest" viewBox="0 0 64 64"><path class="stz-r" d="M8.2 12.6h47.6a1.2 1.2 0 0 1 1.2 1.2v36.5a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 50.3V13.8a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-g" d="M10 15.6h20.8v32.9H10Z"/><path class="stz-g" d="M33.2 15.6H54v32.9H33.2Z"/></symbol><symbol id="z-hst" viewBox="0 0 64 64"><path class="stz-r" d="M8.2 10.8h47.6a1.2 1.2 0 0 1 1.2 1.2v39.9a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 51.9V12a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-g" d="M10 13.8h20.8v36.3H10Z"/><path class="stz-f" d="M33.2 13.8H54v36.3H33.2Z"/><path class="stz-g" d="M35.1 15.7h17.1v32.6H35.1Z"/><path class="stz-l stz-dick" d="M47 41h-10"/><path class="stz-l stz-dick" d="m40 38.5-3 2.5 3 2.5"/><path class="stz-k" d="M50.3 25.5a1.2 1.2 0 0 1 1.2 1.2v7.8a1.2 1.2 0 0 1-2.4 0v-7.8a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-b" d="M6 52.7h52v2.4H6Z"/></symbol><symbol id="z-psk" viewBox="0 0 64 64"><path class="stz-r" d="M10.3 7h43.5a1.2 1.2 0 0 1 1.2 1.2v47.6a1.2 1.2 0 0 1-1.2 1.2H10.3a1.2 1.2 0 0 1-1.2-1.2V8.2A1.2 1.2 0 0 1 10.3 7Z"/><path class="stz-g" d="M11.8 9.8h19.1v44.5H11.8Z"/><path class="stz-f" d="M33.1 9.8h19.1v44.5H33.1Z"/><path class="stz-g" d="M34.8 11.5h15.6v41.1H34.8Z"/><path class="stz-l" d="M36.5 44 42.6 13l6.1 31"/><path class="stz-l stz-dick" d="M46 49.5h-8"/><path class="stz-l stz-dick" d="m38 47-2.5 2.5 2.5 2.5"/><path class="stz-k" d="M48.7 26a1.2 1.2 0 0 1 1.2 1.2V34a1.2 1.2 0 0 1-2.4 0v-6.8a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-b" d="M8.1 56.5H56v2.4H8.1Z"/></symbol><symbol id="z-fsw" viewBox="0 0 64 64"><path class="stz-r" d="M8.2 13h47.6a1.2 1.2 0 0 1 1.2 1.2v38a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 52.2V14.2a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-f" d="M10 16h13.1v32H10Z"/><path class="stz-g" d="M11.5 17.5h10.1v29H11.5Z"/><path class="stz-f" d="M25.5 16h13.1v32H25.5Z"/><path class="stz-g" d="M27 17.5h10.1v29H27Z"/><path class="stz-f" d="M40.9 16H54v32H40.9Z"/><path class="stz-g" d="M42.4 17.5h10.1v29H42.4Z"/><path class="stz-l" d="M42.4 17.5 52.5 32 42.4 46.5"/><path class="stz-b" d="M6 51.5h52v2.4H6Z"/></symbol>';
 function startDna() {
   const w = S.win, art = ST_BILD[w.art] ? w.art : 'fenster', neu = !!w.neu, o = OPT.art.find((x) => x.k === art) || OPT.art[0], g = optG('art', o), b = ST_BILD[art];
-  const steps = stepsFor(w), nr = steps.indexOf('start') + 1;
+  const steps = stepsFor(w), nr = steps.indexOf('start') + 1, stelleK = neu ? 'neu' : w.nachruest ? 'nachruest' : 'ersatz';
   /* Wechsel auf demselben Bildschirm: aus der Wischrichtung, sonst aus der Richtung in der Reihe */
   const gleich = lastScreen === 'start', still = stSofort || ruhig(), wechsel = gleich && !still && stZuletzt && stZuletzt !== art, kommt = gleich && !still && neu && !stNeuZuletzt;
   const d = stRichtung || (stIdx(art) > stIdx(stZuletzt) ? 1 : -1);
@@ -3308,9 +3309,9 @@ function startDna() {
     '<p class="st-name' + wl + '"><b>' + esc(ST_NAME[art] || o.label) + '</b><small>' + esc(o.sub || '') + '</small>' +
     (g ? '<button type="button" class="lg-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc('Was ist das: ' + o.label + '?') + '">' + LG_I + '</button>' : '') + '</p></div>';
   const bento = '<div class="st-bento" role="radiogroup" aria-label="Element">' + OPT.art.map((x) => { const an = x.k === art; return '<button type="button" class="st-kachel" role="radio" data-act="art" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '" aria-label="' + esc(x.label) + '"><span class="st-kreis" aria-hidden="true"><svg class="st-zeichen" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + ST_ICON[x.k] + '</svg></span><span class="st-kachel-name" aria-hidden="true">' + ST_KURZ[x.k] + '</span></button>'; }).join('') + '</div>';
-  const stelle = '<div class="lg-karte lg-hell st-stelle-karte"><div class="lg-feld"><span class="dna-label" id="st-stelle-l">Die Stelle</span><h2 class="st-weiss-titel">Neu oder ersetzen? <span>Danach planst du am Modell.</span></h2><div class="st-stelle" role="radiogroup" aria-labelledby="st-stelle-l">' +
-    OPT.situation.map((x) => { const an = (x.k === 'neu') === neu; return '<button type="button" role="radio" data-act="situation" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '">' + esc(x.k === 'ersatz' && istTuer(w) ? 'Tür ersetzen' : x.label) + '</button>'; }).join('') + '</div>' +
-    '<p class="st-stelle-text" aria-live="polite">' + ST_STELLE[neu ? 'neu' : 'ersatz'] + (neu ? ' <button type="button" class="ulink" data-act="gloss" data-k="neuoeffnung">Mehr erfahren</button>' : '') + '</p></div></div>';
+  const stelle = '<div class="lg-karte lg-hell st-stelle-karte"><div class="lg-feld"><span class="dna-label" id="st-stelle-l">Die Stelle</span><h2 class="st-weiss-titel">Ersetzen, neu oder nachrüsten? <span>Danach planst du am Modell.</span></h2><div class="st-stelle" role="radiogroup" aria-labelledby="st-stelle-l">' +
+    OPT.situation.map((x) => { const an = x.k === stelleK; return '<button type="button" role="radio" data-act="situation" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '">' + esc(x.k === 'ersatz' ? 'Ersetzen' : x.label) + '</button>'; }).join('') + '</div>' +
+    '<p class="st-stelle-text" aria-live="polite">' + ST_STELLE[stelleK] + (neu ? ' <button type="button" class="ulink" data-act="gloss" data-k="neuoeffnung">Mehr erfahren</button>' : '') + '</p></div></div>';
   const zurLanding = PROBE && PROBE_LANDING && !S.windows.length, zur = zurLanding ? ['probe-landing', PROBE_DIREKT ? 'Zurück zur Seite für Fensterbauer' : 'Zurück zur Website von Fensterbau Brandt'] : ['back', 'Zurück: Aufmaß']; // Testansicht: die Beispielseite ist die Website des Betriebs
   const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="' + zur[0] + '" aria-label="' + zur[1] + '">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="wuensche">Weiter' + pfeil + '</button></div>';
   return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(zur) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + probeInfo() + bento + '<div class="st-weiss">' + stelle + fuss + rechtLinks() + '</div></div></div>', back: ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
@@ -4778,7 +4779,7 @@ const KAP_APP = { typ: 'oeffnung', din: 'oeffnung', stulp: 'oeffnung', hstr: 'oe
 /* Der Hauptweg: was jeder Kunde gefragt wird (das Wesentliche, das man sieht und das den Preis macht, dazu die Pflichtthemen Absturz und
    Erreichbarkeit). Alles andere steht in der Liste „Möchtest du noch etwas einstellen?“ nach den Fensterbänken und ist freiwillig */
 const Q_HAUPT = { htModell: 1, htSeiten: 1, htGlas: 1, htGriff: 1, htSchloss: 1, form: 1, teilung: 1, stulpLage: 1, felder: 1, hsts: 1, pskS: 1, fswn: 1, massweg: 1, lage: 1, absturz: 1, design: 1, stulp: 1, typ: 1, din: 1, hstr: 1, pskR: 1, fsws: 1, fswg: 1, schwelle: 1, material: 1, fa: 1, fi: 1, glas: 1, sprossen: 1, breite: 1, sprFarbe: 1, rc: 1, sart: 1, sfarbe: 1, antrieb: 1, klFarbe: 1, fbi: 1, fba: 1, extras: 1 };
-const qHaupt = (q) => !!Q_HAUPT[String(q.id).split('-')[0]];
+const qHaupt = (q) => !!(q.haupt || Q_HAUPT[String(q.id).split('-')[0]]);
 const KAP_I = {}; KAPITEL.forEach((k, i) => { KAP_I[k.k] = i; });
 /* Kapitel und Stufe je Frage stehen in modell.js (AW.FRAGE), damit Klärungsliste, Betrieb und Blatt wissen, was bei welcher Tiefe
    gefragt wurde. Stufe 2 (sonst 1): was viele mögen, für ein erstes Angebot aber nicht braucht. Pflichtthemen (Lage, Absturz,
@@ -5046,6 +5047,18 @@ function qList(w) {
   });
   /* Haustür: Seitenteile stehen im Hauptweg (htSeiten), nicht noch einmal in der Liste */
   if (art === 'haustuer') { const k = L.findIndex((q) => q.id === 'seiten'); if (k >= 0) L.splice(k, 1); }
+  /* Nur nachrüsten (Lückenprüfung 3.11.2026): Das Element bleibt; gefragt werden Maße, Lage und was dazukommt (Sonnenschutz außen mit
+     Kasten, Farbe und Antrieb, Insektenschutz, Sicht- und Blendschutz innen), alles im Hauptweg. Ein Aufsatzkasten geht nur mit neuem Element */
+  if (w.nachruest && !neu) {
+    const NACH = { massweg: 1, lage: 1, sart: 1, einbau: 1, sfarbe: 1, antrieb: 1, klFarbe: 1, insekt: 1, iart: 1, ifarbe: 1, notiz: 1 };
+    for (let k = L.length - 1; k >= 0; k--) {
+      const q = L[k], b = q.id.split('-')[0], dd = AW.DETAIL.find((x) => x.k === q.id);
+      if (NACH[b]) { if (b !== 'notiz') q.haupt = true; } else if (!dd || (dd.wg !== 'sonne' && dd.wg !== 'insekt')) L.splice(k, 1);
+    }
+    const sa = L.find((q) => q.id === 'sart'); if (sa) { sa.title = 'Sonnenschutz außen dazu?'; sa.sub = 'Ein Rollladen oder Raffstore wird vor das bestehende Element gesetzt.'; }
+    const eb = L.find((q) => q.id === 'einbau'); if (eb) eb.opts = OPT.einbau.filter((o) => o.k !== 'aufsatz');
+    const ins = L.find((q) => q.id === 'insekt'); if (ins) ins.title = 'Insektenschutz dazu?';
+  }
   /* Am Ende des Hauptwegs die freiwillige Liste */
   L.push({ id: 'extras', title: 'Möchtest du noch etwas einstellen?', sub: 'Alles hier ist freiwillig. Was du nicht wählst, plant ' + (fbName() || 'dein Fensterbauer') + ' nach seinem Standard.', kind: 'extras', view: 'three', kap: 'extras', s: 1 });
   /* „Weiß ich noch nicht“: keine Option gedrückt */
@@ -7741,7 +7754,7 @@ function act(name, el) {
     case 'tour-pdf': return tourPDF();
     case 'tour-nochmal': { const t = S.tour; if (!t) return; tourStopp(); t.mess = { k: 0, cur: '', fertig: false }; render(); nachBild(tourMessen, 300); return; }
     case 'tour-art': { if (!S.tour) return; if (v === S.win.art) return render(); const alt = S.win, nw = tourWin(v); ['fa', 'fi', 'material', 'glas', 'glasfn', 'sart', 'sfarbe', 'roll', 'ki'].forEach((k) => { nw[k] = alt[k]; }); S.win = nw; S.selSash = 0; S.openSash = -1; render(); if (tourArtTuer(v)) nachBild(tuerZeigen, 360); return; }
-    case 'situation': { const neu = v === 'neu'; if (neu === !!w.neu) return render(); w.neu = neu; w.plan = null; if (neu) { w.demontage = false; if (w.sart === 'behalten') { w.sart = 'keiner'; w.roll = 'keiner'; } if (w.fbi === 'behalten') w.fbi = 'werzalit'; if (w.fba === 'behalten') w.fba = 'alu'; } else w.demontage = true; return render(); }
+    case 'situation': { const neu = v === 'neu', nach = v === 'nachruest'; if (neu === !!w.neu && nach === !!w.nachruest) return render(); const warNeu = !!w.neu; w.nachruest = nach; if (nach && w.roll === 'aufsatz') w.roll = 'vorbau'; if (neu === warNeu) { w.demontage = !neu && !nach; return render(); } w.neu = neu; w.plan = null; if (neu) { w.demontage = false; if (w.sart === 'behalten') { w.sart = 'keiner'; w.roll = 'keiner'; } if (w.fbi === 'behalten') w.fbi = 'werzalit'; if (w.fba === 'behalten') w.fba = 'alu'; } else w.demontage = !nach; return render(); }
     case 'art': { if (v === w.art) return render(); artSetzen(w, v); S.selSash = 0; S.openSash = -1; return render(); }
     case 'felder': { w.e_teilung = true; w.teilung = v; delete w.anteile; w.sashes = festFelder(v === '2p' ? 2 : num(v)); mirrorBars(w); S.selSash = 0; S.selBar = null; return render(); }
     case 'ul-set': { w.ul = v !== 'nein'; if (v !== 'nein') w.ulA = v; return render(); }
@@ -7799,7 +7812,7 @@ function act(name, el) {
       /* Neuer Rollladen, Raffstore oder Screen: den Kasten wählt erst einmal der Fensterbauer (nach den Fotos), der Kunde darf es selbst */
       const vorher = w.sart === 'rollladen' || w.sart === 'raffstore' || w.sart === 'screen';
       w.sart = v; entschieden(w, 'sart');
-      if (v === 'keiner' || v === 'behalten') w.roll = v; else if (v === 'klappladen') w.roll = 'keiner'; else { if (w.roll !== 'vorbau' && w.roll !== 'unterputz') w.roll = 'aufsatz'; if (!vorher) w.offen = Object.assign({}, w.offen || {}, { einbau: true }); }
+      if (v === 'keiner' || v === 'behalten') w.roll = v; else if (v === 'klappladen') w.roll = 'keiner'; else { if (w.roll !== 'vorbau' && w.roll !== 'unterputz') w.roll = w.nachruest && !w.neu ? 'vorbau' : 'aufsatz'; if (!vorher) w.offen = Object.assign({}, w.offen || {}, { einbau: true }); }
       return render();
     }
     case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return;
@@ -8328,7 +8341,7 @@ SCREENS.tour = () => {
     html = kopf('Was möchtest du planen?', 'Such dir ein Element aus. Die Maße sind vorgegeben, manches ist gesperrt: So siehst du in zwei Minuten jeden Schritt.') +
       modell({ view: 'three', stageH: 250, fitW: 0.76, fitH: 0.7, hint: o.label + (tourArtTuer(art) ? ' · bodentief' : '') }) +
       '<div class="qpanel"><div class="qcards quad" role="group" aria-label="Element">' + OPT.art.map((x) => '<div class="qo"><button type="button" class="qopt" data-act="tour-art" data-v="' + x.k + '" aria-pressed="' + (x.k === art) + '">' + svgIcon(ICO.art(x.k), 44) + '<span class="tx"><span class="lbl">' + esc(x.label) + '</span><span class="sb">' + esc(x.sub) + '</span></span></button></div>').join('') + '</div>' +
-      auswahl(OPT.situation, 'data-act="situation"', (x) => x.k === 'ersatz') + '</div>';
+      auswahl(OPT.situation.filter((x) => x.k !== 'nachruest'), 'data-act="situation"', (x) => x.k === 'ersatz') + '</div>';
   } else if (id === 'fotos') {
     const kachel = (k, label) => { const p = S.photos[k], a = S.ai[k]; return '<div class="tile">' + (p ? '<img src="' + p.url + '" alt="' + label + ', Beispielfoto">' : '<span class="empty"><span class="spin dark"></span>' + label + '</span>') + (a && a.status === 'running' ? '<span class="ai-scan" data-lottie="fotos" data-loop="1" aria-hidden="true"></span><span class="ai"><span class="spin"></span>KI liest</span>' : a && a.status === 'done' ? '<span class="ai">' + KI_OK + 'KI fertig</span>' : '') + (p ? '<span class="tag">' + CHECK + esc(label) + '</span>' : '') + '</div>'; };
     const ki = w.ki && w.ki.chips && w.ki.chips.length && S.ai.in && S.ai.in.status === 'done';

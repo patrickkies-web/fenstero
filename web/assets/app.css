@@ -2112,7 +2112,7 @@ html.dna-voll body { background: #07090a }
 .dna .st-weiss .st-stelle-karte { margin-top: 0 }
 .dna .st-stelle-karte .lg-feld { padding: 0; gap: 8px }
 .dna .st-stelle-karte .dna-label { font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--textgrau) }
-.dna .st-stelle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 999px; background: color-mix(in srgb, var(--silbergrau) 22%, var(--weiss)) }
+.dna .st-stelle { display: grid; grid-template-columns: repeat(3, auto); gap: 4px; padding: 4px; border-radius: 999px; background: color-mix(in srgb, var(--silbergrau) 22%, var(--weiss)) }
 .dna .st-stelle button { min-height: 44px; padding: 6px 4px; border: 0; border-radius: 999px; background: transparent; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font: 500 14px/1.2 var(--font-sans); color: var(--textgrau); cursor: pointer;
   transition: background-color 150ms var(--dna-druck), color 150ms var(--dna-druck), transform 160ms var(--dna-druck) }
 .dna .st-stelle button:active { transform: scale(.97); transition-duration: 0s }
@@ -2145,6 +2145,7 @@ html.dna-voll body { background: #07090a }
   .dna .st-bento { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 4px; margin: 0; padding: 4px 0 0; overflow: visible }
   .dna .st-kachel { width: auto }
   .dna .st-weiss { margin: 18px 0 0; padding: 24px 22px 0; border-radius: 28px }
+  .dna .st-weiss .st-stelle button { padding: 6px 2px; gap: 5px; font-size: 14px; white-space: nowrap }
   .dna .st-weiss::before { display: none }
   .dna .st-weiss .lg-fuss { margin: auto 0 0; padding: 18px 0 20px }
   .dna .st-rechts .lg-fuss { position: static; order: 1; margin: auto 0 0; padding: 16px 0 0; background: none; justify-content: stretch }

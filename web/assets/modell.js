@@ -117,6 +117,9 @@
     const TYP = { F: 'Fest', D: 'Dreh', K: 'Kipp', DK: 'Dreh-Kipp', S: 'Schiebeflügel', X: 'Faltflügel', P: 'Gehflügel', PS: 'PSK-Flügel' };
     /* Türen: Hebe-Schiebe, Faltschiebewand, Balkon-/Terrassentür, PSK; ihre Einstellungen (Schwelle usw.) liegen je Art in einem eigenen Feld */
     const istTuer = (w) => w.art === 'hst' || w.art === 'fsw' || w.art === 'balkon' || w.art === 'psk' || w.art === 'haustuer';
+    /* Nur nachrüsten (Lückenprüfung 3.11.2026): Das Element bleibt; geplant werden nur Sonnenschutz außen, Insektenschutz und Sicht- und
+       Blendschutz innen. Kein Richtmaß fürs Element, keine Fragen zu Material, Farbe, Glas, Griff, Einbruchschutz, Fensterbank, Montage */
+    const nachruest = (w) => !!(w && w.nachruest && !w.neu);
     const tuerCfg = (w) => (w.art === 'hst' ? w.hst : w.art === 'fsw' ? w.fsw : w.art === 'psk' ? w.psk : w.art === 'balkon' || w.art === 'haustuer' ? w.bt : null) || {};
     /* Haustür in Worten: Füllung, Glas, Griff außen, Schloss, Extras */
     const htText = (w) => { const h = w.ht || {}; return [lab('htModell', h.modell) || 'Füllung', h.modell && h.modell !== 'voll' ? 'Glas ' + (lab('htGlas', h.glas) || 'satiniert') : '', lab('htGriffA', h.griffA) || 'Stoßgriff außen', lab('htSchloss', h.schloss) || 'Mehrfachverriegelung'].concat((h.extra || []).map((x) => lab('htExtra', x) || x)).filter(Boolean).join(', '); };
@@ -412,6 +415,15 @@
       const kStd = istStd(w, 'einbau'), fStd = istStd(w, 'sfarbe');
       return lab('sart', a) + ', ' + (istOffen(w, 'einbau') ? 'Kasten nach Wahl des Fensterbauers' : kStd && fStd ? 'Kasten und Farbe ' + STD_TEXT : kStd ? 'Kasten ' + STD_TEXT : lab('einbau', OPT.einbau[w.roll] ? w.roll : 'aufsatz')) + (kStd && fStd ? '' : ', ' + (fStd ? 'Farbe ' + STD_TEXT : nameMitWunsch(w.wunschSf, optName('sfarbe', w.sfarbe, 'silber')))) + ', ' + (istOffen(w, 'antrieb') ? 'Antrieb offen' : lab('antrieb', w.antrieb));
     }
+    /* Was an ein bestehendes Element kommt, in einem Satzteil; leer, wenn noch nichts gewählt ist */
+    function nachText(w) {
+      const sa = sartVon(w), t = [];
+      if (sa && sa !== 'keiner' && sa !== 'behalten') t.push(sonne(w));
+      if (w.insekt && w.insekt !== 'keiner') t.push('Insektenschutz ' + (istOffen(w, 'insekt') ? OFFEN_TEXT : lab('insekt', w.insekt)));
+      if (w.iart && w.iart !== 'keiner') t.push('innen ' + innen(w));
+      return t.join('; ');
+    }
+    const nachName = (w) => 'Bestehende' + (istTuer(w) ? ' Tür' : w.art === 'fest' ? ' Verglasung' : 's Fenster') + ' bleibt, nur nachrüsten';
     const innen = (w) => (istOffen(w, 'iart') ? OFFEN_TEXT : !w.iart || w.iart === 'keiner' ? 'keiner' : lab('iart', w.iart) + ', ' + nameMitWunsch(w.wunschIf, optName('ifarbe', w.ifarbe, 'weiß')));
     const griffText = (w) => (w.art === 'fest' ? 'ohne Griff' : istOffen(w, 'griff') ? OFFEN_TEXT : istStd(w, 'griff') ? STD_TEXT : (w.art === 'hst' ? (lab('hstGriff', w.griff) || 'Hebegriff') : (lab('griff', w.griff) || 'Standard')) + (w.griff === 'ohne' || w.griff === 'motor' ? '' : ', ' + griffName(w)));
     /* Fassade, wie der Kunde sie am Modell eingestellt hat (Zahnrad in der App): Art und Farbton; leer, wenn er nichts gewählt hat (dann
@@ -427,7 +439,7 @@
     const ABSTURZ_MM = 900;
     const bruDa = (w) => w.bru !== '' && w.bru != null && String(w.bru).trim() !== '';
     function absturzFrage(w) {
-      if (!w || (w.etage !== 'og' && w.etage !== 'dg')) return false;
+      if (!w || (w.etage !== 'og' && w.etage !== 'dg') || nachruest(w)) return false;
       if (istTuer(w)) return true;
       if (bruDa(w)) return num(w.bru) < ABSTURZ_MM;
       const f = w.ki && w.ki.fach;
@@ -493,6 +505,20 @@
     function rows(w, p) {
       w = nachTiefe(w, p);
       const d = derive(w), mo = w.mo || {}, art = w.art || 'fenster', z = uwZiel(w, p);
+      if (nachruest(w)) {
+        const n = [
+          ['Maueröffnung', d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm, kleinstes Maß' + (d.devW > 5 || d.devH > 5 ? ', bis ' + Math.max(d.devW, d.devH) + ' mm außer Winkel' : '') : 'nicht gemessen'],
+          ['Breiten', 'oben ' + th(mo.wt) + ' · Mitte ' + th(mo.wm) + ' · unten ' + th(mo.wb)],
+          ['Höhen', 'links ' + th(mo.hl) + ' · Mitte ' + th(mo.hm) + ' · rechts ' + th(mo.hr)],
+          [istTuer(w) ? 'Bestehende Tür' : 'Bestehendes Fenster', (lab('art', art) || 'Fenster') + (d.elW && d.elH ? ', ' + th(d.elW) + ' × ' + th(d.elH) + ' mm mit Rahmen' : ', nicht gemessen')],
+          ['Lage', (w.name || 'ohne Raum') + ', ' + (etageText(w) || 'EG') + (num(w.bru) ? ', Brüstung ' + th(w.bru) + ' mm' : '') + (num(w.laib) ? ', Laibung innen ' + th(w.laib) + ' mm' : '') + (num(w.wand) ? ', Wand ' + th(w.wand) + ' mm' : '')],
+          ['Umfang', nachName(w) + (ohneFotos(w) ? ', ohne Fotos erfasst' : '')],
+          ['Sonnenschutz außen', sonne(w)], ['Sonnenschutz innen', innen(w)], ['Insektenschutz', ov(w, 'insekt', lab('insekt', w.insekt) || 'keiner')]
+        ];
+        detailRows(w).filter((x) => { const dd = DETAIL.find((y) => y.n === x[0] || y.k === x[0]); return !dd || dd.wg === 'sonne' || dd.wg === 'insekt'; }).forEach((x) => n.push(x));
+        if (w.notiz) n.push(['Notiz des Kunden', w.notiz]);
+        return n;
+      }
       const r = [
         ['Maueröffnung', d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm, kleinstes Maß' + (d.devW > 5 || d.devH > 5 ? ', bis ' + Math.max(d.devW, d.devH) + ' mm außer Winkel' : '') : 'nicht gemessen'],
         ['Breiten', 'oben ' + th(mo.wt) + ' · Mitte ' + th(mo.wm) + ' · unten ' + th(mo.wb)],
@@ -802,6 +828,13 @@
       if (dg('kontakt')) t.push('Alarmkontakt');
       if (dg('oeffner')) t.push('elektrischer Fensteröffner');
       if (dg('luefter')) t.push(lab('luefter', w.luefter));
+      if (nachruest(w)) {
+        /* Nur nachrüsten: Umfang, Sonnenschutz und Insektenschutz; der Satz nennt, was dazukommt */
+        const H = G.filter((g) => g.id === 'sonne' || g.id === 'insekt');
+        H.unshift({ id: 'fenster', titel: 'Umfang', zeilen: [zeile('Umfang', nachName(w))], standard: [], notizen: (G.find((g) => g.id === 'fenster') || {}).notizen || [] });
+        G.length = 0; H.forEach((g) => G.push(g));
+        t.length = 0; t.push(nachName(w) + ': ' + (nachText(w) || 'noch nichts gewählt'));
+      }
       const standard = []; G.forEach((g) => g.standard.forEach((x) => { if (standard.indexOf(x) < 0) standard.push(x); }));
       return { satz: t.join(', '), offen: offenListe(w).map((k) => offenName(w, k)), tiefe: mitTiefe ? tw : '', standard: standard, gruppen: G, notizen: rest };
     }
@@ -820,6 +853,7 @@
     const festForm = (w) => w.form === 'rund' || w.form === 'dreieck';
     const fluegelZahl = (w) => (festForm(w) || w.art === 'fest' ? 0 : (w.sashes || sashesFor(w.teilung)).filter((x) => !x.st && x.t !== 'F').length);
     function oeffnungKurz(w) {
+      if (nachruest(w)) return 'nur nachrüsten';
       const art = w.art || 'fenster', S = w.sashes || sashesFor(w.teilung), nSt = S.filter((x) => x.st).length, n = fluegelZahl(w), nF = S.filter((x) => !x.st && x.t === 'F').length;
       if (art === 'fest') return S.length + (S.length === 1 ? ' Feld' : ' Felder') + ', fest verglast';
       if (art !== 'fenster' && art !== 'balkon') return opening(w).split(/, (?=[a-zäöüß]*[Ss]chwelle|flache|barrierefrei|Standard)/)[0];
@@ -832,7 +866,7 @@
     function abzugVon(ab) { ab = ab || {}; const z = (v, d) => { const k = parseInt(v, 10); return isNaN(k) ? d : Math.max(0, Math.min(60, k)); }; return { seite: z(ab.seite, 15), oben: z(ab.oben, 15), unten: z(ab.unten, 0), untenT: z(ab.untenT, 0) }; }
     function bestellmass(w, ab) {
       const a = abzugVon(ab), d = derive(w), u = istTuer(w) ? a.untenT : a.unten;
-      if (!d.moW || !d.moH) return null;
+      if (!d.moW || !d.moH || nachruest(w)) return null;
       const f = (w.ki && w.ki.fach) || {}, warn = [], dev = Math.max(d.devW, d.devH), anschlag = f.anschlagI === 'innen' || f.anschlagA === 'aussen';
       if (anschlag) warn.push('Anschlag ' + (f.anschlagI === 'innen' && f.anschlagA === 'aussen' ? 'innen und außen' : f.anschlagI === 'innen' ? 'innen' : 'außen') + ' laut Foto');
       if (!w.neu && dev > 10) warn.push('Öffnung bis ' + dev + ' mm außer Winkel');
@@ -1127,7 +1161,7 @@
       if (tuer) o += path(R(bx - 1, by + bh - 0.6, bw + 2, 1.6), '#ddd6cb', ink, 0.5);
       return '<svg viewBox="0 0 64 64" width="' + (size || 44) + '" height="' + (size || 44) + '" aria-hidden="true">' + o + '</svg>';
     }
-    return { OPT: OPT, TYP: TYP, lab: lab, etageText: etageText, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, htAusschnitt: htAusschnitt, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor, profilMm: profilMm, fugeStulp: fugeStulp, stulpPaare: stulpPaare, hatStulp: hatStulp,
+    return { OPT: OPT, TYP: TYP, lab: lab, etageText: etageText, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, htAusschnitt: htAusschnitt, nachruest: nachruest, nachText: nachText, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor, profilMm: profilMm, fugeStulp: fugeStulp, stulpPaare: stulpPaare, hatStulp: hatStulp,
       DETAIL: DETAIL, detailGilt: detailGilt, festImFluegel: festImFluegel, festText: festText, detailText: detailText, detailRows: detailRows, RC_RANG: RC_RANG, rcAb: rcAb,
       OFFEN_TEXT: OFFEN_TEXT, OFFEN_NAME: OFFEN_NAME, offenName: offenName, istOffen: istOffen, offenGilt: offenGilt, offenListe: offenListe, griffText: griffText, montageText: montageText, fassadeText: fassadeText, teilungText: teilungText, teilFrei: teilFrei, anteileGueltig: anteileGueltig, rcText: rcText,
       nachTiefe: nachTiefe, tiefeVon: tiefeVon, tiefeKopf: tiefeKopf, FRAGE: FRAGE, FRAGE_STUFE: FRAGE_STUFE, STD_TEXT: STD_TEXT, istStd: istStd, TIEFE_NAME: TIEFE_NAME, tiefeText: tiefeText, fluegelZahl: fluegelZahl, oeffnungKurz: oeffnungKurz, absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz,
