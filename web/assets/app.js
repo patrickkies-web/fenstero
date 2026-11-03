@@ -3139,22 +3139,31 @@ SCREENS.home = () => {
    Sache (folgt dem Scrollen, --sp), „So funktioniert's“ als drei Stationen auf Anthrazit, Links und unten die Pille „Erstes Fenster
    ausmessen“. Texte und Aktionen wie bisher (new, tour-start, gloss referenz/feinaufmass, anmelden, meinkonto). Am Laptop wie die Start-Folie. */
 function homeLeerDna() {
-  const chips = ['Fotografieren', 'Messen', 'Wünschen'].map((t, i) => '<span class="wl-chip"><b aria-hidden="true">' + (i + 1) + '</b>' + t + '</span>').join('');
+  /* Neu am 3.11.2026 (Inhaber: „diese Willkomm Seite … sieht Mega Scheiße aus“, „in Anlehnung an die Hauptseite … und da wo man auf den
+     Toggle zum Fensterbauer stellt“): statt der Waschbären sein Hausfoto als Bühne (Lichtkante, Vignette, G14) mit Glas-Chips der drei
+     Schritte wie „So läuft es“ auf der Startseite (Messen, In 3D planen, Aufmaßblatt); darunter Etikett, Titel, Lead, Kosten, „Führung
+     starten“ leise; das 3-D-Modell mit den Maßen an der Sache; „So läuft es“ als drei Anthrazit-Karten mit den Bildern der Startseite
+     (Wand mit Maß, Modell, Aufmaßblatt als PDF); Links und unten die eine Pille. Aktionen wie bisher (new, entwurf-weiter, tour-start,
+     gloss referenz/feinaufmass, anmelden, meinkonto). */
+  const chips = ['Messen', 'In 3D planen', 'Aufmaßblatt'].map((t, i) => '<span class="wl-chip"><b aria-hidden="true">' + (i + 1) + '</b>' + t + '</span>').join('');
   const ent = entwurfLesen(), entName = ent ? entwurfName(ent) : '';
-  const kosten = KUNDE_FREI() ? 'Messen, Fotos und das Aufmaßblatt sind kostenlos.' : 'Messen, Fotos und 3-D-Modell sind kostenlos. Das fertige Aufmaßblatt kostet einmalig ' + euro(PREIS()) + (MWST() ? ' inkl. MwSt.' : '') + '.';
-  const buehne = '<div class="wl-buehne"><img src="/bilder/foto/app-start.webp" width="1120" height="1400" alt="Drei Waschbären im Wohnzimmer: einer fotografiert mit dem Handy die Maueröffnung samt Zollstock, einer tippt auf dem Sofa seine Wünsche an, einer lehnt sich zufrieden zurück" fetchpriority="high" decoding="async"><div class="wl-chips">' + chips + '</div></div>';
+  const kosten = KUNDE_FREI() ? 'Messen, Planen und das Aufmaßblatt sind kostenlos.' : 'Messen, Fotos und 3-D-Modell sind kostenlos. Das fertige Aufmaßblatt als PDF für deinen Fensterbauer kostet einmalig ' + euro(PREIS()) + (MWST() ? ' inkl. MwSt.' : '.');
+  const buehne = '<div class="wl-buehne wl-haus"><img src="/bilder/start/hero.webp" width="1448" height="1086" alt="Einfamilienhaus mit Sprossenfenstern im Abendlicht" fetchpriority="high" decoding="async">' +
+    '<span class="wl-etikett-haus" aria-hidden="true"><i></i>Dein Haus · deine Fenster</span><div class="wl-chips">' + chips + '</div></div>';
   const konto = kontoBereit() ? '<p class="wl-zeile">' + (KS ? 'Angemeldet als ' + esc(KS.mail) + ' · <button type="button" class="ulink" data-act="go" data-v="meinkonto">Dein Konto</button>' : 'Schon ein Aufmaß gesichert? <button type="button" class="ulink" data-act="anmelden">Anmelden</button>') + '</p>' : '';
-  const kopf = '<div class="wl-kopf"><span class="dna-label wl-etikett"><i aria-hidden="true"></i><span>Fensterplanung, ganz <span translate="no">eezi</span></span></span><h1 tabindex="-1">Fotografieren. Messen. <em>Wünschen.</em></h1>' +
-    '<p class="wl-lead">Zwei Fotos, vier Maße mit dem Zollstock, und aus deinen Zahlen wächst dein Fenster als 3-D-Modell. Dein Fensterbauer bekommt alles fürs Angebot.</p>' +
+  const kopf = '<div class="wl-kopf"><span class="dna-label wl-etikett"><i aria-hidden="true"></i><span>Fensterplanung, ganz <span translate="no">eezi</span></span></span><h1 tabindex="-1">Dein erstes Fenster, <em>in zwei Minuten gemessen.</em></h1>' +
+    '<p class="wl-lead">Zollstock holen, vier Maße eintippen, Farbe und Glas wählen. Am Ende bekommt dein Fensterbauer alles als PDF fürs Angebot.</p>' +
     '<p class="wl-kosten"><i aria-hidden="true"></i>' + esc(kosten) + '</p>' +
-    '<div class="wl-aktionen">' + (ent ? '<button type="button" class="dna-pille dna-pille--leise wl-neu" data-act="new">Erstes Fenster ausmessen</button>' : '') + '<button type="button" class="dna-pille dna-pille--leise wl-tour" data-act="tour-start">Führung starten</button><p class="wl-zeile">Zwei Minuten, ohne eigene Maße · <button type="button" class="ulink" data-act="gloss" data-k="referenz">Wie genau ist das?</button></p>' + konto + '</div>' +
+    '<div class="wl-aktionen">' + (ent ? '<button type="button" class="dna-pille dna-pille--leise wl-neu" data-act="new">Neues Fenster ausmessen</button>' : '') + '<button type="button" class="dna-pille dna-pille--leise wl-tour" data-act="tour-start">Führung starten</button><p class="wl-zeile">Zwei Minuten, ohne eigene Maße · <button type="button" class="ulink" data-act="gloss" data-k="referenz">Wie genau ist das?</button></p>' + konto + '</div>' +
     (window.EinfBanner ? window.EinfBanner('kunde', { act: 'new' }) : '') + '</div>';
   const modell = '<div class="wl-modell"><span class="dna-label">Aus deinen Zahlen wächst dein Fenster</span><div class="hero-scene">' + model(HERO_WIN, { id: 'w3d-hero', view: 'three', sway: true, cls: 'hero dims-all', stageH: 280, dims: ['hm', 'wm', 'eh', 'ew'], labels: { hm: '1.480 mm', wm: '1.370 mm', eh: '1.410 mm', ew: '1.230 mm' } }) + '</div></div>';
-  const station = (n, t, x) => '<li class="wl-station"><span class="wl-nr">' + n + '</span><div><b>' + t + '</b><p>' + x + '</p></div></li>';
-  const erklaert = '<section class="wl-erklaert"><span class="dna-label">So funktioniert\'s</span><h2>Zollstock statt <em>Rätselraten.</em></h2><ol class="wl-stationen">' +
-    station(1, 'Fotografieren.', 'Innen und außen, das Handy gerade halten. Die KI liest daraus die Einbausituation: Rollladenkasten, Laibung, Fensterbänke, Fassade.') +
-    station(2, 'Messen.', 'Vier Maße mit dem Zollstock, Schritt für Schritt erklärt. Mit jeder Zahl formt sich Öffnung und Fenster als Modell, dann ergänzt du die Ränder.') +
-    station(3, 'Wünschen.', 'Flügel antippen, Sprossen ziehen, Farben innen und außen wählen. Jeder Fachbegriff mit Bild erklärt.') + '</ol>' +
+  /* „So läuft es“ wie auf der Startseite: Bild oben, Ring mit Zahl, „Schritt x von 3“, Titel, eine Zeile */
+  const karte = (n, bild, b, h, alt, t, x, extra) => '<li class="wl-karte"><figure class="wl-karte-bild"><img src="' + bild + '" width="' + b + '" height="' + h + '" alt="' + alt + '" loading="lazy" decoding="async">' + (extra || '') + '</figure>' +
+    '<p class="wl-karte-schritt"><span class="wl-nr">' + n + '</span>Schritt ' + n + ' von 3</p><h3>' + t + '</h3><p>' + x + '</p></li>';
+  const erklaert = '<section class="wl-erklaert" aria-labelledby="wl-so-t"><span class="dna-label">So läuft es</span><h2 id="wl-so-t">Drei Schritte zu <em>deinem Aufmaß.</em></h2><ol class="wl-karten">' +
+    karte(1, '/bilder/start/so/wand-innen.webp', 1200, 1186, 'Fenster in der Wand mit Maßlinie', 'Messen.', 'Zwei Fotos und der Zollstock, jeder Schritt erklärt. Die KI liest die Einbausituation.', '<span class="wl-mass" aria-hidden="true">1.236 <small>mm</small></span>') +
+    karte(2, '/bilder/start/so/modell-anthrazit.webp', 981, 1000, 'Fenster in Anthrazit aus dem 3-D-Modell', 'In 3D planen.', 'Flügel, Farbe innen und außen, Glas und Sprossen. Jeder Fachbegriff mit Bild.') +
+    karte(3, '/bilder/start/blatt.webp', 920, 903, 'Seite eines Aufmaßblatts mit Übersicht der Fenster', 'Aufmaßblatt.', 'Alle Maße und Wünsche als PDF, mit Code für deinen Fensterbauer.') + '</ol>' +
     '<p class="wl-nachsatz">Vor der Fertigung misst dein Fensterbauer einmal vor Ort nach, das <button type="button" class="ulink" data-act="gloss" data-k="feinaufmass">Feinaufmaß</button>.</p></section>';
   const links = '<div class="foot-links wl-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a><a class="link" href="' + PORTAL_URL + '">Zur Startseite ›</a></div>';
   const fuss = rechtLinks() + '<div class="lg-fuss">' + (ent ? '<button type="button" class="dna-pille lg-weiter btn primary" data-act="entwurf-weiter">' + esc(entName) + ' fortsetzen' + abPfeil + '</button>' : '<button type="button" class="dna-pille lg-weiter btn primary" data-act="new">Erstes Fenster ausmessen' + abPfeil + '</button>') + '</div>';
@@ -3211,10 +3220,11 @@ function homeAufmassDna() {
   const plus = n && neuMoeglich() && linkOffen() ? '<button type="button" class="dna-pille dna-pille--leise dna-pille--klein hd-neu" data-act="new">' + PLUS + 'Fenster</button>' : '';
   const kopf = '<div class="hd li-kopf"><div class="li-titel"><h1 tabindex="-1">Deine <em>Fenster.</em></h1>' + plus + '</div><p class="sub li-stand">' + stand + '</p></div>';
   const liste = '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true).replace(/<svg[\s\S]*?<\/svg>/, zuStrich)).join('') + neuKnopf() + '</div></section>';
-  const erklaert = '<section class="card erklaert li-erklaert"><p class="eyebrow">So funktioniert\'s</p><div class="steps">' +
-    '<div class="step"><span class="n">1</span><div><b>Fotografieren.</b><p>Innen und außen, das Handy gerade halten. Die KI liest daraus die Einbausituation.</p></div></div>' +
-    '<div class="step"><span class="n">2</span><div><b>Messen.</b><p>Vier Maße mit dem Zollstock, Schritt für Schritt erklärt, dann die Ränder.</p></div></div>' +
-    '<div class="step"><span class="n">3</span><div><b>Wünschen.</b><p>Flügel, Sprossen, Farben innen und außen, jeder Fachbegriff mit Bild erklärt.</p></div></div></div>' +
+  /* drei Schritte wie auf der Startseite und der Willkommensseite (3.11.2026): Messen, In 3D planen, Aufmaßblatt als PDF */
+  const erklaert = '<section class="card erklaert li-erklaert"><p class="eyebrow">So läuft es</p><div class="steps">' +
+    '<div class="step"><span class="n">1</span><div><b>Messen.</b><p>Zwei Fotos und der Zollstock, jeder Schritt erklärt. Die KI liest die Einbausituation.</p></div></div>' +
+    '<div class="step"><span class="n">2</span><div><b>In 3D planen.</b><p>Flügel, Farbe innen und außen, Glas und Sprossen, jeder Fachbegriff mit Bild erklärt.</p></div></div>' +
+    '<div class="step"><span class="n">3</span><div><b>Aufmaßblatt.</b><p>Alle Maße und Wünsche als PDF, mit Code für deinen Fensterbauer. Damit schreibt er dir ein erstes Angebot.</p></div></div></div>' +
     '<p class="nachsatz">Ein Fenster in zwei Minuten ausprobieren, ohne eigene Maße: <button type="button" class="ulink" data-act="tour-start">Führung starten</button></p></section>';
   const links = '<div class="foot-links li-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a><a class="link" href="' + PORTAL_URL + '">Zur Startseite ›</a></div>';
   const fuss = n ? '<div class="lg-fuss li-fuss"><button type="button" class="dna-pille lg-weiter btn primary" data-act="go" data-v="' + (FREI() ? 'teilen' : 'anfrage') + '">' + (FREI() ? 'Zum Aufmaßblatt' : 'Aufmaßblatt fertigstellen') + abPfeil + '</button></div>' : '';
@@ -3315,8 +3325,13 @@ function linkHomeInhaltAlt(I) {
    das Element. Beim Wechsel blendet das neue Element aus der Wischrichtung ein (220 ms), der Name im selben Frame; Tastatur und
    „weniger Bewegung“ ohne Übergang. */
 let stZuletzt = '', stNeuZuletzt = false, stRichtung = 0, stSofort = false;
-const stIdx = (k) => Math.max(0, OPT.art.findIndex((x) => x.k === k));
-const stNachbar = (k, d) => OPT.art[(stIdx(k) + d + OPT.art.length) % OPT.art.length].k;
+/* Wählbare Elementarten (Inhaber, 3.11.2026: Türen vorerst nicht erreichbar, auch nicht am Anfang). Die Tür-Logik bleibt vollständig;
+   ARTEN_AN wieder auf alle Arten setzen, um sie freizugeben. Gespeicherte Türen lassen sich weiter öffnen und bearbeiten. */
+const ARTEN_AN = ['fenster', 'fest'];
+const artWaehlbar = (k) => ARTEN_AN.indexOf(k) >= 0;
+const artenWahl = () => OPT.art.filter((x) => artWaehlbar(x.k));
+const stIdx = (k) => Math.max(0, artenWahl().findIndex((x) => x.k === k));
+const stNachbar = (k, d) => { const a = artenWahl(); return a[(stIdx(k) + d + a.length) % a.length].k; };
 /* Bilder des Inhabers (web/bilder/konfigurator/element/), Breite und Höhe in px */
 const ST_BILD = { fenster: [879, 1194], balkon: [853, 1200], haustuer: [590, 1200], fest: [1200, 565], hst: [1200, 652], psk: [908, 1079], fsw: [1200, 754] };
 /* Datei je Element, wo sie anders heißt: Fenster in Anthrazit mit Raffstore, zweiflügelige Balkontür und Hebe-Schiebe-Tür in Anthrazit
@@ -3361,7 +3376,7 @@ function startDna() {
     (neu ? '<span class="st-rahmen' + (kommt ? ' kommt' : '') + '"></span>' : '') + '</div>' +
     '<p class="st-name' + wl + '"><b>' + esc(ST_NAME[art] || o.label) + '</b><small>' + esc(o.sub || '') + '</small>' +
     (g ? '<button type="button" class="lg-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc('Was ist das: ' + o.label + '?') + '">' + LG_I + '</button>' : '') + '</p></div>';
-  const bento = '<div class="st-bento" role="radiogroup" aria-label="Element">' + OPT.art.map((x) => { const an = x.k === art; return '<button type="button" class="st-kachel" role="radio" data-act="art" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '" aria-label="' + esc(x.label) + '"><span class="st-kreis" aria-hidden="true"><svg class="st-zeichen" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + ST_ICON[x.k] + '</svg></span><span class="st-kachel-name" aria-hidden="true">' + ST_KURZ[x.k] + '</span></button>'; }).join('') + '</div>';
+  const bento = '<div class="st-bento' + (artenWahl().length < 4 ? ' st-bento-wenig' : '') + '" role="radiogroup" aria-label="Element">' + artenWahl().map((x) => { const an = x.k === art; return '<button type="button" class="st-kachel" role="radio" data-act="art" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '" aria-label="' + esc(x.label) + '"><span class="st-kreis" aria-hidden="true"><svg class="st-zeichen" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + ST_ICON[x.k] + '</svg></span><span class="st-kachel-name" aria-hidden="true">' + ST_KURZ[x.k] + '</span></button>'; }).join('') + '</div>';
   const stelle = '<div class="lg-karte lg-hell st-stelle-karte"><div class="lg-feld"><span class="dna-label" id="st-stelle-l">Die Stelle</span><h2 class="st-weiss-titel">Ersetzen, neu oder nachrüsten? <span>Danach planst du am Modell.</span></h2><div class="st-stelle" role="radiogroup" aria-labelledby="st-stelle-l">' +
     OPT.situation.map((x) => { const an = x.k === stelleK; return '<button type="button" role="radio" data-act="situation" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '">' + esc(x.k === 'ersatz' ? 'Ersetzen' : x.label) + '</button>'; }).join('') + '</div>' +
     '<p class="st-stelle-text" aria-live="polite">' + ST_STELLE[stelleK] + (neu ? ' <button type="button" class="ulink" data-act="gloss" data-k="neuoeffnung">Mehr erfahren</button>' : '') + '</p></div></div>';
@@ -4010,7 +4025,7 @@ function fertigDna() {
   const weiter = '<section class="fg-weiter weiter-karte" aria-labelledby="fg-weiter-t"><h2 class="fg-label" id="fg-weiter-t">Wie geht es weiter?</h2>' +
     zeile('data-act="new"', 'plus', 'Weiteres Fenster', 'Gleicher Weg wie eben. Keller, Bad und Dach schon dabei?') +
     zeile('data-act="go" data-v="home"', 'liste', 'Alle Fenster ansehen', S.windows.length + ' Fenster gespeichert') +
-    '<p class="fg-satz">' + esc(angaben) + (lk ? ' gehen mit deinem Aufmaß an ' + esc(bn) + '.' : ' stehen in deinem Aufmaßblatt.') + '</p></section>';
+    '<p class="fg-satz">' + esc(angaben) + (lk ? ' gehen mit deinem Aufmaß an ' + esc(bn) + '.' : ' stehen in deinem Aufmaßblatt, einem PDF für deinen Fensterbauer. Damit schreibt er dir ein erstes Angebot.') + '</p></section>';
   /* Dieses Fenster: vier Kacheln und die Änderungsgrenze */
   const grenze = st.fest ? '<p class="fg-grenze note warn">' + festText(st) + ' ' + (lk ? 'Änderungen klärst du direkt mit ' + esc(bn) + '.' : 'Brauchst du etwas anders, legst du es als neues Fenster an.') + '</p>'
     : !st.frei ? '<p class="fg-grenze note warn">' + (st.kauf ? 'Seit dem Freischalten' : 'Seit dem ' + esc(datumKurz(st.bis))) + ' kannst du dieses Fenster noch ' + MAL[st.rest] + ' ändern. Jedes Speichern mit einer Änderung zählt.</p>'
@@ -7831,7 +7846,7 @@ function act(name, el) {
     case 'tour-schloss': return tourSchloss();
     case 'tour-pdf': return tourPDF();
     case 'tour-nochmal': { const t = S.tour; if (!t) return; tourStopp(); t.mess = { k: 0, cur: '', fertig: false }; render(); nachBild(tourMessen, 300); return; }
-    case 'tour-art': { if (!S.tour) return; if (v === S.win.art) return render(); const alt = S.win, nw = tourWin(v); ['fa', 'fi', 'material', 'glas', 'glasfn', 'sart', 'sfarbe', 'roll', 'ki'].forEach((k) => { nw[k] = alt[k]; }); S.win = nw; S.selSash = 0; S.openSash = -1; render(); if (tourArtTuer(v)) nachBild(tuerZeigen, 360); return; }
+    case 'tour-art': { if (!S.tour || !artWaehlbar(v)) return; if (v === S.win.art) return render(); const alt = S.win, nw = tourWin(v); ['fa', 'fi', 'material', 'glas', 'glasfn', 'sart', 'sfarbe', 'roll', 'ki'].forEach((k) => { nw[k] = alt[k]; }); S.win = nw; S.selSash = 0; S.openSash = -1; render(); if (tourArtTuer(v)) nachBild(tuerZeigen, 360); return; }
     case 'kombi': {
       if (f === 'seite') { w.kombiSeite = v === 'L' ? 'L' : 'R'; const alt = w.sashes.filter((x) => !x.st), neuS = kombiFluegel(w.kombiSeite); neuS.forEach((x) => { const a = alt.find((y) => !!y.fe === !!x.fe); if (a) x.t = a.t; }); w.sashes = neuS; delete w.anteile; if (w.seiten) seitenAnwenden(w); mirrorBars(w); }
       else if (f === 'bru') w.kombiBru = num(v) || KOMBI_BRU;
@@ -7839,7 +7854,7 @@ function act(name, el) {
       return render();
     }
     case 'situation': { const neu = v === 'neu', nach = v === 'nachruest'; if (neu === !!w.neu && nach === !!w.nachruest) return render(); const warNeu = !!w.neu; w.nachruest = nach; if (nach && w.roll === 'aufsatz') w.roll = 'vorbau'; if (neu === warNeu) { w.demontage = !neu && !nach; return render(); } w.neu = neu; w.plan = null; if (neu) { w.demontage = false; if (w.sart === 'behalten') { w.sart = 'keiner'; w.roll = 'keiner'; } if (w.fbi === 'behalten') w.fbi = 'werzalit'; if (w.fba === 'behalten') w.fba = 'alu'; } else w.demontage = !nach; return render(); }
-    case 'art': { if (v === w.art) return render(); artSetzen(w, v); S.selSash = 0; S.openSash = -1; return render(); }
+    case 'art': { if (v === w.art || !artWaehlbar(v)) return render(); artSetzen(w, v); S.selSash = 0; S.openSash = -1; return render(); }
     case 'felder': { w.e_teilung = true; w.teilung = v; delete w.anteile; w.sashes = festFelder(v === '2p' ? 2 : num(v)); mirrorBars(w); S.selSash = 0; S.selBar = null; return render(); }
     case 'ul-set': { w.ul = v !== 'nein'; if (v !== 'nein') w.ulA = v; return render(); }
     case 'ulh': { w.ulH = clamp(num(w.ulH) + n(v), 200, 1200); return render(); }
@@ -8431,7 +8446,7 @@ SCREENS.tour = () => {
     const o = OPT.art.find((x) => x.k === art) || OPT.art[0];
     html = kopf('Was möchtest du planen?', 'Such dir ein Element aus. Die Maße sind vorgegeben, manches ist gesperrt: So siehst du in zwei Minuten jeden Schritt.') +
       modell({ view: 'three', stageH: 250, fitW: 0.76, fitH: 0.7, hint: o.label + (tourArtTuer(art) ? ' · bodentief' : '') }) +
-      '<div class="qpanel"><div class="qcards quad" role="group" aria-label="Element">' + OPT.art.map((x) => '<div class="qo"><button type="button" class="qopt" data-act="tour-art" data-v="' + x.k + '" aria-pressed="' + (x.k === art) + '">' + svgIcon(ICO.art(x.k), 44) + '<span class="tx"><span class="lbl">' + esc(x.label) + '</span><span class="sb">' + esc(x.sub) + '</span></span></button></div>').join('') + '</div>' +
+      '<div class="qpanel"><div class="qcards quad" role="group" aria-label="Element">' + artenWahl().map((x) => '<div class="qo"><button type="button" class="qopt" data-act="tour-art" data-v="' + x.k + '" aria-pressed="' + (x.k === art) + '">' + svgIcon(ICO.art(x.k), 44) + '<span class="tx"><span class="lbl">' + esc(x.label) + '</span><span class="sb">' + esc(x.sub) + '</span></span></button></div>').join('') + '</div>' +
       auswahl(OPT.situation.filter((x) => x.k !== 'nachruest'), 'data-act="situation"', (x) => x.k === 'ersatz') + '</div>';
   } else if (id === 'fotos') {
     const kachel = (k, label) => { const p = S.photos[k], a = S.ai[k]; return '<div class="tile">' + (p ? '<img src="' + p.url + '" alt="' + label + ', Beispielfoto">' : '<span class="empty"><span class="spin dark"></span>' + label + '</span>') + (a && a.status === 'running' ? '<span class="ai-scan" data-lottie="fotos" data-loop="1" aria-hidden="true"></span><span class="ai"><span class="spin"></span>KI liest</span>' : a && a.status === 'done' ? '<span class="ai">' + KI_OK + 'KI fertig</span>' : '') + (p ? '<span class="tag">' + CHECK + esc(label) + '</span>' : '') + '</div>'; };

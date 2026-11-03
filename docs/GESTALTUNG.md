@@ -707,6 +707,22 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
   dieser Karte, Wunsch des Inhabers): kleines Haus-Zeichen, „Sieh dein Fenster *an deinem Haus.*“ (vorher „in echt“, nach der Prüfung irreführend für ein KI-Bild), ein Satz, Knopf „An meinem Haus ansehen“ über
   die ganze Breite. Nur im eigenen Aufmaß (nicht im Kundenlink, nicht in den Konfiguratoren der Fensterbauer, nicht in der Führung) und
   nur, wenn der Server den Bilddienst eingerichtet hat (`/api/status` meldet `hausbild`).
+- **Seit 3.11.2026 (Nachtpaket des Inhabers: „in dieser kleinen Maske da oben … übelst anstrengend“, „mit dem Daumen dann viele Sachen
+  bedeckt“, „auch größer angezeigt“) ist der Editor eine eigene Maske über den ganzen Bildschirm:** Leiste oben (Rundknopf Zurück,
+  „An deinem Haus“, Kapselreihe „Schritt x von 3 · Foto wählen / Fenster setzen / KI-Vorschau“), Bühne über die volle Breite und Höhe,
+  unten das weiße Blatt mit einer Aufgabe und einer Pille (am Laptop rechts daneben). Das gewählte Element holt die Bühne groß heran (gut
+  die Hälfte der Bühne, 280 ms ease-out); beim Ziehen einer Ecke zeigt eine **Lupe** (132 px, 2,4-fach) die Stelle unter dem Finger mit
+  Fadenkreuz und den Kanten des Elements in der Ecke der Bühne, die der Finger nicht verdeckt. **Feinjustieren** ohne Ziehen: Kachel mit
+  dem Element (vier Ecken und die Mitte zum Antippen), daneben Pfeile (2 Bildschirmpunkte je Tipp, Halten wiederholt), für das ganze
+  Element dazu Kleiner/Größer. Kopie daneben und Entfernen als Rundknöpfe neben „Bestätigen“. Mehrere Fenster stehen als **Leiste** im Blatt
+  (Bild, Name, Haken); antippen oder kurz im Foto antippen holt eins zurück. Ansicht: Glasknöpfe Näher, Weiter, Ganzes Bild; zwei Finger
+  zoomen, Doppeltipp springt heran. Prüfung: `scripts/pruefen.mjs` Abschnitt 3b.
+- **Lenkung zum Aufmaßblatt (Inhaber, 3.11.2026: jede Generierung kostet; Konzept docs/konzepte/2026-11-03-conversion-funnel.md):** Die
+  Einladung erscheint erst, wenn ein Fenster vollständige Maße hat. Eine KI-Vorschau (ein Durchgang mit allen gesetzten Fenstern) ist frei,
+  mit gesichertem Konto drei, mit freigeschaltetem Aufmaßblatt (gekauft oder über „Angebote aus deiner Nähe“) zehn je Gerät; der Editor
+  sagt das vorher offen. Danach öffnet „KI-Vorschau“ den Bogen „Weitere Vorschauen mit deinem Aufmaßblatt“ (Zum Aufmaßblatt / Nicht jetzt).
+  Nach dem Ergebnis ist die Pille „Zum Aufmaßblatt“, dazu die Karte „Dein Aufmaßblatt · als PDF an deinen Fensterbauer“. Der Zähler liegt
+  im Browser und lenkt nur; die harte Grenze hält der Server (Bremse je Tag).
 - **Editor (Bildschirm `hausbild`):** Rahmen wie „Gespeichert“ (schwarze Bühne, weißes Blatt, Fuß mit Rundknopf und einer vollen Pille),
   Bühne aus Anthrazit mit Licht von oben links und Punktraster. Ablauf:
   1. Foto wählen (im Browser auf höchstens 2.000 px verkleinert, bleibt im Browser).

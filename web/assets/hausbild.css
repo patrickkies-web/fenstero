@@ -25,18 +25,23 @@
   .dna .fg-kopf h1 { font-size: 32px }
 }
 
-/* ---------- Einladung (hellblau) ---------- */
+/* ---------- Einladung (hellblau, Wunsch des Inhabers vom 2.11.2026; seit 3.11.2026 mit dem Beispielhaus der Startseite und einem
+   gestrichelten Rahmen oben: hier kommt dein Fenster hin, G1) ---------- */
 .dna .hb-einladung { --hb-tinte: #0d2440; --hb-tinte-2: #3b5470; --hb-blau: #1d4f8c;
-  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; margin: 4px 0 14px; padding: 18px 16px 16px; border-radius: var(--rund-l);
-  background: radial-gradient(120% 120% at 0% 0%, #eef6ff 0, #dcebfc 46%, #cbe1f8 100%); color: var(--hb-tinte);
+  display: grid; gap: 0; margin: 4px 0 18px; padding: 8px 8px 12px; border-radius: var(--rund-l); color: var(--hb-tinte);
+  background: radial-gradient(120% 120% at 0% 0%, #eef6ff 0, #dcebfc 46%, #cbe1f8 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 0 0 1px rgba(29, 79, 140, .10), 0 14px 28px -20px rgba(29, 79, 140, .55) }
-.dna .hb-ein-zeichen { flex: none; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 20px; background: rgba(255, 255, 255, .78); box-shadow: inset 0 0 0 1px rgba(29, 79, 140, .12) }
-.dna .hb-ein-zeichen svg { width: 46px; height: 46px }
-.dna .hb-ein-text { min-width: 0 }
-.dna .hb-einladung h2 { margin: 2px 0 0; font: 600 22px/1.15 var(--font-sans); letter-spacing: -.02em; color: var(--hb-tinte) }
+.dna .hb-ein-bild { position: relative; margin: 0; aspect-ratio: 16 / 8; border-radius: 20px; overflow: hidden; background: #cbe1f8 }
+.dna .hb-ein-bild img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 62% }
+.dna .hb-ein-bild::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 0 0 1px rgba(29, 79, 140, .12) }
+.dna .hb-ein-bild i { position: absolute; border: 1.5px dashed #fff; border-radius: 2px; box-shadow: 0 0 0 1px rgba(13, 36, 64, .3) }
+.dna .hb-ein-bild .wz-chip { position: absolute; left: 10px; top: 10px; z-index: 2 }
+.dna .hb-ein-text { min-width: 0; padding: 14px 8px 0 }
+.dna .hb-ein-label { font: 400 12px/1.2 var(--font-sans); letter-spacing: .03em; color: var(--hb-tinte-2) }
+.dna .hb-einladung h2 { margin: 6px 0 0; font: 600 22px/1.15 var(--font-sans); letter-spacing: -.02em; color: var(--hb-tinte); text-wrap: balance }
 .dna .hb-einladung h2 em { font-style: normal; color: var(--hb-blau) }
 .dna .hb-einladung p { margin: 8px 0 0; font: 400 15px/1.45 var(--font-sans); color: var(--hb-tinte-2); max-width: 36ch }
-.dna .hb-ein-knopf { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; margin-top: 2px; padding: 0 6px 0 16px; border: 0; border-radius: 999px; cursor: pointer;
+.dna .hb-ein-knopf { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; margin-top: 14px; padding: 0 6px 0 16px; border: 0; border-radius: 999px; cursor: pointer;
   background: rgba(255, 255, 255, .7); color: var(--hb-tinte); font: 500 15px/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--hb-blau);
   transition: transform .16s cubic-bezier(.2, .7, .2, 1), background-color .16s ease }
 .dna .hb-ein-knopf > svg { width: 20px; height: 20px; color: var(--hb-blau) }
@@ -47,82 +52,196 @@
 @media (hover: hover) { .dna .hb-ein-knopf:hover { background: #fff } }
 .dna .hb-ein-knopf:focus-visible { outline: 2px solid var(--hb-blau); outline-offset: 3px }
 
-/* ---------- Editor ---------- */
-.dna.hb .hb-tisch { --bh: clamp(340px, calc(100svh - 330px), 560px) }
-.dna.hb .hb-tisch::before { display: none }
-.dna.hb .hb-buehne { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 14px; overflow: hidden;
-  background: radial-gradient(90% 70% at 18% 0%, #2a2a2e 0, #17171a 52%, var(--schwarz) 100%) }
-.dna.hb .hb-buehne::before { height: 100%; background: radial-gradient(rgba(255, 255, 255, .07) 1px, transparent 1.4px) 0 0 / 14px 14px; -webkit-mask-image: radial-gradient(80% 70% at 50% 40%, #000, transparent); mask-image: radial-gradient(80% 70% at 50% 40%, #000, transparent) }
-.dna.hb .hb-rahmen { --hbz: 1; position: relative; z-index: 2; flex: none; border-radius: 14px; overflow: hidden; background: #111; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 22px 40px -24px rgba(0, 0, 0, .9) }
-.dna.hb .hb-zoom { position: absolute; inset: 0; transform-origin: 0 0 }
-.dna.hb .hb-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-select: none }
-.dna.hb .hb-ebene { position: absolute; inset: 0; touch-action: pan-y }
-.dna.hb .bedienen .hb-ebene { touch-action: none }
-.dna.hb .bedienen .hb-ebene { cursor: grab }
+/* ---------- Editor als eigene Maske (Inhaber, 3.11.2026: „größer angezeigt … nicht in diesem Fenster da oben“) ----------
+   Vollbild auf Schwarz: Leiste oben (Rundknopf Zurück, „An deinem Haus“, Kapselreihe Schritt x von 3), Bühne über die ganze Breite und Höhe,
+   unten das weiße Blatt mit der einen Aufgabe und der einen Pille. Werkzeuge der Ansicht als senkrechte Reihe runder Glasknöpfe (G13), Lupe
+   über dem Daumen als runde Scheibe mit Fadenkreuz und den Kanten des Elements (G1 weich trifft präzise). Am Laptop steht das Blatt rechts. */
+.dna.hb .hbv { position: fixed; inset: 0; z-index: 50; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: var(--schwarz); color: var(--weiss); overscroll-behavior: contain }
+.dna.hb .hbv-kopf { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 12px; padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px }
+.dna.hb .hbv-rund { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; color: var(--weiss);
+  background: radial-gradient(120% 90% at 30% 0%, #363638, var(--anthrazit) 60%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .06);
+  transition: transform 160ms cubic-bezier(.2, .7, .2, 1) }
+.dna.hb .hbv-rund:active { transform: scale(.95) }
+.dna.hb .hbv-rund svg { width: 20px; height: 20px }
+.dna.hb .hbv-rund:focus-visible, .dna.hb .hbv-glas:focus-visible { outline: 2px solid var(--weiss); outline-offset: 3px }
+.dna.hb .hbv-schritt { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: center; column-gap: 8px; row-gap: 5px; margin: 0; min-width: 0; text-align: center }
+.dna.hb .hbv-schritt b { grid-column: 1 / -1; font: 500 15px/1.1 var(--font-sans); letter-spacing: -.01em }
+.dna.hb .hbv-schritt small { font: 400 12px/1 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); white-space: nowrap }
+.dna.hb .hbv-kapseln { display: flex; gap: 3px }
+.dna.hb .hbv-kapseln i { width: 16px; height: 5px; border-radius: 3px; background: #3a3a3e }
+.dna.hb .hbv-kapseln i.an { background: var(--silbergrau) }
+.dna.hb .hbv-kapseln i.jetzt { width: 22px; background: var(--violett) }
+
+/* Bühne = Sichtfenster; das Foto liegt in .hb-zoom (Größe und Lage aus hbLayout) */
+.dna.hb .hbv-buehne { position: relative; min-height: 0; overflow: hidden; background: radial-gradient(60% 55% at 50% 48%, #141517, transparent 72%), var(--schwarz) }
+.dna.hb .hb-rahmen { --hbz: 1; position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab }
+.dna.hb .hb-rahmen.zieht { cursor: grabbing }
+.dna.hb .hb-zoom { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform }
+.dna.hb .hb-foto { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: calc(12px / var(--hbz)); user-select: none; -webkit-user-select: none; pointer-events: none;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .95) }
+.dna.hb .hb-ebene { position: absolute; inset: 0 }
 .dna.hb .hb-el { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; outline: none }
 .dna.hb .hb-el img { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; pointer-events: none }
 .dna.hb .hb-el.aktiv { pointer-events: auto; cursor: move }
 .dna.hb .hb-el.aktiv::after { content: ""; position: absolute; inset: 0; box-shadow: 0 0 0 calc(1.5px / var(--hbz)) rgba(255, 255, 255, .95), 0 0 0 calc(4px / var(--hbz)) rgba(137, 126, 252, .55) }
-.dna.hb .waehlen .hb-el { pointer-events: auto; cursor: pointer }
-.dna.hb .waehlen .hb-el::after { content: ""; position: absolute; inset: 0; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .75); animation: hb-puls 1.6s ease-in-out 2 }
-@keyframes hb-puls { 50% { box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .75), 0 0 0 7px rgba(137, 126, 252, .35) } }
-.dna.hb .hb-ecke { position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%; cursor: grab; touch-action: none; transform-origin: 22px 22px }
-.dna.hb .hb-ecke::before { content: ""; position: absolute; left: 14px; top: 14px; width: 16px; height: 16px; border-radius: 50%; background: var(--weiss); box-shadow: 0 0 0 3px var(--violett), 0 4px 10px rgba(0, 0, 0, .5) }
+.dna.hb .hb-rahmen.waehlen .hb-el { pointer-events: auto; cursor: pointer }
+.dna.hb .hb-el:focus-visible::after { content: ""; position: absolute; inset: 0; box-shadow: 0 0 0 calc(2px / var(--hbz)) var(--weiss) }
+/* Eckpunkte: 48 px Griff, sichtbar 18 px; die gewählte Ecke (Pfeile) violett gefüllt */
+.dna.hb .hb-ecke { position: absolute; left: -24px; top: -24px; width: 48px; height: 48px; border-radius: 50%; cursor: grab; touch-action: none; transform-origin: 24px 24px }
+.dna.hb .hb-ecke::before { content: ""; position: absolute; left: 15px; top: 15px; width: 18px; height: 18px; border-radius: 50%; background: var(--weiss); box-shadow: 0 0 0 3px var(--violett), 0 4px 10px rgba(0, 0, 0, .55) }
+.dna.hb .hb-ecke.gewaehlt::before { background: var(--violett); box-shadow: 0 0 0 3px var(--weiss), 0 0 0 9px rgba(137, 126, 252, .28), 0 4px 10px rgba(0, 0, 0, .55) }
 .dna.hb .zieht .hb-ecke { cursor: grabbing }
-.dna.hb .hb-vergleich { position: relative; z-index: 3; display: flex; gap: 4px; margin-top: 14px; padding: 4px; border-radius: 999px; background: rgba(32, 32, 34, .9); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08) }
-.dna.hb .hb-vergleich button { min-width: 104px; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--silbergrau); font: 500 15px/1 var(--font-sans); cursor: pointer }
+
+/* Glasknöpfe der Ansicht (Näher, Weiter, Ganzes Bild), rechts in der Mitte */
+.dna.hb .hb-lupe { position: absolute; z-index: 5; right: 12px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px }
+.dna.hb .hbv-glas { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(255, 255, 255, .18); border-radius: 50%; cursor: pointer; color: var(--weiss);
+  background: rgba(32, 32, 34, .62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 -1px 0 rgba(7, 9, 10, .4);
+  transition: transform 160ms cubic-bezier(.2, .7, .2, 1), opacity 160ms ease }
+.dna.hb .hbv-glas:active { transform: scale(.94) }
+.dna.hb .hbv-glas[disabled] { opacity: .35; cursor: default; transform: none }
+.dna.hb .hbv-glas svg { width: 20px; height: 20px }
+
+/* Lupe über dem Daumen */
+.dna.hb .hbv-lupe { position: absolute; z-index: 7; top: 12px; left: 12px; width: 132px; height: 132px; border-radius: 50%; overflow: hidden; pointer-events: none; background: #111;
+  box-shadow: 0 0 0 3px var(--weiss), 0 0 0 4px rgba(7, 9, 10, .5), 0 18px 36px -12px rgba(0, 0, 0, .85); opacity: 0; transform: scale(.94);
+  transition: opacity 120ms ease-out, transform 180ms cubic-bezier(.23, 1, .32, 1) }
+.dna.hb .hbv-lupe.rechts { left: auto; right: 12px }
+.dna.hb .hbv-lupe.unten { top: auto; bottom: 12px }
+.dna.hb .hbv-lupe.an { opacity: 1; transform: none }
+.dna.hb .hbv-lupe-bild { position: absolute; inset: 0; background-repeat: no-repeat }
+.dna.hb .hbv-lupe svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible }
+.dna.hb .hbv-lupe polygon { fill: none; stroke: var(--violett); stroke-width: 2; stroke-linejoin: round; filter: drop-shadow(0 0 1px rgba(7, 9, 10, .9)) }
+.dna.hb .hbv-lupe path { stroke: var(--weiss); stroke-width: 1.2; stroke-linecap: round; filter: drop-shadow(0 0 1px rgba(7, 9, 10, 1)) }
+.dna.hb .hbv-lupe circle { fill: var(--weiss); stroke: var(--schwarz); stroke-width: 1 }
+
+.dna.hb .hb-ki-chip { position: absolute; left: 12px; right: auto; top: 12px; z-index: 5; background: rgba(7, 9, 10, .78) }
+.dna.hb .hb-vergleich { position: absolute; z-index: 5; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .18); background: rgba(32, 32, 34, .62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28) }
+.dna.hb .hb-vergleich button { min-width: 104px; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--weiss); font: 500 15px/1 var(--font-sans); cursor: pointer }
 .dna.hb .hb-vergleich button[aria-pressed="true"] { background: var(--weiss); color: var(--schwarz) }
-.dna.hb .hb-laedt { position: absolute; inset: 0; z-index: 4; display: flex; align-items: flex-end; justify-content: center; gap: 10px; padding-bottom: 18px;
-  background: linear-gradient(rgba(7, 9, 10, .1), rgba(7, 9, 10, .62)); color: var(--weiss); font: 500 14px/1.3 var(--font-sans) }
-.dna.hb .hb-leer { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; height: 100%; padding: 0 24px 24px; text-align: center }
-.dna.hb .hb-leer-zeichen { display: grid; place-items: center; width: 84px; height: 84px; border-radius: 26px; color: var(--weiss);
-  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
-.dna.hb .hb-leer-zeichen svg { width: 40px; height: 40px }
-.dna.hb .hb-leer-satz { margin: 0; font: 500 20px/1.2 var(--font-sans); color: var(--weiss) }
-.dna.hb .hb-leer-knopf { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 20px; border-radius: 999px; cursor: pointer; color: var(--weiss); font: 500 15px/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
-.dna.hb .hb-leer-knopf svg { width: 20px; height: 20px }
+.dna.hb .hb-laedt { position: absolute; inset: 0; z-index: 6; display: flex; align-items: flex-end; justify-content: center; gap: 10px; padding: 0 24px 22px; text-align: center;
+  background: linear-gradient(rgba(7, 9, 10, .05), rgba(7, 9, 10, .66)); color: var(--weiss); font: 500 15px/1.35 var(--font-sans) }
+
+/* ohne Foto: Beispielhaus der Startseite, gestrichelte Rahmen, Knopf in der Mitte */
+.dna.hb .hbv-leer { display: grid; place-items: center }
+.dna.hb .hbv-beispiel { position: absolute; left: 50%; top: 50%; width: min(calc(100% - 28px), calc((100% - 28px) * 1.6), 900px); margin: 0; transform: translate(-50%, -50%); aspect-ratio: 8 / 5; border-radius: 12px; overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 30px 60px -30px rgba(0, 0, 0, .95) }
+.dna.hb .hbv-beispiel img { display: block; width: 100%; height: 100%; object-fit: cover; filter: saturate(.75) brightness(.62) }
+.dna.hb .hbv-beispiel i { position: absolute; border: 1.5px dashed rgba(255, 255, 255, .85); border-radius: 2px }
+.dna.hb .hbv-chip { position: absolute; left: 12px; top: 12px; z-index: 3 }
+.dna.hb .hbv-leer-knopf { position: relative; z-index: 3; display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 22px; border-radius: 999px; cursor: pointer; color: var(--weiss); font: 500 15px/1 var(--font-sans);
+  border: 1px solid rgba(255, 255, 255, .18); background: rgba(32, 32, 34, .62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 -1px 0 rgba(7, 9, 10, .4);
+  transition: transform 160ms cubic-bezier(.2, .7, .2, 1) }
+.dna.hb .hbv-leer-knopf:active { transform: scale(.97) }
+.dna.hb .hbv-leer-knopf svg { width: 20px; height: 20px }
 .dna.hb .hb-datei { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none }
 
-.dna.hb .hb-ki-chip { left: auto; right: 10px; top: 10px; z-index: 5; background: rgba(7, 9, 10, .78) }
-.dna.hb .hb-lupe { position: absolute; z-index: 5; right: 8px; top: 8px; display: flex; flex-direction: column; gap: 6px }
-.dna.hb .hb-lupe .hb-rund { width: 44px; height: 44px; background: rgba(7, 9, 10, .72); color: var(--weiss); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px) }
-.dna.hb .hb-lupe .hb-rund[disabled] { opacity: .35; cursor: default }
-.dna.hb .hb-lupe svg { width: 20px; height: 20px }
-@media (max-width: 899px) {
-  .dna.hb .hb-buehne { height: auto; min-height: 360px; padding-bottom: 34px }
-  .dna.hb .hb-buehne:has(.hb-rahmen) { min-height: 0 }
-  /* das weiße Blatt reicht bis zum unteren Rand, auch wenn wenig darauf steht */
-  .scr.dna.hb { min-height: 100svh; display: flex; flex-direction: column }
-  .scr.dna.hb .hb-tisch { flex: 1 0 auto; display: flex; flex-direction: column }
-  .scr.dna.hb .hb-rechts { flex: 1 0 auto }
-}
 /* Blatt */
-.dna.hb .hb-kopf h1 { margin: 0; font: 600 28px/1.12 var(--font-sans); letter-spacing: -.025em; color: var(--schwarz); text-wrap: balance; outline: none }
+/* helle Werte im Blatt und in den Bögen: Pille schwarz, Text schwarz, Fokus schwarz */
+.dna.hb .hbv-blatt, .dna.hb .hb-wahl-blatt { --grund: var(--weiss); --tinte: var(--schwarz); --tinte-2: var(--textgrau); --fokus: var(--schwarz); --handlung: var(--schwarz); --auf-handlung: var(--weiss) }
+.dna.hb .hbv-blatt { position: relative; z-index: 8; max-height: 58dvh; overflow: auto; overscroll-behavior: contain; padding: 20px 16px calc(14px + env(safe-area-inset-bottom, 0px)); border-radius: 28px 28px 0 0; background: var(--weiss); color: var(--schwarz) }
+.dna.hb .hb-kopf h1 { margin: 0; font: 600 24px/1.15 var(--font-sans); letter-spacing: -.025em; color: var(--schwarz); text-wrap: balance; outline: none }
 .dna.hb .hb-kopf h1 em { font-style: normal; color: var(--textgrau) }
-.dna.hb .hb-kopf .wz-sub { margin: 10px 0 0; font: 400 15px/1.45 var(--font-sans); color: var(--textgrau); max-width: 40ch }
+.dna.hb .hb-kopf .wz-sub { margin: 10px 0 0; font: 400 15px/1.45 var(--font-sans); color: var(--textgrau); max-width: 42ch }
+.dna.hb .hb-kopf.knapp .wz-sub { margin-top: 6px; font-size: 14px; line-height: 1.4 }
 .dna.hb .hb-fehler { margin: 14px 0 0 }
-.dna.hb .hb-werkzeuge, .dna.hb .hb-ergebnis-knoepfe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 22px }
-.dna.hb .hb-ergebnis-knoepfe { grid-template-columns: repeat(2, minmax(0, 1fr)) }
-.dna.hb .hb-werk { display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 84px; padding: 12px 6px 10px; border: 0; border-radius: var(--rund-m); cursor: pointer;
-  background: #f4f4f6; color: var(--schwarz); font: 500 14px/1.2 var(--font-sans); text-align: center; text-decoration: none; transition: transform .16s cubic-bezier(.2, .7, .2, 1), background-color .16s ease }
-.dna.hb .hb-werk:active { transform: scale(.97) }
-.dna.hb .hb-werk[disabled] { opacity: .4; cursor: default; transform: none }
-.dna.hb .hb-werk-rund { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
-.dna.hb .hb-werk-rund svg { width: 20px; height: 20px }
-.dna.hb .hb-werk.an { background: var(--schwarz); color: var(--weiss) }
-.dna.hb .hb-werk.an .hb-werk-rund { background: var(--violett); color: var(--schwarz); box-shadow: none }
-@media (hover: hover) { .dna.hb .hb-werk:not([disabled]):hover { background: #ececf0 } .dna.hb .hb-werk.an:hover { background: #1b1b1e } }
-.dna.hb .hb-liste { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 0 }
-.dna.hb .hb-liste span { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; background: #f4f4f6; color: var(--textgrau); font: 400 13px/1 var(--font-sans) }
-.dna.hb .hb-liste span.ok { color: var(--schwarz) }
-.dna.hb .hb-liste span.ak { background: var(--indigo); color: var(--weiss) }
-.dna.hb .hb-liste svg { width: 14px; height: 14px; stroke-width: 2.4 }
-.dna.hb .hb-klein { margin: 18px 0 0; font: 400 13px/1.45 var(--font-sans); color: var(--textgrau); max-width: 46ch }
-.dna.hb .lg-fuss .dna-pille .spin { margin-right: 8px }
+.dna.hb .hbv-fuss { position: sticky; bottom: 0; margin-top: 18px; padding-top: 4px; background: linear-gradient(transparent, var(--weiss) 10px) }
+.dna.hb .hbv-fuss { display: flex; align-items: center; gap: 8px }
+.dna.hb .hbv-fuss .dna-pille { flex: 1; width: 100%; min-width: 0 }
+.dna.hb .hbv-fuss-rund { flex: none; display: grid; place-items: center; width: 52px; height: 52px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; background: var(--weiss); color: var(--schwarz); box-shadow: inset 0 0 0 1.5px #cfcdd4; transition: transform 160ms cubic-bezier(.2, .7, .2, 1) }
+.dna.hb .hbv-fuss-rund:active { transform: scale(.94) }
+.dna.hb .hbv-fuss-rund:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px }
+.dna.hb .hbv-fuss-rund svg { width: 20px; height: 20px }
+.dna.hb .hbv-fuss .dna-pille[disabled] { opacity: .4; cursor: default }
+.dna.hb .lg-fuss .dna-pille .spin, .dna.hb .hbv-fuss .dna-pille .spin { margin-right: 8px }
 .dna.hb label.dna-pille { cursor: pointer }
+.dna.hb .hb-klein { margin: 16px 0 0; font: 400 13px/1.45 var(--font-sans); color: var(--textgrau); max-width: 48ch }
+.dna.hb .hb-textknopf { display: inline-flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; color: var(--schwarz); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
+.dna.hb .hb-klein .hb-textknopf { display: inline; min-height: 0 } /* Link im Satz */
+.dna.hb .hbv-zeile { margin-top: 2px; font: 400 14px/1.3 var(--font-sans) }
+
+/* drei Schritte vor dem Foto */
+.dna.hb .hbv-wie { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 16px 0 0; padding: 0; list-style: none; font: 400 14px/1.2 var(--font-sans); color: var(--schwarz) }
+.dna.hb .hbv-wie li { display: inline-flex; align-items: center; gap: 8px }
+.dna.hb .hbv-wie span { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1.2px var(--schwarz); font: 500 12px/1 var(--font-sans) }
+
+/* Leiste der gesetzten Fenster: Anthrazit-Kacheln (G14) mit Bild, Name, Stand; „Nächstes einsetzen“ gestrichelt (G1: noch offen) */
+.dna.hb .hbv-leiste { display: flex; gap: 8px; margin: 16px -16px 0; padding: 0 16px 4px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity }
+.dna.hb .hbv-leiste::-webkit-scrollbar { display: none }
+.dna.hb .hbv-el { position: relative; flex: none; display: flex; align-items: center; gap: 10px; min-width: 148px; max-width: 210px; min-height: 64px; padding: 8px 14px 8px 8px; border: 0; border-radius: var(--rund-m); cursor: pointer; scroll-snap-align: start;
+  color: var(--weiss); text-align: left; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045);
+  transition: transform 160ms cubic-bezier(.2, .7, .2, 1) }
+.dna.hb .hbv-el:active { transform: scale(.97) }
+.dna.hb .hbv-el-bild { flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: rgba(255, 255, 255, .06) }
+.dna.hb .hbv-el-bild img { max-width: 40px; max-height: 40px }
+.dna.hb .hbv-el-bild svg { width: 20px; height: 20px }
+.dna.hb .hbv-el-text { display: flex; flex-direction: column; gap: 3px; min-width: 0 }
+.dna.hb .hbv-el-text b { overflow: hidden; font: 500 15px/1.15 var(--font-sans); white-space: nowrap; text-overflow: ellipsis }
+.dna.hb .hbv-el-text small { font: 400 12px/1.1 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau) }
+.dna.hb .hbv-haken { position: absolute; right: 8px; top: 8px; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--violett); color: var(--schwarz) }
+.dna.hb .hbv-haken svg { width: 12px; height: 12px; stroke-width: 2.6 }
+.dna.hb .hbv-el-neu { min-width: 132px; background: var(--weiss); color: var(--schwarz); box-shadow: inset 0 0 0 1.5px transparent; outline: 1.5px dashed var(--silbergrau); outline-offset: -1.5px }
+.dna.hb .hbv-el-neu .hbv-el-bild { background: #f4f4f6 }
+.dna.hb .hbv-el-neu small { color: var(--textgrau) }
+.dna.hb .hbv-frei { display: flex; align-items: center; gap: 8px; margin: 12px 0 0; font: 400 13px/1.35 var(--font-sans); color: var(--textgrau) }
+.dna.hb .hbv-frei i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px rgba(137, 126, 252, .22) }
+
+/* Feinjustieren: Kachel mit dem Element (Punkte an Ecken und Mitte) und Pfeilkreuz */
+.dna.hb .hbv-fein { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 14px; row-gap: 8px; align-items: center; margin-top: 14px }
+.dna.hb .hbv-label { grid-column: 1 / -1; margin: 0; font: 400 12px/1.2 var(--font-sans); letter-spacing: .03em; color: var(--textgrau) }
+.dna.hb .hbv-label b { font-weight: 500; color: var(--schwarz) }
+.dna.hb .hbv-was { position: relative; width: 100%; max-width: 172px; height: 156px; justify-self: start; border-radius: var(--rund-m);
+  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+.dna.hb .hbv-was img { position: absolute; left: 28px; right: 28px; top: 26px; bottom: 26px; width: calc(100% - 56px); height: calc(100% - 52px); object-fit: fill; opacity: .9; pointer-events: none }
+.dna.hb .hbv-punkt { position: absolute; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; transform: translate(-50%, -50%) }
+.dna.hb .hbv-punkt i { display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--weiss); box-shadow: 0 0 0 2.5px var(--violett); transition: transform 160ms cubic-bezier(.2, .7, .2, 1) }
+.dna.hb .hbv-punkt[aria-checked="true"] i { background: var(--violett); box-shadow: 0 0 0 2.5px var(--weiss), 0 0 0 8px rgba(137, 126, 252, .3); transform: scale(1.2) }
+.dna.hb .hbv-punkt:active i { transform: scale(.9) }
+.dna.hb .hbv-punkt:focus-visible { outline: 2px solid var(--weiss); outline-offset: -4px }
+.dna.hb .hbv-punkt.ol { left: 28px; top: 26px } .dna.hb .hbv-punkt.or { left: calc(100% - 28px); top: 26px }
+.dna.hb .hbv-punkt.ul { left: 28px; top: calc(100% - 26px) } .dna.hb .hbv-punkt.ur { left: calc(100% - 28px); top: calc(100% - 26px) }
+.dna.hb .hbv-punkt.mi { left: 50%; top: 50% }
+.dna.hb .hbv-punkt.mi i { width: 34px; height: 34px; color: var(--schwarz) }
+.dna.hb .hbv-punkt.mi i svg { width: 22px; height: 22px }
+.dna.hb .hbv-punkt.mi[aria-checked="true"] i { color: var(--weiss); transform: none }
+.dna.hb .hbv-pfeile { display: grid; grid-template-columns: repeat(3, 50px); grid-template-rows: repeat(3, 50px); gap: 3px; grid-template-areas: "k o g" "l . r" ". u ." }
+.dna.hb .hbv-pfeil { display: grid; place-items: center; width: 50px; height: 50px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; background: #f1f1f4; color: var(--schwarz);
+  box-shadow: inset 0 0 0 1px #e2e1e6; touch-action: manipulation; -webkit-user-select: none; user-select: none; transition: transform 120ms cubic-bezier(.2, .7, .2, 1), background-color 120ms ease }
+.dna.hb .hbv-pfeil:active { transform: scale(.93); background: #e4e3ea }
+.dna.hb .hbv-pfeil:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px }
+.dna.hb .hbv-pfeil svg { width: 22px; height: 22px; stroke-width: 2 }
+.dna.hb .p-o { grid-area: o } .dna.hb .p-l { grid-area: l } .dna.hb .p-r { grid-area: r } .dna.hb .p-u { grid-area: u } .dna.hb .p-k { grid-area: k } .dna.hb .p-g { grid-area: g }
+.dna.hb .hbv-pfeile:not(.mit-groesse) .p-k, .dna.hb .hbv-pfeile:not(.mit-groesse) .p-g { visibility: hidden }
+.dna.hb .p-k, .dna.hb .p-g { width: 40px; height: 40px; place-self: center; background: transparent; box-shadow: inset 0 0 0 1.5px #cfcdd4 }
+.dna.hb .hbv-werk-reihe { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px }
+.dna.hb .hbv-werk-reihe .dna-pille { gap: 8px; height: 44px; padding: 0 16px; font-size: 14px; color: var(--schwarz) }
+.dna.hb .hbv-werk-reihe .dna-pille svg { width: 18px; height: 18px }
+
+/* Karte „Dein Aufmaßblatt“ (Anthrazit, drei Ebenen) */
+.dna .hbv-karte { display: flex; align-items: center; gap: 14px; margin-top: 16px; padding: 14px 16px 14px 14px; border-radius: var(--rund-m); color: var(--weiss);
+  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045) }
+.dna .hbv-karte-zeichen { position: relative; flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: rgba(255, 255, 255, .06); color: var(--weiss) }
+.dna .hbv-karte-zeichen::after { content: "PDF"; position: absolute; right: -6px; bottom: -4px; padding: 2px 5px; border-radius: 6px; background: var(--koralle); color: var(--schwarz); font: 600 9px/1 var(--font-sans); letter-spacing: .04em }
+.dna .hbv-karte-zeichen svg { width: 26px; height: 26px }
+.dna .hbv-karte-text { display: flex; flex-direction: column; gap: 4px; min-width: 0 }
+.dna .hbv-karte-label { font: 400 12px/1.2 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau) }
+.dna .hbv-karte-text b { font: 500 16px/1.25 var(--font-sans); letter-spacing: -.01em }
+.dna .hbv-karte-text small { font: 400 13px/1.35 var(--font-sans); color: var(--silbergrau) }
+.dna .hb-grenze p { margin: 0 0 4px; font: 400 15px/1.5 var(--font-sans); color: var(--textgrau) }
+.dna .hb-grenze-knoepfe { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 18px }
+.dna .hb-grenze-knoepfe .dna-pille { width: 100% }
+.dna .hb-grenze .hb-textknopf { display: inline-flex; align-items: center; min-height: 44px; padding: 0 8px; border: 0; background: none; color: var(--schwarz); font: 400 15px/1 var(--font-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
+
+@media (min-width: 900px) {
+  .dna.hb .hbv { grid-template-columns: minmax(0, 1fr) 420px; grid-template-rows: auto minmax(0, 1fr) }
+  .dna.hb .hbv-kopf { grid-column: 1 / -1; padding: 12px 20px }
+  .dna.hb .hbv-buehne { grid-row: 2; grid-column: 1 }
+  .dna.hb .hbv-blatt { grid-row: 2; grid-column: 2; max-height: none; margin: 0 16px 16px 0; padding: 28px 24px 20px; border-radius: 28px }
+  .dna.hb .hb-kopf h1 { font-size: 30px }
+}
 
 /* Auswahl des Elements */
-.dna .hb-wahl { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-end; justify-content: center; background: rgba(7, 9, 10, .55); animation: hb-grund .22s ease-out }
+.dna .hb-wahl { position: fixed; inset: 0; z-index: 70; display: flex; align-items: flex-end; justify-content: center; background: rgba(7, 9, 10, .55); animation: hb-grund .22s ease-out }
 .dna .hb-wahl-blatt { width: min(560px, 100%); max-height: 82svh; overflow: auto; padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px)); border-radius: 28px 28px 0 0; background: var(--weiss); color: var(--schwarz); animation: hb-blatt .32s cubic-bezier(.16, 1, .3, 1) }
 .dna .hb-wahl-kopf { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px }
 .dna .hb-wahl-kopf h2 { margin: 0; font: 600 22px/1.2 var(--font-sans); letter-spacing: -.02em }
@@ -153,7 +272,6 @@
 .dna .hb-einw-knopf { min-height: 52px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--weiss); color: var(--schwarz); font: 500 15px/1.2 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; transition: transform .16s cubic-bezier(.2, .7, .2, 1) }
 .dna .hb-einw-knopf:active { transform: scale(.97) }
 @media (max-width: 380px) { .dna .hb-einw-knoepfe { grid-template-columns: 1fr } }
-.dna.hb .hb-textknopf { display: inline; min-height: 44px; padding: 0; border: 0; background: none; color: var(--schwarz); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
 @keyframes hb-grund { from { opacity: 0 } }
 @keyframes hb-blatt { from { transform: translateY(100%) } }
 
@@ -161,12 +279,7 @@
 #hb-studio { position: fixed; left: 0; top: 0; width: 520px; height: 640px; opacity: 0; pointer-events: none; z-index: -1 }
 #hb-studio > .w3d-stage { position: absolute; inset: 0; width: 100%; height: 100%; background: transparent !important; box-shadow: none !important; border-radius: 0 }
 
-@media (min-width: 900px) {
-  .dna.hb .hb-tisch { --bh: calc(100svh - 60px) }
-  .dna.hb .hb-buehne { justify-content: center; padding-top: 0 }
-  .dna.hb .hb-kopf h1 { font-size: 32px }
-}
 @media (prefers-reduced-motion: reduce) {
-  .dna .hb-ein-knopf, .dna.hb .hb-werk, .dna .hb-wahl-zeile { transition: none }
-  .dna .hb-wahl, .dna .hb-wahl-blatt, .dna.hb .waehlen .hb-el::after { animation: none }
+  .dna .hb-ein-knopf, .dna .hb-wahl-zeile, .dna.hb .hbv-el, .dna.hb .hbv-pfeil, .dna.hb .hbv-glas, .dna.hb .hbv-rund, .dna.hb .hbv-punkt i, .dna.hb .hbv-lupe { transition: none }
+  .dna .hb-wahl, .dna .hb-wahl-blatt { animation: none }
 }

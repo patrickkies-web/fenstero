@@ -370,7 +370,7 @@ if (teil(3)) {
 
   await page.click('[data-act="new"]');
   await page.waitForSelector('.scr[data-screen="start"]');
-  ok(await page.locator('.st-stelle [role="radio"][data-act="situation"]').count() === 3 && await page.locator('.st-bento [role="radio"][data-act="art"]').count() === 7 && /Schritt\s1\svon\s6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen, neu oder nachrüsten) und das Element (Fenster, Balkon- oder Terrassentür, Haustür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand) zur Wahl');
+  ok(await page.locator('.st-stelle [role="radio"][data-act="situation"]').count() === 3 && await page.locator('.st-bento [role="radio"][data-act="art"]').count() === 2 && /Schritt\s1\svon\s6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen, neu oder nachrüsten) und das Element zur Wahl, Türen vorerst ausgeblendet (Inhaber, 3.11.2026): nur Fenster und Festverglasung');
   await zuDenFotos(page);
   await page.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
   const kiPosts = [], kiUrls = [];
@@ -505,6 +505,55 @@ if (teil(3)) {
 }
 
 /* ---------- 4. Kundenlink: Portal → App → Code → Portal ---------- */
+/* ---------- 3b. An meinem Haus ansehen: eigene Maske, Lupe, Pfeile, eine freie Vorschau (Inhaber, 3.11.2026) ---------- */
+if (teil(3)) {
+  console.log('3b. An meinem Haus ansehen');
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, locale: 'de-DE' });
+  const hp = await neueSeite(ctx);
+  await hp.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const da = await hp.evaluate(() => !!SERVER.hausbild);
+  if (!da) console.log('  (Bilddienst auf diesem Server aus, Abschnitt übersprungen)');
+  else {
+    await hp.evaluate(() => { localStorage.removeItem('aufmass.hausbild.vorschauen'); const a = baseWin(); a.name = 'Küche'; a.el = { w: 1230, h: 1400 }; a.mo = { hm: 1420, wm: 1250, hl: 1420, hr: 1420, wt: 1250, wb: 1250 }; const c = baseWin(); c.name = 'Bad'; S.windows = [c]; S.editIdx = 0; S.win = c; go('fertig'); });
+    await hp.waitForTimeout(400);
+    ok(await hp.locator('.hb-einladung').count() === 0, 'Einladung „An meinem Haus ansehen“ erst, wenn ein Fenster vollständige Maße hat');
+    await hp.evaluate(() => { const a = baseWin(); a.name = 'Küche'; a.el = { w: 1230, h: 1400 }; a.mo = { hm: 1420, wm: 1250, hl: 1420, hr: 1420, wt: 1250, wb: 1250 }; S.windows.unshift(a); S.editIdx = 0; S.win = a; go('fertig'); });
+    await hp.waitForTimeout(400);
+    ok(await hp.locator('.hb-einladung').count() === 1 && /Eine Vorschau ist frei/.test(await hp.locator('.hb-einladung').innerText()) && /PDF für deinen Fensterbauer/.test(await hp.locator('.fg-satz').innerText()), 'Gespeichert: Einladung mit „Eine Vorschau ist frei“, das Aufmaßblatt als PDF für den Fensterbauer genannt');
+    await hp.click('[data-act="hb-auf"]'); await hp.waitForSelector('.hbv');
+    const maske = await hp.evaluate(() => { const r = document.querySelector('.hbv').getBoundingClientRect(); return { w: r.width, h: r.height, t: document.querySelector('.hbv-schritt').textContent }; });
+    ok(maske.w === 390 && maske.h === 844 && /Schritt 1 von 3/.test(maske.t), 'Editor als eigene Maske über den ganzen Bildschirm, Schritt 1 von 3');
+    await hp.setInputFiles('#hb-datei', 'web/bilder/start/fassade.webp'); await hp.waitForSelector('.hb-wahl [data-act="hb-waehle"]');
+    await hp.waitForFunction(() => !document.querySelector('.hb-wahl .spin'), null, { timeout: 15000 }).catch(() => {});
+    await hp.click('.hb-wahl [data-act="hb-waehle"][data-v="0"]'); await hp.waitForSelector('.hb-el.aktiv'); await hp.waitForTimeout(500);
+    const gross = await hp.evaluate(() => { const r = document.querySelector('.hb-el.aktiv').getBoundingClientRect(), b = document.querySelector('.hbv-buehne').getBoundingClientRect(); return { z: HB.z, anteil: r.width / b.width, bh: b.height }; });
+    ok(gross.z > 1.4 && gross.anteil > 0.4 && gross.bh > 360, 'Gewähltes Element groß herangeholt (Zoom ' + gross.z.toFixed(2) + ', ' + Math.round(gross.anteil * 100) + ' % der Bühnenbreite, Bühne ' + Math.round(gross.bh) + ' px hoch)');
+    const e0 = await hp.locator('.hb-ecke[data-i="0"]').boundingBox(), vorher = await hp.evaluate(() => HB.el[0].q[0].slice());
+    await hp.mouse.move(e0.x + e0.width / 2, e0.y + e0.height / 2); await hp.mouse.down(); await hp.mouse.move(e0.x + e0.width / 2 + 12, e0.y + e0.height / 2 + 20, { steps: 4 });
+    const lupe = await hp.evaluate(() => { const l = document.querySelector('.hbv-lupe'); return !!l && l.classList.contains('an') && /url\(/.test(l.firstChild.style.backgroundImage); });
+    await hp.mouse.up();
+    const nach = await hp.evaluate(() => HB.el[0].q[0].slice());
+    ok(lupe && nach[0] > vorher[0] && nach[1] > vorher[1], 'Ecke ziehen: Lupe zeigt die Stelle unter dem Finger, die Ecke folgt');
+    await hp.click('[data-act="hb-fein"][data-v="2"]'); const q2 = await hp.evaluate(() => HB.el[0].q[2][0]);
+    for (let i = 0; i < 3; i++) await hp.click('.hbv-pfeile [data-act="hb-schub"][data-v="r"]');
+    const q2n = await hp.evaluate(() => HB.el[0].q[2][0]), q0n = await hp.evaluate(() => HB.el[0].q[0][0]);
+    ok(q2n > q2 && Math.abs(q0n - nach[0]) < 1e-9 && await hp.locator('.hb-ecke.gewaehlt[data-i="2"]').count() === 1, 'Feinjustieren: Pfeile bewegen nur die gewählte Ecke (unten rechts), die Ecke ist markiert');
+    await hp.click('[data-act="hb-ok"]'); await hp.waitForTimeout(400);
+    ok(await hp.evaluate(() => HB.el[0].fest && !HB.aktiv) && await hp.locator('.hbv-leiste .hbv-el[data-act="hb-el"] .hbv-haken').count() === 1 && /Eine KI-Vorschau ist frei/.test(await hp.locator('.hbv-frei').innerText()), 'Bestätigen: Fenster in der Leiste mit Haken, Hinweis „Eine KI-Vorschau ist frei“');
+    await hp.click('.hbv-leiste [data-act="hb-el"]'); await hp.waitForSelector('.hb-el.aktiv');
+    ok(await hp.evaluate(() => HB.aktiv === HB.el[0].id), 'Antippen in der Leiste holt das Fenster zum Ändern zurück');
+    await hp.click('[data-act="hb-ok"]'); await hp.waitForTimeout(300);
+    let rechnet = 0; hp.on('request', (r) => { if (r.url().includes('/api/hausbild') && r.method() === 'POST') rechnet++; });
+    await hp.evaluate(() => localStorage.setItem('aufmass.hausbild.vorschauen', '1'));
+    await hp.click('[data-act="hb-vorschau"]'); await hp.waitForSelector('.hb-grenze');
+    ok(rechnet === 0 && /Weitere Vorschauen mit deinem Aufmaßblatt/.test(await hp.locator('.hb-grenze').innerText()), 'Nach der freien Vorschau: keine weitere Rechnung, Bogen führt zum Aufmaßblatt');
+    await hp.click('.hb-grenze [data-act="hb-blatt"]'); await hp.waitForTimeout(400);
+    ok(await hp.evaluate(() => S.screen === 'anfrage' || S.screen === 'teilen'), '„Zum Aufmaßblatt“ führt in die Anfrage');
+    sauber(hp, 'An meinem Haus ansehen ohne Fehler');
+  }
+  await ctx.close();
+}
+
 if (teil(4)) {
   console.log('4. Kundenlink von Anfang bis Ende');
   const ctx = await browser.newContext({ ...telefon, acceptDownloads: true });
@@ -1662,8 +1711,8 @@ if (teil(9)) {
   ok(await ap.evaluate(() => S.screen === 'tour' && TOUR[S.tour.i] === 'start'), '#fuehrung (von der Startseite) öffnet die Führung');
   await ap.click('[data-act="situation"][data-v="neu"]', { force: true }); await ap.waitForTimeout(150);
   ok(await ap.evaluate(() => !S.win.neu && /gesperrt/.test(S.toast)), 'Gesperrt antippen: Hinweis, keine Änderung');
-  await ap.click('[data-act="tour-art"][data-v="fsw"]'); await ap.waitForTimeout(300);
-  ok(await ap.evaluate(() => S.win.art === 'fsw' && derive(S.win).elW === 3600 && derive(S.win).complete), 'Element frei wählbar, Maße passend vorgegeben');
+  await ap.click('[data-act="tour-art"][data-v="fest"]'); await ap.waitForTimeout(300);
+  ok(await ap.evaluate(() => S.win.art === 'fest' && derive(S.win).complete && !document.querySelector('[data-act="tour-art"][data-v="fsw"]') && !document.querySelector('[data-act="tour-art"][data-v="balkon"]')), 'Element frei wählbar (Türen vorerst ausgeblendet), Maße passend vorgegeben');
   sauber(ap, 'Führung ohne Fehler');
   await ctx2.close();
 
