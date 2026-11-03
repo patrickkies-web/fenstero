@@ -952,7 +952,7 @@ function demoPhotoUrl(side) {
    und um diese Kante gedreht wird. Alle Maße kommen aus w3dCalc, w3dLayout schreibt sie in die Flächen; so verformt
    sich das Modell mit Übergängen, wenn eine Zahl getippt wird. */
 const W3D = { FD: 70, PF: 62, SF: 46, MUL: 72, OUTD: 110, SILL: 30, MARGIN_W: 6400, MARGIN_H: 4000 };
-const VIEWS = { inside: [-9, -27], front: [0, 0], outside: [-8, 152], three: [-10, -34], result: [-7, -20], bankInnen: [-24, -24], bankAussen: [-22, 156] };
+const VIEWS = { inside: [-9, -27], front: [0, 0], outside: [-8, 152], three: [-10, -34], result: [-7, -20], bankInnen: [-24, -24], bankAussen: [-22, 156], aussenGerade: [0, 180] }; // aussenGerade: Standbild für „An meinem Haus ansehen“ (hausbild.js)
 /* Aufsatzkasten (mm) je Behang: Rollladen 200, Raffstore 230, Screen 170. Er sitzt oben in der Öffnung auf dem Blendrahmen; das Element
    beginnt erst darunter (w3dCalc kürzt die Elementhöhe, w3dSonne setzt den Kasten auf den Rahmen) */
 const KASTEN_AUF = { rollladen: 200, raffstore: 230, screen: 170 };
@@ -2989,6 +2989,7 @@ function render(fresh) {
   if (fokus && !neu) fokusZurueck(root, fokus);
   blattFokus(root, fokus, neu);
   bindAfterRender();
+  if (window.hbNachRender) hbNachRender(); // Editor „An meinem Haus ansehen“: Datei, Lage der Elemente, Gesten
   if (['teilen', 'blatt', 'gesendet', 'datei', 'gekauft'].includes(S.screen)) blattSchrift();
   /* Blöcke erscheinen nacheinander bzw. beim Scrollen; die wiederverwendete 3-D-Bühne bleibt, wie sie ist */
   if (view.dna) { lgAuf(); fussPasst(); }
@@ -3952,8 +3953,9 @@ SCREENS.fertig = () => {
 };
 /* ---------- Gespeichert im Look der Design-DNA (28.10.2026, Wunsch des Inhabers: „intuitive Ansicht und einfache Bedienbarkeit, die
    Menüführung der vorherigen Folien als Anlehnung“) ----------
-   Kopf, Chip, Überschrift und Fuß wie in den Folien davor; die Bühne ist der Boden im Fensterlicht vom Start mit dem Bild der Elementart
-   (kein Bild des gestalteten Fensters, keine Maße, keine Wünsche: keine Gesamtübersicht, Entscheidung des Inhabers). Darunter „Wie geht
+   Kopf, Chip und Fuß wie in den Folien davor; die Bühne zeigt das gestaltete Element wie in den Wünschen (Inhaber, 2.11.2026: „das
+   tatsächliche Bild von dem erstellten Element“ statt des Symbols, „die originale Ansicht“ ohne Bearbeiten-Leiste; weiter ohne Maße und
+   ohne Liste der Wünsche). Darunter auf Weiß die Überschrift, die hellblaue Einladung „An meinem Haus ansehen“ (hausbild.js), dann „Wie geht
    es weiter?“ als zwei Zeilen (weiteres Fenster, alle Fenster), dann „Dieses Fenster“ als vier Kacheln (Maße, Wünsche, Kopieren,
    Löschen) mit der Änderungsgrenze, „Direkt zu einem Thema“ als Chips; unten zurück zur Liste und die Pille zum Aufmaßblatt. */
 const FG_Z = {
@@ -3975,12 +3977,12 @@ function fertigDna() {
   const teile = ['Maße', 'Wünsche'].concat(nz ? ['deine ' + (nz === 1 ? 'Notiz' : nz + ' Notizen')] : [], bilderVon(w).length || num(w.fotos) > 0 ? ['die Auswertung der Fotos'] : []);
   const angaben = teile.slice(0, -1).join(', ') + ' und ' + teile[teile.length - 1];
   const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
-  /* Bühne: Boden im Fensterlicht, Chip mit Haken, der Name als Überschrift, die gespeicherte Aufteilung als Strichzeichnung (das Symbol
-     der App; Gremium: ein Musterfenster ließ das Fenster falsch gespeichert aussehen), darunter Art und Stand */
-  const buehne = '<div class="fg-buehne">' +
+  /* Bühne wie in den Wünschen (Inhaber, 2.11.2026: „die originale Ansicht … eine ganz gesunde Ansicht“, „der Editor einfach da oben
+     ohne die Bearbeiten-Leiste“): dasselbe Modell in derselben Größe und auf demselben Grund, ohne Zoom, Zahnrad und Kapitelleiste;
+     oben der Chip, unten Art und Stand. Die Überschrift steht darunter auf Weiß wie die Frage in den Wünschen */
+  const buehne = '<div class="fg-buehne wz-frei">' +
     '<span class="wz-chip fg-chip" aria-hidden="true"><i class="fg-chip-haken">' + fgZ('haken') + '</i>Gespeichert · Position ' + (S.editIdx + 1) + '</span>' +
-    '<div class="fg-titel"><h1 tabindex="-1"><span class="fg-name">' + esc(w.name || ding) + '</span> <em>gespeichert.</em></h1></div>' +
-    '<div class="fg-objekt" aria-hidden="true"><span class="st-schatten"></span><span class="fg-symbol">' + zuStrich(svgIcon(miniWin(gespeichert), 160)) + '</span></div>' +
+    '<div class="fg-modell" aria-hidden="true">' + model(gespeichert, { id: 'w3d', view: 'inside', frei: !istTuer(w), haus: false, sway: true, noZoom: true }) + '</div>' +
     '<p class="fg-stand fertig-stand"><i class="' + (ganz ? 'ganz' : 'offen') + '" aria-hidden="true">' + (ganz ? fgZ('haken') : '') + '</i><b>' + esc(lab('art', w.art || 'fenster')) + '</b><small>' + esc(((num(w.anzahl) || 1) > 1 ? ' · ' + w.anzahl + ' Stück' : '') + ' · ' + status) + '</small></p></div>';
   const ki = kiLaeuftFuer(gespeichert) || kiLaeuftFuer(w) ? '<p class="fg-ki ki-laeuft" role="status"><span class="spin"></span><span>Die KI liest noch die Einbausituation. Die Auswertung kommt von selbst zu diesem Fenster.</span></p>' : '';
   /* Wie geht es weiter: zwei Zeilen, die Pille unten führt zum Aufmaßblatt bzw. zum Absenden */
@@ -4006,7 +4008,9 @@ function fertigDna() {
   const spaeter = lk ? '<p class="fg-spaeter">' + (instWebsite() ? 'Gespeichert, auch für später: Öffne diese Seite wieder, dann geht es weiter.' : 'Gespeichert, auch für später: Über den Link von ' + esc(bn) + ' kommst du jederzeit zurück.') + '</p>' : '';
   /* an der Pille die Frage nach dem ganzen Haus und die Zahl der Fenster (Gremium: sonst kommen halbe Häuser als Anfrage) */
   const fuss = '<div class="lg-fuss fg-fuss"><p class="fg-fuss-frage">Alle Fenster im Haus erfasst?</p><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Fenster">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="anfrage">' + (lk ? 'Zum Absenden' : 'Zum Aufmaßblatt') + '<span class="fg-zahl"> · ' + S.windows.length + ' Fenster</span>' + pfeil + '</button></div>';
-  const html = lgKopf(['back', 'Zurück: Fenster']) + '<div class="fg-tisch">' + buehne + '<div class="fg-rechts">' + ki + weiter + dieses + themen + spaeter + rechtLinks() + fuss + '</div></div>';
+  const einladung = window.hbEinladung ? hbEinladung() : '';
+  const titel = '<div class="fg-kopf"><h1 tabindex="-1"><span class="fg-name">' + esc(w.name || ding) + '</span> <em>gespeichert.</em></h1></div>';
+  const html = lgKopf(['back', 'Zurück: Fenster']) + '<div class="fg-tisch">' + buehne + '<div class="fg-rechts">' + titel + ki + einladung + weiter + dieses + themen + spaeter + rechtLinks() + fuss + '</div></div>';
   return { html: html, back: ['Fenster', 'home'], dna: true, cls: 'dna fg', voll: true };
 }
 SCREENS.fertigAlt = SCREENS.fertig;
@@ -7780,6 +7784,7 @@ function act(name, el) {
     if (!TOUR_DARF.test(name)) return;
   }
   if (name.startsWith('vm-')) return vmAct(name, el, v); // Vermittlung
+  if (name.startsWith('hb-')) return window.hbAct ? hbAct(name, el, v) : undefined; // An meinem Haus ansehen (hausbild.js)
   switch (name) {
     case 'none': return;
     case 'tour-start': return tourStart();
@@ -8543,7 +8548,7 @@ const einstiegNach = () => { if (EINSTIEG_NEU) einstiegNeu(); };
    „Gesendet“ erst mit dem Code, keine Scheinzahlung, die Datei ist kostenlos.
    Schalter: window.KONFIG.pilot in /config.js */
 let PILOT = !!(window.KONFIG && window.KONFIG.pilot);
-const SERVER = { daten: false, zahlung: false, konten: false, attrappe: false, testmodus: false, preise: null, zahlarten: null, recht: null, betriebskonto: !!(window.KONFIG || {}).betriebskonto };
+const SERVER = { hausbild: false, daten: false, zahlung: false, konten: false, attrappe: false, testmodus: false, preise: null, zahlarten: null, recht: null, betriebskonto: !!(window.KONFIG || {}).betriebskonto };
 /* Das frühere Konto für Betriebe (Code vom Kunden einfügen, Aufmaß-Links) gibt es seit 28.10.2026 nicht mehr; ohne es kein Aufmaß-Code für den Fensterbauer */
 const BK = () => !!SERVER.betriebskonto;
 const LOGO = (px) => (window.Logo ? window.Logo.svg(px) : '');
@@ -8555,9 +8560,9 @@ function rechtLinks(ohneKz) {
   const C = window.KONFIG || {}, ki = window.FotoKI && window.FotoKI.eingewilligt && window.FotoKI.eingewilligt();
   /* Instanz: Impressum und Datenschutz des Betriebs, KI-Widerruf; kein Vertrag mit dem Endkunden (ohne Widerruf, AGB, Cookies),
      darunter die Kennzeichnung des Pakets (ohneKz: die Seite trägt sie schon) */
-  if (INST) return '<div class="foot-links recht inst"><a class="link" href="' + esc(C.impressum || '/impressum/') + '" target="_blank" rel="noopener">Impressum</a><a class="link" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>' + (ki ? '<button type="button" class="link" data-act="ki-widerrufen">KI-Einwilligung widerrufen</button>' : '') + '</div>' +
+  if (INST) return '<div class="foot-links recht inst"><a class="link" href="' + esc(C.impressum || '/impressum/') + '" target="_blank" rel="noopener">Impressum</a><a class="link" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>' + (ki ? '<button type="button" class="link" data-act="ki-widerrufen">KI-Einwilligung widerrufen</button>' : '') + (typeof hbEinwDa === 'function' && hbEinwDa() ? '<button type="button" class="link" data-act="hb-einw-weg">Vorschau-Einwilligung widerrufen</button>' : '') + '</div>' +
     (ohneKz || !window.Einladung ? '' : window.Einladung.kennzeichnung(INST_M.kennzeichnung));
-  return '<div class="foot-links recht"><a class="link widerruf" href="/widerruf/" target="_blank" rel="noopener">Vertrag widerrufen</a><a class="link" href="/agb/" target="_blank" rel="noopener">AGB</a><a class="link" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a><a class="link" href="/cookies/" target="_blank" rel="noopener">Cookies</a><a class="link" href="' + esc(C.impressum || '/impressum/') + '" target="_blank" rel="noopener">Impressum</a>' + (ki ? '<button type="button" class="link" data-act="ki-widerrufen">KI-Einwilligung widerrufen</button>' : '') + '</div>';
+  return '<div class="foot-links recht"><a class="link widerruf" href="/widerruf/" target="_blank" rel="noopener">Vertrag widerrufen</a><a class="link" href="/agb/" target="_blank" rel="noopener">AGB</a><a class="link" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a><a class="link" href="/cookies/" target="_blank" rel="noopener">Cookies</a><a class="link" href="' + esc(C.impressum || '/impressum/') + '" target="_blank" rel="noopener">Impressum</a>' + (ki ? '<button type="button" class="link" data-act="ki-widerrufen">KI-Einwilligung widerrufen</button>' : '') + (typeof hbEinwDa === 'function' && hbEinwDa() ? '<button type="button" class="link" data-act="hb-einw-weg">Vorschau-Einwilligung widerrufen</button>' : '') + '</div>';
 }
 const SEND_IC = '<div class="okmark-l" data-lottie="senden"><span class="lottie-still"><svg class="okmark send" viewBox="0 0 64 64" width="78" height="78" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--accent-soft)"></circle><path d="M17 31l29-12-9 28-7-10z" fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linejoin="round"></path><path d="M30 37l16-18" fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linecap="round"></path></svg></span></div>';
 /* Versand im Kundenlink: der Code geht per WhatsApp oder E-Mail an den Betrieb */
@@ -8890,7 +8895,7 @@ function gesendetPilot() {
    zahlung: das Aufmaßblatt wird über Stripe bezahlt */
 async function statusHolen() {
   if (PROBE) return false; // Testansicht: ohne Server, wie eine Instanz ohne Verbindung, aber ohne Hinweis darauf
-  try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); const j = r.ok ? await r.json() : null; if (j && j.ok) { SERVER.daten = !!j.daten; SERVER.konten = !!j.konten; SERVER.zahlung = !!j.zahlung; SERVER.attrappe = !!j.attrappe; SERVER.testmodus = !!j.testmodus; SERVER.preise = j.preise || null; SERVER.betriebskonto = !!j.betriebskonto; SERVER.vermittlung = j.vermittlung || null; if (j.preise && window.Abrechnung && window.Abrechnung.setPreise) window.Abrechnung.setPreise(j.preise); /* auch die Box für Fensterbauer im Aufmaßblatt (blatt.js) */ if (window.Abrechnung && window.Abrechnung.setEinfuehrung) window.Abrechnung.setEinfuehrung(j.einfuehrung || null); SERVER.zahlarten = Array.isArray(j.zahlarten) ? j.zahlarten : null; SERVER.recht = j.recht || null; } } catch (e) { /* ohne Server weiter */ }
+  try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); const j = r.ok ? await r.json() : null; if (j && j.ok) { SERVER.hausbild = j.hausbild === 'probe' ? 'probe' : !!j.hausbild; SERVER.hausbildMax = Number(j.hausbildMax) || 0; SERVER.daten = !!j.daten; SERVER.konten = !!j.konten; SERVER.zahlung = !!j.zahlung; SERVER.attrappe = !!j.attrappe; SERVER.testmodus = !!j.testmodus; SERVER.preise = j.preise || null; SERVER.betriebskonto = !!j.betriebskonto; SERVER.vermittlung = j.vermittlung || null; if (j.preise && window.Abrechnung && window.Abrechnung.setPreise) window.Abrechnung.setPreise(j.preise); /* auch die Box für Fensterbauer im Aufmaßblatt (blatt.js) */ if (window.Abrechnung && window.Abrechnung.setEinfuehrung) window.Abrechnung.setEinfuehrung(j.einfuehrung || null); SERVER.zahlarten = Array.isArray(j.zahlarten) ? j.zahlarten : null; SERVER.recht = j.recht || null; } } catch (e) { /* ohne Server weiter */ }
   return SERVER.daten;
 }
 async function serverStart() {

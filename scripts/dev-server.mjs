@@ -34,6 +34,7 @@ const env = Object.assign({}, process.env, {
   /* Die Prüfsuite prüft die abgeschaltete Abrechnung je Projekt weiter (umgebung.js); BETRIEBSKONTO=0 zeigt das kostenlose Konto wie online */
   BETRIEBSKONTO: process.env.BETRIEBSKONTO || '1',
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || (ATTRAPPE ? 'attrappe' : ''),
+  BFL_API_KEY: process.env.BFL_API_KEY || (ATTRAPPE ? 'attrappe' : ''), // echte Vorschau „An meinem Haus ansehen“ (hausbild.js): nachgestellt
   KI_MODELL: process.env.KI_MODELL || ''
 });
 

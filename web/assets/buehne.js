@@ -1505,5 +1505,12 @@ window.Buehne3D = (function () {
     matrix(stage, role) { const B = stage && stage._b3, it = B && B.items ? B.items.find((x) => x.role === role) : null; return it ? Array.from(it.M) : null; },
     ohne(re, ohneArt) { DBG.ohne = re || null; DBG.ohneArt = !!ohneArt; }
   };
-  return { DBG: DBG, pruef: pruef, an: an, anstoss: anstoss, treffer: treffer, aktiv: (stage) => !!(stage && stage._b3 && !stage._b3.aus), unterstuetzt: unterstuetzt };
+  /* Standbild für „An meinem Haus ansehen“ (hausbild.js): die Bühne sofort einmal zeichnen, Übergänge als abgeschlossen, und das Bild
+     als PNG mit durchsichtigem Grund zurückgeben. WebGL leert den Bildspeicher erst, nachdem der Browser ihn gezeigt hat; im selben
+     Durchlauf gelesen, steht das Bild noch darin. Ohne WebGL-Bühne: null (dann zeichnet hausbild.js eine Ansicht selbst). */
+  function foto(stage) {
+    const B = stage && stage._b3; if (!B || B.aus || !lebt(B.L)) return null;
+    try { B.neu = true; zeichnen(stage, B, performance.now() + 60000); return B.L.cv.toDataURL('image/png'); } catch (e) { return null; }
+  }
+  return { DBG: DBG, pruef: pruef, an: an, anstoss: anstoss, treffer: treffer, aktiv: (stage) => !!(stage && stage._b3 && !stage._b3.aus), unterstuetzt: unterstuetzt, foto: foto };
 })();

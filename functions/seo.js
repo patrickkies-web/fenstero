@@ -13,7 +13,7 @@ import { konfig, einfuehrungLaeuft, jetztAus, EINFUEHRUNG } from './api/umgebung
 /* Haken für die Konfigurator-Pakete (Verkaufsseite, llms.txt, Seiten der Paketbedingungen): functions/pakete-seite.js */
 import { paketeSeite, paketeLlms, PAKETE_SEITEN } from './pakete-seite.js';
 
-export const STAND = '2026-10-29';
+export const STAND = '2026-11-02';
 
 /* Alle Seiten für die Sitemap, wichtigste zuerst. stand = letzte inhaltliche Änderung (lastmod in der Sitemap, IndexNow); bei
    Ratgeberseiten gleich dem dateModified im JSON-LD und dem „Stand“ auf der Seite (prüft die Suite) */
@@ -65,10 +65,10 @@ export const SEITEN = [
   { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-29' },
   { pfad: '/redaktion/', prio: '0.4', stand: '2026-10-30' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-28' },
-  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-30' },
-  { pfad: '/agb/', prio: '0.2', stand: '2026-10-30' },
+  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-11-02' },
+  { pfad: '/agb/', prio: '0.2', stand: '2026-11-02' },
   { pfad: '/partnerbedingungen/', prio: '0.3', stand: '2026-10-30' },
-  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-28' },
+  { pfad: '/cookies/', prio: '0.1', stand: '2026-11-02' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
 ].concat(PAKETE_SEITEN);
 

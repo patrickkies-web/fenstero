@@ -220,7 +220,7 @@ Die öffentlichen Seiten haben zwei Ansichten, nie gemischt: Wer auf „Starten�
 
 - **Fortsetzen statt starten:** Mit erfassten Fenstern zeigt die App-Startseite kein Startbild mehr, sondern die Übersicht „Deine Fenster.“ (Stand in einem Satz, Balken, „+ Fenster“, siehe „Übersicht aller Fenster“ im Abschnitt Feinschliff) und gleich darunter die Karten mit „Weiteres Fenster“; Erklärung, Führung und Fußlinks folgen darunter. Beim Kundenlink genauso, unter der Liste die Karte „Jederzeit weitermachen“ (über den Link, auch auf einem anderen Gerät, sobald der Abgleich mit dem Server geklappt hat; die Fotos sieht der Betrieb erst nach dem Senden; gültig bis …). An der Grenze ohne Fenster bleibt diese Ansicht mit der Erklärung statt des Startbilds.
 - **Rückweg zur Liste:** Der Knopf oben links heißt „Fenster“ und führt zur Übersicht; ein gespeichertes Fenster hat zusätzlich „Alle Fenster ansehen (n)“ als volle Pille.
-- **Keine Gesamtübersicht, nie (Entscheidung des Inhabers):** Ein gespeichertes Fenster zeigt seine Aufteilung als Symbol (seit 28.10.2026 groß als Strichzeichnung auf einer Anthrazit-Kachel; nie das gestaltete Fenster, keine Farben), „Gespeichert · Position n“, den Namen, die Elementart und den Stand („Vollständig“, „Maße offen“, „2 Wünsche offen“), darunter „Wie geht es weiter?“ (weiteres Fenster oder Absenden bzw. Aufmaßblatt) und die Aktionen. Eine Karte „Alle Angaben“, Maße in der Faktenzeile oder Listen aller Wünsche gibt es in keinem Zustand, auch nicht nach dem Freischalten und nicht im Kundenlink: Sonst ersetzt ein Bildschirmfoto das Blatt. Karten in Listen und auf „Prüfen“ sagen nur den Stand und zählen offene Wünsche, ohne sie zu nennen. Das Ergebnis zeigt im Modell nur die vier Hauptmaße zum Prüfen beim Messen, aus den Fotos nur die Zahl der Angaben. Das freigeschaltete Aufmaßblatt gibt es als PDF (Herunterladen, Teilen); eine HTML-Fassung in der App gibt es nicht mehr. Die Vorschau des Blatts vor dem Freischalten zeigt Positionen und Räume, die Maße als Punkte.
+- **Keine Gesamtübersicht, nie (Entscheidung des Inhabers):** Ein gespeichertes Fenster zeigt seit 2.11.2026 das gestaltete Element in derselben Bühne wie die Wünsche, groß und ohne Bedienleiste (kein Zoom, kein Zahnrad, keine Kapitelleiste; Wünsche des Inhabers: „das tatsächliche Bild von dem erstellten Element“, „die originale Ansicht … ohne die Bearbeiten-Leiste“; vorher seit 28.10.2026 die Aufteilung als Strichzeichnung), die Überschrift „<Name> gespeichert.“ darunter auf Weiß, weiter ohne Maße und ohne Liste der Wünsche, „Gespeichert · Position n“, den Namen, die Elementart und den Stand („Vollständig“, „Maße offen“, „2 Wünsche offen“), darunter „Wie geht es weiter?“ (weiteres Fenster oder Absenden bzw. Aufmaßblatt) und die Aktionen. Eine Karte „Alle Angaben“, Maße in der Faktenzeile oder Listen aller Wünsche gibt es in keinem Zustand, auch nicht nach dem Freischalten und nicht im Kundenlink: Sonst ersetzt ein Bildschirmfoto das Blatt. Karten in Listen und auf „Prüfen“ sagen nur den Stand und zählen offene Wünsche, ohne sie zu nennen. Das Ergebnis zeigt im Modell nur die vier Hauptmaße zum Prüfen beim Messen, aus den Fotos nur die Zahl der Angaben. Das freigeschaltete Aufmaßblatt gibt es als PDF (Herunterladen, Teilen); eine HTML-Fassung in der App gibt es nicht mehr. Die Vorschau des Blatts vor dem Freischalten zeigt Positionen und Räume, die Maße als Punkte.
 - **Grenzen sichtbar machen, bevor sie greifen:** Unter einem Fenster steht, bis wann es frei änderbar ist; danach ein Hinweis in Warnfarbe mit den übrigen Änderungen („noch dreimal“), nach jeder gezählten Änderung eine kurze Meldung. Feste Fenster tragen in der Liste „fest“, „Maße ändern“ und „Wünsche ändern“ sind blass (`aria-disabled`), antippen erklärt den Grund. Ab zehn freien Plätzen steht unter „Weiteres Fenster“, wie viele noch gehen; an der Grenze ersetzt ein Hinweis den Knopf.
 - **Link zu:** Abgelaufen oder deaktiviert zeigt der Kundenlink „Hier geht es gerade nicht weiter.“ mit dem Grund, die Liste ohne Knöpfe und keine untere Leiste.
 - **Nachbesserung:** Unter einem Fenster steht dann „Während der Nachbesserung kannst du dieses Fenster frei ändern, darum hat … gebeten.“, nichts ist blass.
@@ -670,6 +670,69 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
   mm gespeichert; „bodentief“ ist 0 mm; der Satz zur Absturzsicherung erscheint unter 80 cm.
 - **Schmale Telefone (320 px):** „Übersicht“ im Kopf nur als Zeichen, Zurück und Pille bleiben in einer Zeile; jedes Ziel 44 px.
 - **Prüfsuite:** die Prüfungen der Schriftrollen nehmen `.dna` aus; Lage und Tiefe haben eigene Prüfungen (Abschnitte 3, 16 und 22).
+
+## An meinem Haus ansehen (seit 2.11.2026, Wunsch des Inhabers)
+
+Ziel: Der Kunde sieht sein geplantes Fenster an seinem eigenen Haus, bevor er das Aufmaßblatt kauft oder die Anfrage an Betriebe schickt.
+Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbild.js` (Route `POST /api/hausbild`), Standbild aus der
+3-D-Bühne `Buehne3D.foto` (`web/assets/buehne.js`).
+
+- **Einladung in „Gespeichert“:** unter der schwarzen Bühne mit dem gestalteten Element eine hellblaue Karte (eigene Blaufamilie nur auf
+  dieser Karte, Wunsch des Inhabers): kleines Haus-Zeichen, „Sieh dein Fenster *an deinem Haus.*“ (vorher „in echt“, nach der Prüfung irreführend für ein KI-Bild), ein Satz, Knopf „An meinem Haus ansehen“ über
+  die ganze Breite. Nur im eigenen Aufmaß (nicht im Kundenlink, nicht in den Konfiguratoren der Fensterbauer, nicht in der Führung) und
+  nur, wenn der Server den Bilddienst eingerichtet hat (`/api/status` meldet `hausbild`).
+- **Editor (Bildschirm `hausbild`):** Rahmen wie „Gespeichert“ (schwarze Bühne, weißes Blatt, Fuß mit Rundknopf und einer vollen Pille),
+  Bühne aus Anthrazit mit Licht von oben links und Punktraster. Ablauf:
+  1. Foto wählen (im Browser auf höchstens 2.000 px verkleinert, bleibt im Browser).
+  2. **Plus** öffnet die Liste der gespeicherten Elemente mit Bild; das gewählte erscheint mittig, in der Größe passend zu schon gesetzten
+     Elementen (echte Maße in mm), sonst ein Viertel der Bildbreite. Verschieben mit dem Finger, die **vier Eckpunkte** auf die Öffnung
+     ziehen (Winkel und Perspektive; die Punkte stehen 18 px außerhalb der Ecken, damit sie kleine Fenster nicht verdecken), mit zwei
+     Fingern drehen und vergrößern, am Rechner Mausrad (Umschalt: drehen) und Pfeiltasten. Die **Lupe** (Näher, Weiter) vergrößert bis
+     vierfach um das gewählte Element, höchstens so weit, dass es mit seinen Eckpunkten im Bild bleibt; Ziehen neben dem Element verschiebt
+     dann den Ausschnitt.
+     **Zoomen mit den Fingern** (Wunsch des Inhabers, 2.11.2026): Zwei Finger neben dem Element (oder auf der fertigen Vorschau) zoomen
+     das Bild bis vierfach um ihre Mitte, ein Finger verschiebt, sobald vergrößert ist; Doppeltipp springt auf 2,5-fach an die Stelle und
+     wieder zurück (260 ms, ease-out, ohne bei reduzierter Bewegung); am Rechner Mausrad und Trackpad um den Zeiger, Doppelklick. Zwei
+     Finger auf dem gewählten Element drehen und vergrößern weiter das Element. Bei 1-fach scrollt ein Finger die Seite. Vorher/Nachher
+     behält den Ausschnitt, damit man dieselbe Stelle vergleicht.
+  3. **Bestätigen** verankert das Element. Danach sind die Elemente nicht mehr antippbar; **Bearbeiten** schaltet das Antippen ein, nach
+     dem nächsten Bestätigen ist es wieder aus (Wunsch des Inhabers: nichts aus Versehen verschieben). **Duplizieren** setzt eine Kopie
+     daneben, **Entfernen** nimmt das gewählte heraus. Bis hier keine KI.
+  4. **KI-Vorschau** (früher „Echte Vorschau“; erst mit mindestens einem bestätigten Element, vor der ersten mit Einwilligung, die den
+     übermittelten Ausschnitt zeigt): Die App schickt nur den Ausschnitt um alle Elemente (mit Rand,
+     höchstens 1.600 px) als sauberes Foto und je Fenster ein Bild aus dem 3-D-Modell (gerade von außen, `VIEWS.aussenGerade`) mit
+     seinen Daten (Farbe, Flügel, Oberlicht, Sprossen, Sonnenschutz, Glas). Der Server schreibt den Auftrag für FLUX 3 Image Klein: je
+     Element ein Feld nach docs.bfl.ai „Bounding boxes“, Quelle ist die Vorlage, Ziel die markierte Öffnung; eingebaut wie vom Monteur
+     (Rahmen zurückgesetzt in der Öffnung, Laibungen sichtbar, Fensterbank mit Tropfkante, Schatten von Sturz und Laibung, Glas spiegelt
+     Himmel und Umgebung des Fotos, altes Fenster ganz weg bzw. neue Öffnung), übrige Fassade unverändert. Nie das Foto mit den flach
+     eingesetzten Fenstern als Quelle eines Feldes: dann übernimmt die KI die flachen Fenster (erste Fassung, Urteil des Inhabers:
+     „einfach nur schräg eingesetzt, nicht implementiert in den Gesamtkontext“). Der Server gibt nur die Adresse zum Abholen zurück, die
+     App fragt bis zu 3 Minuten nach (GET /api/hausbild). Das Ergebnis setzt die App nur innerhalb der Elementflächen (24 % größer, unten
+     mit Platz für die Fensterbank, weich auslaufend) ins Originalfoto; außerhalb bleibt jedes Pixel das Foto des Kunden. Danach Vorher/Nachher mit Chip „KI-Bild“, „Bild
+     speichern“ (Datei `mein-haus-ki-visualisierung.jpg`), „Weiter bearbeiten“; Titel „So *könnte* es aussehen.“ Das Ergebnis trägt unten
+     rechts sichtbar „KI-Visualisierung · kein Foto · eeziframes.com“ und in den Bilddaten XMP (IPTC DigitalSourceType
+     „compositeWithTrainedAlgorithmicMedia“), Art. 50 Abs. 2 KI-Verordnung.
+- **KI über Cloudflare (seit 2.11.2026 abends, Wunsch des Inhabers):** Die Vorschau rechnet Cloudflare Workers AI mit FLUX.2 [klein] 9B
+  auf eigenen Servern (kein Vertrag mit Black Forest Labs nötig, Cloudflare ist schon Auftragsverarbeiter, kein Training). Das Modell kennt
+  keine Felder je Fenster: Die App schickt deshalb **je Fenster einen eigenen Ausschnitt** (unter 512 Pixel, mit dem flach eingesetzten
+  Fenster als Platzhalter) samt Vorlage, und der Auftrag nennt Lage, Flügel und Farbe. Alle Fenster in einem Bild verwechselte im
+  Vergleich die Teilung (unten zwei statt ein Flügel); einzeln hält sich das Modell daran (docs/profis/2026-11-02-hausbild.md,
+  `docs/profis/bilder/2026-11-02-hausbild-cloudflare-ablauf.jpg`). Der Weg über Black Forest Labs direkt (FLUX 3, oben beschrieben) bleibt
+  im Code, ist aber aus (`FREIGEGEBEN`).
+- **Kosten und Grenzen:** rund 1,7 Cent je Fenster (Cloudflare: 1,5 US-Cent je Bild bis 1 Megapixel plus 0,2 Cent je Megapixel Eingabe).
+  Server: 10 Vorschauen je 10 Minuten und Anschluss, 20 je Anschluss und Tag, `HAUSBILD_TAG_MAX` (Vorgabe 500) am Tag insgesamt; eine
+  Vorschau zählt einmal, mit höchstens 8 Fenstern. Gespeichert wird nichts.
+- **Ohne WebGL** zeichnet hausbild.js eine einfache Ansicht des Elements (Rahmenfarbe, Flügel, Glas, Kasten).
+- **Recht (Prüfung 2.11.2026, docs/recht/2026-11-02-hausbild-pruefung.md):** Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) vor der ersten
+  KI-Vorschau, Widerruf im Editor und in der Fußleiste, Datenschutzerklärung 5a, AGB § 2 Abs. 5 und § 11 Abs. 2, nur EU-Zugang. Werbung mit
+  solchen Bildern nur mit Hinweis „KI-Visualisierung mit eeziframes, kein Foto eines Einbaus. Ergebnisse können abweichen.“ und nie mit
+  Bildern von Kunden ohne eigene Freigabe.
+- **Schalter:** An, sobald Workers AI gebunden ist (`"ai"` in wrangler.jsonc); `HAUSBILD_FREI=0` bei Cloudflare schaltet die Vorschau
+  ab (`hausbildWeg` in functions/api/hausbild.js, `/api/status` meldet `hausbild` und `hausbildMax`). Lokal mit `KI_ATTRAPPE=1`.
+- **Rechtstexte online (2.11.2026):** Datenschutz 5a (Cloudflare), Satz zum Prüfwert in Abschnitt 2, AGB § 2 Abs. 5 und § 11 Abs. 2
+  (Stand 2.11.2026), Cookie-Zeile `aufmass.hausbild.einwilligung`; Einwilligungstext Stand `2026-11-02c`.
+- **Offen:** Blick des Anwalts auf 5a in der Fassung für Cloudflare; Zählung in der Statistik (Editor geöffnet, Vorschau, danach
+  gekauft oder angefragt).
 
 ## Entscheidungen
 
