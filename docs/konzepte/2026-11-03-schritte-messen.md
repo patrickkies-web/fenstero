@@ -1,6 +1,6 @@
 # Wo steigen die Leute aus? Brainstorm zum Messen der Schritte
 
-Stand 3.11.2026, nachts, auf Wunsch des Inhabers. Noch nichts davon ist gebaut und nichts ist online. Das hier ist eine Ideensammlung mit
+Stand 3.11.2026, nachts, auf Wunsch des Inhabers. **Umgesetzt am 4.11.2026** (Wunsch des Inhabers): A bis F, also Schritt-Signal, Ausstieg, Herkunft, Dauer-Stufen, Zeichen für Mühe, Szenen und Klicks der Startseite, dazu der Strang Führung und die Karte „Wo steigen sie aus?“ in der Zentrale. Prüfmappe für die Anwälte: docs/recht/2026-11-04-pruefmappe-tracking-funnel.md. Nicht umgesetzt sind G (Varianten), H (Besuchsnummer) und I (Frage beim Gehen). Das hier ist eine Ideensammlung mit
 Empfehlung. Rechtliches ist Einschätzung, keine Rechtsberatung.
 
 ## 1. Kurz

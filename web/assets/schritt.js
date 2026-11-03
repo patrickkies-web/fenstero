@@ -5,7 +5,8 @@
    ist, merkt sie sich nur im Arbeitsspeicher dieses Tabs (kein Cookie, kein localStorage, keine Nummer); nach dem Neuladen zählt es neu.
    Mit „Global Privacy Control“ oder „Do Not Track“ meldet sie nichts. Gesendet wird mit navigator.sendBeacon an die eigene Adresse. */
 (function () {
-  const AUS = navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || window.doNotTrack === '1';
+  /* aus: mit Global Privacy Control oder Do Not Track, oder wenn web/config.js schritte: false setzt (Schalter für die rechtliche Prüfung) */
+  const AUS = (window.KONFIG && window.KONFIG.schritte === false) || navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || window.doNotTrack === '1';
   const gemeldet = new Set();
   let letzte = '', strang = '', seit = 0, herkunft = null, ausGemeldet = false;
   /* grobe Herkunft des Tabs aus der Adresse, von der er kam (der Browser kennt sie ohnehin), und Anzeigen-Merkmalen in der eigenen Adresse */

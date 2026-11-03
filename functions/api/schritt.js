@@ -53,6 +53,7 @@ export function schluesselSchritt(f, ua) {
 export async function onRequestPost({ request, env, warte, inst }) {
   const leer = () => new Response(null, { status: 204, headers: { 'cache-control': 'no-store' } });
   if (inst) return leer(); // Konfiguratoren der Fensterbauer: nichts zählen
+  if (env && String(env.SCHRITTE_AUS || '') === '1') return leer(); // Schalter bei Cloudflare: Meldungen annehmen, aber nichts zählen
   const h = request.headers;
   if (h.get('sec-gpc') === '1' || h.get('dnt') === '1') return leer();
   if (/(^|;\s*)__Host-(zentrale|inhaber)=/.test(h.get('cookie') || '')) return leer(); // der Inhaber selbst

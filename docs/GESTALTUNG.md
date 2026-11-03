@@ -762,7 +762,7 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
   `docs/profis/bilder/2026-11-02-hausbild-cloudflare-ablauf.jpg`). Der Weg über Black Forest Labs direkt (FLUX 3, oben beschrieben) bleibt
   im Code, ist aber aus (`FREIGEGEBEN`).
 - **Kosten und Grenzen:** rund 1,7 Cent je Fenster (Cloudflare: 1,5 US-Cent je Bild bis 1 Megapixel plus 0,2 Cent je Megapixel Eingabe).
-  Server: 10 Vorschauen je 10 Minuten und Anschluss, 20 je Anschluss und Tag, `HAUSBILD_TAG_MAX` (Vorgabe 500) am Tag insgesamt; eine
+  Server: 10 Vorschauen je 10 Minuten und Anschluss, 6 je Anschluss und Tag, `HAUSBILD_TAG_MAX` (Vorgabe 150 seit 4.11.2026, vorher 500) am Tag insgesamt; eine
   Vorschau zählt einmal, mit höchstens 8 Fenstern. Gespeichert wird nichts.
 - **Ohne WebGL** zeichnet hausbild.js eine einfache Ansicht des Elements (Rahmenfarbe, Flügel, Glas, Kasten).
 - **Recht (Prüfung 2.11.2026, docs/recht/2026-11-02-hausbild-pruefung.md):** Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) vor der ersten

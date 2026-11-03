@@ -82,6 +82,7 @@ export async function api(request, env, ctx0, inst) {
     /* Schritte in App und Startseite für die eigene Statistik (schritt.js, ohne Kennung, nur Tageszähler) */
     if (pfad === '/api/schritt') return request.method === 'POST' ? schrittPost({ request, env, warte, inst }) : new Response(null, { status: 405, headers: { allow: 'POST' } });
     /* Hausbild: KI-Vorschau der Fenster am Foto des Hauses (hausbild.js, Black Forest Labs) */
+    if (pfad === '/api/hausbild' && request.method === 'POST') { const r = await hausbildPost({ request, env }); if (r.status === 200) warte(zaehlen(k, speicher(k), mitWerbung(['ereignis:hausbild'], werbungAus(request))).catch(() => false)); return r; } // Vorgang „KI-Vorschau am Haus gestartet“
     if (pfad === '/api/hausbild') return request.method === 'POST' ? hausbildPost({ request, env }) : request.method === 'GET' ? hausbildGet({ request, env }) : new Response(null, { status: 405, headers: { allow: 'GET, POST' } });
     if (pfad === '/api/ki') {
       if (request.method === 'GET' || request.method === 'HEAD') return kiGet({ request, env });

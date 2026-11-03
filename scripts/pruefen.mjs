@@ -2584,6 +2584,9 @@ if (teil(13)) {
     ok(sr1.status === 204 && sr2.status === 405 && dS2('start', 'n') === 1 && dS2('fotos', 'n') === 1 && dS2('fotos', 'aus') === 1 && dS2('start', 'dauer', 'm') === 1 && dS2('fotos', 'zeichen', 'hilfe') === 1 &&
       dS2('gekauft', 'merkmal', 'vorschau') === 1 && dS2('start', 'herkunft', 'startseite') === 1 && dS2('start', 'geraet', 'Telefon') === 1 && !JSON.stringify(stN.trichter).includes('script') && !stN.trichter.X,
       'Schritte (/api/schritt): erreicht, Ausstieg, Dauer-Stufe, Hilfe, Merkmal „Vorschau“, Herkunft und Gerät je Folie; nicht gezählt: Do Not Track, Global Privacy Control, Inhaber, Bot, unbekannte Namen und Stränge; GET 405');
+    const vorAus = ((await stat.auswerten(sp, 1)).trichter.K.schritte.vcode || {}).n || 0;
+    await api(new Request(B + '/api/schritt', { method: 'POST', headers: { 'user-agent': iphone, 'content-type': 'application/x-www-form-urlencoded', 'cf-connecting-ip': '192.0.2.78' }, body: 's=K&n=vcode' }), Object.assign({}, env, { SCHRITTE_AUS: '1' }));
+    ok((((await stat.auswerten(sp, 1)).trichter.K.schritte.vcode || {}).n || 0) === vorAus, 'Schalter SCHRITTE_AUS=1: der Server zählt keine Schritte');
     const stZ2 = await mitC('/api/zentrale/statistik?tage=1');
     ok(stZ2.ok && stZ2.trichter && stZ2.trichter.K && stZ2.trichter.K.schritte.start && !/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(JSON.stringify(stZ2.trichter)), 'Zentrale: Trichter je Strang in der Statistik, ohne IP-Adressen');
 

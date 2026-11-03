@@ -693,6 +693,7 @@
       { t: 'Besuche', n: st.summe.besuche, z: 'Einstiege von außen, ohne Bots' },
       { t: 'Aufrufe der App', n: seitenN('/app/'), z: 'Seitenaufrufe, nicht Personen' },
       { t: 'Fotos von der KI ausgewertet', n: ereignis.ki_foto || 0, z: 'jemand hat ein Fenster fotografiert' },
+      { t: 'KI-Vorschau am Haus gestartet', n: ereignis.hausbild || 0, z: 'seit 4.11.2026 gezählt' },
       { t: 'Kasse geöffnet', n: ereignis.kasse || 0, z: 'Aufmaßblatt freischalten angetippt' },
       { t: 'Aufmaßblätter gekauft', n: kz.kauf, z: kz.umsatz ? U.euro(kz.umsatz) + ' brutto' : '' }
     ].filter((x) => x.n != null);
@@ -702,7 +703,7 @@
       h('span', { class: 'a-tr-zahl', text: zahlText(x.n) }),
       h('span', { class: 'a-tr-balken', 'aria-hidden': 'true' }, h('i', { style: 'width:' + Math.min(100, Math.round((x.n / basis) * 100)) + '%' })))));
     const weg = U.kachel([h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Weg der Hauseigentümer' })), trichter,
-      h('p', { class: 'a-hinweis', style: 'margin:12px 0 0', text: 'Planungen in der kostenlosen App bleiben im Browser der Besucher. Gezählt wird erst, was über den Server läuft: Fotos mit KI, Kasse, Kauf.' })]);
+      h('p', { class: 'a-hinweis', style: 'margin:12px 0 0', text: 'Planungen in der kostenlosen App bleiben im Browser der Besucher. Diese Stufen zählt der Server bei Vorgängen, die über ihn laufen; wie weit die Besucher Folie für Folie kommen, zeigt „Wo steigen sie aus?“.' })]);
 
     /* Wo steigen sie aus? Schritte in Startseite und App (functions/api/schritt.js, web/assets/schritt.js, seit 4.11.2026): je Strang die
        Folien in der Reihenfolge des Ablaufs mit erreicht, Ausstiegen, Verweildauer und Zeichen für Mühe; der größte Absprung ist markiert */
