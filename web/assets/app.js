@@ -3027,6 +3027,7 @@ function render(fresh) {
   bindAfterRender();
   if (window.hbNachRender) hbNachRender(); // Editor „An meinem Haus ansehen“: Datei, Lage der Elemente, Gesten
   schrittMelden(); // eigene Statistik: welche Folie zu sehen ist (schritt.js, ohne Kennung)
+  if (window.hbVnBinden) hbVnBinden(); // Vorher/Nachher am Beispielhaus (hausbild.js)
   if (['teilen', 'blatt', 'gesendet', 'datei', 'gekauft'].includes(S.screen)) blattSchrift();
   /* Blöcke erscheinen nacheinander bzw. beim Scrollen; die wiederverwendete 3-D-Bühne bleibt, wie sie ist */
   if (view.dna) { lgAuf(); fussPasst(); }
@@ -3185,7 +3186,8 @@ function homeLeerDna() {
     '<p class="wl-nachsatz">Vor der Fertigung misst dein Fensterbauer einmal vor Ort nach, das <button type="button" class="ulink" data-act="gloss" data-k="feinaufmass">Feinaufmaß</button>.</p></section>';
   const links = '<div class="foot-links wl-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a><a class="link" href="' + PORTAL_URL + '">Zur Startseite ›</a></div>';
   const fuss = rechtLinks() + '<div class="lg-fuss">' + (ent ? '<button type="button" class="dna-pille lg-weiter btn primary" data-act="entwurf-weiter">' + esc(entName) + ' fortsetzen' + abPfeil + '</button>' : '<button type="button" class="dna-pille lg-weiter btn primary" data-act="new">Erstes Fenster ausmessen' + abPfeil + '</button>') + '</div>';
-  return { html: lgKopf(false) + dnaTisch(buehne, kopf + modell + erklaert + links + fuss), dna: true, cls: 'dna wl dt', voll: true };
+  const ausblick = window.hbAusblick ? hbAusblick() : ''; // Am Ende: dein Haus (Vorher/Nachher, hausbild.js)
+  return { html: lgKopf(false) + dnaTisch(buehne, kopf + modell + ausblick + erklaert + links + fuss), dna: true, cls: 'dna wl dt', voll: true };
 }
 const PLUS = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2v14M2 9h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>';
 /* Stand des Aufmaßes in einem Satz */
@@ -3246,7 +3248,8 @@ function homeAufmassDna() {
     '<p class="nachsatz">Ein Fenster in zwei Minuten ausprobieren, ohne eigene Maße: <button type="button" class="ulink" data-act="tour-start">Führung starten</button></p></section>';
   const links = '<div class="foot-links li-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a><a class="link" href="' + PORTAL_URL + '">Zur Startseite ›</a></div>';
   const fuss = n ? '<div class="lg-fuss li-fuss"><button type="button" class="dna-pille lg-weiter btn primary" data-act="go" data-v="' + (FREI() ? 'teilen' : 'anfrage') + '">' + (FREI() ? 'Zum Aufmaßblatt' : 'Aufmaßblatt fertigstellen') + abPfeil + '</button></div>' : '';
-  return { html: lgKopf(false) + dnaTisch(buehne, kopf + liste + neu + kontoKarte() + (n ? dateiCard() : '') + erklaert + links + rechtLinks() + fuss), dna: true, cls: 'dna li dt', voll: true };
+  const hausbild = n && window.hbEinladung ? hbEinladung('liste') : ''; // An deinem Haus (hausbild.js)
+  return { html: lgKopf(false) + dnaTisch(buehne, kopf + liste + hausbild + neu + kontoKarte() + (n ? dateiCard() : '') + erklaert + links + rechtLinks() + fuss), dna: true, cls: 'dna li dt', voll: true };
 }
 /* Eigenes Aufmaß: wo es gespeichert ist. Gast: nur in diesem Browser, mit „Aufmaß sichern“; mit Konto: gesichert, „Dein Konto“ */
 function kontoKarte() {

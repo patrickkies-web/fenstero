@@ -548,7 +548,7 @@ if (teil(3)) {
   else {
     await hp.evaluate(() => { localStorage.removeItem('aufmass.hausbild.vorschauen'); const a = baseWin(); a.name = 'Küche'; a.el = { w: 1230, h: 1400 }; a.mo = { hm: 1420, wm: 1250, hl: 1420, hr: 1420, wt: 1250, wb: 1250 }; const c = baseWin(); c.name = 'Bad'; S.windows = [c]; S.editIdx = 0; S.win = c; go('fertig'); });
     await hp.waitForTimeout(400);
-    ok(await hp.locator('.hb-einladung').count() === 0, 'Einladung „An meinem Haus ansehen“ erst, wenn ein Fenster vollständige Maße hat');
+    ok(await hp.locator('.hb-einladung .hb-vn').count() === 1 && /ausprobieren/.test(await hp.locator('.hb-einladung .hb-ein-knopf').innerText()), 'Einladung mit Vorher/Nachher am Beispielhaus, sobald ein Fenster gespeichert ist (auch ohne vollständige Maße, Inhaber 4.11.2026)');
     await hp.evaluate(() => { const a = baseWin(); a.name = 'Küche'; a.el = { w: 1230, h: 1400 }; a.mo = { hm: 1420, wm: 1250, hl: 1420, hr: 1420, wt: 1250, wb: 1250 }; S.windows.unshift(a); S.editIdx = 0; S.win = a; go('fertig'); });
     await hp.waitForTimeout(400);
     ok(await hp.locator('.hb-einladung').count() === 1 && /Eine Vorschau ist frei/.test(await hp.locator('.hb-einladung').innerText()) && /PDF für deinen Fensterbauer/.test(await hp.locator('.fg-satz').innerText()), 'Gespeichert: Einladung mit „Eine Vorschau ist frei“, das Aufmaßblatt als PDF für den Fensterbauer genannt');

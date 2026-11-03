@@ -2859,6 +2859,14 @@ html.dna-voll body { background: #07090a }
 .dna .wl-station:first-child .wl-nr { color: var(--schwarz); background: var(--weiss); box-shadow: none }
 .dna .wl-station b { display: block; margin: 5px 0 4px; font: 500 16px/1.25 var(--font-sans); color: var(--weiss) }
 .dna .wl-station p { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau) }
+/* Willkommen: Ausblick „Am Ende: dein Haus“ mit Vorher/Nachher (hausbild.js hbAusblick, 4.11.2026) */
+.dna .wl-haus-ausblick { display: grid; gap: 0; margin-top: 40px }
+.dna .wl-haus-ausblick .dna-label { font: 400 13px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau) }
+.dna .wl-haus-ausblick h2 { margin: 6px 0 16px; font: 500 26px/1.1 var(--font-sans); letter-spacing: -.025em; color: var(--weiss); text-wrap: balance }
+.dna .wl-haus-ausblick h2 em { font-style: normal; color: var(--silbergrau) }
+.dna .wl-haus-ausblick .hb-vn { color: var(--weiss) }
+.dna .wl-hb-satz { margin: 14px 2px 0; max-width: 40ch; font: 400 15px/1.45 var(--font-sans); color: var(--silbergrau) }
+.dna .wl-hb-knopf { justify-self: start; min-height: 48px; margin-top: 16px; padding: 0 20px }
 /* Willkommen neu (3.11.2026): Hausfoto als Bühne, „So läuft es“ als Karten mit Bildern wie auf der Startseite */
 .dna .wl-haus img { object-position: 50% 55% }
 .dna .wl-etikett-haus { position: absolute; z-index: 2; left: 12px; top: 12px; display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 10px; border-radius: 999px; color: var(--weiss); font: 500 13px/1 var(--font-sans);

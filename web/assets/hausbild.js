@@ -61,20 +61,74 @@ function hbEinwBlatt() {
     '<div class="hb-einw-knoepfe"><button type="button" class="hb-einw-knopf" data-act="hb-einw-ja">Einwilligen und rechnen</button><button type="button" class="hb-einw-knopf" data-act="hb-einw-nein">Nicht einwilligen</button></div></div></div>';
 }
 
-/* ---------- Einladung in „Gespeichert“ (hellblau, Wunsch des Inhabers vom 2.11.2026) ----------
-   Seit 3.11.2026 mit dem Beispielhaus der Startseite und einem gestrichelten Rahmen (G1: hier kommt dein Fenster hin), Etikett, Titel und
-   einer Zeile, die sagt, dass eine Vorschau frei ist; der Knopf bleibt leise (die volle Pille ist „Zum Aufmaßblatt“). Erst wenn
-   mindestens ein Fenster vollständige Maße hat (Funnel-Konzept 2026-11-03: die Vorschau ist Lohn fürs Messen, nicht der Einstieg). */
-function hbEinladung() {
-  if (!hbDa()) return '';
-  if (!S.windows.some((x) => { try { return derive(x).complete; } catch (e) { return false; } })) return '';
-  const tuer = istTuer(S.win), ding = tuer ? 'deine Tür' : S.win.art === 'fest' ? 'deine Verglasung' : 'dein Fenster', rest = hbRest();
-  const zeile = rest <= 0 ? 'Deine Vorschauen sind gerechnet. Ansehen kannst du dein Haus weiter.' : hbBlattFrei() ? 'Mit deinem Aufmaßblatt: noch ' + rest + (rest === 1 ? ' Vorschau.' : ' Vorschauen.') : 'Eine Vorschau ist frei.';
-  return '<section class="hb-einladung" aria-labelledby="hb-ein-t"><figure class="hb-ein-bild" aria-hidden="true"><img src="/bilder/start/fassade.webp" width="800" height="500" alt="" loading="lazy" decoding="async"><i style="left:45.4%;top:60.8%;width:8.35%;height:24.2%"></i><span class="wz-chip">KI-Vorschau</span></figure>' +
-    '<div class="hb-ein-text"><span class="hb-ein-label">An deinem Haus</span><h2 id="hb-ein-t">Sieh ' + ding + ' <em>an deinem Haus.</em></h2>' +
-    '<p>Foto wählen, ' + ding + ' an seine Stelle ziehen, eine KI rechnet das Bild. ' + zeile + '</p></div>' +
-    '<button type="button" class="hb-ein-knopf" data-act="hb-auf">' + hbZ('foto') + '<span>An meinem Haus ansehen</span><span class="hb-ein-pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></button></section>';
+/* ---------- Vorher/Nachher am Beispielhaus (Inhaber, 4.11.2026: „irgendwo muss man ja drauf kommen im Verlauf und sich denken boah wie
+   geil ist das denn und dann das mal ausprobieren können“) ----------
+   Das Haus der Startseite (web/bilder/start/fassade.webp) und dasselbe Foto mit neuen Fenstern in Anthrazit: gerechnet mit FLUX.2 [pro],
+   danach nur die Fensterflächen weich ins Original gesetzt (wie die App es mit dem Ergebnis macht), damit Licht, Läden und Haustür gleich
+   bleiben (web/bilder/hausbild/beispiel-*.webp). Kennzeichnung „KI-Bild“ am Nachher. Bedienung: ziehen (Finger oder Maus, waagrecht;
+   senkrecht scrollt die Seite weiter), Tippen springt dorthin, am Rechner die Pfeiltasten über den Regler. Beim ersten Erscheinen wischt
+   die Linie einmal von „Vorher“ zu „Nachher“ (1,2 s, ease-in-out; erklärt die Bedienung), bei weniger Bewegung steht sie in der Mitte. */
+function hbVorherNachher() {
+  return '<figure class="hb-vn" style="--vn: 50%"><img class="hb-vn-vor" src="/bilder/hausbild/beispiel-vorher.webp" width="800" height="500" alt="Beispielhaus mit alten Holzfenstern" loading="lazy" decoding="async" draggable="false">' +
+    '<img class="hb-vn-nach" src="/bilder/hausbild/beispiel-nachher.webp" width="800" height="500" alt="Dasselbe Haus mit neuen Fenstern in Anthrazit, von einer KI berechnet" loading="lazy" decoding="async" draggable="false">' +
+    '<span class="wz-chip hb-vn-chip l" aria-hidden="true">Vorher</span><span class="wz-chip hb-vn-chip r" aria-hidden="true">Nachher · KI-Bild</span>' +
+    '<span class="hb-vn-linie" aria-hidden="true"><i class="hb-vn-griff"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 6 3 10l4 4M13 6l4 4-4 4"/></svg></i></span>' +
+    '<input type="range" class="hb-vn-regler" min="0" max="100" value="50" aria-label="Vorher und Nachher vergleichen"></figure>';
 }
+const hbVnFertig = new WeakSet();
+function hbVnBinden() {
+  document.querySelectorAll('.hb-vn').forEach((f) => {
+    if (hbVnFertig.has(f)) return; hbVnFertig.add(f);
+    const regler = f.querySelector('.hb-vn-regler');
+    const setzen = (p) => { const v = Math.max(0, Math.min(100, p)); f.style.setProperty('--vn', v + '%'); if (regler) regler.value = String(Math.round(v)); };
+    const punkt = (e) => { const r = f.getBoundingClientRect(); return (e.clientX - r.left) / r.width * 100; };
+    let zug = null;
+    f.addEventListener('pointerdown', (e) => { if (e.button > 0) return; zug = { x: e.clientX, y: e.clientY, an: false, id: e.pointerId }; f._wisch = false; });
+    f.addEventListener('pointermove', (e) => {
+      if (!zug || e.pointerId !== zug.id) return;
+      const dx = e.clientX - zug.x, dy = e.clientY - zug.y;
+      if (!zug.an) { if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return; if (Math.abs(dy) > Math.abs(dx)) { zug = null; return; } zug.an = true; try { f.setPointerCapture(e.pointerId); } catch (x) { /* egal */ } f.classList.add('zieht'); }
+      setzen(punkt(e));
+    });
+    const ende = (e) => { if (zug && e.pointerId === zug.id) { if (!zug.an && e.type === 'pointerup') setzen(punkt(e)); zug = null; f.classList.remove('zieht'); } };
+    f.addEventListener('pointerup', ende); f.addEventListener('pointercancel', ende);
+    if (regler) regler.addEventListener('input', () => { f._wisch = false; setzen(Number(regler.value)); });
+    /* einmal wischen, sobald es zur Hälfte im Bild ist */
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver((ein) => {
+      if (!ein[0] || !ein[0].isIntersecting) return; io.disconnect();
+      const t0 = performance.now(), von = 88, bis = 38, kurve = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      f._wisch = true;
+      const lauf = (t) => { if (!f._wisch) return; const k = Math.min(1, Math.max(0, (t - t0) / 1200)); setzen(von + (bis - von) * kurve(k)); if (k < 1) requestAnimationFrame(lauf); };
+      requestAnimationFrame(lauf);
+    }, { threshold: 0.5 });
+    io.observe(f);
+  });
+}
+window.hbVnBinden = hbVnBinden;
+
+/* ---------- Einladung in „Gespeichert“ und in der Liste (hellblau, Wunsch des Inhabers vom 2.11.2026) ----------
+   Seit 4.11.2026 mit dem Vorher/Nachher am Beispielhaus und sichtbar, sobald ein Fenster gespeichert ist (vorher erst mit vollständigen
+   Maßen; der Inhaber fand die Funktion im Ablauf nicht). Zeile „Eine Vorschau ist frei“; der Knopf bleibt leise (die volle Pille ist
+   „Zum Aufmaßblatt“). wo: 'liste' für „Deine Fenster“. */
+function hbEinladung(wo) {
+  if (!hbDa() || !S.windows.length) return '';
+  const liste = wo === 'liste', tuer = istTuer(S.win), ding = liste ? 'deine Fenster' : tuer ? 'deine Tür' : S.win.art === 'fest' ? 'deine Verglasung' : 'dein Fenster', rest = hbRest();
+  const zeile = rest <= 0 ? 'Deine Vorschauen sind gerechnet; mit dem Aufmaßblatt gibt es weitere.' : hbBlattFrei() ? 'Mit deinem Aufmaßblatt: noch ' + rest + (rest === 1 ? ' Vorschau.' : ' Vorschauen.') : 'Eine Vorschau ist frei.';
+  return '<section class="hb-einladung' + (liste ? ' liste' : '') + '" aria-labelledby="hb-ein-t">' + hbVorherNachher() +
+    '<div class="hb-ein-text"><span class="hb-ein-label">An deinem Haus</span><h2 id="hb-ein-t">Sieh ' + ding + ' <em>an deinem Haus.</em></h2>' +
+    '<p>So wie oben, nur mit deinem Foto: Foto wählen, ' + (liste ? 'deine Fenster an ihre Stelle' : ding + ' an seine Stelle') + ' ziehen, eine KI rechnet das Bild. ' + zeile + '</p></div>' +
+    '<button type="button" class="hb-ein-knopf" data-act="hb-auf">' + hbZ('foto') + '<span>Jetzt an meinem Haus ausprobieren</span><span class="hb-ein-pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></button></section>';
+}
+window.hbEinladung = hbEinladung;
+/* Willkommensseite: zeigt, was am Ende geht (ohne eigenes Fenster noch kein Editor; der Weg dorthin ist das erste Fenster) */
+function hbAusblick() {
+  if (!hbDa()) return '';
+  return '<section class="wl-haus-ausblick" aria-labelledby="wl-hb-t"><span class="dna-label">Am Ende: dein Haus</span><h2 id="wl-hb-t">Sieh deine neuen Fenster <em>an deinem Haus.</em></h2>' + hbVorherNachher() +
+    '<p class="wl-hb-satz">Zieh die Linie: links heute, rechts mit neuen Fenstern. Mit deinem ersten gespeicherten Fenster probierst du das an einem Foto deines eigenen Hauses aus. Eine Vorschau ist frei.</p>' +
+    '<button type="button" class="dna-pille dna-pille--leise wl-hb-knopf" data-act="new">Erstes Fenster ausmessen</button></section>';
+}
+window.hbAusblick = hbAusblick;
 
 /* ---------- Bild eines Elements aus der 3-D-Bühne ---------- */
 function hbBildVon(i) {

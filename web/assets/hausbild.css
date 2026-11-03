@@ -25,18 +25,28 @@
   .dna .fg-kopf h1 { font-size: 32px }
 }
 
-/* ---------- Einladung (hellblau, Wunsch des Inhabers vom 2.11.2026; seit 3.11.2026 mit dem Beispielhaus der Startseite und einem
-   gestrichelten Rahmen oben: hier kommt dein Fenster hin, G1) ---------- */
+/* ---------- Einladung (hellblau, Wunsch des Inhabers vom 2.11.2026; seit 4.11.2026 mit dem Vorher/Nachher am Beispielhaus oben) ---------- */
 .dna .hb-einladung { --hb-tinte: #0d2440; --hb-tinte-2: #3b5470; --hb-blau: #1d4f8c;
   display: grid; gap: 0; margin: 4px 0 18px; padding: 8px 8px 12px; border-radius: var(--rund-l); color: var(--hb-tinte);
   background: radial-gradient(120% 120% at 0% 0%, #eef6ff 0, #dcebfc 46%, #cbe1f8 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 0 0 1px rgba(29, 79, 140, .10), 0 14px 28px -20px rgba(29, 79, 140, .55) }
-.dna .hb-ein-bild { position: relative; margin: 0; aspect-ratio: 16 / 8; border-radius: 20px; overflow: hidden; background: #cbe1f8 }
-.dna .hb-ein-bild img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 62% }
-.dna .hb-ein-bild::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 0 0 1px rgba(29, 79, 140, .12) }
-.dna .hb-ein-bild i { position: absolute; border: 1.5px dashed #fff; border-radius: 2px; box-shadow: 0 0 0 1px rgba(13, 36, 64, .3) }
-.dna .hb-ein-bild .wz-chip { position: absolute; left: 10px; top: 10px; z-index: 2 }
+/* Vorher/Nachher am Beispielhaus (hausbild.js hbVorherNachher): Nachher per clip-path, Linie mit weißem Griff, Glas-Chips; ziehen waagrecht */
+.dna .hb-vn { --vn: 50%; position: relative; margin: 0; aspect-ratio: 8 / 5; border-radius: 20px; overflow: hidden; background: #1c1c1e; touch-action: pan-y; cursor: ew-resize;
+  -webkit-user-select: none; user-select: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 14px 28px -20px rgba(7, 9, 10, .6) }
+.dna .hb-vn img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none }
+.dna .hb-vn-nach { clip-path: inset(0 0 0 var(--vn)) }
+.dna .hb-vn-linie { position: absolute; z-index: 2; top: 0; bottom: 0; left: var(--vn); width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 0 1px rgba(7, 9, 10, .22); pointer-events: none }
+.dna .hb-vn-griff { position: absolute; left: 50%; top: 50%; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; transform: translate(-50%, -50%); background: #fff; color: #07090a;
+  box-shadow: 0 8px 20px rgba(7, 9, 10, .38); transition: transform 160ms cubic-bezier(.2, .7, .2, 1) }
+.dna .hb-vn-griff svg { width: 20px; height: 20px }
+.dna .hb-vn.zieht .hb-vn-griff { transform: translate(-50%, -50%) scale(1.08) }
+.dna .hb-vn .hb-vn-chip { position: absolute; z-index: 3; top: 10px; bottom: auto; width: auto; max-width: 46%; margin: 0; transform: none; pointer-events: none }
+.dna .hb-vn .hb-vn-chip.l { left: 10px; right: auto } .dna .hb-vn .hb-vn-chip.r { right: 10px; left: auto }
+.dna .hb-vn-regler { position: absolute; z-index: 1; left: 0; bottom: 0; width: 100%; height: 44px; margin: 0; opacity: 0; pointer-events: none }
+.dna .hb-vn:has(.hb-vn-regler:focus-visible) { outline: 2px solid currentColor; outline-offset: 3px }
+@media (prefers-reduced-motion: reduce) { .dna .hb-vn-griff { transition: none } }
 .dna .hb-ein-text { min-width: 0; padding: 14px 8px 0 }
+.dna .hb-einladung .hb-vn { color: var(--hb-blau) }
 .dna .hb-ein-label { font: 400 12px/1.2 var(--font-sans); letter-spacing: .03em; color: var(--hb-tinte-2) }
 .dna .hb-einladung h2 { margin: 6px 0 0; font: 600 22px/1.15 var(--font-sans); letter-spacing: -.02em; color: var(--hb-tinte); text-wrap: balance }
 .dna .hb-einladung h2 em { font-style: normal; color: var(--hb-blau) }
