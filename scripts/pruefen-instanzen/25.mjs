@@ -301,7 +301,7 @@ export default async (h) => {
   const ctxH = await desktop(), sH = await h.neueSeite(ctxH, X.base('localhost'));
   await sH.goto(X.base('localhost') + '/app/', { waitUntil: 'networkidle' }); await sH.waitForTimeout(400);
   const hd = await sH.evaluate(() => ({ inst: !!(window.KONFIG && window.KONFIG.instanz), betrieb: S.betrieb, text: document.body.innerText, recht: Array.from(document.querySelectorAll('.foot-links.recht a')).map((a) => a.getAttribute('href')).join(' ') }));
-  ok(!hd.inst && hd.betrieb === null && /Fotografieren\./.test(hd.text) && /Führung starten/.test(hd.text) && /\/agb\//.test(hd.recht) && /\/widerruf\//.test(hd.recht), '25.10 Hauptdomain: eigene App wie bisher (eeziframes-Start, Führung, AGB und Widerruf in den Rechtslinks)');
+  ok(!hd.inst && hd.betrieb === null && /Dein erstes Fenster/.test(hd.text) && /Führung starten/.test(hd.text) && /\/agb\//.test(hd.recht) && /\/widerruf\//.test(hd.recht), '25.10 Hauptdomain: eigene App wie bisher (eeziframes-Start „Dein erstes Fenster“ seit 3.11.2026, Führung, AGB und Widerruf in den Rechtslinks)');
   h.sauber(sH, '25.10 Hauptdomain ohne Fehler'); await ctxH.close();
 
   /* ---------- 25.11 Testansicht für Fensterbauer (/app/?ausprobieren[=<paket>] auf der Hauptdomain) ----------
