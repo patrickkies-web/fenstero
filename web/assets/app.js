@@ -6081,7 +6081,10 @@ function zuStrich(svg) {
   if (!/stroke-width="1\.8"/.test(svg)) { let k = 0; svg = svg.replace(/stroke-width="1\.2"/g, (m) => (++k <= 3 ? 'stroke-width="1.8"' : m)); }
   return svg;
 }
-const WZ_FREI = { aufbau: 1, oeffnung: 1, material: 1, glas: 1, bedienung: 1, extras: 1 };
+/* Seit 4.11.2026 steht das Element in allen Kapiteln der Wünsche in seiner Wand (Inhaber: „Dieser plötzliche schwarze Hintergrund … das hab ich
+   nirgendswo gewollt“); vorher schwebte es bei Aufbau, Öffnung, Material, Glas, Bedienung und Extras frei auf Schwarz. Zum Zurückholen die
+   Kapitel wieder eintragen, etwa { aufbau: 1 }. Die Start-Folie behält ihre schwarze Bühne (Vorlage des Inhabers). */
+const WZ_FREI = {};
 /* Türen bis zum Boden behalten Wand und Boden: Schwelle und Boden innen und außen gehören zu ihrer Planung */
 /* Farbe außen steht in der Fassade: die Außenfarbe beurteilt man vor der Hauswand, dort bleibt auch der Knopf für die Fassade */
 const wzFrei = (q) => !!WZ_FREI[q.kap || 'aufbau'] && !istTuer(S.win) && q.id !== 'fa';
