@@ -3259,8 +3259,9 @@ if (teil(15)) {
     await s2.evaluate(() => go('teilen')); await s2.waitForTimeout(200); await s2.click('.bb .btn.primary, .scr.dna .lg-weiter'); await s2.waitForSelector('[data-screen="kasse"]', { timeout: 8000 });
     const kasse = await s2.evaluate(() => document.body.innerText);
     await s2.click('[data-in="kc"][data-f="bedingungen"]'); await s2.click('[data-in="kc"][data-f="widerruf"]'); await s2.click('.bb .btn.primary, .scr.dna .lg-weiter');
-    await s2.waitForFunction(() => S.kauf && S.kauf.paid && S.screen === 'gekauft', null, { timeout: 10000 });
-    await s1.reload({ waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.kauf && S.kauf.paid, null, { timeout: 8000 });
+    /* die Kasse wechselt über die nachgestellte Zahlungsseite zurück in die App; dort gibt es S erst nach dem Laden */
+    await s2.waitForFunction(() => typeof S !== 'undefined' && S.kauf && S.kauf.paid && S.screen === 'gekauft', null, { timeout: 15000 });
+    await s1.reload({ waitUntil: 'networkidle' }); await s1.waitForFunction(() => typeof S !== 'undefined' && S.kauf && S.kauf.paid, null, { timeout: 8000 });
     const nach = await s1.evaluate(() => { S.win = kopie(S.windows[1]); S.editIdx = 1; go('fertig'); return { frei: FREI(), note: (document.querySelector('.note.warn') || {}).textContent || '' }; });
     ok(/Rechnung an haus6-/.test(kasse) && !/Wohin soll die Rechnung/.test(kasse) && nach.frei && /Seit dem Freischalten kannst du dieses Fenster noch viermal ändern/.test(nach.note), 'Mit Konto direkt zur Kasse (Rechnung an die E-Mail des Kontos); der Kauf kommt aufs andere Gerät; danach zählt jede Änderung („Seit dem Freischalten … noch viermal“)');
     let post15 = []; for (let i = 0; i < 20 && !post15.some((m) => m.an === mail6); i++) { post15 = (await fetch(B6 + '/api/test/post').then((r) => r.json())).post || []; if (!post15.some((m) => m.an === mail6)) await new Promise((r) => setTimeout(r, 150)); }
