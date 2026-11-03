@@ -1709,6 +1709,8 @@ if (teil(9)) {
   ok(await ap.evaluate(() => !S.tour && S.screen === 'home' && S.windows.length === 1) && await ap.evaluate(() => localStorage.getItem('aufmass.v1')) === vorher, 'Führung beenden: eigenes Projekt unverändert');
   await ap.goto(BASE + '/app/#fuehrung', { waitUntil: 'networkidle' }); await ap.waitForTimeout(300);
   ok(await ap.evaluate(() => S.screen === 'tour' && TOUR[S.tour.i] === 'start'), '#fuehrung (von der Startseite) öffnet die Führung');
+  /* die Stelle steht unter der Elementwahl; erst in die Mitte rollen, sonst liegt die untere Leiste darüber */
+  await ap.evaluate(() => document.querySelector('[data-act="situation"][data-v="neu"]').scrollIntoView({ block: 'center' })); await ap.waitForTimeout(150);
   await ap.click('[data-act="situation"][data-v="neu"]', { force: true }); await ap.waitForTimeout(150);
   ok(await ap.evaluate(() => !S.win.neu && /gesperrt/.test(S.toast)), 'Gesperrt antippen: Hinweis, keine Änderung');
   await ap.click('[data-act="tour-art"][data-v="fest"]'); await ap.waitForTimeout(300);
