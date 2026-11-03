@@ -171,7 +171,7 @@
        Detailangaben tragen ihre Stufe im Register DETAIL (s). Ist ein Sonnenschutz, ein Sichtschutz innen, Klappläden oder ein
        Insektenschutz gewählt, kommt die Frage nach seiner Farbe bei jeder Tiefe (Stufe 1; Wunsch des Inhabers, 28.10.2026). */
     const FRAGE = {
-      kap: { lage: 'vorweg', absturz: 'vorweg', design: 'vorweg', tiefe: 'vorweg', form: 'aufbau', teilung: 'aufbau', typ: 'aufbau', din: 'aufbau', stulp: 'aufbau', stulpLage: 'aufbau', htModell: 'aufbau', htSeiten: 'aufbau', htGlas: 'glas', htGriff: 'bedienung', htSchloss: 'bedienung', htExtra: 'bedienung', felder: 'aufbau', hsts: 'aufbau', hstr: 'aufbau', pskS: 'aufbau', pskR: 'aufbau', fswn: 'aufbau', fsws: 'aufbau', fswg: 'aufbau', ol: 'aufbau', ul: 'aufbau', richtung: 'aufbau', schwelle: 'aufbau', boden: 'aufbau',
+      kap: { lage: 'vorweg', absturz: 'vorweg', design: 'vorweg', tiefe: 'vorweg', form: 'aufbau', teilung: 'aufbau', typ: 'aufbau', din: 'aufbau', stulp: 'aufbau', stulpLage: 'aufbau', kombiSeite: 'aufbau', kombiBru: 'aufbau', kombiFeld: 'aufbau', htModell: 'aufbau', htSeiten: 'aufbau', htGlas: 'glas', htGriff: 'bedienung', htSchloss: 'bedienung', htExtra: 'bedienung', felder: 'aufbau', hsts: 'aufbau', hstr: 'aufbau', pskS: 'aufbau', pskR: 'aufbau', fswn: 'aufbau', fsws: 'aufbau', fswg: 'aufbau', ol: 'aufbau', ul: 'aufbau', richtung: 'aufbau', schwelle: 'aufbau', boden: 'aufbau',
         material: 'material', fa: 'material', fi: 'material', glas: 'glas', glasfn: 'glas', orn: 'glas', sprossen: 'glas', spross: 'glas', aufseite: 'glas', breite: 'glas', griff: 'bedienung', griffA: 'bedienung', gf: 'bedienung', rc: 'bedienung',
         sart: 'sonne', einbau: 'sonne', sfarbe: 'sonne', antrieb: 'sonne', insekt: 'sonne', iart: 'sonne', ifarbe: 'sonne', fbi: 'bank', fba: 'bank', montage: 'bank', notiz: 'bank' },
       /* Seit 2.11.2026 (Inhaber): Stufe 1 ist der Hauptweg der App, Stufe 2 die freiwillige Liste am Ende (Sprossen samt Breite und
@@ -383,6 +383,11 @@
       if (w.art === 'fsw') { const f = w.fsw || {}; return ol + S.length + ' Flügel, ' + lab('fswSchema', f.schema) + (f.geh ? ', mit Gehflügel' : ', ohne Gehflügel') + (w.fswAuf ? ', ' + lab('fswAuf', w.fswAuf) : '') + ', ' + ov(w, 'schwelle', lab('schwelle', f.schwelle)); }
       if (w.art === 'psk') { const p = w.psk || {}; return lab('pskSchema', p.schema) + (p.schema === 'C' ? '' : ', ' + lab('hstRichtung', p.richtung)) + ', kippbar, mit Schwelle'; }
       if (w.art === 'haustuer') { const b = w.bt || {}, x = S.find((y) => !y.st) || {}; return ol + 'Haustür, Bänder ' + (x.din === 'R' ? 'rechts' : 'links') + ' (DIN ' + (x.din === 'R' ? 'rechts' : 'links') + '), ' + htText(w) + festText(w) + ', ' + ov(w, 'schwelle', lab('schwelle', b.schwelle)); }
+      /* Fenster-Tür-Kombination: Tür und Fenster mit Brüstung in einem Rahmen (Lückenprüfung 3.11.2026) */
+      if (w.art === 'balkon' && w.kombi) {
+        const b = w.bt || {}, t = S.find((y) => !y.st && !y.fe) || {}, f = S.find((y) => y.fe) || {};
+        return ol + 'Fenster-Tür-Kombination, Fenster ' + (S.indexOf(f) < S.indexOf(t) ? 'links' : 'rechts') + ' der Tür: Tür ' + fluegelEin(t) + ', Fenster ' + fluegelEin(f) + ' über ' + th(num(w.kombiBru) || 850) + ' mm Brüstung, darunter ' + (w.kombiFeld === 'glas' ? 'Festglas' : 'Paneel') + festText(w) + kvdText(w) + ', ' + ov(w, 'schwelle', lab('schwelle', b.schwelle));
+      }
       if (w.art === 'balkon') { const b = w.bt || {}; return ol + fluegelText(S, w) + festText(w) + kvdText(w) + (w.paneel === 'paneel' ? ' · unten Paneel ' + th(w.paneelH || 400) + ' mm' : '') + ', ' + ov(w, 'schwelle', lab('schwelle', b.schwelle)); }
       return ol + fluegelText(S, w) + festText(w) + kvdText(w) + (w.ul ? ' · ' + lab('ul', w.ulA) + ' ' + th(w.ulH) + ' mm' : '');
     }
@@ -771,7 +776,7 @@
        „nach Standard des Fensterbauers“ (nicht gefragt, nachTiefe); der Betrieb liest „nach Ihrem Standard“. Für Betriebsbereich,
        Text und PDF, eine Quelle. */
     const NOTIZ_GRUPPE = { start: 'allgemein', lage: 'allgemein', design: 'allgemein', tiefe: 'allgemein', notiz: 'allgemein', fotos: 'fotos', zeichnen: 'fotos', messen: 'masse', raender: 'masse', ergebnis: 'masse', planmasse: 'masse',
-      teilung: 'fenster', material: 'fenster', ol: 'fenster', ul: 'fenster', form: 'fenster', richtung: 'fenster', felder: 'fenster', hsts: 'fenster', hstr: 'fenster', psks: 'fenster', pskr: 'fenster', psk: 'fenster', fswn: 'fenster', fsws: 'fenster', fswg: 'fenster', stulp: 'fenster', stulpLage: 'fenster', htModell: 'fenster', htSeiten: 'fenster', htGlas: 'glas', htGriff: 'beschlag', htSchloss: 'beschlag', htExtra: 'beschlag', sprossen: 'fenster', spross: 'fenster', aufseite: 'fenster', breite: 'fenster',
+      teilung: 'fenster', kombiSeite: 'fenster', kombiBru: 'fenster', kombiFeld: 'fenster', material: 'fenster', ol: 'fenster', ul: 'fenster', form: 'fenster', richtung: 'fenster', felder: 'fenster', hsts: 'fenster', hstr: 'fenster', psks: 'fenster', pskr: 'fenster', psk: 'fenster', fswn: 'fenster', fsws: 'fenster', fswg: 'fenster', stulp: 'fenster', stulpLage: 'fenster', htModell: 'fenster', htSeiten: 'fenster', htGlas: 'glas', htGriff: 'beschlag', htSchloss: 'beschlag', htExtra: 'beschlag', sprossen: 'fenster', spross: 'fenster', aufseite: 'fenster', breite: 'fenster',
       fa: 'farbe', fi: 'farbe', glas: 'glas', glasfn: 'glas', orn: 'glas', griff: 'beschlag', griffa: 'beschlag', gf: 'beschlag', rc: 'beschlag', absturz: 'beschlag',
       sart: 'sonne', einbau: 'sonne', sfarbe: 'sonne', antrieb: 'sonne', iart: 'sonne', ifarbe: 'sonne', insekt: 'insekt', fbi: 'bank', fba: 'bank', schwelle: 'bank', boden: 'bank', montage: 'montage' };
     const notizGruppe = (k) => (/^(typ|din)-\d+$/.test(k) ? 'fenster' : NOTIZ_GRUPPE[k] || NOTIZ_GRUPPE[String(k).toLowerCase()] || (DMAP[k] ? DMAP[k].wg : '') || 'allgemein');
@@ -854,6 +859,7 @@
     const fluegelZahl = (w) => (festForm(w) || w.art === 'fest' ? 0 : (w.sashes || sashesFor(w.teilung)).filter((x) => !x.st && x.t !== 'F').length);
     function oeffnungKurz(w) {
       if (nachruest(w)) return 'nur nachrüsten';
+      if (w.art === 'balkon' && w.kombi) return 'Tür und Fensterflügel über ' + th(num(w.kombiBru) || 850) + ' mm Brüstung';
       const art = w.art || 'fenster', S = w.sashes || sashesFor(w.teilung), nSt = S.filter((x) => x.st).length, n = fluegelZahl(w), nF = S.filter((x) => !x.st && x.t === 'F').length;
       if (art === 'fest') return S.length + (S.length === 1 ? ' Feld' : ' Felder') + ', fest verglast';
       if (art !== 'fenster' && art !== 'balkon') return opening(w).split(/, (?=[a-zäöüß]*[Ss]chwelle|flache|barrierefrei|Standard)/)[0];
@@ -1147,13 +1153,16 @@
       S.forEach((x, i) => {
         const sw = x.st ? stB : ant ? (frei - stB * nSt) * ant[kA++] / 100 : nSt ? flB : (iw - gap * (n - 1)) / n, fest = x.t === 'F' || art === 'fest' || !!x.st, g = fest ? 0 : Math.max(1.5, sw * 0.09);
         const gS = w.ol ? { eckig: true } : formFn(form, ix, by + f, iw, bh - 2 * f);
-        if (!fest) o += path(pfad(schnitt(gS, sx, iy, sw, ih)), fc, ink, 0.7);
-        const gx = sx + g, gy = iy + g, gw = sw - 2 * g, gh = ih - 2 * g - (pan && !fest ? pan : 0), gG = w.ol ? { eckig: true } : formFn(form, ix + g, by + f + g, iw - 2 * g, bh - 2 * f - 2 * g);
+        /* Fenster-Tür-Kombination: der Fensterflügel endet über der Brüstung, darunter Riegel und festes Feld (Paneel grau, Glas blau) */
+        const ihX = x.fe ? ih * Math.max(0.25, Math.min(0.75, ((d.elH || 2150) - (num(w.kombiBru) || 850)) / (d.elH || 2150))) : ih;
+        if (x.fe) o += path(R(sx, iy + ihX + f * 0.45, sw, Math.max(1, ih - ihX - f * 0.45)), w.kombiFeld === 'glas' ? gl : '#c9c9c6', ink, 0.5);
+        if (!fest) o += path(pfad(schnitt(gS, sx, iy, sw, ihX)), fc, ink, 0.7);
+        const gx = sx + g, gy = iy + g, gw = sw - 2 * g, gh = ihX - 2 * g - (pan && !fest && !x.fe ? pan : 0), gG = w.ol ? { eckig: true } : formFn(form, ix + g, by + f + g, iw - 2 * g, bh - 2 * f - 2 * g);
         /* Haustür: Füllung in der Farbe außen, Glas nur im Ausschnitt des Modells (htAusschnitt, wie im 3-D-Modell der App) */
         const hta = art === 'haustuer' && !fest ? htAusschnitt(w, x) : undefined;
         if (art === 'haustuer' && !fest) { o += path(R(gx, gy, gw, gh), fc, ink, 0.5); if (hta) o += path(R(gx + gw * hta[0], gy + gh * hta[1], gw * (hta[2] - hta[0]), gh * (hta[3] - hta[1])), gl, ink, 0.4); }
         else o += path(pfad(schnitt(gG, gx, gy, gw, gh)), gl, ink, 0.5);
-        if (pan && !fest) o += path(R(gx, gy + gh, gw, pan), '#c9c9c6', ink, 0.5);
+        if (pan && !fest && !x.fe) o += path(R(gx, gy + gh, gw, pan), '#c9c9c6', ink, 0.5);
         (w.bars || []).filter((b) => b.s === i).forEach((b) => { o += path(b.d === 'v' ? Ln([gx + gw * b.p, gy], [gx + gw * b.p, gy + gh]) : Ln([gx, gy + gh * b.p], [gx + gw, gy + gh * b.p]), 'none', spr, 1.2); });
         if (x.t !== 'X' && !x.st) o += sym(gx, gy + (gG.eckig ? 0 : gh * 0.3), gw, gG.eckig ? gh : gh * 0.7, x.t, x.din, da);
         sx += sw + gapAt(i);
@@ -1180,7 +1189,7 @@
       start: 'Start: Stelle und Element', fotos: 'Fotos', zeichnen: 'Lage auf dem Foto', planmasse: 'Wunschmaße', messen: 'Messen', raender: 'Ränder der Öffnung', ergebnis: 'Ergebnis der Maße',
       massweg: 'Weg zu den Maßen', lage: 'Lage', absturz: 'Absturzsicherung', design: 'Gestaltung', tiefe: 'Planungstiefe', teilung: 'Flügel', material: 'Material', ol: 'Oberlicht', ul: 'Unterlicht', form: 'Form', richtung: 'Öffnungsrichtung',
       felder: 'Felder', hsts: 'Schema der Hebe-Schiebe-Tür', hstr: 'Seite des Schiebeflügels', psks: 'Teile der PSK-Tür', pskr: 'Seite des Schiebeflügels', schwelle: 'Schwelle', boden: 'Fußboden',
-      fswn: 'Zahl der Flügel', fsws: 'Faltrichtung', fswg: 'Gehflügel', stulp: 'Gehflügel des Stulpfensters', stulpLage: 'Lage des Stulppaars', htModell: 'Füllung der Haustür', htSeiten: 'Seitenteile der Haustür', htGlas: 'Glas der Haustür', htGriff: 'Griff außen', htSchloss: 'Schloss', htExtra: 'Extras der Haustür', sprossen: 'Sprossen', spross: 'Sprossenart', aufseite: 'Aufgesetzte Sprossen', breite: 'Sprossenbreite',
+      fswn: 'Zahl der Flügel', fsws: 'Faltrichtung', fswg: 'Gehflügel', stulp: 'Gehflügel des Stulpfensters', stulpLage: 'Lage des Stulppaars', kombiSeite: 'Lage des Fensters neben der Tür', kombiBru: 'Brüstung unter dem Fenster', kombiFeld: 'Feld unter dem Fenster', htModell: 'Füllung der Haustür', htSeiten: 'Seitenteile der Haustür', htGlas: 'Glas der Haustür', htGriff: 'Griff außen', htSchloss: 'Schloss', htExtra: 'Extras der Haustür', sprossen: 'Sprossen', spross: 'Sprossenart', aufseite: 'Aufgesetzte Sprossen', breite: 'Sprossenbreite',
       fa: 'Farbe außen', fi: 'Farbe innen', glas: 'Verglasung', glasfn: 'Glas-Extras', orn: 'Ornamentglas', griff: 'Griff', griffa: 'Griff außen', gf: 'Griff-Farbe', rc: 'Einbruchschutz',
       sart: 'Sonnenschutz außen', einbau: 'Kasten des Sonnenschutzes', sfarbe: 'Farbe des Sonnenschutzes', antrieb: 'Antrieb', insekt: 'Insektenschutz', iart: 'Sicht- und Blendschutz innen',
       ifarbe: 'Farbe des Sichtschutzes', fbi: 'Fensterbank innen', fba: 'Fensterbank außen', montage: 'Montage', notiz: 'Notiz', extras: 'Weitere Wünsche',

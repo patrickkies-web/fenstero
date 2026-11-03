@@ -121,6 +121,7 @@ const ICO = {
   /* Flügelzahl und Felder als Strichzeichen (2.11.2026): Rahmen, Teilungen (Stulp gestrichelt, ohne Pfosten) und je Flügel ein Griff;
      feste Felder ohne Griff. Ersetzt in den runden Knöpfen die Zeichnung mit Glas und Öffnungsdreiecken, die bei 28 px zu dicht war */
   teil: (k, fest) => {
+    if (k === 'kombi') return [P(R(9, 8, 46, 48, 2), FR, INK, 1.4), P(L([30, 8], [30, 56]), 'none', INK, 1.3), P(L([30, 36], [55, 36]), 'none', INK, 1.3), P(R(33, 39, 19, 14.5), '#c9c9c6', INK, 0.6), P(L([25, 28], [25, 36]), 'none', INK, 2.2), P(L([35, 18], [35, 26]), 'none', INK, 2.2)];
     const n = k === '1' ? 1 : k === '2p' || k === '2s' ? 2 : num(k) || 1, x0 = 9, x1 = 55, y0 = 8, y1 = 56, bw = (x1 - x0) / n, o = [P(R(x0, y0, x1 - x0, y1 - y0, 2), FR, INK, 1.4)];
     const sk = fest ? [] : sashesFor(k), stulpF = (i) => !!(sk[i - 1] && sk[i - 1].stR); // Fuge links von Feld i
     for (let i = 1; i < n; i++) o.push(P(L([x0 + bw * i, y0], [x0 + bw * i, y1]), 'none', INK, stulpF(i) ? 1 : 1.3, stulpF(i) ? '3 3' : null));
@@ -350,6 +351,9 @@ const OPT = {
   htGriffA: [{ k: 'stange', label: 'Stoßgriff', sub: 'Stange außen' }, { k: 'knauf', label: 'Knauf', sub: 'feststehend' }, { k: 'druecker', label: 'Drücker', sub: 'beidseitig' }],
   htSchloss: [{ k: 'mehrfach', label: 'Mehrfach', sub: 'Standard' }, { k: 'automatik', label: 'Automatik', sub: 'beim Zuziehen' }, { k: 'elektronik', label: 'Elektronisch', sub: 'Finger, Code' }],
   htExtra: [{ k: 'brief', label: 'Briefschlitz' }, { k: 'spion', label: 'Türspion' }, { k: 'schliesser', label: 'Türschließer' }],
+  kombiSeite: [{ k: 'L', label: 'Links der Tür' }, { k: 'R', label: 'Rechts der Tür' }],
+  kombiBru: [{ k: '500', label: '50 cm' }, { k: '700', label: '70 cm' }, { k: '850', label: '85 cm' }, { k: '1000', label: '1 m' }],
+  kombiFeld: [{ k: 'paneel', label: 'Paneel', sub: 'geschlossen' }, { k: 'glas', label: 'Glas', sub: 'fest verglast' }],
   absturzTuer: [{ k: 'balkon', label: 'Ja, Balkon', sub: 'oder Terrasse davor' }, { k: 'gelaender', label: 'Nein, Geländer', sub: 'französischer Balkon' }, { k: 'glas', label: 'Nein, Glas', sub: 'Glasbrüstung davor' }],
   griffA: [{ k: 'keiner', label: 'Kein Griff außen' }, { k: 'ziehgriff', label: 'Ziehgriff mit Schnäpper' }, { k: 'abschliessbar', label: 'Abschließbar, mit Schlüssel' }],
   boden: [{ k: 'bleibt', label: 'Bleibt, wie er ist' }, { k: 'neu', label: 'Wird erneuert' }],
@@ -490,6 +494,7 @@ const GLOSS = {
   unterlicht: { s: 'Unterlicht', t: 'Was ist ein Unterlicht?', x: ['Ein festes Feld unter den Flügeln, als Glas oder als gedämmtes Paneel. Typisch in Küchen: Die Arbeitsplatte steht vor dem Fenster, der Flügel beginnt erst darüber und lässt sich trotzdem öffnen.', 'Die Höhe richtet sich nach Arbeitsplatte oder Brüstung, meist 30 bis 60 cm.'], tipp: 'Steht eine Küchenzeile davor, miss von der Fensterbank bis knapp über die Arbeitsplatte. So hoch wird das Unterlicht, und der Flügel darüber geht frei auf.', ico: () => ICO.ul('glas'), see: ['oberlicht', 'fest'] },
   festverglasung: { s: 'Festverglasung', t: 'Was ist eine Festverglasung?', x: ['Glas direkt im Blendrahmen, ohne Flügel und ohne Griff. Dadurch schmalere Ansichten, mehr Licht und weniger Kosten. Zum Lüften braucht es daneben ein Fenster, das aufgeht.', 'Großflächige Festverglasungen werden in Felder geteilt, weil Scheiben ab etwa 2,5 m² schwer und teuer werden.'], tipp: 'Kombiniere eine große Festverglasung mit einem schmalen Flügel daneben. So hast du das Licht und kannst trotzdem lüften.', ico: () => ICO.art('fest'), see: ['fest', 'pfosten'] },
   haustuer: { s: 'Haustür', t: 'Was wählst du bei der Haustür?', x: ['Die Füllung ist das Türblatt: geschlossen oder mit Glas, als schmaler Streifen, mittig oder als großer Ausschnitt. Das genaue Modell suchst du mit deinem Fensterbauer aus seinem Katalog aus.', 'Außen hat eine Haustür meist einen Stoßgriff oder einen Knauf, innen einen Drücker. Eine Mehrfachverriegelung schließt an mehreren Punkten; eine Automatik verriegelt schon beim Zuziehen; elektronisch öffnest du per Fingerabdruck, Code oder App.', 'Seitenteile und Oberlicht bringen Licht in den Flur. Auch eine Nebeneingangstür planst du hier.'], tipp: 'Miss die Haustür wie eine Balkontür: die Öffnung bis zum fertigen Fußboden und den Rahmen samt Schwelle. Das Modell, die Füllung im Detail und den Preis klärst du danach mit deinem Fensterbauer.', ico: () => ICO.art('haustuer'), see: ['seitenteil', 'schwelle', 'rc2'] },
+  kombi: { s: 'Fenster-Tür-Kombination', t: 'Was ist eine Fenster-Tür-Kombination?', x: ['Eine Balkon- oder Terrassentür und ein Fenster in einem gemeinsamen Rahmen, mit einem Pfosten dazwischen. Das Fenster sitzt über einer Brüstung; darunter ist ein festes Feld, meist ein geschlossenes Paneel, manchmal Glas.', 'Häufig in Häusern aus den 60er- bis 90er-Jahren am Wohnzimmer oder an der Küche. Ersetzt wird sie meist wieder als ein Element, damit die Öffnung in der Wand bleibt, wie sie ist.'], tipp: 'Miss die Brüstung vom fertigen Fußboden bis zur Unterkante des Fensterflügels. Die Maße der Öffnung misst du wie bei einer Tür, über die ganze Breite.', ico: () => ICO.teil('kombi'), see: ['balkon', 'pfosten', 'paneel'] },
   balkon: { s: 'Balkon- und Terrassentür', t: 'Was ist eine Balkon- oder Terrassentür?', x: ['Eine Tür, die aufgeht wie ein Fenster: drehen zum Durchgehen, kippen zum Lüften. Unten sitzt eine Schwelle statt der Fensterbank.', 'Damit sie von außen zugeht, gibt es einen Ziehgriff mit Schnäpper. Mit Schloss lässt sie sich auch von außen abschließen.'], tipp: 'Gehst du oft hinaus und ziehst die Tür hinter dir zu, nimm den Ziehgriff. Ohne ihn bleibt sie von außen nur angelehnt.', ico: () => ICO.art('balkon'), see: ['schwelle', 'ziehgriff', 'psk'] },
   hst: { s: 'Hebe-Schiebe-Tür', t: 'Was ist eine Hebe-Schiebe-Tür?', x: ['Eine bodentiefe Tür, bei der ein großer Flügel per Hebegriff angehoben und zur Seite geschoben wird. Die Öffnung bleibt frei, nichts schwenkt in den Raum.', 'Schema A: ein Schiebeflügel vor einem festen Teil. Schema C: zwei Schiebeflügel öffnen in der Mitte zwischen zwei festen Teilen. Schema D: zwei Schiebeflügel, die in der Mitte schließen.'], tipp: 'Achte auf die Schwelle: Eine flache Schwelle ist bequem, außen braucht es dann eine Rinne für das Regenwasser.', ico: () => ICO.art('hst'), see: ['schiebeseite', 'schwelle', 'psk'] },
   psk: { s: 'PSK-Tür', t: 'Was ist eine PSK-Tür?', x: ['Parallel-Schiebe-Kipp: Der Flügel kippt zum Lüften. Zum Öffnen stellt er sich parallel ab und schiebt sich vor das feste Teil.', 'Meist deutlich günstiger als eine Hebe-Schiebe-Tür. Dafür sind die Flügel kleiner, und unten ist immer eine Schwelle. Vierteilig schieben sich zwei Flügel von der Mitte aus vor die festen Teile außen.'], tipp: 'Gehst du täglich oft hinaus, ist eine Hebe-Schiebe-Tür leichtgängiger. Für gelegentliches Öffnen reicht eine PSK-Tür.', ico: () => ICO.art('psk'), see: ['hst', 'schiebeseite', 'schwelle'] },
@@ -595,7 +600,7 @@ const GLOSS = {
 /* Verzeichnis „Begriffe“: nach Themen gruppiert, darin alphabetisch; jeder Eintrag steht genau einmal */
 const GLOSS_GRUPPEN = [
   ['Aufmaß und Messen', ['referenz', 'rahmenmass', 'oeffnung-hoehe', 'element-hoehe', 'oeffnung-breite', 'element-breite', 'raender', 'laibung', 'anschlag', 'bruestung', 'rohbau', 'wandstaerke', 'feinaufmass', 'bestellmass', 'einbausituation', 'lage']],
-  ['Element und Öffnen', ['elementart', 'ersatz', 'neuoeffnung', 'oeffnungsart', 'dk', 'dreh', 'kipp', 'fest', 'symbol', 'dinlr', 'aussen', 'blendrahmen', 'pfosten', 'stulp', 'oberlicht', 'unterlicht', 'festverglasung', 'balkon', 'haustuer', 'hst', 'psk', 'fsw', 'schiebeseite', 'faltpaket', 'schwelle', 'fussboden', 'absturz', 'seitenteil', 'kvd', 'paneel', 'eckhst']],
+  ['Element und Öffnen', ['elementart', 'ersatz', 'neuoeffnung', 'oeffnungsart', 'dk', 'dreh', 'kipp', 'fest', 'symbol', 'dinlr', 'aussen', 'blendrahmen', 'pfosten', 'stulp', 'oberlicht', 'unterlicht', 'festverglasung', 'balkon', 'kombi', 'haustuer', 'hst', 'psk', 'fsw', 'schiebeseite', 'faltpaket', 'schwelle', 'fussboden', 'absturz', 'seitenteil', 'kvd', 'paneel', 'eckhst']],
   ['Material und Form', ['material', 'kunststoff', 'kunststoffalu', 'holz', 'holzalu', 'alu', 'form', 'holzart', 'profil', 'oberflaeche', 'dichtung']],
   ['Sprossen', ['sprossen', 'wiener', 'szr', 'auf', 'echt', 'sprossenbreite']],
   ['Farbe', ['ral', 'holzdekor', 'db703']],
@@ -620,6 +625,10 @@ function sashesFor(k) {
   if (k === '4s') return [{ t: 'D', din: 'L', steh: true, stR: true }, { t: 'DK', din: 'R' }, { t: 'DK', din: 'L', stR: true }, { t: 'D', din: 'R', steh: true }];
   return [{ t: 'DK', din: 'L' }, { t: 'DK', din: 'R' }];
 }
+/* Fenster-Tür-Kombination (Lückenprüfung 3.11.2026): Balkon- oder Terrassentür und Fenster in einem Rahmen, Pfosten dazwischen; fe = der
+   Fensterflügel, darunter Riegel und festes Feld (Paneel oder Glas) bis zur Unterkante; seite = wo das Fenster sitzt, von innen gesehen */
+const kombiFluegel = (seite) => (seite === 'L' ? [{ t: 'DK', din: 'L', fe: true }, { t: 'D', din: 'R' }] : [{ t: 'D', din: 'L' }, { t: 'DK', din: 'R', fe: true }]);
+const KOMBI_BRU = 850;
 /* Festverglasung: nur Felder, ohne Flügelrahmen und Griff */
 const festFelder = (n) => Array.from({ length: Math.max(1, Math.min(4, num(n) || 1)) }, (x, i) => ({ t: 'F', din: i % 2 ? 'R' : 'L' }));
 /* Hebe-Schiebe-Tür nach Schema: A = 1 Schiebeflügel vor 1 Festteil, A3 = 1 vor 2 Festteilen, C = 2 Schiebeflügel mittig vor 2 Festteilen,
@@ -658,7 +667,7 @@ const bankFarbePasst = (fbi, f) => !BANK_FARBEN[fbi] || BANK_FARBEN[fbi].indexOf
 const htAusschnitt = (w, x) => AW.htAusschnitt(w, x);
 /* Wechsel der Elementart: Flügel, Teilung und Griff passend setzen; Sprossen, Ober- und Unterlicht zurück auf Standard */
 function artSetzen(w, art) {
-  w.art = art;
+  w.art = art; delete w.kombi;
   if (art === 'fest') { w.teilung = '2p'; w.sashes = festFelder(2); w.ol = false; w.ul = false; w.griff = 'ohne'; }
   else if (art === 'hst') { w.hst = Object.assign({ schema: 'A', richtung: 'R', schwelle: 'flach' }, w.hst || {}); w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); w.teilung = String(w.sashes.length); w.ol = false; w.ul = false; w.form = 'rechteck'; if (!OPT.hstGriff.some((o) => o.k === w.griff)) w.griff = 'standard'; }
   else if (art === 'fsw') { w.fsw = Object.assign({ n: 3, schema: 'links', geh: true, schwelle: 'flach' }, w.fsw || {}); w.sashes = fswFluegel(w.fsw.n, w.fsw.schema, w.fsw.geh); w.teilung = String(w.sashes.length); w.ol = false; w.ul = false; w.form = 'rechteck'; if (w.griff !== 'abschliessbar') w.griff = 'standard'; }
@@ -1348,6 +1357,8 @@ function w3dHTML(w, o) {
   /* Schwelle: das untere Profil der Tür, Aluminium, mit Trittfläche */
   if (V.tuer) h += faceEl('schw', 'w3d-schw') + faceEl('schw-t', 'w3d-schw w3d-schw-t');
   for (let i = 0; i < V.n - 1; i++) h += faceEl('mul-' + i, 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('mulb-' + i, 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
+  /* Fenster-Tür-Kombination: unter dem Fensterflügel Riegel und festes Feld (Glas oder Paneel) im Blendrahmen */
+  w.sashes.forEach((x, i) => { if (x.fe) h += faceEl('fe-front-' + i, 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('fe-glass-' + i, 'w3d-glass w3d-ul') + faceEl('fe-pan-b-' + i, 'w3d-paneel w3d-back') + faceEl('fe-back-' + i, 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"') + faceEl('fe-k-' + i, 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('fe-kb-' + i, 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"'); });
   w.sashes.forEach((x, i) => {
     const fixed = x.t === 'F' || x.t === 'X', symSvg = '<svg class="w3d-sym" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" data-r="sym-' + i + '">' + symPaths(w, x) + '</svg>';
     const bars = w.bars.filter((b) => b.s === i).map((b) => '<span class="w3d-bar' + (o.editBars ? ' is-edit' : '') + (o.selBar === b.id ? ' is-sel' : '') + '" data-bar="' + b.id + '" data-dir="' + b.d + '" data-r="bar-' + b.id + '" style="--bi: ' + barBg(w, fin, 'innen') + '; --bo: ' + barBg(w, fout, 'aussen') + '; background: var(--bi)"></span>').join('');
@@ -1356,7 +1367,7 @@ function w3dHTML(w, o) {
     h += '<div class="w3d-f w3d-glass" data-r="glass-' + i + '" data-glass="' + i + '">' + symSvg + bars + '</div>' + faceEl('pane-a-' + i, 'w3d-scheibe') + faceEl('pane-b-' + i, 'w3d-scheibe');
     for (let k = 0; k < 8; k++) h += '<span class="w3d-f w3d-pilz" data-r="pz-' + i + '-' + k + '" style="--i: ' + k + '"></span>';
     /* Paneel unten in der Balkontür (mit Riegel darüber), nur unten satiniertes Glas */
-    if (Z.paneel && !fixed) h += faceEl('riegel-i-' + i, 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('pan-i-' + i, 'w3d-paneel') + faceEl('pan-o-' + i, 'w3d-paneel w3d-back') + faceEl('riegel-o-' + i, 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
+    if (Z.paneel && !fixed && !x.fe) h += faceEl('riegel-i-' + i, 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('pan-i-' + i, 'w3d-paneel') + faceEl('pan-o-' + i, 'w3d-paneel w3d-back') + faceEl('riegel-o-' + i, 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
     if (Z.sicht) h += faceEl('su-' + i, 'w3d-sicht-u');
     /* Bänder: oben und unten auf der Bandseite (sichtbare Bänder; verdeckte liegen im Falz) */
     if (Z.baender && (x.t === 'D' || x.t === 'DK' || x.t === 'P') && !x.st) h += faceEl('bd-o-' + i, 'w3d-band') + faceEl('bd-u-' + i, 'w3d-band');
@@ -1510,7 +1521,7 @@ function glasLupe(w) {
 const glasLupeKey = (w) => [w.glas, (w.glasfn || []).join(','), w.rc, dg(w, 'ahFarbe') ? w.ahFarbe : '', dg(w, 'dicht') ? w.dicht : ''].join('|');
 const glasText = (w) => (w.glas === '2' ? '2 Scheiben · Ug ≈ 1,1' : '3 Scheiben · Ug ≈ 0,5 bis 0,7');
 /* Struktur-Signatur: solange sie gleich bleibt, wird die Bühne weiterverwendet und alles morpht mit Übergängen */
-function w3dSig(w, o) { o = o || {}; const V = w3dCalc(w, o); return [o.id || 'w3d', w.art || 'fenster', o.frei ? 'frei' : '', w3dGeformt(w, o) ? 'g' : 'e', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0, V.tuer ? 't' : 'f', V.ulH ? 1 : 0, sonneAktiv(w) ? w.sart : 0, innenAktiv(w) ? 1 : 0, zubehoerSig(w)].join('|'); }
+function w3dSig(w, o) { o = o || {}; const V = w3dCalc(w, o); return [o.id || 'w3d', w.art || 'fenster', w.sashes.map((x) => (x.fe ? 'e' : '-')).join(''), o.frei ? 'frei' : '', w3dGeformt(w, o) ? 'g' : 'e', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0, V.tuer ? 't' : 'f', V.ulH ? 1 : 0, sonneAktiv(w) ? w.sart : 0, innenAktiv(w) ? 1 : 0, zubehoerSig(w)].join('|'); }
 /* Farben und Materialien auf die Flächen schreiben (mit Übergang, wenn sich etwas ändert) */
 function w3dPaint(stage, w) {
   /* Nur schreiben, was sich geändert hat (der Vergleich mit dem gelesenen Stil schlägt bei Verläufen immer fehl) */
@@ -1538,6 +1549,13 @@ function w3dPaint(stage, w) {
   bg('el-front', fin.bg); bg('el-back', fout.bg); bgc('el-side-l', fout.solid); bgc('el-side-r', fout.solid); bgc('el-side-t', fin.solid); bgc('el-side-b', fin.solid);
   bg('ol-front', fin.bg); bg('ol-back', fout.bg); bg('kf', fin.bg); bg('kfb', fout.bg);
   bg('ul-front', fin.bg); bg('ul-back', fout.bg); bg('kfu', fin.bg); bg('kfub', fout.bg);
+  w.sashes.forEach((x, i) => {
+    if (!x.fe) return;
+    const pan = w.kombiFeld !== 'glas', fg = q('fe-glass-' + i), fpb = q('fe-pan-b-' + i);
+    bg('fe-front-' + i, fin.bg); bg('fe-back-' + i, fout.bg); bg('fe-k-' + i, fin.bg); bg('fe-kb-' + i, fout.bg);
+    if (fg) { fg.classList.toggle('w3d-glass', !pan); fg.classList.toggle('w3d-paneel', pan); fg._bg = pan ? fin.solid : ''; fg.style.background = fg._bg; }
+    if (fpb) { fpb._bg = fout.solid; fpb.style.background = fpb._bg; fpb.style.opacity = pan ? '' : '0'; }
+  });
   const paneel = w.ul && w.ulA === 'paneel', ug = q('ul-glass'), upb = q('ul-pan-b');
   if (ug) { ug.classList.toggle('w3d-glass', !paneel); ug.classList.toggle('w3d-paneel', paneel); ug._bg = paneel ? fin.solid : ''; ug.style.background = ug._bg; }
   if (upb) { upb._bg = fout.solid; upb.style.background = upb._bg; upb.style.opacity = paneel ? '' : '0'; }
@@ -1592,7 +1610,7 @@ function w3dOberflaeche(stage, w, fin, fout) {
   ['el-front', 'ol-front', 'kf', 'ul-front', 'kfu', 'el-side-t', 'el-side-b'].forEach((r) => setz(r, hi, fin.solid, oi));
   ['el-back', 'ol-back', 'kfb', 'ul-back', 'kfub', 'el-side-l', 'el-side-r', 'ul-pan-b'].forEach((r) => setz(r, ha, fout.solid, oa));
   setz('ul-glass', w.ul && w.ulA === 'paneel' ? hi : '');
-  w.sashes.forEach((x, i) => { ['mul-', 'sf-in-', 'sfe-t-', 'sfe-b-', 'pan-i-', 'riegel-i-'].forEach((r) => setz(r + i, hi, fin.solid, oi)); ['mulb-', 'sf-out-', 'sfe-l-', 'sfe-r-', 'pan-o-', 'riegel-o-'].forEach((r) => setz(r + i, ha, fout.solid, oa)); });
+  w.sashes.forEach((x, i) => { ['mul-', 'sf-in-', 'sfe-t-', 'sfe-b-', 'pan-i-', 'riegel-i-', 'fe-front-', 'fe-k-'].forEach((r) => setz(r + i, hi, fin.solid, oi)); ['mulb-', 'sf-out-', 'sfe-l-', 'sfe-r-', 'pan-o-', 'riegel-o-', 'fe-back-', 'fe-kb-', 'fe-pan-b-'].forEach((r) => setz(r + i, ha, fout.solid, oa)); if (x.fe) setz('fe-glass-' + i, w.kombiFeld !== 'glas' ? hi : ''); });
   ['t', 'l', 'r'].forEach((k) => { setz('li-' + k, hi, fin.solid, oi); setz('la-' + k, ha, fout.solid, oa); });
   /* Fensterbank innen: die gewählte Farbe bestimmt das Material (Marmor und Granit als Stein, Holzdekor als Holz) */
   const fF = dg(w, 'fbiFarbe') ? w.fbiFarbe : '', bi = fF === 'granit' ? 'granit' : fF === 'holz' ? 'holz' : fF === 'weiss' || fF === 'marmor' ? '' : BANK_ART[w.fbi] || '', ba = w.fba === 'alu' ? 'alu' : '';
@@ -1790,6 +1808,14 @@ function w3dLayout(stage, w, o, gr) {
   const griffe = [], rand = barBezug(w, V, sf);
   stage._bez = { rand: rand, sashH: sashH }; // fürs Ziehen der Sprossen (bindRails)
   w.sashes.forEach((x, i) => {
+    /* Fenster-Tür-Kombination: der Fensterflügel endet über der Brüstung (kombiBru ab Unterkante Element), darunter Riegel und festes Feld */
+    const sashH = x.fe ? kombiFensterH(w, V, s, y0 + elH - sashTop, V.sashH * s) : V.sashH * s;
+    if (x.fe) {
+      const fl = ix + V.sx[i] * s, fw = V.sw[i] * s, kh = Math.max(3, V.mul * s), ky = sashTop + sashH, fy = ky + kh, fh = Math.max(2, sashTop + V.sashH * s - fy), ub = 3, pan = w.kombiFeld !== 'glas';
+      face(q('fe-k-' + i), fw, kh, fl, ky, z0, '', '0 0'); face(q('fe-kb-' + i), fw, kh, fl, ky, z0 - fd, 'rotateY(180deg)', '50% 50%');
+      face(q('fe-front-' + i), fw, fh, fl, fy, z0, '', '0 0', hole(fw, fh, ub, ub, fw - ub, fh - ub)); face(q('fe-back-' + i), fw, fh, fl, fy, z0 - fd, 'rotateY(180deg)', '50% 50%', hole(fw, fh, ub, ub, fw - ub, fh - ub));
+      face(q('fe-glass-' + i), fw - 2 * ub, fh - 2 * ub, fl + ub, fy + ub, pan ? z0 - 2 : z0 - fd / 2, '', '0 0'); face(q('fe-pan-b-' + i), fw - 2 * ub, fh - 2 * ub, fl + ub, fy + ub, z0 - fd + 2, 'rotateY(180deg)', '50% 50%');
+    }
     /* Hebe-Schiebe-Tür: das Festteil sitzt in der äußeren Laufebene mit eigenem Profil, der Schiebeflügel innen davor */
     const sashW = V.sw[i] * s, sash = q('sash-' + i), fixed = x.t === 'F', hstFest = fixed && V.art === 'hst', ssf = rand.r[i], left = ix + V.sx[i] * s, zS = hstFest ? -(fd - sd) : 0;
     if (!sash) return;
@@ -2130,6 +2156,12 @@ function w3dGriffAchse(V, w, s, sashH, yt, yb, lang) {
   const lo = yt + Math.max(250 * s, 40 * s), hi = yb - Math.max(lang + 23 * s, 250 * s);
   const ziel = tuer || bodentief ? sashH - (1050 - unter) * s : Math.max(sashH / 2, (yt + yb) / 2);
   return lo <= hi ? clamp(ziel, lo, hi) : (yt + yb) / 2;
+}
+/* Höhe des Fensterflügels der Kombination in Bildpunkten: von der Oberkante der Flügel bis über die Brüstung (bis = Abstand Oberkante der Flügel
+   bis Unterkante Element), abzüglich Riegel; mindestens ein Viertel, höchstens drei Viertel der Türflügelhöhe */
+function kombiFensterH(w, V, s, bis, voll) {
+  const kh = Math.max(3, V.mul * s), h = bis - (num(w.kombiBru) || KOMBI_BRU) * s - kh;
+  return clamp(h, voll * 0.25, voll * 0.75);
 }
 function w3dGriffLage(V, w, x, i, s, g) {
   const sashW = g.sashW, sashH = g.sashH, sf = g.sf, G = g.G, gI = g.gI;
@@ -4778,7 +4810,7 @@ const KAPITEL = [{ k: 'aufbau', n: 'Aufbau' }, { k: 'vorweg', n: 'Lage' }, { k: 
 const KAP_APP = { typ: 'oeffnung', din: 'oeffnung', stulp: 'oeffnung', hstr: 'oeffnung', pskR: 'oeffnung', fsws: 'oeffnung', fswg: 'oeffnung', schwelle: 'oeffnung', boden: 'oeffnung', ol: 'oeffnung', ul: 'oeffnung', richtung: 'oeffnung', massweg: 'aufbau', extras: 'extras' };
 /* Der Hauptweg: was jeder Kunde gefragt wird (das Wesentliche, das man sieht und das den Preis macht, dazu die Pflichtthemen Absturz und
    Erreichbarkeit). Alles andere steht in der Liste „Möchtest du noch etwas einstellen?“ nach den Fensterbänken und ist freiwillig */
-const Q_HAUPT = { htModell: 1, htSeiten: 1, htGlas: 1, htGriff: 1, htSchloss: 1, form: 1, teilung: 1, stulpLage: 1, felder: 1, hsts: 1, pskS: 1, fswn: 1, massweg: 1, lage: 1, absturz: 1, design: 1, stulp: 1, typ: 1, din: 1, hstr: 1, pskR: 1, fsws: 1, fswg: 1, schwelle: 1, material: 1, fa: 1, fi: 1, glas: 1, sprossen: 1, breite: 1, sprFarbe: 1, rc: 1, sart: 1, sfarbe: 1, antrieb: 1, klFarbe: 1, fbi: 1, fba: 1, extras: 1 };
+const Q_HAUPT = { kombiSeite: 1, kombiBru: 1, htModell: 1, htSeiten: 1, htGlas: 1, htGriff: 1, htSchloss: 1, form: 1, teilung: 1, stulpLage: 1, felder: 1, hsts: 1, pskS: 1, fswn: 1, massweg: 1, lage: 1, absturz: 1, design: 1, stulp: 1, typ: 1, din: 1, hstr: 1, pskR: 1, fsws: 1, fswg: 1, schwelle: 1, material: 1, fa: 1, fi: 1, glas: 1, sprossen: 1, breite: 1, sprFarbe: 1, rc: 1, sart: 1, sfarbe: 1, antrieb: 1, klFarbe: 1, fbi: 1, fba: 1, extras: 1 };
 const qHaupt = (q) => !!(q.haupt || Q_HAUPT[String(q.id).split('-')[0]]);
 const KAP_I = {}; KAPITEL.forEach((k, i) => { KAP_I[k.k] = i; });
 /* Kapitel und Stufe je Frage stehen in modell.js (AW.FRAGE), damit Klärungsliste, Betrieb und Blatt wissen, was bei welcher Tiefe
@@ -4863,7 +4895,7 @@ function detailFrage(w, dd) {
 }
 /* Erklärung je Frage (i-Knopf am Titel). Q_G_STATT ersetzt eine unpassende Zuordnung, Q_G füllt, wo eine Frage noch keine hat */
 const Q_G_STATT = { typ: 'oeffnungsart', richtung: 'aussen', teilung: 'blendrahmen', glas: 'uwert', glasfn: 'glasextras', sart: 'sonnenschutz', griff: 'griff', fswg: 'faltpaket', felder: 'festverglasung' };
-const Q_G = { massweg: 'rahmenmass', extras: 'tiefe', lage: 'lage', absturz: 'absturz', design: 'design', din: 'dinlr', material: 'material', ol: 'oberlicht', ul: 'unterlicht', form: 'form', hsts: 'hst', hstr: 'schiebeseite', pskS: 'psk', pskR: 'schiebeseite', schwelle: 'schwelle', boden: 'fussboden', fswn: 'fsw', fsws: 'faltpaket', sprossen: 'sprossen', spross: 'sprossen', aufseite: 'auf', breite: 'sprossenbreite', fa: 'ral', fi: 'ral', orn: 'ornament', griffA: 'ziehgriff', gf: 'grifffarbe', rc: 'rc2', einbau: 'rollladen', sfarbe: 'ral', antrieb: 'antrieb', insekt: 'insekt', iart: 'innenschutz', ifarbe: 'innenschutz', fbi: 'fensterbank', fba: 'fensterbank', montage: 'montage', notiz: 'notizen', tiefe: 'tiefe', htModell: 'haustuer', htSeiten: 'seitenteil', htGlas: 'haustuer', htGriff: 'haustuer', htSchloss: 'haustuer', htExtra: 'haustuer' };
+const Q_G = { massweg: 'rahmenmass', extras: 'tiefe', lage: 'lage', absturz: 'absturz', design: 'design', din: 'dinlr', material: 'material', ol: 'oberlicht', ul: 'unterlicht', form: 'form', hsts: 'hst', hstr: 'schiebeseite', pskS: 'psk', pskR: 'schiebeseite', schwelle: 'schwelle', boden: 'fussboden', fswn: 'fsw', fsws: 'faltpaket', sprossen: 'sprossen', spross: 'sprossen', aufseite: 'auf', breite: 'sprossenbreite', fa: 'ral', fi: 'ral', orn: 'ornament', griffA: 'ziehgriff', gf: 'grifffarbe', rc: 'rc2', einbau: 'rollladen', sfarbe: 'ral', antrieb: 'antrieb', insekt: 'insekt', iart: 'innenschutz', ifarbe: 'innenschutz', fbi: 'fensterbank', fba: 'fensterbank', montage: 'montage', notiz: 'notizen', tiefe: 'tiefe', htModell: 'haustuer', htSeiten: 'seitenteil', htGlas: 'haustuer', htGriff: 'haustuer', htSchloss: 'haustuer', htExtra: 'haustuer', kombiSeite: 'kombi', kombiBru: 'kombi', kombiFeld: 'kombi' };
 /* Erklärung je Option (i in Karten und Chips): OPT_G vor dem g in OPT, damit Fachbegriffe ihren eigenen Eintrag bekommen */
 const OPT_G = { art: { fenster: 'oeffnungsart', fest: 'festverglasung', fsw: 'fsw' }, situation: { ersatz: 'ersatz', neu: 'neuoeffnung' }, typ: { F: 'fest', D: 'dreh', K: 'kipp', DK: 'dk' }, teilung: { '3': 'fest', '4': 'fest', '3s': 'stulp', '4s': 'stulp' }, material: { kunststoff: 'kunststoff', kunststoffalu: 'kunststoffalu', holz: 'holz', holzalu: 'holzalu', alu: 'alu' }, glasfn: { sonne: 'sonnenschutzglas', extraklar: 'glasarten', vogel: 'glasarten', selbstr: 'glasarten' }, sart: { rollladen: 'rollladen', raffstore: 'raffstore', screen: 'screen', klappladen: 'klappladen' }, einbau: { aufsatz: 'aufsatz', vorbau: 'vorbau', unterputz: 'unterputz' }, antrieb: { solar: 'antrieb' }, insekt: { rollo: 'insekt', pendel: 'insekt', schiebe: 'insekt' }, pskSchema: { C: 'psk' }, fbi: { werzalit: 'werzalit' }, rc: { basis: 'basisschutz', rc1: 'rc1n', rc2n: 'rcstufen', rc2: 'rc2', rc3: 'rcstufen' } };
 const optG = (group, o) => ((OPT_G[group] || {})[o.k] || o.g || '');
@@ -4902,7 +4934,7 @@ function qList(w) {
         nr += 2; i++; continue;
       }
       nr++;
-      L.push({ id: 'typ-' + i, title: echt > 1 ? 'Wie öffnet Flügel ' + nr + '?' : 'Wie soll es aufgehen?', sub: echt > 1 ? 'Der markierte Flügel. Antippen wechselt.' : '', kind: 'cards', group: 'typ', opts: typen, val: x.t, act: 'sash', f: 't', sash: i, ico: ICO.typ, view: 'inside', g: 'symbol', hint: echt > 1 ? 'Flügel ' + nr + ' von ' + echt : 'Er schwingt so auf' });
+      L.push({ id: 'typ-' + i, title: x.fe ? 'Wie öffnet das Fenster?' : w.kombi ? 'Wie öffnet die Tür?' : echt > 1 ? 'Wie öffnet Flügel ' + nr + '?' : 'Wie soll es aufgehen?', sub: w.kombi ? '' : echt > 1 ? 'Der markierte Flügel. Antippen wechselt.' : '', kind: 'cards', group: 'typ', opts: x.fe ? OPT.typ : typen, val: x.t, act: 'sash', f: 't', sash: i, ico: ICO.typ, view: 'inside', g: 'symbol', hint: echt > 1 ? 'Flügel ' + nr + ' von ' + echt : 'Er schwingt so auf' });
       if (x.t === 'D' || x.t === 'DK') L.push({ id: 'din-' + i, title: echt > 1 ? 'Scharniere von Flügel ' + nr + '?' : 'Scharniere links oder rechts?', sub: 'Von innen gesehen. Der Griff sitzt gegenüber.', kind: 'chips', group: 'din', val: x.din, act: 'sash', f: 'din', sash: i, view: 'inside', g: 'dinlr', hint: 'Der Griff wandert mit' });
     }
   };
@@ -4932,9 +4964,14 @@ function qList(w) {
       L.push({ id: 'richtung', title: 'Öffnet nach innen oder außen?', kind: 'chips', group: 'richtung', val: w.richtung, act: 'setw', f: 'richtung', view: 'inside', g: 'symbol' });
     }
   } else if (art === 'balkon') {
-    L.push({ id: 'teilung', title: 'Tür oder Doppeltür?', sub: w.e_teilung || !d.elW ? '' : 'Vorschlag nach deiner Breite von ' + thousand(d.elW) + ' mm.', kind: 'cards', group: 'teilung', opts: [{ k: '1', label: 'Einflügelig', sub: 'eine Tür' }, { k: '2p', label: 'Doppeltür', sub: 'mit Pfosten', g: 'pfosten' }, { k: '2s', label: 'Doppeltür', sub: 'ohne Pfosten, Stulp', g: 'stulp' }], val: w.teilung, act: 'teilung', ico: ICO.teil, view: 'inside', g: 'stulp', hint: 'Zum Drehen ziehen' });
+    L.push({ id: 'teilung', title: 'Wie ist die Tür aufgeteilt?', sub: w.e_teilung || !d.elW ? '' : 'Vorschlag nach deiner Breite von ' + thousand(d.elW) + ' mm.', kind: 'cards', group: 'teilung', opts: [{ k: '1', label: 'Einflügelig', sub: 'eine Tür' }, { k: '2p', label: 'Doppeltür', sub: 'mit Pfosten', g: 'pfosten' }, { k: '2s', label: 'Doppeltür', sub: 'ohne Pfosten, Stulp', g: 'stulp' }, { k: 'kombi', label: 'Tür + Fenster', sub: 'Fenster daneben', g: 'kombi' }], val: w.kombi ? 'kombi' : w.teilung, act: 'teilung', ico: ICO.teil, view: 'inside', g: 'stulp', hint: 'Zum Drehen ziehen' });
+    if (w.kombi) {
+      L.push({ id: 'kombiSeite', title: 'Wo sitzt das Fenster?', sub: 'Von innen gesehen.', kind: 'chips', group: 'kombiSeite', val: w.kombiSeite || 'R', act: 'kombi', f: 'seite', view: 'inside', g: 'kombi' });
+      L.push({ id: 'kombiBru', title: 'Wie hoch ist die Brüstung?', sub: 'Vom Fußboden bis zur Unterkante des Fensters.', kind: 'chips', group: 'kombiBru', val: String(w.kombiBru || KOMBI_BRU), act: 'kombi', f: 'bru', view: 'inside', g: 'kombi' });
+    }
     zwischen();
     fluegel(OPT.typ.filter((o) => o.k !== 'K' && (o.k !== 'F' || echt > 1))); // eine Tür muss aufgehen: „fest“ nur neben einem zweiten Flügel
+    if (w.kombi) L.push({ id: 'kombiFeld', title: 'Was ist unter dem Fenster?', sub: 'Das feste Feld zwischen Riegel und Boden.', kind: 'chips', group: 'kombiFeld', val: w.kombiFeld || 'paneel', act: 'kombi', f: 'feld', view: 'inside', g: 'kombi' });
     L.push(oberlicht('Ein extra Feld über der Tür.'));
     L.push(schwelle(w.bt, 'bt'));
     L.push({ id: 'boden', title: 'Und der Fußboden?', sub: 'Davon hängt ab, wie hoch die Schwelle sitzt.', kind: 'chips', group: 'boden', val: w.bt.boden, act: 'bt', f: 'boden', view: 'bankInnen', hint: lab('boden', w.bt.boden) });
@@ -7754,6 +7791,12 @@ function act(name, el) {
     case 'tour-pdf': return tourPDF();
     case 'tour-nochmal': { const t = S.tour; if (!t) return; tourStopp(); t.mess = { k: 0, cur: '', fertig: false }; render(); nachBild(tourMessen, 300); return; }
     case 'tour-art': { if (!S.tour) return; if (v === S.win.art) return render(); const alt = S.win, nw = tourWin(v); ['fa', 'fi', 'material', 'glas', 'glasfn', 'sart', 'sfarbe', 'roll', 'ki'].forEach((k) => { nw[k] = alt[k]; }); S.win = nw; S.selSash = 0; S.openSash = -1; render(); if (tourArtTuer(v)) nachBild(tuerZeigen, 360); return; }
+    case 'kombi': {
+      if (f === 'seite') { w.kombiSeite = v === 'L' ? 'L' : 'R'; const alt = w.sashes.filter((x) => !x.st), neuS = kombiFluegel(w.kombiSeite); neuS.forEach((x) => { const a = alt.find((y) => !!y.fe === !!x.fe); if (a) x.t = a.t; }); w.sashes = neuS; delete w.anteile; if (w.seiten) seitenAnwenden(w); mirrorBars(w); }
+      else if (f === 'bru') w.kombiBru = num(v) || KOMBI_BRU;
+      else if (f === 'feld') w.kombiFeld = v === 'glas' ? 'glas' : 'paneel';
+      return render();
+    }
     case 'situation': { const neu = v === 'neu', nach = v === 'nachruest'; if (neu === !!w.neu && nach === !!w.nachruest) return render(); const warNeu = !!w.neu; w.nachruest = nach; if (nach && w.roll === 'aufsatz') w.roll = 'vorbau'; if (neu === warNeu) { w.demontage = !neu && !nach; return render(); } w.neu = neu; w.plan = null; if (neu) { w.demontage = false; if (w.sart === 'behalten') { w.sart = 'keiner'; w.roll = 'keiner'; } if (w.fbi === 'behalten') w.fbi = 'werzalit'; if (w.fba === 'behalten') w.fba = 'alu'; } else w.demontage = !nach; return render(); }
     case 'art': { if (v === w.art) return render(); artSetzen(w, v); S.selSash = 0; S.openSash = -1; return render(); }
     case 'felder': { w.e_teilung = true; w.teilung = v; delete w.anteile; w.sashes = festFelder(v === '2p' ? 2 : num(v)); mirrorBars(w); S.selSash = 0; S.selBar = null; return render(); }
@@ -8013,7 +8056,8 @@ function act(name, el) {
     }
     case 'sash-tap': return onSashTap(+v);
     case 'teil-gleich': { delete w.anteile; return render(); }
-    case 'teilung': { w.e_teilung = true; const sashes = sashesFor(v); w.teilung = v; w.sashes = sashes; delete w.anteile; if (w.seiten) seitenAnwenden(w); mirrorBars(w); S.selSash = 0; S.selBar = null; S.openSash = -1; return render(); }
+    case 'teilung': { w.e_teilung = true; const kombi = v === 'kombi' && w.art === 'balkon'; if (kombi) { w.kombi = true; w.kombiSeite = w.kombiSeite || 'R'; w.kombiBru = num(w.kombiBru) || KOMBI_BRU; } else delete w.kombi;
+      const sashes = kombi ? kombiFluegel(w.kombiSeite) : sashesFor(v); w.teilung = kombi ? '2p' : v; w.sashes = sashes; delete w.anteile; if (w.seiten) seitenAnwenden(w); mirrorBars(w); S.selSash = 0; S.selBar = null; S.openSash = -1; return render(); }
     case 'form': {
       wzAutoWeiter('form'); // Form gewählt: das Modell zeigt sie, dann geht es von selbst zur Flügelzahl (Wunsch des Inhabers, 2.11.2026)
       if (v === w.form) return render();

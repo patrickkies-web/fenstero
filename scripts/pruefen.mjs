@@ -5103,6 +5103,24 @@ if (teil(32)) {
   ok(na32.an && na32.ids0 === 'massweg lage sart insekt iart extras' && na32.ids1 === 'massweg lage sart einbau sfarbe antrieb insekt iart extras' && na32.roll === 'vorbau' && na32.einbau === 'vorbau,unterputz' &&
     /Umfang/.test(na32.rows) && !/Glas|Griff|Material|Fensterbank|Montage/.test(na32.rows) && na32.b === null && na32.abs === false && /^Bestehendes Fenster bleibt, nur nachrüsten: Rollladen, .*Insektenschutz Spannrahmen$/.test(na32.satz) && na32.gruppen === 'Umfang|Sonnenschutz|Insektenschutz' && na32.zurueck,
     'Nur nachrüsten: dritte Wahl bei der Stelle, Hauptweg Maße, Lage, Sonnenschutz außen (Vorbau oder Unterputz), Insektenschutz, Sichtschutz innen; Aufmaß mit Umfang, ohne Richtmaß und Absturzfrage; zurück auf Ersetzen (' + JSON.stringify(na32).slice(0, 500) + ')');
+  /* Fenster-Tür-Kombination (Lückenprüfung 3.11.2026): vierte Karte bei der Balkontür; Seite und Brüstung im Hauptweg, das Feld darunter in
+     der Liste; der Fensterflügel ist kürzer, darunter Riegel und Feld im Blendrahmen; das Fenster darf kippen; Text fürs Aufmaß */
+  const ko32 = await p.evaluate(() => {
+    const w = baseWin(); artSetzen(w, 'balkon'); w.el = { w: 1800, h: 2150 }; S.win = w; S.editIdx = -1; S.windows = []; S.q = 'teilung'; S.screen = 'frage'; render(true);
+    document.querySelector('[data-act="teilung"][data-v="kombi"]').click();
+    const ids = qSichtbar(S.win).map((q) => q.id), alle = qList(S.win).map((q) => q.id), st = document.getElementById('w3d');
+    const fe = !!st.querySelector('[data-r="fe-k-1"]') && !!st.querySelector('[data-r="fe-glass-1"]') && !st.querySelector('[data-r="fe-k-0"]');
+    const verh = parseFloat(st.querySelector('[data-r="sash-1"]').style.height) / parseFloat(st.querySelector('[data-r="sash-0"]').style.height);
+    const typ = qList(S.win).find((q) => q.id === 'typ-1').opts.map((o) => o.k).join(',');
+    S.q = 'kombiSeite'; render(true); document.querySelector('[data-act="kombi"][data-f="seite"][data-v="L"]').click();
+    const links = !!S.win.sashes[0].fe && !S.win.sashes[1].fe && !!document.querySelector('#w3d [data-r="fe-k-0"]') && !document.querySelector('#w3d [data-r="fe-k-1"]');
+    const x = { ids: ids.join(' '), feld: alle.indexOf('kombiFeld') >= 0 && ids.indexOf('kombiFeld') < 0, fe: fe, verh: +verh.toFixed(3), typ: typ, links: links, text: AW.opening(S.win), kurz: AW.oeffnungKurz(S.win), svg: (AW.svg(S.win, 64).match(/<path/g) || []).length };
+    artSetzen(S.win, 'fenster'); x.weg = !S.win.kombi;
+    return x;
+  });
+  ok(/^teilung kombiSeite kombiBru massweg lage typ-0 din-0 typ-1 din-1 /.test(ko32.ids) && ko32.feld && ko32.fe && ko32.verh > 0.4 && ko32.verh < 0.7 && ko32.typ === 'F,D,K,DK' && ko32.links &&
+    /^Fenster-Tür-Kombination, Fenster links der Tür: Tür Dreh DIN rechts, Fenster Dreh-Kipp DIN links über 850 mm Brüstung, darunter Paneel/.test(ko32.text) && /Fensterflügel/.test(ko32.kurz) && ko32.svg >= 8 && ko32.weg,
+    'Fenster-Tür-Kombination: vierte Karte bei der Balkontür, Seite und Brüstung im Hauptweg, Feld darunter in der Liste; Fensterflügel kürzer mit Riegel und Feld im Rahmen, darf kippen; Seite wechselt das Modell; Text, Zeichnung; anderes Element setzt zurück (' + JSON.stringify(ko32).slice(0, 500) + ')');
   /* b) Was der Inhaber aus dem Hauptweg genommen hat, steht in der Liste */
   const ex32 = await p.evaluate(() => { const w = demoProject()[0]; S.win = w; return qExtras(qList(w)).map((q) => q.id); });
   const soll32 = ['kvd', 'profil', 'schmal', 'dicht', 'ahFarbe', 'oberfl', 'griffM', 'griffPos', 'kinder', 'baender', 'luefter', 'oeffner', 'kontakt', 'gitter', 'leiste'];
