@@ -151,7 +151,7 @@ export default async (h) => {
   ok(vorNeu === 0 && /^[a-z0-9]{10}$/.test(codeA) && aktivA === codeA, '25.2 Code erst mit dem ersten Fenster (POST /api/instanz/start), gemerkt als laufende Planung dieses Geräts (' + codeA + ')');
   await merken(sA, 'Start des Fensters');
   await fotosMachen(sA); await merken(sA, 'Fotos');
-  await fensterSpeichern(sA, 'Wohnzimmer'); await sA.waitForSelector('.scr[data-screen="fertig"]'); await merken(sA, 'Fenster gespeichert');
+  await fensterSpeichern(sA, 'Wohnzimmer'); await sA.waitForSelector('.scr[data-screen="home"]'); await merken(sA, 'Fenster gespeichert');
   const fotosOben = await bis(sA, async () => !!S.windows[0] && bilderVon(S.windows[0]).length === 2 && (await fotosOffen()) === 0, 20000);
   const ids = await sA.evaluate(() => bilderVon(S.windows[0]));
   const ab = (await X.attrappe()).ablage.fotos || [], ord = 'link/' + codeA + '/';
@@ -203,7 +203,7 @@ export default async (h) => {
   for (const [x, art, k] of [[E, 'essential', { name: 'Familie Birke', mail: 'birke@beispiel.de' }], [S9, 'signature', { name: 'Familie Eiche', tel: '0221 998877' }]]) {
     const ctx = await telefon(), s = await oeffnen(ctx, x);
     await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]');
-    await fensterSpeichern(s, 'Küche'); await s.waitForSelector('.scr[data-screen="fertig"]');
+    await fensterSpeichern(s, 'Küche'); await s.waitForSelector('.scr[data-screen="home"]');
     if (art === 'signature') await merken(s, 'Fenster gespeichert (Signature)');
     await kontaktSenden(s, k, { merken: art === 'signature' });
     if (art === 'signature') { await merken(s, 'Bestätigung (Signature)'); await h.foto(s, '25-bestaetigung-signature'); }
@@ -271,7 +271,7 @@ export default async (h) => {
   ok(/Persönliche Anfrage von/.test(e1.text) && /Fensterwerk Kranich/.test(e1.text) && /für Familie Linde/.test(e1.text) && !eezi.test(e1.text) && !e1.web && !e1.aktiv && e1.hash === '#k-' + ein.code, '25.7 Signature-Einladung #k-…: persönliche Startseite in der Marke, ohne eeziframes, nicht als Planung der Website gemerkt');
   ok(!!zE && (zE.status === 'geoeffnet' || !!((zE.daten || {}).log || {}).geoeffnet), '25.7 „Geöffnet“ an den Betrieb gemeldet');
   await sE.click('[data-act="new"]'); await sE.waitForSelector('.scr[data-screen="start"]');
-  await fensterSpeichern(sE, 'Erker'); await sE.waitForSelector('.scr[data-screen="fertig"]');
+  await fensterSpeichern(sE, 'Erker'); await sE.waitForSelector('.scr[data-screen="home"]');
   await sE.evaluate(() => go('anfrage')); await sE.click('.bb .btn.primary, .scr.dna .lg-weiter'); await sE.waitForSelector('.scr[data-screen="anfrage2"]');
   const e2 = await sE.evaluate(() => ({ kopf: (document.querySelector('.hd .eyebrow, .scr.dna .ab-chip') || {}).textContent || '', bar: (document.querySelector('.bb .btn.primary, .scr.dna .lg-weiter') || {}).textContent || '' }));
   await sE.click('.bb .btn.primary, .scr.dna .lg-weiter'); await sE.waitForSelector('.scr[data-screen="blatt"]'); await sE.click('.bb .btn.primary, .scr.dna .lg-weiter');
@@ -289,7 +289,7 @@ export default async (h) => {
   await h.foto(sV, '25-vorschau');
   await sV.click('[data-act="new"]'); await sV.waitForSelector('.scr[data-screen="start"]');
   const bandFenster = await sV.evaluate(() => !!document.querySelector('.inst-vorschau'));
-  await fensterSpeichern(sV, 'Probe'); await sV.waitForSelector('.scr[data-screen="fertig"]');
+  await fensterSpeichern(sV, 'Probe'); await sV.waitForSelector('.scr[data-screen="home"]');
   await kontaktSenden(sV, { name: 'Familie Probe', mail: 'probe@beispiel.de' });
   const v2 = await sV.evaluate(() => ({ nr: S.sent.nr, art: S.sent.art, text: document.querySelector('.scr').innerText }));
   const mailV = (await T.warteMail((m) => (m.betreff || '').includes('Familie Probe'), 15000))[0];

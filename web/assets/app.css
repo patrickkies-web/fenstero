@@ -3415,6 +3415,23 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .scr.dna.wz .qpanel .qcur, .scr.dna.wz .qpanel .fw-hinweis, .scr.dna.wz .qpanel .qrow, .scr.dna.wz .qpanel .ff-info, .scr.dna.wz .qpanel .qrow .sub, .scr.dna.wz .qpanel .qlabel { color: var(--textgrau) }
 .scr.dna.wz .qpanel .qcur b { color: var(--schwarz) }
 /* Kacheln (Karten und Formen) auf Weiß: hellgrau, gewählt schwarz mit violettem Punkt */
+/* Angebots-Folien (anfrage, anfrage2): Antworten als Karten wie in den Wünschen (4.11.2026) */
+.scr.dna.ab .ab-karten { margin-top: 2px }
+.scr.dna.ab .ab-karten .qopt { position: relative; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 8px; width: 100%; min-height: 64px; padding: 12px 14px; border: 0; border-radius: var(--rund-m);
+  color: var(--schwarz); background: #f4f4f6; box-shadow: inset 0 0 0 1px #e6e5ea; text-align: left; cursor: pointer; transition: transform 160ms cubic-bezier(.2, .7, .2, 1), background-color 160ms ease }
+.scr.dna.ab .ab-karten.mit-zeichen .qopt { min-height: 104px; justify-content: space-between }
+.scr.dna.ab .ab-karten.ab-drei { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+.scr.dna.ab .ab-karten.ab-drei .qopt { padding: 12px 10px }
+.scr.dna.ab .ab-karten.ab-drei .qopt .lbl { font-size: 14px; overflow-wrap: anywhere }
+.scr.dna.ab .ab-karten .qopt::before { content: none }
+.scr.dna.ab .ab-karten .qopt > svg { color: var(--textgrau) }
+.scr.dna.ab .ab-karten .qopt .lbl { font: 500 15px/1.2 var(--font-sans); color: var(--schwarz) }
+.scr.dna.ab .ab-karten .qopt[aria-pressed="true"] { background: var(--schwarz); box-shadow: none }
+.scr.dna.ab .ab-karten .qopt[aria-pressed="true"] > svg, .scr.dna.ab .ab-karten .qopt[aria-pressed="true"] .lbl { color: var(--weiss) }
+.scr.dna.ab .ab-karten .qopt[aria-pressed="true"]::after { content: ""; position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px rgba(137, 126, 252, .3) }
+.scr.dna.ab .ab-karten .qopt:active { transform: scale(.97) }
+.scr.dna.ab .ab-karten .qopt:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px }
+@media (prefers-reduced-motion: reduce) { .scr.dna.ab .ab-karten .qopt { transition: none } }
 .scr.dna.wz .qpanel .qopt, .scr.dna.wz .qpanel .qformen .qf { color: var(--schwarz); background: #f4f4f6; box-shadow: inset 0 0 0 1px #e6e5ea }
 .scr.dna.wz .qpanel .qopt::before, .scr.dna.wz .qpanel .qformen .qf::before { content: none }
 .scr.dna.wz .qpanel .qopt > svg, .scr.dna.wz .qpanel .qformen .qf > svg { color: var(--textgrau) }
@@ -3527,6 +3544,9 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .mw-wert small { font: 400 13px/1 var(--font-sans); color: var(--textgrau) }
 .mw-mal { font: 300 22px/1 var(--font-sans); color: var(--silbergrau) }
 .mw-hinweis { margin: 10px 2px 0; font: 400 13px/1.4 var(--font-sans); color: var(--textgrau) }
+/* Pflichtauswahl beim Weg zu den Maßen (4.11.2026): ohne Auswahl kein Weiter, die Zeile sagt warum */
+.mw-fehler { display: flex; gap: 8px; align-items: flex-start; margin: 12px 2px 0; font: 500 14px/1.4 var(--font-sans); color: #b4441f }
+.mw-fehler::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: var(--koralle); box-shadow: 0 0 0 3px rgba(248, 137, 98, .25) }
 .ex-liste { display: grid; gap: 22px }
 .ex-gruppe { display: grid; gap: 6px }
 .ex-kopf { margin: 0 4px 2px; color: var(--textgrau) }

@@ -682,6 +682,15 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     Stationen), Führung (Bühne mit Modell, Fotos oder Aufmaßblatt, Auswahl wie die Wünsche, „Gut zu wissen“ auf Anthrazit) und die
     Bögen auf allen Folien (Übersicht, Begriffe, Erklärung, Notiz, Verlassen, Großansicht: nur CSS, Aufbau und Aktionen unverändert).
     Alle mit Laptop-Raster. Grün gibt es dort nicht mehr: Haken der alten Bausteine violett (`--ok`), Hinweise mit Koralle-Punkt.
+  - Antworten auf „Fürs Angebot“ 1–3 (Inhaber, 4.11.2026: „noch in dem alten Design … konzentriere dich auf die Designs, die bereits im
+    Konfigurator erstellt sind“): Gebäude, Baujahr, Wann, Budget, Förderung und „Am besten erreichbar“ als Karten wie in den Wünschen
+    (`abKarten` in app.js: `qcards kompakt quad`, Fläche #f4f4f6 mit feinem Rand, gewählt schwarz mit weißer Schrift und violettem
+    Punkt, 0,97 beim Druck); Gebäude mit feinen Strichzeichen (Einfamilienhaus, Doppelhaus, Reihenhaus, Mehrfamilienhaus, Wohnung,
+    Denkmal), drei Antworten in einer Reihe. Gilt auch für Weg A (Kontakt der Vermittlung) und den Kontakt im Konfigurator der Betriebe.
+  - Ablauf (Inhaber, 4.11.2026): „Wie kommst du zu den Maßen?“ ist Pflicht; „Weiter“ ohne Wahl bleibt auf der Frage und sagt mit
+    Koralle-Punkt, was fehlt (`.mw-fehler`). Der Bogen „Bevor du speicherst“ hat „Zurück“ (eine Frage zurück, nichts gespeichert).
+    „Fenster speichern“ führt in die Liste „Deine Fenster“ (vorher „Gespeichert“); „Gespeichert“ öffnet sich über das Fenster in der
+    Liste, und „Zurück“ in den Angebots-Folien geht Schritt für Schritt zurück.
     Unverändert im alten Look: die Einladungsseite eines Betriebs im Kundenlink (`linkHome`) und alle Bildschirme in Instanzen auf der
     Website eines Fensterbauers (eigene Marke). Die alten Fassungen bleiben als `SCREENS.*Alt` bzw. `AB_ALT` im Code.
   - Regel des Inhabers (27.10.2026): Beim Messen eine feste Ansicht je Element, in den Wünschen das ausgearbeitete 3-D-Modell; die
@@ -724,8 +733,8 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
   Vorher/Nachher am Beispielhaus auf der Willkommensseite, in „Gespeichert“ und in der Liste; die Einladung ab dem ersten gespeicherten
   Fenster. In „Gespeichert“ steht „Dieses Fenster“ (Maße, Wünsche, Kopieren, Löschen, Themen) über der Einladung und „Wie geht es weiter?“.
 - **Lenkung zum Aufmaßblatt (Inhaber, 3.11.2026: jede Generierung kostet; Konzept docs/konzepte/2026-11-03-conversion-funnel.md):** Die
-  Einladung erscheint erst, wenn ein Fenster vollständige Maße hat. Eine KI-Vorschau (ein Durchgang mit allen gesetzten Fenstern) ist frei,
-  mit gesichertem Konto drei, mit freigeschaltetem Aufmaßblatt (gekauft oder über „Angebote aus deiner Nähe“) zehn je Gerät; der Editor
+  Einladung erscheint erst, wenn ein Fenster vollständige Maße hat. Drei KI-Vorschauen (je ein Durchgang mit allen gesetzten Fenstern) sind frei,
+  mit gesichertem Konto (E-Mail und Code) zehn, mit freigeschaltetem Aufmaßblatt (gekauft oder über „Angebote aus deiner Nähe“) zwanzig je Gerät (seit 4.11.2026); der Editor
   sagt das vorher offen. Danach öffnet „KI-Vorschau“ den Bogen „Weitere Vorschauen mit deinem Aufmaßblatt“ (Zum Aufmaßblatt / Nicht jetzt).
   Nach dem Ergebnis ist die Pille „Zum Aufmaßblatt“, dazu die Karte „Dein Aufmaßblatt · als PDF an deinen Fensterbauer“. Der Zähler liegt
   im Browser und lenkt nur; die harte Grenze hält der Server (Bremse je Tag).
@@ -768,7 +777,7 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
   `docs/profis/bilder/2026-11-02-hausbild-cloudflare-ablauf.jpg`). Der Weg über Black Forest Labs direkt (FLUX 3, oben beschrieben) bleibt
   im Code, ist aber aus (`FREIGEGEBEN`).
 - **Kosten und Grenzen:** rund 1,7 Cent je Fenster (Cloudflare: 1,5 US-Cent je Bild bis 1 Megapixel plus 0,2 Cent je Megapixel Eingabe).
-  Server: 10 Vorschauen je 10 Minuten und Anschluss, 6 je Anschluss und Tag, `HAUSBILD_TAG_MAX` (Vorgabe 150 seit 4.11.2026, vorher 500) am Tag insgesamt; eine
+  Server: 10 Vorschauen je 10 Minuten und Anschluss, 12 je Anschluss und Tag, `HAUSBILD_TAG_MAX` (Vorgabe 150 seit 4.11.2026, vorher 500) am Tag insgesamt; eine
   Vorschau zählt einmal, mit höchstens 8 Fenstern. Gespeichert wird nichts.
 - **Ohne WebGL** zeichnet hausbild.js eine einfache Ansicht des Elements (Rahmenfarbe, Flügel, Glas, Kasten).
 - **Recht (Prüfung 2.11.2026, docs/recht/2026-11-02-hausbild-pruefung.md):** Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) vor der ersten

@@ -3244,7 +3244,7 @@ function homeAufmassDna() {
   const erklaert = '<section class="card erklaert li-erklaert"><p class="eyebrow">So läuft es</p><div class="steps">' +
     '<div class="step"><span class="n">1</span><div><b>Messen.</b><p>Zwei Fotos und der Zollstock, jeder Schritt erklärt. Die KI liest die Einbausituation.</p></div></div>' +
     '<div class="step"><span class="n">2</span><div><b>In 3D planen.</b><p>Flügel, Farbe innen und außen, Glas und Sprossen, jeder Fachbegriff mit Bild erklärt.</p></div></div>' +
-    '<div class="step"><span class="n">3</span><div><b>Aufmaßblatt.</b><p>Alle Maße und Wünsche als PDF, mit Code für deinen Fensterbauer. Damit schreibt er dir ein erstes Angebot.</p></div></div></div>' +
+    '<div class="step"><span class="n">3</span><div><b>Aufmaßblatt.</b><p>Alle Maße und Wünsche als PDF zum Ausdrucken, mit Code für deinen Fensterbauer. So versteht er genau, was du willst, und schreibt dir ein erstes Angebot.</p></div></div></div>' +
     '<p class="nachsatz">Ein Fenster in zwei Minuten ausprobieren, ohne eigene Maße: <button type="button" class="ulink" data-act="tour-start">Führung starten</button></p></section>';
   const links = '<div class="foot-links li-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a><a class="link" href="' + PORTAL_URL + '">Zur Startseite ›</a></div>';
   const fuss = n ? '<div class="lg-fuss li-fuss"><button type="button" class="dna-pille lg-weiter btn primary" data-act="go" data-v="' + (FREI() ? 'teilen' : 'anfrage') + '">' + (FREI() ? 'Zum Aufmaßblatt' : 'Aufmaßblatt fertigstellen') + abPfeil + '</button></div>' : '';
@@ -4144,13 +4144,29 @@ function abHausBuehne(pr, replaced, schritt) {
     '<div class="ab-kapseln' + (ueber ? ' ist-ueber' : '') + '">' + kapseln + drittel + '</div>' +
     '<p class="ab-satz">' + (total ? anr('Sie tauschen ', 'Du tauschst ') + '<b>' + replaced + ' von ' + total + '</b>' + (ueber ? ', mehr als ein Drittel.' : '.') : anr('Wie viele Fenster hat das Haus? Tragen Sie es unten ein.', 'Wie viele Fenster hat das Haus? Trag es unten ein.')) + '</p></div>');
 }
+/* Antworten der Angebots-Folien als Karten wie in den Wünschen (Inhaber, 4.11.2026: „noch in dem alten Design … konzentriere dich auf die
+   Designs, die bereits im Konfigurator erstellt sind“): qcards/qopt mit feinem Zeichen beim Gebäude, gewählt schwarz mit weißer Schrift */
+const AB_HAUS = {
+  efh: '<path d="M8 30 32 12l24 18"/><path d="M14 26v26h36V26"/><rect x="27" y="38" width="10" height="14" rx="1"/><rect x="18" y="32" width="7" height="7" rx="1"/><rect x="39" y="32" width="7" height="7" rx="1"/>',
+  dh: '<path d="M6 30 20 18l12 10 12-10 14 12"/><path d="M10 27v25h44V27"/><path d="M32 28v24"/><rect x="16" y="34" width="7" height="7" rx="1"/><rect x="41" y="34" width="7" height="7" rx="1"/>',
+  rh: '<path d="M4 30h56"/><path d="M6 30l8-10h36l8 10"/><path d="M8 30v22h48V30"/><path d="M24 30v22M40 30v22"/><rect x="13" y="36" width="5" height="6" rx="1"/><rect x="29.5" y="36" width="5" height="6" rx="1"/><rect x="46" y="36" width="5" height="6" rx="1"/>',
+  mfh: '<rect x="16" y="10" width="32" height="42" rx="2"/><path d="M23 18h6M35 18h6M23 27h6M35 27h6M23 36h6M35 36h6"/><path d="M29 52v-8h6v8"/>',
+  etw: '<rect x="16" y="10" width="32" height="42" rx="2"/><path d="M23 18h6M35 18h6M35 27h6M23 36h6M35 36h6"/><rect x="22" y="25" width="8" height="5" rx="1" fill="currentColor" stroke="none"/><path d="M29 52v-8h6v8"/>',
+  denkmal: '<path d="M10 24 32 12l22 12"/><path d="M12 24h40"/><path d="M17 28v20M27 28v20M37 28v20M47 28v20"/><path d="M10 52h44M13 48h38"/>'
+};
+const abZeichen = (k) => (AB_HAUS[k] ? '<svg viewBox="0 0 64 64" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="strich">' + AB_HAUS[k] + '</svg>' : '');
+function abKarten(group, cur, field, mitZeichen) {
+  const q = { act: 'setp', f: field };
+  return '<div class="qcards kompakt quad ab-karten' + (mitZeichen ? ' mit-zeichen' : '') + (OPT[group].length === 3 ? ' ab-drei' : '') + '" role="group">' + OPT[group].map((o) => '<div class="qo">' + qOpt(q, o, String(cur) === String(o.k), (mitZeichen ? abZeichen(o.k) : '') +
+    '<span class="tx"><span class="lbl">' + (OPT[group].length === 3 ? esc(o.label) : trenn(o.label)).replace(/ €/g, '\u00a0€') + '</span></span>') + '</div>').join('') + '</div>';
+}
 function anfrageDna() {
   const pr = S.proj, replaced = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'dein Fensterbauer') : 'der Fensterbauer';
   const frage = lgFrage('Noch kurz zum <em>Haus.</em>', 'angaben', 'Damit ' + bn + ' gut planen kann. Alles freiwillig.');
   let karte = '<div class="qpanel ab-panel">' +
-    '<div class="ab-teil">' + abKopf('Gebäude', 'gebaeude') + chips('gebaeude', pr.gebaeude, 'gebaeude', 'setp') + '</div>';
+    '<div class="ab-teil">' + abKopf('Gebäude', 'gebaeude') + abKarten('gebaeude', pr.gebaeude, 'gebaeude', true) + '</div>';
   if (pr.gebaeude === 'denkmal') karte += noteBox(anr('Bei Denkmalschutz brauchen Sie', 'Bei Denkmalschutz brauchst du') + ' meist eine Genehmigung. Material und Sprossen können vorgeschrieben sein.', 'echt', 'warn ab-note');
-  karte += '<div class="ab-teil">' + abKopf('Baujahr des Hauses', 'baujahr') + chips('baujahr', pr.baujahr, 'baujahr', 'setp') + '</div>' +
+  karte += '<div class="ab-teil">' + abKopf('Baujahr des Hauses', 'baujahr') + abKarten('baujahr', pr.baujahr, 'baujahr') + '</div>' +
     '<div class="ab-teil">' + abKopf('Fenster im ganzen Haus', 'lueftung') + '<div class="ab-weiss ab-stepper"><button type="button" class="ab-rund" aria-label="Weniger" data-act="bumpp" data-v="-1">−</button><label class="ab-eingabe"><input type="text" inputmode="numeric" id="p-total" data-in="p" data-f="total" value="' + esc(pr.total) + '" placeholder="z. B. 12" maxlength="3" aria-label="Fenster im ganzen Haus"><span>Stück</span></label><button type="button" class="ab-rund" aria-label="Mehr" data-act="bumpp" data-v="1">+</button></div>' +
     '<p class="ab-klein">' + anr('Sie tauschen ', 'Du tauschst ') + replaced + ' davon.</p></div>';
   if (num(pr.total) && replaced > num(pr.total) / 3) karte += noteBox(anr('Sie tauschen ', 'Du tauschst ') + replaced + ' von ' + (num(pr.total) || 0) + ' Fenstern, mehr als ein Drittel. Dann ist ein Lüftungskonzept nach DIN 1946-6 erforderlich; darum kümmert sich ' + (lk ? esc(bn) : 'dein Fensterbauer') + '.', 'lueftung', 'warn ab-note');
@@ -4175,10 +4191,10 @@ function anfrage2Dna() {
   const frage = lgFrage('Zeit und <em>Budget.</em>', 'zeitraum', lk && !web ? 'Freiwillig. Deine Kontaktdaten hat ' + bn + ' schon.' : 'Freiwillig, hilft beim Angebot.');
   const fw = AW.foerdWeg(pr);
   let karte = '<div class="qpanel ab-panel">' +
-    '<div class="ab-teil">' + abKopf('Wann soll es losgehen?', 'zeitraum') + chips('zeit', pr.zeit, 'zeit', 'setp') + '</div>' +
-    '<div class="ab-teil">' + abKopf('Budget', 'budget') + chips('budget', pr.budget, 'budget', 'setp') + '</div>' +
+    '<div class="ab-teil">' + abKopf('Wann soll es losgehen?', 'zeitraum') + abKarten('zeit', pr.zeit, 'zeit') + '</div>' +
+    '<div class="ab-teil">' + abKopf('Budget', 'budget') + abKarten('budget', pr.budget, 'budget') + '</div>' +
     /* Förderweg früh klären: Er ändert das Angebot (Zielwerte, Energieeffizienz-Experte, Bescheinigung) */
-    '<div class="ab-teil">' + abKopf('Förderung', 'foerderung') + chips('foerdweg', fw, 'foerdweg', 'setp') + '</div>';
+    '<div class="ab-teil">' + abKopf('Förderung', 'foerderung') + abKarten('foerdweg', fw, 'foerdweg') + '</div>';
   if (FOERD_HINWEIS[fw]) karte += noteBox(FOERD_HINWEIS[fw], null, 'ab-note');
   if (lk) karte += '<div class="ab-teil">' + abKopf('Nachricht an ' + bn) + '<p class="ab-klein">' + (web ? anr('Freiwillig, zum Beispiel was Ihnen wichtig ist.', 'Freiwillig, zum Beispiel was dir wichtig ist.') : 'Freiwillig, zum Beispiel wann du erreichbar bist.') + '</p><div class="rows">' + textRow('Nachricht', 'notiz', 'z. B. Rollladen im Bad klemmt', 'text', 'p') + '</div></div>';
   karte += '</div>';
@@ -4209,7 +4225,7 @@ function anfrage3Dna() {
   const pr = S.proj, vw = vermAn(), zur = vw ? 'Zurück: Wie geht es weiter?' : 'Zurück: Zeit und Budget';
   const frage = lgFrage('Wie erreicht dich <em>dein Fensterbauer?</em>', 'kontakt', 'Steht auf dem Aufmaßblatt, damit er sich mit dem Angebot melden kann. Alles freiwillig; das Blatt bekommt nur, wem du es gibst.');
   const karte = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Kontakt') + '<div class="rows ab-felder">' + textRow('Name', 'name', 'Vor- und Nachname', 'text', 'p') + textRow('PLZ und Ort', 'ort', 'z. B. 50667 Köln', 'text', 'p') + textRow('Telefon', 'tel', 'Für Rückfragen', 'tel', 'p') + textRow('E-Mail', 'mail', 'name@beispiel.de', 'email', 'p') + '</div></div>' +
-    '<div class="ab-teil">' + abKopf('Am besten erreichbar') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div></div>';
+    '<div class="ab-teil">' + abKopf('Am besten erreichbar') + abKarten('erreich', pr.erreich, 'erreich') + '</div></div>';
   return { html: lgKopf(['back', zur]) + dnaTisch(abBuehne('ab-blatt', vw ? vmSchritt(4) : anfrageHead(3, false), abPapier()), frage + karte + abFuss(zur, 'go', 'teilen', 'Zum Aufmaßblatt')), back: ['Zurück', vw ? 'weg' : 'anfrage2'], dna: true, cls: 'dna ab dt', voll: true };
 }
 SCREENS.anfrageAlt = SCREENS.anfrage; SCREENS.anfrage2Alt = SCREENS.anfrage2; SCREENS.anfrage3Alt = SCREENS.anfrage3;
@@ -4320,7 +4336,7 @@ function vmKontakt() {
     kontaktFeld('Telefon, am besten Handy', 'tel', 'z. B. 0171 2345678', 'tel', 'tel', f.tel, true) + kontaktFeld('E-Mail', 'mail', 'Freiwillig, dann kommt das Aufmaßblatt auch per Mail', 'email', 'email', f.mail, false) +
     '</div><p class="vm-vertrauen vm-vertrauen--tel"><b>Deine Nummer bestätigst du gleich mit einem Code.</b> Damit die Betriebe wissen, dass ein echter Mensch anfragt. So bekommst du ernsthafte Rückmeldungen.</p>' +
     '<p class="ab-pflicht">* Pflicht. Deine Angaben bekommen nur die Betriebe, die du ausgewählt hast, und erst, wenn sie zugesagt haben. Mehr im <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>.</p></div>' +
-    '<div class="ab-teil">' + abKopf('Am besten erreichbar · freiwillig') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div></div>' +
+    '<div class="ab-teil">' + abKopf('Am besten erreichbar · freiwillig') + abKarten('erreich', pr.erreich, 'erreich') + '</div></div>' +
     '<button type="button" class="vm-einw' + (f.einw ? ' ist-bad' : '') + '" data-act="vm-einw" role="checkbox" aria-checked="' + !!v.einw + '"><span class="vm-box" aria-hidden="true">' + CHECK_S + '</span><span>' + esc(vmEinwText()) + '</span></button>';
   const grund = f.fehlt || f.einw ? '<p class="vm-grund" role="status">' + esc(f.fehlt ? 'Bitte noch die markierten Felder ausfüllen.' : f.einw) + '</p>' : '';
   const busy = v.codeLaeuft, fuss = busy ? rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Betriebe" disabled>' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter btn primary" disabled aria-busy="true">Einen Moment …</button></div>' : abFuss('Zurück: Betriebe', 'vm-kontakt', '', 'Abschicken');
@@ -4598,7 +4614,7 @@ function dateiCard() {
   if (INST && S.betrieb) return INST_M.kopieKunde ? '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Eine Kopie für dich</p><b>Deine Anfrage als PDF</b><small>Direkt nach dem Senden, als Durchschrift mit deinen Fenstern, der Ausstattung und deinen Wünschen.</small></div></div></div>' : '';
   if (S.betrieb) { const bn = S.betrieb.name || 'dein Fensterbauer'; return '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Eine Kopie für dich?</p><b>Frag ' + esc(bn) + '</b><small>Dein Aufmaß gehört zu diesem Auftrag. ' + esc(bn) + ' hat das komplette Aufmaßblatt als PDF und gibt es dir gern mit dem Angebot.</small></div></div></div>'; }
   if (FREI()) return '<div class="card datei-card bought"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">' + (KUNDE_FREI() ? 'Für dich · kostenlos' : 'Freigeschaltet') + '</p><b>Dein Aufmaßblatt als PDF</b><small>' + n + (n === 1 ? ' Fenster' : ' Fenster') + ', alle Maße, Fotoauswertung und Wünsche, mit Code für den Fensterbauer.</small></div></div><span class="row" style="display: flex; gap: 8px; flex: 0 0 auto"><button type="button" class="btn ghost" data-act="teil-pdf">Teilen</button><button type="button" class="btn ghost" data-act="k-dl">Herunterladen</button></span></div>';
-  return '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Dein Aufmaßblatt · ' + euro(PREIS()) + '</p><b>Fertig gemessen? Dann freischalten.</b><small>Alle Maße, die Auswertung der Fotos und deine Wünsche als PDF, mit Code für jeden Fensterbauer. Einmal zahlen, für dieses Projekt.</small></div></div><button type="button" class="btn ghost" style="flex: 0 0 auto" data-act="go" data-v="teilen">Ansehen</button></div>';
+  return '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Dein Aufmaßblatt · ' + euro(PREIS()) + '</p><b>Mit allen Wünschen zum Ausdrucken.</b><small>Alle Maße, die Auswertung der Fotos und deine Wünsche als PDF zum Ausdrucken oder Weitergeben, mit Code: So versteht dein Fensterbauer genau, was du willst. Einmal zahlen, für dieses Projekt.</small></div></div><button type="button" class="btn ghost" style="flex: 0 0 auto" data-act="go" data-v="teilen">Ansehen</button></div>';
 }
 /* Vorschau des Blatts vor dem Freischalten: Kopf und Übersicht echt, die Positionen dahinter verschwommen */
 function blattVorschau() {
@@ -5210,6 +5226,8 @@ function qStep(delta) {
   let c = qCurrent();
   /* Lage: ohne Namen (im OG und DG ohne Brüstung) kein Weiter; die Zeile über „Weiter“ sagt, was fehlt */
   if (delta > 0 && c.q.id === 'lage' && lgFehlt(S.win)) return lgVerlangen(lgFehlt(S.win));
+  /* Weg zu den Maßen: Pflichtauswahl (Inhaber, 4.11.2026), sonst stünde das Fenster ohne Entscheidung ohne Maße da */
+  if (delta > 0 && c.q.id === 'massweg' && !derive(S.win).complete && !S.win.massWeg) { S.mwFehler = true; return render(); }
   /* Tiefe: übergangen heißt „die üblichen Wünsche“; oben bei einer Frage geöffnet, geht es dorthin zurück (mit Weiter wie mit Zurück
      und der Zurück-Taste des Browsers) */
   if (c.q.id === 'tiefe') {
@@ -6144,6 +6162,7 @@ function qMassweg() {
     h += zeile('ohne', 'Ohne Maße weiter', 'Erst planen, messen kannst du später.', weg === 'ohne');
   }
   h += '</div>';
+  if (S.mwFehler && !gemessen && !weg) h += '<p class="mw-fehler" role="alert">Bitte wähle, wie du zu den Maßen kommst: messen, eingeben oder erst ohne Maße weiter.</p>';
   if (!gemessen && weg === 'eingeben') {
     const feld = (k, wert) => '<button type="button" class="mw-wert" data-act="mass-tasten" data-f="' + k + '" aria-label="' + esc(MW_CFG[k].t + ': ' + (wert ? thousand(wert) + ' mm' : 'noch leer') + '. Antippen zum Eintippen') + '"><span class="mw-was">' + esc(k === 'elW' ? 'Breite' : 'Höhe') + '</span><b>' + (wert ? thousand(wert) : '–') + '</b><small>mm</small></button>';
     h += '<div class="mw-felder" role="group" aria-label="Maße mit Rahmen">' + feld('elW', d.elW) + '<span class="mw-mal" aria-hidden="true">×</span>' + feld('elH', d.elH) + '</div>' +
@@ -6190,8 +6209,10 @@ function extrasBlatt() {
   const teilListe = liste ? (kachel ? '<h3 class="exb-zwischen">' + titel + '</h3>' : '') +
     '<p class="vl-sub" id="exb-s">' + esc('Das Wichtigste hast du gewählt. Diese Dinge kannst du noch einstellen, wenn sie dir wichtig sind; sonst plant ' + bn + ' sie nach seinem Standard.') + '</p>' +
     '<div class="exb-chips">' + offen.slice(0, 6).map((q) => '<button type="button" class="chip" data-act="extras-oeffnen" data-v="' + esc(q.id) + '">' + esc(name(q)) + '</button>').join('') + (offen.length > 6 ? '<span class="exb-mehr">und ' + (offen.length - 6) + ' weitere</span>' : '') + '</div>' : '';
-  const knoepfe = liste ? '<button type="button" class="btn primary" data-act="extras-ansehen">Möglichkeiten ansehen</button><button type="button" class="btn ghost" data-act="extras-speichern">' + esc(elN + ' so speichern') + '</button>'
-    : '<button type="button" class="btn primary" data-act="extras-speichern">' + esc(elN + ' speichern') + '</button><button type="button" class="btn ghost" data-act="extras-ansehen">Zurück zur Liste</button>';
+  /* „Zurück“ schließt den Bogen und bleibt im Konfigurator (Inhaber, 4.11.2026: „die Möglichkeit, einfach einen Schritt zurückzugehen“) */
+  const zurueck = '<button type="button" class="btn ghost exb-zurueck" data-act="extras-zurueck">Zurück</button>';
+  const knoepfe = liste ? '<button type="button" class="btn primary" data-act="extras-ansehen">Möglichkeiten ansehen</button><button type="button" class="btn ghost" data-act="extras-speichern">' + esc(elN + ' so speichern') + '</button>' + zurueck
+    : '<button type="button" class="btn primary" data-act="extras-speichern">' + esc(elN + ' speichern') + '</button>' + zurueck;
   return '<button type="button" class="sheet-bg" aria-label="Zurück zur Liste" data-act="extras-ansehen"></button><div class="sheet verlassen ex-blatt" role="alertdialog" aria-modal="true" aria-labelledby="exb-t"' + (liste ? ' aria-describedby="exb-s"' : '') + '><div class="grip"></div>' +
     '<p class="eyebrow kicker" style="margin-top: 6px">Bevor du speicherst</p>' + (kachel ? '<h2 id="exb-t" tabindex="-1" class="ex-blatt-titel">' + (liste ? 'Zwei Dinge vor dem <span class="ak">Speichern</span>' : titel) + '</h2>' + kachel : '<h2 id="exb-t" tabindex="-1">' + titel + '</h2>') +
     teilListe + '<div class="vl-knoepfe">' + knoepfe + '</div></div>';
@@ -7809,7 +7830,7 @@ function saveWin() {
   if (S.editIdx >= 0 && S.windows[S.editIdx]) {
     const alt = S.windows[S.editIdx], st = aendStand(alt, jetzt), anders = fensterFp(alt) !== fensterFp(w), zaehlt = aenderungFp(alt) !== aenderungFp(w);
     w.wid = alt.wid || neueWid(); w.t0 = Number(alt.t0) || jetzt; w.aend = Number(alt.aend) || 0; w.ts = anders ? jetzt : Number(alt.ts) || 0;
-    if (zaehlt && st.fest) { toast(festText(st)); S.win = kopie(alt); return go('fertig'); }
+    if (zaehlt && st.fest) { toast(festText(st)); S.win = kopie(alt); return go('home'); }
     if (zaehlt && !st.frei) { w.aend += 1; const rest = GRENZE.aenderungen - w.aend; hinweis = rest > 0 ? 'Gespeichert. Dieses Fenster kannst du noch ' + MAL[rest] + ' ändern.' : 'Gespeichert. Das war die letzte Änderung an diesem Fenster.'; }
     S.windows[S.editIdx] = kopie(w);
   } else {
@@ -7821,9 +7842,11 @@ function saveWin() {
   kiZielMerken(S.win, ziel.wid); // läuft die Auswertung noch, kommt ihre Antwort in dieses gespeicherte Fenster
   /* Das Bild der Lage entsteht erst aus Foto und Ecken; fehlt es, wird es für das gespeicherte Fenster nachgezogen */
   if (ziel.plan && !ziel.plan.bild && ziel.plan.ecken && planFoto()) planBildErzeugen(ziel).then((b) => { if (b && S.win && S.win.wid === ziel.wid && S.win.plan) { S.win.plan.bild = b; S.win.plan.bw = ziel.plan.bw; S.win.plan.bh = ziel.plan.bh; } lokalSpeichern(); });
-  S.win = kopie(ziel); persist(); entwurfWeg(); go('fertig');
+  /* Nach dem Speichern in die Liste aller Fenster (Inhaber, 4.11.2026: „mit dem Beenden von einem Fenster soll man in die Liste kommen,
+     wo alle Fenster aufgereiht sind“); „Gespeichert“ mit Maße, Wünsche, Kopieren und Löschen öffnet das Fenster in der Liste */
+  S.win = kopie(ziel); persist(); entwurfWeg(); go('home');
   fotosHochladen(); // die Fotos gehen mit dem gespeicherten Fenster zum Server (Link oder Konto)
-  if (hinweis) toast(hinweis);
+  toast(hinweis || (ziel.name ? ziel.name + ' gespeichert.' : 'Gespeichert.'));
 }
 /* ---------- Sprossen: Einrasten auf Viertel, Drittel, Hälfte ---------- */
 function snapP(p) { const pts = [0.25, 1 / 3, 0.5, 2 / 3, 0.75]; for (let i = 0; i < pts.length; i++) if (Math.abs(p - pts[i]) < 0.03) return pts[i]; return clamp(p, 0.06, 0.94); }
@@ -7960,6 +7983,7 @@ function act(name, el) {
        „kostenlos oder bezahlen“ bzw. zum Kontakt (Inhaber, 2.11.2026: vorher übersprang es auch die Wahl) */
     case 'geb-nein': S.gebFrage = false; S.gebGefragt = true; return go(nachAngaben());
     case 'geb-zu': S.gebFrage = false; return render();
+    case 'extras-zurueck': { S.extrasHinweis = false; S.exMasse = ''; S.masseFehler = false; return qStep(-1); }
     case 'extras-ansehen': { S.extrasHinweis = false; render(); const d = document.querySelector('.ex-liste'); if (d && d.scrollIntoView) d.scrollIntoView({ block: 'start', behavior: ruhig() ? 'auto' : 'smooth' }); return; }
     case 'extras-speichern': {
       if (S.exMasse === 'eingegeben' && !w.masseOk) { S.masseFehler = true; render(); nachBild(() => { const k = document.querySelector('.ex-masse'); if (k && k.scrollIntoView) k.scrollIntoView({ block: 'nearest', behavior: ruhig() ? 'auto' : 'smooth' }); }); return; }
@@ -8089,6 +8113,7 @@ function act(name, el) {
     case 'mass-tasten': return massTasten(f);
     /* Weg zu den Maßen: geführt messen (Fotos), Ergebnis ansehen, Maße eingeben (Felder erscheinen), ohne Maße weiter (gleich weiter) */
     case 'massweg': {
+      S.mwFehler = false;
       if (v === 'ansehen') return go('ergebnis');
       /* Wechsel des Wegs (Prüfung 2.11.2026): eingetippte Maße für später beiseite (das Messen nicht damit vorbelegen), angefangene
          Messungen ohne Ergebnis verwerfen (sonst bleibt z. B. eine Höhe 1.600 stehen und oben im Modell ein Luftraum) */
@@ -8698,7 +8723,7 @@ function instAnfrage3() {
   const probe = PROBE ? '<p class="probe-zeile" role="note"><span><b>Testansicht:</b> Hier dürfen Sie auch ausgedachte Angaben eintragen. Nichts wird gesendet, alles bleibt auf diesem Gerät.</span></p>' : '';
   const karte = '<div class="qpanel ab-panel"><div class="ab-teil">' + abKopf('Kontakt') + '<div class="rows ab-felder kontakt-felder">' + kontaktFeld('Name', 'name', 'Vor- und Nachname', 'text', 'name', f.name, true) + kontaktFeld('Telefon', 'tel', 'Für Rückfragen', 'tel', 'tel', f.tel || !!f.weg, false) + kontaktFeld('E-Mail', 'mail', 'name@beispiel.de', 'email', 'email', f.mail || f.weg, false) +
     kontaktFeld('PLZ und Ort', 'ort', 'z. B. 50667 Köln', 'text', 'postal-code address-level2', '', false) + '</div><p class="ab-pflicht">* Pflicht. Dazu Telefon oder E-Mail, eins genügt. Mehr im <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>.</p></div>' +
-    '<div class="ab-teil">' + abKopf('Am besten erreichbar · freiwillig') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div></div>';
+    '<div class="ab-teil">' + abKopf('Am besten erreichbar · freiwillig') + abKarten('erreich', pr.erreich, 'erreich') + '</div></div>';
   const voll = S.windows.filter((x) => derive(x).complete).length, fehlt = S.windows.length - voll;
   const hinweis = (fehlt ? '<p class="ab-note">' + (voll ? fehlt + (fehlt === 1 ? ' Fenster hat' : ' Fenster haben') + ' noch keine vollständigen Maße. ' + anr('Sie können', 'Du kannst') + ' trotzdem senden, ' + esc(bn) + ' sieht dann, was fehlt.' : anr('Noch kein Fenster ist vollständig gemessen. Tragen Sie die fehlenden Maße nach, dann können Sie senden.', 'Noch kein Fenster ist vollständig gemessen. Trag die fehlenden Maße nach, dann kannst du senden.')) + ' <button type="button" class="ulink" data-act="go" data-v="home">Fenster ansehen</button></p>' : '') + entwurfWarnung() +
     '<p class="ab-danach">' + anr('Nach dem Senden bekommen Sie', 'Nach dem Senden bekommst du') + ' sofort eine Bestätigung' + (INST_M.kopieKunde ? anr(' und eine Durchschrift Ihrer Anfrage als PDF', ' und eine Durchschrift deiner Anfrage als PDF') : '') + '. ' + anr('Ändern können Sie', 'Ändern kannst du') + ' danach nur noch direkt mit ' + esc(bn) + '.</p>';

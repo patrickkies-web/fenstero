@@ -114,7 +114,7 @@ window.hbVnBinden = hbVnBinden;
 function hbEinladung(wo) {
   if (!hbDa() || !S.windows.length) return '';
   const liste = wo === 'liste', tuer = istTuer(S.win), ding = liste ? 'deine Fenster' : tuer ? 'deine Tür' : S.win.art === 'fest' ? 'deine Verglasung' : 'dein Fenster', rest = hbRest();
-  const zeile = rest <= 0 ? 'Deine Vorschauen sind gerechnet; mit dem Aufmaßblatt gibt es weitere.' : hbBlattFrei() ? 'Mit deinem Aufmaßblatt: noch ' + rest + (rest === 1 ? ' Vorschau.' : ' Vorschauen.') : 'Eine Vorschau ist frei.';
+  const zeile = rest <= 0 ? (!hbBlattFrei() && !hbKonto() && hbKontoMoeglich() ? 'Weitere Vorschauen, wenn du dein Aufmaß sicherst.' : 'Weitere Vorschauen mit deinem Aufmaßblatt.') : 'Noch ' + rest + (rest === 1 ? ' Vorschau' : ' Vorschauen') + (hbBlattFrei() || hbKonto() ? '.' : ' frei.');
   return '<section class="hb-einladung' + (liste ? ' liste' : '') + '" aria-labelledby="hb-ein-t">' + hbVorherNachher() +
     '<div class="hb-ein-text"><span class="hb-ein-label">An deinem Haus</span><h2 id="hb-ein-t">Sieh ' + ding + ' <em>an deinem Haus.</em></h2>' +
     '<p>So wie oben, nur mit deinem Foto: Foto wählen, ' + (liste ? 'deine Fenster an ihre Stelle' : ding + ' an seine Stelle') + ' ziehen, eine KI rechnet das Bild. ' + zeile + '</p></div>' +
@@ -125,7 +125,7 @@ window.hbEinladung = hbEinladung;
 function hbAusblick() {
   if (!hbDa()) return '';
   return '<section class="wl-haus-ausblick" aria-labelledby="wl-hb-t"><span class="dna-label">Am Ende: dein Haus</span><h2 id="wl-hb-t">Sieh deine neuen Fenster <em>an deinem Haus.</em></h2>' + hbVorherNachher() +
-    '<p class="wl-hb-satz">Zieh die Linie: links heute, rechts mit neuen Fenstern. Mit deinem ersten gespeicherten Fenster probierst du das an einem Foto deines eigenen Hauses aus. Eine Vorschau ist frei.</p>' +
+    '<p class="wl-hb-satz">Zieh die Linie: links heute, rechts mit neuen Fenstern. Mit deinem ersten gespeicherten Fenster probierst du das an einem Foto deines eigenen Hauses aus. ' + HB_FREI_N + ' Vorschauen sind frei.</p>' +
     '<button type="button" class="dna-pille dna-pille--leise wl-hb-knopf" data-act="new">Erstes Fenster ausmessen</button></section>';
 }
 window.hbAusblick = hbAusblick;
@@ -268,12 +268,15 @@ const hbVollPx = (e, W, H) => hbVoll(hbPx(e.q, W, H), HB.bilder[e.win]);
    freigeschalteten Aufmaßblatt (gekauft oder über „Angebote aus deiner Nähe“, beides setzt kauf().paid; bei kostenlosem Blatt nach dem
    Senden), dann bis zu HB_MIT_BLATT Durchgänge auf diesem Gerät. Der Zähler liegt im Browser und lenkt nur; die harte Grenze hält der
    Server (Bremse je Tag, functions/api/hausbild.js). So endet „nur mal ansehen“ beim Aufmaßblatt, nicht bei der nächsten Rechnung. */
-const HB_ZAEHL = 'aufmass.hausbild.vorschauen', HB_FREI_N = 1, HB_MIT_BLATT = 10;
+/* Kontingent seit 4.11.2026 (Inhaber: „maximal zum Beispiel dreimal und wenn man … mehr … generieren möchte, dann soll man zumindest sein
+   Aufmaß per Mail sichern und mit Code bestätigen“): 3 frei, 10 mit gesichertem Konto, 20 mit freigeschaltetem Aufmaßblatt, je Gerät */
+const HB_ZAEHL = 'aufmass.hausbild.vorschauen', HB_FREI_N = 3, HB_MIT_BLATT = 20;
 const hbGezaehlt = () => { try { return Math.max(0, parseInt(localStorage.getItem(HB_ZAEHL) || '0', 10) || 0); } catch (e) { return 0; } };
 const hbZaehlen = () => { try { localStorage.setItem(HB_ZAEHL, String(hbGezaehlt() + 1)); } catch (e) { /* ohne Speicher: zählt nicht */ } };
 const hbBlattFrei = () => !!(S.kauf && S.kauf.paid) || (typeof KUNDE_FREI === 'function' && KUNDE_FREI() && !!S.sent);
-const HB_MIT_KONTO = 3; // Funnel-Konzept (docs/konzepte/2026-11-03-conversion-funnel.md): zwei weitere, wenn das Aufmaß im Konto gesichert ist
-const hbGrenzeN = () => (hbBlattFrei() ? HB_MIT_BLATT : typeof KS !== 'undefined' && KS ? HB_MIT_KONTO : HB_FREI_N);
+const HB_MIT_KONTO = 10; // mit E-Mail und Code gesichertes Aufmaß (Konto)
+const hbKonto = () => typeof KS !== 'undefined' && !!KS, hbKontoMoeglich = () => typeof kontoBereit === 'function' && kontoBereit();
+const hbGrenzeN = () => (hbBlattFrei() ? HB_MIT_BLATT : hbKonto() ? HB_MIT_KONTO : HB_FREI_N);
 const hbRest = () => Math.max(0, hbGrenzeN() - hbGezaehlt());
 const hbBlattZiel = () => (typeof FREI === 'function' && FREI() ? 'teilen' : 'anfrage');
 /* Satz zum Aufmaßblatt: PDF für den Fensterbauer, und was es kostet (Preis aus pakete.js über PREIS()) */
@@ -287,16 +290,20 @@ const hbPdfZeichen = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
 /* Karte „Dein Aufmaßblatt“: Anthrazit (G14), PDF-Zeichen, drei Ebenen (Label, Titel, eine Zeile) */
 function hbBlattKarte(titel) {
   return '<div class="hbv-karte"><span class="hbv-karte-zeichen">' + hbPdfZeichen + '</span><div class="hbv-karte-text"><span class="hbv-karte-label">Dein Aufmaßblatt</span>' +
-    '<b>' + (titel || 'Als PDF an deinen Fensterbauer.') + '</b><small>' + esc(hbBlattSatz()) + '</small></div></div>';
+    '<b>' + (titel || 'Mit allen Wünschen, zum Ausdrucken oder als PDF.') + '</b><small>' + esc('So versteht dein Fensterbauer genau, was du willst. ' + hbBlattSatz()) + '</small></div></div>';
 }
 function hbGrenzeBlatt() {
   if (!HB.grenze) return '';
-  const frei = hbBlattFrei();
-  const text = frei ? 'Auf diesem Gerät sind alle ' + HB_MIT_BLATT + ' Vorschauen gerechnet. Dein Aufmaßblatt hast du: Es geht als PDF an deinen Fensterbauer, und der zeigt dir vor Ort echte Muster.'
-    : 'Deine freie Vorschau hast du gesehen. Mit deinem Aufmaßblatt rechnest du hier bis zu ' + HB_MIT_BLATT + ' weitere, und dein Fensterbauer bekommt alle Maße, Fotos und Wünsche als PDF fürs Angebot.';
-  return '<div class="hb-wahl" role="dialog" aria-modal="true" aria-labelledby="hb-grenze-t"><div class="hb-wahl-blatt hb-grenze"><div class="hb-wahl-kopf"><h2 id="hb-grenze-t">' + (frei ? 'Alle Vorschauen gerechnet.' : 'Weitere Vorschauen mit deinem Aufmaßblatt.') + '</h2>' +
-    '<button type="button" class="hb-rund" data-act="hb-grenze-zu" aria-label="Schließen">' + hbZ('zu') + '</button></div><p>' + text + '</p>' + hbBlattKarte() +
-    '<div class="hb-grenze-knoepfe"><button type="button" class="dna-pille lg-weiter" data-act="hb-blatt">Zum Aufmaßblatt' + hbPfeil + '</button><button type="button" class="hb-textknopf" data-act="hb-grenze-zu">Nicht jetzt</button></div></div></div>';
+  /* Stufen: ohne Konto zuerst sichern (E-Mail und Code), mit Konto das Aufmaßblatt, mit Aufmaßblatt alles gerechnet */
+  const frei = hbBlattFrei(), sichern = !frei && !hbKonto() && hbKontoMoeglich();
+  const titel = frei ? 'Alle Vorschauen gerechnet.' : sichern ? 'Weitere Vorschauen: Aufmaß sichern.' : 'Weitere Vorschauen mit deinem Aufmaßblatt.';
+  const text = frei ? 'Auf diesem Gerät sind alle ' + HB_MIT_BLATT + ' Vorschauen gerechnet. Dein Aufmaßblatt hast du: Es geht mit allen Wünschen an deinen Fensterbauer, und der zeigt dir vor Ort echte Muster.'
+    : sichern ? 'Deine ' + HB_FREI_N + ' freien Vorschauen hast du gesehen. Sichere dein Aufmaß mit deiner E-Mail-Adresse und einem Code, dann rechnest du hier bis zu ' + HB_MIT_KONTO + ' Vorschauen, und dein Aufmaß ist auf jedem Gerät da.'
+    : 'Mit deinem Aufmaßblatt rechnest du hier bis zu ' + HB_MIT_BLATT + ' Vorschauen, und dein Fensterbauer bekommt alle Maße, Fotos und Wünsche, zum Ausdrucken oder als PDF.';
+  const pille = sichern ? '<button type="button" class="dna-pille lg-weiter" data-act="hb-sichern">Aufmaß sichern' + hbPfeil + '</button>' : '<button type="button" class="dna-pille lg-weiter" data-act="hb-blatt">Zum Aufmaßblatt' + hbPfeil + '</button>';
+  return '<div class="hb-wahl" role="dialog" aria-modal="true" aria-labelledby="hb-grenze-t"><div class="hb-wahl-blatt hb-grenze"><div class="hb-wahl-kopf"><h2 id="hb-grenze-t">' + titel + '</h2>' +
+    '<button type="button" class="hb-rund" data-act="hb-grenze-zu" aria-label="Schließen">' + hbZ('zu') + '</button></div><p>' + text + '</p>' + (sichern ? '' : hbBlattKarte()) +
+    '<div class="hb-grenze-knoepfe">' + pille + '<button type="button" class="hb-textknopf" data-act="hb-grenze-zu">Nicht jetzt</button></div></div></div>';
 }
 
 /* ---------- Bildschirm: eigene Maske (Inhaber, 3.11.2026) ----------
@@ -393,7 +400,8 @@ SCREENS.hausbild = function () {
   const hinweis = '<p class="hb-klein">Für die KI-Vorschau gehen nur Ausschnitte rund um deine Elemente an die KI unseres Dienstleisters Cloudflare, und erst nach deiner Zustimmung. Gespeichert wird dein Foto nicht, es bleibt in diesem Browser.' +
     (hbEinwDa() ? ' <button type="button" class="hb-textknopf" data-act="hb-einw-weg">Vorschau-Einwilligung widerrufen</button>' : '') + '</p>';
   const rest = hbRest();
-  const frei = '<p class="hbv-frei"><i aria-hidden="true"></i>' + (rest <= 0 ? 'Weitere Vorschauen gibt es mit deinem Aufmaßblatt.' : hbBlattFrei() ? 'Noch ' + rest + (rest === 1 ? ' Vorschau' : ' Vorschauen') + ' mit deinem Aufmaßblatt.' : 'Eine KI-Vorschau ist frei, weitere mit deinem Aufmaßblatt.') + '</p>';
+  const frei = '<p class="hbv-frei"><i aria-hidden="true"></i>' + (rest <= 0 ? (!hbBlattFrei() && !hbKonto() && hbKontoMoeglich() ? 'Weitere Vorschauen, wenn du dein Aufmaß sicherst.' : 'Weitere Vorschauen gibt es mit deinem Aufmaßblatt.')
+    : 'Noch ' + rest + (rest === 1 ? ' Vorschau' : ' Vorschauen') + (hbBlattFrei() ? ' mit deinem Aufmaßblatt.' : hbKonto() ? ' mit deinem gesicherten Aufmaß.' : ' frei.')) + '</p>';
   let mitte = '';
   if (!HB.foto) mitte = '<ol class="hbv-wie">' + HB_SCHRITTE.map((s, i) => '<li><span>' + (i + 1) + '</span>' + s + '</li>').join('') + '</ol>' + hbBlattKarte('Dein Aufmaß geht als PDF an deinen Fensterbauer.') + hinweis;
   else if (HB.laedt) mitte = '';
@@ -742,6 +750,7 @@ function hbAct(name, el, v, wiederholt) {
     case 'hb-einw-weg': hbEinwSetzen(false); return toast('Einwilligung widerrufen. Vor der nächsten Vorschau fragen wir wieder.');
     case 'hb-grenze-zu': HB.grenze = false; return render();
     case 'hb-blatt': HB.grenze = false; HB.aktiv = null; return go(hbBlattZiel());
+    case 'hb-sichern': HB.grenze = false; HB.aktiv = null; return typeof sichernStart === 'function' ? sichernStart('sichern') : go('home'); // E-Mail und Code (Konto)
     case 'hb-zeige': HB.zeige = v === 'vor' ? 'vor' : 'nach'; return render();
     case 'hb-zoom': return hbZoom(parseInt(v, 10) || 0);
     case 'hb-weiter-bearbeiten': HB.ergebnis = null; return render();
