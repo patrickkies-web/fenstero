@@ -3307,11 +3307,12 @@ let stZuletzt = '', stNeuZuletzt = false, stRichtung = 0, stSofort = false;
 const stIdx = (k) => Math.max(0, OPT.art.findIndex((x) => x.k === k));
 const stNachbar = (k, d) => OPT.art[(stIdx(k) + d + OPT.art.length) % OPT.art.length].k;
 /* Bilder des Inhabers (web/bilder/konfigurator/element/), Breite und Höhe in px */
-const ST_BILD = { fenster: [879, 1194], balkon: [853, 1200], haustuer: [590, 1200], fest: [1179, 996], hst: [1200, 652], psk: [908, 1079], fsw: [1200, 754] };
+const ST_BILD = { fenster: [879, 1194], balkon: [853, 1200], haustuer: [590, 1200], fest: [1200, 565], hst: [1200, 652], psk: [908, 1079], fsw: [1200, 754] };
 /* Datei je Element, wo sie anders heißt: Fenster in Anthrazit mit Raffstore, zweiflügelige Balkontür und Hebe-Schiebe-Tür in Anthrazit
    (Fotos des Inhabers, 2.11.2026; die Schiebetür vom hellen Grund freigestellt); Haustür in Anthrazit mit Glasstreifen und Stoßgriff
-   (erzeugt mit scripts/bilder-erzeugen.py, 3.11.2026, vom weißen Grund freigestellt) */
-const ST_DATEI = { fenster: 'fenster-anthrazit', balkon: 'balkon-anthrazit', haustuer: 'haustuer-anthrazit', hst: 'hst-anthrazit' };
+   (erzeugt mit scripts/bilder-erzeugen.py, 3.11.2026, vom weißen Grund freigestellt); Festverglasung dreiteilig in Anthrazit (Bild des
+   Inhabers, 3.11.2026, schon freigestellt, auf den Inhalt beschnitten) */
+const ST_DATEI = { fenster: 'fenster-anthrazit', balkon: 'balkon-anthrazit', haustuer: 'haustuer-anthrazit', fest: 'fest-anthrazit', hst: 'hst-anthrazit' };
 /* Feine Zeichen der runden Knöpfe (2.11.2026, Vorlage des Inhabers): 28 × 28, Strich 1,6 in currentColor */
 const ST_ICON = {
   fenster: '<rect x="5" y="4" width="18" height="20" rx="1.5"/><path d="M14 4v20M11.5 13v2.5M16.5 13v2.5"/>',
