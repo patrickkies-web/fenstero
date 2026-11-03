@@ -671,6 +671,8 @@ const bankFarbePasst = (fbi, f) => !BANK_FARBEN[fbi] || BANK_FARBEN[fbi].indexOf
 const htAusschnitt = (w, x) => AW.htAusschnitt(w, x);
 /* Wechsel der Elementart: Flügel, Teilung und Griff passend setzen; Sprossen, Ober- und Unterlicht zurück auf Standard */
 function artSetzen(w, art) {
+  /* Seitenteile einer Haustür sind etwas anderes als die eines Fensters: beim Wechsel von oder zur Haustür nicht mitnehmen (Wirkungskette 3.11.2026) */
+  if (w.art !== art && (w.art === 'haustuer' || art === 'haustuer')) { delete w.seiten; delete w.seitenB; w.sashes = (w.sashes || []).filter((x) => !x.st); }
   w.art = art; delete w.kombi;
   if (art === 'fest') { w.teilung = '2p'; w.sashes = festFelder(2); w.ol = false; w.ul = false; w.griff = 'ohne'; }
   else if (art === 'hst') { w.hst = Object.assign({ schema: 'A', richtung: 'R', schwelle: 'flach' }, w.hst || {}); w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); w.teilung = String(w.sashes.length); w.ol = false; w.ul = false; w.form = 'rechteck'; if (!OPT.hstGriff.some((o) => o.k === w.griff)) w.griff = 'standard'; }
@@ -756,9 +758,9 @@ const farbeOffen = (w, seite) => !!(w.offen && (seite === 'innen' ? (w.gleich ? 
 function rahmenFarbe(w, seite) {
   if (farbeOffen(w, seite)) return FARBE_OFFEN;
   const innen = seite === 'innen', t = innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA, k = innen ? (w.gleich ? w.fa : w.fi) : w.fa, f = farbLesen(t);
-  if (!f) return colorOf(k);
-  const e = f.eintrag;
-  return { k: e ? e.key : 'eigen', name: e ? e.name : f.name, code: e ? e.code : f.code ? 'RAL ' + f.code : f.holz ? 'Holzdekor' : 'eigene Farbe', bg: f.bg, solid: f.hex, holz: f.holz, eigen: true };
+  const e = f && f.eintrag, c = !f ? colorOf(k) : { k: e ? e.key : 'eigen', name: e ? e.name : f.name, code: e ? e.code : f.code ? 'RAL ' + f.code : f.holz ? 'Holzdekor' : 'eigene Farbe', bg: f.bg, solid: f.hex, holz: f.holz, eigen: true };
+  /* Echtes Holz: Lasur im Holzton statt Dekorfolie (wie AW.farbe) */
+  return c.code === 'Holzdekor' && AW.seitenMaterial(w, seite) === 'holz' ? Object.assign({}, c, { code: 'Lasur im Holzton' }) : c;
 }
 function farbZeile(w, seite) {
   if (farbeOffen(w, seite)) return AW.OFFEN_TEXT;
@@ -1301,15 +1303,18 @@ function innenBg(w, s) {
 const SPROSS_FARBE = { weiss: 'linear-gradient(180deg, #fbfbf9, #e6e6e2)', anthrazit: 'linear-gradient(180deg, #4a5055, #2f3337)', messing: 'linear-gradient(180deg, #e6cf8a, #b08f45)' };
 /* Sprossenfarbe: Messing und die früheren Töne (SPROSS_FARBE), sonst jede Farbe aus dem Farbblatt wie beim Rahmen; „Wie der Rahmen“
    (leer) folgt der Rahmenfarbe der Seite, auch bei Sprossen im Scheibenzwischenraum (vorher immer grau, die Wahl blieb ohne Wirkung) */
-function sprossFarbe(w) {
-  if (!dg(w, 'sprFarbe') || w.sprFarbe === 'rahmen') return null;
-  if (SPROSS_FARBE[w.sprFarbe]) return { bg: SPROSS_FARBE[w.sprFarbe] };
-  const c = FARBE_K[w.sprFarbe] || ralFarbe(w.sprFarbe);
-  return c ? { bg: c.bg, solid: c.solid || c.hex } : null;
+/* Je Seite (Inhaber, 3.11.2026): sprFarbe außen, sprFarbeI innen; ältere Aufmaße ohne sprFarbeI hatten eine Farbe für beide Seiten */
+const sprKey = (w, side) => (side === 'innen' ? (w.sprFarbeI !== undefined ? w.sprFarbeI : w.sprFarbe) : w.sprFarbe);
+function sprossFarbe(w, side) {
+  const k = sprKey(w, side || 'aussen');
+  if (!dg(w, side === 'innen' ? 'sprFarbeI' : 'sprFarbe') || !k || k === 'rahmen') return null;
+  if (SPROSS_FARBE[k]) return { bg: SPROSS_FARBE[k] };
+  const c = FARBE_K[k] || ralFarbe(k);
+  return c ? { bg: c.bg, solid: c.solid || c.hex, c: c } : null;
 }
 function barBg(w, fcol, side) {
   if (w.spross === 'auf' && w.aufSeite && w.aufSeite !== 'beide' && w.aufSeite !== side) return 'transparent';
-  const eigen = sprossFarbe(w); if (eigen) return eigen.bg;
+  const eigen = sprossFarbe(w, side); if (eigen) return eigen.bg;
   return fcol.bg;
 }
 /* Öffnendes Element der Bühne: Klassen, Signatur, Höhe, Blickwinkel */
@@ -1538,7 +1543,8 @@ function w3dPaint(stage, w) {
   stage.classList.toggle('glas-sonne', w.glasfn.indexOf('sonne') >= 0); stage.classList.toggle('glas-sicht', htSicht || (w.glasfn.indexOf('sicht') >= 0 && !(dg(w, 'sichtZone') && w.sichtZone === 'unten')));
   stage.classList.toggle('glas-klar', w.glasfn.indexOf('extraklar') >= 0); stage.classList.toggle('glas-vogel', w.glasfn.indexOf('vogel') >= 0);
   /* Werkstoff der Bühne (buehne.js): Profilform, Oberfläche, Dichtungs- und Abstandhalterfarbe; das Attribut löst das Neuzeichnen aus */
-  stage._profil = dg(w, 'profil') ? w.profil : ''; stage._oberfl = dg(w, 'oberfl') ? w.oberfl : '';
+  /* Oberfläche: bei zweifarbigen Fenstern nur außen (die Struktur gehört zur Folie bzw. Beschichtung), innen bleibt glatt (Wirkungskette 3.11.2026) */
+  stage._profil = dg(w, 'profil') ? w.profil : ''; stage._oberfl = dg(w, 'oberfl') && !zweifarbig(w) ? w.oberfl : '';
   stage._dicht = dg(w, 'dicht') ? (OPT.dicht.find((o) => o.k === w.dicht) || {}).bg || '' : ''; stage._ah = dg(w, 'ahFarbe') ? AH_SOL[w.ahFarbe] || '' : '';
   /* Art der Sprossen: die Bühne zeichnet Wiener und aufgesetzte als Profil auf dem Glas, innenliegende flach im Zwischenraum */
   const spr = (w.bars || []).length ? w.spross || 'wiener' : ''; if (stage._spross !== spr) { stage._spross = spr; if (window.Buehne3D) window.Buehne3D.anstoss(stage); }
@@ -1581,7 +1587,7 @@ function w3dPaint(stage, w) {
   }
   else { bg('roll-f', ''); bg('roll-sl', ''); bg('roll-b', ''); bg('roll-t', ''); bg('roll-l', ''); bg('roll-r', ''); }
   w.sashes.forEach((x, i) => {
-    bg('mul-' + i, fin.bg); bg('mulb-' + i, fout.bg); bg('sf-in-' + i, fin.bg); bg('sf-out-' + i, fout.bg); bg('handle-' + i, hcol); bg('hros-' + i, hcol); bg('ga-' + i, w.art === 'haustuer' && (w.ht || {}).griffA !== 'druecker' ? 'linear-gradient(90deg, #8f9499, #e6e8ea 38%, #b9bdc1 70%, #7d8287)' : hcol);
+    bg('mul-' + i, fin.bg); bg('mulb-' + i, fout.bg); bg('sf-in-' + i, fin.bg); bg('sf-out-' + i, fout.bg); bg('handle-' + i, hcol); bg('hros-' + i, hcol); bg('ga-' + i, w.art === 'haustuer' && (w.ht || {}).griffA !== 'druecker' ? 'linear-gradient(90deg, #8f9499, #e6e8ea 38%, #b9bdc1 70%, #7d8287)' : griffFarbeAussen(w, hcol));
     bg('hk-' + i, KNOPF_BG); bg('hs-' + i, SCHLOSS_BG); bg('gas-' + i, SCHLOSS_BG);
     bgc('sfe-l-' + i, fout.solid); bgc('sfe-r-' + i, fout.solid); bgc('sfe-t-' + i, fin.solid); bgc('sfe-b-' + i, fin.solid);
     bg('pan-i-' + i, fin.bg); bg('pan-o-' + i, fout.bg); bg('riegel-i-' + i, fin.bg); bg('riegel-o-' + i, fout.bg);
@@ -1591,8 +1597,8 @@ function w3dPaint(stage, w) {
     const sash = q('sash-' + i); if (sash) { sash.classList.toggle('is-fixed', x.t === 'F' || x.t === 'X'); sash.classList.toggle('is-kvd', x.t === 'DK' && dg(w, 'kvd') && w.kvd === 'kvd'); sash.classList.toggle('is-schiebe', x.t === 'S'); sash.setAttribute('data-t', x.t); sash.setAttribute('data-din', x.din); sash.style.setProperty('--sdir', x.din === 'L' ? '1' : '-1'); }
     const sv = q('sym-' + i); if (sv) { const p = symPaths(w, x); if (sv.getAttribute('data-k') !== x.t + x.din + w.richtung) { sv.innerHTML = p; sv.setAttribute('data-k', x.t + x.din + w.richtung); } }
   });
-  const sprF = sprossFarbe(w), sprC = sprF ? FARBE_K[w.sprFarbe] || ralFarbe(w.sprFarbe) : null;
-  w.bars.forEach((b) => { const be = q('bar-' + b.id); if (be) { be._bi = barBg(w, fin, 'innen'); be._bo = barBg(w, fout, 'aussen'); be._art = holzig(sprF ? sprC : fin) && w.spross !== 'szr' ? 'holz' : ''; be._arto = holzig(sprF ? sprC : fout) && w.spross !== 'szr' ? 'holz' : ''; be.style.setProperty('--bi', be._bi); be.style.setProperty('--bo', be._bo); } });
+  const sprI = sprossFarbe(w, 'innen'), sprA = sprossFarbe(w, 'aussen');
+  w.bars.forEach((b) => { const be = q('bar-' + b.id); if (be) { be._bi = barBg(w, fin, 'innen'); be._bo = barBg(w, fout, 'aussen'); be._art = holzig(sprI ? sprI.c : fin) && w.spross !== 'szr' ? 'holz' : ''; be._arto = holzig(sprA ? sprA.c : fout) && w.spross !== 'szr' ? 'holz' : ''; be.style.setProperty('--bi', be._bi); be.style.setProperty('--bo', be._bo); } });
   const ms = q('mesh'), mk = q('mesh-k'), ir = insRahmen(w);
   if (ms) { ms._kante = ir; ms.style.boxShadow = 'inset 0 0 0 1.5px ' + ir; bg('mesh', meshBg(w, stage._v && stage._v.s), meshCss(w)); }
   if (mk) bg('mesh-k', 'linear-gradient(180deg, ' + mischHex(ir, '#ffffff', 0.22) + ', ' + ir + ' 45%, ' + mischHex(ir, '#000000', 0.25) + ')');
@@ -1602,6 +1608,8 @@ function w3dPaint(stage, w) {
 const AH_SOL = { schwarz: '#232528', grau: '#6d7378', silber: '#b9bfc5', weiss: '#ecebe6' };
 /* Oberflächen für die WebGL-Bühne (buehne.js): Holzdekor mit Maserung, Fensterbänke aus Naturstein, Holz und Aluminium,
    Fassade als Klinker, Holz, Putz oder WDVS. Das CSS-Modell zeigt weiter die Verläufe aus BANK, WOOD und facadeBg. */
+/* Zweifarbig: innen eine andere Farbe als außen */
+const zweifarbig = (w) => !w.gleich && rahmenFarbe(w, 'innen').name !== rahmenFarbe(w, 'aussen').name;
 const holzig = (c) => !!(c && (c.holz || /Holzdekor/.test(c.code || '')));
 /* Sonderoberflächen aus dem Farbblatt (ral.js): Eisenglimmer glänzt metallisch, Struktur ist rau, Eloxal gebürstet, Holzstruktur genarbt */
 const SONDER_OBERFL = { db701: 'metall', db702: 'metall', db703: 'metall', sand7016: 'struktur', sand9005: 'struktur', holz7016: 'holz', eloxal: 'eloxal', eloxbronze: 'eloxal' };
@@ -1610,7 +1618,7 @@ const FASSADE_ART = { klinker: 'klinker', holz: 'holzfassade', wdvs: 'putzfein' 
 function w3dOberflaeche(stage, w, fin, fout) {
   /* _sol: Vollfarbe für die Falzflächen, die buehne.js zwischen Vorder- und Rückseite eines Profils ergänzt */
   /* _oberfl: Sonderoberfläche der Farbe je Seite (buehne.js, vor der Oberfläche aus der Detailangabe) */
-  const oi = SONDER_OBERFL[fin.k] || '', oa = SONDER_OBERFL[fout.k] || '';
+  const oi = SONDER_OBERFL[fin.k] || '', oa = SONDER_OBERFL[fout.k] || (dg(w, 'oberfl') && zweifarbig(w) ? w.oberfl : '');
   /* _artC: Grundton einer Struktur (Klinker, Holzfassade), den die Bühne statt der Mittelfarbe des CSS-Hintergrunds nimmt */
   const setz = (r, k, sol, of, ac) => { const el = stage.querySelector('[data-r="' + r + '"]'); if (el) { el._art = k; if (sol) el._sol = sol; if (of != null) el._oberfl = of; el._artC = ac || ''; } };
   const hi = holzig(fin) ? 'holz' : '', ha = holzig(fout) ? 'holz' : '';
@@ -1699,6 +1707,7 @@ function w3dLayout(stage, w, o, gr) {
   if (V.dimY) stage.style.setProperty('--dimy', px(V.dimY)); else stage.style.removeProperty('--dimy');
   stage.classList.toggle('is-niedrig', (gr ? gr[1] : stage.clientHeight || 360) < 200); // niedrige Bühne: Knöpfe am Modell in einer Reihe (app.css)
   const moW = V.moW * s, moH = V.moH * s, T = V.T * s, d = V.laib * s, fd = V.fd * s, sd = W3D.FD * s, wallW = V.wallW * s, wallH = V.wallH * s, tuer = V.tuer;
+  stage.style.setProperty('--sd', px(sd)); // Flügeltiefe: im CSS-Modell sitzen die Sprossen von außen gesehen auf der äußeren Scheibe
   /* Größe der Öffnung für das Tageslicht dahinter (app.css, .raum-licht: durch die Öffnung sieht man hell nach draußen) */
   stage.style.setProperty('--lw', px(moW)); stage.style.setProperty('--lh', px(moH)); stage.style.setProperty('--mm', s.toFixed(5)); // Maßstab für das Mauerwerk (klinkerCss)
   const gO = G ? formGeo(form, -moW / 2, -moH / 2, moW, moH) : null;
@@ -2171,6 +2180,8 @@ function kombiFensterH(w, V, s, bis, voll) {
   const kh = Math.max(3, V.mul * s), h = bis - (num(w.kombiBru) || KOMBI_BRU) * s - kh;
   return clamp(h, voll * 0.25, voll * 0.75);
 }
+/* Griff außen der Balkontür: eigene Farbe (Detail gfA), sonst wie innen */
+const griffFarbeAussen = (w, innen) => (w.art === 'balkon' && dg(w, 'gfA') && w.gfA ? (OPT.gf.find((o) => o.k === w.gfA) || {}).bg || innen : innen);
 function w3dGriffLage(V, w, x, i, s, g) {
   const sashW = g.sashW, sashH = g.sashH, sf = g.sf, G = g.G, gI = g.gI;
   const steh = stehFluegel(w, i), bedien = fswBedien(w) === i, fest = (x.t === 'F' || x.t === 'X' || !!x.st) && !bedien;
@@ -4823,7 +4834,7 @@ const KAPITEL = [{ k: 'aufbau', n: 'Aufbau' }, { k: 'vorweg', n: 'Lage' }, { k: 
 const KAP_APP = { olTeil: 'oeffnung', typ: 'oeffnung', din: 'oeffnung', stulp: 'oeffnung', hstr: 'oeffnung', pskR: 'oeffnung', fsws: 'oeffnung', fswg: 'oeffnung', schwelle: 'oeffnung', boden: 'oeffnung', ol: 'oeffnung', ul: 'oeffnung', richtung: 'oeffnung', massweg: 'aufbau', extras: 'extras' };
 /* Der Hauptweg: was jeder Kunde gefragt wird (das Wesentliche, das man sieht und das den Preis macht, dazu die Pflichtthemen Absturz und
    Erreichbarkeit). Alles andere steht in der Liste „Möchtest du noch etwas einstellen?“ nach den Fensterbänken und ist freiwillig */
-const Q_HAUPT = { olTeil: 1, kombiSeite: 1, kombiBru: 1, htModell: 1, htSeiten: 1, htGlas: 1, htGriff: 1, htSchloss: 1, form: 1, teilung: 1, stulpLage: 1, felder: 1, hsts: 1, pskS: 1, fswn: 1, massweg: 1, lage: 1, absturz: 1, design: 1, stulp: 1, typ: 1, din: 1, hstr: 1, pskR: 1, fsws: 1, fswg: 1, schwelle: 1, material: 1, fa: 1, fi: 1, glas: 1, sprossen: 1, breite: 1, sprFarbe: 1, rc: 1, sart: 1, sfarbe: 1, antrieb: 1, klFarbe: 1, fbi: 1, fba: 1, extras: 1 };
+const Q_HAUPT = { sprFarbeI: 1, olTeil: 1, kombiSeite: 1, kombiBru: 1, htModell: 1, htSeiten: 1, htGlas: 1, htGriff: 1, htSchloss: 1, form: 1, teilung: 1, stulpLage: 1, felder: 1, hsts: 1, pskS: 1, fswn: 1, massweg: 1, lage: 1, absturz: 1, design: 1, stulp: 1, typ: 1, din: 1, hstr: 1, pskR: 1, fsws: 1, fswg: 1, schwelle: 1, material: 1, fa: 1, fi: 1, glas: 1, sprossen: 1, breite: 1, sprFarbe: 1, rc: 1, sart: 1, sfarbe: 1, antrieb: 1, klFarbe: 1, fbi: 1, fba: 1, extras: 1 };
 const qHaupt = (q) => !!(q.haupt || Q_HAUPT[String(q.id).split('-')[0]]);
 const KAP_I = {}; KAPITEL.forEach((k, i) => { KAP_I[k.k] = i; });
 /* Kapitel und Stufe je Frage stehen in modell.js (AW.FRAGE), damit Klärungsliste, Betrieb und Blatt wissen, was bei welcher Tiefe
@@ -4858,13 +4869,15 @@ const DETAIL_UI = {
   hstEck: { t: 'Gerade oder über Eck?', sub: 'Über Eck treffen zwei Türen ohne Pfosten zusammen. Das Modell zeigt eine Seite.', nach: ['hstr', 'hsts'], g: 'eckhst', kurz: 'Ecklösung' },
   fswAuf: { t: 'Faltet sie nach innen oder außen?', sub: 'Nach außen bleibt innen mehr Platz, nach innen steht das Paket geschützt.', nach: ['fsws'], std: 'nach Lage vor Ort', g: 'faltpaket', kurz: 'Faltrichtung' },
   holzart: { t: 'Welche Holzart?', sub: 'Bestimmt Maserung, Härte und Preis.', nach: ['material'], g: 'holzart', std: 'meist Kiefer oder Fichte', kurz: 'Holzart' },
-  oberfl: { t: 'Welche Oberfläche?', sub: 'Wie sich Rahmen und Flügel anfühlen.', nach: ['fi'], std: 'meist glatt', g: 'oberflaeche', kurz: 'Oberfläche' },
+  oberfl: { t: 'Welche Oberfläche?', sub: (w) => (zweifarbig(w) ? 'Gilt für die farbige Außenseite, innen bleibt glatt.' : 'Wie sich Rahmen und Flügel anfühlen.'), nach: ['fi'], std: 'meist glatt', g: 'oberflaeche', kurz: 'Oberfläche' },
   profil: { t: 'Welche Profilform?', sub: 'Die Kanten von Rahmen und Flügeln.', nach: ['fi'], g: 'profil', std: 'meist kantig', kurz: 'Profilform' },
   schmal: { t: 'Schmale Rahmenansicht?', sub: 'Schmalere Profile lassen mehr Licht herein.', nach: ['fi'], g: 'profil', std: 'die übliche Ansicht', kurz: 'Rahmenansicht', view: 'front' },
   dicht: { t: 'Welche Farbe haben die Dichtungen?', sub: 'Man sieht sie als schmalen Streifen rund ums Glas.', nach: ['fi'], kind: 'tupfen', g: 'dichtung', std: 'meist schwarz oder grau', kurz: 'Dichtung', lupe: true },
   sichtZone: { t: 'Wo soll satiniert sein?', sub: 'Unten blickdicht, oben klar: Licht und Ausblick bleiben.', nach: ['orn'], g: 'ornament', kurz: 'Satinierung' },
   ahFarbe: { t: 'Welche Farbe hat der Abstandhalter?', sub: 'Der Steg zwischen den Scheiben, sichtbar am Glasrand.', nach: ['sichtZone', 'orn', 'glasfn'], kind: 'tupfen', g: 'abstandhalter', std: 'meist schwarz', kurz: 'Abstandhalter', lupe: true },
-  sprFarbe: { t: 'Welche Farbe haben die Sprossen?', sub: 'Wie der Rahmen oder jede andere Farbe, auch Messing.', nach: ['breite', 'aufseite', 'spross', 'sprossen'], kind: 'farbe', g: 'sprossen', kurz: 'Sprossenfarbe', view: 'front' },
+  sprFarbe: { t: 'Welche Farbe haben die Sprossen außen?', sub: 'Wie der Rahmen außen oder jede andere Farbe, auch Messing.', nach: ['breite', 'aufseite', 'spross', 'sprossen'], kind: 'farbe', g: 'sprossen', kurz: 'Sprossenfarbe außen', view: 'outside' },
+  sprFarbeI: { t: 'Und innen?', sub: 'Wie der Rahmen innen oder eine eigene Farbe.', nach: ['sprFarbe', 'breite', 'aufseite', 'spross', 'sprossen'], kind: 'farbe', g: 'sprossen', kurz: 'Sprossenfarbe innen', view: 'inside' },
+  gfA: { gruppe: 'gfA', t: 'Welche Farbe hat der Griff außen?', sub: 'Ohne Wahl wie der Griff innen. Zur dunklen Außenseite passt oft Silber oder Anthrazit.', nach: ['griffA'], view: 'outside', g: 'grifffarbe', kurz: 'Griff-Farbe außen', opts: () => [{ k: '', label: 'Wie innen' }].concat(OPT.gf.map((o) => ({ k: o.k, label: o.label }))) },
   griffM: { t: 'Welches Griffmodell?', nach: ['gf', 'griffA', 'griff'], std: 'der Standardgriff des Herstellers', g: 'griff', kurz: 'Griffmodell' },
   griffPos: { t: 'Wo sitzt der Griff?', sub: 'Tiefer ist gut erreichbar, höher außer Reichweite von Kindern.', nach: ['griffM', 'gf', 'griff'], g: 'griff', kurz: 'Griffhöhe' },
   kinder: { t: 'Eine Kindersicherung?', nach: ['griffPos', 'griffM', 'gf', 'griff'], g: 'kindersicherung', kurz: 'Kindersicherung' },
@@ -4902,9 +4915,9 @@ const DETAIL_UI = {
 };
 const passt = (id, muster) => id === muster || (muster.slice(-1) === '*' && id.indexOf(muster.slice(0, -1)) === 0);
 function detailFrage(w, dd) {
-  const ui = DETAIL_UI[dd.k], v = w[dd.k], g = dd.g || dd.k, opts = (OPT[g] || []).filter((o) => dd.k !== 'fbiFarbe' || bankFarbePasst(w.fbi, o.k));
+  const ui = DETAIL_UI[dd.k], v = w[dd.k], g = dd.g || dd.k, opts = ui.opts ? ui.opts(w) : (OPT[g] || []).filter((o) => dd.k !== 'fbiFarbe' || bankFarbePasst(w.fbi, o.k));
   const hint = v === undefined || v === '' ? (ui.std ? stdName() : (opts[0] && opts[0].k === '' ? opts[0].label : '')) : (AW.detailText(w, dd) || (opts.find((o) => o.k === String(v)) || {}).label || '');
-  return { id: dd.k, title: ui.t, sub: ui.sub || '', kind: ui.kind || (dd.mehr ? 'multi' : 'chips'), group: g, opts: opts, val: v === undefined ? '' : String(v), vals: dd.mehr ? (v || []).slice() : undefined, act: 'detail', f: dd.k, view: ui.view || 'inside', g: ui.g, lupe: !!ui.lupe, hint: hint, s: dd.s, kap: dd.kap, detail: true, kurz: ui.kurz || dd.n };
+  return { id: dd.k, title: ui.t, sub: (typeof ui.sub === 'function' ? ui.sub(w) : ui.sub) || '', kind: ui.kind || (dd.mehr ? 'multi' : 'chips'), group: ui.gruppe || g, opts: opts, val: v === undefined ? '' : String(v), vals: dd.mehr ? (v || []).slice() : undefined, act: 'detail', f: dd.k, view: ui.view || 'inside', g: ui.g, lupe: !!ui.lupe, hint: hint, s: dd.s, kap: dd.kap, detail: true, kurz: ui.kurz || dd.n };
 }
 /* Erklärung je Frage (i-Knopf am Titel). Q_G_STATT ersetzt eine unpassende Zuordnung, Q_G füllt, wo eine Frage noch keine hat */
 const Q_G_STATT = { typ: 'oeffnungsart', richtung: 'aussen', teilung: 'blendrahmen', glas: 'uwert', glasfn: 'glasextras', sart: 'sonnenschutz', griff: 'griff', fswg: 'faltpaket', felder: 'festverglasung' };
@@ -5040,7 +5053,8 @@ function qList(w) {
     if (w.bars.length) {
       L.push({ id: 'spross', title: 'Welche Sprossenart?', kind: 'cards', group: 'spross', val: w.spross, act: 'setw', f: 'spross', ico: ICO.spross, view: 'front', offen: 'spross' });
       if (w.spross === 'auf') L.push({ id: 'aufseite', title: 'Aufgesetzt wo?', kind: 'chips', group: 'aufseite', val: w.aufSeite, act: 'setw', f: 'aufSeite', view: 'outside', hint: 'Ansicht von außen' });
-      L.push({ id: 'breite', title: 'Wie dick sollen die Sprossen sein?', sub: 'Die Breite, die man von vorn sieht.', kind: 'chips', group: 'breite', val: w.breite, act: 'setw', f: 'breite', view: 'front' });
+      /* Glasteilende Sprossen haben je Feld eigenes Glas und Rahmen: nur kräftig (Wirkungskette 3.11.2026) */
+      L.push({ id: 'breite', title: 'Wie dick sollen die Sprossen sein?', sub: w.spross === 'echt' ? 'Glasteilende Sprossen sind kräftig: jedes Feld hat eigenes Glas.' : 'Die Breite, die man von vorn sieht.', kind: 'chips', group: 'breite', opts: w.spross === 'echt' ? OPT.breite.filter((o) => o.k >= 45) : OPT.breite, val: w.breite, act: 'setw', f: 'breite', view: 'front' });
     }
   }
   /* Griff & Schutz */
@@ -5076,7 +5090,8 @@ function qList(w) {
   if (art !== 'haustuer') L.push({ id: 'iart', title: 'Sicht- und Blendschutz innen?', sub: 'Rollo, Plissee oder Jalousie, gleich mitbestellt.', kind: 'cards', group: 'iart', val: w.iart, act: 'setw', f: 'iart', ico: ICO.innen, view: 'inside', g: 'innenschutz', hint: 'Ansicht von innen', offen: 'iart' });
   if (w.iart && w.iart !== 'keiner') L.push({ id: 'ifarbe', title: 'Welche Farbe innen?', kind: 'swatch', group: 'ifarbe', f: 'ifarbe', val: w.ifarbe, view: 'inside', hint: lab('iart', w.iart) + ' · ' + innenName(w) });
   /* Fensterbank & Einbau */
-  if (!tuer && w.form !== 'rund') {
+  /* Bodentiefe Fenster haben keine Fensterbank (Wirkungskette 3.11.2026) */
+  if (!tuer && w.form !== 'rund' && !AW.bodentiefFenster(w)) {
     L.push({ id: 'fbi', title: 'Fensterbank innen?', sub: ki.fbi ? 'Laut Foto: ' + AW.lab('bank', ki.fbi) + '.' : '', kind: 'chips', group: 'fbi', opts: ohne('fbi'), val: w.fbi, act: 'setw', f: 'fbi', view: 'bankInnen', g: 'fensterbank', hint: 'Fensterbank: ' + lab('fbi', w.fbi), offen: 'fbi' });
     L.push({ id: 'fba', title: 'Fensterbank außen?', sub: ki.fba ? 'Laut Foto: ' + AW.lab('bank', ki.fba) + '.' : '', kind: 'chips', group: 'fba', opts: ohne('fba'), val: w.fba, act: 'setw', f: 'fba', view: 'bankAussen', hint: 'Von außen · ' + (istOffen(w, 'fba') ? 'noch offen' : lab('fba', w.fba)), offen: 'fba' });
   }
@@ -5248,10 +5263,11 @@ function qMulti(q) {
 /* Sprossenfarbe (Inhaber, 2.11.2026): wie die Rahmenfarben oben die gewählte Farbe groß, darunter „Wie der Rahmen“, Messing und die
    beliebten Rahmenfarben als Raster, dann „Alle Farben“ und „Holzdekore“; eine Farbe aus dem Blatt steht gedrückt mit im Raster */
 function qSprFarbe(q) {
-  const w = S.win, feld = q.f, v = w[feld], aktiv = v === undefined || v === 'rahmen' ? '' : String(v), attrs = 'data-act="detail" data-f="' + feld + '"';
+  const w = S.win, feld = q.f, v = feld === 'sprFarbeI' ? sprKey(w, 'innen') : w[feld], aktiv = v === undefined || v === 'rahmen' ? '' : String(v), attrs = 'data-act="detail" data-f="' + feld + '"';
   const zelle = (k, farbe, name, label) => '<button type="button" class="qsw" ' + attrs + ' data-v="' + esc(k) + '" aria-pressed="' + (k === aktiv) + '" aria-label="' + esc(label) + '"><span class="c" style="background: ' + farbe + '"></span><span class="n">' + esc(name) + '</span></button>';
   const beliebt = fwBeliebt('rahmen'), alt = aktiv && aktiv !== 'messing' && beliebt.indexOf(aktiv) < 0 ? (SPROSS_FARBE[aktiv] ? { key: aktiv, bg: SPROSS_FARBE[aktiv], code: lab('sprFarbe', aktiv) } : ralFarbe(aktiv)) : null;
-  let h = zelle('', rahmenBeide(w).bg, 'Rahmen', 'Wie der Rahmen') + zelle('messing', SPROSS_FARBE.messing, 'Messing', 'Messing');
+  const rs = FW[feld] && FW[feld].seite ? rahmenFarbe(w, FW[feld].seite) : rahmenBeide(w);
+  let h = zelle('', rs.bg, 'Rahmen', 'Wie der Rahmen') + zelle('messing', SPROSS_FARBE.messing, 'Messing', 'Messing');
   h += beliebt.map((k) => zelle(k, colorOf(k).bg, (colorOf(k).code || '').replace(/^RAL /, ''), colorOf(k).name + ', ' + colorOf(k).code)).join('');
   if (alt) h += zelle(alt.key, alt.bg, String(alt.code || alt.name || '').replace(/^RAL /, ''), alt.label || alt.name || alt.code);
   return fwKopf(feld) + '<div class="qswatches fw-raster" role="group" aria-label="' + esc(FW[feld].beliebtT) + '">' + h + '</div>' +
@@ -5317,7 +5333,8 @@ const FW = {
   insFarbe: { titel: 'Farbe des Insektenschutzes', beliebt: 'rahmen', beliebtT: 'Beliebt bei Insektenschutz', detail: true },
   fbaFarbe: { titel: 'Farbe der Fensterbank außen', beliebt: 'sonne', beliebtT: 'Beliebt bei Fensterbänken', schnell: ['db703'], detail: true },
   /* Sprossen (Inhaber, 2.11.2026): Auswahl wie bei den Rahmenfarben, dazu „Wie der Rahmen“ und Messing */
-  sprFarbe: { titel: 'Sprossenfarbe', beliebt: 'rahmen', beliebtT: 'Beliebt bei Sprossen', detail: true, wieRahmen: true }
+  sprFarbe: { titel: 'Sprossenfarbe außen', beliebt: 'rahmen', beliebtT: 'Beliebt bei Sprossen', detail: true, wieRahmen: true, seite: 'aussen' },
+  sprFarbeI: { titel: 'Sprossenfarbe innen', beliebt: 'rahmen', beliebtT: 'Beliebt bei Sprossen', detail: true, wieRahmen: true, seite: 'innen' }
 };
 /* Auswahl einer Detailfarbe (OPT der Gruppe aus dem Register, sfK und sfS nutzen die Töne des Sonnenschutzes) */
 const fwOpts = (feld) => { const d = AW.DETAIL.find((x) => x.k === feld); return OPT[(d && d.g) || feld] || []; };
@@ -5347,9 +5364,9 @@ function fwAnzeige(feld) {
     return { name: c.name, bg: c.bg, zeile: [c.code === 'eigene Farbe' ? '' : c.code, c.eigen ? 'eigene Angabe' : '', wie] };
   }
   if (FW[feld].detail) {
-    const v = w[feld], o = fwOpts(feld).find((x) => x.k === v), e = o ? null : ralFarbe(v);
-    if ((v === undefined || v === '' || v === 'rahmen') && FW[feld].wieRahmen) { const c = rahmenBeide(w); return { name: 'Wie der Rahmen', bg: c.bg, zeile: c.zeile }; }
-    if (SPROSS_FARBE[v] && feld === 'sprFarbe') return { name: lab('sprFarbe', v), bg: SPROSS_FARBE[v], zeile: [] };
+    const v = feld === 'sprFarbeI' ? sprKey(w, 'innen') : w[feld], o = fwOpts(feld).find((x) => x.k === v), e = o ? null : ralFarbe(v);
+    if ((v === undefined || v === '' || v === 'rahmen') && FW[feld].wieRahmen) { const c = FW[feld].seite ? rahmenFarbe(w, FW[feld].seite) : rahmenBeide(w); return { name: 'Wie der Rahmen' + (FW[feld].seite ? (FW[feld].seite === 'innen' ? ' innen' : ' außen') : ''), bg: c.bg, zeile: c.zeile || [c.name] }; }
+    if (SPROSS_FARBE[v] && (feld === 'sprFarbe' || feld === 'sprFarbeI')) return { name: lab('sprFarbe', v), bg: SPROSS_FARBE[v], zeile: [] };
     if (v === undefined || v === '') return { offen: true, name: 'Standard', zeile: [(DETAIL_UI[feld] || {}).std || ''] };
     if (v === 'rahmen') { const c = rahmenFarbe(w, 'aussen'); return { name: 'Wie der Rahmen', bg: c.bg, zeile: [c.name] }; }
     return o ? { name: o.label, bg: o.bg, zeile: [] } : e ? { name: e.name, bg: e.bg, zeile: [e.code] } : { name: String(v), zeile: [] };
@@ -5375,7 +5392,7 @@ function fwSetzen(feld, key) {
   const w = S.win; S.offenVorText = null;
   if (feld === 'fa') { w.fa = key; w.wunschA = ''; entschieden(w, 'fa'); }
   else if (feld === 'fi') { w.fi = key; w.gleich = false; w.wunschI = ''; entschieden(w, 'fi'); }
-  else if (FW[feld].detail) w[feld] = key;
+  else if (FW[feld].detail) { w[feld] = key; if (feld === 'sprFarbe' && w.sprFarbeI === undefined) w.sprFarbeI = ''; }
   else { w[feld] = key; w[FW[feld].wunsch] = ''; entschieden(w, feld); }
 }
 const FW_LUPE = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="7.6" cy="7.6" r="5.2" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M11.5 11.5L16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>';
@@ -5395,7 +5412,7 @@ function qColor(q) {
   const wie = side === 'innen' ? '<button type="button" class="chip" data-act="togglew" data-f="gleich" aria-pressed="' + w.gleich + '">Innen wie außen</button>' : '';
   let h = fwKopf(feld, wie);
   h += '<div class="qswatches fw-raster" role="group" aria-label="Beliebt bei Fenstern">' + fwBeliebt('rahmen').map((k) => fwTupfen(k, 'data-act="color" data-side="' + side + '"', aktiv, (colorOf(k).code || '').replace(/^RAL /, ''))).join('') + '</div>';
-  h += '<div class="fw-mehr">' + fwBlattKnopf(feld, '', 'Alle Farben') + fwBlattKnopf(feld, 'holz', 'Holzdekore') + '</div>';
+  h += '<div class="fw-mehr">' + fwBlattKnopf(feld, '', 'Alle Farben') + fwBlattKnopf(feld, 'holz', fbHolzName(feld)) + '</div>';
   return h + farbFeld(side === 'innen' ? 'wunschI' : 'wunschA') + FW_HINWEIS;
 }
 /* Maße in den Wünschen (Unterlicht, Seitenteile, Paneel, Ausladung der Fensterbank): Stufenregler; ein Tipp auf den Wert öffnet die
@@ -5488,9 +5505,15 @@ function fbWahlHTML() {
   const a = fwAnzeige(FB.feld), z = a.zeile.filter(Boolean).join(' · ');
   return '<span class="fw-tupf gross' + (a.offen ? ' offen' : '') + '"' + (a.bg ? ' style="background: ' + a.bg + '"' : '') + ' aria-hidden="true"></span><span class="tx"><small id="fb-t">' + esc(FW[FB.feld].titel) + '</small><b>' + esc(a.name) + '</b>' + (z ? '<small>' + esc(z) + '</small>' : '') + '</span>';
 }
+/* Rahmenfarben nach Material der Seite (Wirkungskette 3.11.2026): auf Holz heißen die Holztöne Lasuren, Eloxal gibt es nur auf Aluminium;
+   bei „innen wie außen“ muss die Farbe außen auch innen gehen */
+const fbSeiten = (feld) => (feld === 'fa' ? (S.win && S.win.gleich ? ['aussen', 'innen'] : ['aussen']) : feld === 'fi' ? ['innen'] : []);
+const fbMoeglich = (feld, k) => fbSeiten(feld).every((sd) => AW.farbeMoeglich(S.win, sd, k));
+const fbHolzName = (feld) => (fbSeiten(feld).some((sd) => AW.seitenMaterial(S.win, sd) === 'holz') ? 'Lasuren' : 'Holzdekore');
 function fbListeHTML() {
-  const R = window.RAL, aktiv = fwAktiv(FB.feld), q = FB.such.trim(), cfg = FW[FB.feld];
-  const knopf = (e) => { const k = fbKurz(e); return '<button type="button" class="fb-f' + (k ? '' : ' ohne') + '" data-fb="f" data-v="' + esc(e.key) + '" aria-pressed="' + (e.key === aktiv) + '" aria-label="' + esc(e.label + (e.art === 'holz' ? ', Holzdekor' : '')) + '"><span class="c" style="background: ' + e.bg + '"></span>' + (k ? '<span class="nr">' + esc(k) + '</span>' : '') + '<span class="nm">' + esc(fwTrenn(e.name)) + '</span></button>'; };
+  const R0 = window.RAL, aktiv = fwAktiv(FB.feld), q = FB.such.trim(), cfg = FW[FB.feld];
+  const R = { suche: (t) => R0.suche(t).filter((e) => fbMoeglich(FB.feld, e.key)), liste: R0.liste.filter((e) => fbMoeglich(FB.feld, e.key)), FAMILIEN: R0.FAMILIEN.map((f) => (f.k === 'holz' ? Object.assign({}, f, { label: fbHolzName(FB.feld) }) : f)), BELIEBT: R0.BELIEBT, eintrag: (k) => (fbMoeglich(FB.feld, k) ? R0.eintrag(k) : null) };
+  const knopf = (e) => { const k = fbKurz(e); return '<button type="button" class="fb-f' + (k ? '' : ' ohne') + '" data-fb="f" data-v="' + esc(e.key) + '" aria-pressed="' + (e.key === aktiv) + '" aria-label="' + esc(e.label + (e.art === 'holz' ? (fbHolzName(FB.feld) === 'Lasuren' ? ', Lasur' : ', Holzdekor') : '')) + '"><span class="c" style="background: ' + e.bg + '"></span>' + (k ? '<span class="nr">' + esc(k) + '</span>' : '') + '<span class="nm">' + esc(fwTrenn(e.name)) + '</span></button>'; };
   const gruppe = (titel, liste) => (liste.length ? '<h3 class="fb-gr">' + esc(titel) + '</h3><div class="fb-raster">' + liste.map(knopf).join('') + '</div>' : '');
   if (q) {
     const t = R.suche(q);
@@ -5503,7 +5526,7 @@ function fbListeHTML() {
 }
 const FB_HILFE = ['Frag deinen Fensterbauer nach dem Farbfächer. Er hat echte Muster, auch für Holzdekore.', 'Auf alten Rechnungen, Auftragsbestätigungen oder dem Etikett im Falz steht die Farbe oft als RAL-Nummer.', 'Soll es zur Haustür, zum Garagentor oder zur Dachrinne passen? Mach ein Foto davon, dein Fensterbauer bestimmt den Ton.', 'Unsicher? Beschreib die Farbe im Feld unter der Auswahl, etwa „wie die Haustür“, oder lass sie offen.'];
 function fbHTML() {
-  const R = window.RAL, fam = [{ k: '', label: 'Alle' }].concat(R.FAMILIEN), cfg = FW[FB.feld];
+  const R = window.RAL, fam = [{ k: '', label: 'Alle' }].concat(R.FAMILIEN.map((f) => (f.k === 'holz' ? Object.assign({}, f, { label: fbHolzName(FB.feld) }) : f))), cfg = FW[FB.feld];
   return '<button type="button" class="fb-weg" data-fb="zu" tabindex="-1" aria-label="Farbwahl schließen"></button>' +
     '<div class="fb-blatt" tabindex="-1"><div class="fb-kopf"><div class="grip" aria-hidden="true"></div>' +
     '<div class="fb-wahl"><div class="fb-wahl-t" aria-live="polite">' + fbWahlHTML() + '</div><button type="button" class="btn primary small fb-fertig" data-fb="zu">Fertig</button></div>' +
@@ -7842,6 +7865,8 @@ function act(name, el) {
       const dd = AW.DETAIL.find((x) => x.k === f); if (!dd) return;
       if (dd.mehr && v !== '') { const a = (w[f] || []).slice(), i = a.indexOf(v); if (i >= 0) a.splice(i, 1); else a.push(v); if (a.length) w[f] = a; else delete w[f]; }
       else if (v === '') delete w[f]; else w[f] = v;
+      if (f === 'sprFarbe' && w.sprFarbeI === undefined) w.sprFarbeI = '';
+      if (f === 'sprFarbeI' && v === '') w.sprFarbeI = '';
       if (f === 'seiten') { seitenAnwenden(w); w.e_teilung = true; }
       if (f === 'paneel') { if (w.paneel === 'paneel') { if (!num(w.paneelH)) w.paneelH = 400; } else delete w.paneelH; }
       if (f === 'sfTeile' && w.sfTeile !== 'eigen') { delete w.sfK; delete w.sfS; }
@@ -7990,7 +8015,11 @@ function act(name, el) {
     case 'ohne-foto': { if (ohneFotoZu()) return ohneFotoWeiter(); S.ohneFotoFrage = true; return render(); }
     case 'ohne-foto-weiter': return ohneFotoWeiter();
     case 'ohne-foto-zu': { S.ohneFotoFrage = false; return render(); }
-    case 'setw': { if (f === 'fbi' && w.fbiFarbe && !bankFarbePasst(v, w.fbiFarbe)) delete w.fbiFarbe; if (f === 'material') w.e_material = true; if (f === 'etage') w.e_etage = true; if (f === 'gf') w.wunschGf = ''; else if (f === 'sfarbe') w.wunschSf = ''; else if (f === 'ifarbe') w.wunschIf = ''; if (NUMF[f]) w[f] = n(v); else w[f] = v; entschieden(w, f); return render(); }
+    case 'setw': { if (f === 'fbi' && w.fbiFarbe && !bankFarbePasst(v, w.fbiFarbe)) delete w.fbiFarbe; if (f === 'material') w.e_material = true; if (f === 'etage') w.e_etage = true; if (f === 'gf') w.wunschGf = ''; else if (f === 'sfarbe') w.wunschSf = ''; else if (f === 'ifarbe') w.wunschIf = ''; if (NUMF[f]) w[f] = n(v); else w[f] = v; entschieden(w, f);
+      if (f === 'spross' && v === 'echt' && num(w.breite) < 45) w.breite = 45;
+      /* Material gewechselt: eine Rahmenfarbe, die es auf dem neuen Material nicht gibt (Eloxal nur auf Aluminium), zurück auf Weiß */
+      if (f === 'material') { const weg = []; if (!AW.farbeMoeglich(w, 'aussen', w.fa) || (w.gleich && !AW.farbeMoeglich(w, 'innen', w.fa))) { weg.push(colorOf(w.fa).name || w.fa); w.fa = '9016'; } if (!w.gleich && !AW.farbeMoeglich(w, 'innen', w.fi)) { weg.push(colorOf(w.fi).name || w.fi); w.fi = '9016'; } if (weg.length) return toast(weg.join(' und ') + ' gibt es auf ' + lab('material', w.material) + ' nicht. Die Farbe steht wieder auf Weiß.'); }
+      return render(); }
     case 'setp': { S.proj[f] = v; if (f === 'foerdweg') S.proj.foerd = v === 'bafa' || v === 'steuer'; persist(); return render(); }
     case 'togglew': { w[f] = !w[f]; entschieden(w, f); return render(); }
     case 'togglep': { S.proj[f] = !S.proj[f]; persist(); return render(); }

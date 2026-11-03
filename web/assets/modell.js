@@ -242,13 +242,18 @@
       { k: 'hstEck', s: 2, kap: 'aufbau', n: 'Ecklösung', zeile: false, gilt: (w) => w.art === 'hst' },
       { k: 'fswAuf', s: 2, kap: 'aufbau', n: 'Faltrichtung', zeile: false, gilt: (w) => w.art === 'fsw' },
       { k: 'holzart', s: 2, kap: 'material', n: 'Holzart', gilt: (w) => w.material === 'holz' || w.material === 'holzalu', design: true },
-      { k: 'oberfl', s: 3, kap: 'material', n: 'Oberfläche', design: true },
+      { k: 'oberfl', s: 3, kap: 'material', n: 'Oberfläche', design: true, text: (w) => optName('oberfl', w.oberfl, String(w.oberfl)) + (!w.gleich && farbe(w, 'innen')[0] !== farbe(w, 'aussen')[0] ? ' außen, innen glatt' : '') },
       { k: 'profil', s: 3, kap: 'material', n: 'Profilform', design: true },
       { k: 'schmal', s: 3, kap: 'material', n: 'Rahmenansicht', design: true },
       { k: 'dicht', s: 3, kap: 'material', n: 'Dichtung', design: true },
       { k: 'sichtZone', s: 3, kap: 'glas', n: 'Sichtschutz', gilt: (w) => (w.glasfn || []).indexOf('sicht') >= 0 && !istOffen(w, 'glasfn'), design: true },
       { k: 'ahFarbe', s: 3, kap: 'glas', n: 'Abstandhalter', design: true },
-      { k: 'sprFarbe', s: 1, kap: 'glas', wg: 'fenster', n: 'Sprossenfarbe', gilt: (w) => (w.bars || []).length > 0, design: true },
+      /* Sprossenfarbe je Seite (Inhaber, 3.11.2026: innen weiß, außen grau muss gehen); aufgesetzte Sprossen nur auf ihrer Seite.
+         Ältere Aufmaße ohne sprFarbeI: die eine Farbe galt für beide Seiten (sprInnen) */
+      { k: 'sprFarbe', s: 1, kap: 'glas', wg: 'fenster', n: 'Sprossenfarbe außen', gilt: (w) => (w.bars || []).length > 0 && !(w.spross === 'auf' && w.aufSeite === 'innen'), design: true, text: (w) => optName('sprFarbe', w.sprFarbe, String(w.sprFarbe)) + (w.sprFarbeI === '' && !(w.spross === 'auf' && w.aufSeite === 'aussen') ? '; innen wie der Rahmen' : '') },
+      { k: 'sprFarbeI', g: 'sprFarbe', s: 1, kap: 'glas', wg: 'fenster', n: 'Sprossenfarbe innen', gilt: (w) => (w.bars || []).length > 0 && !(w.spross === 'auf' && w.aufSeite === 'aussen'), design: true, text: (w) => optName('sprFarbe', w.sprFarbeI, String(w.sprFarbeI)) + (!w.sprFarbe && !(w.spross === 'auf' && w.aufSeite === 'innen') ? '; außen wie der Rahmen' : '') },
+      /* Griff außen an der Balkontür in eigener Farbe (Wirkungskette 3.11.2026: innen weiß, außen anthrazit); ohne Wahl wie innen */
+      { k: 'gfA', g: 'gf', s: 1, kap: 'bedienung', wg: 'beschlag', n: 'Griff-Farbe außen', gilt: (w) => w.art === 'balkon' && !!(w.bt && w.bt.griffA && w.bt.griffA !== 'keiner'), design: true },
       { k: 'griffM', s: 3, kap: 'bedienung', n: 'Griffmodell', gilt: (w) => mitGriff(w) && w.art !== 'hst', design: true },
       { k: 'griffPos', s: 3, kap: 'bedienung', n: 'Griffhöhe', gilt: (w) => fenOderTuer(w) && mitGriff(w) && mitDreh(w) },
       { k: 'kinder', s: 3, kap: 'bedienung', n: 'Kindersicherung', gilt: (w) => fenOderTuer(w) && mitDreh(w) },
@@ -262,7 +267,7 @@
       { k: 'gitter', s: 3, kap: 'bedienung', n: 'Fenstergitter', gilt: (w) => !w.art || w.art === 'fenster' || w.art === 'fest' },
       { k: 'gelForm', s: 3, kap: 'bedienung', n: 'Geländer', gilt: (w) => absturzFrage(w) && w.absturz === 'gelaender' },
       { k: 'gelFarbe', s: 3, kap: 'bedienung', n: 'Farbe Geländer', gilt: (w) => absturzFrage(w) && (w.absturz === 'gelaender' || w.absturz === 'glas') },
-      { k: 'sfTeile', s: 2, kap: 'sonne', n: 'Kasten und Schienen', gilt: sonneDa, design: true, text: (w) => (w.sfTeile === 'eigen' ? '' : lab('sfTeile', w.sfTeile)) },
+      { k: 'sfTeile', s: 2, kap: 'sonne', n: 'Kasten und Schienen', gilt: sonneDa, design: true, text: (w) => (w.sfTeile === 'eigen' ? (w.sfK || w.sfS ? '' : 'eigene Farben, noch nicht gewählt') : lab('sfTeile', w.sfTeile)) },
       { k: 'sfK', s: 2, kap: 'sonne', n: 'Farbe Kasten', g: 'sfarbe', gilt: (w) => sonneDa(w) && w.sfTeile === 'eigen' && w.roll !== 'unterputz', design: true },
       { k: 'sfS', s: 2, kap: 'sonne', n: 'Farbe Schienen', g: 'sfarbe', gilt: (w) => sonneDa(w) && w.sfTeile === 'eigen', design: true },
       /* Aufsatzkasten: die Blende außen vor dem Kasten ist verputzt bzw. verblendet wie die Fassade oder eine Alu-Blende in Kastenfarbe */
@@ -310,11 +315,16 @@
     const leser = () => ral() || (typeof globalThis !== 'undefined' && globalThis.Farbtext) || null;
     const erkannt = (t) => { const ft = leser(); return t && ft ? ft.lesen(t) : null; };
     const farbeOffen = (w, seite) => !!(w.offen && (seite === 'innen' ? (w.gleich ? w.offen.fa : w.offen.fi) : w.offen.fa));
+    /* Material je Seite des Rahmens (Wirkungskette 3.11.2026): Aluminium außen bei Kunststoff-Alu und Holz-Alu, Holz innen bei Holz-Alu */
+    const seitenMaterial = (w, seite) => { const m = (w && w.material) || 'kunststoff'; if (m === 'alu' || (seite !== 'innen' && (m === 'kunststoffalu' || m === 'holzalu'))) return 'alu'; if (m === 'holz' || (seite === 'innen' && m === 'holzalu')) return 'holz'; return 'kunststoff'; };
+    /* Gibt es die Rahmenfarbe auf dem Material der Seite? Eloxal nur auf Aluminium, die Kunststofffolie mit Holzstruktur nur auf Kunststoff */
+    const farbeMoeglich = (w, seite, k) => { const sm = seitenMaterial(w, seite); if ((k === 'eloxal' || k === 'eloxbronze') && sm !== 'alu') return false; if (k === 'holz7016' && sm !== 'kunststoff') return false; return true; };
     function farbe(w, seite) {
       if (farbeOffen(w, seite)) return ['Farbe offen', 'bitte beraten', '#f1f0ea'];
       const innen = seite === 'innen', t = innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA, k = innen ? (w.gleich ? w.fa : w.fi) : w.fa, f = erkannt(t);
-      if (!f) return col(k);
-      return f.eintrag ? [f.eintrag.name, f.eintrag.code, f.hex] : [f.name, f.code ? 'RAL ' + f.code : 'eigene Farbe', f.hex];
+      const c = !f ? col(k) : f.eintrag ? [f.eintrag.name, f.eintrag.code, f.hex] : [f.name, f.code ? 'RAL ' + f.code : 'eigene Farbe', f.hex];
+      /* Echtes Holz bekommt keine Dekorfolie, sondern eine Lasur im Holzton */
+      return c[1] === 'Holzdekor' && seitenMaterial(w, seite) === 'holz' ? [c[0], 'Lasur im Holzton', c[2]] : c;
     }
     function farbZeile(w, seite) {
       if (farbeOffen(w, seite)) return OFFEN_TEXT;
@@ -442,6 +452,8 @@
        ab einer Brüstung unter 900 mm (die Absturzhöhe kennt die App nicht); ohne gemessene Brüstung, wenn das Innenfoto eine bodentiefe oder
        niedrige zeigt. */
     const ABSTURZ_MM = 900;
+    /* Bodentiefes Fenster (Brüstung 0 oder fast 0): ohne Fensterbank innen und außen (Wirkungskette 3.11.2026) */
+    const bodentiefFenster = (w) => !istTuer(w) && bruDa(w) && num(w.bru) < 100;
     const bruDa = (w) => w.bru !== '' && w.bru != null && String(w.bru).trim() !== '';
     function absturzFrage(w) {
       if (!w || (w.etage !== 'og' && w.etage !== 'dg') || nachruest(w)) return false;
@@ -544,6 +556,7 @@
       if (z) r.push(['Förderwert', uwText(z) + ', ' + lab('foerdweg', foerdWeg(p))]);
       r.push(['Sonnenschutz außen', sonne(w)], ['Sonnenschutz innen', innen(w)], ['Insektenschutz', ov(w, 'insekt', lab('insekt', w.insekt) || 'keiner')]);
       if (istTuer(w)) r.push(['Schwelle', art === 'psk' ? 'mit Schwelle (PSK)' : ov(w, 'schwelle', lab('schwelle', tuerCfg(w).schwelle) || 'flache Schwelle') + (art === 'balkon' ? ', ' + lab('boden', (w.bt || {}).boden || 'bleibt') : '')]);
+      else if (bodentiefFenster(w)) r.push(['Fensterbank', 'keine, bodentief']);
       else r.push(['Fensterbank', istStd(w, 'fbi') && istStd(w, 'fba') ? STD_TEXT : 'innen ' + ov(w, 'fbi', lab('fbi', w.fbi) || 'behalten') + ', außen ' + ov(w, 'fba', lab('fba', w.fba) || 'behalten')]);
       detailRows(w).forEach((x) => r.push(x));
       r.push(['Montage', montageText(w)]);
@@ -800,7 +813,7 @@
         { id: 'sonne', titel: 'Sonnenschutz', zeilen: [zeile('außen', sonne(w)), zeile('innen', innen(w))] },
         { id: 'insekt', titel: 'Insektenschutz', zeilen: [zeile('Insektenschutz', ov(w, 'insekt', lab('insekt', w.insekt) || 'keiner'))] },
         tuer ? { id: 'bank', titel: 'Schwelle und Boden', zeilen: [zeile('Schwelle', art === 'psk' ? 'mit Schwelle (PSK)' : ov(w, 'schwelle', lab('schwelle', tuerCfg(w).schwelle) || 'flache Schwelle'))].concat(art === 'balkon' ? [zeile('Fußboden', lab('boden', (w.bt || {}).boden || 'bleibt'))] : []) }
-          : { id: 'bank', titel: 'Fensterbänke', zeilen: w.form === 'rund' ? [zeile('Fensterbänke', 'keine (rundes Fenster)')] : istStd(w, 'fbi') && istStd(w, 'fba') ? [zeile('Fensterbänke', STD_TEXT)] : [zeile('innen', ov(w, 'fbi', lab('fbi', w.fbi) || 'behalten')), zeile('außen', ov(w, 'fba', lab('fba', w.fba) || 'behalten'))] },
+          : { id: 'bank', titel: 'Fensterbänke', zeilen: w.form === 'rund' ? [zeile('Fensterbänke', 'keine (rundes Fenster)')] : bodentiefFenster(w) ? [zeile('Fensterbänke', 'keine, bodentief')] : istStd(w, 'fbi') && istStd(w, 'fba') ? [zeile('Fensterbänke', STD_TEXT)] : [zeile('innen', ov(w, 'fbi', lab('fbi', w.fbi) || 'behalten')), zeile('außen', ov(w, 'fba', lab('fba', w.fba) || 'behalten'))] },
         { id: 'montage', titel: 'Montage', zeilen: [zeile('Montage', montageText(w))].concat(fassadeText(w) ? [zeile('Fassade', fassadeText(w) + ' (Angabe des Kunden am Modell)')] : []) }
       ];
       /* Detailangaben (AW.DETAIL, nur gewählte und passende) bei ihrer Gruppe; ohne Wahl gilt der Standard des Fensterbauers */
@@ -916,7 +929,9 @@
     }
     const SPR_HEX = { weiss: '#f4f4f2', anthrazit: '#383e42', messing: '#b8964e' };
     /* Sprossenfarbe: Messing und die früheren Töne aus SPR_HEX, sonst jede Farbe aus dem Farbblatt (RAL, Dekore) wie beim Rahmen */
-    const sprHex = (w) => (detailGilt(w, 'sprFarbe') && w.sprFarbe && w.sprFarbe !== 'rahmen' ? SPR_HEX[w.sprFarbe] || (ralEintrag(w.sprFarbe) || {}).hex || '' : '');
+    /* Zeichnung: Ansicht von innen, also die Sprossenfarbe innen (ältere Aufmaße: die eine Farbe für beide Seiten) */
+    const sprInnen = (w) => (w.sprFarbeI !== undefined ? w.sprFarbeI : w.sprFarbe);
+    const sprHex = (w) => { const k = sprInnen(w); return detailGilt(w, 'sprFarbeI') && k && k !== 'rahmen' ? SPR_HEX[k] || (ralEintrag(k) || {}).hex || '' : ''; };
     const hell = (hex) => { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return true; const v = parseInt(m[1], 16); return ((v >> 16) * 299 + ((v >> 8) & 255) * 587 + (v & 255) * 114) / 1000 > 200; };
     function plan(w, o) {
       o = o || {};
@@ -1173,7 +1188,7 @@
       if (tuer) o += path(R(bx - 1, by + bh - 0.6, bw + 2, 1.6), '#ddd6cb', ink, 0.5);
       return '<svg viewBox="0 0 64 64" width="' + (size || 44) + '" height="' + (size || 44) + '" aria-hidden="true">' + o + '</svg>';
     }
-    return { OPT: OPT, TYP: TYP, lab: lab, etageText: etageText, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, htAusschnitt: htAusschnitt, nachruest: nachruest, nachText: nachText, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor, profilMm: profilMm, fugeStulp: fugeStulp, stulpPaare: stulpPaare, hatStulp: hatStulp,
+    return { OPT: OPT, TYP: TYP, lab: lab, etageText: etageText, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, bodentiefFenster: bodentiefFenster, seitenMaterial: seitenMaterial, farbeMoeglich: farbeMoeglich, htAusschnitt: htAusschnitt, nachruest: nachruest, nachText: nachText, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor, profilMm: profilMm, fugeStulp: fugeStulp, stulpPaare: stulpPaare, hatStulp: hatStulp,
       DETAIL: DETAIL, detailGilt: detailGilt, festImFluegel: festImFluegel, festText: festText, detailText: detailText, detailRows: detailRows, RC_RANG: RC_RANG, rcAb: rcAb,
       OFFEN_TEXT: OFFEN_TEXT, OFFEN_NAME: OFFEN_NAME, offenName: offenName, istOffen: istOffen, offenGilt: offenGilt, offenListe: offenListe, griffText: griffText, montageText: montageText, fassadeText: fassadeText, teilungText: teilungText, teilFrei: teilFrei, anteileGueltig: anteileGueltig, rcText: rcText,
       nachTiefe: nachTiefe, tiefeVon: tiefeVon, tiefeKopf: tiefeKopf, FRAGE: FRAGE, FRAGE_STUFE: FRAGE_STUFE, STD_TEXT: STD_TEXT, istStd: istStd, TIEFE_NAME: TIEFE_NAME, tiefeText: tiefeText, fluegelZahl: fluegelZahl, oeffnungKurz: oeffnungKurz, absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz,

@@ -4858,7 +4858,7 @@ if (teil(22)) {
   // Jede Frage bei „Alles im Detail“ hat ihr i, in allen Bauarten und mit allen Detailangaben
   const iB = await p.evaluate(() => {
     const ohne = [], gesehen = new Set(); S.proj.tiefe = 'genau'; S.editIdx = -1; S.screen = 'frage';
-    const varianten = [['fenster', {}], ['fenster', { sart: 'raffstore', roll: 'vorbau', antrieb: 'motor', etage: 'og', bru: 500, absturz: 'gelaender', insekt: 'spann', glasfn: ['sicht'], material: 'holz', fba: 'alu', fbi: 'werzalit', bars: 1 }], ['fenster', { sart: 'rollladen', roll: 'vorbau', sfTeile: 'eigen' }], ['fenster', { sart: 'screen', roll: 'aufsatz' }], ['fenster', { sart: 'klappladen' }], ['fenster', { teilung: '2s', seiten: 'beide' }], ['balkon', { etage: 'og', absturz: 'glas' }], ['hst', {}], ['psk', {}], ['fsw', {}], ['fest', {}]];
+    const varianten = [['fenster', {}], ['fenster', { sart: 'raffstore', roll: 'vorbau', antrieb: 'motor', etage: 'og', bru: 500, absturz: 'gelaender', insekt: 'spann', glasfn: ['sicht'], material: 'holz', fba: 'alu', fbi: 'werzalit', bars: 1 }], ['fenster', { sart: 'rollladen', roll: 'vorbau', sfTeile: 'eigen' }], ['fenster', { sart: 'screen', roll: 'aufsatz' }], ['fenster', { sart: 'klappladen' }], ['fenster', { teilung: '2s', seiten: 'beide' }], ['balkon', { etage: 'og', absturz: 'glas' }], ['balkon', { bt: { schwelle: 'standard', griffA: 'ziehgriff', boden: 'bleibt' } }], ['hst', {}], ['psk', {}], ['fsw', {}], ['fest', {}]];
     varianten.forEach(([art, set]) => {
       const w = baseWin(); artSetzen(w, art); Object.assign(w, set, { name: 'X', offen: {} }); if (set.bars) { w.bars = []; barCount(w, 'v', 1); } if (w.teilung === '2s') w.sashes = sashesFor('2s'); if (w.seiten) seitenAnwenden(w); S.win = w;
       qList(w).forEach((q) => { S.q = q.id; render(true); const b = document.querySelector('.qdock .hd h1 .qg, .qdock .hd h1 .lg-i, .scr.dna .lg-frage h1 .lg-i'), k = b && b.getAttribute('data-k'); /* Design-DNA (Lage): i am Titel */ gesehen.add(q.id); if (!k || !GLOSS[k] || !(/^Erklärung: /.test(b.getAttribute('aria-label') || '') || (b.matches('.lg-i') && b.getAttribute('aria-label') === GLOSS[k].t))) ohne.push(art + ':' + q.id); });
@@ -5137,6 +5137,35 @@ if (teil(32)) {
   ok(/ ol material /.test(' ' + fe32.ids + ' ') && / glas glasfn sprossen /.test(' ' + fe32.ids + ' ') && / sart insekt fbi /.test(' ' + fe32.ids + ' ') && /Milchglas/.test(fe32.gfSub) && fe32.orn && fe32.olTeil && fe32.olm &&
     /^Oberlicht kippbar, geteilt über jedem Flügel · /.test(fe32.text) && fe32.svg >= 10 && !fe32.einfl && /Bodentief: bis zum Fußboden/.test(fe32.mess),
     'Fenster: Oberlicht, Glas-Extras (Milchglas) und Insektenschutz im Hauptweg, Ornament nach Sichtschutz; geteiltes Oberlicht ab zwei Flügeln mit durchlaufendem Pfosten, Text und Zeichnung; Messtext nennt bodentief (' + JSON.stringify(fe32).slice(0, 400) + ')');
+  /* Wirkungskette (3.11.2026): Seite, Material, Wechsel; die Regeln aus der Prüfung nach den sieben Punkten in docs/GESTALTUNG.md */
+  const wk32 = await p.evaluate(async () => {
+    const warte = (ms) => new Promise((r) => setTimeout(r, ms)), x = {};
+    /* Material: Holz-Alu innen Lasuren statt Holzdekore, Eloxal nur außen; Text „Lasur im Holzton“; Wechsel auf Kunststoff setzt Eloxal zurück */
+    let w = baseWin(); w.material = 'holzalu'; w.fa = '7016'; w.fi = 'goak'; w.gleich = false; S.win = w; S.editIdx = -1; S.windows = [];
+    S.q = 'fi'; S.screen = 'frage'; render(true); await warte(30);
+    x.lasurKnopf = [...document.querySelectorAll('.qpanel [data-farbblatt]')].map((b) => b.textContent.trim()).join('|');
+    fbAuf('fi', ''); x.eloxInnen = !!document.querySelector('.fb [data-v="eloxal"]'); fbZu(); fbAuf('fa', ''); x.eloxAussen = !!document.querySelector('.fb [data-v="eloxal"]'); fbZu();
+    x.farbText = AW.rows(w).find((r) => r[0] === 'Farbe')[1];
+    w.fa = 'eloxal'; S.q = 'material'; render(true); await warte(30); document.querySelector('[data-act="setw"][data-f="material"][data-v="kunststoff"]').click(); await warte(40); x.eloxWeg = S.win.fa;
+    /* Griff außen der Balkontür in eigener Farbe */
+    w = baseWin(); artSetzen(w, 'balkon'); w.fa = '7016'; w.gf = 'weiss'; w.bt.griffA = 'ziehgriff'; S.win = w; S.q = 'gfA'; S.screen = 'frage'; render(true); await warte(30);
+    document.querySelector('.qpanel [data-act="detail"][data-f="gfA"][data-v="silber"]').click(); await warte(40);
+    x.gfA = [document.querySelector('#w3d [data-r="ga-0"]').style.background, document.querySelector('#w3d [data-r="handle-0"]').style.background, AW.detailRows(S.win).filter((r) => r[0] === 'Griff-Farbe außen').map((r) => r[1]).join()];
+    /* Oberfläche zweifarbig nur außen */
+    w = baseWin(); w.fa = 'goak'; w.fi = '9016'; w.gleich = false; w.oberfl = 'holz'; S.win = w; S.q = 'oberfl'; render(true); await warte(30);
+    const st = document.getElementById('w3d'); x.oberfl = [st._oberfl, st.querySelector('[data-r="sf-out-0"]')._oberfl, st.querySelector('[data-r="sf-in-0"]')._oberfl || '', AW.detailRows(w).filter((r) => r[0] === 'Oberfläche').map((r) => r[1]).join()];
+    /* Bodentief: keine Fensterbank; glasteilende Sprossen nur kräftig; Haustür-Seitenteile nicht ins Fenster */
+    w = baseWin(); w.bru = 0; x.bodentief = [qList(w).some((q) => q.id === 'fbi' || q.id === 'fba'), AW.rows(w).find((r) => r[0] === 'Fensterbank')[1]];
+    w = baseWin(); w.bars = [{ id: 'b1', s: 0, d: 'h', p: 0.5 }]; w.breite = 18; S.win = w; S.q = 'spross'; render(true); await warte(30); document.querySelector('.qpanel [data-act="setw"][data-f="spross"][data-v="echt"]').click(); await warte(30);
+    x.echt = [S.win.breite, qList(S.win).find((q) => q.id === 'breite').opts.map((o) => o.k).join()];
+    w = baseWin(); artSetzen(w, 'haustuer'); w.seiten = 'beide'; seitenAnwenden(w); artSetzen(w, 'fenster'); x.htSeiten = [w.seiten || '', w.sashes.filter((y) => y.st).length];
+    return x;
+  });
+  ok(wk32.lasurKnopf === 'Alle Farben|Lasuren' && !wk32.eloxInnen && wk32.eloxAussen && /innen Golden Oak \(Lasur im Holzton\)/.test(wk32.farbText) && wk32.eloxWeg === '9016' &&
+    /201, 204, 208/.test(wk32.gfA[0]) && /244, 244, 242/.test(wk32.gfA[1]) && wk32.gfA[2] === 'silber' &&
+    wk32.oberfl[0] === '' && wk32.oberfl[1] === 'holz' && wk32.oberfl[2] === '' && wk32.oberfl[3] === 'Holzstruktur außen, innen glatt' &&
+    !wk32.bodentief[0] && wk32.bodentief[1] === 'keine, bodentief' && wk32.echt[0] === 45 && wk32.echt[1] === '45' && wk32.htSeiten[0] === '' && wk32.htSeiten[1] === 0,
+    'Wirkungskette: Farben nach Material (Holz Lasur, Eloxal nur auf Alu, Wechsel setzt zurück), Griff außen in eigener Farbe, Oberfläche zweifarbig nur außen, bodentief ohne Fensterbank, glasteilende Sprossen kräftig, Haustür-Seitenteile nicht ins Fenster (' + JSON.stringify(wk32).slice(0, 600) + ')');
   /* b) Was der Inhaber aus dem Hauptweg genommen hat, steht in der Liste */
   const ex32 = await p.evaluate(() => { const w = demoProject()[0]; S.win = w; return qExtras(qList(w)).map((q) => q.id); });
   const soll32 = ['kvd', 'profil', 'schmal', 'dicht', 'ahFarbe', 'oberfl', 'griffM', 'griffPos', 'kinder', 'baender', 'luefter', 'oeffner', 'kontakt', 'gitter', 'leiste'];
@@ -5257,11 +5286,17 @@ if (teil(32)) {
   await p.evaluate(() => { S.q = 'sprFarbe'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(500);
   const s1 = await p.evaluate(() => ({ tupfen: document.querySelectorAll('.qpanel .qsw').length, alle: !!document.querySelector('.qpanel [data-farbblatt="sprFarbe"]'), holz: !!document.querySelector('.qpanel [data-farbblatt="sprFarbe"][data-familie="holz"]'), kopf: (document.querySelector('.qpanel .fw-cur b') || {}).textContent }));
   await p.tap('.qpanel .qsw[data-v="7016"]'); await p.waitForTimeout(400);
-  const s2 = await p.evaluate(() => ({ v: S.win.sprFarbe, bi: document.querySelector('#w3d .w3d-bar')._bi, kopf: document.querySelector('.qpanel .fw-cur b').textContent }));
-  await p.evaluate(() => { S.win.spross = 'szr'; S.win.sprFarbe = ''; delete S.win.sprFarbe; S.win.fi = '7016'; render(true); }); await p.waitForTimeout(400);
+  const s2 = await p.evaluate(() => { const b = document.querySelector('#w3d .w3d-bar'); return { v: S.win.sprFarbe, vi: S.win.sprFarbeI, bo: b._bo, bi: b._bi, fin: rahmenFarbe(S.win, 'innen').bg, kopf: document.querySelector('.qpanel .fw-cur b').textContent }; });
+  /* Je Seite (Inhaber, 3.11.2026): außen gewählt wirkt nur außen; innen eigens wählbar */
+  await p.evaluate(() => { S.q = 'sprFarbeI'; render(true); }); await p.waitForTimeout(400);
+  const s4a = await p.evaluate(() => (document.querySelector('.qpanel .fw-cur b') || {}).textContent);
+  await p.tap('.qpanel .qsw[data-v="messing"]'); await p.waitForTimeout(400);
+  const s4 = await p.evaluate(() => { const b = document.querySelector('#w3d .w3d-bar'); return { vi: S.win.sprFarbeI, bi: b._bi, bo: b._bo, zeilen: AW.detailRows(S.win).filter((r) => /Sprossenfarbe/.test(r[0])).map((r) => r.join(': ')).join(' | ') }; });
+  await p.evaluate(() => { S.win.spross = 'szr'; delete S.win.sprFarbe; S.win.sprFarbeI = ''; S.win.fi = '7016'; render(true); }); await p.waitForTimeout(400);
   const s3 = await p.evaluate(() => document.querySelector('#w3d .w3d-bar')._bi);
-  ok(s0 === 'sprossen,breite,sprFarbe' && s1.tupfen >= 10 && s1.alle && s1.holz && s1.kopf === 'Wie der Rahmen' && s2.v === '7016' && /#3/i.test(s2.bi) && s2.kopf !== 'Wie der Rahmen' && !/d9d9d6/.test(s3),
-    'Sprossen: danach Dicke und Farbe; Farbwahl wie beim Rahmen (beliebte Töne, alle Farben, Holzdekore), das Modell zeigt die Farbe, im Scheibenzwischenraum folgt „wie der Rahmen“ dem Rahmen (' + JSON.stringify([s0, s1, s2, s3]) + ')');
+  ok(s0 === 'sprossen,breite,sprFarbe' && s1.tupfen >= 10 && s1.alle && s1.holz && s1.kopf === 'Wie der Rahmen außen' && s2.v === '7016' && /#3/i.test(s2.bo) && s2.vi === '' && s2.bi === s2.fin && s2.kopf !== 'Wie der Rahmen außen' &&
+    s4a === 'Wie der Rahmen innen' && s4.vi === 'messing' && /e6cf8a/i.test(s4.bi) && /#3/i.test(s4.bo) && /Sprossenfarbe außen: .*7016.* \| Sprossenfarbe innen: messing/i.test(s4.zeilen) && !/d9d9d6/.test(s3),
+    'Sprossen: danach Dicke und Farbe außen und innen; Farbwahl wie beim Rahmen (beliebte Töne, alle Farben, Holzdekore), außen gewählt wirkt nur außen, innen bleibt wie der Rahmen innen bis zur eigenen Wahl; Aufmaß nennt beide Seiten; im Scheibenzwischenraum folgt „wie der Rahmen“ dem Rahmen (' + JSON.stringify([s0, s1, s2, s4a, s4, s3]) + ')');
   /* g) Strichzeichen in den Antworten */
   await p.evaluate(() => { S.q = 'material'; render(true); }); await p.waitForTimeout(400);
   const z32 = await p.evaluate(() => { const svgs = Array.from(document.querySelectorAll('.qpanel .qopt > svg')); return { n: svgs.length, strich: svgs.every((s) => s.classList.contains('strich')), fuellung: svgs.flatMap((s) => Array.from(s.querySelectorAll('path')).map((x) => x.getAttribute('fill'))).filter((f) => f !== 'none' && f !== 'currentColor') }; });

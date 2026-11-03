@@ -192,6 +192,29 @@ app.js; `AW.FRAGE.stufe`: 1 Hauptweg, 2 Liste).
 - **Fürs Blatt:** Neue Projekte haben die Tiefe „kurz“: Was der Kunde in der Liste nicht wählt, steht beim Fensterbauer als „nach
   Standard“. Ältere Aufmaße behalten ihre Tiefe.
 
+## Wirkungskette prüfen (seit 3.11.2026, Auftrag des Inhabers)
+
+Die Fehler, die der Inhaber in der Bedienung fand (Sprossenfarbe auf beiden Seiten, Stulp nur bei zwei Flügeln, Luftraum über
+eingegebenen Maßen, „Nein“ übersprang die Wahl, weißer Text auf Weiß), haben einen gemeinsamen Kern: Eine Wahl wirkt nicht genau dort,
+wo sie am echten Fenster wirkt. Jede neue oder geänderte Frage geht deshalb durch sieben Prüfpunkte:
+
+1. **Seite:** Hat das Teil eine Innen- und eine Außenseite (Rahmen, Sprossen, Paneel, Griff außen, Fensterbank, Oberfläche,
+   Abdeckleisten)? Dann gilt die Wahl je Seite, Standard ist „wie der Rahmen“ bzw. „wie innen“.
+2. **Material:** Gibt es die Wahl auf dem Material dieser Seite? (Holz: Lasur statt Dekorfolie; Eloxal nur auf Aluminium;
+   Holzstruktur-Folie nur auf Kunststoff; glasteilende Sprossen nur kräftig.)
+3. **Sichtbar:** Die Wahl ändert das Modell in der passenden Ansicht, und nur dort.
+4. **Text:** Das Aufmaß sagt dasselbe wie das Modell, ohne Lücke („Sprossenfarbe außen …; innen wie der Rahmen“).
+5. **Kombination:** Die Wahl geht mit jeder Bauart (1 bis 4 Flügel, Stulp, Seitenteile, Oberlicht, Formen, Elementarten,
+   bodentief, nur nachrüsten) oder ist dort ausgeblendet.
+6. **Wechsel:** Ändert der Kunde eine frühere Wahl (Element, Flügel, Form, Material, Farbe, Stelle), passen sich abhängige Werte an
+   oder fallen weg (Kombination, Seitenteile der Haustür, Eloxal nach Materialwechsel, Fensterbank bei bodentief).
+7. **Ablauf und Verständnis:** Jedes Nein, Überspringen und Zurück führt zum nächsten sinnvollen Schritt; die Frage zeigt die Seite,
+   nach der sie fragt, in Worten, die ein Laie versteht.
+
+Werkzeug: `BASE=http://localhost:8797 PW_PFAD=/opt/node-tools/node_modules node scripts/wirkungskette.mjs alle` klickt in jeder Frage
+jede Antwort wie ein Kunde und meldet Antworten ohne jede Wirkung (weder Modell noch Text) und Fehler; Punkt 1, 2, 6 und 7 brauchen
+zusätzlich den fachlichen Blick. Die Prüfsuite (Abschnitt 32) hält die gefundenen Regeln fest.
+
 ## Detailtiefe (bis 1.11.2026): so tief, wie der Kunde will
 
 Die App fragt inzwischen rund 90 Dinge ab (dazu 2026 noch Sicherheitsstufen, Sonderformen, Seitenteile, Beschläge, Oberflächen, Technik und Zubehör). Wer alles auf einmal sieht, wird schwindelig; wer nur die Hälfte sieht, kann vieles nicht sagen. Darum entscheidet der Kunde selbst, wie tief er geht, und alles, was er nicht beantwortet, ist trotzdem geregelt.
