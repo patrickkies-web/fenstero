@@ -4158,7 +4158,7 @@ const abZeichen = (k) => (AB_HAUS[k] ? '<svg viewBox="0 0 64 64" width="40" heig
 function abKarten(group, cur, field, mitZeichen) {
   const q = { act: 'setp', f: field };
   return '<div class="qcards kompakt quad ab-karten' + (mitZeichen ? ' mit-zeichen' : '') + (OPT[group].length === 3 ? ' ab-drei' : '') + '" role="group">' + OPT[group].map((o) => '<div class="qo">' + qOpt(q, o, String(cur) === String(o.k), (mitZeichen ? abZeichen(o.k) : '') +
-    '<span class="tx"><span class="lbl">' + (OPT[group].length === 3 ? esc(o.label) : trenn(o.label)).replace(/ €/g, '\u00a0€') + '</span></span>') + '</div>').join('') + '</div>';
+    '<span class="tx"><span class="lbl">' + (OPT[group].length === 3 ? esc(o.label) : trenn(o.label)).replace(/ €/g, '\u00a0€').replace(/&nbsp;bis&nbsp;/g, '&nbsp;bis ') + '</span></span>') + '</div>').join('') + '</div>';
 }
 function anfrageDna() {
   const pr = S.proj, replaced = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'dein Fensterbauer') : 'der Fensterbauer';
