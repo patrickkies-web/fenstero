@@ -505,6 +505,26 @@ if (teil(3)) {
 }
 
 /* ---------- 4. Kundenlink: Portal → App → Code → Portal ---------- */
+/* ---------- 3d. Sonnenschutz: was man von außen sieht, im Hauptweg und in der KI-Vorschau (Inhaber, 4.11.2026) ---------- */
+if (teil(3)) {
+  console.log('3d. Sonnenschutz im Hauptweg und an die KI');
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE' }), sp5 = await neueSeite(ctx);
+  await sp5.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const so = await sp5.evaluate(() => {
+    const ids = (w) => qSichtbar(w).filter(qHaupt).map((q) => q.id).filter((id) => /^(sart|einbau|blende|sfarbe|sfTeile|sfK|sfS|antrieb|klBauart|klFarbe)$/.test(id)).join(' ');
+    const a = baseWin(); a.sart = 'rollladen'; a.roll = 'aufsatz'; a.blende = 'alu'; a.sfarbe = 'anthrazit';
+    const b = baseWin(); b.sart = 'raffstore'; b.roll = 'vorbau'; b.sfTeile = 'eigen'; b.sfK = 'weiss'; b.sfS = 'schwarz';
+    const c = baseWin(); c.sart = 'klappladen'; c.klFarbe = '6005';
+    const da = typeof hbDaten === 'function';
+    return { a: ids(a), b: ids(b), c: ids(c), da: da, ka: da ? hbDaten(a) : null, kb: da ? hbDaten(b) : null, kc: da ? hbDaten(c) : null };
+  });
+  const hb = await import('../functions/api/hausbild.js');
+  const ta = so.ka ? hb.beschreibung({ daten: so.ka }) : '', tb = so.kb ? hb.beschreibung({ daten: so.kb }) : '', tc = so.kc ? hb.beschreibung({ daten: so.kc }) : '';
+  ok(so.a === 'sart einbau blende sfarbe sfTeile antrieb' && so.b === 'sart einbau sfarbe sfTeile sfK sfS antrieb' && so.c === 'sart klBauart klFarbe', 'Hauptweg: Kastenart, Blende beim Aufsatzkasten, Farbe von Behang, Kasten und Schienen (eigene Farben einzeln), Klappläden mit Bauart und Farbe (' + so.a + ' | ' + so.b + ' | ' + so.c + ')');
+  ok(so.da && /aluminium fascia/.test(ta) && /anthracite/.test(ta) && /Vorbaukasten/.test(tb) && /box \(Vorbaukasten\)[^;]*white/.test(tb) && /guide rails in black/.test(tb) && /hinged wooden shutters in (dark )?green/.test(tc), 'KI-Vorschau: Kastenart, Blende und Farben stehen im Auftrag an den Bilddienst');
+  sauber(sp5, 'Sonnenschutz ohne Fehler'); await ctx.close();
+}
+
 /* ---------- 3c. Schritte zählen im Browser (web/assets/schritt.js): Startseite, Klick in die App, Folien, Hilfe ---------- */
 if (teil(3)) {
   console.log('3c. Schritte zählen');
@@ -4757,7 +4777,7 @@ if (teil(21)) {
     return { fehlt: fehlt, n: n, ganz: haupt.length + extra.length === alle.length && alle.every((id) => haupt.includes(id) || extra.includes(id)), tiefeWeg: alle.indexOf('tiefe') < 0, kapitel: Array.from(new Set(qList(w).map((q) => q.kap))).join(','), gitter: extra.indexOf('gitter') >= 0, alleDetails: AW.DETAIL.filter((d) => AW.detailGilt(w, d.k)).every((d) => alle.indexOf(d.k) >= 0) };
   });
   ok(zahl21.fehlt.length === 0, 'App und Modell haben dieselben Detailangaben, jede mit Frage und Auswahl' + (zahl21.fehlt.length ? ' (fehlt: ' + zahl21.fehlt.join(', ') + ')' : ''));
-  ok(zahl21.n.kurz === zahl21.n.normal && zahl21.n.normal === zahl21.n.genau && zahl21.n.kurz <= 22 && zahl21.tiefeWeg && zahl21.ganz, 'Hauptweg statt Tiefe: ' + zahl21.n.kurz + ' Fragen bei jeder Tiefe (höchstens 22: seit der Lückenprüfung vom 3.11.2026 mit Oberlicht, Glas-Extras und Insektenschutz), keine Frage nach der Tiefe; Hauptweg und Liste ergeben zusammen alle Fragen');
+  ok(zahl21.n.kurz === zahl21.n.normal && zahl21.n.normal === zahl21.n.genau && zahl21.n.kurz <= 25 && zahl21.tiefeWeg && zahl21.ganz, 'Hauptweg statt Tiefe: ' + zahl21.n.kurz + ' Fragen bei jeder Tiefe (höchstens 25: seit der Lückenprüfung vom 3.11.2026 mit Oberlicht, Glas-Extras und Insektenschutz, seit 4.11.2026 beim Sonnenschutz mit Kastenart, Blende und Farbe von Kasten und Schienen), keine Frage nach der Tiefe; Hauptweg und Liste ergeben zusammen alle Fragen');
   ok(zahl21.kapitel === 'aufbau,vorweg,oeffnung,material,glas,bedienung,sonne,bank,extras', 'Kapitel in fester Reihenfolge: Aufbau, Lage, Öffnung, Material, Glas, Griff, Sonnenschutz, Fensterbank, Extras (' + zahl21.kapitel + ')');
   ok(zahl21.gitter && zahl21.alleDetails, 'Die Detailangaben (z. B. Fenstergitter) stehen in der Liste; jede geltende Detailangabe hat ihre Frage');
   /* Standard des Fensterbauers in der Frage, Wahl und Zurücknehmen */
@@ -5202,7 +5222,7 @@ if (teil(32)) {
     x.zurueck = !S.win.nachruest && S.win.demontage === true;
     return x;
   });
-  ok(na32.an && na32.ids0 === 'massweg lage sart insekt iart extras' && na32.ids1 === 'massweg lage sart einbau sfarbe antrieb insekt iart extras' && na32.roll === 'vorbau' && na32.einbau === 'vorbau,unterputz' &&
+  ok(na32.an && na32.ids0 === 'massweg lage sart insekt iart extras' && na32.ids1 === 'massweg lage sart einbau sfarbe sfTeile antrieb insekt iart extras' && na32.roll === 'vorbau' && na32.einbau === 'vorbau,unterputz' &&
     /Umfang/.test(na32.rows) && !/Glas|Griff|Material|Fensterbank|Montage/.test(na32.rows) && na32.b === null && na32.abs === false && /^Bestehendes Fenster bleibt, nur nachrüsten: Rollladen, .*Insektenschutz Spannrahmen$/.test(na32.satz) && na32.gruppen === 'Umfang|Sonnenschutz|Insektenschutz' && na32.zurueck,
     'Nur nachrüsten: dritte Wahl bei der Stelle, Hauptweg Maße, Lage, Sonnenschutz außen (Vorbau oder Unterputz), Insektenschutz, Sichtschutz innen; Aufmaß mit Umfang, ohne Richtmaß und Absturzfrage; zurück auf Ersetzen (' + JSON.stringify(na32).slice(0, 500) + ')');
   /* Fenster-Tür-Kombination (Lückenprüfung 3.11.2026): vierte Karte bei der Balkontür; Seite und Brüstung im Hauptweg, das Feld darunter in

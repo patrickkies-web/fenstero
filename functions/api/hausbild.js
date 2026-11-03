@@ -5,7 +5,8 @@
      lage    derselbe Ausschnitt mit den eingesetzten Fenstern (nur für die Attrappe; geht nicht an den Dienst, siehe auftrag())
      vorlagen je Fenster ein Bild aus dem 3-D-Modell, von außen (PNG oder JPEG), höchstens 8
      elemente [{ box: [oben, links, unten, rechts] auf 0–1000, vorlage: Index, art: 'ersetzen' | 'neu',
-               daten: { farbe: '#rrggbb', fluegel, oberlicht, sprossen, tuer, sonne: 'raffstore' | 'rollladen' | 'screen' | '', glas: 'klar' | 'ornament' } }]
+               daten: { farbe: '#rrggbb', fluegel, oberlicht, sprossen, tuer, sonne: 'raffstore' | 'rollladen' | 'screen' | 'klappladen' | '', glas: 'klar' | 'ornament',
+                        kasten: 'aufsatz' | 'vorbau' | 'unterputz', blende: 'fassade' | 'alu', behangFarbe, kastenFarbe, schienenFarbe, ladenFarbe: '#rrggbb' } }]
      format  [Breite, Höhe] des Ausschnitts in Pixeln (für das Seitenverhältnis des Ergebnisses)
    AKTUELL (Inhaber, 2.11.2026 abends): Cloudflare Workers AI mit FLUX.2 [klein] 9B, siehe cloudflare() unten. Das Folgende beschreibt den
    Weg über Black Forest Labs direkt, der im Code bleibt, aber aus ist (FREIGEGEBEN):
@@ -58,7 +59,7 @@ const box = (b) => Array.isArray(b) && b.length === 4 && b.every((x) => Number.i
 const farbName = (hex) => {
   const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '')); if (!m) return 'the colour of the reference';
   const n = parseInt(m[1], 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255, l = 0.2126 * r + 0.7152 * g + 0.0722 * b, sat = Math.max(r, g, b) - Math.min(r, g, b);
-  const name = l > 225 ? 'white' : l > 190 && sat < 30 ? 'light grey' : sat > 40 && r > g && g > b ? (l > 120 ? 'golden oak wood' : 'dark brown wood') : l < 45 ? 'black' : l < 95 ? 'anthracite grey' : 'grey';
+  const name = l > 225 ? 'white' : l > 190 && sat < 30 ? 'light grey' : sat > 40 && r > g && g > b ? (l > 120 ? 'golden oak wood' : 'dark brown wood') : sat > 30 && g > r && g >= b ? (l < 90 ? 'dark green' : 'green') : sat > 30 && b > r && b > g ? (l < 90 ? 'dark blue' : 'blue') : sat > 40 && r > g && r > b ? 'red' : l < 45 ? 'black' : l < 95 ? 'anthracite grey' : 'grey'; // Farbton für Klappläden und Behang
   return name + ' (#' + m[1].toLowerCase() + ')';
 };
 export function beschreibung(e) {
@@ -67,9 +68,17 @@ export function beschreibung(e) {
   if (d.fluegel > 1) teile.push(d.fluegel + ' sashes side by side'); else teile.push('one sash');
   if (d.oberlicht) teile.push('a transom light on top');
   if (d.sprossen) teile.push('glazing bars dividing the glass');
-  if (d.sonne === 'raffstore') teile.push('an external venetian blind (raffstore) head box on top of the frame with guide rails');
-  else if (d.sonne === 'rollladen') teile.push('a roller shutter box on top of the frame with guide rails');
-  else if (d.sonne === 'screen') teile.push('a fabric screen box on top of the frame');
+  /* Sonnenschutz mit allem, was man von außen sieht (seit 4.11.2026): Kastenart, Blende, Farben von Behang, Kasten und Schienen; der
+     Behang ist ganz hochgefahren, damit das Fenster frei bleibt. Klappläden stehen offen an der Wand. */
+  const behang = { raffstore: 'external venetian blind (raffstore)', rollladen: 'roller shutter', screen: 'fabric sun screen' }[d.sonne];
+  if (behang) {
+    const schienen = ' guide rails in ' + farbName(d.schienenFarbe || d.kastenFarbe || d.behangFarbe) + ' run down both sides of the frame';
+    const kasten = d.kasten === 'vorbau' ? 'a visible surface-mounted ' + behang + ' box (Vorbaukasten) fixed on the facade above the window, in ' + farbName(d.kastenFarbe || d.behangFarbe)
+      : d.kasten === 'unterputz' ? 'a ' + behang + ' whose box is hidden inside the wall above the window, so no box is visible, only a narrow slot under the lintel'
+      : d.blende === 'alu' ? 'a ' + behang + ' box on top of the frame, covered by a flat aluminium fascia panel in ' + farbName(d.kastenFarbe || d.behangFarbe) + ' flush with the facade'
+      : 'a ' + behang + ' box on top of the frame, rendered over with plaster in the facade colour so it is not visible, only a narrow slot above the frame';
+    teile.push(kasten + ';' + schienen + '; the ' + (d.sonne === 'raffstore' ? 'slats are' : d.sonne === 'screen' ? 'fabric is' : 'shutter curtain is') + ' in ' + farbName(d.behangFarbe) + ' and fully raised, so the window is uncovered');
+  } else if (d.sonne === 'klappladen') teile.push('a pair of hinged wooden shutters in ' + farbName(d.ladenFarbe) + ', opened and fixed to the wall left and right of the window');
   teile.push(d.glas === 'ornament' ? 'obscured privacy glass' : 'clear insulating glass that reflects the sky and the surroundings, with a hint of the dark room behind, not frosted and not milky');
   return teile.join(', ');
 }
@@ -169,7 +178,9 @@ async function bfl(env, pfad, daten) {
 }
 
 const zahl = (v, max) => Math.max(0, Math.min(max, parseInt(v, 10) || 0));
-const daten = (x) => { x = x || {}; return { farbe: /^#[0-9a-f]{6}$/i.test(String(x.farbe || '')) ? x.farbe : '', fluegel: zahl(x.fluegel, 6), oberlicht: !!x.oberlicht, sprossen: !!x.sprossen, tuer: !!x.tuer, sonne: ['raffstore', 'rollladen', 'screen'].indexOf(x.sonne) >= 0 ? x.sonne : '', glas: x.glas === 'ornament' ? 'ornament' : 'klar' }; };
+const daten = (x) => { x = x || {}; return { farbe: /^#[0-9a-f]{6}$/i.test(String(x.farbe || '')) ? x.farbe : '', fluegel: zahl(x.fluegel, 6), oberlicht: !!x.oberlicht, sprossen: !!x.sprossen, tuer: !!x.tuer, sonne: ['raffstore', 'rollladen', 'screen', 'klappladen'].indexOf(x.sonne) >= 0 ? x.sonne : '', glas: x.glas === 'ornament' ? 'ornament' : 'klar',
+  kasten: ['aufsatz', 'vorbau', 'unterputz'].indexOf(x.kasten) >= 0 ? x.kasten : '', blende: ['fassade', 'alu'].indexOf(x.blende) >= 0 ? x.blende : '', behangFarbe: hex(x.behangFarbe), kastenFarbe: hex(x.kastenFarbe), schienenFarbe: hex(x.schienenFarbe), ladenFarbe: hex(x.ladenFarbe) }; };
+const hex = (v) => (/^#[0-9a-f]{6}$/i.test(String(v || '')) ? String(v).toLowerCase() : '');
 /* Ein Paket lesen: Ausschnitt (bild und/oder lage), Vorlagen, Elemente, Format; null, wenn etwas fehlt oder nicht passt */
 function paketLesen(p, mitBild) {
   if (!p || typeof p !== 'object') return null;

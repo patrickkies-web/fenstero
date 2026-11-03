@@ -133,7 +133,7 @@ window.hbAusblick = hbAusblick;
 /* ---------- Bild eines Elements aus der 3-D-Bühne ---------- */
 function hbBildVon(i) {
   const w = S.windows[i]; if (!w) return Promise.resolve(null);
-  const key = i + '|' + (w.aend || 0) + '|' + JSON.stringify([w.art, w.teilung, w.fa, w.wunschA, w.roll, w.sart, w.ol, w.bars && w.bars.length, w.el && w.el.w, w.el && w.el.h, w.w, w.h]);
+  const key = i + '|' + (w.aend || 0) + '|' + JSON.stringify([w.art, w.teilung, w.fa, w.wunschA, w.roll, w.sart, w.ol, w.bars && w.bars.length, w.el && w.el.w, w.el && w.el.h, w.w, w.h, w.sfarbe, w.wunschSf, w.sfTeile, w.sfK, w.sfS, w.blende, w.klFarbe, w.klBauart]);
   if (HB.bilder[i] && HB.bilder[i].key === key) return Promise.resolve(HB.bilder[i]);
   return hbStudio(w).then((b) => { if (b) { b.key = key; HB.bilder[i] = b; } return b; });
 }
@@ -142,12 +142,14 @@ function hbStudio(w) {
   const lauf = hbStudioKette.then(() => new Promise((fertig) => {
     let box = document.getElementById('hb-studio');
     if (!box) { box = document.createElement('div'); box.id = 'hb-studio'; box.setAttribute('aria-hidden', 'true'); document.body.appendChild(box); }
-    const o = { id: 'hb-studio-st', view: 'aussenGerade', frei: true, haus: false, sway: false, noZoom: true, zkey: 'hb-studio' };
+    /* Behang ganz hochgefahren (wie im Auftrag an die KI): Kasten, Blende und Schienen bleiben sichtbar, das Fenster frei */
+    const o = { id: 'hb-studio-st', view: 'aussenGerade', frei: true, haus: false, sway: false, noZoom: true, zkey: 'hb-studio', behang: { stand: 0, wend: 0, pos: 0 } };
     box.innerHTML = model(w, o);
     const st = box.querySelector('.w3d-stage');
     const zeichnung = () => { box.innerHTML = ''; delete W3DS['hb-studio-st']; fertig(hbZeichnung(w)); };
     if (!st) return zeichnung();
     st.classList.add('no-anim'); w3dApply(st, w, W3DS['hb-studio-st'].o);
+    st.querySelectorAll('.w3d-an').forEach((e) => e.remove()); // Gurt, Wickler, Taster sitzen innen; ohne Wand sähe die KI sie vor der Fassade
     if (!window.Buehne3D || !window.Buehne3D.an(st)) return zeichnung();
     requestAnimationFrame(() => requestAnimationFrame(() => {
       const url = window.Buehne3D.foto(st);
@@ -194,12 +196,31 @@ function hbZeichnung(w) {
   return { src: cv.toDataURL('image/png'), w: W, h: H, zeichnung: true };
 }
 
-/* Daten des Fensters für den Auftrag an den Bilddienst (functions/api/hausbild.js, beschreibung) */
+/* Daten des Fensters für den Auftrag an den Bilddienst (functions/api/hausbild.js, beschreibung). Sonnenschutz seit 4.11.2026 mit allem,
+   was man von außen sieht (Inhaber: „ob das ein Vorbaukasten ist oder unter Putz oder oben mit Blende oder ohne … Farben“): Kastenart,
+   Blende des Aufsatzkastens, Farbe von Behang, Kasten und Schienen (wie der Behang, wie der Rahmen oder eigene), Klappläden mit Farbe. */
+const hbHex = (x) => { const m = String((x && typeof x === 'object' ? (x.hex || x.solid || x.bg || (Array.isArray(x) ? x[0] : '')) : x) || '').match(/#[0-9a-f]{6}/i); return m ? m[0].toLowerCase() : ''; };
+function hbFarbeVon(k) {
+  if (!k) return '';
+  const r = typeof ralFarbe === 'function' ? ralFarbe(k) : null; if (r && r.hex) return hbHex(r.hex);
+  return typeof SFARBE !== 'undefined' && SFARBE[k] ? hbHex(SFARBE[k][0]) : '';
+}
+function hbSonneDaten(w, rahmen) {
+  const offen = (k) => typeof istOffen === 'function' && istOffen(w, k);
+  if (w.sart === 'klappladen' && !offen('sart')) return { sonne: 'klappladen', ladenFarbe: hbFarbeVon(w.klFarbe) || '#f1f0ea' };
+  const sonne = typeof sonneAktiv === 'function' && sonneAktiv(w) ? w.sart : '';
+  if (!sonne || sonne === 'klappladen') return {};
+  const behang = hbHex(typeof farbLesen === 'function' && farbLesen(w.wunschSf)) || hbFarbeVon(w.sfarbe) || '#c9cdd1';
+  const teile = w.sfTeile === 'rahmen' ? rahmen : w.sfTeile === 'eigen' ? null : behang;
+  const kasten = teile || hbFarbeVon(w.sfK) || behang, schienen = teile || hbFarbeVon(w.sfS) || behang;
+  const einbau = ['aufsatz', 'vorbau', 'unterputz'].indexOf(w.roll) >= 0 ? w.roll : 'aufsatz';
+  return { sonne: sonne, kasten: einbau, blende: einbau === 'aufsatz' ? (w.blende === 'alu' ? 'alu' : 'fassade') : '', behangFarbe: behang, kastenFarbe: kasten, schienenFarbe: schienen };
+}
 function hbDaten(w) {
   if (!w) return {};
-  const f = rahmenFarbe(w, 'aussen'), farbe = String((f && (f.solid || f.bg)) || '').match(/#[0-9a-f]{6}/i);
-  return { farbe: farbe ? farbe[0] : '', fluegel: (w.sashes || []).length || 1, oberlicht: !!w.ol, sprossen: (w.bars || []).length > 0, tuer: istTuer(w),
-    sonne: typeof sonneAktiv === 'function' && sonneAktiv(w) ? w.sart : '', glas: (w.glasfn || []).indexOf('sicht') >= 0 ? 'ornament' : 'klar' };
+  const f = rahmenFarbe(w, 'aussen'), farbe = hbHex(f);
+  return Object.assign({ farbe: farbe, fluegel: (w.sashes || []).length || 1, oberlicht: !!w.ol, sprossen: (w.bars || []).length > 0, tuer: istTuer(w), sonne: '',
+    glas: (w.glasfn || []).indexOf('sicht') >= 0 ? 'ornament' : 'klar' }, hbSonneDaten(w, farbe));
 }
 
 /* ---------- Geometrie ---------- */

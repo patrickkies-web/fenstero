@@ -287,6 +287,7 @@
 
 /* Standbild des Elements: unsichtbare Bühne, gerade von außen (hausbild.js) */
 #hb-studio { position: fixed; left: 0; top: 0; width: 520px; height: 640px; opacity: 0; pointer-events: none; z-index: -1 }
+#hb-studio .w3d-an { display: none !important } /* Gurt, Wickler und Taster sitzen innen; von außen ohne Wand sähe die KI sie sonst vor der Fassade */
 #hb-studio > .w3d-stage { position: absolute; inset: 0; width: 100%; height: 100%; background: transparent !important; box-shadow: none !important; border-radius: 0 }
 
 @media (prefers-reduced-motion: reduce) {
