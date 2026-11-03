@@ -1081,9 +1081,11 @@ window.Buehne3D = (function () {
         const triK = (x0, y0, w0, h0) => (K ? klippDreiecke(dreiecke(null, w0, h0, 0), K.map((q) => [q[0] - r[0] - x0, q[1] - r[1] - y0])) : dreiecke(null, w0, h0, 0));
         const leer = (bg) => !bg || /^transparent$/.test(String(bg).trim());
         if (spArt === 'szr') {
-          /* innenliegend: flach in der Mitte des ersten Zwischenraums, durchs Glas gesehen */
-          const bg = be._bi || be._bo || '#d9d9d6'; if (leer(bg)) return;
-          items.push({ el: be, M: Mb, W: r[2], H: r[3], tri: triK(0, 0, r[2], r[3]), st: stoff(bg, 'w3d-frame', 'w3d-frame', ''), op: op, rund: 0, art: 'teil', dz: raeume.length ? raeume[0][1] / 2 : -1, senk: senk, wirftNicht: true });
+          /* innenliegend: flach im ersten Zwischenraum, durchs Glas gesehen, von außen in der Außenfarbe. Von innen malt die innere Scheibe die
+             Aussicht deckend; dort liegt die Sprosse knapp vor ihr in der Innenfarbe (Prüfung 2.11.2026: von innen unsichtbar, außen die Innenfarbe) */
+          const bgO = be._bo || be._bi || '#d9d9d6', bgI = be._bi || be._bo || '#d9d9d6';
+          if (!leer(bgO)) items.push({ el: be, M: Mb, W: r[2], H: r[3], tri: triK(0, 0, r[2], r[3]), st: stoff(bgO, 'w3d-frame', 'w3d-frame', ''), op: op, rund: 0, art: 'teil', dz: raeume.length ? raeume[0][1] / 2 : -1, senk: senk, wirftNicht: true, seite: -1 });
+          if (!leer(bgI)) items.push({ el: be, M: Mb, W: r[2], H: r[3], tri: triK(0, 0, r[2], r[3]), st: stoff(bgI, 'w3d-frame', 'w3d-frame', ''), op: op, rund: 0, art: 'teil', dz: 0.06, senk: senk, wirftNicht: true, seite: 1 });
         } else {
           [[be._bi, 1, 0, hb, be._art, SCHATTEN.innen], [be._bo, -1, zAus, -hb, be._arto, SCHATTEN.aussen]].forEach((s) => {
             if (leer(s[0])) return;

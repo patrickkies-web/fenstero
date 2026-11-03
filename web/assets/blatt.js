@@ -689,10 +689,12 @@
         const w = wins[i], n = num(w.anzahl) || 1;
         const mat = AW.istOffen(w, 'material') ? 'Material offen' : AW.lab('material', w.material) || 'Kunststoff';
         const fa = AW.istOffen(w, 'fa') ? 'außen offen' : 'außen ' + AW.farbe(w, 'aussen')[0], fi = AW.istOffen(w, 'fi') ? 'innen offen' : 'innen ' + AW.farbe(w, 'innen')[0];
-        dazu('Fenster und Türen', (ARTNAME[w.art] || 'Fenster') + ', ' + mat + ', ' + fa + ', ' + fi, i, n);
         /* Detailangaben einer Gruppe der Wünsche (Lamelle, Führung, Gewebe, Farbe …) hängen am Gewerk, damit nichts aus dem Konfigurator fehlt */
         const Wg = (id) => (WN[i].gruppen.find((g) => g.id === id) || { zeilen: [] }).zeilen;
         const detail = (id, ohne) => Wg(id).filter((z) => ohne.indexOf(z.k) < 0 && !z.std && !z.offen && z.t && z.t !== 'keiner').map((z) => z.k + ' ' + z.t).join(', ');
+        /* Holzart, Profil, Oberfläche usw. gehören zur Zeile des Elements (Prüfung 2.11.2026: Holzart fehlte); Sprossen stehen eigens */
+        const fzus = detail('fenster', ['Element', 'Öffnung', 'Material', 'Form', 'Farbe', 'Sprossen', 'Sprossenfarbe', 'Aufteilung', 'Oberlicht', 'Unterlicht']);
+        dazu('Fenster und Türen', (ARTNAME[w.art] || 'Fenster') + ', ' + mat + ', ' + fa + ', ' + fi + (fzus ? ', ' + fzus : ''), i, n);
         AUS[i].forEach((a) => {
           const g = a.k === 'aussen' ? 'Sonnenschutz außen' : a.k === 'innen' ? 'Sicht- und Blendschutz innen' : 'Insektenschutz';
           const zus = a.z === 'offen' ? '' : a.k === 'aussen' ? detail('sonne', ['außen', 'innen']) : a.k === 'insekt' ? detail('insekt', ['Insektenschutz']) : '';
@@ -701,12 +703,15 @@
         dazu('Glas', AW.istOffen(w, 'glas') ? 'Verglasung offen' : (AW.lab('glas', w.glas) || '3-fach') + '-Verglasung', i, n);
         (w.glasfn || []).forEach((g) => dazu('Glas', (AW.lab('glasfn', g) || g) + (g === 'sicht' && w.orn ? ' (' + (AW.lab('orn', w.orn) || w.orn) + ')' : ''), i, n));
         (AW.glasPflicht ? AW.glasPflicht(w) : []).forEach((g) => dazu('Glas', g, i, n));
-        if ((w.bars || []).length) dazu('Fenster und Türen', 'Sprossen: ' + ((Wg('fenster').find((z) => z.k === 'Sprossen') || {}).t || 'ja'), i, n);
+        /* Sprossen mit ihrer Farbe, sonst stehen Messing und Rahmenfarbe in einer Zeile (Prüfung 2.11.2026) */
+        if ((w.bars || []).length) { const sf = Wg('fenster').find((z) => z.k === 'Sprossenfarbe'); dazu('Fenster und Türen', 'Sprossen: ' + ((Wg('fenster').find((z) => z.k === 'Sprossen') || {}).t || 'ja') + (sf && sf.t && !sf.offen ? ', ' + sf.t : ''), i, n); }
         if (!istTuer(w) && w.form !== 'rund') {
           const bank = Wg('bank').filter((z) => (z.k === 'innen' || z.k === 'außen') && !z.offen && !z.std && z.t !== 'behalten');
           bank.forEach((z) => dazu('Fensterbänke', 'Fensterbank ' + z.k + ' ' + z.t + (z.k === 'außen' ? (detail('bank', ['innen', 'außen', 'Fensterbänke']) ? ', ' + detail('bank', ['innen', 'außen', 'Fensterbänke']) : '') : ''), i, n));
         } else { const sw = Wg('bank').find((z) => z.k === 'Schwelle'); if (sw && !sw.offen) dazu('Schwelle und Boden', 'Schwelle: ' + sw.t, i, n); }
         const zub = Wg('beschlag').filter((z) => ['Griff', 'Griff außen', 'Einbruchschutz', 'Absturzsicherung'].indexOf(z.k) < 0 && !z.std && !z.offen && z.t && z.t !== 'ohne');
+        /* der Griff selbst (Art und Farbe) fehlte in der Aufstellung (Prüfung 2.11.2026) */
+        Wg('beschlag').filter((z) => (z.k === 'Griff' || z.k === 'Griff außen') && !z.offen && z.t && z.t !== 'keiner').forEach((z) => dazu('Beschlag und Zubehör', z.k + ': ' + z.t, i, n));
         zub.forEach((z) => dazu('Beschlag und Zubehör', z.k + ': ' + z.t, i, n));
         if (w.rc && w.rc !== 'basis' && !AW.istOffen(w, 'rc')) dazu('Sicherheit', 'Einbruchschutz ' + (AW.lab('rc', w.rc) || w.rc), i, n);
         if (w.absturz && w.absturz !== 'balkon' && AW.absturzFrage(w)) dazu('Sicherheit', 'Absturzsicherung: ' + (AW.lab('absturz', w.absturz) || w.absturz), i, n);
@@ -842,7 +847,7 @@
       return [[w.neu ? 'Rohbauöffnung' : 'Maueröffnung', d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm' + (w.neu ? ', Wunsch' : ', Kleinstmaß') : 'nicht gemessen', d.moW && d.moH ? { bold: true, col: MO_T } : { offen: true }]]
         .concat(w.neu || mitTab ? [] : [['Breiten', 'oben ' + L('wt') + ' · Mitte ' + L('wm') + ' · unten ' + L('wb'), /Breite/.test(luecken.join()) ? { offen: true } : null], ['Höhen', 'links ' + L('hl') + ' · Mitte ' + L('hm') + ' · rechts ' + L('hr'), /Höhe/.test(luecken.join()) ? { offen: true } : null]],
           !w.neu ? [['Winkelabweichung', dev > 5 ? 'bis ' + dev + ' mm, das Kleinstmaß zählt' : 'unter 5 mm', dev > 10 ? { offen: true } : null]] : [],
-          [[w.neu ? (istTuer(w) ? 'Türelement' : 'Element') + ', Wunsch' : 'Altfenster mit Rahmen', d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm' : 'nicht gemessen', d.elW && d.elH ? { bold: true, col: EL_T } : { offen: true }],
+          [[w.neu ? (istTuer(w) ? 'Türelement' : 'Element') + ', Wunsch' : w.massWeg === 'eingeben' && !(d.moW && d.moH) ? 'Element mit Rahmen, vom Kunden eingegeben' + (w.masseOk ? ' und bestätigt' : '') : 'Altfenster mit Rahmen', d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm' : 'nicht gemessen', d.elW && d.elH ? { bold: true, col: EL_T } : { offen: true }],
             ['Brüstung', istTuer(w) ? 'bodentief' : AW.bruDa(w) ? (num(w.bru) ? th(w.bru) + ' mm' : 'bodentief') : '–'], ['Laibungstiefe innen', num(w.laib) ? th(w.laib) + ' mm' : '–'], ].concat(num(w.wand) ? [['Wandstärke', th(w.wand) + ' mm']] : [], [['Lage', AW.etageText(w) || 'EG'],
             ['Einbau', w.neu ? 'neue Öffnung, Wunschmaße' : 'Austausch' + (AW.ohneFotos(w) ? ', ohne Fotos' : '')]]), w.massOk && !w.neu ? [['Bestätigt', 'Kunde hat die Maße trotz Abweichung zum Foto bestätigt']] : []);
     }
