@@ -50,8 +50,8 @@
   const rgb = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(h || ''); const n = m ? parseInt(m[1], 16) : 0; return [n >> 16, (n >> 8) & 255, n & 255]; };
   /* Zeichen, die Outfit im eingebetteten Ausschnitt nicht hat, werden ersetzt */
   const t = (s) => (Array.isArray(s) ? s.map(t) : String(s == null ? '' : s).replace(/[    ]/g, ' ').replace(/[‐‑‒]/g, '-').replace(/­/g, '').replace(/≥/g, 'ab ').replace(/≤/g, 'bis ').replace(/≈/g, 'ca. ').replace(/\(([^()]+) \(([^()]+)\)\)/g, '($1, $2)').replace(/[←-↓]/g, '-').replace(/✓/g, ''));
-  const istTuer = (w) => w.art === 'hst' || w.art === 'fsw' || w.art === 'balkon' || w.art === 'psk';
-  const ARTNAME = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Faltschiebewand' };
+  const istTuer = (w) => w.art === 'hst' || w.art === 'fsw' || w.art === 'balkon' || w.art === 'psk' || w.art === 'haustuer';
+  const ARTNAME = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Faltschiebewand', haustuer: 'Haustür' };
   const A = () => G.AW || null;
   const ERREICH = { vm: 'vormittags', nm: 'nachmittags', ab: 'abends' };
   const BASIS = typeof document !== 'undefined' && document.currentScript && document.currentScript.src ? document.currentScript.src.replace(/[^/]*$/, '') : '/assets/';

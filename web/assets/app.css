@@ -2142,7 +2142,7 @@ html.dna-voll body { background: #07090a }
   .dna .st-objekt { top: 53%; width: min(720px, 68%, calc(64vh * var(--asp))); transform: translate(-50%, -46%) }
   .dna .st-name { bottom: 22px }
   .dna .st-rechts { padding: 16px 32px 24px 24px }
-  .dna .st-bento { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 6px; margin: 0; padding: 4px 0 0; overflow: visible }
+  .dna .st-bento { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 4px; margin: 0; padding: 4px 0 0; overflow: visible }
   .dna .st-kachel { width: auto }
   .dna .st-weiss { margin: 18px 0 0; padding: 24px 22px 0; border-radius: 28px }
   .dna .st-weiss::before { display: none }

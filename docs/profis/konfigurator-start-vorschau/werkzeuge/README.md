@@ -31,3 +31,11 @@ Die Pfade der Skripte sind die der Arbeitssitzung (Ordner `mess-render/`); vor d
 - `wuensche-daten.py`: Bilder nach bilder/wuensche/ (WebP, 1074 px), Zeichnungen der App als Strichzeichnung, schreibt wuensche-daten.js.
 - Die Folien Gespeichert bis Teilen stehen in index.html (ursprünglich als eigenes Fragment gebaut, seit der Übernahme dort gepflegt).
 - Die Pfade sind die der Arbeitssitzung (Scratchpad); vor dem nächsten Lauf anpassen.
+
+## Haustür (3.11.2026)
+
+- `render-zustand.mjs`: setzt den Zustand direkt (Elementart, die vier Werte der Balkontür 2150/2110/900/860) statt durch die Folien zu
+  tippen, öffnet die alte Messansicht der App (`SCREENS.messenAlt`) und nimmt sie schräg oder von vorn auf. Die Haustür hat dieselbe
+  Größe und Kamera wie die Balkontür; messen-dna.js übernimmt deshalb deren Linienlagen. Von vorn mit Knauf statt Stoßgriff gerendert,
+  weil die Kante der langen Stange sonst bei Faktor 6 durch die Füllung schimmert (von innen ist der Griff außen ohnehin nicht zu sehen).
+- Kontrolle: Die Balkontür auf diesem Weg weicht vom Bild vom 27.10.2026 im Mittel um 6 von 255 ab (Licht und Glas), Lage gleich.

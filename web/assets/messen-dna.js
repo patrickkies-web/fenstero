@@ -120,7 +120,9 @@
     { k: 'wt', g: 'raender', wer: 'mo', r: 'h', rand: 'oben', sub: 'Waagerecht, dicht unter der Oberkante der Öffnung.', enden: ['Mauer', 'Mauer'], chip: 'nicht' },
     { k: 'wb', g: 'raender', wer: 'mo', r: 'h', rand: 'unten', sub: 'Waagerecht, dicht über der Fensterbank.', enden: ['Mauer', 'Mauer'], chip: 'nicht' }
   ];
-  var UEBLICH = { fenster: { v: [500, 2400, 1250], h: [400, 3000, 1100] }, balkon: { v: [1900, 2600, 2150], h: [700, 1400, 900] }, fest: { v: [300, 3000, 1250], h: [300, 4000, 1500] }, hst: { v: [2000, 2700, 2250], h: [2000, 6000, 3500] }, psk: { v: [1900, 2600, 2150], h: [1400, 3500, 2000] }, fsw: { v: [2000, 2700, 2250], h: [1800, 6000, 3500] } };
+  /* Haustür: Renderings in derselben Größe und Kamera wie die Balkontür (860 × 2110 mm in 900 × 2150 mm), die Linien liegen gleich */
+  ['MESS_LAGE', 'MESS_RAHMEN', 'RAND_LAGE', 'PASST_LAGE'].forEach(function (n) { var t = { MESS_LAGE: MESS_LAGE, MESS_RAHMEN: MESS_RAHMEN, RAND_LAGE: RAND_LAGE, PASST_LAGE: PASST_LAGE }[n]; t.haustuer = t.balkon; });
+  var UEBLICH = { fenster: { v: [500, 2400, 1250], h: [400, 3000, 1100] }, balkon: { v: [1900, 2600, 2150], h: [700, 1400, 900] }, haustuer: { v: [1900, 3000, 2150], h: [800, 3600, 1100] }, fest: { v: [300, 3000, 1250], h: [300, 4000, 1500] }, hst: { v: [2000, 2700, 2250], h: [2000, 6000, 3500] }, psk: { v: [1900, 2600, 2150], h: [1400, 3500, 2000] }, fsw: { v: [2000, 2700, 2250], h: [1800, 6000, 3500] } };
   /* satz 0: die vier Maße (Schritt 3), satz 1: die vier Ränder (Schritt 4); passt: Übersicht „Passt.“ nach dem letzten Rand */
   var mess = zustand, cmTimer = 0;
   var da = function () { return d.body.contains(folien.messen); };

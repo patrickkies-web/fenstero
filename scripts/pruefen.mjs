@@ -370,7 +370,7 @@ if (teil(3)) {
 
   await page.click('[data-act="new"]');
   await page.waitForSelector('.scr[data-screen="start"]');
-  ok(await page.locator('.st-stelle [role="radio"][data-act="situation"]').count() === 2 && await page.locator('.st-bento [role="radio"][data-act="art"]').count() === 6 && /Schritt\s1\svon\s6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen oder neu) und das Element (Fenster, Balkon- oder Terrassentür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand) zur Wahl');
+  ok(await page.locator('.st-stelle [role="radio"][data-act="situation"]').count() === 2 && await page.locator('.st-bento [role="radio"][data-act="art"]').count() === 7 && /Schritt\s1\svon\s6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen oder neu) und das Element (Fenster, Balkon- oder Terrassentür, Haustür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand) zur Wahl');
   await zuDenFotos(page);
   await page.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
   const kiPosts = [], kiUrls = [];
@@ -3630,7 +3630,7 @@ if (teil(16)) {
       /* Messen und Ränder (Messen im Raum): die Notiz steht im Info-Blatt, oben steht nur die Überschrift */
       const pruef = (wo) => { n++; const raum = wo === 'messen' || wo === 'rest'; if (raum) { S.gloss = wo === 'messen' ? MESS[S.mess.step].g : 'raender'; render(); } if (!document.querySelector(raum ? '.sheet [data-act="notiz-auf"]' : '.hd .nz-knopf, .scr.dna .lg-notiz-knopf')) fehlt.push(wo); if (raum) { S.gloss = null; render(); } if (!document.querySelector('.hdr-wo, .scr.dna .lg-kopf [data-act="wohin"]')) ohneWo.push(wo); }; // Design-DNA (Lage): Notiz und Übersicht im eigenen Kopf
       ['start', 'fotos', 'messen', 'rest', 'ergebnis'].forEach((sc) => { go(sc); if (sc === 'rest') { S.rest.i = 0; render(); } pruef(sc); if (sc !== 'messen' && sc !== 'rest' && !document.querySelector('.bb .bb-zurueck, .scr.dna .lg-fuss .lg-zurueck')) ohnePfeil.push(sc); });
-      ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { artSetzen(S.win, art); S.win.sart = 'rollladen'; S.win.iart = 'rollo'; qList(S.win).forEach((q) => { if (q.id === 'notiz') return; S.q = q.id; go('frage'); pruef(art + ':' + q.id); }); });
+      ['fenster', 'balkon', 'haustuer', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { artSetzen(S.win, art); S.win.sart = 'rollladen'; S.win.iart = 'rollo'; qList(S.win).forEach((q) => { if (q.id === 'notiz') return; S.q = q.id; go('frage'); pruef(art + ':' + q.id); }); });
       S.win.neu = true; go('planmasse'); pruef('planmasse'); if (!document.querySelector('.bb .bb-zurueck, .scr.dna .lg-fuss .lg-zurueck')) ohnePfeil.push('planmasse'); S.win.neu = false; artSetzen(S.win, 'fenster');
       ['anfrage', 'anfrage2', 'anfrage3'].forEach((sc) => { go(sc); if (!document.querySelector('.hd .nz-knopf, .scr.dna .lg-notiz-knopf')) fehlt.push(sc); if (!document.querySelector('.bb .bb-zurueck, .scr.dna .lg-fuss .lg-zurueck')) ohnePfeil.push(sc); }); // Fürs Angebot im Look der Design-DNA
       return { fehlt: fehlt, ohneWo: ohneWo, ohnePfeil: ohnePfeil, n: n };
@@ -3713,7 +3713,7 @@ if (teil(16)) {
     const gi2 = await sk.evaluate(() => !document.querySelector('.g-leer').hidden);
     await sk.keyboard.press('Escape'); await sk.waitForTimeout(150);
     const gi3 = await sk.evaluate(() => {
-      const ohne = []; ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { const w = baseWin(); artSetzen(w, art); w.sart = 'rollladen'; w.iart = 'rollo'; w.sprossen = 'wiener'; qList(w).forEach((q) => { if (!q.g || !GLOSS[q.g]) ohne.push(art + ':' + q.id); }); });
+      const ohne = []; ['fenster', 'balkon', 'haustuer', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { const w = baseWin(); artSetzen(w, art); w.sart = 'rollladen'; w.iart = 'rollo'; w.sprossen = 'wiener'; qList(w).forEach((q) => { if (!q.g || !GLOSS[q.g]) ohne.push(art + ':' + q.id); }); });
       const k = Object.keys(GLOSS), duenn = k.filter((x) => !GLOSS[x].tipp || GLOSS[x].x.length < 2 || GLOSS[x].x.join(' ').split(/\s+/).length < 30), doppelt = GLOSS_ORDER.filter((x, i) => GLOSS_ORDER.indexOf(x) !== i);
       const verweis = [].concat(Object.values(Q_G), Object.values(Q_G_STATT), MESS.map((m) => m.g), [].concat.apply([], Object.values(SCHRITT_G)), [].concat.apply([], Object.values(OPT_G).map((o) => Object.values(o))), [].concat.apply([], k.map((x) => GLOSS[x].see))).filter((x) => !GLOSS[x]);
       return { ohne: ohne, duenn: duenn, doppelt: doppelt, fehlend: k.filter((x) => GLOSS_ORDER.indexOf(x) < 0), verweis: verweis, n: k.length, offen: !!(S.gloss || S.glossIndex) };
@@ -4764,7 +4764,7 @@ if (teil(22)) {
   });
   for (const [W, H] of [[390, 844], [320, 640], [1440, 900]]) {
     await p.setViewportSize({ width: W, height: H });
-    for (const art of ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw']) for (let n = 0; n < 8; n++) {
+    for (const art of ['fenster', 'balkon', 'haustuer', 'fest', 'hst', 'psk', 'fsw']) for (let n = 0; n < 8; n++) {
       await p.evaluate(([art, n]) => { const w = demoProject()[0]; artSetzen(w, art); S.win = w; S.editIdx = -1; if (n < 4) { S.mess.step = n; S.mess.cur = ''; go('messen'); } else { S.rest.i = n - 4; S.rest.cur = ''; go('rest'); } render(true); }, [art, n]);
       await p.waitForTimeout(260); const m = await buehneMd();
       if (m.fehler.length) schilder.push(W + ' ' + art + ' ' + (n < 4 ? 'Maß ' + (n + 1) : 'Rand ' + (n - 3)) + ': ' + m.fehler.join(', '));
@@ -5066,8 +5066,24 @@ if (teil(32)) {
   const a32 = await p.evaluate(() => ({ screen: S.screen, q: S.q, weg: qSichtbar(S.win).map((q) => q.id).join(' '), tiefe: S.proj.tiefe }));
   ok(a32.screen === 'frage' && a32.q === 'form' && a32.weg === 'form teilung massweg lage typ-0 din-0 typ-1 din-1 material fa fi glas sprossen rc sart fbi fba extras' && a32.tiefe === 'kurz',
     'Start → „Weiter“ führt direkt zur Form am Modell; Hauptweg eines Fensters: Form, Flügel, Maße, wie viele und wo, Öffnung, Material, Farben, Glas, Sprossen, Erreichbarkeit, Sonnenschutz, Fensterbänke, Liste (' + a32.weg + ')');
-  const arten = await p.evaluate(() => ['balkon', 'fest', 'hst', 'psk', 'fsw'].map((art) => { const w = baseWin(); artSetzen(w, art); if (art === 'hst') w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); S.win = w; const ids = qSichtbar(w).map((q) => q.id), i = ids.indexOf('massweg'); return { art: art, ids: ids.join(' '), ok: i > 0 && i <= 2 && ids[i + 1] === 'lage' && ids[ids.length - 1] === 'extras' && ids.every((x) => qHaupt({ id: x })) }; }));
+  const arten = await p.evaluate(() => ['balkon', 'haustuer', 'fest', 'hst', 'psk', 'fsw'].map((art) => { const w = baseWin(); artSetzen(w, art); if (art === 'hst') w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); S.win = w; const ids = qSichtbar(w).map((q) => q.id), i = ids.indexOf('massweg'); return { art: art, ids: ids.join(' '), ok: i > 0 && i <= 2 && ids[i + 1] === 'lage' && ids[ids.length - 1] === 'extras' && ids.every((x) => qHaupt({ id: x })) }; }));
   ok(arten.every((x) => x.ok), 'Alle Elementarten: erst Aufbau (Schema, Teile, Flügel, Felder), dann der Weg zu den Maßen und wie viele und wo, am Ende die Liste (' + arten.filter((x) => !x.ok).map((x) => x.art + ': ' + x.ids).join(' | ') + ')');
+  /* Haustür (Lückenprüfung 3.11.2026): eigene Elementart mit Füllung, Seitenteilen, Bändern, Schwelle, Glas im Ausschnitt, Griff außen,
+     Schloss und Extras; kein Fenster-Sonnenschutz, keine Sprossen; Text, Zeichnung und Bilder für Start und Messen */
+  const ht32 = await p.evaluate(async () => {
+    const w = baseWin(); artSetzen(w, 'haustuer'); S.win = w; S.editIdx = -1;
+    const ids = qSichtbar(w).map((q) => q.id), alle = qList(w).map((q) => q.id);
+    w.ht.modell = 'voll'; const ohneGlas = qList(w).map((q) => q.id).indexOf('htGlas') < 0; w.ht.modell = 'streifen';
+    const text = AW.opening(w), svg = AW.svg(w, 64);
+    w.neu = false; S.screen = 'start'; render(true);
+    const ersetzen = [...document.querySelectorAll('.st-stelle [data-act="situation"]')].map((b) => b.textContent.trim());
+    const bild = async (u) => (await fetch(u)).ok;
+    const bilder = await Promise.all(['/bilder/konfigurator/element/haustuer-anthrazit.webp', '/bilder/konfigurator/mess/haustuer.webp', '/bilder/konfigurator/mess/haustuer-front.webp'].map(bild));
+    return { ids: ids.join(' '), ok: ['htModell', 'htSeiten', 'massweg', 'lage', 'din-0', 'schwelle', 'material', 'fa', 'fi', 'htGlas', 'htGriff', 'htSchloss', 'extras'].every((x) => ids.indexOf(x) >= 0) && ['sart', 'iart', 'sprossen', 'glas', 'griff', 'seiten'].every((x) => alle.indexOf(x) < 0) && alle.indexOf('htExtra') >= 0,
+      ohneGlas: ohneGlas, text: text, svg: (svg.match(/<path/g) || []).length, ersetzen: ersetzen, bilder: bilder, tuer: istTuer(w) && AW.istTuer(w) };
+  });
+  ok(ht32.ok && ht32.ohneGlas && /^Haustür, Bänder links \(DIN links\)/.test(ht32.text) && /Füllung mit Glasstreifen/.test(ht32.text) && ht32.svg >= 6 && ht32.ersetzen[0] === 'Tür ersetzen' && ht32.bilder.every(Boolean) && ht32.tuer,
+    'Haustür: Füllung, Seitenteile, Maße, Lage, Bänder, Schwelle, Material, Farben, Glas nur mit Ausschnitt, Griff außen, Schloss, Extras in der Liste; kein Fenster-Sonnenschutz und keine Sprossen; Text fürs Aufmaß, Zeichnung, Bilder für Start und Messen, „Tür ersetzen“ (' + JSON.stringify(ht32).slice(0, 400) + ')');
   /* b) Was der Inhaber aus dem Hauptweg genommen hat, steht in der Liste */
   const ex32 = await p.evaluate(() => { const w = demoProject()[0]; S.win = w; return qExtras(qList(w)).map((q) => q.id); });
   const soll32 = ['kvd', 'profil', 'schmal', 'dicht', 'ahFarbe', 'oberfl', 'griffM', 'griffPos', 'kinder', 'baender', 'luefter', 'oeffner', 'kontakt', 'gitter', 'leiste'];

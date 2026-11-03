@@ -659,7 +659,7 @@ const CAPS = [
    die Maße und die Einbausituation laut Fotos. Regeln und Texte stehen in modell.js, damit Bildschirm, Text und PDF dasselbe sagen. */
 const SPRECH = I('<path d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3v-3H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/>', 16);
 const WARN_I = I('<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.5v.5"/>', 16);
-const ARTKURZ = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Faltschiebewand' };
+const ARTKURZ = { fenster: 'Fenster', balkon: 'Balkontür', haustuer: 'Haustür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Faltschiebewand' };
 const amKlaer = (l) => { const am = (l && l.aufmass) || {}; return AW.klaerung(am.windows || [], am.proj || {}, l || {}); };
 const klaerOk = (l, id) => !!(l && l.klaer && l.klaer[id] && l.klaer[id].ok);
 const klaerNotiz = (l, id) => (l && l.klaer && l.klaer[id] && l.klaer[id].notiz) || '';
