@@ -717,6 +717,12 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
   Element dazu Kleiner/Größer. Kopie daneben und Entfernen als Rundknöpfe neben „Bestätigen“. Mehrere Fenster stehen als **Leiste** im Blatt
   (Bild, Name, Haken); antippen oder kurz im Foto antippen holt eins zurück. Ansicht: Glasknöpfe Näher, Weiter, Ganzes Bild; zwei Finger
   zoomen, Doppeltipp springt heran. Prüfung: `scripts/pruefen.mjs` Abschnitt 3b.
+- **Seit 4.11.2026:** Die vier Eckpunkte sitzen auf dem **Fensterrahmen**, nicht auf Kasten oder Schienen: hausbild.js rendert das
+  Element einmal ganz und einmal nur mit Rahmen (gleiche Kamera) und setzt das ganze Bild perspektivisch vom Rahmen aus fort (hbVoll). Der
+  Auftrag an die KI ist **kurz** („1:1 wie die Vorlage einbauen, passend zu Winkel und Perspektive der Wand, sonst nichts ändern“) und
+  zählt die Merkmale nicht mehr auf; das Element zeigt die Vorlage aus dem 3-D-Modell (Behang hochgefahren, ohne Bedienung von innen).
+  Vorher/Nachher am Beispielhaus auf der Willkommensseite, in „Gespeichert“ und in der Liste; die Einladung ab dem ersten gespeicherten
+  Fenster. In „Gespeichert“ steht „Dieses Fenster“ (Maße, Wünsche, Kopieren, Löschen, Themen) über der Einladung und „Wie geht es weiter?“.
 - **Lenkung zum Aufmaßblatt (Inhaber, 3.11.2026: jede Generierung kostet; Konzept docs/konzepte/2026-11-03-conversion-funnel.md):** Die
   Einladung erscheint erst, wenn ein Fenster vollständige Maße hat. Eine KI-Vorschau (ein Durchgang mit allen gesetzten Fenstern) ist frei,
   mit gesichertem Konto drei, mit freigeschaltetem Aufmaßblatt (gekauft oder über „Angebote aus deiner Nähe“) zehn je Gerät; der Editor

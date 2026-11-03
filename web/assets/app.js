@@ -4068,7 +4068,9 @@ function fertigDna() {
   const fuss = '<div class="lg-fuss fg-fuss"><p class="fg-fuss-frage">Alle Fenster im Haus erfasst?</p><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Fenster">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="anfrage">' + (lk ? 'Zum Absenden' : 'Zum Aufmaßblatt') + '<span class="fg-zahl"> · ' + S.windows.length + ' Fenster</span>' + pfeil + '</button></div>';
   const einladung = window.hbEinladung ? hbEinladung() : '';
   const titel = '<div class="fg-kopf"><h1 tabindex="-1"><span class="fg-name">' + esc(w.name || ding) + '</span> <em>gespeichert.</em></h1></div>';
-  const html = lgKopf(['back', 'Zurück: Fenster']) + '<div class="fg-tisch">' + buehne + '<div class="fg-rechts">' + titel + ki + einladung + weiter + dieses + themen + spaeter + rechtLinks() + fuss + '</div></div>';
+  /* Reihenfolge (Inhaber, 4.11.2026): erst „Dieses Fenster“ mit Maße, Wünsche, Kopieren, Löschen und die Themen zum Nachschärfen, dann die
+     Einladung „An deinem Haus“, dann „Wie geht es weiter?“ */
+  const html = lgKopf(['back', 'Zurück: Fenster']) + '<div class="fg-tisch">' + buehne + '<div class="fg-rechts">' + titel + ki + dieses + themen + einladung + weiter + spaeter + rechtLinks() + fuss + '</div></div>';
   return { html: html, back: ['Fenster', 'home'], dna: true, cls: 'dna fg', voll: true };
 }
 SCREENS.fertigAlt = SCREENS.fertig;

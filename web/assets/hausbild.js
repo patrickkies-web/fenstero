@@ -138,51 +138,69 @@ function hbBildVon(i) {
   return hbStudio(w).then((b) => { if (b) { b.key = key; HB.bilder[i] = b; } return b; });
 }
 let hbStudioKette = Promise.resolve();
-function hbStudio(w) {
-  const lauf = hbStudioKette.then(() => new Promise((fertig) => {
+/* Teile, die nicht zum Fensterrahmen gehören (Kasten, Schienen, Behang, Fensterbank, Klappläden, Insektenschutz, Bedienung innen) */
+const HB_NICHT_RAHMEN = '.w3d-an, .w3d-roll, [class*="w3d-roll-"], [class*="w3d-behang"], .w3d-fs, [class*="w3d-fs-"], [class*="w3d-kl"], [class*="w3d-ins"], [class*="w3d-gel"], [class*="w3d-gitter"]';
+/* ein Standbild der Bühne: ganz oder nur der Rahmen (ohne die Teile oben); null ohne WebGL */
+function hbStudioBild(w, nurRahmen) {
+  return new Promise((fertig) => {
     let box = document.getElementById('hb-studio');
     if (!box) { box = document.createElement('div'); box.id = 'hb-studio'; box.setAttribute('aria-hidden', 'true'); document.body.appendChild(box); }
     /* Behang ganz hochgefahren (wie im Auftrag an die KI): Kasten, Blende und Schienen bleiben sichtbar, das Fenster frei */
     const o = { id: 'hb-studio-st', view: 'aussenGerade', frei: true, haus: false, sway: false, noZoom: true, zkey: 'hb-studio', behang: { stand: 0, wend: 0, pos: 0 } };
     box.innerHTML = model(w, o);
-    const st = box.querySelector('.w3d-stage');
-    const zeichnung = () => { box.innerHTML = ''; delete W3DS['hb-studio-st']; fertig(hbZeichnung(w)); };
-    if (!st) return zeichnung();
+    const st = box.querySelector('.w3d-stage'), weg = () => { box.innerHTML = ''; delete W3DS['hb-studio-st']; };
+    if (!st) { weg(); return fertig(null); }
     st.classList.add('no-anim'); w3dApply(st, w, W3DS['hb-studio-st'].o);
-    st.querySelectorAll('.w3d-an').forEach((e) => e.remove()); // Gurt, Wickler, Taster sitzen innen; ohne Wand sähe die KI sie vor der Fassade
-    if (!window.Buehne3D || !window.Buehne3D.an(st)) return zeichnung();
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      const url = window.Buehne3D.foto(st);
-      box.innerHTML = ''; delete W3DS['hb-studio-st'];
-      if (!url) return fertig(hbZeichnung(w));
-      hbZuschneiden(url).then(fertig);
-    }));
-  }));
+    st.querySelectorAll(nurRahmen ? HB_NICHT_RAHMEN : '.w3d-an').forEach((e) => e.remove()); // Gurt, Wickler, Taster sitzen innen; ohne Wand sähe die KI sie vor der Fassade
+    if (!window.Buehne3D || !window.Buehne3D.an(st)) { weg(); return fertig(null); }
+    requestAnimationFrame(() => requestAnimationFrame(() => { const url = window.Buehne3D.foto(st); weg(); fertig(url || null); }));
+  });
+}
+/* Element einmal ganz und einmal nur mit Rahmen rendern (gleiche Kamera): Der Rahmen bestimmt die vier Eckpunkte im Editor (Inhaber,
+   4.11.2026: „die Ecken … nicht vom eigentlichen Element oder Fensterrahmen“, sondern von den Schienen des Rollladenkastens). b.rahmen:
+   Lage des Rahmens im zugeschnittenen Bild als Anteile [x0, y0, x1, y1]. */
+function hbStudio(w) {
+  const lauf = hbStudioKette.then(async () => {
+    const url = await hbStudioBild(w, false); if (!url) return hbZeichnung(w);
+    const voll = await hbAlphaBox(url); if (!voll) return hbZeichnung(w);
+    const nur = await hbStudioBild(w, true).then((u) => (u ? hbAlphaBox(u) : null)).catch(() => null);
+    const b = hbAusschneiden(voll);
+    if (nur && nur.x1 > nur.x0 && nur.y1 > nur.y0) {
+      const W = voll.x1 - voll.x0 + 2, H = voll.y1 - voll.y0 + 2, k = (v, a, l) => Math.max(0, Math.min(1, (v - a) / l));
+      const r = [k(nur.x0, voll.x0, W), k(nur.y0, voll.y0, H), k(nur.x1 + 2, voll.x0, W), k(nur.y1 + 2, voll.y0, H)];
+      if (r[2] - r[0] > 0.2 && r[3] - r[1] > 0.2) b.rahmen = r;
+    }
+    return b;
+  });
   hbStudioKette = lauf.catch(() => null);
   return lauf;
 }
-/* durchsichtigen Rand abschneiden */
-function hbZuschneiden(url) {
+/* Bild laden und den sichtbaren Bereich (Deckkraft über 12) bestimmen */
+function hbAlphaBox(url) {
   return new Promise((fertig) => {
     const im = new Image();
     im.onload = () => {
       const cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = im.naturalHeight; const c = cv.getContext('2d'); c.drawImage(im, 0, 0);
-      let px; try { px = c.getImageData(0, 0, cv.width, cv.height).data; } catch (e) { return fertig({ src: url, w: cv.width, h: cv.height }); }
+      let px; try { px = c.getImageData(0, 0, cv.width, cv.height).data; } catch (e) { return fertig({ cv: cv, x0: 0, y0: 0, x1: cv.width - 2, y1: cv.height - 2, url: url }); }
       let x0 = cv.width, y0 = cv.height, x1 = -1, y1 = -1;
       for (let y = 0; y < cv.height; y += 2) for (let x = 0; x < cv.width; x += 2) if (px[(y * cv.width + x) * 4 + 3] > 12) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-      if (x1 < 0) return fertig(null);
-      const w = x1 - x0 + 2, h = y1 - y0 + 2, aus = document.createElement('canvas'); aus.width = w; aus.height = h;
-      aus.getContext('2d').drawImage(cv, x0, y0, w, h, 0, 0, w, h);
-      fertig({ src: aus.toDataURL('image/png'), w: w, h: h });
+      fertig(x1 < 0 ? null : { cv: cv, x0: x0, y0: y0, x1: x1, y1: y1, url: url });
     };
     im.onerror = () => fertig(null);
     im.src = url;
   });
 }
+/* durchsichtigen Rand abschneiden */
+function hbAusschneiden(a) {
+  const w = a.x1 - a.x0 + 2, h = a.y1 - a.y0 + 2, aus = document.createElement('canvas'); aus.width = w; aus.height = h;
+  aus.getContext('2d').drawImage(a.cv, a.x0, a.y0, w, h, 0, 0, w, h);
+  return { src: aus.toDataURL('image/png'), w: w, h: h };
+}
+function hbZuschneiden(url) { return hbAlphaBox(url).then((a) => (a ? hbAusschneiden(a) : null)); }
 /* ohne WebGL: einfache Ansicht von außen in der Rahmenfarbe (Flügel, Glas, Kasten des Sonnenschutzes) */
 function hbZeichnung(w) {
   const bw = num(w.el && w.el.w) || num(w.w) || 1200, bh = num(w.el && w.el.h) || num(w.h) || 1400, k = 520 / Math.max(bw, bh);
-  const W = Math.round(bw * k), kasten = /rollladen|raffstore|screen/.test(String(w.roll || w.sart || '')) ? Math.round(150 * k) : 0, H = Math.round(bh * k) + kasten;
+  const W = Math.round(bw * k), kasten = /^(rollladen|raffstore|screen)$/.test(String(w.sart || '')) && w.roll !== 'unterputz' && !(typeof istOffen === 'function' && istOffen(w, 'sart')) ? Math.round(150 * k) : 0, H = Math.round(bh * k) + kasten;
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const c = cv.getContext('2d');
   const f = rahmenFarbe(w, 'aussen'), farbe = (f && (f.solid || f.bg)) || '#3a3d40', r = Math.max(6, Math.round(64 * k));
   if (kasten) { c.fillStyle = farbe; c.fillRect(0, 0, W, kasten); }
@@ -193,7 +211,7 @@ function hbZeichnung(w) {
     c.fillStyle = g; c.fillRect(x + r * .45, kasten + r * 1.45, sw - r * .9, H - kasten - r * 2.9);
     c.strokeStyle = 'rgba(0,0,0,.18)'; c.lineWidth = 2; c.strokeRect(x + r * .45, kasten + r * 1.45, sw - r * .9, H - kasten - r * 2.9);
   }
-  return { src: cv.toDataURL('image/png'), w: W, h: H, zeichnung: true };
+  return { src: cv.toDataURL('image/png'), w: W, h: H, zeichnung: true, rahmen: [0, kasten / H, 1, 1] };
 }
 
 /* Daten des Fensters für den Auftrag an den Bilddienst (functions/api/hausbild.js, beschreibung). Sonnenschutz seit 4.11.2026 mit allem,
@@ -236,6 +254,14 @@ const hbPunkt = (m, x, y) => { const z = m[3] * x + m[7] * y + m[15]; return [(m
 const hbMitte = (q) => [(q[0][0] + q[1][0] + q[2][0] + q[3][0]) / 4, (q[0][1] + q[1][1] + q[2][1] + q[3][1]) / 4];
 /* Ecken liegen relativ zum Foto (0..1); px: Faktoren für Breite und Höhe */
 const hbPx = (q, W, H) => q.map((p) => [p[0] * W, p[1] * H]);
+/* Die vier Eckpunkte sitzen auf dem Fensterrahmen (b.rahmen); Kasten, Schienen und Läden ragen darüber hinaus. hbVoll rechnet aus dem
+   Rahmen-Viereck (in Bildpunkten) die vier Ecken des ganzen Bildes mit derselben Perspektive (Homographie vom Rahmen aus fortgesetzt). */
+function hbVoll(qpx, b) {
+  const r = b && b.rahmen; if (!r) return qpx;
+  const fw = Math.max(1, (r[2] - r[0]) * b.w), fh = Math.max(1, (r[3] - r[1]) * b.h), ox = r[0] * b.w, oy = r[1] * b.h, m = hbMatrix(fw, fh, qpx);
+  return [[-ox, -oy], [b.w - ox, -oy], [b.w - ox, b.h - oy], [-ox, b.h - oy]].map((p) => hbPunkt(m, p[0], p[1]));
+}
+const hbVollPx = (e, W, H) => hbVoll(hbPx(e.q, W, H), HB.bilder[e.win]);
 
 /* ---------- Vorschauen zählen (Inhaber, 3.11.2026: „weil ich ja für diese Generierung immer wieder Geld bezahle“) ----------
    Eine KI-Vorschau (ein Durchgang mit allen gesetzten Fenstern) ist frei, das sagt der Editor vorher offen. Weitere gibt es mit dem
@@ -445,14 +471,14 @@ function hbZoom(stufe) {
 /* gewähltes Element groß heran: es füllt gut die Hälfte der Bühne */
 function hbFokus(id) {
   const A = HB.anzeige, e = HB.el.find((x) => x.id === id); if (!A || !e) return;
-  const p = hbPx(e.q, A.w, A.h), xs = p.map((q) => q[0]), ys = p.map((q) => q[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const p = hbVollPx(e, A.w, A.h), xs = p.map((q) => q[0]), ys = p.map((q) => q[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
   const z = Math.max(1, Math.min(4, Math.min(A.vw * 0.56 / Math.max(1, x1 - x0), A.vh * 0.56 / Math.max(1, y1 - y0))));
   hbBlickAuf(z, A.vw / 2 - (x0 + x1) / 2 * z, A.vh / 2 - (y0 + y1) / 2 * z);
 }
 function hbSetzen(d) {
   const e = HB.el.find((x) => String(x.id) === d.getAttribute('data-id')), b = e && HB.bilder[e.win]; if (!e || !b || !HB.anzeige) return;
   d.style.width = b.w + 'px'; d.style.height = b.h + 'px';
-  d.style.transform = 'matrix3d(' + hbMatrix(b.w, b.h, hbPx(e.q, HB.anzeige.w, HB.anzeige.h)).map((v) => +v.toFixed(8)).join(',') + ')';
+  d.style.transform = 'matrix3d(' + hbMatrix(b.w, b.h, hbVoll(hbPx(e.q, HB.anzeige.w, HB.anzeige.h), b)).map((v) => +v.toFixed(8)).join(',') + ')';
 }
 /* Eckpunkte 18 Bildschirmpunkte außerhalb der Ecken (in Richtung von der Mitte weg), gleich groß bei jedem Zoom */
 function hbEckpunkte(e) {
@@ -648,7 +674,8 @@ function hbEinsetzen(i) {
   const mmW = num(w.el && w.el.w) || num(w.w) || 1200, ref = HB.el.find((e) => e.fest);
   let breite = 0.24;
   if (ref) { const rw = S.windows[ref.win], rq = ref.q, rbr = Math.hypot((rq[1][0] - rq[0][0]) * HB.foto.w, (rq[1][1] - rq[0][1]) * HB.foto.h); const rmm = num(rw && rw.el && rw.el.w) || num(rw && rw.w) || 1200; breite = Math.min(0.8, rbr / rmm * mmW / HB.foto.w); }
-  const hoehe = breite * HB.foto.w * (b.h / b.w) / HB.foto.h, x0 = 0.5 - breite / 2 + (HB.el.length % 3) * 0.03, y0 = Math.max(0.04, 0.45 - hoehe / 2);
+  const r = b.rahmen || [0, 0, 1, 1], seite = ((r[3] - r[1]) * b.h) / Math.max(1, (r[2] - r[0]) * b.w); // Höhe zu Breite des Rahmens
+  const hoehe = breite * HB.foto.w * seite / HB.foto.h, x0 = 0.5 - breite / 2 + (HB.el.length % 3) * 0.03, y0 = Math.max(0.08, 0.45 - hoehe / 2);
   const id = HB.zaehler++;
   HB.el.push({ id: id, win: i, name: w.name || artName(w), art: w.neu ? 'neu' : 'ersetzen', fest: false, q: [[x0, y0], [x0 + breite, y0], [x0 + breite, y0 + hoehe], [x0, y0 + hoehe]] });
   HB.aktiv = id; HB.fein = 'alle'; HB.fokus = id; HB.bearbeiten = false; HB.wahl = false; HB.ergebnis = null; HB.fehler = '';
@@ -823,7 +850,7 @@ async function hbAusschnitt(els, groesse, vgroesse) {
     const W = HB.foto.w, H = HB.foto.h, foto = await hbLadeBild(HB.foto.src);
     /* Ausschnitt: alle Elemente mit Rand, mindestens 384 px, höchstens das ganze Foto */
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    els.forEach((e) => hbPx(e.q, W, H).forEach((p) => { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); }));
+    els.forEach((e) => hbVollPx(e, W, H).forEach((p) => { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); }));
     const rand = Math.max(48, 0.35 * Math.max(x1 - x0, y1 - y0));
     let ax = Math.max(0, Math.floor(x0 - rand)), ay = Math.max(0, Math.floor(y0 - rand)), bx = Math.min(W, Math.ceil(x1 + rand)), by = Math.min(H, Math.ceil(y1 + rand));
     const mind = Math.min(384, W, H);
@@ -837,14 +864,14 @@ async function hbAusschnitt(els, groesse, vgroesse) {
     for (const e of els) {
       const b = HB.bilder[e.win]; if (!b) continue;
       if (vIdx[e.win] == null) { vIdx[e.win] = vorl.length; vorl.push(b); }
-      const im = await hbLadeBild(b.src), q = hbPx(e.q, W, H).map((p) => [(p[0] - ax) * k, (p[1] - ay) * k]);
+      const im = await hbLadeBild(b.src), q = hbVollPx(e, W, H).map((p) => [(p[0] - ax) * k, (p[1] - ay) * k]);
       hbVerziehen(ac, im, q);
     }
     const lage = hbJpeg(aus);
     /* Vorlagen höchstens vgroesse (mit Rand), auf hellem Grund (der Dienst sieht so die Kanten des Rahmens) */
     const vorlagen = await Promise.all(vorl.map(async (b) => { const im = await hbLadeBild(b.src), s = Math.min(1, (vgroesse - 40) / Math.max(b.w, b.h)), cv = document.createElement('canvas'); cv.width = Math.round(b.w * s) + 40; cv.height = Math.round(b.h * s) + 40; const c = cv.getContext('2d'); c.fillStyle = '#e2e2e0'; c.fillRect(0, 0, cv.width, cv.height); c.drawImage(im, 20, 20, cv.width - 40, cv.height - 40); return hbJpeg(cv, 0.9); }));
     const elemente = els.map((e) => {
-      const p = hbPx(e.q, W, H); let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+      const p = hbVollPx(e, W, H); let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
       p.forEach((pt) => { bx0 = Math.min(bx0, pt[0]); by0 = Math.min(by0, pt[1]); bx1 = Math.max(bx1, pt[0]); by1 = Math.max(by1, pt[1]); });
       const g = (v, a, l) => Math.round((v - a) / l * 1000);
       return { box: [g(by0, ay, ch), g(bx0, ax, cw), g(by1, ay, ch), g(bx1, ax, cw)], vorlage: vIdx[e.win] || 0, art: e.art, daten: hbDaten(S.windows[e.win]) };
@@ -863,7 +890,7 @@ async function hbEinsetzenTeile(teile, P) {
     const schicht = document.createElement('canvas'); schicht.width = W; schicht.height = H; const sc = schicht.getContext('2d'); sc.drawImage(neu, ax, ay, cw, ch);
     const maske = document.createElement('canvas'); maske.width = W; maske.height = H; const mc = maske.getContext('2d'), weit = W * 3;
     els.forEach((e) => {
-      const p = hbPx(e.q, W, H), m = hbMitte(p), gr = Math.max(Math.hypot(p[1][0] - p[0][0], p[1][1] - p[0][1]), Math.hypot(p[3][0] - p[0][0], p[3][1] - p[0][1]));
+      const p = hbVollPx(e, W, H), m = hbMitte(p), gr = Math.max(Math.hypot(p[1][0] - p[0][0], p[1][1] - p[0][1]), Math.hypot(p[3][0] - p[0][0], p[3][1] - p[0][1]));
       const r2 = Math.max(6, gr * 0.06), q2 = p.map((pt) => [m[0] + (pt[0] - m[0]) * 1.24, m[1] + (pt[1] - m[1]) * 1.24 + (pt[1] > m[1] ? gr * 0.06 : 0)]); // mit Laibung, Schatten und Fensterbank
       mc.save(); mc.shadowColor = '#000'; mc.shadowBlur = r2; mc.shadowOffsetX = -weit; mc.fillStyle = '#000'; mc.beginPath();
       q2.forEach((pt, i) => (i ? mc.lineTo(pt[0] + weit, pt[1]) : mc.moveTo(pt[0] + weit, pt[1]))); mc.closePath(); mc.fill(); mc.restore();

@@ -82,47 +82,34 @@ export function beschreibung(e) {
   teile.push(d.glas === 'ornament' ? 'obscured privacy glass' : 'clear insulating glass that reflects the sky and the surroundings, with a hint of the dark room behind, not frosted and not milky');
   return teile.join(', ');
 }
+/* Kurzer Auftrag (Inhaber, 4.11.2026: „dass der Prompt nicht so groß ist … je länger der wird, umso weniger wird nachher in den Feinheiten
+   aufgepasst“; das Element ist im Konfigurator gestaltet und liegt als Bild vor, es muss nur eins zu eins verbaut werden): kein Aufzählen
+   der Merkmale mehr, nur Einbau 1:1 nach der Vorlage, in Größe, Proportion und Perspektive der Wand, und sonst nichts ändern. */
 export function auftrag(elemente) {
-  const neu = elemente.some((e) => e.art === 'neu'), alt = elemente.some((e) => e.art !== 'neu');
-  const namen = elemente.map((e, i) => '<window_' + (i + 1) + '>').join(', ');
-  const text = 'Photorealistic architectural edit of <ref_image_0>, a photo of a house. Install the new windows ' + namen + ' into the wall at the marked places, as a professional window fitter would. ' +
-    'Each box marks a masonry opening in the photo. ' +
-    (alt ? 'If there is an old window or a bare opening, the new window replaces it completely; no part of an old frame remains. ' : '') +
-    (neu ? 'If the wall is closed there, first cut a clean rectangular opening with plastered reveals and a lintel that match the facade. ' : '') +
-    'Set the window frame back inside the opening, recessed behind the facade surface, so the reveals stay visible on the sides and on top, seen in exactly the perspective, angle and vanishing lines of this wall and this camera. ' +
-    'Below the window a window sill with a small overhang and a drip edge. Cast the soft shadows of the lintel and the reveals onto the frame and the glass, following the direction of the sunlight in the photo. ' +
-    'The glass reflects the real sky and the surroundings of this photo; the frame has the same light, colour temperature, sharpness and camera noise as the rest of the image. ' +
-    'Keep the design of each window exactly as in its reference image: frame colour, number and division of sashes, glazing bars, handles and blind box. ' +
-    'Only the marked boxes get new windows: every other opening, window or door in the photo stays exactly as it is, even if it is empty. ' +
-    'Do not add, remove or change people, faces, text, logos or licence plates. ' +
-    'Do not change anything outside the boxes: facade <facade_1>, roof, plants and sky stay exactly as they are.';
-  const zeilen = elemente.map((e, i) => ({ id: 'window_' + (i + 1), from: 'ref_image_' + (e.vorlage + 1), src_bbox: [0, 0, 1000, 1000], tgt_bbox: e.box, desc: 'new ' + beschreibung(e) + ', built into the opening' }));
-  zeilen.push({ id: 'facade_1', from: 'ref_image_0', src_bbox: [0, 0, 1000, 1000], tgt_bbox: [0, 0, 1000, 1000], desc: 'the existing house facade, unchanged outside the windows' });
+  const neu = elemente.some((e) => e.art === 'neu'), namen = elemente.map((e, i) => '<window_' + (i + 1) + '>').join(', ');
+  const text = 'Photorealistic edit of <ref_image_0>, a photo of a house. Build ' + namen + ' into the marked openings exactly as in their reference images, 1:1: ' +
+    'same proportions, sashes, colours and blind box, nothing added or left out. Match the angle and perspective of the wall: frame set back in the opening, ' +
+    'reveals visible, sill below, light and shadows as in the photo. Old windows there are replaced completely' + (neu ? '; on a closed wall cut a matching opening' : '') + '. ' +
+    'Change nothing else in the photo.';
+  const zeilen = elemente.map((e, i) => ({ id: 'window_' + (i + 1), from: 'ref_image_' + (e.vorlage + 1), src_bbox: [0, 0, 1000, 1000], tgt_bbox: e.box, desc: 'the window from its reference image, 1:1' }));
+  zeilen.push({ id: 'facade_1', from: 'ref_image_0', src_bbox: [0, 0, 1000, 1000], tgt_bbox: [0, 0, 1000, 1000], desc: 'the house, unchanged' });
   return text + ' ' + JSON.stringify(zeilen);
 }
 
-/* Auftrag für FLUX.2 [klein] bei Cloudflare: Das Modell kennt keine Felder je Fenster. Bild 1 ist deshalb der Ausschnitt mit den flach
-   eingesetzten Fenstern (lage) als Platzhalter, ab Bild 2 bis zu drei Vorlagen; je Fenster nennt der Text Lage im Bild und Merkmale aus den
-   Daten (Flügel, Farbe usw.), weil das Modell im Vergleich am Beispielhaus sonst die Teilung rät (docs/profis/2026-11-02-hausbild.md). */
-const EINBAU = 'Set each frame back inside its masonry opening, recessed behind the facade surface, so the plastered reveals stay visible on the sides and on top, ' +
-  'seen in exactly the perspective, angle and vanishing lines of this wall and this camera. Below each window a window sill with a small overhang. ' +
-  'Soft shadows of the lintel and the reveals fall onto the frame and the glass, following the direction of the sunlight in the photo. ' +
-  'The glass reflects the real sky and surroundings of this photo; the frames have the same light, colour temperature, sharpness and noise as the rest of the image. ';
+/* Auftrag für FLUX.2 [klein] bei Cloudflare: Bild 1 ist der Ausschnitt mit den flach eingesetzten Fenstern (lage), ab Bild 2 die Vorlagen
+   aus dem 3-D-Modell. Seit 4.11.2026 kurz (Wunsch des Inhabers): Lage im Bild und die Nummer der Vorlage je Fenster, keine Merkmalsliste;
+   die eingesetzten Fenster in Bild 1 zeigen Teilung und Farbe schon. */
 function lageWort(b) {
   const cy = (b[0] + b[2]) / 2, cx = (b[1] + b[3]) / 2, v = cy < 380 ? 'upper' : cy > 620 ? 'lower' : '', h = cx < 380 ? 'left' : cx > 620 ? 'right' : '';
-  return v && h ? 'at the ' + v + ' ' + h : v ? 'in the ' + v + ' part' : h ? 'on the ' + h : 'in the centre';
+  return v && h ? v + ' ' + h : v || h || 'centre';
 }
 export function auftragCf(elemente, vorlagenZahl) {
-  const neu = elemente.some((e) => e.art === 'neu'), alt = elemente.some((e) => e.art !== 'neu'), mehr = elemente.length > 1;
-  const je = elemente.map((e, i) => 'Window ' + (i + 1) + ' ' + lageWort(e.box) + ' of image 1: new ' + beschreibung(e) +
-    (e.vorlage < vorlagenZahl ? ', looking exactly like the window in image ' + (e.vorlage + 2) : '') + '.').join(' ');
-  return 'Photorealistic architectural edit of image 1, a photo of a house. ' + (mehr ? 'New windows were' : 'A new window was') +
-    ' pasted flat into the photo as a rough placement guide. Make ' + (mehr ? 'each of them' : 'it') + ' look really built in by a professional window fitter. ' +
-    (alt ? 'If there was an old window, the new one replaces it completely; no part of an old frame remains. ' : '') +
-    (neu ? 'Where the wall is closed, cut a clean rectangular opening with plastered reveals and a lintel that match the facade. ' : '') +
-    EINBAU + je + ' Keep the number of sashes, the division and the frame colour of every window exactly as described; do not add or remove sashes, mullions or bars. ' +
-    'Every other opening, window or door in the photo stays exactly as it is, even if it is empty. Do not add, remove or change people, faces, text, logos or licence plates. ' +
-    'Do not change anything else: facade, roof, plants and sky stay exactly as they are.';
+  const neu = elemente.some((e) => e.art === 'neu'), mehr = elemente.length > 1;
+  const je = elemente.map((e, i) => (mehr ? 'Window ' + (i + 1) + ' (' + lageWort(e.box) + ')' : 'The window') + (e.vorlage < vorlagenZahl ? ' is image ' + (e.vorlage + 2) : ' is as pasted') + '.').join(' ');
+  return 'Photorealistic edit of image 1, a photo of a house. ' + (mehr ? 'The new windows are' : 'The new window is') + ' pasted flat into it as a placement guide. ' +
+    'Build ' + (mehr ? 'each one' : 'it') + ' into the wall exactly as pasted, 1:1: same size, proportions, sashes, colours and blind box as its reference. ' + je + ' ' +
+    'Match the angle and perspective of the wall: frame set back in the opening, reveals visible, sill below, light and shadows as in the photo. ' +
+    'Old windows there are replaced completely' + (neu ? '; on a closed wall cut a matching opening' : '') + '. Change nothing else in the photo.';
 }
 const zuBytes = (dataUrl) => { const t = atob(roh(dataUrl)), b = new Uint8Array(t.length); for (let i = 0; i < t.length; i++) b[i] = t.charCodeAt(i); return b; };
 /* Breite und Höhe eines JPEG oder PNG ohne Dekodieren (Cloudflare lehnt Bilder ab 512 Pixel ab; etwa von einer alten App-Fassung) */

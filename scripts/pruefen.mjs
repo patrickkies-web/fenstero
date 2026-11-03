@@ -519,9 +519,12 @@ if (teil(3)) {
     return { a: ids(a), b: ids(b), c: ids(c), da: da, ka: da ? hbDaten(a) : null, kb: da ? hbDaten(b) : null, kc: da ? hbDaten(c) : null };
   });
   const hb = await import('../functions/api/hausbild.js');
-  const ta = so.ka ? hb.beschreibung({ daten: so.ka }) : '', tb = so.kb ? hb.beschreibung({ daten: so.kb }) : '', tc = so.kc ? hb.beschreibung({ daten: so.kc }) : '';
-  ok(so.a === 'sart einbau blende sfarbe sfTeile antrieb' && so.b === 'sart einbau sfarbe sfTeile sfK sfS antrieb' && so.c === 'sart klBauart klFarbe', 'Hauptweg: Kastenart, Blende beim Aufsatzkasten, Farbe von Behang, Kasten und Schienen (eigene Farben einzeln), Klappläden mit Bauart und Farbe (' + so.a + ' | ' + so.b + ' | ' + so.c + ')');
-  ok(so.da && /aluminium fascia/.test(ta) && /anthracite/.test(ta) && /Vorbaukasten/.test(tb) && /box \(Vorbaukasten\)[^;]*white/.test(tb) && /guide rails in black/.test(tb) && /hinged wooden shutters in (dark )?green/.test(tc), 'KI-Vorschau: Kastenart, Blende und Farben stehen im Auftrag an den Bilddienst');
+  const cf = hb.auftragCf([{ art: 'ersetzen', box: [100, 100, 400, 300], vorlage: 0, daten: so.ka }, { art: 'neu', box: [500, 600, 800, 900], vorlage: 1, daten: so.kb }], 2), bfl = hb.auftrag([{ art: 'ersetzen', box: [100, 100, 400, 300], vorlage: 0, daten: so.ka }]);
+  ok(so.da && so.ka.kasten === 'aufsatz' && so.ka.blende === 'alu' && so.kb.kasten === 'vorbau' && so.kc.sonne === 'klappladen', 'Daten zum Sonnenschutz liegen vor (Kastenart, Blende, Klappläden)');
+  ok(cf.length < 700 && /1:1/.test(cf) && /image 2/.test(cf) && /image 3/.test(cf) && !/guide rails|sashes side by side|frame in /.test(cf) && bfl.length < 1100 && /1:1/.test(bfl), 'Kurzer Auftrag an die KI (Inhaber, 4.11.2026): Vorlage 1:1 einbauen, passend zur Wand, ohne Merkmalsliste (' + cf.length + ' Zeichen)');
+  /* Eckpunkte am Fensterrahmen: Rahmen im Bild des Elements ohne Kasten und Schienen */
+  const rahmen = await sp5.evaluate(async () => { const w = baseWin(); w.sart = 'rollladen'; w.roll = 'vorbau'; S.windows = [w]; HB.bilder = {}; const b = await hbBildVon(0); return b && b.rahmen ? b.rahmen : null; });
+  ok(!!rahmen && rahmen[1] > 0.04 && rahmen[3] <= 1 && rahmen[2] - rahmen[0] > 0.5, 'Eckpunkte am Fensterrahmen: Kasten liegt über dem Rahmen (' + JSON.stringify(rahmen && rahmen.map((x) => +x.toFixed(3))) + ')');
   sauber(sp5, 'Sonnenschutz ohne Fehler'); await ctx.close();
 }
 
