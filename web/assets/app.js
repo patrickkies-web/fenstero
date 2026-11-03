@@ -3325,9 +3325,11 @@ function linkHomeInhaltAlt(I) {
    das Element. Beim Wechsel blendet das neue Element aus der Wischrichtung ein (220 ms), der Name im selben Frame; Tastatur und
    „weniger Bewegung“ ohne Übergang. */
 let stZuletzt = '', stNeuZuletzt = false, stRichtung = 0, stSofort = false;
-/* Wählbare Elementarten (Inhaber, 3.11.2026: Türen vorerst nicht erreichbar, auch nicht am Anfang). Die Tür-Logik bleibt vollständig;
-   ARTEN_AN wieder auf alle Arten setzen, um sie freizugeben. Gespeicherte Türen lassen sich weiter öffnen und bearbeiten. */
-const ARTEN_AN = ['fenster', 'fest'];
+/* Wählbare Elementarten (Inhaber, 3.11.2026: „die Bearbeitung von Türen also im Sinne von der Eingangstür, der Haustür“ soll nicht
+   erreichbar sein, auch nicht am Anfang). Nur die Haustür ist ausgeblendet; Balkon- und Terrassentür, Hebe-Schiebe-Tür, PSK-Tür und
+   Faltschiebewand bleiben wählbar. Die Haustür-Logik bleibt vollständig; 'haustuer' wieder in ARTEN_AN aufnehmen, um sie freizugeben.
+   Gespeicherte Haustüren lassen sich weiter öffnen und bearbeiten. */
+const ARTEN_AN = ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'];
 const artWaehlbar = (k) => ARTEN_AN.indexOf(k) >= 0;
 const artenWahl = () => OPT.art.filter((x) => artWaehlbar(x.k));
 const stIdx = (k) => Math.max(0, artenWahl().findIndex((x) => x.k === k));

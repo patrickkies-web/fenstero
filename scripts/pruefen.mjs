@@ -370,7 +370,7 @@ if (teil(3)) {
 
   await page.click('[data-act="new"]');
   await page.waitForSelector('.scr[data-screen="start"]');
-  ok(await page.locator('.st-stelle [role="radio"][data-act="situation"]').count() === 3 && await page.locator('.st-bento [role="radio"][data-act="art"]').count() === 2 && /Schritt\s1\svon\s6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen, neu oder nachrüsten) und das Element zur Wahl, Türen vorerst ausgeblendet (Inhaber, 3.11.2026): nur Fenster und Festverglasung');
+  ok(await page.locator('.st-stelle [role="radio"][data-act="situation"]').count() === 3 && await page.locator('.st-bento [role="radio"][data-act="art"]').count() === 6 && await page.locator('.st-bento [data-act="art"][data-v="haustuer"]').count() === 0 && /Schritt\s1\svon\s6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen, neu oder nachrüsten) und das Element (Fenster, Balkon- oder Terrassentür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand); die Haustür vorerst ausgeblendet (Inhaber, 3.11.2026)');
   await zuDenFotos(page);
   await page.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
   const kiPosts = [], kiUrls = [];
@@ -1713,8 +1713,8 @@ if (teil(9)) {
   await ap.evaluate(() => document.querySelector('[data-act="situation"][data-v="neu"]').scrollIntoView({ block: 'center' })); await ap.waitForTimeout(150);
   await ap.click('[data-act="situation"][data-v="neu"]', { force: true }); await ap.waitForTimeout(150);
   ok(await ap.evaluate(() => !S.win.neu && /gesperrt/.test(S.toast)), 'Gesperrt antippen: Hinweis, keine Änderung');
-  await ap.click('[data-act="tour-art"][data-v="fest"]'); await ap.waitForTimeout(300);
-  ok(await ap.evaluate(() => S.win.art === 'fest' && derive(S.win).complete && !document.querySelector('[data-act="tour-art"][data-v="fsw"]') && !document.querySelector('[data-act="tour-art"][data-v="balkon"]')), 'Element frei wählbar (Türen vorerst ausgeblendet), Maße passend vorgegeben');
+  await ap.click('[data-act="tour-art"][data-v="fsw"]'); await ap.waitForTimeout(300);
+  ok(await ap.evaluate(() => S.win.art === 'fsw' && derive(S.win).elW === 3600 && derive(S.win).complete && !document.querySelector('[data-act="tour-art"][data-v="haustuer"]')), 'Element frei wählbar (nur die Haustür vorerst ausgeblendet), Maße passend vorgegeben');
   sauber(ap, 'Führung ohne Fehler');
   await ctx2.close();
 
