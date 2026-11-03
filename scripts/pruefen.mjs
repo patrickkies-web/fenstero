@@ -505,6 +505,38 @@ if (teil(3)) {
 }
 
 /* ---------- 4. Kundenlink: Portal → App → Code → Portal ---------- */
+/* ---------- 3c. Schritte zählen im Browser (web/assets/schritt.js): Startseite, Klick in die App, Folien, Hilfe ---------- */
+if (teil(3)) {
+  console.log('3c. Schritte zählen');
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE' });
+  const sp3 = await neueSeite(ctx), signale = [];
+  /* sendBeacon: den Inhalt sieht die Prüfung nur beim Abfangen der Anfrage */
+  await ctx.route('**/api/schritt', async (route) => { const r = route.request(); signale.push(r.postData() || String(r.postDataBuffer() || '')); await route.continue(); });
+  await sp3.goto(BASE + '/', { waitUntil: 'networkidle' }); await sp3.waitForTimeout(500);
+  await sp3.mouse.move(195, 400); await sp3.mouse.wheel(0, 2600); await sp3.waitForTimeout(900);
+  const hat = (...teile) => signale.some((x) => teile.every((t) => x.split('&').includes(t)));
+  ok(hat('s=W', 'n=start') && hat('s=W', 'n=szene-weg') && !signale.some((x) => /mail|name=|\d{4,}/.test(x)), 'Startseite meldet „geöffnet“ und die erreichte Szene, ohne Kennung und ohne Inhalte (' + signale.length + ' Signale)');
+  await sp3.goto(BASE + '/app/', { waitUntil: 'networkidle', referer: BASE + '/' }); await sp3.waitForTimeout(300);
+  await sp3.click('[data-act="new"]'); await sp3.waitForSelector('.scr[data-screen="start"]'); await sp3.waitForTimeout(300);
+  const gl = sp3.locator('[data-act="gloss"]').first(); if (await gl.count()) { await gl.click({ force: true }); await sp3.waitForTimeout(300); }
+  await sp3.evaluate(() => go('fotos')); await sp3.waitForTimeout(300);
+  ok(hat('s=K', 'n=home') && hat('s=K', 'n=start', 'h=startseite') && hat('s=K', 'n=fotos', 'v=start', 'd=k') && (await gl.count() === 0 || hat('s=K', 'v=start', 'z=hilfe')), 'App meldet Folien mit Herkunft „Startseite“, die Verweildauer der vorigen Folie als Stufe und Hilfe auf der Folie');
+  const vorher = signale.length; await sp3.evaluate(() => go('start')); await sp3.evaluate(() => go('fotos')); await sp3.waitForTimeout(300);
+  ok(signale.length - vorher <= 1, 'Jede Folie zählt je Tab einmal (nur noch die Dauer von „Fotos“ kommt dazu)');
+  /* beim echten Seitenwechsel ist die Seite schon weg, bevor die Prüfung mitlesen kann; „pagehide“ auslösen wie der Browser */
+  await sp3.evaluate(() => window.dispatchEvent(new Event('pagehide'))); await sp3.waitForTimeout(300);
+  ok(hat('s=K', 'a=fotos'), 'Beim Verlassen der App: letzte Folie als Ausstieg');
+  sauber(sp3, 'Schritte zählen ohne Fehler'); await ctx.close();
+  /* Testansicht der Fensterbauer und Führung: Testansicht zählt nicht, Führung als eigener Strang */
+  const ctx2 = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE' }), sp4 = await neueSeite(ctx2), sig2 = [];
+  await ctx2.route('**/api/schritt', async (route) => { const r = route.request(); sig2.push(r.postData() || String(r.postDataBuffer() || '')); await route.continue(); });
+  await sp4.goto(BASE + '/app/?ausprobieren=essential', { waitUntil: 'networkidle' }); await sp4.waitForTimeout(500);
+  const probe = sig2.length;
+  await sp4.goto(BASE + '/app/#fuehrung', { waitUntil: 'networkidle' }); await sp4.waitForTimeout(500);
+  ok(probe === 0 && sig2.some((x) => x.includes('s=P') && x.includes('n=tour-start')), 'Testansicht für Fensterbauer zählt nicht; die Führung zählt als eigener Strang');
+  await ctx2.close();
+}
+
 /* ---------- 3b. An meinem Haus ansehen: eigene Maske, Lupe, Pfeile, eine freie Vorschau (Inhaber, 3.11.2026) ---------- */
 if (teil(3)) {
   console.log('3b. An meinem Haus ansehen');
@@ -2538,6 +2570,22 @@ if (teil(13)) {
     ok(verd2.reihe.length === 6 && verd2.bis === zrBisGestern.bis && verd2.summe.aufrufe === 0 && JSON.stringify(roh2.summe) === JSON.stringify(verd2.summe) && JSON.stringify(roh2.seiten) === JSON.stringify(verd2.seiten) && verd2.seiten.length === 0, 'Auswertung bis gestern: die Zähler von heute bleiben draußen, verdichtet wie aus den einzelnen Tageszählern');
     const stZ = await mitC('/api/zentrale/statistik?tage=30');
     ok(stZ.ok && stZ.tabelle && stZ.tage === 30 && stZ.reihe.length === 30 && stZ.reihe[29].aufrufe >= 4 && stZ.seiten.some((x) => x.name === 'App') && !/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(JSON.stringify(stZ)), 'Auswertung: 30 Tage als Reihe, Seiten mit Namen, keine IP-Adressen');
+
+    // l2) Schritte in App und Startseite (functions/api/schritt.js): Tageszähler ohne Kennung; nichts bei Do Not Track, Global Privacy
+    //     Control, dem angemeldeten Inhaber, Bots, unbekannten Namen und Strängen
+    const schrittSenden = (text, kopf) => api(new Request(B + '/api/schritt', { method: 'POST', headers: Object.assign({ 'user-agent': iphone, 'content-type': 'application/x-www-form-urlencoded', 'cf-connecting-ip': '192.0.2.77' }, kopf || {}), body: text }), env);
+    const tVor = ((await stat.auswerten(sp, 1)).trichter || { K: { schritte: {} } }).K.schritte;
+    const sr1 = await schrittSenden('s=K&n=start&h=startseite');
+    await schrittSenden('s=K&n=fotos&h=startseite&v=start&d=m'); await schrittSenden('s=K&v=fotos&z=hilfe'); await schrittSenden('s=K&a=fotos'); await schrittSenden('s=K&n=gekauft&h=startseite&m=vorschau');
+    await schrittSenden('s=K&n=start', { dnt: '1' }); await schrittSenden('s=K&n=start', { 'sec-gpc': '1' }); await schrittSenden('s=K&n=start', { cookie: '__Host-zentrale=abc.def' });
+    await schrittSenden('s=K&n=start', { 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' }); await schrittSenden('s=K&n=%3Cscript%3E'); await schrittSenden('s=X&n=start');
+    const stN = await stat.auswerten(sp, 1), tNach = stN.trichter.K.schritte, dS2 = (n, f, u) => { const a = (tNach[n] || {})[f], b = (tVor[n] || {})[f]; return u ? ((a || {})[u] || 0) - ((b || {})[u] || 0) : (a || 0) - (b || 0); };
+    const sr2 = await api(new Request(B + '/api/schritt', { method: 'GET' }), env);
+    ok(sr1.status === 204 && sr2.status === 405 && dS2('start', 'n') === 1 && dS2('fotos', 'n') === 1 && dS2('fotos', 'aus') === 1 && dS2('start', 'dauer', 'm') === 1 && dS2('fotos', 'zeichen', 'hilfe') === 1 &&
+      dS2('gekauft', 'merkmal', 'vorschau') === 1 && dS2('start', 'herkunft', 'startseite') === 1 && dS2('start', 'geraet', 'Telefon') === 1 && !JSON.stringify(stN.trichter).includes('script') && !stN.trichter.X,
+      'Schritte (/api/schritt): erreicht, Ausstieg, Dauer-Stufe, Hilfe, Merkmal „Vorschau“, Herkunft und Gerät je Folie; nicht gezählt: Do Not Track, Global Privacy Control, Inhaber, Bot, unbekannte Namen und Stränge; GET 405');
+    const stZ2 = await mitC('/api/zentrale/statistik?tage=1');
+    ok(stZ2.ok && stZ2.trichter && stZ2.trichter.K && stZ2.trichter.K.schritte.start && !/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(JSON.stringify(stZ2.trichter)), 'Zentrale: Trichter je Strang in der Statistik, ohne IP-Adressen');
 
     // m) Übersicht, Käufe, Einstellungen, Protokoll
     const ue = await mitC('/api/zentrale/uebersicht');

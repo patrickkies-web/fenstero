@@ -1,6 +1,7 @@
 /* eeziframes · Verteiler für /api/… (Cloudflare Worker und lokaler Testserver nutzen denselben Code)
    GET  /api/status                 was eingerichtet ist (KI, Zahlung, Daten, Stripe im Testmodus, Webhook) und die Preise
    GET/POST /api/ki                 KI-Auswertung der Fotos (ki.js)
+   POST /api/schritt                Schritt in App oder Startseite für die eigene Statistik (schritt.js, ohne Kennung)
    POST/GET /api/hausbild           KI-Vorschau der Fenster am Foto des Hauses: Auftrag, Ergebnis abholen (hausbild.js, Black Forest Labs)
    /api/zahlung/…                   Aufmaßblatt kaufen (zahlung.js)
    /api/konto/…, /api/link/…, /api/aufmass   Betriebe, Links, Eingang (konten.js)
@@ -19,6 +20,7 @@ import { konfig, json, ApiFehler } from './umgebung.js';
 import { AGB_STAND, NB_STAND, ZUSTIMMUNG, verkaufStand } from './recht.js';
 import { bestaetigungenNachholen } from './bestaetigung.js';
 import { onRequestGet as kiGet, onRequestPost as kiPost } from './ki.js';
+import { onRequestPost as schrittPost } from './schritt.js';
 import { onRequestPost as hausbildPost, onRequestGet as hausbildGet, hausbildFrei, hausbildWeg, CF_MAX } from './hausbild.js';
 import { speicher } from './speicher.js';
 import { zahlungsdienst } from './stripe.js';
@@ -77,6 +79,8 @@ export async function api(request, env, ctx0, inst) {
     if (pfad === '/api/test/post' && k.post && k.post.attrappe) { const st = url.searchParams.get('stoerung'); if (st !== null) attrappeAus.an = st === '1'; const mitAnhang = url.searchParams.get('anhaenge') === '1'; return json({ ok: true, post: mitAnhang ? attrappePost : attrappePost.map((m) => { const x = Object.assign({}, m); delete x.anhangDaten; return x; }), stoerung: attrappeAus.an }); } // ?anhaenge=1: mit den Anhängen (Base64)
     /* nur lokal mit DATEN_ATTRAPPE=1 und MAIL_ATTRAPPE=1: das Nachholen des täglichen Laufs sofort ausführen */
     if (pfad === '/api/test/nachholen' && k.datenAttrappe && k.post && k.post.attrappe) { const sp0 = speicher(k); return json({ ok: true, vertrag: await bestaetigungenNachholen(k, sp0, env), widerruf: await widerrufeNachholen(k, sp0), erinnerung: await erinnerungenSenden(k, sp0, env) }); }
+    /* Schritte in App und Startseite für die eigene Statistik (schritt.js, ohne Kennung, nur Tageszähler) */
+    if (pfad === '/api/schritt') return request.method === 'POST' ? schrittPost({ request, env, warte, inst }) : new Response(null, { status: 405, headers: { allow: 'POST' } });
     /* Hausbild: KI-Vorschau der Fenster am Foto des Hauses (hausbild.js, Black Forest Labs) */
     if (pfad === '/api/hausbild') return request.method === 'POST' ? hausbildPost({ request, env }) : request.method === 'GET' ? hausbildGet({ request, env }) : new Response(null, { status: 405, headers: { allow: 'GET, POST' } });
     if (pfad === '/api/ki') {

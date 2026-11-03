@@ -225,6 +225,24 @@ export async function seitenaufruf(request, env) {
   return zaehlen(k, speicher(k), keys);
 }
 
+/* Stränge der Schritte (functions/api/schritt.js, web/assets/schritt.js) */
+export const STRAENGE = { W: 'Website: Startseite', K: 'Konfigurator: eigenes Aufmaß', L: 'Kundenlink eines Fensterbauers', P: 'Führung' };
+/* Trichter für die Zentrale aus den Summen der Auswertung (statistik.js auswerten → summen): je Strang die Schritte mit erreicht,
+   Ausstiegen, Dauer-Stufen, Zeichen, Merkmalen, Herkunft und Gerät */
+export function trichter(summen) {
+  const get = (art) => summen[art] || new Map(), aus = {};
+  for (const s of Object.keys(STRAENGE)) aus[s] = { name: STRAENGE[s], schritte: {} };
+  const zeile = (s, n) => { const t = aus[s]; if (!t) return null; return (t.schritte[n] = t.schritte[n] || { n: 0, aus: 0, dauer: {}, zeichen: {}, merkmal: {}, herkunft: {}, geraet: {} }); };
+  for (const [name, n] of get('schritt')) { const [s, sch] = name.split('|'); const z = zeile(s, sch); if (z) z.n += n; }
+  for (const [name, n] of get('aus')) { const [s, sch] = name.split('|'); const z = zeile(s, sch); if (z) z.aus += n; }
+  for (const [name, n] of get('dauer')) { const [s, sch, st] = name.split('|'); const z = zeile(s, sch); if (z) z.dauer[st] = (z.dauer[st] || 0) + n; }
+  for (const [name, n] of get('zeichen')) { const [s, sch, a] = name.split('|'); const z = zeile(s, sch); if (z) z.zeichen[a] = (z.zeichen[a] || 0) + n; }
+  for (const [name, n] of get('merkmal')) { const [s, sch, m] = name.split('|'); const z = zeile(s, sch); if (z) z.merkmal[m] = (z.merkmal[m] || 0) + n; }
+  for (const [name, n] of get('schritth')) { const [s, her, sch] = name.split('|'); const z = zeile(s, sch); if (z) z.herkunft[her] = (z.herkunft[her] || 0) + n; }
+  for (const [name, n] of get('schrittg')) { const [s, g, sch] = name.split('|'); const z = zeile(s, sch); if (z) z.geraet[g] = (z.geraet[g] || 0) + n; }
+  return aus;
+}
+
 /* Auswertung für die Zentrale: Zeitreihe je Tag und Ranglisten je Merkmal über den Zeitraum.
    zeit: { von, bis } als JJJJ-MM-TT (beide eingeschlossen) oder wie früher eine Zahl von Tagen bis heute (7, 30, 90, 365) */
 export async function auswerten(sp, zeit) {
@@ -258,6 +276,8 @@ export async function auswerten(sp, zeit) {
     system: rang('system'), land: rang('land'), bots: rang('bot'), dateien: rang('datei'), ereignisse: ereignisse,
     anzeigen: rang('anzeige'), kampagnen: rang('kampagne'), anzeigeseiten: rang('anzeigeseite', SEITEN_NAMEN), werbung: Object.fromEntries((summen.werbung || new Map()).entries()),
     /* Stundensummen über den Zeitraum (stunde:HH|…), etwa für das Tagesprofil */
-    stunden: Object.fromEntries((summen.stunde || new Map()).entries())
+    stunden: Object.fromEntries((summen.stunde || new Map()).entries()),
+    /* Schritte in App und Startseite je Strang (schritt.js): erreicht, Ausstiege, Dauer, Zeichen, Merkmale, Herkunft, Gerät */
+    trichter: trichter(summen)
   };
 }

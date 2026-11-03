@@ -2900,6 +2900,23 @@ function setP(patch) { Object.assign(S.proj, patch); persist(); render(); }
 /* Kundenschutz: Wer über den Link eines Betriebs misst, bekommt von eeziframes weder das Aufmaßblatt noch einen Code, kann nichts
    kaufen und kein Konto anlegen. Diese Bildschirme gibt es im Link nicht; dort zeigt die App „Prüfen und senden“ (blatt). */
 const NUR_EIGENES = { teilen: 1, datei: 1, kasse: 1, gekauft: 1, konto: 1, sichern: 1, meinkonto: 1 };
+/* ---------- Schritte für die eigene Statistik (Inhaber, 3.11.2026; web/assets/schritt.js, functions/api/schritt.js) ----------
+   Nach jedem Zeichnen: Strang (K eigenes Aufmaß, L Kundenlink, P Führung) und Name der Folie, ohne Inhalte. Wünsche je Frage (frage-<id>),
+   das zweite bis fünfte gespeicherte Fenster, die Stände von „An meinem Haus ansehen“; Kauf, Anfrage und Weiche mit dem Merkmal, ob vorher
+   eine KI-Vorschau gerechnet wurde. Nicht in den Konfiguratoren der Fensterbauer (INST), nicht in der Testansicht (PROBE), nicht in der
+   Vorschau eines Betriebs. */
+function schrittMelden() {
+  if (!window.EzSchritt || INST || PROBE || vorschau()) return;
+  const s = S.tour ? 'P' : S.betrieb ? 'L' : 'K';
+  let n = S.screen;
+  if (n === 'home') n = S.windows.length ? 'liste' : 'home';
+  else if (n === 'tour') n = 'tour-' + String((S.tour && TOUR[S.tour.i]) || 'start').toLowerCase().replace(/[^a-z]/g, '');
+  else if (n === 'frage') n = 'frage-' + String(S.q || 'liste').replace(/[^a-zA-Z0-9]/g, '').slice(0, 24);
+  else if (n === 'hausbild' && typeof HB !== 'undefined') n = HB.grenze ? 'hausbild-grenze' : HB.ergebnis ? 'hausbild-ergebnis' : HB.laedt ? 'hausbild-vorschau' : HB.el.some((e) => e.fest) ? 'hausbild-gesetzt' : HB.foto ? 'hausbild-foto' : 'hausbild';
+  const merkmal = ['weg', 'kasse', 'gekauft', 'angefragt', 'gesendet', 'teilen'].indexOf(n) >= 0 && typeof hbGezaehlt === 'function' && hbGezaehlt() > 0 ? 'vorschau' : '';
+  EzSchritt.schritt(s, n, merkmal);
+  if (n === 'fertig' && S.windows.length >= 2 && S.windows.length <= 5) EzSchritt.schritt(s, 'fenster-' + S.windows.length);
+}
 function go(screen, dir) {
   if (S.betrieb && NUR_EIGENES[screen]) screen = 'blatt';
   S.sendeFrage = false; // Rückfrage vor dem Senden gilt nur auf „Prüfen“
@@ -3009,6 +3026,7 @@ function render(fresh) {
   blattFokus(root, fokus, neu);
   bindAfterRender();
   if (window.hbNachRender) hbNachRender(); // Editor „An meinem Haus ansehen“: Datei, Lage der Elemente, Gesten
+  schrittMelden(); // eigene Statistik: welche Folie zu sehen ist (schritt.js, ohne Kennung)
   if (['teilen', 'blatt', 'gesendet', 'datei', 'gekauft'].includes(S.screen)) blattSchrift();
   /* Blöcke erscheinen nacheinander bzw. beim Scrollen; die wiederverwendete 3-D-Bühne bleibt, wie sie ist */
   if (view.dna) { lgAuf(); fussPasst(); }
@@ -7830,6 +7848,7 @@ function masseTauschen(w) {
 const NUMF = { w: 1, h: 1, bru: 1, laib: 1, anzahl: 1, breite: 1 };
 function act(name, el) {
   const v = el.getAttribute('data-v'), f = el.getAttribute('data-f'), w = S.win;
+  if (window.EzSchritt) { const z = name === 'gloss' || name === 'gindex' ? 'hilfe' : name === 'back' || name === 'qprev' || name === 'tour-zurueck' ? 'zurueck' : name === 'offen' ? 'weissnicht' : name === 'mass-tausch' || name === 'masse-korr' ? 'fehler' : ''; if (z) EzSchritt.zeichen(z); }
   const n = (x) => { const k = parseInt(x, 10); return isNaN(k) ? x : k; };
   /* In der Führung: Gesperrtes erklärt sich, alles, was das eigene Projekt verändern würde, bleibt aus */
   if (S.tour && S.screen === 'tour') {

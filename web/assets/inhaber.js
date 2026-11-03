@@ -704,6 +704,27 @@
     const weg = U.kachel([h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Weg der Hauseigentümer' })), trichter,
       h('p', { class: 'a-hinweis', style: 'margin:12px 0 0', text: 'Planungen in der kostenlosen App bleiben im Browser der Besucher. Gezählt wird erst, was über den Server läuft: Fotos mit KI, Kasse, Kauf.' })]);
 
+    /* Wo steigen sie aus? Schritte in Startseite und App (functions/api/schritt.js, web/assets/schritt.js, seit 4.11.2026): je Strang die
+       Folien in der Reihenfolge des Ablaufs mit erreicht, Ausstiegen, Verweildauer und Zeichen für Mühe; der größte Absprung ist markiert */
+    const tr = st.trichter || {}, strangWahl = U.segment([{ w: 'W', t: 'Startseite' }, { w: 'K', t: 'Konfigurator' }, { w: 'L', t: 'Kundenlink' }, { w: 'P', t: 'Führung' }], S.strang || 'K', (w) => { S.strang = w; statistik({ stehen: true }); }, 'Strang', true);
+    const schrittListe = schrittZeilen(S.strang || 'K', (tr[S.strang || 'K'] || {}).schritte || {});
+    const erste = schrittListe.length ? Math.max(1, schrittListe[0].z.n) : 1;
+    const maxAus = schrittListe.reduce((m, x) => (x.z.aus > m ? x.z.aus : m), 0);
+    const mini = (o, namen) => Object.keys(o || {}).filter((k) => o[k]).map((k) => (namen[k] || k) + ' ' + zahlText(o[k])).join(' · ');
+    const DAUER = { k: 'unter 30 s', m: '30 s–2 min', l: 'über 2 min' }, MUEHE = { hilfe: 'Hilfe', zurueck: 'Zurück', weissnicht: 'Weiß nicht', fehler: 'Maß-Rückfrage' };
+    const schrittListeH = schrittListe.length ? h('ol', { class: 'a-trichter' }, schrittListe.map((x) => h('li', null,
+      h('span', { class: 'a-tr-text' }, h('b', null, x.t, x.z.aus && x.z.aus === maxAus ? h('span', { style: 'margin-left:8px' }, U.chip('größter Absprung', 'hinweis')) : null),
+        h('small', { text: [x.z.aus ? zahlText(x.z.aus) + ' hier ausgestiegen' : '', mini(x.z.dauer, DAUER) ? 'Dauer: ' + mini(x.z.dauer, DAUER) : '', mini(x.z.zeichen, MUEHE), x.z.merkmal && x.z.merkmal.vorschau ? zahlText(x.z.merkmal.vorschau) + ' mit KI-Vorschau' : ''].filter(Boolean).join(' · ') })),
+      h('span', { class: 'a-tr-zahl', text: zahlText(x.z.n) }),
+      h('span', { class: 'a-tr-balken', 'aria-hidden': 'true' }, h('i', { style: 'width:' + Math.min(100, Math.round((x.z.n / erste) * 100)) + '%' })))))
+      : h('p', { class: 'a-hinweis', style: 'margin:12px 0 0', text: 'Noch keine Schritte in diesem Zeitraum. Gezählt wird seit dem 4.11.2026.' });
+    const herkunftErste = schrittListe.length ? mini(schrittListe[0].z.herkunft, { startseite: 'Startseite', ratgeber: 'Ratgeber', fensterbauer: 'Seite für Fensterbauer', anzeige: 'Anzeige', extern: 'andere Website', direkt: 'direkt', intern: 'andere eigene Seite' }) : '';
+    const geraetErste = schrittListe.length ? mini(schrittListe[0].z.geraet, {}) : '';
+    const aussteig = U.kachel([h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Wo steigen sie aus?' })), strangWahl, schrittListeH,
+      herkunftErste ? h('p', { class: 'a-hinweis', style: 'margin:12px 0 0', text: 'Herkunft beim ersten Schritt: ' + herkunftErste }) : null,
+      geraetErste ? h('p', { class: 'a-hinweis', style: 'margin:6px 0 0', text: 'Geräte beim ersten Schritt: ' + geraetErste }) : null,
+      h('p', { class: 'a-hinweis', style: 'margin:12px 0 0', text: 'Je Tab gezählt, ohne Kennung: Wer neu lädt, zählt neu. „Ausgestiegen“ heißt: Diese Folie war zuletzt zu sehen, als die Seite geschlossen oder verlassen wurde (an der Kasse auch der Wechsel zu Stripe). Ab etwa 200 Personen je Schritt sind Unterschiede von 10 Prozentpunkten belastbar.' })]);
+
     /* Fensterbauer: Seite, Anmeldungen, Aufträge der Pakete im Zeitraum */
     const ab = Date.parse(zr.start || '') || 0, bis = Date.parse(zr.ende || '') || Date.now();
     const neueAuftraege = (S.liste || []).filter((a) => { const t = Date.parse(a.created_at || a.updated_at || ''); return t >= ab && t <= bis; }).length;
@@ -734,7 +755,27 @@
       rang('Geräte', st.geraet), rang('Browser', st.browser));
 
     seite({ band: umschalter('statistik'), frage: U.frage('Statistik. *Ohne Cookies.*', 'Gezählt wird auf dem Server, ohne Kennung. Bots, „Do Not Track“ und Ihre eigenen Aufrufe, solange Sie hier angemeldet sind, zählen nicht.'),
-      inhalt: [wahl, zahlen, weg, verlauf, fb, listen], stehen: o && o.stehen });
+      inhalt: [wahl, zahlen, weg, aussteig, verlauf, fb, listen], stehen: o && o.stehen });
+  }
+  /* Reihenfolge und Namen der Schritte je Strang; Unbekanntes hinten, Wünsche nach Zahl */
+  const SCHRITT_FOLGE = {
+    W: [['start', 'Startseite geöffnet'], ['szene-weg', 'Szene „So läuft es“'], ['szene-konfigurator', 'Szene „Jedes Fenster bis ins Detail“'], ['szene-so', 'Szene „Vom Zollstock zum Aufmaß“'], ['szene-preis-szene', 'Szene „Messen kostet nichts“'], ['szene-ratgeber', 'Szene Ratgeber'], ['szene-fensterbauer', 'Szene für Fensterbauer']],
+    K: [['home', 'App geöffnet'], ['start', 'Folie 1: Was planst du?'], ['frage-', 'Wünsche: '], ['fotos', 'Fotos'], ['messen', 'Messen'], ['planmasse', 'Wunschmaße'], ['zeichnen', 'Einzeichnen'], ['rest', 'Ränder'], ['ergebnis', 'Ergebnis'], ['fertig', 'Gespeichert'],
+      ['fenster-2', '2. Fenster gespeichert'], ['fenster-3', '3. Fenster gespeichert'], ['fenster-4', '4. Fenster gespeichert'], ['fenster-5', '5. Fenster gespeichert'], ['liste', 'Liste der Fenster'],
+      ['hausbild', 'An meinem Haus: geöffnet'], ['hausbild-foto', 'An meinem Haus: Foto gewählt'], ['hausbild-gesetzt', 'An meinem Haus: Fenster gesetzt'], ['hausbild-vorschau', 'An meinem Haus: Vorschau gestartet'], ['hausbild-ergebnis', 'An meinem Haus: Vorschau gesehen'], ['hausbild-grenze', 'An meinem Haus: Grenze erreicht'],
+      ['anfrage', 'Fürs Angebot 1'], ['anfrage2', 'Fürs Angebot 2'], ['anfrage3', 'Fürs Angebot 3'], ['weg', 'Weiche: Angebote oder Aufmaßblatt'], ['betriebe', 'Betriebe gewählt'], ['vcode', 'Code an die Nummer'], ['angefragt', 'Anfrage bestätigt'],
+      ['sichern', 'Aufmaß sichern'], ['kasse', 'Kasse'], ['gekauft', 'Aufmaßblatt gekauft'], ['teilen', 'Aufmaßblatt teilen'], ['blatt', 'Aufmaßblatt'], ['gesendet', 'Gesendet'], ['konto', 'Konto'], ['meinkonto', 'Mein Konto']],
+    P: [['tour-start', 'Führung: Element'], ['tour-fotos', 'Führung: Fotos'], ['tour-messen', 'Führung: Messen'], ['tour-oeffnung', 'Führung: Öffnung'], ['tour-material', 'Führung: Material'], ['tour-farbe', 'Führung: Farbe'], ['tour-glas', 'Führung: Glas'], ['tour-sonne', 'Führung: Sonnenschutz'], ['tour-blatt', 'Führung: Aufmaßblatt']]
+  };
+  SCHRITT_FOLGE.L = SCHRITT_FOLGE.K;
+  function schrittZeilen(s, schritte) {
+    const folge = SCHRITT_FOLGE[s] || [], namen = Object.keys(schritte), aus = [], genommen = {};
+    folge.forEach(([k, t]) => {
+      if (k === 'frage-') namen.filter((n) => n.indexOf('frage-') === 0).sort((a, b) => schritte[b].n - schritte[a].n).forEach((n) => { genommen[n] = 1; aus.push({ k: n, t: t + n.slice(6), z: schritte[n] }); });
+      else if (schritte[k]) { genommen[k] = 1; aus.push({ k: k, t: t, z: schritte[k] }); }
+    });
+    namen.filter((n) => !genommen[n]).sort((a, b) => schritte[b].n - schritte[a].n).forEach((n) => aus.push({ k: n, t: n.indexOf('klick-') === 0 ? 'Klick: ' + n.slice(6).replace(/-/g, ' ') : n, z: schritte[n] }));
+    return aus;
   }
 
   /* ---------- Weiche ---------- */

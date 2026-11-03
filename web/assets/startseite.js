@@ -435,7 +435,7 @@
     wurzel.appendChild(vorlage.content.cloneNode(true));
     daten(wurzel, d);
     /* Bausteine erst starten, wenn die Gestaltung steht: Szenen und Leiste messen beim Start */
-    const los = () => { halter.style.visibility = ''; beleben(wurzel, d); };
+    const los = () => { halter.style.visibility = ''; beleben(wurzel, d); schritte(wurzel); };
     const perLink = () => { const l = doc.createElement('link'); l.rel = 'stylesheet'; l.href = CSS; l.onload = l.onerror = los; wurzel.prepend(l); };
     if (gemeinsam && blatt) { wurzel.adoptedStyleSheets = [blatt]; los(); }
     else { halter.style.visibility = 'hidden'; if (gemeinsam) stil().then((s) => { if (s) { wurzel.adoptedStyleSheets = [s]; los(); } else perLink(); }); else perLink(); }
@@ -443,4 +443,25 @@
 
   if (gemeinsam) stil(); // früh laden, damit der erste Aufbau nicht wartet
   w.Startseite = { auf: auf };
+
+  /* Schritte für die eigene Statistik (web/assets/schritt.js, Strang W, Inhaber 3.11.2026): Startseite geöffnet, Szene zu einem Drittel
+     im Bild (einmal je Szene), Klick in die App oder zur Ansicht für Fensterbauer mit der Stelle (Kopf, Hero oder Szene). Ohne Kennung.
+     Die Seite steht im Shadow-DOM (wurzel), deshalb hört der Zähler dort und nicht am Dokument. */
+  let schritteAn = false;
+  function schritte(r) {
+    const Z = w.EzSchritt; if (!Z || !r || schritteAn) return; schritteAn = true;
+    Z.schritt('W', 'start');
+    const szenen = ['weg', 'konfigurator', 'so', 'preis-szene', 'ratgeber', 'fensterbauer'].map((id) => r.getElementById(id)).filter(Boolean);
+    if ('IntersectionObserver' in w && szenen.length) {
+      const io = new IntersectionObserver((ein) => ein.forEach((e) => { if (e.isIntersecting) { Z.schritt('W', 'szene-' + e.target.id); io.unobserve(e.target); } }), { threshold: 0.33 });
+      szenen.forEach((el) => io.observe(el));
+    }
+    r.addEventListener('click', (ev) => {
+      const a = ev.target.closest && ev.target.closest('a[href]'); if (!a) return;
+      const href = a.getAttribute('href') || '', app = href.indexOf('/app/') === 0, fb = href === '/fensterbauer' || href.indexOf('/fuer-fensterbauer') === 0;
+      if (!app && !fb) return;
+      const sz = a.closest('#weg, #konfigurator, #so, #preis-szene, #ratgeber, #fensterbauer'), wo = a.closest('.ez-kopf, .ez-leiste') ? 'kopf' : sz ? sz.id : a.closest('.ez-hero') ? 'hero' : 'seite';
+      Z.schritt('W', 'klick-' + (fb ? 'fensterbauer-' : 'app-') + wo);
+    }, true);
+  }
 })();
