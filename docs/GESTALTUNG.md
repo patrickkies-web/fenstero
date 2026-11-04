@@ -691,6 +691,13 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     Koralle-Punkt, was fehlt (`.mw-fehler`). Der Bogen „Bevor du speicherst“ hat „Zurück“ (eine Frage zurück, nichts gespeichert).
     „Fenster speichern“ führt in die Liste „Deine Fenster“ (vorher „Gespeichert“); „Gespeichert“ öffnet sich über das Fenster in der
     Liste, und „Zurück“ in den Angebots-Folien geht Schritt für Schritt zurück.
+  - „Maße ändern“ auf der Seite des Fensters (Inhaber, 4.11.2026 abends; vorher öffnete der Knopf das Ergebnis, auf dem man nichts ändern
+    konnte): Bogen „Wie willst du die Maße ändern?“ mit „Geführt messen“ (Fotos, Messen, Ränder, Ergebnis mit „Maße übernehmen“) und
+    „Maße eingeben“ (Frage „Neue Maße für …“, Zifferntasten für Breite, dann Höhe, „Maße übernehmen“). Bei der neuen Öffnung gleich die
+    Wunschmaße mit „Maße übernehmen“. Übernehmen speichert und führt zurück aufs Fenster; Zurück ohne eigene Änderung ohne Rückfrage,
+    sonst „Noch nicht gespeichert“ (`S.masseAendern`, `masseUebernehmen`, `masseZurueck` in app.js).
+  - Kacheln oben in der Liste (und auf Sichern, Konto, Prüfen): am Telefon höchstens vier, ab fünf Fenstern drei und „+n weitere“; am
+    Laptop ab sieben kleiner in drei Reihen (`liSymbole`). Vorher liefen sie über beide Ränder und die Nummern wurden abgeschnitten.
     Unverändert im alten Look: die Einladungsseite eines Betriebs im Kundenlink (`linkHome`) und alle Bildschirme in Instanzen auf der
     Website eines Fensterbauers (eigene Marke). Die alten Fassungen bleiben als `SCREENS.*Alt` bzw. `AB_ALT` im Code.
   - Regel des Inhabers (27.10.2026): Beim Messen eine feste Ansicht je Element, in den Wünschen das ausgearbeitete 3-D-Modell; die

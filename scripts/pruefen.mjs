@@ -5397,6 +5397,39 @@ if (teil(32)) {
   await p.tap('.ex-blatt [data-act="extras-zurueck"]'); await p.waitForTimeout(400);
   const zb = await p.evaluate(() => ({ blatt: !!document.querySelector('.ex-blatt'), screen: S.screen, q: S.q, n: S.windows.length }));
   ok(zb0.blatt && /Zurück/.test(zb0.knopf) && !zb.blatt && zb.screen === 'frage' && zb.q !== 'extras' && zb.n === 0, 'Bogen vor dem Speichern: „Zurück“ schließt ihn und geht eine Frage zurück, nichts gespeichert (' + JSON.stringify([zb0, zb]) + ')');
+  /* c6) „Maße ändern“ auf der Seite des Fensters (Inhaber, 4.11.2026: „in der Maske nur die Maße ändern … entweder geführt messen oder …
+     einfach eingeben“; neue Öffnung „direkt in die Maske, wo man die Öffnung einträgt“): Bogen mit zwei Wegen, eingeben über die
+     Zifferntasten (Breite, dann Höhe), „Maße übernehmen“ speichert und führt zurück aufs Fenster; Zurück ohne Änderung ohne Rückfrage */
+  await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Küche'; S.windows = [w]; S.editIdx = -1; persist(); fensterOeffnen(0); }); await p.waitForTimeout(500);
+  await p.evaluate(() => document.querySelector('[data-act="masse-aendern"]').scrollIntoView({ block: 'center' }));
+  await p.tap('[data-act="masse-aendern"]'); await p.waitForTimeout(400);
+  const ma1 = await p.evaluate(() => ({ blatt: !!document.querySelector('.ma-blatt'), wege: [...document.querySelectorAll('.ma-blatt [data-act="masse-wahl"]')].map((b) => b.getAttribute('data-v')).join() }));
+  await p.tap('.ma-blatt [data-act="masse-wahl"][data-v="eingeben"]'); await p.waitForTimeout(400);
+  const ma2 = await p.evaluate(() => ({ screen: S.screen, q: S.q, f: S.qMass && S.qMass.f }));
+  for (const k of '1200') await p.tap('.keypad [data-v="' + k + '"]');
+  await p.tap('.keypad [data-v="ok"]'); await p.waitForTimeout(300);
+  const ma3 = await p.evaluate(() => S.qMass && S.qMass.f);
+  for (const k of '1350') await p.tap('.keypad [data-v="' + k + '"]');
+  await p.tap('.keypad [data-v="ok"]'); await p.waitForTimeout(300);
+  const ma4 = await p.evaluate(() => ({ pille: document.querySelector('.lg-weiter').textContent.trim(), zeilen: [...document.querySelectorAll('.mw-zeile')].map((b) => b.getAttribute('data-v')).join(), titel: document.querySelector('.wz-frage h1').textContent }));
+  await p.tap('.lg-weiter'); await p.waitForTimeout(500);
+  const ma5 = await p.evaluate(() => ({ screen: S.screen, el: S.windows[0].el, weg: S.windows[0].massWeg, ok: !!S.windows[0].masseOk, n: S.windows.length }));
+  ok(ma1.blatt && ma1.wege === 'messen,eingeben' && ma2.screen === 'frage' && ma2.q === 'massweg' && ma2.f === 'elW' && ma3 === 'elH' && /Maße übernehmen/.test(ma4.pille) && ma4.zeilen === 'messen,eingeben' && /Neue Maße für Küche/.test(ma4.titel) &&
+    ma5.screen === 'fertig' && ma5.el.w === 1200 && ma5.el.h === 1350 && ma5.weg === 'eingeben' && ma5.ok && ma5.n === 1, '„Maße ändern“: Bogen mit „Geführt messen“ und „Maße eingeben“; Breite, dann Höhe über die Zifferntasten, „Maße übernehmen“ speichert und führt zurück aufs Fenster (' + JSON.stringify([ma1, ma2, ma3, ma4, ma5]) + ')');
+  await p.evaluate(() => { const w = Object.assign(baseWin(), { name: 'Neue Öffnung', neu: true, mo: { hm: 1400, wm: 1000, hl: '', hr: '', wt: '', wb: '' } }); S.windows = [w]; persist(); fensterOeffnen(0); }); await p.waitForTimeout(400);
+  await p.evaluate(() => document.querySelector('[data-act="masse-aendern"]').scrollIntoView({ block: 'center' }));
+  await p.tap('[data-act="masse-aendern"]'); await p.waitForTimeout(500);
+  const mn1 = await p.evaluate(() => ({ screen: S.screen, pille: document.querySelector('.lg-weiter').textContent.trim(), blatt: !!document.querySelector('.ma-blatt') }));
+  await p.tap('.lg-fuss .lg-zurueck'); await p.waitForTimeout(500);
+  const mn2 = await p.evaluate(() => ({ screen: S.screen, verlassen: !!S.verlassen }));
+  ok(mn1.screen === 'planmasse' && !mn1.blatt && /Maße übernehmen/.test(mn1.pille) && mn2.screen === 'fertig' && !mn2.verlassen, '„Maße ändern“ bei der neuen Öffnung: gleich die Wunschmaße mit „Maße übernehmen“; Zurück ohne Änderung ohne Rückfrage aufs Fenster (' + JSON.stringify([mn1, mn2]) + ')');
+  /* c7) Fenster als Kacheln oben in der Liste (Inhaber, 4.11.2026: „Symbole oben … abgeschnitten“): am Telefon höchstens vier, alle ganz im Bild */
+  const kach = [];
+  for (const n of [4, 6]) {
+    await p.evaluate((n) => { const ws = []; for (let i = 0; i < n; i++) ws.push(Object.assign(baseWin(), { name: 'Raum ' + (i + 1) })); S.windows = ws; persist(); go('home'); }, n); await p.waitForTimeout(400);
+    kach.push(await p.evaluate(() => { const r = document.querySelector('.li-reihe').getBoundingClientRect(), sicht = [...document.querySelectorAll('.li-reihe .li-sym')].filter((e) => getComputedStyle(e).display !== 'none'); return { n: sicht.length, drin: sicht.every((e) => { const q = e.getBoundingClientRect(), b = e.querySelector('b'), bq = b ? b.getBoundingClientRect() : q; return q.left >= r.left - 0.5 && q.right <= r.right + 0.5 && bq.top >= r.top - 0.5 && bq.left >= r.left - 0.5; }), letzte: sicht[sicht.length - 1].textContent.trim() }; }));
+  }
+  ok(kach[0].n === 4 && kach[0].drin && kach[1].n === 4 && kach[1].drin && /^\+3/.test(kach[1].letzte), 'Liste: Kacheln oben ganz im Bild, am Telefon höchstens vier, ab fünf Fenstern „+n weitere“ (' + JSON.stringify(kach) + ')');
   /* d) Weg zu den Maßen: ohne Maße gleich weiter; eingeben über die Zifferntasten; geführt über Fotos, zurück auf den Weg, nach dem Ergebnis weiter bei „wie viele und wo“ */
   await p.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.windows = []; S.q = 'massweg'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(400);
   const m0 = await p.evaluate(() => ({ zeilen: Array.from(document.querySelectorAll('.mw-zeile')).map((b) => b.getAttribute('data-v')).join(), h: Math.round(document.querySelector('.mw-kreis').getBoundingClientRect().height) }));

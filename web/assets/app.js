@@ -2927,6 +2927,7 @@ function go(screen, dir) {
   if (screen === 'frage' && S.screen === 'ergebnis' && (!S.q || S.q === 'massweg')) { const L = qSichtbar(S.win), i = L.findIndex((q) => q.id === 'massweg'); if (i >= 0 && L[i + 1]) S.q = L[i + 1].id; }
   if (screen === 'frage' && dir === 'back' && (S.screen === 'fotos' || S.screen === 'zeichnen')) S.q = 'massweg';
   if (screen !== 'frage' || !S.q) S.ausListe = false;
+  if (MA_SCHIRME.indexOf(screen) < 0) { S.masseAendern = null; S.masseWahl = false; }
   /* Die Tiefe wird nicht mehr gefragt: Hauptweg plus freiwillige Liste heißt fürs Blatt „das Wichtigste, den Rest nach Standard“, solange
      das Projekt keine eigene Tiefe hat (ältere Aufmaße, Vorgabe des Betriebs) */
   if (screen === 'frage' && S.proj && !S.proj.tiefe) S.proj.tiefe = 'kurz';
@@ -3223,13 +3224,22 @@ function homeAufmass() {
    Aufteilung und der Name, keine Maße: keine Gesamtübersicht), darunter Titel, Stand mit Balken und „+ Fenster“, die Fensterkarten als
    Anthrazit-Kacheln, „Weiteres Fenster“, Konto, das Aufmaßblatt und „So funktioniert's“; unten die Pille zum Aufmaßblatt. Bausteine und
    Aktionen wie bisher (winCard, neuKnopf, kontoKarte, dateiCard), nur in der Form der neuen Folien. Am Laptop wie die Start-Folie. */
+/* Fenster als Kacheln auf der Bühne (Liste, Angebots-Folien, Liste im Konfigurator der Betriebe): Am Telefon höchstens vier nebeneinander
+   (Inhaber, 4.11.2026: „die Symbole oben … abgeschnitten … nicht so sauber“; vorher liefen fünf und mehr über beide Ränder), ab fünf
+   Fenstern drei und „+n weitere“; am Laptop bis zu dtMax und danach „+n“. li-tel-aus und li-mehr-tel gelten nur am Telefon, li-mehr-dt
+   nur am Laptop (app.css). */
+function liSymbole(dtMax) {
+  const n = S.windows.length, TEL = 4, mehr = (k, cls) => '<span class="li-sym li-mehr ' + cls + '"><span class="li-kachel">+' + k + '</span><small>weitere</small></span>';
+  return S.windows.slice(0, dtMax).map((x, i) => '<span class="li-sym' + (n > TEL && i >= TEL - 1 ? ' li-tel-aus' : '') + '"><span class="li-kachel"><b>' + (i + 1) + '</b>' + zuStrich(svgIcon(miniWin(x), 64)) + '</span><small>' + esc(x.name || 'Fenster ' + (i + 1)) + '</small></span>').join('') +
+    (n > TEL ? mehr(n - (TEL - 1), 'li-mehr-tel') : '') + (n > dtMax ? mehr(n - dtMax, 'li-mehr-dt') : '');
+}
 function homeAufmassDna() {
   const n = S.windows.length, voll = S.windows.filter((x) => fensterStand(x).k === 'voll').length;
   const neu = S.neuFrage && kontoBereit() && KS ? '<div class="card neu-frage"><p class="eyebrow">Neues Aufmaß</p><b>Ein neues Aufmaß beginnen?</b><p class="sub">Dein bisheriges Aufmaß bleibt in deinem Konto, du findest es unter „Dein Konto“.</p><div class="pill-row"><button type="button" class="pill" data-act="aufmass-neu-ja">Neues Aufmaß beginnen</button><button type="button" class="pill" data-act="aufmass-neu-nein">Abbrechen</button></div></div>'
     : S.neuFrage ? '<div class="card neu-frage"><p class="eyebrow">Neues Aufmaß</p><b>Dieses Aufmaß auf diesem Gerät löschen?</b><p class="sub">Fenster, Angaben und die Freischaltung dieses Aufmaßes sind danach weg. Lade dein Aufmaßblatt vorher herunter, falls du es noch brauchst.</p><div class="pill-row"><button type="button" class="pill danger" data-act="aufmass-neu-ja">Löschen und neu beginnen</button><button type="button" class="pill" data-act="aufmass-neu-nein">Abbrechen</button></div></div>' : '';
   /* Bühne: bis zu acht Fenster als Strichzeichnung mit Nummer und Name */
-  const sym = S.windows.slice(0, 8).map((x, i) => '<span class="li-sym"><span class="li-kachel"><b>' + (i + 1) + '</b>' + zuStrich(svgIcon(miniWin(x), 64)) + '</span><small>' + esc(x.name || 'Fenster ' + (i + 1)) + '</small></span>').join('') + (n > 8 ? '<span class="li-sym li-mehr"><span class="li-kachel">+' + (n - 8) + '</span><small>weitere</small></span>' : '');
-  const buehne = '<div class="li-buehne' + (n > 4 ? ' li-viele' : '') + '"><span class="wz-chip li-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (n ? voll / n : 0).toFixed(4) + '"></i>Dein Aufmaß · ' + n + ' Fenster</span><div class="li-reihe" aria-hidden="true">' + sym + '</div></div>';
+  const sym = liSymbole(8);
+  const buehne = '<div class="li-buehne' + (n > 3 ? ' li-viele' : '') + (n > 6 ? ' li-sehr-viele' : '') + '"><span class="wz-chip li-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (n ? voll / n : 0).toFixed(4) + '"></i>Dein Aufmaß · ' + n + ' Fenster</span><div class="li-reihe" aria-hidden="true">' + sym + '</div></div>';
   /* Titel mit Stand und Balken, „+ Fenster“ rechts (Klassen wie bisher: .hd, .ueb-zeile, .ueb-prog, .hd-neu) */
   let stand = esc(aufmassStand());
   if (n) {
@@ -3651,8 +3661,8 @@ function planmasseDna() {
     '<p class="pm-satz"><i aria-hidden="true"></i>Das Element wird ' + FUGE + ' mm je Seite kleiner als die Öffnung: ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm.</p></div>';
   const hinweis = (!tuer && num(w.bru) && num(w.bru) < 800 ? noteBox('Brüstung unter 80 cm: Im Obergeschoss braucht das Fenster dann meist eine Absturzsicherung. Danach fragt die App bei der Lage.', 'absturz', 'warn ab-note') : '') +
     noteBox('Neue Öffnung in der Wand: Bei tragenden Wänden entscheidet die Statik über Sturz und Größe. Der Fachbetrieb bricht die Öffnung, setzt den Sturz und baut ein.', 'neuoeffnung', 'ab-note');
-  const zur = planFoto() ? 'Zurück: Einzeichnen' : 'Zurück: Fotos';
-  const fuss = rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="' + zur + '">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter btn primary" data-act="go" data-v="ergebnis">Maße ansehen' + abPfeil + '</button></div>';
+  const ma = masseAendernHier(), zur = ma ? 'Zurück: Fenster' : planFoto() ? 'Zurück: Einzeichnen' : 'Zurück: Fotos';
+  const fuss = rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="' + zur + '">' + LG_PFEIL_L + '</button>' + (ma ? '<button type="button" class="dna-pille lg-weiter btn primary" data-act="masse-uebernehmen">Maße übernehmen' + abPfeil + '</button>' : '<button type="button" class="dna-pille lg-weiter btn primary" data-act="go" data-v="ergebnis">Maße ansehen' + abPfeil + '</button>') + '</div>';
   return { html: lgKopf(['back', zur]) + '<div class="er-tisch">' + buehne + '<div class="er-rechts">' + unter + karte + warn + hinweis + fuss + '</div></div>', back: planFoto() ? ['Einzeichnen', 'zeichnen'] : ['Fotos', 'fotos'], dna: true, cls: 'dna er pm', voll: true };
 }
 SCREENS.planmasseAlt = SCREENS.planmasse;
@@ -3975,7 +3985,7 @@ function ergebnisDna() {
   const falls = '<details class="er-falls fold"><summary><span><b>Falls zur Hand</b><small>Brüstungshöhe und Laibungstiefe, sonst beim Feinaufmaß</small></span></summary><div class="fold-body"><div class="rows">' + fieldRow('Brüstungshöhe', 'bru', 'mm', 10, 'bruestung') + fieldRow('Laibungstiefe innen', 'laib', 'mm', 5, 'laibung', ki && ki.laib && !w.e_laib ? 'KI-Schätzung' : '') + '</div></div></details>';
   const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
   const zur = einstiegHier() ? 'Zurück: Fenster' : neu ? 'Zurück: Maße' : 'Zurück: Ränder';
-  const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="' + zur + '">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="wuensche">' + (tuer ? 'Weiter: Wunschtür' : 'Weiter: Wünsche') + pfeil + '</button></div>';
+  const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="' + zur + '">' + LG_PFEIL_L + '</button>' + (masseAendernHier() ? '<button type="button" class="dna-pille lg-weiter" data-act="masse-uebernehmen">Maße übernehmen' + pfeil + '</button>' : '<button type="button" class="dna-pille lg-weiter" data-act="wuensche">' + (tuer ? 'Weiter: Wunschtür' : 'Weiter: Wünsche') + pfeil + '</button>') + '</div>';
   const html = lgKopf(['back', zur]) + '<div class="er-tisch">' + buehne + '<div class="er-rechts">' + unter + pruef + karte + teaser + plan + falls + rechtLinks() + fuss + '</div></div>';
   /* über „Maße ändern“ geöffnet: oben „Fenster“ zur Übersicht aller Fenster (wie in den Wünschen), die Zurück-Taste zur Seite des Fensters */
   return { html: html, back: einstiegHier() ? ['Fenster', 'fertig', 'liste'] : neu ? ['Maße', 'planmasse'] : ['Ränder', 'rest'], dna: true, cls: 'dna er', voll: true };
@@ -4002,7 +4012,7 @@ SCREENS.fertig = () => {
   const html = '<div class="center fertig-kopf links"><span class="fertig-ic">' + svgIcon(miniWin(w), 84) + '</span><p class="eyebrow" style="color: var(--ok)">' + CHECK + ' Gespeichert · Position ' + (S.editIdx + 1) + '</p><h1 style="margin: 10px 0 0">' + esc(w.name || 'Fenster') + '</h1><p class="fertig-stand" style="margin: 8px 0 0">' + esc(lab('art', w.art || 'fenster') + ((num(w.anzahl) || 1) > 1 ? ' · ' + w.anzahl + ' Stück' : '') + ' · ' + fensterStatus(gespeichert)) + '</p></div>' +
     (kiLaeuftFuer(gespeichert) || kiLaeuftFuer(w) ? kiLaeuftKarte('Die KI liest noch die Einbausituation. Die Auswertung kommt von selbst zu diesem Fenster.') : '') +
     '<section class="card weiter-karte"><p class="eyebrow">Wie geht es weiter?</p><p>' + (lk ? 'Noch ein Fenster? Dann tipp auf „Weiteres Fenster“. Alles erfasst? Dann weiter zum Absenden.' : 'Noch ein Fenster? Dann tipp auf „Weiteres Fenster“. Alles erfasst? Dann weiter zu deinem Aufmaßblatt.') + '</p><p class="sub">' + esc(angaben) + (lk ? ' gehen mit deinem Aufmaß an ' + esc(bn) + '.' : ' stehen in deinem Aufmaßblatt.') + '</p></section>' + aend +
-    '<div class="pill-row grid2"><button type="button" class="pill" data-act="go" data-v="ergebnis"' + zu + '>Maße ändern</button><button type="button" class="pill" data-act="wuensche"' + zu + '>Wünsche ändern</button><button type="button" class="pill" data-act="copywin">Kopieren</button><button type="button" class="pill danger" data-act="delwin">Löschen</button></div>' +
+    '<div class="pill-row grid2"><button type="button" class="pill" data-act="masse-aendern"' + zu + '>Maße ändern</button><button type="button" class="pill" data-act="wuensche"' + zu + '>Wünsche ändern</button><button type="button" class="pill" data-act="copywin">Kopieren</button><button type="button" class="pill danger" data-act="delwin">Löschen</button></div>' +
     /* Gezielt ein Thema nachschärfen: direkt zum Kapitel, in der gewählten Tiefe */
     (st.fest ? '' : '<div class="kap-sprung"><p class="qlabel">Direkt zu einem Thema</p><div class="kap-chips">' + KAPITEL.slice(1).map((k) => '<button type="button" class="chip" data-act="wuensche" data-v="' + k.k + '">' + esc(k.n) + '</button>').join('') + '</div></div>') +
     '<button type="button" class="pill voll" data-act="go" data-v="home">Alle Fenster ansehen (' + S.windows.length + ')</button>' +
@@ -4058,7 +4068,7 @@ function fertigDna() {
   const kachel = (attr, z, t, sub, cls) => '<button type="button" class="fg-kachel' + (cls ? ' ' + cls : '') + '" ' + attr + '>' + fgZ(z) + '<span>' + t + (sub ? '<small>' + sub + '</small>' : '') + '</span></button>';
   const zaehlt = st.fest || !st.frei;
   const dieses = '<section class="fg-dieses" aria-labelledby="fg-dieses-t"><h2 class="fg-label" id="fg-dieses-t">' + nomen + '</h2>' + (zaehlt ? grenze : '') + '<div class="fg-kacheln">' +
-    kachel('data-act="go" data-v="ergebnis"' + zu, 'masse', 'Maße ändern') + kachel('data-act="wuensche"' + zu, 'wuensche', 'Wünsche ändern') +
+    kachel('data-act="masse-aendern"' + zu, 'masse', 'Maße ändern') + kachel('data-act="wuensche"' + zu, 'wuensche', 'Wünsche ändern') +
     kachel('data-act="copywin"', 'kopie', 'Kopieren', 'nur für baugleiche Fenster', 'fg-breit') + '</div>' + (zaehlt ? '' : grenze) +
     '<button type="button" class="fg-loeschen" data-act="delwin">' + fgZ('loeschen') + '<span>' + (tuer ? 'Tür' : w.art === 'fest' ? 'Verglasung' : 'Fenster') + ' löschen</span></button></section>';
   /* Gezielt ein Thema nachschärfen: direkt zum Kapitel, in der gewählten Tiefe */
@@ -4742,8 +4752,8 @@ SCREENS.gekauft = () => {
    die Fenster als Strichzeichnungen), Titel, Karten auf Anthrazit und Fuß mit der Pille aus der alten Leiste. Instanzen bleiben unberührt. */
 function abBlattBuehne(chip, offen, extra) { return abBuehne('ab-blatt', chip, abPapier(offen, !offen) + (extra || '')); }
 function abSymBuehne(chip, extra) {
-  const n = S.windows.length, sym = S.windows.slice(0, 6).map((x, i) => '<span class="li-sym"><span class="li-kachel"><b>' + (i + 1) + '</b>' + zuStrich(svgIcon(miniWin(x), 64)) + '</span><small>' + esc(x.name || 'Fenster ' + (i + 1)) + '</small></span>').join('') + (n > 6 ? '<span class="li-sym li-mehr"><span class="li-kachel">+' + (n - 6) + '</span><small>weitere</small></span>' : '');
-  return abBuehne('ab-sym' + (n > 4 ? ' li-viele' : ''), chip, (n ? '<div class="li-reihe" aria-hidden="true">' + sym + '</div>' : '') + (extra || ''));
+  const n = S.windows.length, sym = liSymbole(6);
+  return abBuehne('ab-sym' + (n > 3 ? ' li-viele' : '') + (n > 6 ? ' li-sehr-viele' : ''), chip, (n ? '<div class="li-reihe" aria-hidden="true">' + sym + '</div>' : '') + (extra || ''));
 }
 const abBetrag = () => { const p = PREIS(); return p > 0 ? '<div class="ab-betrag" aria-hidden="true"><b>' + euro(p).replace(/\s*€$/, '') + '</b><small>€</small><span>einmalig' + (MWST() ? ', inkl. MwSt.' : '') + '</span></div>' : ''; };
 const abEtikett = (klein, wert) => '<div class="ab-etikett" aria-hidden="true"><span class="ab-etikett-punkt"></span><span><small>' + esc(klein) + '</small><b>' + esc(wert) + '</b></span></div>';
@@ -5224,6 +5234,7 @@ function wzAutoWeiter(q) {
 function qStep(delta) {
   S.qMass = null;
   let c = qCurrent();
+  if (masseAendernHier() && c.q.id === 'massweg') return delta > 0 ? masseUebernehmen() : masseZurueck(); // über „Maße ändern“
   /* Lage: ohne Namen (im OG und DG ohne Brüstung) kein Weiter; die Zeile über „Weiter“ sagt, was fehlt */
   if (delta > 0 && c.q.id === 'lage' && lgFehlt(S.win)) return lgVerlangen(lgFehlt(S.win));
   /* Weg zu den Maßen: Pflichtauswahl (Inhaber, 4.11.2026), sonst stünde das Fenster ohne Entscheidung ohne Maße da */
@@ -5490,16 +5501,21 @@ function massTasten(f) {
 function massKey(k) {
   const st = S.qMass, m = massCfg(st.f), w = S.win;
   /* aus dem Bogen vor dem Speichern: nach der Breite die Höhe, danach zurück in den Bogen */
+  /* Breite, dann Höhe („Maße ändern“ → eingeben): nach OK gleich das nächste Maß */
+  const kette = () => { S.qMass = { f: st.weiter, q: st.q, cur: '', msg: '' }; render(); nachBild(() => { const e = document.getElementById('qm-ein'); if (e) e.focus({ preventScroll: true }); }); };
   const zumBlatt = () => { if (st.weiter) { S.qMass = { f: st.weiter, q: st.q, cur: '', msg: '', blatt: true }; render(); nachBild(() => { const e = document.getElementById('qm-ein'); if (e) e.focus({ preventScroll: true }); }); return; } S.qMass = null; S.exMasse = masseLage(w) || S.exMasse; S.masseFehler = false; S.extrasHinweis = true; render(); };
   if (!m || k === 'zurueck') { if (st && st.blatt) { st.weiter = null; return zumBlatt(); } S.qMass = null; return render(); } // Pfeil zurück: ohne Änderung zurück zur Frage
   if (k === 'ok') {
-    if (!st.cur) { if (st.blatt) return zumBlatt(); S.qMass = null; return render(); }
+    if (!st.cur) { if (st.blatt) return zumBlatt(); if (st.weiter && num(w.el[st.f === 'elW' ? 'w' : 'h'])) return kette(); S.qMass = null; return render(); }
     const v = num(st.cur);
     if (v < m.min || v > m.max) { st.msg = 'Bitte zwischen ' + thousand(m.min) + ' und ' + thousand(m.max) + ' mm.'; if (window.Haptik) window.Haptik.fehler(); return render(); }
     if (/^teil:\d+$/.test(st.f)) teilMm(w, +st.f.slice(5), v); else if (MW_CFG[st.f]) { const vorher = num(w.el[st.f === 'elW' ? 'w' : 'h']); w.el[st.f === 'elW' ? 'w' : 'h'] = v; w.massWeg = 'eingeben'; if (vorher !== v) w.masseOk = false; if (st.f === 'elW') teilungVorschlagen(w, true); } else w[st.f] = v;
     if (window.Haptik) window.Haptik.ok();
     if (st.blatt) return zumBlatt();
-    S.qMass = null; return render();
+    if (st.weiter) return kette();
+    S.qMass = null; render();
+    if (MW_CFG[st.f] && masseAendernHier()) nachBild(() => { const f = document.querySelector('.mw-felder'); if (f) f.scrollIntoView({ block: 'center', behavior: 'auto' }); }); // die eingetippten Maße über „Maße übernehmen“ zeigen
+    return;
   }
   let cur = st.cur || '';
   if (k === 'del') cur = cur.slice(0, -1); else if (/^\d$/.test(k)) { if (cur.length >= 4 || (!cur && k === '0')) return; cur += k; } else return;
@@ -6112,14 +6128,16 @@ function frageDna(c, q, panel, stage, designFertig, tasten) {
   const w = S.win, n = c.list.length, last = c.i === n - 1, ab = qAbschnitte(c).find((g) => g.jetzt) || { i0: 0, i1: n - 1 };
   const steps = stepsFor(w), nr = steps.indexOf('frage') + 1;
   const buehne = '<div class="wz-buehne' + (wzFrei(q) ? ' wz-frei' : '') + '">' + stage + '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + Math.max(0.04, (c.i + 1) / n).toFixed(3) + '"></i>Schritt ' + nr + ' · Wünsche</span></div>';
-  const pos = q.kind === 'extras' ? 'Zum Schluss, freiwillig' : !qHaupt(q) ? 'Freiwillig · ' + qAbschnitt(q) : 'Frage ' + (c.i - ab.i0 + 1) + ' von ' + (ab.i1 - ab.i0 + 1);
+  const maHier = masseAendernHier() && q.id === 'massweg';
+  const pos = maHier ? 'Maße ändern' : q.kind === 'extras' ? 'Zum Schluss, freiwillig' : !qHaupt(q) ? 'Freiwillig · ' + qAbschnitt(q) : 'Frage ' + (c.i - ab.i0 + 1) + ' von ' + (ab.i1 - ab.i0 + 1);
   const kopf = '<div class="hd wz-frage"><div class="hd-zeile"><p class="eyebrow" id="wz-pos">' + esc(pos) + '</p><span class="hd-tools">' + tiefeKnopf(q) + (q.id === 'notiz' ? '' : notizKnopf(notizOrt())) + '</span></div>' +
-    '<h1 tabindex="-1" aria-describedby="wz-pos">' + wzTitel(q) + '</h1>' + (q.sub ? '<p class="wz-sub">' + esc(q.sub) + '</p>' : '') + '</div>';
+    '<h1 tabindex="-1" aria-describedby="wz-pos">' + (maHier ? 'Neue Maße für <em>' + esc(String(w.name || '').trim() || 'dein Fenster') + '.</em>' : wzTitel(q)) + '</h1>' +
+    (maHier ? '<p class="wz-sub">Breite und Höhe eintippen oder geführt neu messen.</p>' : q.sub ? '<p class="wz-sub">' + esc(q.sub) + '</p>' : '') + '</div>';
   const sichern = istTuer(w) ? 'Tür speichern' : w.art === 'fest' ? 'Verglasung speichern' : 'Fenster speichern';
   const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
   const fuss = '<div class="lg-fuss qnav"><button type="button" class="lg-zurueck" data-act="qprev" aria-label="Zurück">' + LG_PFEIL_L + '</button>' +
     (designFertig ? '<button type="button" class="dna-pille dna-pille--leise wz-anpassen" data-act="qnext">Anpassen</button><button type="button" class="dna-pille lg-weiter btn primary" data-act="save">Speichern' + pfeil + '</button>'
-      : '<button type="button" class="dna-pille lg-weiter btn primary" data-act="qnext">' + (!qHaupt(q) ? 'Fertig' : last ? sichern : 'Weiter') + pfeil + '</button>') + '</div>' + rechtLinks(); // die Verweise unter der Pille (Inhaber, 2.11.2026)
+      : '<button type="button" class="dna-pille lg-weiter btn primary" data-act="qnext">' + (maHier ? 'Maße übernehmen' : !qHaupt(q) ? 'Fertig' : last ? sichern : 'Weiter') + pfeil + '</button>') + '</div>' + rechtLinks(); // die Verweise unter der Pille (Inhaber, 2.11.2026)
   if (tasten) return { html: lgKopf() + wzBand(c) + buehne + tasten, back: ['Zurück', 'qprev'], dna: true, cls: 'dna wz wz-tasten', qpos: (c.i + 1) / n };
   return { html: lgKopf() + dnaTisch(wzBand(c) + buehne, '<div class="qdock wz-dock">' + kopf + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div></div>' + fuss) + wzKapitel(c),
     back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna wz dt', voll: true, qpos: (c.i + 1) / n };
@@ -6152,9 +6170,19 @@ const MW_ZEICHEN = {
 const mwZeichen = (k) => '<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + MW_ZEICHEN[k] + '</svg>';
 const MW_CFG = { elW: { f: 'elW', t: 'Breite mit Rahmen', st: 'von außen gesehen, in Millimetern', min: 300, max: 9000, schritt: 10 }, elH: { f: 'elH', t: 'Höhe mit Rahmen', st: 'bis Unterkante Rahmen, in Millimetern', min: 300, max: 4000, schritt: 10 } };
 function qMassweg() {
-  const w = S.win, d = derive(w), weg = w.massWeg || '', gemessen = d.complete, neu = !!w.neu;
+  const w = S.win, d = derive(w), weg = w.massWeg || '', gemessen = d.complete, neu = !!w.neu, aendern = masseAendernHier();
   const zeile = (k, b, sm, an) => '<button type="button" class="mw-zeile" data-act="massweg" data-v="' + k + '" aria-pressed="' + !!an + '"><span class="mw-kreis">' + mwZeichen(k) + '</span><span class="mw-tx"><b>' + b + '</b><small>' + esc(sm) + '</small></span><span class="mw-pfeil" aria-hidden="true">' + CHEV + '</span></button>';
   let h = '<div class="mw-liste" role="group" aria-label="Weg zu den Maßen">';
+  /* über „Maße ändern“: nur die beiden Wege, eingeben mit den Feldern; „Maße übernehmen“ speichert (masseUebernehmen) */
+  if (aendern) {
+    h += zeile('messen', 'Geführt messen', 'Mit Fotos und Zollstock, Schritt für Schritt. Etwa 5 Minuten.', weg === 'messen') + zeile('eingeben', 'Maße eingeben', 'Du hast Breite und Höhe mit Rahmen zur Hand.', weg === 'eingeben') + '</div>';
+    if (weg === 'eingeben') {
+      const feld = (k, wert) => '<button type="button" class="mw-wert" data-act="mass-tasten" data-f="' + k + '" aria-label="' + esc(MW_CFG[k].t + ': ' + (wert ? thousand(wert) + ' mm' : 'noch leer') + '. Antippen zum Eintippen') + '"><span class="mw-was">' + esc(k === 'elW' ? 'Breite' : 'Höhe') + '</span><b>' + (wert ? thousand(wert) : '–') + '</b><small>mm</small></button>';
+      h += '<div class="mw-felder" role="group" aria-label="Maße mit Rahmen">' + feld('elW', d.elW) + '<span class="mw-mal" aria-hidden="true">×</span>' + feld('elH', d.elH) + '</div>' +
+        '<p class="mw-hinweis">Mit Rahmen, von Kante zu Kante. Die Maueröffnung misst dein Fensterbauer beim Termin. „Maße übernehmen“ speichert sie.</p>';
+    }
+    return h;
+  }
   if (gemessen) h += zeile('ansehen', esc('Gemessen: ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm'), (neu ? 'Rohbauöffnung' : 'Maueröffnung') + '. Antippen zeigt das Ergebnis.', true);
   h += zeile('messen', gemessen ? 'Neu messen' : 'Geführt messen', neu ? 'Mit Fotos: Öffnung einzeichnen, dann Wunschmaße. Etwa 3 Minuten.' : 'Mit Fotos und Zollstock, Schritt für Schritt. Etwa 5 Minuten.', !gemessen && weg === 'messen');
   if (!gemessen) {
@@ -6174,6 +6202,42 @@ function qMassweg() {
 /* zuerst, was Kunden am häufigsten nachträglich wünschen, dann die übrigen in der Reihenfolge der Liste */
 const EXTRA_ZUERST = ['insekt', 'iart', 'griff', 'glasfn', 'kvd', 'kinder', 'luefter', 'ol', 'gf', 'oeffner'];
 const extrasOffen = () => { const L = qExtras(qList(S.win)).filter((q) => !extraWert(q).an && String(q.id).split('-')[0] !== 'notiz'), r = (q) => { const i = EXTRA_ZUERST.indexOf(String(q.id).split('-')[0]); return i < 0 ? 99 : i; }; return L.map((q, i) => [q, i]).sort((a, b) => r(a[0]) - r(b[0]) || a[1] - b[1]).map((x) => x[0]); };
+/* „Maße ändern“ auf der Seite des Fensters (Inhaber, 4.11.2026: „man will ja eigentlich in der Maske nur die Maße ändern“, „entweder mit
+   geführtem Messen oder wenn man die Maße schon zur Hand hat, dass man die einfach eingeben kann“; bei Elementen für eine neue Öffnung
+   „direkt in die Maske, wo man die Öffnung in der Wand einträgt“). Vorher öffnete der Knopf das Ergebnis, auf dem man nichts ändern konnte.
+   Jetzt: ein Bogen mit zwei Wegen (bei der neuen Öffnung gleich die Wunschmaße). S.masseAendern = { i } hält den Weg, bis „Maße
+   übernehmen“ das Fenster speichert und auf seine Seite zurückführt, oder bis der Kunde zurückgeht (mit „Noch nicht gespeichert“, wenn
+   sich etwas geändert hat). Alles geschieht an der Arbeitskopie S.win; das gespeicherte Fenster bleibt bis zum Übernehmen, wie es war. */
+const MA_SCHIRME = ['frage', 'fotos', 'zeichnen', 'messen', 'rest', 'ergebnis', 'planmasse'];
+const masseAendernHier = () => !!(S.masseAendern && S.masseAendern.i === S.editIdx && S.windows[S.editIdx]);
+function masseWahlBlatt() {
+  const w = S.win, d = derive(w), tuer = istTuer(w), ding = tuer ? 'deine Tür' : w.art === 'fest' ? 'deine Verglasung' : 'dein Fenster';
+  const stand = d.complete ? 'Gemessen: ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm Maueröffnung.' : d.elW && d.elH && w.massWeg === 'eingeben' ? 'Eingegeben: ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm mit Rahmen.' : 'Noch ohne Maße.';
+  const zeile = (k, b, sm) => '<button type="button" class="mw-zeile" data-act="masse-wahl" data-v="' + k + '"><span class="mw-kreis">' + mwZeichen(k) + '</span><span class="mw-tx"><b>' + b + '</b><small>' + esc(sm) + '</small></span><span class="mw-pfeil" aria-hidden="true">' + CHEV + '</span></button>';
+  return '<button type="button" class="sheet-bg" aria-label="Abbrechen" data-act="masse-wahl-zu"></button><div class="sheet verlassen ma-blatt" role="dialog" aria-modal="true" aria-labelledby="ma-t" aria-describedby="ma-s"><div class="grip"></div>' +
+    '<p class="eyebrow kicker" style="margin-top: 6px">Maße ändern</p><h2 id="ma-t" tabindex="-1">Wie willst du die <span class="ak">Maße</span> ändern?</h2>' +
+    '<p class="vl-sub" id="ma-s">' + esc(stand + ' Wähle, wie du ' + ding + ' neu misst.') + '</p>' +
+    '<div class="mw-liste ma-liste" role="group" aria-label="Weg zu den Maßen">' + zeile('messen', 'Geführt messen', 'Mit Fotos und Zollstock, Schritt für Schritt. Etwa 5 Minuten.') +
+    zeile('eingeben', 'Maße eingeben', 'Du hast Breite und Höhe mit Rahmen zur Hand.') + '</div>' +
+    '<div class="vl-knoepfe"><button type="button" class="btn ghost" data-act="masse-wahl-zu">Abbrechen</button></div></div>';
+}
+/* Eingeben statt Messen: Breite und Höhe mit Rahmen aus dem bisherigen Stand vorbelegen, das Messen beiseite (wie beim Wechsel des Wegs) */
+function masseEingebenVorbereiten(w) {
+  const d = derive(w);
+  if (d.complete || (w.massWeg === 'eingeben' && d.elW && d.elH)) w.el = { w: d.elW || '', h: d.elH || '' }; else w.el = { w: '', h: '' };
+  w.mo = { hm: '', hl: '', hr: '', wm: '', wt: '', wb: '' }; w.massWeg = 'eingeben'; w.masseOk = false;
+}
+function masseUebernehmen() {
+  const w = S.win, d = derive(w);
+  if (!w.neu && w.massWeg === 'eingeben') {
+    if (!(d.elW && d.elH)) { massTasten(d.elW ? 'elH' : 'elW'); if (S.qMass && !d.elW) S.qMass.weiter = 'elH'; return; }
+    w.masseOk = true; // „Maße übernehmen“ bestätigt die selbst eingetippten Maße
+  }
+  return saveWin();
+}
+/* Zurück ohne eigene Änderung (Vorgaben wie die Brüstung der Wunschmaße zählen nicht): gleich zurück aufs Fenster; sonst „Noch nicht gespeichert“ */
+const masseStand = () => { if (S.masseAendern) S.masseAendern.fp = fensterFp(S.win); };
+const masseZurueck = () => { const m = S.masseAendern; if (m.fp && fensterFp(S.win) === m.fp) return fensterOeffnen(m.i); return verlassen({ art: 'fenster', i: m.i }); };
 /* Maße vor dem Speichern (Inhaber, 2.11.2026: „wenn man Maße eingegeben hat, die man selber halt nicht gemessen hat …“): Selbst
    eingetragene Maße bestätigt man, bevor das Fenster gespeichert wird, oder korrigiert sie bzw. misst geführt neu. Ohne Maße steht dieselbe
    Kachel als Hinweis, ohne zu sperren. 'eingegeben' = Breite und Höhe eingetippt und noch nicht bestätigt, 'ohne' = keine vollständigen
@@ -6555,6 +6619,7 @@ function sheetsHTML() {
   if (S.ohneFotoFrage && S.screen === 'fotos') return ohneFotoBlatt();
   if (S.extrasHinweis && S.screen === 'frage') return extrasBlatt();
   if (S.gebFrage) return gebFrageBlatt();
+  if (S.masseWahl && S.screen === 'fertig') return masseWahlBlatt();
   return '';
 }
 
@@ -6818,6 +6883,7 @@ function zurueckTaste() {
   if (S.wohin) { S.wohin = false; render(); return true; }
   if (S.extrasHinweis) { S.extrasHinweis = false; render(); return true; }
   if (S.gebFrage) { S.gebFrage = false; render(); return true; }
+  if (S.masseWahl) { S.masseWahl = false; S.masseAendern = null; render(); return true; }
   if (S.wzKap) { S.wzKap = false; render(); const b = document.querySelector('.wz-band'); if (b) b.focus({ preventScroll: true }); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
   if (S.qMass && S.screen === 'frage') { S.qMass = null; render(); return true; } // Zifferntasten in den Wünschen
@@ -7844,9 +7910,11 @@ function saveWin() {
   if (ziel.plan && !ziel.plan.bild && ziel.plan.ecken && planFoto()) planBildErzeugen(ziel).then((b) => { if (b && S.win && S.win.wid === ziel.wid && S.win.plan) { S.win.plan.bild = b; S.win.plan.bw = ziel.plan.bw; S.win.plan.bh = ziel.plan.bh; } lokalSpeichern(); });
   /* Nach dem Speichern in die Liste aller Fenster (Inhaber, 4.11.2026: „mit dem Beenden von einem Fenster soll man in die Liste kommen,
      wo alle Fenster aufgereiht sind“); „Gespeichert“ mit Maße, Wünsche, Kopieren und Löschen öffnet das Fenster in der Liste */
-  S.win = kopie(ziel); persist(); entwurfWeg(); go('home');
+  /* über „Maße ändern“: zurück auf die Seite dieses Fensters */
+  const zurFenster = masseAendernHier(); S.masseAendern = null;
+  S.win = kopie(ziel); persist(); entwurfWeg(); go(zurFenster ? 'fertig' : 'home');
   fotosHochladen(); // die Fotos gehen mit dem gespeicherten Fenster zum Server (Link oder Konto)
-  toast(hinweis || (ziel.name ? ziel.name + ' gespeichert.' : 'Gespeichert.'));
+  toast(hinweis || (zurFenster ? 'Maße gespeichert.' : ziel.name ? ziel.name + ' gespeichert.' : 'Gespeichert.'));
 }
 /* ---------- Sprossen: Einrasten auf Viertel, Drittel, Hälfte ---------- */
 function snapP(p) { const pts = [0.25, 1 / 3, 0.5, 2 / 3, 0.75]; for (let i = 0; i < pts.length; i++) if (Math.abs(p - pts[i]) < 0.03) return pts[i]; return clamp(p, 0.06, 0.94); }
@@ -7991,6 +8059,22 @@ function act(name, el) {
     }
     /* orange Kachel im Bogen vor dem Speichern: bestätigen, korrigieren (Zifferntasten, danach zurück in den Bogen), geführt neu messen */
     case 'masse-ok': w.masseOk = !w.masseOk; S.masseFehler = false; persist(); return render();
+    /* „Maße ändern“ auf der Seite des Fensters: Bogen mit zwei Wegen, bei der neuen Öffnung gleich die Wunschmaße */
+    case 'masse-aendern': {
+      if (!(S.editIdx >= 0 && S.windows[S.editIdx])) return go('ergebnis');
+      S.masseAendern = { i: S.editIdx };
+      if (w.neu) { go('planmasse'); return masseStand(); }
+      S.masseWahl = true; render(); return nachBild(() => { const t = document.getElementById('ma-t'); if (t) t.focus({ preventScroll: true }); });
+    }
+    case 'masse-wahl-zu': S.masseWahl = false; S.masseAendern = null; return render();
+    case 'masse-wahl': {
+      S.masseWahl = false; S.masseAendern = { i: S.editIdx };
+      if (v === 'messen') { w.massWeg = 'messen'; w.masseOk = false; go('fotos'); return masseStand(); }
+      masseEingebenVorbereiten(w); S.q = 'massweg'; S.selSash = 0; go('frage'); masseStand();
+      massTasten('elW'); if (S.qMass) S.qMass.weiter = 'elH';
+      return;
+    }
+    case 'masse-uebernehmen': return masseUebernehmen();
     case 'masse-korr': case 'masse-feld': {
       S.extrasHinweis = false;
       const f = name === 'masse-feld' ? el.getAttribute('data-f') : 'elW';
@@ -8001,7 +8085,8 @@ function act(name, el) {
     case 'extras-oeffnen': S.extrasHinweis = false; S.ausListe = true; S.q = v; S.dir = 'fwd'; S.openSash = -1; S.qDock = null; return render(true);
     /* Übersicht aller Fenster aus den Wünschen (Knopf oben links): bei ungespeicherten Änderungen erst das Blatt „Noch nicht gespeichert“ */
     case 'liste': { S.qMass = null; return verlassen({ art: 'home' }); }
-    case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'md-zurueck') return window.MessenDna.zurueck(); if (b === 'mess-back') { S.mess.step = 3; S.mess.pad = false; S.mess.msg = null; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
+    case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg();
+      if (masseAendernHier() && ((S.screen === 'frage' && S.q === 'massweg') || S.screen === 'fotos' || (S.screen === 'planmasse' && S.win.neu))) return masseZurueck(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'md-zurueck') return window.MessenDna.zurueck(); if (b === 'mess-back') { S.mess.step = 3; S.mess.pad = false; S.mess.msg = null; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
     case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: zeit(), aend: 0, ts: zeit() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); S.designVorher = null; persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
     case 'new': if (INST && S.betrieb && S.sent) return instanzWeitere(); if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg());
       if (INST && S.instZu) return go('home');
@@ -8114,6 +8199,10 @@ function act(name, el) {
     /* Weg zu den Maßen: geführt messen (Fotos), Ergebnis ansehen, Maße eingeben (Felder erscheinen), ohne Maße weiter (gleich weiter) */
     case 'massweg': {
       S.mwFehler = false;
+      if (masseAendernHier()) {
+        if (v === 'messen') { w.massWeg = 'messen'; w.masseOk = false; return go('fotos'); }
+        if (v === 'eingeben') { if (w.massWeg !== 'eingeben') masseEingebenVorbereiten(w); massTasten('elW'); if (S.qMass) S.qMass.weiter = 'elH'; return; }
+      }
       if (v === 'ansehen') return go('ergebnis');
       /* Wechsel des Wegs (Prüfung 2.11.2026): eingetippte Maße für später beiseite (das Messen nicht damit vorbelegen), angefangene
          Messungen ohne Ergebnis verwerfen (sonst bleibt z. B. eine Höhe 1.600 stehen und oben im Modell ein Luftraum) */
@@ -8747,8 +8836,8 @@ function instWeiterKarte(du) {
    Balken, „+ Fenster“, die Karten, „Jederzeit weitermachen“ (auf anderem Gerät), Fragen an den Betrieb, unten „Weiter zum Absenden“ */
 function instListeDna(weg) {
   const d = lkDaten(), du = d.du, T = (sie, x) => (du ? x : sie), n = S.windows.length, voll = S.windows.filter((x) => fensterStand(x).k === 'voll').length;
-  const sym = S.windows.slice(0, 8).map((x, i) => '<span class="li-sym"><span class="li-kachel"><b>' + (i + 1) + '</b>' + zuStrich(svgIcon(miniWin(x), 64)) + '</span><small>' + esc(x.name || 'Fenster ' + (i + 1)) + '</small></span>').join('');
-  const buehne = '<div class="li-buehne' + (n > 4 ? ' li-viele' : '') + '"><span class="wz-chip li-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (n ? voll / n : 0).toFixed(4) + '"></i>' + T('Ihre', 'Deine') + ' Anfrage · ' + n + ' Fenster</span><div class="li-reihe" aria-hidden="true">' + sym + '</div></div>';
+  const sym = liSymbole(8);
+  const buehne = '<div class="li-buehne' + (n > 3 ? ' li-viele' : '') + (n > 6 ? ' li-sehr-viele' : '') + '"><span class="wz-chip li-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (n ? voll / n : 0).toFixed(4) + '"></i>' + T('Ihre', 'Deine') + ' Anfrage · ' + n + ' Fenster</span><div class="li-reihe" aria-hidden="true">' + sym + '</div></div>';
   let stand = '';
   if (n) {
     const st = S.windows.map(fensterStand), masse = st.filter((x) => x.k === 'masse' && !x.ein).length, ein = st.filter((x) => x.ein).length, wunsch = st.filter((x) => x.k === 'wunsch').length;

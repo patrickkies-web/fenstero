@@ -2609,14 +2609,17 @@ html.dna-voll body { background: #07090a }
   background: linear-gradient(rgba(7, 9, 10, .45), rgba(7, 9, 10, .7)), url(/bilder/konfigurator/buehne.webp) 42% 30% / cover no-repeat var(--anthrazit); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10) }
 .dna .li-buehne .wz-chip { left: 12px; top: 12px; background: var(--schwarz); border-color: var(--anthrazit); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16) }
 .dna .li-buehne .wz-ring { background: conic-gradient(var(--weiss) calc(var(--anteil) * 360deg), rgba(255, 255, 255, .22) 0) }
-.dna .li-reihe { position: absolute; left: 16px; right: 16px; bottom: 18px; display: flex; justify-content: center; gap: 12px; overflow: hidden }
+.dna .li-reihe { position: absolute; left: 16px; right: 16px; bottom: 18px; display: flex; justify-content: center; gap: 12px; padding-top: 8px; overflow: hidden }
 .dna .li-sym { flex: 0 0 auto; display: grid; justify-items: center; gap: 8px; width: 92px; min-width: 0 }
 .dna .li-kachel { position: relative; display: grid; place-items: center; width: 92px; height: 92px; border-radius: 22px; color: var(--weiss); font: 300 24px/1 var(--font-sans);
   background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045), 0 18px 24px -14px rgba(7, 9, 10, .8) }
 .dna .li-kachel svg { width: 72px; height: 72px }
 .dna .li-kachel b { position: absolute; left: -6px; top: -6px; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; background: var(--weiss); color: var(--schwarz); font: 500 13px/24px var(--font-sans); text-align: center }
 .dna .li-sym small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 13px/1.2 var(--font-sans); color: var(--weiss); text-shadow: 0 1px 2px rgba(7, 9, 10, .6) }
-.dna .li-viele .li-reihe { justify-content: flex-start; gap: 10px }
+.dna .li-viele .li-reihe { gap: 10px }
+/* Telefon: höchstens vier Kacheln, ab fünf Fenstern „+n weitere“ als vierte (liSymbole in app.js); am Laptop alle bis dtMax */
+.dna .li-tel-aus, .dna .li-mehr-dt { display: none }
+.dna .li-mehr .li-kachel { font: 300 24px/1 var(--font-sans); color: var(--weiss) }
 .dna .li-viele .li-sym, .dna .li-viele .li-kachel { width: 72px } .dna .li-viele .li-kachel { height: 72px } .dna .li-viele .li-kachel svg { width: 56px; height: 56px }
 /* Titel, Stand und „+ Fenster“ */
 .dna .li-kopf { padding: 20px 0 6px; margin: 0; background: none }
@@ -2670,12 +2673,18 @@ html.dna-voll body { background: #07090a }
 .dna.li .li-links .link { display: flex; align-items: center; min-height: 44px; font: 500 15px/1.3 var(--font-sans); color: var(--weiss); text-decoration: none }
 .dna.li .foot-links.recht { margin: 16px 0 48px }
 .dna .li-fuss .dna-pille { flex: 1 }
-@media (max-width: 374px) { .dna .li-sym, .dna .li-kachel { width: 72px } .dna .li-kachel { height: 72px } .dna .li-kachel svg { width: 56px; height: 56px } .dna .li-kopf h1 { font-size: 26px } }
+@media (max-width: 374px) { .dna .li-sym, .dna .li-kachel { width: 72px } .dna .li-kachel { height: 72px } .dna .li-kachel svg { width: 56px; height: 56px } .dna .li-kopf h1 { font-size: 26px }
+  .dna .li-viele .li-sym, .dna .li-viele .li-kachel { width: 62px } .dna .li-viele .li-kachel { height: 62px } .dna .li-viele .li-kachel svg { width: 48px; height: 48px } .dna .li-viele .li-reihe { gap: 8px } }
 @media (min-width: 1024px) {
   .dna.dt .dna-links > .li-buehne { flex: 1; height: auto; margin: 0; border-radius: 0 }
   .dna.dt .li-reihe { top: 50%; bottom: auto; transform: translateY(-50%); flex-wrap: wrap; align-content: center; justify-content: center; gap: 24px; max-height: calc(100% - 120px) }
   .dna.dt .li-sym, .dna.dt .li-kachel { width: 150px } .dna.dt .li-kachel { height: 150px; border-radius: 28px } .dna.dt .li-kachel svg { width: 116px; height: 116px }
   .dna.dt .li-sym small { font-size: 15px }
+  .dna.dt .li-tel-aus { display: grid } .dna.dt .li-mehr-tel { display: none } .dna.dt .li-mehr-dt { display: grid }
+  /* ab sieben Kacheln drei Reihen: kleiner, damit nichts oben und unten abgeschnitten wird */
+  .dna.dt .li-sehr-viele .li-reihe { gap: 18px 20px; max-height: none }
+  .dna.dt .li-sehr-viele .li-sym, .dna.dt .li-sehr-viele .li-kachel { width: 104px } .dna.dt .li-sehr-viele .li-kachel { height: 104px; border-radius: 24px } .dna.dt .li-sehr-viele .li-kachel svg { width: 80px; height: 80px }
+  .dna.dt .li-sehr-viele .li-sym small { font-size: 14px }
   .dna.dt .dna-rechts > .li-kopf:first-child { padding-top: 0 }
 }
 
@@ -2776,6 +2785,7 @@ html.dna-voll body { background: #07090a }
   .dna.dt .ab-betrag b { font-size: 64px }
   .dna.dt .ab-sym .li-reihe { top: 50%; bottom: auto; transform: translateY(-50%); flex-wrap: wrap; align-content: center; justify-content: center; gap: 24px }
   .dna.dt .ab-sym .li-sym, .dna.dt .ab-sym .li-kachel { width: 150px } .dna.dt .ab-sym .li-kachel { height: 150px; border-radius: 28px } .dna.dt .ab-sym .li-kachel svg { width: 116px; height: 116px }
+  .dna.dt .ab-sym.li-sehr-viele .li-sym, .dna.dt .ab-sym.li-sehr-viele .li-kachel { width: 104px } .dna.dt .ab-sym.li-sehr-viele .li-kachel { height: 104px; border-radius: 24px } .dna.dt .ab-sym.li-sehr-viele .li-kachel svg { width: 80px; height: 80px } .dna.dt .ab-sym.li-sehr-viele .li-reihe { gap: 18px 20px }
   .dna.dt .ab-schloss { width: 48px; height: 48px; right: 14px; top: 46px } .dna.dt .ab-schloss svg { width: 22px; height: 22px }
   .dna.ab2 .dna-rechts > .ab-inhalt:first-child { padding-top: 0 }
 }
