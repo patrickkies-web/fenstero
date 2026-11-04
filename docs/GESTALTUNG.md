@@ -739,8 +739,9 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
   Vorher/Nachher am Beispielhaus auf der Willkommensseite, in „Gespeichert“ und in der Liste; die Einladung ab dem ersten gespeicherten
   Fenster. In „Gespeichert“ steht „Dieses Fenster“ (Maße, Wünsche, Kopieren, Löschen, Themen) über der Einladung und „Wie geht es weiter?“.
 - **Lenkung zum Aufmaßblatt (Inhaber, 3.11.2026: jede Generierung kostet; Konzept docs/konzepte/2026-11-03-conversion-funnel.md):** Die
-  Einladung erscheint erst, wenn ein Fenster vollständige Maße hat. Drei KI-Vorschauen (je ein Durchgang mit allen gesetzten Fenstern) sind frei,
-  mit gesichertem Konto (E-Mail und Code) zehn, mit freigeschaltetem Aufmaßblatt (gekauft oder über „Angebote aus deiner Nähe“) zwanzig je Gerät (seit 4.11.2026); der Editor
+  Einladung erscheint erst, wenn ein Fenster vollständige Maße hat. Fünf KI-Vorschauen (je ein Durchgang mit allen gesetzten Fenstern) sind frei,
+  mit gesichertem Konto (E-Mail und Code) zehn weitere, zusammen 15; mit gekauftem Aufmaßblatt zusammen 25, auf dem kostenlosen Weg
+  („Angebote aus deiner Nähe“ abgeschickt oder Blatt ohne Preis gesendet) zusammen 50, je Gerät (Inhaber, 4.11.2026 abends); der Editor
   sagt das vorher offen. Danach öffnet „KI-Vorschau“ den Bogen „Weitere Vorschauen mit deinem Aufmaßblatt“ (Zum Aufmaßblatt / Nicht jetzt).
   Nach dem Ergebnis ist die Pille „Zum Aufmaßblatt“, dazu die Karte „Dein Aufmaßblatt · als PDF an deinen Fensterbauer“. Der Zähler liegt
   im Browser und lenkt nur; die harte Grenze hält der Server (Bremse je Tag).
@@ -783,7 +784,7 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
   `docs/profis/bilder/2026-11-02-hausbild-cloudflare-ablauf.jpg`). Der Weg über Black Forest Labs direkt (FLUX 3, oben beschrieben) bleibt
   im Code, ist aber aus (`FREIGEGEBEN`).
 - **Kosten und Grenzen:** rund 1,7 Cent je Fenster (Cloudflare: 1,5 US-Cent je Bild bis 1 Megapixel plus 0,2 Cent je Megapixel Eingabe).
-  Server: 10 Vorschauen je 10 Minuten und Anschluss, 12 je Anschluss und Tag, `HAUSBILD_TAG_MAX` (Vorgabe 150 seit 4.11.2026, vorher 500) am Tag insgesamt; eine
+  Server: 10 Vorschauen je 10 Minuten und Anschluss, 25 je Anschluss und Tag, `HAUSBILD_TAG_MAX` (Vorgabe 150 seit 4.11.2026, vorher 500) am Tag insgesamt; eine
   Vorschau zählt einmal, mit höchstens 8 Fenstern. Gespeichert wird nichts.
 - **Ohne WebGL** zeichnet hausbild.js eine einfache Ansicht des Elements (Rahmenfarbe, Flügel, Glas, Kasten).
 - **Recht (Prüfung 2.11.2026, docs/recht/2026-11-02-hausbild-pruefung.md):** Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) vor der ersten

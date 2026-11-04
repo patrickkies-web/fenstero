@@ -574,7 +574,7 @@ if (teil(3)) {
     ok(await hp.locator('.hb-einladung .hb-vn').count() === 1 && /ausprobieren/.test(await hp.locator('.hb-einladung .hb-ein-knopf').innerText()), 'Einladung mit Vorher/Nachher am Beispielhaus, sobald ein Fenster gespeichert ist (auch ohne vollständige Maße, Inhaber 4.11.2026)');
     await hp.evaluate(() => { const a = baseWin(); a.name = 'Küche'; a.el = { w: 1230, h: 1400 }; a.mo = { hm: 1420, wm: 1250, hl: 1420, hr: 1420, wt: 1250, wb: 1250 }; S.windows.unshift(a); S.editIdx = 0; S.win = a; go('fertig'); });
     await hp.waitForTimeout(400);
-    ok(await hp.locator('.hb-einladung').count() === 1 && /Noch 3 Vorschauen frei/.test(await hp.locator('.hb-einladung').innerText()) && /PDF für deinen Fensterbauer/.test(await hp.locator('.fg-satz').innerText()), 'Gespeichert: Einladung mit „Noch 3 Vorschauen frei“, das Aufmaßblatt als PDF für den Fensterbauer genannt');
+    ok(await hp.locator('.hb-einladung').count() === 1 && /Noch 5 Vorschauen frei/.test(await hp.locator('.hb-einladung').innerText()) && /PDF für deinen Fensterbauer/.test(await hp.locator('.fg-satz').innerText()), 'Gespeichert: Einladung mit „Noch 5 Vorschauen frei“, das Aufmaßblatt als PDF für den Fensterbauer genannt');
     await hp.click('[data-act="hb-auf"]'); await hp.waitForSelector('.hbv');
     const maske = await hp.evaluate(() => { const r = document.querySelector('.hbv').getBoundingClientRect(); return { w: r.width, h: r.height, t: document.querySelector('.hbv-schritt').textContent }; });
     ok(maske.w === 390 && maske.h === 844 && /Schritt 1 von 3/.test(maske.t), 'Editor als eigene Maske über den ganzen Bildschirm, Schritt 1 von 3');
@@ -594,19 +594,20 @@ if (teil(3)) {
     const q2n = await hp.evaluate(() => HB.el[0].q[2][0]), q0n = await hp.evaluate(() => HB.el[0].q[0][0]);
     ok(q2n > q2 && Math.abs(q0n - nach[0]) < 1e-9 && await hp.locator('.hb-ecke.gewaehlt[data-i="2"]').count() === 1, 'Feinjustieren: Pfeile bewegen nur die gewählte Ecke (unten rechts), die Ecke ist markiert');
     await hp.click('[data-act="hb-ok"]'); await hp.waitForTimeout(400);
-    ok(await hp.evaluate(() => HB.el[0].fest && !HB.aktiv) && await hp.locator('.hbv-leiste .hbv-el[data-act="hb-el"] .hbv-haken').count() === 1 && /Noch 3 Vorschauen frei/.test(await hp.locator('.hbv-frei').innerText()), 'Bestätigen: Fenster in der Leiste mit Haken, Hinweis „Noch 3 Vorschauen frei“');
+    ok(await hp.evaluate(() => HB.el[0].fest && !HB.aktiv) && await hp.locator('.hbv-leiste .hbv-el[data-act="hb-el"] .hbv-haken').count() === 1 && /Noch 5 Vorschauen frei/.test(await hp.locator('.hbv-frei').innerText()), 'Bestätigen: Fenster in der Leiste mit Haken, Hinweis „Noch 5 Vorschauen frei“');
     await hp.click('.hbv-leiste [data-act="hb-el"]'); await hp.waitForSelector('.hb-el.aktiv');
     ok(await hp.evaluate(() => HB.aktiv === HB.el[0].id), 'Antippen in der Leiste holt das Fenster zum Ändern zurück');
     await hp.click('[data-act="hb-ok"]'); await hp.waitForTimeout(300);
     let rechnet = 0; hp.on('request', (r) => { if (r.url().includes('/api/hausbild') && r.method() === 'POST') rechnet++; });
-    await hp.evaluate(() => localStorage.setItem('aufmass.hausbild.vorschauen', '3'));
+    await hp.evaluate(() => localStorage.setItem('aufmass.hausbild.vorschauen', '5'));
     await hp.click('[data-act="hb-vorschau"]'); await hp.waitForSelector('.hb-grenze');
-    ok(rechnet === 0 && /Weitere Vorschauen mit deinem Aufmaßblatt/.test(await hp.locator('.hb-grenze').innerText()), 'Nach den 3 freien Vorschauen (ohne Konten auf diesem Server): keine weitere Rechnung, Bogen führt zum Aufmaßblatt');
+    ok(rechnet === 0 && /Weitere Vorschauen mit deinem Aufmaßblatt/.test(await hp.locator('.hb-grenze').innerText()), 'Nach den 5 freien Vorschauen (ohne Konten auf diesem Server): keine weitere Rechnung, Bogen führt zum Aufmaßblatt');
     /* Mit Konten auf dem Server (Inhaber, 4.11.2026: „maximal dreimal … dann soll man zumindest sein Aufmaß per Mail sichern und mit
        Code bestätigen“): ohne Konto zuerst „Aufmaß sichern“ (E-Mail und Code), mit Konto bis 10, mit Aufmaßblatt bis 20 */
     const stufen = await hp.evaluate(() => { const alt = SERVER.konten; SERVER.konten = true; render(); const b = document.querySelector('.hb-grenze'); const r = { text: b ? b.innerText : '', knopf: !!document.querySelector('.hb-grenze [data-act="hb-sichern"]'), n: [hbGrenzeN()] };
+      const ks = KS, ka = S.kauf, vm0 = S.verm; KS = { mail: 'probe@beispiel.de' }; r.n.push(hbGrenzeN()); S.kauf = Object.assign({}, ka || {}, { paid: true }); r.n.push(hbGrenzeN()); S.verm = { weg: 'A', wahl: [], gesendet: { nr: '1' } }; r.n.push(hbGrenzeN()); KS = ks; S.kauf = ka; S.verm = vm0;
       SERVER.konten = alt; render(); return r; });
-    ok(/Aufmaß sichern/.test(stufen.text) && /E-Mail-Adresse und einem Code/.test(stufen.text) && /bis zu 10 Vorschauen/.test(stufen.text) && stufen.knopf && stufen.n[0] === 3, 'Nach 3 freien Vorschauen mit Konten auf dem Server: Bogen „Aufmaß sichern“ mit E-Mail und Code, danach bis zu 10 (' + JSON.stringify(stufen).slice(0, 200) + ')');
+    ok(/Aufmaß sichern/.test(stufen.text) && /E-Mail-Adresse und einem Code/.test(stufen.text) && /10 weitere Vorschauen/.test(stufen.text) && stufen.knopf && stufen.n[0] === 5 && stufen.n[1] === 15 && stufen.n[2] === 25 && stufen.n[3] === 50, 'Nach 5 freien Vorschauen mit Konten auf dem Server: Bogen „Aufmaß sichern“ mit E-Mail und Code, 10 weitere; gekauft 25, kostenloser Weg 50 (' + JSON.stringify(stufen).slice(0, 200) + ')');
     await hp.click('.hb-grenze [data-act="hb-blatt"]'); await hp.waitForTimeout(400);
     ok(await hp.evaluate(() => S.screen === 'anfrage' || S.screen === 'teilen'), '„Zum Aufmaßblatt“ führt in die Anfrage');
     sauber(hp, 'An meinem Haus ansehen ohne Fehler');

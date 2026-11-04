@@ -16,7 +16,7 @@
    Elementflächen ins Originalfoto zurück; was außerhalb liegt, bleibt Pixel für Pixel das Foto des Kunden.
    Kosten: 0,9 Cent je Bild (resolution 1k, Preisliste docs.bfl.ai, 1.11.2026). Nur der EU-Zugang, siehe unten. Ohne BFL_API_KEY: 503 (die App sagt „noch nicht
    verfügbar“). BFL_API_KEY=attrappe (lokal, KI_ATTRAPPE=1): Das Bild mit den eingesetzten Fenstern kommt unverändert zurück.
-   Bremsen: 10 Bilder je 10 Minuten und Anschluss (Arbeitsspeicher), 12 je Anschluss und Tag (Prüfwert statt IP-Adresse in der Tabelle
+   Bremsen: 10 Bilder je 10 Minuten und Anschluss (Arbeitsspeicher), 25 je Anschluss und Tag (Prüfwert statt IP-Adresse in der Tabelle
    statistik, nach zwei Tagen gelöscht), HAUSBILD_TAG_MAX (Vorgabe 150) am Tag über alle Kunden. Foto und Ergebnis speichert der Server
    nicht; sie liegen nur im Browser des Kunden. Ohne den aktuellen Stand der Einwilligung (EINW_STAND) keine Übermittlung. */
 import { erlaubt, quelle, konfig } from './umgebung.js';
@@ -212,9 +212,9 @@ export async function onRequestPost({ request, env }) {
      eingang.js) und über alle Kunden (Datenbank, sonst Arbeitsspeicher); eine Vorschau zählt einmal, gleich wie viele Fenster */
   const ctx = { env: env, sp: null }; let k = {}; try { k = konfig(env); ctx.sp = speicher(k); } catch (e) { /* ohne Datenbank */ }
   /* Vorgaben seit 4.11.2026 (Funnel-Konzept docs/konzepte/2026-11-03-conversion-funnel.md, Fahrplan Punkt 1): 150 am Tag über alle Kunden
-     (vorher 500), 12 je Anschluss und Tag (vorher 20; 3 frei, 10 mit Konto, 20 mit Aufmaßblatt je Gerät); die Variable HAUSBILD_TAG_MAX bei Cloudflare geht vor */
+     (vorher 500), 25 je Anschluss und Tag (vorher 12; je Gerät 5 frei, 15 mit Konto, 25 mit gekauftem Aufmaßblatt, 50 auf dem kostenlosen Weg, die sich über Tage verteilen); die Variable HAUSBILD_TAG_MAX bei Cloudflare geht vor */
   const max = Math.max(1, parseInt(env.HAUSBILD_TAG_MAX, 10) || 150);
-  if (!(await budget(ctx, 'hbanschluss:' + (await pruefwert(k, q)), 12)).ok || !(await budget(ctx, 'hausbild:tag', max)).ok) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'tag' }, 429);
+  if (!(await budget(ctx, 'hbanschluss:' + (await pruefwert(k, q)), 25)).ok || !(await budget(ctx, 'hausbild:tag', max)).ok) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'tag' }, 429);
   if (teile) {
     if (weg === 'attrappe') return antwort({ ok: true, bilder: teile.map((t) => t.lage), attrappe: true, kosten: 0 }); // lokal: die eingesetzten Fenster
     if (weg !== 'cloudflare') return antwort({ ok: false, fehler: 'bad_request' }, 400);

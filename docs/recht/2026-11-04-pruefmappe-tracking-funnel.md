@@ -100,24 +100,25 @@ verarbeitet werden (kurz IP-Adresse für die Bremse, Browser-Kennung für die Ge
 **Was gilt seit 3./4.11.2026.**
 
 - Die Einladung erscheint erst, wenn ein Fenster vollständige Maße hat.
-- Auf einem Gerät gibt es drei KI-Vorschauen frei, zehn mit gesichertem Konto (E-Mail und Code), zwanzig mit freigeschaltetem Aufmaßblatt (geändert am 4.11.2026 auf Wunsch des Inhabers). Freigeschaltet
-  heißt: gekauft (7,99 €) oder über „Angebote aus deiner Nähe“ (Weg A der Vermittlung; die Weitergabe an Betriebe beruht dort auf eigener
-  Einwilligung).
-- Der Editor sagt das vorher offen („Noch 3 Vorschauen frei“). Danach öffnet „KI-Vorschau“ einen Bogen: ohne Konto „Weitere Vorschauen:
+- Auf einem Gerät gibt es fünf KI-Vorschauen frei, mit gesichertem Konto (E-Mail und Code) zehn weitere (zusammen 15), mit gekauftem
+  Aufmaßblatt (7,99 €) zusammen 25 und auf dem kostenlosen Weg zusammen 50 (geändert am 4.11.2026 abends auf Wunsch des Inhabers).
+  Kostenloser Weg heißt: „Angebote aus deiner Nähe“ abgeschickt (Weg A der Vermittlung; die Weitergabe an Betriebe beruht dort auf eigener
+  Einwilligung) oder ein Aufmaßblatt ohne Preis, das gesendet ist.
+- Der Editor sagt das vorher offen („Noch 5 Vorschauen frei“). Danach öffnet „KI-Vorschau“ einen Bogen: ohne Konto „Weitere Vorschauen:
   Aufmaß sichern“ (E-Mail und Code, Knopf „Aufmaß sichern“), mit Konto „Weitere Vorschauen mit deinem Aufmaßblatt“ (Knopf „Zum
   Aufmaßblatt“), jeweils mit „Nicht jetzt“. Frage dazu: Ist das Sichern des Aufmaßes im Konto als Bedingung für weitere Vorschauen eine
   zulässige Gegenleistung (die E-Mail-Adresse wird für das Konto gebraucht, nicht für Werbung)?
 - Der Zähler liegt im Browser (`aufmass.hausbild.vorschauen`, nur eine Zahl, neu in „Cookies und Speicher“). Die Server-Grenzen sind
-  gesenkt: 12 je Anschluss und Tag, 150 am Tag insgesamt.
+  25 je Anschluss und Tag (vorher 12), 150 am Tag insgesamt.
 - Die Einwilligung zur KI-Vorschau (Cloudflare, Stand 2026-11-02c) ist unverändert.
 
 **Fragen an die Anwälte.**
 
 1. **Kopplungsverbot (Art. 7 Abs. 4 DSGVO):** Weitere Vorschauen gibt es auch über Weg A, also nach Einwilligung in die Weitergabe der
-   Kontaktdaten an Betriebe. Wir halten das für zulässig: Es ist ein Zusatz, kein Kerndienst; der bezahlte Weg B steht gleichwertig daneben;
+   Kontaktdaten an Betriebe, und dort sogar mehr als beim Kauf (50 statt 25). Wir halten das für zulässig: Es ist ein Zusatz, kein Kerndienst; der bezahlte Weg B steht gleichwertig daneben;
    ohne Einwilligung bleibt alles andere nutzbar. Trägt das?
 2. **Transparenz (§ 5a UWG):** Reicht der Hinweis vor der ersten Vorschau? Braucht es den Hinweis auch auf der Kauf- bzw. Weichen-Seite
-   („mit dem Aufmaßblatt bis zu 10 Vorschauen“)?
+   („mit dem Aufmaßblatt bis zu 25 Vorschauen, mit Angeboten aus deiner Nähe kostenlos sogar bis zu 50“)?
 3. **§ 25 TDDDG für den Zähler im Browser:** Wir stützen ihn auf § 25 Abs. 2 Nr. 2, weil er zum angebotenen Dienst gehört (Kontingent).
    Einverstanden?
 4. **Leistungsbeschreibung:** Muss das Kontingent in die AGB bzw. in die Beschreibung des Aufmaßblatts, wenn es als Teil des Kaufs genannt

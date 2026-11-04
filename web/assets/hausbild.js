@@ -269,14 +269,19 @@ const hbVollPx = (e, W, H) => hbVoll(hbPx(e.q, W, H), HB.bilder[e.win]);
    Senden), dann bis zu HB_MIT_BLATT Durchgänge auf diesem Gerät. Der Zähler liegt im Browser und lenkt nur; die harte Grenze hält der
    Server (Bremse je Tag, functions/api/hausbild.js). So endet „nur mal ansehen“ beim Aufmaßblatt, nicht bei der nächsten Rechnung. */
 /* Kontingent seit 4.11.2026 (Inhaber: „maximal zum Beispiel dreimal und wenn man … mehr … generieren möchte, dann soll man zumindest sein
-   Aufmaß per Mail sichern und mit Code bestätigen“): 3 frei, 10 mit gesichertem Konto, 20 mit freigeschaltetem Aufmaßblatt, je Gerät */
-const HB_ZAEHL = 'aufmass.hausbild.vorschauen', HB_FREI_N = 3, HB_MIT_BLATT = 20;
+   Aufmaß per Mail sichern und mit Code bestätigen“). Seit dem Abend (Inhaber: „5 Vorschauen für den freien Nutzer, mit E-Mail-Sicherung
+   nochmal 10, und wenn man dann das Aufmaß bestellt, bekommt man 25 Vorschauen. Im ‚kostenlos‘-Modus gibt's 50 statt 25“): 5 frei,
+   15 mit gesichertem Konto (10 dazu), 25 mit gekauftem Aufmaßblatt, 50 auf dem kostenlosen Weg (Angebote aus der Nähe abgeschickt, oder
+   das Blatt ist ohne Preis und gesendet); Gesamtzahlen je Gerät */
+const HB_ZAEHL = 'aufmass.hausbild.vorschauen', HB_FREI_N = 5, HB_MIT_BLATT = 25, HB_KOSTENLOS = 50;
 const hbGezaehlt = () => { try { return Math.max(0, parseInt(localStorage.getItem(HB_ZAEHL) || '0', 10) || 0); } catch (e) { return 0; } };
 const hbZaehlen = () => { try { localStorage.setItem(HB_ZAEHL, String(hbGezaehlt() + 1)); } catch (e) { /* ohne Speicher: zählt nicht */ } };
 const hbBlattFrei = () => !!(S.kauf && S.kauf.paid) || (typeof KUNDE_FREI === 'function' && KUNDE_FREI() && !!S.sent);
-const HB_MIT_KONTO = 10; // mit E-Mail und Code gesichertes Aufmaß (Konto)
+const HB_MIT_KONTO = 15; // mit E-Mail und Code gesichertes Aufmaß (Konto): 10 zu den 5 freien
+/* kostenloser Weg: Anfrage „Angebote aus deiner Nähe“ abgeschickt (Weg A), oder das Blatt hat keinen Preis und ist gesendet */
+const hbKostenlos = () => !!(S.verm && S.verm.gesendet) || (typeof KUNDE_FREI === 'function' && KUNDE_FREI() && !!S.sent);
 const hbKonto = () => typeof KS !== 'undefined' && !!KS, hbKontoMoeglich = () => typeof kontoBereit === 'function' && kontoBereit();
-const hbGrenzeN = () => (hbBlattFrei() ? HB_MIT_BLATT : hbKonto() ? HB_MIT_KONTO : HB_FREI_N);
+const hbGrenzeN = () => (hbKostenlos() ? HB_KOSTENLOS : hbBlattFrei() ? HB_MIT_BLATT : hbKonto() ? HB_MIT_KONTO : HB_FREI_N);
 const hbRest = () => Math.max(0, hbGrenzeN() - hbGezaehlt());
 const hbBlattZiel = () => (typeof FREI === 'function' && FREI() ? 'teilen' : 'anfrage');
 /* Satz zum Aufmaßblatt: PDF für den Fensterbauer, und was es kostet (Preis aus pakete.js über PREIS()) */
@@ -297,9 +302,10 @@ function hbGrenzeBlatt() {
   /* Stufen: ohne Konto zuerst sichern (E-Mail und Code), mit Konto das Aufmaßblatt, mit Aufmaßblatt alles gerechnet */
   const frei = hbBlattFrei(), sichern = !frei && !hbKonto() && hbKontoMoeglich();
   const titel = frei ? 'Alle Vorschauen gerechnet.' : sichern ? 'Weitere Vorschauen: Aufmaß sichern.' : 'Weitere Vorschauen mit deinem Aufmaßblatt.';
-  const text = frei ? 'Auf diesem Gerät sind alle ' + HB_MIT_BLATT + ' Vorschauen gerechnet. Dein Aufmaßblatt hast du: Es geht mit allen Wünschen an deinen Fensterbauer, und der zeigt dir vor Ort echte Muster.'
-    : sichern ? 'Deine ' + HB_FREI_N + ' freien Vorschauen hast du gesehen. Sichere dein Aufmaß mit deiner E-Mail-Adresse und einem Code, dann rechnest du hier bis zu ' + HB_MIT_KONTO + ' Vorschauen, und dein Aufmaß ist auf jedem Gerät da.'
-    : 'Mit deinem Aufmaßblatt rechnest du hier bis zu ' + HB_MIT_BLATT + ' Vorschauen, und dein Fensterbauer bekommt alle Maße, Fotos und Wünsche, zum Ausdrucken oder als PDF.';
+  const nahe = typeof vermAn === 'function' && vermAn();
+  const text = frei ? 'Auf diesem Gerät sind alle ' + hbGrenzeN() + ' Vorschauen gerechnet. Dein Aufmaßblatt hast du: Es geht mit allen Wünschen an deinen Fensterbauer, und der zeigt dir vor Ort echte Muster.'
+    : sichern ? 'Deine ' + HB_FREI_N + ' freien Vorschauen hast du gesehen. Sichere dein Aufmaß mit deiner E-Mail-Adresse und einem Code, dann bekommst du ' + (HB_MIT_KONTO - HB_FREI_N) + ' weitere Vorschauen, und dein Aufmaß ist auf jedem Gerät da.'
+    : 'Mit deinem Aufmaßblatt rechnest du hier bis zu ' + HB_MIT_BLATT + ' Vorschauen' + (nahe ? ', mit Angeboten aus deiner Nähe kostenlos sogar bis zu ' + HB_KOSTENLOS : '') + '. Dein Fensterbauer bekommt alle Maße, Fotos und Wünsche, zum Ausdrucken oder als PDF.';
   const pille = sichern ? '<button type="button" class="dna-pille lg-weiter" data-act="hb-sichern">Aufmaß sichern' + hbPfeil + '</button>' : '<button type="button" class="dna-pille lg-weiter" data-act="hb-blatt">Zum Aufmaßblatt' + hbPfeil + '</button>';
   return '<div class="hb-wahl" role="dialog" aria-modal="true" aria-labelledby="hb-grenze-t"><div class="hb-wahl-blatt hb-grenze"><div class="hb-wahl-kopf"><h2 id="hb-grenze-t">' + titel + '</h2>' +
     '<button type="button" class="hb-rund" data-act="hb-grenze-zu" aria-label="Schließen">' + hbZ('zu') + '</button></div><p>' + text + '</p>' + (sichern ? '' : hbBlattKarte()) +
