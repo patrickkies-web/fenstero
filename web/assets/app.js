@@ -6837,8 +6837,8 @@ function wohinBlatt() {
 }
 /* Status eines Fensters in Listen: nur vollständig oder offen, keine Angaben (die stehen im Aufmaßblatt) */
 function fensterStatus(x) {
-  const d = derive(x), n = AW.offenListe(AW.nachTiefe(x, S.proj)).length;
-  return !d.complete || n ? (d.complete ? 'Maße vollständig' : 'Maße offen') + (n ? ', ' + n + (n === 1 ? ' Wunsch offen' : ' Wünsche offen') : '') : 'Vollständig';
+  const d = derive(x), n = AW.offenListe(AW.nachTiefe(x, S.proj)).length, ein = !d.complete && x.massWeg === 'eingeben' && d.elW && d.elH; // wie fensterStand
+  return !d.complete || n ? (d.complete ? 'Maße vollständig' : ein ? 'Maße eingegeben' : 'Maße offen') + (n ? ', ' + n + (n === 1 ? ' Wunsch offen' : ' Wünsche offen') : '') : 'Vollständig';
 }
 /* Stand eines Fensters für die Übersicht: vollständig, Maße offen oder die Zahl der offenen Wünsche; welche es sind, steht nie in Listen (Entscheidung des Inhabers) */
 function fensterStand(x) {
