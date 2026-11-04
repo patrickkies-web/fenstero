@@ -82,6 +82,18 @@ export function beschreibung(e) {
   teile.push(d.glas === 'ornament' ? 'obscured privacy glass' : 'clear insulating glass that reflects the sky and the surroundings, with a hint of the dark room behind, not frosted and not milky');
   return teile.join(', ');
 }
+/* Licht und Glas (Inhaber, 4.11.2026 abends: Einbau „megageil“, aber die Fenster „nicht mehr so detailreich … im Hinblick auf Licht,
+   Einstrahlung“, „die Spiegelungen … passen nicht zu der Umgebung“). Beim Kürzen waren die Sätze zu Licht und Glas weggefallen, und „1:1
+   wie die Vorlage“ ließ die KI das glatte Studioglas des 3-D-Bildes übernehmen. Deshalb: Form und Farben aus der Vorlage, Licht und Glas
+   aus dem Foto. Kein Aufzählen der Merkmale; nur, wie echtes Glas und ein echter Rahmen in diesem Licht aussehen. */
+export function lichtUndGlas(elemente, mehr) {
+  const orn = elemente.some((e) => e.daten && e.daten.glas === 'ornament'), es = mehr ? 'them' : 'it';
+  return 'Take only shape and colours from the reference, not its flat studio glass and studio light. ' +
+    'Light ' + es + ' like the photo: same sun direction, colour temperature, sharpness and grain; lintel and reveals cast soft shadows onto frame and glass; ' +
+    'frame edges, gaskets and handles catch the light with a slight sheen. ' +
+    'The glass is real double glazing: it mirrors the sky and the surroundings in front of the house, bent by the perspective and slightly uneven, ' +
+    'brighter at the top, darker below, with a faint hint of the dark room behind' + (orn ? '; obscured glass stays obscured' : '') + '; never flat blue, plain grey or a perfect mirror. ';
+}
 /* Kurzer Auftrag (Inhaber, 4.11.2026: „dass der Prompt nicht so groß ist … je länger der wird, umso weniger wird nachher in den Feinheiten
    aufgepasst“; das Element ist im Konfigurator gestaltet und liegt als Bild vor, es muss nur eins zu eins verbaut werden): kein Aufzählen
    der Merkmale mehr, nur Einbau 1:1 nach der Vorlage, in Größe, Proportion und Perspektive der Wand, und sonst nichts ändern. */
@@ -89,7 +101,7 @@ export function auftrag(elemente) {
   const neu = elemente.some((e) => e.art === 'neu'), namen = elemente.map((e, i) => '<window_' + (i + 1) + '>').join(', ');
   const text = 'Photorealistic edit of <ref_image_0>, a photo of a house. Build ' + namen + ' into the marked openings exactly as in their reference images, 1:1: ' +
     'same proportions, sashes, colours and blind box, nothing added or left out. Match the angle and perspective of the wall: frame set back in the opening, ' +
-    'reveals visible, sill below, light and shadows as in the photo. Old windows there are replaced completely' + (neu ? '; on a closed wall cut a matching opening' : '') + '. ' +
+    'reveals visible, sill below. ' + lichtUndGlas(elemente, elemente.length > 1) + 'Old windows there are replaced completely' + (neu ? '; on a closed wall cut a matching opening' : '') + '. ' +
     'Change nothing else in the photo.';
   const zeilen = elemente.map((e, i) => ({ id: 'window_' + (i + 1), from: 'ref_image_' + (e.vorlage + 1), src_bbox: [0, 0, 1000, 1000], tgt_bbox: e.box, desc: 'the window from its reference image, 1:1' }));
   zeilen.push({ id: 'facade_1', from: 'ref_image_0', src_bbox: [0, 0, 1000, 1000], tgt_bbox: [0, 0, 1000, 1000], desc: 'the house, unchanged' });
@@ -98,7 +110,7 @@ export function auftrag(elemente) {
 
 /* Auftrag für FLUX.2 [klein] bei Cloudflare: Bild 1 ist der Ausschnitt mit den flach eingesetzten Fenstern (lage), ab Bild 2 die Vorlagen
    aus dem 3-D-Modell. Seit 4.11.2026 kurz (Wunsch des Inhabers): Lage im Bild und die Nummer der Vorlage je Fenster, keine Merkmalsliste;
-   die eingesetzten Fenster in Bild 1 zeigen Teilung und Farbe schon. */
+   die eingesetzten Fenster in Bild 1 zeigen Teilung und Farbe schon. Licht und Glas seit dem Abend wieder ausdrücklich (lichtUndGlas). */
 function lageWort(b) {
   const cy = (b[0] + b[2]) / 2, cx = (b[1] + b[3]) / 2, v = cy < 380 ? 'upper' : cy > 620 ? 'lower' : '', h = cx < 380 ? 'left' : cx > 620 ? 'right' : '';
   return v && h ? v + ' ' + h : v || h || 'centre';
@@ -108,7 +120,7 @@ export function auftragCf(elemente, vorlagenZahl) {
   const je = elemente.map((e, i) => (mehr ? 'Window ' + (i + 1) + ' (' + lageWort(e.box) + ')' : 'The window') + (e.vorlage < vorlagenZahl ? ' is image ' + (e.vorlage + 2) : ' is as pasted') + '.').join(' ');
   return 'Photorealistic edit of image 1, a photo of a house. ' + (mehr ? 'The new windows are' : 'The new window is') + ' pasted flat into it as a placement guide. ' +
     'Build ' + (mehr ? 'each one' : 'it') + ' into the wall exactly as pasted, 1:1: same size, proportions, sashes, colours and blind box as its reference. ' + je + ' ' +
-    'Match the angle and perspective of the wall: frame set back in the opening, reveals visible, sill below, light and shadows as in the photo. ' +
+    'Match the angle and perspective of the wall: frame set back in the opening, reveals visible, sill below. ' + lichtUndGlas(elemente, mehr) +
     'Old windows there are replaced completely' + (neu ? '; on a closed wall cut a matching opening' : '') + '. Change nothing else in the photo.';
 }
 const zuBytes = (dataUrl) => { const t = atob(roh(dataUrl)), b = new Uint8Array(t.length); for (let i = 0; i < t.length; i++) b[i] = t.charCodeAt(i); return b; };

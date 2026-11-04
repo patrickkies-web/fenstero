@@ -730,6 +730,12 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
   Element einmal ganz und einmal nur mit Rahmen (gleiche Kamera) und setzt das ganze Bild perspektivisch vom Rahmen aus fort (hbVoll). Der
   Auftrag an die KI ist **kurz** („1:1 wie die Vorlage einbauen, passend zu Winkel und Perspektive der Wand, sonst nichts ändern“) und
   zählt die Merkmale nicht mehr auf; das Element zeigt die Vorlage aus dem 3-D-Modell (Behang hochgefahren, ohne Bedienung von innen).
+  Seit dem Abend (Inhaber: Einbau „megageil“, aber Licht und Spiegelungen „nicht mehr so detailreich“) sagt der Auftrag wieder, wie
+  Licht und Glas aussehen (`lichtUndGlas` in functions/api/hausbild.js): Form und Farben aus der Vorlage, nie ihr glattes Studioglas;
+  Licht wie im Foto (Sonnenrichtung, Farbtemperatur, Schärfe, Korn, Schatten von Sturz und Laibung, Glanz an Kanten, Dichtung und Griff);
+  Glas als echte Isolierverglasung, die Himmel und Umgebung vor dem Haus perspektivisch und leicht unruhig spiegelt, oben heller, unten
+  dunkler, mit einer Ahnung des dunklen Raums dahinter; Ornamentglas bleibt blickdicht. Probe mit FLUX.2 [klein] 9B am Beispielhaus:
+  docs/profis/bilder/2026-11-04-ki-glas-vorher-nachher.jpg (je zwei Läufe mit altem und neuem Auftrag, dazu einer mit Rollladen).
   Vorher/Nachher am Beispielhaus auf der Willkommensseite, in „Gespeichert“ und in der Liste; die Einladung ab dem ersten gespeicherten
   Fenster. In „Gespeichert“ steht „Dieses Fenster“ (Maße, Wünsche, Kopieren, Löschen, Themen) über der Einladung und „Wie geht es weiter?“.
 - **Lenkung zum Aufmaßblatt (Inhaber, 3.11.2026: jede Generierung kostet; Konzept docs/konzepte/2026-11-03-conversion-funnel.md):** Die
