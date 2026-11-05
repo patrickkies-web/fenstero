@@ -980,7 +980,14 @@ function w3dCalc(w, o) {
   const elW = elWa || Math.round(moW - 30), elH0 = elHa || Math.round(moH - 15 - kast0);
   /* Aufsatzkasten: Öffnungshöhe minus Kasten bleibt fürs Element; der Kasten steht auf dem Rahmen bis zur Oberkante der Öffnung (nie höher
      als die Öffnung abzüglich 300 mm Element) */
-  const kastenH = haveMo ? Math.min(kast0, Math.max(0, moH - 300)) : kast0, elH = kastenH ? Math.max(300, Math.min(elH0, moH - kastenH)) : elH0;
+  let kastenH = haveMo ? Math.min(kast0, Math.max(0, moH - 300)) : kast0, elH = kastenH ? Math.max(300, Math.min(elH0, moH - kastenH)) : elH0;
+  /* Mit gemessener Öffnung sitzt das neue Element passend darin (Inhaber, 5.11.2026: „egal was der Nutzer eingibt … passend in der
+     Laibung … allerhöchstens … kleiner durch Aufsatzkästen“): Öffnung minus 15 mm je Seite und oben, minus Aufsatzkasten; bleibt der
+     bestehende Kasten, die gemessene Lücke über dem alten Element (Fläche „kalt“ darüber). Das gemessene alte Element zeigt nur noch die
+     Schilder beim Messen. Gleiche Regel wie die Zeichnung (AW.elementNeu). */
+  let elWn = elW;
+  const en = haveMo && AW.elementNeu ? AW.elementNeu(w) : null;
+  if (en) { elWn = en.b; elH = en.h; kastenH = en.alt ? 0 : en.kasten; }
   /* Türen: tieferer Blendrahmen mit zwei Laufebenen (Hebe-Schiebe) bzw. Laufschiene (Falt, PSK), unten die Schwelle statt des Rahmenprofils.
      Die Balkontür hat Fensterprofile (gleiche Tiefe, Pfosten zwischen zwei Flügeln), steht aber wie jede Tür auf dem Boden */
   const tuer = istTuer(w), art = w.art || 'fenster', fd = art === 'hst' ? 170 : art === 'balkon' ? W3D.FD : tuer ? 90 : W3D.FD;
@@ -1016,7 +1023,7 @@ function w3dCalc(w, o) {
   /* Fuge je Paar (mulL): Stulp 8 mm (die Stulpleiste), sonst Pfosten; Türen außer der Balkontür ohne Pfosten. mul bleibt die Pfostenbreite */
   const n = Math.max(1, w.sashes.length), pf = prof.pf, sf = prof.sf, mul = tuer && art !== 'balkon' && art !== 'haustuer' ? 0 : prof.mul;
   const mulL = w.sashes.slice(0, -1).map((x, i) => (AW.fugeStulp(w, i) ? 8 : mul)), mulSum = mulL.reduce((a, b) => a + b, 0);
-  const innerW = elW - 2 * pf, innerH = elH - pf - pfB, olH = w.ol ? Math.round(Math.min(innerH * 0.6, Math.max(innerH * 0.26, formSenke(w.form, innerW, innerH)))) : 0;
+  const innerW = elWn - 2 * pf, innerH = elH - pf - pfB, olH = w.ol ? Math.round(Math.min(innerH * 0.6, Math.max(innerH * 0.26, formSenke(w.form, innerW, innerH)))) : 0;
   const ulH = w.ul && art === 'fenster' && !festForm(w.form) ? Math.round(clamp(num(w.ulH) || 400, 200, Math.max(200, (innerH - olH) * 0.55))) : 0;
   /* Kämpfer unter dem Oberlicht: so breit wie ein Pfosten, auch bei Türen (die sonst keinen Pfosten haben) */
   const km = olH ? (mul || prof.mul) : 0;
@@ -1027,8 +1034,8 @@ function w3dCalc(w, o) {
   /* Aufteilung (w.anteile, qTeile): die Flügel ohne Seitenteile teilen sich die freie Breite nach Prozent, sonst gleich */
   const ant = anteileGueltig(w, nFl) ? w.anteile : null; let kAnt = 0;
   const swL = w.sashes.map((x) => Math.max(0, x.st ? stB : ant ? freiFl * ant[kAnt++] / 100 : nSt ? flB : sashW)), sxL = []; swL.reduce((a, b, i) => { sxL[i] = a; return a + b + (mulL[i] || 0); }, 0);
-  return { s: s, sw: swL, sx: sxL, km: km, moW: moW, moH: moH, elW: elW, elH: elH, kastenH: kastenH, laib: laib, T: T, fd: fd, pfB: pfB, tuer: tuer, art: art, n: n, pf: pf, sf: sf, mul: mul, mulL: mulL, innerW: innerW, innerH: innerH, olH: olH, ulH: ulH, sashH: sashH, sashW: sashW, haveMo: haveMo, haveEl: !!(d.elW && d.elH),
-    x0: -elW / 2, y0: moH / 2 - elH, dimX: dimX, dimY: dimY, wallW: moW + W3D.MARGIN_W / Math.sqrt(zoom), wallH: moH + W3D.MARGIN_H / Math.sqrt(zoom), zoom: zoom, showEl: o.showEl !== false, dims: o.dims || [], active: o.active || '' };
+  return { s: s, sw: swL, sx: sxL, km: km, moW: moW, moH: moH, elW: elWn, elH: elH, kastenH: kastenH, laib: laib, T: T, fd: fd, pfB: pfB, tuer: tuer, art: art, n: n, pf: pf, sf: sf, mul: mul, mulL: mulL, innerW: innerW, innerH: innerH, olH: olH, ulH: ulH, sashH: sashH, sashW: sashW, haveMo: haveMo, haveEl: !!(d.elW && d.elH),
+    x0: -elWn / 2, y0: moH / 2 - elH, dimX: dimX, dimY: dimY, wallW: moW + W3D.MARGIN_W / Math.sqrt(zoom), wallH: moH + W3D.MARGIN_H / Math.sqrt(zoom), zoom: zoom, showEl: o.showEl !== false, dims: o.dims || [], active: o.active || '' };
 }
 const px = (v) => (Math.round(v * 100) / 100) + 'px';
 /* Umriss für clip-path; .g trägt dieselbe Geometrie in Zahlen für die WebGL-Bühne (buehne.js) */
@@ -1344,6 +1351,9 @@ function w3dHTML(w, o) {
   h += faceEl('sa-t1', 'w3d-sill', ' style="background: ' + ba.oben + '"') + faceEl('sa-t2', 'w3d-sill', ' style="background: ' + ba.oben + '"') + faceEl('sa-f', 'w3d-sill w3d-sill-f', ' style="background: ' + ba.stirn + '"');
   /* Endkappen der Fensterbank außen */
   h += faceEl('sa-l', 'w3d-sill w3d-sill-e', ' style="background: ' + ba.stirn + '"') + faceEl('sa-r', 'w3d-sill w3d-sill-e', ' style="background: ' + ba.stirn + '"');
+  /* weicher Schatten der Fensterbank auf der Fassade (5.11.2026, Inhaber: mehr Detail; ohne ihn wirkt die Bank aufgeklebt) */
+  h += faceEl('si-sch', 'w3d-sill-sch', ' style="background: linear-gradient(180deg, rgba(24, 21, 17, .22), rgba(24, 21, 17, .08) 38%, rgba(24, 21, 17, 0))"');
+  h += faceEl('sa-sch', 'w3d-sill-sch', ' style="background: linear-gradient(180deg, rgba(24, 21, 17, .3), rgba(24, 21, 17, .12) 38%, rgba(24, 21, 17, 0))"');
   /* Abdeckleisten an der Fuge zwischen Rahmen und Laibung, innen und/oder außen */
   if (Z.leiste === 'innen' || Z.leiste === 'beide') ['t', 'l', 'r'].forEach((k) => { h += faceEl('li-' + k, 'w3d-leiste'); });
   if (Z.leiste === 'aussen' || Z.leiste === 'beide') ['t', 'l', 'r'].forEach((k) => { h += faceEl('la-' + k, 'w3d-leiste'); });
@@ -1759,7 +1769,9 @@ function w3dLayout(stage, w, o, gr) {
   face(q('sa-t2'), bwA, OVA / Math.cos(NG), bxA, yB, -T, 'rotateX(' + n1(-90 + 7) + 'deg)', '0 0');
   face(q('sa-f'), bwA, LIP, bxA, yB + OVA * Math.tan(NG), -T - OVA, 'rotateY(180deg)', '50% 50%');
   face(q('sa-l'), OVA, LIP + OVA * Math.tan(NG), bxA, yB, -T, 'rotateY(90deg)', '0 0'); face(q('sa-r'), OVA, LIP + OVA * Math.tan(NG), bxA + bwA, yB, -T, 'rotateY(90deg)', '0 0');
-  ['sill-t', 'sill-f', 'sill-l', 'sill-r', 'sa-t1', 'sa-t2', 'sa-f', 'sa-l', 'sa-r'].forEach((r) => { const e = q(r); if (e) e.style.opacity = ohneBank ? '0' : ''; });
+  face(q('si-sch'), bwI + 30 * s, OV + 60 * s, bxI - 15 * s, yB + TH - 2 * s, Math.max(2, 4 * s), '', '0 0');
+  face(q('sa-sch'), bwA + 30 * s, OVA + 70 * s, bxA - 15 * s, yB + OVA * Math.tan(NG) + LIP - 2 * s, -T - Math.max(2, 4 * s), 'rotateY(180deg)', '50% 50%');
+  ['sill-t', 'sill-f', 'sill-l', 'sill-r', 'sa-t1', 'sa-t2', 'sa-f', 'sa-l', 'sa-r', 'sa-sch', 'si-sch'].forEach((r) => { const e = q(r); if (e) e.style.opacity = ohneBank ? '0' : ''; });
   /* Abdeckleisten: 22 mm auf der Laibung am Rahmen, innen (zum Raum hin) und außen (zur Fassade hin) */
   const LW = Math.max(2, 22 * s);
   face(q('li-t'), moW, LW, -moW / 2, -moH / 2 + 0.8, -d + LW, 'rotateX(-90deg)', '0 0'); face(q('li-l'), LW, moH, -moW / 2 + 0.8, -moH / 2, -d + LW, 'rotateY(90deg)', '0 0'); face(q('li-r'), LW, moH, moW / 2 - 0.8, -moH / 2, -d + LW, 'rotateY(90deg)', '0 0');
@@ -2928,6 +2940,7 @@ function go(screen, dir) {
   if (screen === 'frage' && dir === 'back' && (S.screen === 'fotos' || S.screen === 'zeichnen')) S.q = 'massweg';
   if (screen !== 'frage' || !S.q) S.ausListe = false;
   if (MA_SCHIRME.indexOf(screen) < 0) { S.masseAendern = null; S.masseWahl = false; }
+  S.wzMenue = false;
   /* Die Tiefe wird nicht mehr gefragt: Hauptweg plus freiwillige Liste heißt fürs Blatt „das Wichtigste, den Rest nach Standard“, solange
      das Projekt keine eigene Tiefe hat (ältere Aufmaße, Vorgabe des Betriebs) */
   if (screen === 'frage' && S.proj && !S.proj.tiefe) S.proj.tiefe = 'kurz';
@@ -6104,6 +6117,31 @@ function wzKapitel(c) {
     '<div class="wz-bogen-kopf"><span id="wz-kap-t">Direkt zu einem Thema</span><button type="button" class="wz-rund" data-act="wz-kapitel" aria-label="Schließen">' + x + '</button></div><div class="wz-kapitel">' +
     abs.map((g) => '<button type="button" class="ql" data-act="q-sprung" data-v="' + esc(g.id) + '" data-kap="' + g.k + '"' + (g.jetzt ? ' aria-current="step"' : '') + '><i class="' + (g.jetzt ? 'ist' : g.fertig ? 'fertig' : '') + '" aria-hidden="true"></i>' + esc(g.name) + '<small>' + (g.jetzt ? 'jetzt' : g.fertig ? 'erledigt' : '') + '</small></button>').join('') + '</div></div></div>';
 }
+/* Menüknopf auf der Bühne (Inhaber, 5.11.2026: „in dem 3-D-Bild … eine kleine Menüknopf, welcher alle Einstellungen vom Fenster einmal
+   öffnet … eine grobe Übersicht … um schnell zu den jeweiligen Schritten zu kommen“; „in der Liste soll auch farblich abgesetzt die
+   Möglichkeit stehen … das Fenster … in 3-D an seinem echten Haus sehen“): oben hellblau „An deinem Haus ansehen“ (wie die Einladung),
+   dann je Kapitel die Fragen mit der Wahl, Antippen springt dorthin (q-sprung), am Ende die freiwillige Liste */
+const WZ_MENUE_ICO = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h12M4 10h12M4 14h8"/></svg>';
+const wzMenueKnopf = () => '<button type="button" class="wz-menue-knopf" data-act="wz-menue" aria-haspopup="dialog" aria-expanded="' + !!S.wzMenue + '" aria-label="Alles an diesem Element: Übersicht der Einstellungen">' + WZ_MENUE_ICO + '</button>';
+function wzMenue(c) {
+  if (!S.wzMenue) return '';
+  const w = S.win, x = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+  const ding = istTuer(w) ? 'deiner Tür' : w.art === 'fest' ? 'deiner Verglasung' : 'deinem Fenster', titel = String(w.name || '').trim() || (istTuer(w) ? 'Tür' : w.art === 'fest' ? 'Verglasung' : 'Fenster');
+  const NAME = { form: 'Form', teilung: 'Flügel', massweg: 'Maße', lage: 'Wie viele und wo', material: 'Material', fa: 'Farbe außen', fi: 'Farbe innen', glas: 'Verglasung', rc: 'Erreichbarkeit und Einbruchschutz', sart: 'Sonnenschutz', extras: 'Weitere Möglichkeiten' };
+  const nr = (id) => { const m = /-(\d+)$/.exec(id); return m ? ' Flügel ' + (+m[1] + 1) : ''; };
+  const name = (q) => { const b = String(q.id).split('-')[0]; return b === 'typ' ? 'Öffnung' + nr(q.id) : b === 'din' ? 'Anschlag' + nr(q.id) : NAME[q.id] || q.kurz || QKURZ[b] || String(q.title || '').replace(/<[^>]+>/g, '').replace(/[?.]$/, ''); };
+  const wert = (q) => { if (q.id === 'fa' || q.id === 'fi') return rahmenFarbe(w, q.id === 'fa' ? 'aussen' : 'innen').name; if (q.id === 'lage') return [AW.etageText(w), (num(w.anzahl) || 1) > 1 ? w.anzahl + ' Stück' : ''].filter(Boolean).join(' · ');
+    if (q.id === 'sprossen') return (w.bars || []).length ? (lab('preset', w.preset) || 'Mit Sprossen') : 'Ohne'; if (q.id === 'rc') return lab('rc', w.rc) || 'Basisschutz';
+    if (q.id === 'massweg') { const d = derive(w); return d.complete ? thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm' : w.massWeg === 'eingeben' && d.elW && d.elH ? thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm, eingegeben' : 'noch offen'; } if (q.kind === 'extras') { const n = qExtras(qList(w)).filter((e) => extraWert(e).an).length; return n ? n + ' gewählt' : 'freiwillig'; } return extraWert(q).t; };
+  const haus = typeof hbDa === 'function' && hbDa() ? '<button type="button" class="wz-menue-haus" data-act="menu-haus"><span class="wz-menue-haus-tx"><span>An deinem Haus</span><b>' + esc('Sieh ' + (istTuer(w) ? 'die Tür' : w.art === 'fest' ? 'die Verglasung' : 'das Fenster') + ' an deinem Haus') + '</b><small>Foto wählen, Element setzen, eine KI rechnet das Bild.</small></span><span class="wz-menue-pfeil" aria-hidden="true">' + CHEV + '</span></button>' : '';
+  const kap = qAbschnitte(c).map((g) => '<div class="wz-menue-gruppe" role="group" aria-label="' + esc(g.name) + '"><p class="wz-menue-kopf">' + esc(g.name) + '</p>' + c.list.slice(g.i0, g.i1 + 1).map((q, k) => {
+    const j = g.i0 + k;
+    return '<button type="button" class="wz-menue-zeile" data-act="q-sprung" data-v="' + esc(q.id) + '"' + (j === c.i ? ' aria-current="step"' : '') + '><span><b>' + esc(name(q)) + '</b><small>' + esc(wert(q)) + '</small></span><span class="wz-menue-pfeil" aria-hidden="true">' + CHEV + '</span></button>';
+  }).join('') + '</div>').join('');
+  return '<div class="wz-bogen wz-menue" role="dialog" aria-modal="true" aria-labelledby="wz-menue-t"><button type="button" class="wz-bogen-grund" data-act="wz-menue" aria-label="Schließen" tabindex="-1"></button><div class="wz-bogen-blatt">' +
+    '<div class="wz-bogen-kopf"><span id="wz-menue-t">' + esc('Alles an ' + ding) + '</span><button type="button" class="wz-rund" data-act="wz-menue" aria-label="Schließen">' + x + '</button></div>' +
+    '<p class="wz-menue-name">' + esc(titel) + ' · Antippen führt direkt zur Einstellung.</p>' + haus + '<div class="wz-menue-liste">' + kap + '</div></div></div>';
+}
 /* Zeichnungen in Kacheln und Formen als Strichzeichnung: Flächen leer, Glas getönt, Striche 1,8 / 1,2 / 1 (gerätunabhängig); fehlt der
    Hauptstrich (Sonnenschutz), tragen Kasten und Rahmen ihn */
 function wzStrich(html) {
@@ -6127,7 +6165,7 @@ function frageDna(c, q, panel, stage, designFertig, tasten) {
   panel = wzStrich(panel);
   const w = S.win, n = c.list.length, last = c.i === n - 1, ab = qAbschnitte(c).find((g) => g.jetzt) || { i0: 0, i1: n - 1 };
   const steps = stepsFor(w), nr = steps.indexOf('frage') + 1;
-  const buehne = '<div class="wz-buehne' + (wzFrei(q) ? ' wz-frei' : '') + '">' + stage + '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + Math.max(0.04, (c.i + 1) / n).toFixed(3) + '"></i>Schritt ' + nr + ' · Wünsche</span></div>';
+  const buehne = '<div class="wz-buehne' + (wzFrei(q) ? ' wz-frei' : '') + '">' + stage + '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + Math.max(0.04, (c.i + 1) / n).toFixed(3) + '"></i>Schritt ' + nr + ' · Wünsche</span>' + wzMenueKnopf() + '</div>';
   const maHier = masseAendernHier() && q.id === 'massweg';
   const pos = maHier ? 'Maße ändern' : q.kind === 'extras' ? 'Zum Schluss, freiwillig' : !qHaupt(q) ? 'Freiwillig · ' + qAbschnitt(q) : 'Frage ' + (c.i - ab.i0 + 1) + ' von ' + (ab.i1 - ab.i0 + 1);
   const kopf = '<div class="hd wz-frage"><div class="hd-zeile"><p class="eyebrow" id="wz-pos">' + esc(pos) + '</p><span class="hd-tools">' + tiefeKnopf(q) + (q.id === 'notiz' ? '' : notizKnopf(notizOrt())) + '</span></div>' +
@@ -6139,7 +6177,7 @@ function frageDna(c, q, panel, stage, designFertig, tasten) {
     (designFertig ? '<button type="button" class="dna-pille dna-pille--leise wz-anpassen" data-act="qnext">Anpassen</button><button type="button" class="dna-pille lg-weiter btn primary" data-act="save">Speichern' + pfeil + '</button>'
       : '<button type="button" class="dna-pille lg-weiter btn primary" data-act="qnext">' + (maHier ? 'Maße übernehmen' : !qHaupt(q) ? 'Fertig' : last ? sichern : 'Weiter') + pfeil + '</button>') + '</div>' + rechtLinks(); // die Verweise unter der Pille (Inhaber, 2.11.2026)
   if (tasten) return { html: lgKopf() + wzBand(c) + buehne + tasten, back: ['Zurück', 'qprev'], dna: true, cls: 'dna wz wz-tasten', qpos: (c.i + 1) / n };
-  return { html: lgKopf() + dnaTisch(wzBand(c) + buehne, '<div class="qdock wz-dock">' + kopf + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div></div>' + fuss) + wzKapitel(c),
+  return { html: lgKopf() + dnaTisch(wzBand(c) + buehne, '<div class="qdock wz-dock">' + kopf + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div></div>' + fuss) + wzKapitel(c) + wzMenue(c),
     back: ['Fenster', 'qprev', 'liste'], dna: true, cls: 'dna wz dt', voll: true, qpos: (c.i + 1) / n };
 }
 function lpZeigen(rasten) {
@@ -6884,6 +6922,7 @@ function zurueckTaste() {
   if (S.extrasHinweis) { S.extrasHinweis = false; render(); return true; }
   if (S.gebFrage) { S.gebFrage = false; render(); return true; }
   if (S.masseWahl) { S.masseWahl = false; S.masseAendern = null; render(); return true; }
+  if (S.wzMenue) { S.wzMenue = false; render(); const b = document.querySelector('.wz-menue-knopf'); if (b) b.focus({ preventScroll: true }); return true; }
   if (S.wzKap) { S.wzKap = false; render(); const b = document.querySelector('.wz-band'); if (b) b.focus({ preventScroll: true }); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
   if (S.qMass && S.screen === 'frage') { S.qMass = null; render(); return true; } // Zifferntasten in den Wünschen
@@ -6913,6 +6952,7 @@ function escTaste() {
   if (S.sendeFrage) { S.sendeFrage = false; render(); return true; }
   if (S.gloss || S.glossIndex) { S.gloss = null; S.glossIndex = false; render(); return true; }
   if (S.wohin) { S.wohin = false; render(); return true; }
+  if (S.wzMenue) { S.wzMenue = false; render(); const b = document.querySelector('.wz-menue-knopf'); if (b) b.focus({ preventScroll: true }); return true; }
   if (S.wzKap) { S.wzKap = false; render(); const b = document.querySelector('.wz-band'); if (b) b.focus({ preventScroll: true }); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
   if (S.qMass && S.screen === 'frage') { S.qMass = null; render(); return true; }
@@ -8147,9 +8187,16 @@ function act(name, el) {
       if (v === 'frage' && S.screen !== 'frage') { S.q = null; S.openSash = -1; S.designVorher = null; S.nameFehler = false; S.lgGrund = null; }
       return go(v, stepsFor(w).indexOf(v) < stepsFor(w).indexOf(S.screen) ? 'back' : 'fwd');
     }
-    case 'q-sprung': { const c = qCurrent(), j = c.list.findIndex((q) => q.id === v); if (j < 0) return; if (j > c.i && c.q.id === 'lage' && lgFehlt(w)) return lgVerlangen(lgFehlt(w)); S.wohin = false; S.wzKap = false; if (j === c.i) return render(); return qStep(j - c.i); }
+    case 'q-sprung': { const c = qCurrent(), j = c.list.findIndex((q) => q.id === v); if (j < 0) return; if (j > c.i && c.q.id === 'lage' && lgFehlt(w)) return lgVerlangen(lgFehlt(w)); S.wohin = false; S.wzKap = false; S.wzMenue = false; if (j === c.i) return render(); return qStep(j - c.i); }
     /* Wünsche (Design-DNA): Tippen aufs Kapitelband öffnet „Direkt zu einem Thema“, Schließen gibt den Fokus ans Band zurück */
-    case 'wz-kapitel': { S.wzKap = !S.wzKap; render(); const z = document.querySelector(S.wzKap ? '.wz-bogen .wz-rund' : '.wz-band'); if (z) z.focus({ preventScroll: true }); return; }
+    case 'wz-menue': { S.wzMenue = !S.wzMenue; S.wzKap = false; render(); const z = document.querySelector(S.wzMenue ? '.wz-menue .wz-rund' : '.wz-menue-knopf'); if (z) z.focus({ preventScroll: true }); return; }
+    /* aus dem Menü an das eigene Haus: ein neues oder geändertes Element erst speichern (ohne Namen fragt saveWin danach) */
+    case 'menu-haus': {
+      S.wzMenue = false;
+      if (fensterOffen()) { saveWin(); if (fensterOffen() || S.screen === 'frage') return; }
+      return hbAct('hb-auf', el);
+    }
+    case 'wz-kapitel': { S.wzKap = !S.wzKap; S.wzMenue = false; render(); const z = document.querySelector(S.wzKap ? '.wz-bogen .wz-rund' : '.wz-band'); if (z) z.focus({ preventScroll: true }); return; }
     case 'verlassen-speichern': { const z = S.verlassen && S.verlassen.ziel; S.verlassen = null; saveWin(); if (S.screen === 'fertig' && z) ziehen(z); return; }
     case 'verlassen-entwurf': { const z = S.verlassen && S.verlassen.ziel; S.verlassen = null; entwurfJetzt(); return ziehen(z); }
     case 'verlassen-verwerfen': { const z = S.verlassen && S.verlassen.ziel, g = S.editIdx >= 0 ? S.windows[S.editIdx] : null; S.verlassen = null; entwurfWeg(); if (g) S.win = altAngleichen(Object.assign(baseWin(), kopie(g))); else { S.win = baseWin(); S.editIdx = -1; } ziehen(z); return toast(g ? 'Änderungen verworfen' : 'Fenster verworfen'); }

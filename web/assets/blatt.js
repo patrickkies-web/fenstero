@@ -954,7 +954,7 @@
       const rest = wH + best + 3 + kiBlock + bildH, ziel = unten() - y - 7 - rest;
       /* Passt alles nicht einmal mit kleiner Zeichnung, geht die Einbausituation geschlossen auf die nächste Seite und die Zeichnung bleibt groß */
       const ohneKi = unten() - y - 7 - (rest - kiBlock - bildH), kiWeiter = ziel < 72 && (kiBlock + bildH) > 0;
-      const zMax = !kiWeiter ? Math.max(72, Math.min(118, ziel)) : Math.max(84, Math.min(118, ohneKi)), pl = AW.plan(w, { b: zw - 6, h: zMax - 13, fs: 3 }), zh = Math.max(pl.h + 13, mH);
+      const zMax = !kiWeiter ? Math.max(72, Math.min(118, ziel)) : Math.max(84, Math.min(118, ohneKi)), pl = AW.plan(w, { b: zw - 6, h: zMax - 13, fs: 3, abzug: ab }), zh = Math.max(pl.h + 13, mH);
       /* Zeichnung links, Maße rechts */
       platzP(zh);
       karteRand(M, y, zw, zh);

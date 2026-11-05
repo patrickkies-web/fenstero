@@ -406,7 +406,7 @@
     /* freie Breite für die Flügel (mm): lichte Rahmenbreite ohne Pfosten und Seitenteile, wie w3dCalc in app.js (Blendrahmen 62, Pfosten 72,
        Stulp 8, schmale Ansicht 52 und 60, Türen ohne Pfosten); 0 ohne Elementbreite */
     function teilFrei(w) {
-      const d = derive(w), elW = d.elW; if (!elW) return 0;
+      const d = derive(w), en = elementNeu(w), elW = en ? en.b : d.elW; if (!elW) return 0; // das neue Element (elementNeu), wie w3dCalc
       const S = w.sashes || sashesFor(w.teilung), n = S.length, tuer = istTuer(w), schmal = w.schmal === 'schmal' && detailGilt(w, 'schmal');
       const pm = profilMm(w), pf = pm.pf, mul = tuer && w.art !== 'balkon' ? 0 : pm.mul, fugen = S.slice(0, -1).reduce((a, x, i) => a + (fugeStulp(w, i) ? 8 : mul), 0), innerW = elW - 2 * pf, nSt = S.filter((x) => x.st).length, nFl = n - nSt, frei = innerW - fugen;
       const stB = nSt ? Math.max(150, Math.min(num(w.seitenB) || 400, Math.max(150, (frei - nFl * 300) / nSt))) : 0;
@@ -622,7 +622,8 @@
     }
     const PROFIL_MM = 120;
     function rettung(w) {
-      const d = derive(w), S = (w.sashes || sashesFor(w.teilung)).filter((x) => !x.st), auf = S.filter((x) => x.t !== 'F' && x.t !== 'K');
+      const d0 = derive(w), en = elementNeu(w), d = en ? Object.assign({}, d0, { elW: en.b, elH: en.h }) : d0; // das neue Fenster in der Öffnung
+      const S = (w.sashes || sashesFor(w.teilung)).filter((x) => !x.st), auf = S.filter((x) => x.t !== 'F' && x.t !== 'K');
       const m = (v) => String(Math.round(v / 10) / 100).replace('.', ',');
       if (!d.elW || !d.elH) return { ok: null, text: 'Ohne Maße des Fensters nicht nachzurechnen.' };
       if (!auf.length) return { ok: false, text: 'Laut Angaben ohne Drehflügel: als Rettungsweg ungeeignet.' };
@@ -899,6 +900,23 @@
       return { b: bw, h: bh, sicher: !warn.length, anschlag: anschlag, aufsatz: aufsatz, text: th(bw) + ' × ' + th(bh) + ' mm', formel: (w.neu ? 'Rohbauöffnung' : 'Öffnung') + ' minus ' + a.seite + ' mm je Seite, ' + a.oben + ' mm oben' + (u ? ', ' + u + ' mm unten' : ''), warn: warn,
         warnText: warn.length ? 'Vor Ort prüfen: ' + warn.join(', ') + (anschlag ? '; der Vorschlag ist ohne Anschlag gerechnet.' : '.') : '' };
     }
+    /* ---------- Neues Element in der Öffnung (Inhaber, 5.11.2026) ----------
+       „Egal was der Nutzer eingibt … muss immer dazu führen, dass das Fenster passend in der Laibung sitzt und es allerhöchstens verschmälert
+       oder kleiner gemacht werden kann durch Aufsatzkästen wie für Rollladen oder Raffstore“. Das gemessene alte Element bleibt ein Messwert
+       (Aufmaßblatt, Klärungsliste), gezeichnet und im Modell gezeigt wird das neue: Öffnung minus Fuge (Abzug des Betriebs, sonst 15 mm je
+       Seite und oben), in der Höhe minus Kasten. Kasten: ein neuer Aufsatzkasten (Rollladen 200, Raffstore 230, Screen 170 mm, wie app.js),
+       oder der bestehende Kasten, der bleibt (Sonnenschutz „Bestehender“): dann die gemessene Lücke über dem alten Element (Altbau mit
+       Rollladenkasten in der Öffnung). Ohne gemessene Öffnung: null (dann gilt, was eingegeben ist). */
+    const KASTEN_AUF = { rollladen: 200, raffstore: 230, screen: 170 };
+    const aufsatzKasten = (w) => (KASTEN_AUF[w.sart] && w.roll === 'aufsatz' ? KASTEN_AUF[w.sart] : 0);
+    const kastenBleibt = (w) => w.sart === 'behalten' || (w.roll === 'behalten' && (!w.sart || w.sart === 'keiner'));
+    function elementNeu(w, ab) {
+      const d = derive(w); if (!d.moW || !d.moH) return null;
+      const a = abzugVon(ab), u = istTuer(w) ? a.untenT : a.unten, frei = d.moH - a.oben - u;
+      const kAuf = aufsatzKasten(w), kAlt = !kAuf && kastenBleibt(w) && d.elH && frei - d.elH > 40 ? frei - d.elH : 0;
+      const k = Math.min(kAuf || kAlt, Math.max(0, frei - 300));
+      return { b: Math.max(300, d.moW - 2 * a.seite), h: Math.max(300, frei - k), kasten: k, alt: !!kAlt, aufsatz: !!kAuf, oben: a.oben, unten: u };
+    }
     /* ---------- Zeichnung fürs Aufmaß ----------
        Ansicht von innen, Maße in mm. plan(w, o) rechnet die Zeichnung einmal als neutrale Teile in einem Rahmen der Breite o.b
        (Einheiten des Aufrufers, Schriftgröße o.fs, kleinste Schrift o.fsMin, höchstens o.h hoch); zeichnungSVG setzt sie als SVG (Betriebsbereich), blatt.js
@@ -906,7 +924,7 @@
        { t: 'text', x, y, s, g, c, b, a, r, bg }. Maßketten außen: Maueröffnung orange (oben, Mitte, unten; links, Mitte, rechts),
        Element blau, Brüstung bis zum Fußboden; nichts liegt auf dem Glas. Öffnungssymbole: Linien beginnen an der Bandseite, die
        Spitze zeigt zum Griff, Kippen mit Spitze oben, gestrichelt öffnet nach außen; F heißt fest. */
-    const ZF = { ink: '#161616', grau: '#5f5f64', wand: '#f3f2ee', laib: '#e4e1d9', glas: '#d6e6f4', bank: '#d3cec4', paneel: '#c9c9c6', boden: '#8a8984', mo: '#ff8a5b', moT: '#b3401e', el: '#7aa2ff', elT: '#3d63c9', griff: '#4a4a4f', papier: '#ffffff' };
+    const ZF = { ink: '#161616', grau: '#5f5f64', wand: '#f3f2ee', laib: '#e4e1d9', glas: '#d6e6f4', bank: '#d3cec4', paneel: '#c9c9c6', boden: '#8a8984', mo: '#ff8a5b', moT: '#b3401e', el: '#7aa2ff', elT: '#3d63c9', griff: '#4a4a4f', papier: '#ffffff', kasten: '#dedbd4' };
     function formFn(form, x, y, b, h) {
       const cx = x + b / 2;
       if (form === 'rund') { const r = Math.max(0, Math.min(b, h) / 2), cy = y + h / 2, q = (xx) => Math.sqrt(Math.max(0, r * r - (xx - cx) * (xx - cx))); return { rund: true, cx: cx, cy: cy, r: r, top: (xx) => cy - q(xx), bot: (xx) => cy + q(xx), xl: cx - r, xr: cx + r }; }
@@ -938,7 +956,8 @@
       const T0 = [], fs = o.fs || 13, B = o.b || 420, HMAX = o.h || B * 1.3, masse = o.masse !== false && !o.nurElement, nurEl = !!o.nurElement;
       const d = derive(w), mo = w.mo || {}, tuer = istTuer(w), art = w.art || 'fenster', form = w.form || 'rechteck', rund = form === 'rund';
       const moW = d.moW || (d.elW ? d.elW + 60 : 1230), moH = d.moH || (d.elH ? d.elH + 40 : 1410);
-      const elW = Math.min(d.elW || moW - 50, moW * 0.985), elH = Math.min(d.elH || moH - 35, moH * 0.985), bru = tuer ? 0 : num(w.bru);
+      /* das neue Element passend in der Öffnung (elementNeu); ohne gemessene Öffnung das eingegebene */
+      const en = elementNeu(w, o.abzug), elW = en ? en.b : Math.min(d.elW || moW - 50, moW * 0.985), elH = en ? en.h : Math.min(d.elH || moH - 35, moH * 0.985), bru = tuer ? 0 : num(w.bru);
       const poly = (p, f, s, sw, x) => T0.push(Object.assign({ t: 'poly', p: p, f: f || null, s: s || null, w: sw || 0 }, x || {}));
       const line = (a, b, s, sw, x) => T0.push(Object.assign({ t: 'line', p: [a, b], s: s, w: sw }, x || {}));
       const text = (x, y, s, x2) => T0.push(Object.assign({ t: 'text', x: x, y: y, s: s, g: fs, c: ZF.ink, b: 700, a: 'middle', r: 0, bg: null }, x2 || {}));
@@ -958,7 +977,7 @@
       if (!nurEl) s = Math.min(s, (HMAX - T - zone(s)) / moH);
       s = Math.max(s, 1e-4);
       const ow = moW * s, oh = moH * s, ox = nurEl ? 0 : L + (wB - ow) / 2, oy = T, oyB = oy + oh, Z = zone(s), H = nurEl ? elH * s : oy + oh + Z;
-      const ew = elW * s, eh = elH * s, ex = nurEl ? (B - ew) / 2 : ox + (ow - ew) / 2, ey = nurEl ? 0 : oyB - eh - (sill ? 0 : 0);
+      const ew = elW * s, eh = elH * s, ex = nurEl ? (B - ew) / 2 : ox + (ow - ew) / 2, ey = nurEl ? 0 : oyB - eh - (en ? en.unten * s : 0);
       const gMo = formFn(form, ox, oy, ow, oh);
       /* Wand, Laibung, Fensterbank, Fußboden */
       const sh = sill ? Math.max(fs * 0.45, 35 * s) : 0;
@@ -982,6 +1001,12 @@
       /* Sprossen in ihrer Farbe (Detailangabe sprFarbe), sonst wie der Rahmen; zu helle Töne bekommen einen sichtbaren Grauton */
       const sprossFarbe = sprHex(w) || (hell(fc) ? '#b9b4a8' : fc);
       poly(schnitt(gEl, ex, ey, ew, eh), fc, ZF.ink, lw * 1.2);
+      /* Kasten über dem Element (Aufsatzkasten oder bestehender Kasten): eine Fläche bis zur Fuge oben, keine Lücke zur Laibung */
+      if (en && en.kasten && !nurEl) {
+        const kh = en.kasten * s, ky = ey - kh;
+        poly(R4(ex, ky, ew, kh), ZF.kasten || '#d9d6cf', ZF.ink, lw);
+        if (kh > fs * 1.1) text(ex + ew / 2, ky + kh / 2 + fs * 0.34, en.alt ? 'Kasten (bleibt)' : 'Kasten', { g: fs * 0.8, c: ZF.grau, b: 500 });
+      }
       /* schmale Rahmenansicht (Detailangabe schmal): Rahmen und Flügel etwa ein Viertel schlanker */
       const sm = detailGilt(w, 'schmal') && w.schmal === 'schmal' ? 0.76 : 1;
       const pf = sm * Math.max(fs * (nurEl ? 0.12 : 0.42), Math.min(ew, eh) * 0.035, 62 * s), pfB = tuer ? Math.max(fs * 0.22, 28 * s) : pf, mul = Math.max(fs * (nurEl ? 0.1 : 0.32), 78 * s), sf = sm * Math.max(fs * (nurEl ? 0.1 : 0.3), 66 * s);
@@ -1085,8 +1110,9 @@
         if (!gleichW || !d.moW) kette(true, ox, ox + ow, oyB + (tuer ? fs * 0.8 + g0 : sh + g0 * 0.85), oyB, 'unten ' + wert('wb'), ZF.mo, ZF.moT);
         if (gleichH && d.moH) kette(false, oy, oyB, ox - g0, ox, (w.neu ? 'Höhe ' : '') + th(d.moH), ZF.mo, ZF.moT);
         else { kette(false, oy, oyB, ox - g0, ox, 'links ' + wert('hl'), ZF.mo, ZF.moT); kette(false, oy, oyB, ox - g0 - gk, ox, 'Mitte ' + wert('hm'), ZF.mo, ZF.moT, { d: mid }); kette(false, oy, oyB, ox + ow + g0, ox + ow, 'rechts ' + wert('hr'), ZF.mo, ZF.moT); }
-        if (d.elW) kette(true, ex, ex + ew, oy - g0 - 2 * gk, ey, 'Element ' + th(d.elW), ZF.el, ZF.elT);
-        if (d.elH) kette(false, ey, ey + eh, ox + ow + g0 + gk, ex + ew, 'Element ' + th(d.elH), ZF.el, ZF.elT);
+        /* Maßkette des Elements: das gezeichnete neue (Öffnung minus Fuge und Kasten); das gemessene alte steht im Aufmaßblatt */
+        if (en || d.elW) kette(true, ex, ex + ew, oy - g0 - 2 * gk, ey, 'Element ' + th(Math.round(elW)), ZF.el, ZF.elT);
+        if (en || d.elH) kette(false, ey, ey + eh, ox + ow + g0 + gk, ex + ew, 'Element ' + th(Math.round(elH)), ZF.el, ZF.elT);
         if (bru && yF != null) kette(false, oyB, yF, ox - g0, ox, 'Brüstung ' + th(bru), ZF.ink, ZF.ink);
       }
       return { b: B, h: H, s: s, teile: T0, mo: { x: ox, y: oy, b: ow, h: oh }, el: { x: ex, y: ey, b: ew, h: eh } };
@@ -1193,7 +1219,7 @@
       OFFEN_TEXT: OFFEN_TEXT, OFFEN_NAME: OFFEN_NAME, offenName: offenName, istOffen: istOffen, offenGilt: offenGilt, offenListe: offenListe, griffText: griffText, montageText: montageText, fassadeText: fassadeText, teilungText: teilungText, teilFrei: teilFrei, anteileGueltig: anteileGueltig, rcText: rcText,
       nachTiefe: nachTiefe, tiefeVon: tiefeVon, tiefeKopf: tiefeKopf, FRAGE: FRAGE, FRAGE_STUFE: FRAGE_STUFE, STD_TEXT: STD_TEXT, istStd: istStd, TIEFE_NAME: TIEFE_NAME, tiefeText: tiefeText, fluegelZahl: fluegelZahl, oeffnungKurz: oeffnungKurz, absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz,
       /* Strang S5: Aufmaß beim Betrieb und im PDF */
-      sartVon: sartVon, kastenAktiv: kastenAktiv, KLAER_GRUPPEN: KLAER_GRUPPEN, klaerGruppen: klaerGruppen, notizenVon: notizenVon, notizGruppe: notizGruppe, massLuecken: massLuecken, wuensche: wuensche, abzugVon: abzugVon, bestellmass: bestellmass, glasPflicht: glasPflicht, rettung: rettung, fugeHinweis: fugeHinweis, laibungGefliest: laibungGefliest, ZF: ZF, plan: plan, zeichnungSVG: zeichnungSVG, textBreite: textBreite };
+      sartVon: sartVon, kastenAktiv: kastenAktiv, KLAER_GRUPPEN: KLAER_GRUPPEN, klaerGruppen: klaerGruppen, notizenVon: notizenVon, notizGruppe: notizGruppe, massLuecken: massLuecken, wuensche: wuensche, abzugVon: abzugVon, bestellmass: bestellmass, elementNeu: elementNeu, KASTEN_AUF: KASTEN_AUF, glasPflicht: glasPflicht, rettung: rettung, fugeHinweis: fugeHinweis, laibungGefliest: laibungGefliest, ZF: ZF, plan: plan, zeichnungSVG: zeichnungSVG, textBreite: textBreite };
   })();
 
   /* ---------- Notizen je Stelle (Strang S1) ----------

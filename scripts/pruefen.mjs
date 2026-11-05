@@ -3882,7 +3882,14 @@ if (teil(16)) {
   ok(bm16.text === '1.260 × 1.425 mm' && /30 mm unten/.test(bm16.formel) && /Anschlag innen laut Foto/.test(bm16.warnText) && /ohne Anschlag gerechnet/.test(bm16.warnText) && bmT.text === '1.260 × 1.450 mm' && /außer Winkel/.test(bmW.warnText) && AW16.abzugVon({ seite: 99, oben: -3 }).seite === 60 && AW16.abzugVon({}).unten === 0, 'Bestellmaß: Abzug unten getrennt für Fenster und Türen; Warnsatz bei Anschlag laut Foto und außer Winkel');
   const sv16 = AW16.zeichnungSVG(voll({ mo: { wt: 1292, wm: 1290, wb: 1289, hl: 1442, hm: 1440, hr: 1439 }, el: { w: 1230, h: 1410 }, bru: 620, teilung: '2p', sashes: AW16.sashesFor('2p') }), { b: 420, fs: 13 }), pl16 = AW16.plan(voll({ mo: MO(1230, 1410) }), { b: 420, fs: 13 });
   const imGlas = pl16.teile.filter((t) => t.t === 'text' && t.bg && t.x > pl16.el.x && t.x < pl16.el.x + pl16.el.b && t.y > pl16.el.y && t.y < pl16.el.y + pl16.el.h).length;
-  ok(['oben 1.292', 'Mitte 1.290', 'unten 1.289', 'links 1.442', 'Mitte 1.440', 'rechts 1.439', 'Element 1.230', 'Element 1.410', 'Brüstung 620', 'Fußboden'].every((t) => sv16.indexOf('>' + t + '<') >= 0) && /#ff8a5b/.test(sv16) && /#7aa2ff/.test(sv16) && imGlas === 0 && /<svg class="zeichnung" viewBox="0 0 420 /.test(sv16), 'Zeichnung: Maueröffnung orange mit drei Breiten und drei Höhen, Element blau, Brüstung bis zum Fußboden, keine Maßzahl auf dem Glas');
+  ok(['oben 1.292', 'Mitte 1.290', 'unten 1.289', 'links 1.442', 'Mitte 1.440', 'rechts 1.439', 'Element 1.259', 'Element 1.424', 'Brüstung 620', 'Fußboden'].every((t) => sv16.indexOf('>' + t + '<') >= 0) && /#ff8a5b/.test(sv16) && /#7aa2ff/.test(sv16) && imGlas === 0 && /<svg class="zeichnung" viewBox="0 0 420 /.test(sv16), 'Zeichnung: Maueröffnung orange mit drei Breiten und drei Höhen, Element blau (das neue: Öffnung minus Fuge), Brüstung bis zum Fußboden, keine Maßzahl auf dem Glas');
+  /* Das neue Element sitzt passend in der Öffnung (Inhaber, 5.11.2026): minus 15 mm je Seite und oben, minus Aufsatzkasten; bleibt der
+     bestehende Kasten, die gemessene Lücke; das gemessene alte Element zählt fürs Bild nicht */
+  const MOk = { wt: 1290, wm: 1290, wb: 1290, hl: 1410, hm: 1410, hr: 1410 };
+  const en1 = AW16.elementNeu(voll({ mo: MOk, el: { w: 1100, h: 1150 } })), en2 = AW16.elementNeu(voll({ mo: MOk, el: { w: 1100, h: 1150 }, sart: 'raffstore', roll: 'aufsatz' })), en3 = AW16.elementNeu(voll({ mo: MOk, el: { w: 1260, h: 1150 }, sart: 'behalten', roll: 'keiner' })), en4 = AW16.elementNeu(voll({ mo: MOk, el: { w: 1400, h: 1500 } }));
+  const svK = AW16.zeichnungSVG(voll({ mo: MOk, el: { w: 1100, h: 1150 }, sart: 'rollladen', roll: 'aufsatz' }), { b: 420, fs: 13 });
+  ok(en1.b === 1260 && en1.h === 1395 && !en1.kasten && en2.h === 1165 && en2.kasten === 230 && en2.aufsatz && en3.alt && en3.h === 1150 && en3.kasten === 245 && en4.b === 1260 && en4.h === 1395 && AW16.elementNeu(voll({ mo: { wm: '', hm: '' }, el: { w: 900, h: 900 } })) === null && />Kasten</.test(svK) && />Element 1\.195</.test(svK),
+    'Neues Element in der Öffnung: Breite minus 2 × 15, Höhe minus 15 und Aufsatzkasten; bestehender Kasten bleibt mit der gemessenen Lücke; ein zu kleines oder zu großes altes Element ändert nichts; Zeichnung mit Kasten (' + JSON.stringify([en1, en2, en3, en4]) + ')');
   /* Nacharbeit portal: Kontakt bei Code ohne Link, Haken der Klärungsliste über eine Runde, Kasten nach Sonnenschutz, jede Frage der App beschriftet */
   const mo16n = (b, h) => ({ wt: b, wm: b, wb: b, hl: h, hm: h, hr: h }), wn16 = (name, b, h) => ({ name: name, etage: 'og', bru: 500, mo: mo16n(b, h), el: { w: b - 30, h: h - 20 } });
   const kto16 = { links: [], book: [], freeUsed: 0 }, ein16 = X16.importCode(kto16, { v: 1, b: '', p: { name: 'Herr Lange', tel: '0170 1112233', mail: 'lange@beispiel.de', erreich: 'vm', ort: 'Köln' }, w: [wn16('Bad', 1000, 1200)], t: 1 });
@@ -5423,6 +5430,27 @@ if (teil(32)) {
   await p.tap('.lg-fuss .lg-zurueck'); await p.waitForTimeout(500);
   const mn2 = await p.evaluate(() => ({ screen: S.screen, verlassen: !!S.verlassen }));
   ok(mn1.screen === 'planmasse' && !mn1.blatt && /Maße übernehmen/.test(mn1.pille) && mn2.screen === 'fertig' && !mn2.verlassen, '„Maße ändern“ bei der neuen Öffnung: gleich die Wunschmaße mit „Maße übernehmen“; Zurück ohne Änderung ohne Rückfrage aufs Fenster (' + JSON.stringify([mn1, mn2]) + ')');
+  /* c8) Kein Leerraum zwischen Element und Laibung (Inhaber, 5.11.2026): je Elementart, Form, Sonnenschutz und Messweg sitzt das Element im
+     Modell passend in der Öffnung, 30 mm schmaler und 15 mm niedriger, dazu höchstens der Kasten */
+  const luecken = await p.evaluate(() => {
+    const raus = [], wege = { klein: { mo: { hm: 1410, hl: 1412, hr: 1408, wm: 1290, wt: 1292, wb: 1288 }, el: { w: 1180, h: 1150 }, massWeg: 'messen' }, gross: { mo: { hm: 1410, hl: 1410, hr: 1410, wm: 1290, wt: 1290, wb: 1290 }, el: { w: 1320, h: 1450 }, massWeg: 'messen' }, ein: { el: { w: 1100, h: 1300 }, massWeg: 'eingeben' }, ohne: { massWeg: 'ohne' } };
+    for (const art of ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw']) for (const sv of [['keiner', 'keiner'], ['rollladen', 'aufsatz'], ['raffstore', 'aufsatz'], ['screen', 'aufsatz'], ['rollladen', 'vorbau'], ['raffstore', 'unterputz']]) for (const k of Object.keys(wege)) {
+      const w = Object.assign(baseWin(), { art: art, sart: sv[0], roll: sv[1] }, JSON.parse(JSON.stringify(wege[k]))), V = w3dCalc(w, {});
+      if (V.moW - V.elW !== 30 || V.moH - V.elH - (V.kastenH || 0) !== 15) raus.push([art, sv.join('/'), k, V.moW, V.elW, V.moH, V.elH, V.kastenH]);
+    }
+    return raus;
+  });
+  ok(!luecken.length, 'Element im Modell immer passend in der Öffnung (6 Arten × 6 Sonnenschutz × 4 Messwege): nur Fuge und Kasten dazwischen (' + JSON.stringify(luecken.slice(0, 3)) + ')');
+  /* c9) Menüknopf in der Bühne der Wünsche (Inhaber, 5.11.2026): Übersicht aller Einstellungen mit der Wahl, Antippen springt dorthin;
+     hellblau „An deinem Haus“ (speichert ein neues Fenster vorher) */
+  await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Küche'; S.win = w; S.editIdx = -1; S.windows = []; S.q = 'fa'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(400);
+  await p.tap('.wz-buehne .wz-menue-knopf'); await p.waitForTimeout(400);
+  const me1 = await p.evaluate(() => ({ offen: !!document.querySelector('.wz-menue'), zeilen: document.querySelectorAll('.wz-menue-zeile').length, farbe: ((document.querySelector('.wz-menue-zeile[data-v="fa"] small') || {}).textContent || ''), jetzt: (document.querySelector('.wz-menue-zeile[aria-current="step"]') || {}).getAttribute ? document.querySelector('.wz-menue-zeile[aria-current="step"]').getAttribute('data-v') : '', haus: !!document.querySelector('.wz-menue-haus') }));
+  await p.tap('.wz-menue-zeile[data-v="glas"]'); await p.waitForTimeout(400);
+  const me2 = await p.evaluate(() => ({ q: S.q, offen: !!document.querySelector('.wz-menue') }));
+  let me3 = { screen: 'ohne Hausbild' };
+  if (me1.haus) { await p.tap('.wz-buehne .wz-menue-knopf'); await p.waitForTimeout(300); await p.tap('.wz-menue-haus'); await p.waitForTimeout(600); me3 = await p.evaluate(() => ({ screen: S.screen, n: S.windows.length })); await p.evaluate(() => go('home')); }
+  ok(me1.offen && me1.zeilen >= 10 && /Anthrazitgrau/.test(me1.farbe) && me1.jetzt === 'fa' && me2.q === 'glas' && !me2.offen && (!me1.haus || (me3.screen === 'hausbild' && me3.n === 1)), 'Menüknopf in der Bühne: Übersicht aller Einstellungen mit der Wahl, Antippen springt dorthin; „An deinem Haus“ speichert und öffnet das Hausbild (' + JSON.stringify([me1, me2, me3]) + ')');
   /* c7) Fenster als Kacheln oben in der Liste (Inhaber, 4.11.2026: „Symbole oben … abgeschnitten“): am Telefon höchstens vier, alle ganz im Bild */
   const kach = [];
   for (const n of [4, 6]) {

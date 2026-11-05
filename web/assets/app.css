@@ -366,7 +366,8 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-selring.is-form { border: 0; border-radius: 0 } .w3d-selring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible } .w3d-selring polygon { fill: none; stroke: var(--el); stroke-width: 3px; stroke-linejoin: round; vector-effect: non-scaling-stroke }
 /* Formen: Laibung aus Streifen (Farbe je Blickrichtung, nach hinten etwas dunkler); bei allen Fenstern die Fuge zwischen Wand und Rahmen */
 .w3d-rs { background-image: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(0, 0, 0, .07)) }
-.w3d-fuge { background: linear-gradient(180deg, #8e8578, #7f7669) }
+/* Einbaufuge: verputzter Anschluss, ein Ton dunkler als die Laibung; sie soll sich nicht als Spalt lesen (Inhaber, 5.11.2026: keine Leerräume zwischen Element und Laibung) */
+.w3d-fuge { background: linear-gradient(180deg, #b7b0a4, #a8a195) }
 /* Öffnung vorführen (oeffnungZeigen): der Flügel geht kurz auf und zu, der Griff dreht vorher mit. Fest: ein Glanz läuft übers Glas */
 .w3d-sash.demo-D { animation: w3d-dreh 1.6s var(--e-io) both }
 .w3d-sash.demo-K { animation: w3d-kipp 1.4s var(--e-io) both }
@@ -3346,6 +3347,35 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .dna.wz-tasten .keypad .ok { height: 48px; font-size: 14px }
 .dna.wz-tasten .keypad .kp-zurueck { width: 48px; height: 48px }
 .dna .wz-kapitel button { min-height: 48px; font-size: 14px }
+/* Menüknopf auf der Bühne der Wünsche (Inhaber, 5.11.2026) und sein Bogen „Alles an deinem Fenster“: links unter dem Chip, Glas wie die
+   Knöpfe der Bühne; im Bogen oben hellblau „An deinem Haus“ (Farbe der Einladung), darunter je Kapitel die Einstellungen */
+.dna .wz-buehne .wz-menue-knopf { position: absolute; z-index: 5; left: 12px; top: 56px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; color: var(--weiss); cursor: pointer;
+  background: rgba(32, 32, 34, .55); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, .18); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 -1px 0 rgba(7, 9, 10, .4); transition: transform 160ms var(--dna-druck) }
+.dna .wz-buehne .wz-menue-knopf svg { width: 20px; height: 20px }
+.dna .wz-buehne .wz-menue-knopf:active { transform: scale(.94) }
+.dna .wz-buehne .wz-menue-knopf:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px }
+.dna .wz-menue-name { margin: -4px 0 14px; font: 400 13px/1.35 var(--font-sans); color: var(--silbergrau) }
+.dna .wz-menue-haus { --hb-tinte: #0d2440; --hb-tinte-2: #3b5470; display: flex; align-items: center; gap: 12px; width: 100%; margin: 0 0 18px; padding: 14px 14px 14px 16px; border: 0; border-radius: 20px; text-align: left; cursor: pointer; color: var(--hb-tinte);
+  background: radial-gradient(120% 120% at 0% 0%, #eef6ff 0, #dcebfc 46%, #cbe1f8 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 0 0 1px rgba(29, 79, 140, .10); transition: transform 160ms var(--dna-druck) }
+.dna .wz-menue-haus:active { transform: scale(.98) }
+.dna .wz-menue-haus-tx { flex: 1; min-width: 0; display: grid; gap: 3px }
+.dna .wz-menue-haus-tx > span { font: 400 12px/1.2 var(--font-sans); letter-spacing: .03em; color: var(--hb-tinte-2) }
+.dna .wz-menue-haus-tx b { font: 500 16px/1.25 var(--font-sans); color: var(--hb-tinte) }
+.dna .wz-menue-haus-tx small { font: 400 13px/1.3 var(--font-sans); color: var(--hb-tinte-2) }
+.dna .wz-menue-haus .wz-menue-pfeil { color: var(--hb-tinte) }
+.dna .wz-menue-liste { display: grid; gap: 16px }
+.dna .wz-menue-gruppe { display: grid; gap: 6px }
+.dna .wz-menue-kopf { margin: 0 0 2px 4px; font: 400 12px/1.2 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau) }
+.dna .wz-menue-zeile { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 12px 8px 14px; border: 0; border-radius: 18px; text-align: left; cursor: pointer; color: var(--weiss);
+  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045); transition: transform 160ms var(--dna-druck) }
+.dna .wz-menue-zeile:active { transform: scale(.98) }
+.dna .wz-menue-zeile[aria-current="step"] { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1.8px var(--violett) }
+.dna .wz-menue-zeile > span:first-child { flex: 1; min-width: 0; display: grid; gap: 2px }
+.dna .wz-menue-zeile b { font: 500 15px/1.2 var(--font-sans) }
+.dna .wz-menue-zeile small { font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.dna .wz-menue-pfeil { flex: none; display: grid; place-items: center; width: 20px; color: var(--silbergrau) }
+.dna .wz-menue-pfeil svg path { stroke: currentColor }
+@media (prefers-reduced-motion: reduce) { .dna .wz-buehne .wz-menue-knopf, .dna .wz-menue-haus, .dna .wz-menue-zeile { transition: none } }
 
 /* Fuß: Pille und Zurück 48 statt 52, überall */
 .dna .dna-pille { height: 48px; padding: 0 22px; font-size: 14px }

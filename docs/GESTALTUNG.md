@@ -696,6 +696,18 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     „Maße eingeben“ (Frage „Neue Maße für …“, Zifferntasten für Breite, dann Höhe, „Maße übernehmen“). Bei der neuen Öffnung gleich die
     Wunschmaße mit „Maße übernehmen“. Übernehmen speichert und führt zurück aufs Fenster; Zurück ohne eigene Änderung ohne Rückfrage,
     sonst „Noch nicht gespeichert“ (`S.masseAendern`, `masseUebernehmen`, `masseZurueck` in app.js).
+  - Neues Element passend in der Öffnung (Inhaber, 5.11.2026: „egal was der Nutzer eingibt … passend in der Laibung … allerhöchstens …
+    kleiner durch Aufsatzkästen“): `AW.elementNeu` in modell.js rechnet Öffnung minus 15 mm je Seite und oben (Abzug des Betriebs im
+    Aufmaßblatt), minus Aufsatzkasten (Rollladen 200, Raffstore 230, Screen 170 mm); bleibt der bestehende Kasten (Sonnenschutz
+    „Bestehender“), die gemessene Lücke über dem alten Element. 3-D-Modell (`w3dCalc`), Strichzeichnung mit Fläche „Kasten“ und Maßkette des
+    neuen Elements, Aufteilung und Rettungsweg folgen dem; das gemessene alte Element bleibt Messwert (Aufmaßblatt, Klärungsliste, Schilder
+    beim Messen). Geprüft über 6 Arten × Formen × 8 Sonnenschutz × 6 Messwege (Prüfsuite 16 und 32). Die Einbaufuge ist verputzt hell
+    statt dunkel, damit sie sich nicht als Spalt liest.
+  - Menüknopf in der Bühne der Wünsche (Telefon und Laptop, links unter dem Chip): Bogen „Alles an deinem Fenster“ mit hellblauer Zeile
+    „An deinem Haus“ (speichert ein neues oder geändertes Element und öffnet das Hausbild), darunter je Kapitel jede Frage mit der Wahl;
+    Antippen springt dorthin (`wzMenue`, `q-sprung`).
+  - 3-D-Bühne (5.11.2026, Detail und Umgebung): Glas spiegelt von außen dieselbe Landschaft wie der Blick von innen (Himmel, Baumreihe,
+    Rasen) nach der Spiegelrichtung, kräftiger als vorher; weicher Schatten unter der Fensterbank innen und außen (`si-sch`, `sa-sch`).
   - Kacheln oben in der Liste (und auf Sichern, Konto, Prüfen): am Telefon höchstens vier, ab fünf Fenstern drei und „+n weitere“; am
     Laptop ab sieben kleiner in drei Reihen (`liSymbole`). Vorher liefen sie über beide Ränder und die Nummern wurden abgeschnitten.
     Unverändert im alten Look: die Einladungsseite eines Betriebs im Kundenlink (`linkHome`) und alle Bildschirme in Instanzen auf der

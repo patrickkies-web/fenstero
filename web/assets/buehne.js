@@ -286,8 +286,10 @@ window.Buehne3D = (function () {
     /* von außen: dahinter der dunkle Raum, das Glas spiegelt den Himmel; von innen bleibt der Blick hinaus hell */
     /* außen: oben spiegelt sich deutlich der helle, kühle Himmel, unten der dunkle Raum, dazu ein weicher schräger Glanzstreif; so liest
        sich die Scheibe als Klarglas, nicht als Grau- oder Sonnenschutzglas */
+    /* seit 5.11.2026 (Inhaber: „Detailreichtum“ und Spiegelungen wie echtes Glas): gespiegelt wird die Umgebung vor dem Haus, dieselbe
+       Landschaft wie der Blick von innen (aussicht: Himmel, Baumreihe, Rasen), gekippt nach der Spiegelrichtung; beim Drehen wandert sie mit */
     'if(fs<0.0){float da=max(c.a,0.94);float yv=clamp(vP.y/max(uWH.y,1.0),0.0,1.0),xv=clamp(vP.x/max(uWH.x,1.0),0.0,1.0);float hi=1.0-smoothstep(0.05,0.62,yv);' +
-    'rgb=mix(rgb,vec3(0.1,0.11,0.12)*da,0.74);c.a=da;F=max(F,0.18)+0.36*hi;env=mix(env,vec3(0.8,0.86,0.93),0.55*hi);float hw=max(uPr.w,1.0);rgb+=vec3(0.92,0.95,0.98)*0.15*exp(-pow((vW.x*0.7+vW.y)/hw/0.1,2.0))*da;}' +
+    'rgb=mix(rgb,vec3(0.1,0.11,0.12)*da,0.74);c.a=da;F=max(F,0.26)+0.3*hi;float hw=max(uPr.w,1.0);vec3 rf=aussicht(0.34*up-0.1,vW.x/(2.2*hw)*0.6+R.x*0.8);rf=mix(vec3(dot(rf,vec3(0.3,0.59,0.11))),rf,1.35);env=mix(env,rf,0.9);env=mix(env,vec3(0.8,0.86,0.93),0.4*hi);rgb+=vec3(0.92,0.95,0.98)*0.15*exp(-pow((vW.x*0.7+vW.y)/hw/0.1,2.0))*da;}' +
     /* von innen: die helle Durchsicht, dazu ein breiter, weicher Glanz schräg über alle Scheiben (Spiegelung des Raums, kaum sichtbar) */
     'else{if(uLi.w>1.5){float hw=max(uPr.w,1.0);vec3 d=-V;float el=-vW.y/(2.2*hw)-d.y,az=vW.x/(2.2*hw)+d.x/max(length(d.xz),1e-3);' +
     'vec3 au=aussicht(el,az)*(uLi.w>2.5?vec3(0.52,0.58,0.64):vec3(0.95,0.985,0.975));rgb=mix(rgb/max(c.a,1e-3),au,1.0-gPG)*uOp;c.a=uOp;}else rgb=mix(rgb,c.rgb*0.99,0.75*(1.0-gPG));float hw=max(uPr.w,1.0);rgb+=vec3(0.97,0.98,1.0)*0.09*exp(-pow((vW.x*0.6+vW.y)/hw/0.2+0.9,2.0))*c.a*(1.0-gPG);}rgb=rgb*(1.0-F)+env*F*c.a;}' +
@@ -750,7 +752,7 @@ window.Buehne3D = (function () {
   const KLASSE = {
     'w3d-wall-in': 'radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, .06) 100%), linear-gradient(180deg, #e9e3d8, #dfd8cc)',
     'w3d-rev': PUTZ, 'w3d-rs': PUTZ,
-    'w3d-fuge': 'linear-gradient(180deg, #8e8578, #7f7669)',
+    'w3d-fuge': 'linear-gradient(180deg, #b7b0a4, #a8a195)', // verputzter Anschluss, liest sich nicht als Spalt (5.11.2026)
     /* Durchsicht wie in echt: oben Himmel, zur Mitte der Horizont, unten Boden; der Glanz kommt aus dem Shader (keine aufgemalten Streifen) */
     'w3d-glass': 'linear-gradient(180deg, rgba(238, 244, 251, .64) 0%, rgba(218, 231, 244, .56) 42%, rgba(199, 211, 222, .58) 60%, rgba(174, 185, 192, .64) 100%)',
     /* Türen: hinter dem Glas liegt die Terrasse; leichter getönt, damit man sie durch die Scheibe sieht */
