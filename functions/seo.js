@@ -13,56 +13,56 @@ import { konfig, einfuehrungLaeuft, jetztAus, EINFUEHRUNG } from './api/umgebung
 /* Haken für die Konfigurator-Pakete (Verkaufsseite, llms.txt, Seiten der Paketbedingungen): functions/pakete-seite.js */
 import { paketeSeite, paketeLlms, PAKETE_SEITEN } from './pakete-seite.js';
 
-export const STAND = '2026-11-02';
+export const STAND = '2026-11-05';
 
 /* Alle Seiten für die Sitemap, wichtigste zuerst. stand = letzte inhaltliche Änderung (lastmod in der Sitemap, IndexNow); bei
    Ratgeberseiten gleich dem dateModified im JSON-LD und dem „Stand“ auf der Seite (prüft die Suite) */
 export const SEITEN = [
   { pfad: '/', prio: '1.0', stand: '2026-10-30' },
   { pfad: '/app/', prio: '0.9', stand: '2026-10-28' },
-  { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-10-30' },
+  { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-11-05' },
   { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-29' },
-  { pfad: '/ratgeber/balkontuer-ausmessen/', prio: '0.8', stand: '2026-10-29' },
-  { pfad: '/ratgeber/fenster-mit-rollladen-ausmessen/', prio: '0.8', stand: '2026-10-29' },
-  { pfad: '/ratgeber/bestellmass-fenster/', prio: '0.8', stand: '2026-10-29' },
-  { pfad: '/ratgeber/aufmassblatt-fenster/', prio: '0.8', stand: '2026-10-29' },
-  { pfad: '/ratgeber/fenster-austauschen/', prio: '0.8', stand: '2026-10-30' },
-  { pfad: '/ratgeber/din-links-rechts/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/ratgeber/bruestungshoehe-fenster/', prio: '0.7', stand: '2026-10-30' },
-  { pfad: '/ratgeber/fenster-standardmasse/', prio: '0.7', stand: '2026-10-30' },
-  { pfad: '/ratgeber/fensterbank-ausmessen/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/ratgeber/kellerfenster-ausmessen/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/ratgeber/fenstertausch-altbau/', prio: '0.7', stand: '2026-10-30' },
-  { pfad: '/ratgeber/ral-montage-fenster/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/ratgeber/uw-wert-fenster/', prio: '0.7', stand: '2026-10-30' },
-  { pfad: '/ratgeber/lueftungskonzept-fenstertausch/', prio: '0.7', stand: '2026-10-30' },
-  { pfad: '/ratgeber/fenster-beschlagen/', prio: '0.8', stand: '2026-10-29' },
-  { pfad: '/ratgeber/fenster-undicht/', prio: '0.8', stand: '2026-10-29' },
-  { pfad: '/ratgeber/fenster-alter-erkennen/', prio: '0.7', stand: '2026-10-30' },
-  { pfad: '/ratgeber/fenster-reparieren-oder-austauschen/', prio: '0.8', stand: '2026-10-30' },
-  { pfad: '/ratgeber/fenster-material-vergleich/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/ratgeber/dreifachverglasung/', prio: '0.7', stand: '2026-10-30' },
-  { pfad: '/ratgeber/fenster-oeffnungsarten/', prio: '0.7', stand: '2026-10-30' },
-  { pfad: '/ratgeber/fenster-angebot-vergleichen/', prio: '0.8', stand: '2026-10-30' },
-  { pfad: '/ratgeber/haus-gekauft-fenster/', prio: '0.8', stand: '2026-10-29' },
-  { pfad: '/ratgeber/fenster-oder-daemmung-zuerst/', prio: '0.8', stand: '2026-10-29' },
-  { pfad: '/ratgeber/fenster-nach-und-nach-tauschen/', prio: '0.8', stand: '2026-10-29' },
-  { pfad: '/ratgeber/fenster-planen-raum-fuer-raum/', prio: '0.8', stand: '2026-10-29' },
-  { pfad: '/ratgeber/fenster-vergroessern/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/ratgeber/fenster-foerderung-2026/', prio: '0.8', stand: '2026-10-29' },
-  { pfad: '/ratgeber/fenster-foerderung-beantragen/', prio: '0.8', stand: '2026-10-30' },
-  { pfad: '/ratgeber/fenster-steuerlich-absetzen/', prio: '0.8', stand: '2026-10-30' },
-  { pfad: '/fuer-fensterbauer/erstaufmass-feinaufmass/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/fuer-fensterbauer/falsches-aufmass-haftung/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/fuer-fensterbauer/aufmass-kostenpflichtig/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/fuer-fensterbauer/geplatzter-aufmasstermin/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/fuer-fensterbauer/fensterbau-software/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/fuer-fensterbauer/fensterangebot-erstellen/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/fuer-fensterbauer/fenster-konfigurator-website/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/fuer-fensterbauer/digitales-aufmass/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/fuer-fensterbauer/leads-fensterbau/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/fuer-fensterbauer/ki-im-fensterbau/', prio: '0.7', stand: '2026-10-29' },
-  { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-29' },
+  { pfad: '/ratgeber/balkontuer-ausmessen/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-mit-rollladen-ausmessen/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/bestellmass-fenster/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/aufmassblatt-fenster/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-austauschen/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/din-links-rechts/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/bruestungshoehe-fenster/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-standardmasse/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fensterbank-ausmessen/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/kellerfenster-ausmessen/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenstertausch-altbau/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/ral-montage-fenster/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/uw-wert-fenster/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/lueftungskonzept-fenstertausch/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-beschlagen/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-undicht/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-alter-erkennen/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-reparieren-oder-austauschen/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-material-vergleich/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/dreifachverglasung/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-oeffnungsarten/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-angebot-vergleichen/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/haus-gekauft-fenster/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-oder-daemmung-zuerst/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-nach-und-nach-tauschen/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-planen-raum-fuer-raum/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-vergroessern/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-foerderung-2026/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-foerderung-beantragen/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/ratgeber/fenster-steuerlich-absetzen/', prio: '0.8', stand: '2026-11-05' },
+  { pfad: '/fuer-fensterbauer/erstaufmass-feinaufmass/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/fuer-fensterbauer/falsches-aufmass-haftung/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/fuer-fensterbauer/aufmass-kostenpflichtig/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/fuer-fensterbauer/geplatzter-aufmasstermin/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/fuer-fensterbauer/fensterbau-software/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/fuer-fensterbauer/fensterangebot-erstellen/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/fuer-fensterbauer/fenster-konfigurator-website/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/fuer-fensterbauer/digitales-aufmass/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/fuer-fensterbauer/leads-fensterbau/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/fuer-fensterbauer/ki-im-fensterbau/', prio: '0.7', stand: '2026-11-05' },
+  { pfad: '/ratgeber/', prio: '0.6', stand: '2026-11-05' },
   { pfad: '/redaktion/', prio: '0.4', stand: '2026-10-30' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-28' },
   { pfad: '/datenschutz/', prio: '0.2', stand: '2026-11-02' },
@@ -88,6 +88,10 @@ export const SICHERHEIT = {
   'Strict-Transport-Security': 'max-age=31536000'
 };
 export const SPERRE = 'noindex, nofollow';
+/* Mit Freigabe: Google darf Vorschaubilder groß zeigen (Discover, Bild neben dem Treffer am Telefon); ohne diese Angabe nur in der
+   Standardgröße. Die übrigen Grenzen (max-snippet, max-video-preview) sind ohne Angabe ohnehin offen. Quelle: Google Search Central,
+   „Robots meta tag, data-nosnippet, and X-Robots-Tag specifications“ und „Get on Discover“ */
+export const VORSCHAU = 'max-image-preview:large';
 
 export const frei = (env, url) => !!env && String(env.INDEXIERUNG || '') === '1' && !(url && /\.workers\.dev$/i.test(url.hostname));
 /* Lokal (Testserver, wrangler dev) gilt die aufgerufene Adresse; im Netz immer https, auch wenn eine Seite über http:// abgerufen wurde */
@@ -134,11 +138,12 @@ export function absolut(html, b) {
     .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, (block) => block.replace(/"(url|@id|item|mainEntityOfPage|logo|image)":"\//g, '"$1":"' + b + '/'));
 }
 
-/* Kopfzeilen einer Seite: Sicherheit wie in _headers; in der Pilotphase X-Robots-Tag: noindex, mit Freigabe ohne; dazu der Canonical-Hinweis */
+/* Kopfzeilen einer Seite: Sicherheit wie in _headers; in der Pilotphase X-Robots-Tag: noindex, mit Freigabe nur die große Bildvorschau
+   (VORSCHAU); dazu der Canonical-Hinweis */
 export async function seite(antwort, env, url, kanonisch) {
   const h = new Headers(antwort.headers);
   for (const [k, v] of Object.entries(SICHERHEIT)) if (!h.has(k)) h.set(k, v);
-  if (frei(env, url)) h.delete('X-Robots-Tag'); else h.set('X-Robots-Tag', SPERRE);
+  h.set('X-Robots-Tag', frei(env, url) ? VORSCHAU : SPERRE);
   const html = antwort.status === 200 && /text\/html/.test(h.get('content-type') || '');
   if (!html) return new Response(antwort.body, { status: antwort.status, statusText: antwort.statusText, headers: h });
   const b = basis(env, url), kan = b + (kanonisch || kanonischerPfad(url.pathname)), nach = !einfuehrungLaeuft(env) && !RECHT_MIT_ZEITRAUM.includes(url.pathname);

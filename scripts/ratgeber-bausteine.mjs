@@ -114,6 +114,11 @@ function vorschau(h, pfad) {
   const datei = slug && path.join(ASSETS, '..', 'bilder', 'og', slug + '.png');
   const eigen = datei && fs.existsSync(datei);
   const titel = ((h.match(/<h1>([\s\S]*?)<\/h1>/) || [])[1] || '').replace(/<[^>]+>/g, '').replace(/"/g, '&quot;');
+  /* Bild des Artikels im JSON-LD: das Vorschaubild (1200 × 630) vor der Zeichnung, damit Google ein großes Rasterbild für Discover und
+     das Bild neben dem Treffer hat (Article: mehrere hochauflösende Bilder empfohlen); ohne eigenes Vorschaubild nur die Zeichnung */
+  const zeichnung = (h.match(/"image":(?:"(\/bilder\/[^"]+\.svg)"|\[\{"@type":"ImageObject","url":"\/bilder\/og\/[^"]+\.png","width":1200,"height":630\},\{"@type":"ImageObject","url":"(\/bilder\/[^"]+\.svg)"\}\])/) || []).slice(1).find(Boolean);
+  const bild = zeichnung && (eigen ? '[{"@type":"ImageObject","url":"/bilder/og/' + slug + '.png","width":1200,"height":630},{"@type":"ImageObject","url":"' + zeichnung + '"}]' : '"' + zeichnung + '"');
+  if (bild) h = h.replace(/"image":(?:"\/bilder\/[^"]+\.svg"|\[\{"@type":"ImageObject","url":"\/bilder\/og\/[^"]+\.png","width":1200,"height":630\},\{"@type":"ImageObject","url":"\/bilder\/[^"]+\.svg"\}\])/, () => '"image":' + bild);
   return h.replace(/<meta property="og:image" content="[^"]*">/, '<meta property="og:image" content="' + (eigen ? '/bilder/og/' + slug + '.png' : '/og.png') + '">')
     .replace(/<meta property="og:image:alt" content="[^"]*">/, '<meta property="og:image:alt" content="' + (eigen && titel ? titel : OG_ALT) + '">')
     .replace(/"author":\{"@type":"Organization","name":"eeziframes","url":"\/(?:redaktion\/)?"\}/g, '"author":{"@type":"Organization","name":"eeziframes","url":"/redaktion/"}');
