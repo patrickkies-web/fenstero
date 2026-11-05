@@ -84,7 +84,7 @@ Px-Werte: Titel ohne Marke / Beschreibung. Begründung je Seite im Bericht (Arti
 
 ## Geprüft
 
-- Prüfsuite Abschnitt 10 grün (298 Prüfungen), darunter die neue Längenprüfung: längster Titelkern 574 px, längste Beschreibung 989 px; IndexNow meldet nach dem Onlinestellen die 42 geänderten Seiten.
+- Ganze Prüfsuite grün (1.772 Prüfungen, alle Abschnitte); Abschnitt 10 allein 298, darunter die neue Längenprüfung: längster Titelkern 574 px, längste Beschreibung 989 px; IndexNow meldet nach dem Onlinestellen die 42 geänderten Seiten.
 - Das Bauskript ist wiederholbar: zweiter Lauf ändert keine Datei.
 - Lokal mit `INDEXIERUNG=1`: robots.txt, Sitemap (53 Adressen), Canonical in Kopfzeile und HTML, `X-Robots-Tag: max-image-preview:large`.
 
