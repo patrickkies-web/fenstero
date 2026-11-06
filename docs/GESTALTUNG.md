@@ -706,6 +706,15 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
   - Menüknopf in der Bühne der Wünsche (Telefon und Laptop, links unter dem Chip): Bogen „Alles an deinem Fenster“ mit hellblauer Zeile
     „An deinem Haus“ (speichert ein neues oder geändertes Element und öffnet das Hausbild), darunter je Kapitel jede Frage mit der Wahl;
     Antippen springt dorthin (`wzMenue`, `q-sprung`).
+  - 3-D-Bühne (6.11.2026, Inhaber: den Punkt mit dem größten Einfluss auf den Realismus und dann den zweitgrößten): 1. Glas von außen
+    wie echtes Klarglas: eigene Spiegelwelt im Shader (`spiegel` in buehne.js: Himmel vom hellen Horizont zum Blau, Wolken, Baumreihe mit
+    unruhiger Kante, Rasen), auf einen Bildpunkt scharf, kräftiger Fresnel, dahinter ein dunkler Raum mit etwas Tiefe. 2. Licht und
+    Schatten: Sonne seitlicher und höher (L1, L2), etwas kräftiger bei etwas weniger Himmelslicht; die Laibung wirft einen sichtbaren
+    Schatten auf Rahmen und Glas, Weiß bleibt an den beleuchteten Stellen weiß. Bilder: docs/profis/bilder/2026-11-06-3d-*.jpg.
+  - Leistung auf schwachen Geräten (6.11.2026): Shader übersetzt der Treiber im Hintergrund (KHR_parallel_shader_compile), bis dahin steht
+    das CSS-Modell; vorher hielt das erste Bild die App an (gemessen mit vierfach gedrosselter CPU: 2 s ohne jede Eingabe). Das Foto fürs
+    Hausbild übersetzt sofort (`an(stage, true)`). Mit `navigator.deviceMemory` bis 4 GB nur eine freie Leinwand im Vorrat statt drei.
+    Bei Fragen ohne Lage kein erzwungenes Layout mehr je Wechsel (`lgAuf`), Prozente ohne `toLocaleString` je Aufruf.
   - 3-D-Bühne (5.11.2026, Detail und Umgebung): Glas spiegelt von außen dieselbe Landschaft wie der Blick von innen (Himmel, Baumreihe,
     Rasen) nach der Spiegelrichtung, kräftiger als vorher; weicher Schatten unter der Fensterbank innen und außen (`si-sch`, `sa-sch`).
   - Kacheln oben in der Liste (und auf Sichern, Konto, Prüfen): am Telefon höchstens vier, ab fünf Fenstern drei und „+n weitere“; am

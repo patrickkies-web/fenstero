@@ -5793,7 +5793,7 @@ function teilMm(w, i, mm) {
   w.anteile = teilRunden(a);
 }
 const teilName = (w, i) => ((w.art === 'fest' || (teilFluegel(w)[i] || {}).t === 'F') ? 'Feld ' : 'Flügel ') + (i + 1);
-const teilProzent = (p) => (Math.round(p * 10) / 10).toLocaleString('de-DE');
+const teilProzent = (p) => String(Math.round(p * 10) / 10).replace('.', ','); // wie toLocaleString('de-DE') bei Werten unter 1.000, ohne den teuren Formatierer je Aufruf
 const teilWertHTML = (w, i, B, a) => '<b>' + thousand(Math.round(B[i])) + ' mm</b><small>' + esc(teilName(w, i)) + ' · ' + teilProzent(a[i]) + ' %</small>';
 /* Zifferntasten für die Breite eines Flügels (massCfg: Schlüssel teil:<i>) */
 function teilMassCfg(f) {
@@ -6009,6 +6009,8 @@ function lgAuf() {
   if (scr.classList.contains('md')) return mdAuf(scr);
   if (scr.classList.contains('er')) return; // Ergebnis: das Modell bindet die App selbst
   if (scr.classList.contains('fg')) return; // Gespeichert: nichts nachzuziehen
+  /* ohne Lage auf dem Bildschirm (die übrigen Wünsche) kein erzwungenes Layout: es kostete bei jedem Fragewechsel ein ganzes Durchrechnen der Seite */
+  if (!scr.querySelector('.lg-buehne, .lp-raster, .lg-fenster, .lw-skala')) return lgZeigen();
   lgMass(); scr.classList.add('lg-still'); lgZeigen(); void scr.offsetWidth; requestAnimationFrame(() => scr.classList.remove('lg-still'));
 }
 /* Pille mit dem Namen des Betriebs („An Fensterbau Brandt senden“): Passt sie nicht neben „Zurück“ (Laptop-Spalte, Telefon unter 390 px),

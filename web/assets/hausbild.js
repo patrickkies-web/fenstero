@@ -152,7 +152,7 @@ function hbStudioBild(w, nurRahmen) {
     if (!st) { weg(); return fertig(null); }
     st.classList.add('no-anim'); w3dApply(st, w, W3DS['hb-studio-st'].o);
     st.querySelectorAll(nurRahmen ? HB_NICHT_RAHMEN : '.w3d-an').forEach((e) => e.remove()); // Gurt, Wickler, Taster sitzen innen; ohne Wand sähe die KI sie vor der Fassade
-    if (!window.Buehne3D || !window.Buehne3D.an(st)) { weg(); return fertig(null); }
+    if (!window.Buehne3D || !window.Buehne3D.an(st, true)) { weg(); return fertig(null); } // true: Programme gleich fertig übersetzen (Foto für die KI)
     requestAnimationFrame(() => requestAnimationFrame(() => { const url = window.Buehne3D.foto(st); weg(); fertig(url || null); }));
   });
 }

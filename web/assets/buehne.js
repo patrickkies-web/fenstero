@@ -259,6 +259,14 @@ window.Buehne3D = (function () {
     'vec3 gr=mix(vec3(0.36,0.41,0.34),vec3(0.48,0.52,0.45),rausch(vec2(az*18.0,el*24.0)));gr=mix(gr,sky,0.3*(1.0-smoothstep(0.0,0.08,tf-el)));vec3 c=mix(sky,gr,baum);' +
     'float hk=hz-0.012+0.008*rausch(vec2(az*12.0,9.0));float bo=1.0-smoothstep(hk-0.008,hk+0.008,el);vec3 ra=mix(vec3(0.6,0.63,0.53),vec3(0.5,0.54,0.44),clamp((hk-el)/0.22,0.0,1.0));c=mix(c,ra,bo);' +
     'float l=dot(c,vec3(0.3,0.59,0.11));return mix(vec3(l),c,0.6);}' +
+    /* Spiegelwelt fürs Glas von außen (Inhaber, 6.11.2026: „den größten Einfluss … Realismus“): was vor dem Haus liegt, scharf wie in
+       einer echten Scheibe: Himmel vom hellen Horizont zum Blau, ziehende Wolken, eine Baumreihe mit unruhiger Kante, davor Rasen und Weg.
+       el: Höhe über dem Horizont, az: Richtung; die Kanten bleiben auf einen Bildpunkt scharf (fwidth) */
+    'vec3 spiegel(float el,float az){float aa=max(fwidth(el)*1.2,0.0015);float hs=clamp(el/0.5,0.0,1.0);vec3 sky=mix(vec3(0.93,0.95,0.97),vec3(0.5,0.67,0.9),pow(hs,0.7));' +
+    'float wo=rausch(vec2(az*2.4,el*5.0)+11.0)*0.55+rausch(vec2(az*5.3,el*11.0)+3.0)*0.3+rausch(vec2(az*12.0,el*25.0)+7.0)*0.15;sky=mix(sky,vec3(0.95,0.96,0.97),smoothstep(0.55,0.8,wo)*smoothstep(0.03,0.16,el));' +
+    'float tf=0.012+0.03*rausch(vec2(az*4.0,1.0))+0.016*rausch(vec2(az*15.0,4.0))+0.011*rausch(vec2(az*48.0,8.0))+0.006*rausch(vec2(az*130.0,6.0));float baum=1.0-smoothstep(tf-aa,tf+aa,el);' +
+    'vec3 bc=mix(vec3(0.17,0.22,0.17),vec3(0.29,0.33,0.26),rausch(vec2(az*36.0,el*48.0)));bc=mix(bc,vec3(0.38,0.43,0.35),0.4*smoothstep(tf-0.035,tf,el));vec3 c=mix(sky,bc,baum);' +
+    'float hz=-0.03+0.003*rausch(vec2(az*9.0,2.0));float bo=1.0-smoothstep(hz-aa,hz+aa,el);vec3 gr=mix(vec3(0.47,0.53,0.41),vec3(0.58,0.58,0.55),smoothstep(-0.12,-0.3,el));return mix(c,gr,bo);}' +
     'void main(){gFw=fwidth(vP);vec3 N=normalize(mix(uN,uN2,clamp(uNA>0.5?vP.y/max(uWH.y,1e-3):vP.x/max(uWH.x,1e-3),0.0,1.0)));vec3 V=normalize(uEye-vW);float fs=dot(N,V);' +
     '\n#ifdef SCHNITT\nif(uSide>0.5&&fs<0.0)discard;if(uSide<-0.5&&fs>0.0)discard;\n#endif\n' +
     'vec2 P=vP;vec4 c=uBase;for(int i=4;i>=0;i--){if(i>=uNL)continue;vec4 l=lage(i,P);c=l+c*(1.0-l.a);}' +
@@ -289,7 +297,8 @@ window.Buehne3D = (function () {
     /* seit 5.11.2026 (Inhaber: „Detailreichtum“ und Spiegelungen wie echtes Glas): gespiegelt wird die Umgebung vor dem Haus, dieselbe
        Landschaft wie der Blick von innen (aussicht: Himmel, Baumreihe, Rasen), gekippt nach der Spiegelrichtung; beim Drehen wandert sie mit */
     'if(fs<0.0){float da=max(c.a,0.94);float yv=clamp(vP.y/max(uWH.y,1.0),0.0,1.0),xv=clamp(vP.x/max(uWH.x,1.0),0.0,1.0);float hi=1.0-smoothstep(0.05,0.62,yv);' +
-    'rgb=mix(rgb,vec3(0.1,0.11,0.12)*da,0.74);c.a=da;F=max(F,0.26)+0.3*hi;float hw=max(uPr.w,1.0);vec3 rf=aussicht(0.34*up-0.1,vW.x/(2.2*hw)*0.6+R.x*0.8);rf=mix(vec3(dot(rf,vec3(0.3,0.59,0.11))),rf,1.35);env=mix(env,rf,0.9);env=mix(env,vec3(0.8,0.86,0.93),0.4*hi);rgb+=vec3(0.92,0.95,0.98)*0.15*exp(-pow((vW.x*0.7+vW.y)/hw/0.1,2.0))*da;}' +
+    'vec3 raum=mix(vec3(0.045,0.05,0.055),vec3(0.12,0.11,0.1),smoothstep(0.4,1.0,yv));rgb=mix(rgb,raum*da,0.86);c.a=da;F=max(F,0.36)+0.3*hi;float hw=max(uPr.w,1.0);' +
+    'env=spiegel(-vW.y/(2.2*hw)*0.7-R.y*0.5+0.1,vW.x/(2.2*hw)*0.7+R.x*0.8);rgb+=vec3(0.92,0.95,0.98)*0.08*exp(-pow((vW.x*0.7+vW.y)/hw/0.1,2.0))*da;}' +
     /* von innen: die helle Durchsicht, dazu ein breiter, weicher Glanz schräg über alle Scheiben (Spiegelung des Raums, kaum sichtbar) */
     'else{if(uLi.w>1.5){float hw=max(uPr.w,1.0);vec3 d=-V;float el=-vW.y/(2.2*hw)-d.y,az=vW.x/(2.2*hw)+d.x/max(length(d.xz),1e-3);' +
     'vec3 au=aussicht(el,az)*(uLi.w>2.5?vec3(0.52,0.58,0.64):vec3(0.95,0.985,0.975));rgb=mix(rgb/max(c.a,1e-3),au,1.0-gPG)*uOp;c.a=uOp;}else rgb=mix(rgb,c.rgb*0.99,0.75*(1.0-gPG));float hw=max(uPr.w,1.0);rgb+=vec3(0.97,0.98,1.0)*0.09*exp(-pow((vW.x*0.6+vW.y)/hw/0.2+0.9,2.0))*c.a*(1.0-gPG);}rgb=rgb*(1.0-F)+env*F*c.a;}' +
@@ -299,16 +308,28 @@ window.Buehne3D = (function () {
 
   const VS_S = '#version 300 es\nlayout(location=0) in vec2 aP;uniform mat4 uM;uniform mat4 uLVP;uniform float uDz;void main(){gl_Position=uLVP*uM*vec4(aP,uDz,1.0);}';
   const FS_S = '#version 300 es\nprecision mediump float;out vec4 o;void main(){o=vec4(1.0);}';
-  function programm(gl, vs, fs, namen) {
-    const sh = (t, src) => { const s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
-    const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs || VS)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs || FS(true))); gl.bindAttribLocation(p, 0, 'aP'); gl.linkProgram(p);
-    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  /* spaeter (6.11.2026, Leistung auf schwachen Geräten): mit KHR_parallel_shader_compile übersetzt der Treiber im Hintergrund; jede
+     Abfrage des Status hielte bis zum Ende an (beim ersten Bild der App bis zu Sekunden auf schwachen Laptops). Dann gibt programm()
+     nur das Programm zurück, fertig() liest Status und Plätze der Uniforms, sobald COMPLETION_STATUS_KHR meldet, dass es fertig ist */
+  function programm(gl, vs, fs, namen, spaeter) {
+    const sh = (t, src) => { const s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s); if (!spaeter && !gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+    const vsh = sh(gl.VERTEX_SHADER, vs || VS), fsh = sh(gl.FRAGMENT_SHADER, fs || FS(true));
+    const p = gl.createProgram(); gl.attachShader(p, vsh); gl.attachShader(p, fsh); gl.bindAttribLocation(p, 0, 'aP'); gl.linkProgram(p);
+    if (spaeter) return { p: p, u: null, namen: namen, sh: [vsh, fsh] };
+    return fertig(gl, { p: p, namen: namen });
+  }
+  function fertig(gl, pr) {
+    const p = pr.p, namen = pr.namen;
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p) || (pr.sh || []).map((x) => gl.getShaderInfoLog(x)).join(' '));
     const u = {}; (namen || ['uM', 'uVP', 'uDz', 'uWH', 'uBase', 'uNL', 'uLA', 'uLB', 'uLC', 'uLM', 'uSC', 'uSP', 'uIn', 'uFx', 'uOp', 'uN', 'uEye', 'uLi', 'uSide', 'uL1', 'uC1', 'uL2', 'uC2', 'uSky', 'uGnd', 'uAo', 'uAoR', 'uTint', 'uN2', 'uSM', 'uLVP', 'uSh', 'uFade', 'uArt', 'uArtC', 'uBand', 'uBev', 'uBevI', 'uTx', 'uTy', 'uNA', 'uArtO', 'uRelief', 'uPr', 'uPrC']).forEach((k) => { u[k] = gl.getUniformLocation(p, k); });
-    return { p: p, u: u };
+    pr.u = u; return pr;
   }
 
   /* ---------- Leinwände: wenige WebGL-Zusammenhänge, die zwischen Bühnen wandern ---------- */
   const POOL = [];
+  /* Geräte mit wenig Arbeitsspeicher (navigator.deviceMemory bis 4 GB, Chrome und Edge): nur eine freie Leinwand vorhalten statt drei;
+     jede hält ihre Programme und eine Schattenkarte im Grafikspeicher. Am Bild ändert das nichts (6.11.2026) */
+  const POOL_MAX = navigator.deviceMemory && navigator.deviceMemory <= 4 ? 1 : 3;
   let OK = null;
   /* ein verlorener Zusammenhang (Grafikchip zurückgesetzt, zu viele Leinwände) zeichnet nichts mehr: nie wiederverwenden */
   const lebt = (L) => !!L && !L.verloren && !L.kaputt && !L.gl.isContextLost();
@@ -354,15 +375,16 @@ window.Buehne3D = (function () {
     /* verloren: sofort das CSS-Modell; zurück: wieder WebGL, außer der Regler oder der Selbsttest hat die Bühne abgeschaltet */
     cv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); L.verloren = true; const st = cv.parentNode; if (st && st.classList) zumCss(st); });
     cv.addEventListener('webglcontextrestored', () => {
-      try { einrichten(L); L.verloren = false; L.geprueft = false; } catch (e) { return; }
+      try { L.sofort = true; einrichten(L); L.verloren = false; L.geprueft = false; } catch (e) { return; } // zurück: gleich fertig übersetzen, die Bühne zeichnet sofort
       const st = cv.parentNode; if (st && st._b3 && !st._b3.aus) { st.classList.add('gl'); st._b3.schattenNeu = true; anstoss(st); }
     });
     return L;
   }
   function einrichten(L) {
-    const gl = L.gl;
-    L.pr = programm(gl); L.pr0 = programm(gl, VS, FS(false));
-    L.ps = programm(gl, VS_S, FS_S, ['uM', 'uLVP', 'uDz']);
+    const gl = L.gl, par = !L.sofort && gl.getExtension('KHR_parallel_shader_compile');
+    L.pr = programm(gl, null, null, null, !!par); L.pr0 = programm(gl, VS, FS(false), null, !!par);
+    L.ps = programm(gl, VS_S, FS_S, ['uM', 'uLVP', 'uDz'], !!par);
+    L.par = par || null; L.wartet = par ? [L.pr, L.pr0, L.ps] : null;
     /* Schattenkarte: Tiefe aus Sicht der Sonne, mit Vergleich beim Lesen (weiche Kanten aus 12 Proben) */
     const GR = 1024;
     L.sm = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, L.sm);
@@ -376,6 +398,26 @@ window.Buehne3D = (function () {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     L.buf = gl.createBuffer(); L.cap = 0;
     L.vao = gl.createVertexArray(); gl.bindVertexArray(L.vao); gl.bindBuffer(gl.ARRAY_BUFFER, L.buf); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 8, 0);
+  }
+  /* Programme fertig? (true ohne Hintergrund-Übersetzung); sofort: jetzt fertigstellen, auch wenn es dauert (Foto fürs Hausbild) */
+  function bereit(L, sofort) {
+    if (!L.wartet) return true;
+    const gl = L.gl, k = L.par.COMPLETION_STATUS_KHR;
+    if (!sofort && L.wartet.some((pr) => !gl.getProgramParameter(pr.p, k))) return false;
+    try { L.wartet.forEach((pr) => fertig(gl, pr)); } catch (e) { if (window.console) console.warn('3-D-Bühne: WebGL nicht nutzbar', e); L.kaputt = true; L.wartet = null; return false; }
+    L.wartet = null; return true;
+  }
+  /* Bühnen, die auf ihre Programme warten: je Bild nachsehen, dann wie sonst einschalten (bis dahin bleibt das CSS-Modell) */
+  const WARTEN = new Map();
+  let wartRaf = 0;
+  function warten() {
+    wartRaf = 0;
+    WARTEN.forEach((L, stage) => {
+      if (!stage.isConnected) { WARTEN.delete(stage); if (lebt(L) && POOL.length < POOL_MAX && POOL.indexOf(L) < 0) POOL.push(L); return; }
+      if (!lebt(L)) { WARTEN.delete(stage); return; }
+      if (bereit(L)) { WARTEN.delete(stage); stage._glL = L; an(stage); }
+    });
+    if (WARTEN.size) wartRaf = requestAnimationFrame(warten);
   }
   function unterstuetzt() {
     if (OK !== null) return OK;
@@ -405,7 +447,7 @@ window.Buehne3D = (function () {
       Object.keys(o).forEach((k) => { if ((k.indexOf('_t') === 0 || k.indexOf('_w') === 0) && o[k] && typeof o[k] === 'object' && 'jetzt' in o[k]) e[k] = Object.assign({}, o[k], { erbe: true }); });
     });
   }
-  function an(stage) {
+  function an(stage, sofort) {
     if (!stage || !unterstuetzt()) return false;
     let alt = null;
     /* nur eine Bühne beerben, die render() eben ersetzt hat (_abgang), nicht eine von einem früheren Bildschirm */
@@ -417,8 +459,15 @@ window.Buehne3D = (function () {
     if (!B) {
       let L = null;
       if (alt) { L = alt._b3.L; }
-      L = L || ausPool() || neueLeinwand();
+      L = L || stage._glL || WARTEN.get(stage) || ausPool() || neueLeinwand();
+      stage._glL = null;
       if (!L) return false;
+      if (!bereit(L, sofort)) {
+        if (L.kaputt) return false;
+        WARTEN.set(stage, L); if (!wartRaf) wartRaf = requestAnimationFrame(warten);
+        return false;
+      }
+      WARTEN.delete(stage);
       B = stage._b3 = { L: L, neu: true, cam: null, stufe: GSTUFE, schwing: { t: 0, a: 0, b: 0, k: 0 }, sicht: true, zuletzt: 0, picks: [], items: null };
       if (alt) { erben(alt, stage, B); const A = alt._b3; BUEHNEN.delete(alt); if (A.mo) A.mo.disconnect(); if (A.io) A.io.disconnect(); if (A.ro) A.ro.disconnect(); alt._b3 = null; }
       stage.insertBefore(L.cv, stage.querySelector('.w3d-cam'));
@@ -473,7 +522,7 @@ window.Buehne3D = (function () {
     BUEHNEN.delete(stage); if (B.mo) B.mo.disconnect(); if (B.io) B.io.disconnect(); if (B.ro) B.ro.disconnect();
     if (B.L.cv.parentNode) B.L.cv.parentNode.removeChild(B.L.cv);
     /* im Vorrat ohne großen Bildspeicher */
-    if (lebt(B.L) && POOL.length < 3) { B.L.cv.width = 1; B.L.cv.height = 1; POOL.push(B.L); } else { const x = B.L.gl.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); }
+    if (lebt(B.L) && POOL.length < POOL_MAX) { B.L.cv.width = 1; B.L.cv.height = 1; POOL.push(B.L); } else { const x = B.L.gl.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); }
     stage._b3 = null; zumCss(stage);
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden) BUEHNEN.forEach(anstoss); });
@@ -1170,8 +1219,10 @@ window.Buehne3D = (function () {
   const norm = (v) => { const l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; };
   /* Sonne innen von rechts oben vorn, außen von links oben; eine dem Betrachter zugewandte Wand kommt auf ihre Farbe,
      Fensterbänke etwas heller, der Sturz im Schatten, die Laibungen je Seite verschieden */
-  const L1 = norm([0.45, -0.5, 0.74]), L2 = norm([-0.42, -0.52, -0.74]);
-  const C1 = [0.6, 0.59, 0.57], C2 = [0.6, 0.59, 0.57], SKY = [0.57, 0.6, 0.66], GND = [0.62, 0.59, 0.55]; // Sonne fast neutral (Weiß bleibt weiß), Boden hellt den Sturz auf
+  /* seit 6.11.2026 (Inhaber: Realismus): die Sonne steht seitlicher und höher, so wirft die Laibung einen sichtbaren Schatten auf Rahmen
+     und Glas, wie bei einem echten Fenster in der Wand; etwas mehr Sonne und etwas weniger Himmelslicht halten die Wand auf ihrer Farbe */
+  const L1 = norm([0.56, -0.62, 0.55]), L2 = norm([-0.54, -0.64, -0.55]);
+  const C1 = [0.72, 0.7, 0.66], C2 = [0.72, 0.7, 0.66], SKY = [0.53, 0.56, 0.62], GND = [0.58, 0.55, 0.51]; // Sonne leicht warm (Weiß bleibt weiß), Boden hellt den Sturz auf
 
   /* ---------- Zeichnen ---------- */
   /* Kamera wie .w3d-cam in app.css: Verschiebung (--panx, --pany; Zoom) vor der Drehung (--rx, --ry). Sie gleitet wie dort: 0,9 s,
@@ -1514,5 +1565,5 @@ window.Buehne3D = (function () {
     const B = stage && stage._b3; if (!B || B.aus || !lebt(B.L)) return null;
     try { B.neu = true; zeichnen(stage, B, performance.now() + 60000); return B.L.cv.toDataURL('image/png'); } catch (e) { return null; }
   }
-  return { DBG: DBG, pruef: pruef, an: an, anstoss: anstoss, treffer: treffer, aktiv: (stage) => !!(stage && stage._b3 && !stage._b3.aus), unterstuetzt: unterstuetzt, foto: foto };
+  return { DBG: DBG, pruef: pruef, an: an, bereit: () => POOL.every((L) => !L.wartet), anstoss: anstoss, treffer: treffer, aktiv: (stage) => !!(stage && stage._b3 && !stage._b3.aus), unterstuetzt: unterstuetzt, foto: foto };
 })();
