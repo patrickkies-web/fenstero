@@ -718,6 +718,23 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     das CSS-Modell; vorher hielt das erste Bild die App an (gemessen mit vierfach gedrosselter CPU: 2 s ohne jede Eingabe). Das Foto fürs
     Hausbild übersetzt sofort (`an(stage, true)`). Mit `navigator.deviceMemory` bis 4 GB nur eine freie Leinwand im Vorrat statt drei.
     Bei Fragen ohne Lage kein erzwungenes Layout mehr je Wechsel (`lgAuf`), Prozente ohne `toLocaleString` je Aufruf.
+  - 3-D-Bühne, zweite Runde (6.11.2026, Inhaber: die zwei Punkte, die Aufbau und Elemente am stärksten realistischer machen, dann der
+    Fluss auf Geräten mit wenig Arbeitsspeicher). Auswahl mit einer unabhängigen Beurteilung der Bilder; ein Glanz der Profile mit
+    Spiegelung des Himmels wurde probiert und verworfen (in der Normalansicht kaum sichtbar).
+    1. Außenlaibung wie die Fassade (`laibungAussen` in buehne.js): von der Außenkante des Rahmens bis zur Fassade trägt die Laibung
+       deren Putz und Farbe, bei Klinker die Steine mit durchlaufenden Schichten, bei Holz die Bretter; innen bleibt der helle Innenputz.
+       Vorher war die ganze Laibung heller Einheitsputz und las sich außen als Papierstreifen neben dem Rahmen. Das CSS-Modell (bis die
+       Grafik bereit ist, ohne WebGL) zeigt die Außenlaibung im Ton der Fassade (`--laib-a`, `--laib-l/r/t`).
+    2. Isolierglas von außen: die Scheibe ist dunkler als die besonnte Wand und spiegelt oben den Himmel (22 bis 40 %, vorher 36 bis
+       66 %, das Glas stand wie ein helles Plakat in der Wand), darunter der dunkle Raum. Jede Scheibe ist leicht gewölbt wie echtes
+       Isolierglas (Doppelscheibeneffekt, je Scheibe nach innen oder außen), die Baumlinie biegt sich je Scheibe etwas anders; rundere
+       Baumkronen, dunklerer Rasen in der Spiegelung. Gemessen am Telefon (Helligkeit 0 bis 255, Wand 143): Glas oben 163 → 130,
+       unten 97 → 84.
+    3. Fluss: Ziehen, Zwei-Finger-Zoom und Zoom gelten als Bewegung. Vorher zeichnete die Bühne ab dem zweiten Bild des Ziehens in
+       Standbild-Schärfe (am Telefon mit dreifacher Pixeldichte 1077 × 1207 statt 718 × 805, am Laptop doppelt überabgetastet), und der
+       Regler zählte diese Bilder nicht. Der Regler stuft nach 6 statt 20 langsamen Bildern herunter (eine Kamerafahrt von 0,9 s hat auf
+       einem schwachen Gerät nur etwa 11 Bilder; vorher griff er dort nie). Steht das Bild, wird es wie bisher einmal scharf gezeichnet:
+       am Standbild ändert sich nichts. Bilder: docs/profis/bilder/2026-11-06-3d2-*.jpg.
   - 3-D-Bühne (5.11.2026, Detail und Umgebung): Glas spiegelt von außen dieselbe Landschaft wie der Blick von innen (Himmel, Baumreihe,
     Rasen) nach der Spiegelrichtung, kräftiger als vorher; weicher Schatten unter der Fensterbank innen und außen (`si-sch`, `sa-sch`).
   - Kacheln oben in der Liste (und auf Sichern, Konto, Prüfen): am Telefon höchstens vier, ab fünf Fenstern drei und „+n weitere“; am

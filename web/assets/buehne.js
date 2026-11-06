@@ -261,12 +261,13 @@ window.Buehne3D = (function () {
     'float l=dot(c,vec3(0.3,0.59,0.11));return mix(vec3(l),c,0.6);}' +
     /* Spiegelwelt fürs Glas von außen (Inhaber, 6.11.2026: „den größten Einfluss … Realismus“): was vor dem Haus liegt, scharf wie in
        einer echten Scheibe: Himmel vom hellen Horizont zum Blau, ziehende Wolken, eine Baumreihe mit unruhiger Kante, davor Rasen und Weg.
-       el: Höhe über dem Horizont, az: Richtung; die Kanten bleiben auf einen Bildpunkt scharf (fwidth) */
-    'vec3 spiegel(float el,float az){float aa=max(fwidth(el)*1.2,0.0015);float hs=clamp(el/0.5,0.0,1.0);vec3 sky=mix(vec3(0.93,0.95,0.97),vec3(0.5,0.67,0.9),pow(hs,0.7));' +
+       el: Höhe über dem Horizont, az: Richtung; die Kanten bleiben scharf (fwidth, mindestens 0,0028).
+       Seit 6.11.2026 rundere Kronen (weniger feine Zacken, die Kante einen Hauch weicher) und ein dunklerer Rasen vor dem Haus */
+    'vec3 spiegel(float el,float az){float aa=max(fwidth(el)*1.2,0.0028);float hs=clamp(el/0.5,0.0,1.0);vec3 sky=mix(vec3(0.93,0.95,0.97),vec3(0.5,0.67,0.9),pow(hs,0.7));' +
     'float wo=rausch(vec2(az*2.4,el*5.0)+11.0)*0.55+rausch(vec2(az*5.3,el*11.0)+3.0)*0.3+rausch(vec2(az*12.0,el*25.0)+7.0)*0.15;sky=mix(sky,vec3(0.95,0.96,0.97),smoothstep(0.55,0.8,wo)*smoothstep(0.03,0.16,el));' +
-    'float tf=0.012+0.03*rausch(vec2(az*4.0,1.0))+0.016*rausch(vec2(az*15.0,4.0))+0.011*rausch(vec2(az*48.0,8.0))+0.006*rausch(vec2(az*130.0,6.0));float baum=1.0-smoothstep(tf-aa,tf+aa,el);' +
+    'float tf=0.014+0.03*rausch(vec2(az*4.0,1.0))+0.017*rausch(vec2(az*13.0,4.0))+0.007*rausch(vec2(az*34.0,8.0))+0.0025*rausch(vec2(az*90.0,6.0));float baum=1.0-smoothstep(tf-aa,tf+aa,el);' +
     'vec3 bc=mix(vec3(0.17,0.22,0.17),vec3(0.29,0.33,0.26),rausch(vec2(az*36.0,el*48.0)));bc=mix(bc,vec3(0.38,0.43,0.35),0.4*smoothstep(tf-0.035,tf,el));vec3 c=mix(sky,bc,baum);' +
-    'float hz=-0.03+0.003*rausch(vec2(az*9.0,2.0));float bo=1.0-smoothstep(hz-aa,hz+aa,el);vec3 gr=mix(vec3(0.47,0.53,0.41),vec3(0.58,0.58,0.55),smoothstep(-0.12,-0.3,el));return mix(c,gr,bo);}' +
+    'float hz=-0.03+0.003*rausch(vec2(az*9.0,2.0));float bo=1.0-smoothstep(hz-aa,hz+aa,el);vec3 gr=mix(vec3(0.38,0.43,0.34),vec3(0.5,0.5,0.47),smoothstep(-0.12,-0.3,el));return mix(c,gr,bo);}' +
     'void main(){gFw=fwidth(vP);vec3 N=normalize(mix(uN,uN2,clamp(uNA>0.5?vP.y/max(uWH.y,1e-3):vP.x/max(uWH.x,1e-3),0.0,1.0)));vec3 V=normalize(uEye-vW);float fs=dot(N,V);' +
     '\n#ifdef SCHNITT\nif(uSide>0.5&&fs<0.0)discard;if(uSide<-0.5&&fs>0.0)discard;\n#endif\n' +
     'vec2 P=vP;vec4 c=uBase;for(int i=4;i>=0;i--){if(i>=uNL)continue;vec4 l=lage(i,P);c=l+c*(1.0-l.a);}' +
@@ -296,9 +297,13 @@ window.Buehne3D = (function () {
        sich die Scheibe als Klarglas, nicht als Grau- oder Sonnenschutzglas */
     /* seit 5.11.2026 (Inhaber: „Detailreichtum“ und Spiegelungen wie echtes Glas): gespiegelt wird die Umgebung vor dem Haus, dieselbe
        Landschaft wie der Blick von innen (aussicht: Himmel, Baumreihe, Rasen), gekippt nach der Spiegelrichtung; beim Drehen wandert sie mit */
+    /* Isolierglas (Inhaber, 6.11.2026: Aufbau und Elemente realistischer): bei Tag ist die Scheibe dunkler als die besonnte Wand, sie
+       spiegelt oben den Himmel (22 bis 40 %, vorher 36 bis 66 %: das Glas stand wie ein helles Plakat in der Wand), darunter sieht man den
+       dunklen Raum. Jede Scheibe ist leicht gewölbt wie echtes Isolierglas (Doppelscheibeneffekt): Wölbung je Scheibe nach ihrer Lage
+       verschieden, nach innen oder außen, so biegt sich die Baumlinie je Scheibe ein wenig anders, statt in allen gleich zu stehen */
     'if(fs<0.0){float da=max(c.a,0.94);float yv=clamp(vP.y/max(uWH.y,1.0),0.0,1.0),xv=clamp(vP.x/max(uWH.x,1.0),0.0,1.0);float hi=1.0-smoothstep(0.05,0.62,yv);' +
-    'vec3 raum=mix(vec3(0.045,0.05,0.055),vec3(0.12,0.11,0.1),smoothstep(0.4,1.0,yv));rgb=mix(rgb,raum*da,0.86);c.a=da;F=max(F,0.36)+0.3*hi;float hw=max(uPr.w,1.0);' +
-    'env=spiegel(-vW.y/(2.2*hw)*0.7-R.y*0.5+0.1,vW.x/(2.2*hw)*0.7+R.x*0.8);rgb+=vec3(0.92,0.95,0.98)*0.08*exp(-pow((vW.x*0.7+vW.y)/hw/0.1,2.0))*da;}' +
+    'vec3 raum=mix(vec3(0.045,0.05,0.055),vec3(0.12,0.11,0.1),smoothstep(0.4,1.0,yv));rgb=mix(rgb,raum*da,0.86);c.a=da;F=max(F,0.22)+0.18*hi;float hw=max(uPr.w,1.0);vec3 o0=vW-uTx*vP.x-uTy*vP.y;float hb=hash(floor(o0.xy*0.37)+floor(uWH*0.21));float bow=0.012*(hb<0.5?-1.0:1.0)*(0.6+0.8*fract(hb*7.0));float bu=sin(3.14159*xv),bv=sin(3.14159*yv);' +
+    'env=spiegel(-vW.y/(2.2*hw)*0.7-R.y*0.5+0.1+bow*bu*cos(3.14159*yv),vW.x/(2.2*hw)*0.7+R.x*0.8+0.8*bow*cos(3.14159*xv)*bv);rgb+=vec3(0.92,0.95,0.98)*0.08*exp(-pow((vW.x*0.7+vW.y)/hw/0.1,2.0))*da;}' +
     /* von innen: die helle Durchsicht, dazu ein breiter, weicher Glanz schräg über alle Scheiben (Spiegelung des Raums, kaum sichtbar) */
     'else{if(uLi.w>1.5){float hw=max(uPr.w,1.0);vec3 d=-V;float el=-vW.y/(2.2*hw)-d.y,az=vW.x/(2.2*hw)+d.x/max(length(d.xz),1e-3);' +
     'vec3 au=aussicht(el,az)*(uLi.w>2.5?vec3(0.52,0.58,0.64):vec3(0.95,0.985,0.975));rgb=mix(rgb/max(c.a,1e-3),au,1.0-gPG)*uOp;c.a=uOp;}else rgb=mix(rgb,c.rgb*0.99,0.75*(1.0-gPG));float hw=max(uPr.w,1.0);rgb+=vec3(0.97,0.98,1.0)*0.09*exp(-pow((vW.x*0.6+vW.y)/hw/0.2+0.9,2.0))*c.a*(1.0-gPG);}rgb=rgb*(1.0-F)+env*F*c.a;}' +
@@ -536,26 +541,36 @@ window.Buehne3D = (function () {
       if (document.hidden || !B.sicht) return;
       /* Nur das Schwingen läuft: halbe Bildrate genügt (auf langsamen Geräten weniger) */
       if (!B.neu && B.nurSchwingen && now - B.zuletzt < (B.stufe ? 50 : 30)) { weiter = true; return; }
-      /* Regler: Bilder einer laufenden Bewegung (Ziehen, Zoomen, Übergang) dauern zu lange, 20 über 50 ms hintereinander: in Bewegung
+      /* Regler: Bilder einer laufenden Bewegung (Ziehen, Zoomen, Übergang) dauern zu lange, 6 über 50 ms hintereinander: in Bewegung
          eine Stufe gröber (Pixeldichte 1,5, dann 1,25 ohne Schatten). 90 schnelle Bilder (unter 30 ms) holen eine Stufe zurück.
          Nur das Schwingen zählt nicht: ist es langsam, hört es auf. Pausen (Tab im Hintergrund) zählen nicht. Steht das Bild,
-         wird es einmal scharf gezeichnet (B.scharf), so wirkt eine grobe Stufe nur, solange sich etwas bewegt */
+         wird es einmal scharf gezeichnet (B.scharf), so wirkt eine grobe Stufe nur, solange sich etwas bewegt.
+         Seit 6.11.2026 (Inhaber: Fluss auf Geräten mit wenig Arbeitsspeicher, ohne Qualitätsverlust): vorher erst nach 20 langsamen
+         Bildern; eine Kamerafahrt dauert 0,9 s, auf einem schwachen Gerät (80 ms je Bild) sind das 11 Bilder, der Regler griff also nie
+         und jede Fahrt ruckelte ganz. Jetzt lernt er in der ersten Fahrt (etwa 0,4 s), die Stufe gilt für die Sitzung (GSTUFE) */
       if (B.fort && !B.neu && !VOLL) {
         const dt = now - B.zuletzt;
         if (dt < 2000) {
           if (B.nurSchwingen) { B.langsamS = dt > 70 ? (B.langsamS || 0) + 1 : 0; if (B.langsamS > 24) B.schwing.aus = true; }
           else {
-            B.langsam = dt > 50 ? (B.langsam || 0) + 1 : 0; B.schnell = dt < 30 ? (B.schnell || 0) + 1 : 0;
-            if (B.langsam >= 20 && B.stufe < 2) { B.langsam = 0; B.stufe++; GSTUFE = B.stufe; }
+            /* beim Ziehen kommen die Bilder mit den Bewegungen des Fingers: ein langsamer Finger ist kein langsames Gerät, darum dort erst ab 70 ms */
+            B.langsam = dt > (B.fortZieht ? 70 : 50) ? (B.langsam || 0) + 1 : 0; B.schnell = dt < 30 ? (B.schnell || 0) + 1 : 0;
+            if (B.langsam >= 6 && B.stufe < 2) { B.langsam = 0; B.stufe++; GSTUFE = B.stufe; }
             if (B.schnell >= 90 && B.stufe > 0) { B.schnell = 0; B.stufe--; GSTUFE = B.stufe; }
           }
         }
       }
+      /* Ziehen, Zwei-Finger-Zoom und Zoom per Knopf sind Bewegung wie eine Kamerafahrt (6.11.2026): vorher zeichnete die Bühne ab dem
+         zweiten Bild des Ziehens in Standbild-Schärfe (am Telefon bis dreifache Pixeldichte, am Laptop doppelt überabgetastet, also das
+         2,25- bis 4-Fache an Pixeln je Bild), und der Regler zählte diese Bilder nicht. Jetzt in der Pixeldichte der Bewegung; das
+         scharfe Bild kommt einmal, wenn der Finger loslässt */
+      const sc = stage.classList; B.zieht = sc.contains('is-drag') || sc.contains('is-pinch') || sc.contains('is-zooming');
+      if (B.zieht) B.scharf = false;
       const lauf = zeichnen(stage, B, now);
       if (B.zuletzt && B.fort) B.dt = now - B.zuletzt;
-      B.neu = false; B.zuletzt = now; B.fort = !!lauf;
+      B.neu = false; B.zuletzt = now; B.fort = !!lauf || B.zieht; B.fortZieht = !lauf && B.zieht;
       infoZeigen(stage, B, now);
-      if (lauf) { weiter = true; B.scharf = false; } else if (!B.scharf && (B.stufe > 0 || (window.devicePixelRatio || 1) > STUFE_DPR[0] || (window.devicePixelRatio || 1) <= 1.5)) { B.scharf = true; weiter = true; }
+      if (lauf) { weiter = true; B.scharf = false; } else if (B.zieht) B.scharf = false; else if (!B.scharf && (B.stufe > 0 || (window.devicePixelRatio || 1) > STUFE_DPR[0] || (window.devicePixelRatio || 1) <= 1.5)) { B.scharf = true; weiter = true; }
     });
     if (weiter && !raf) raf = requestAnimationFrame(bild);
   }
@@ -1014,6 +1029,7 @@ window.Buehne3D = (function () {
       /* Lamellen mit C-Profil: die Normale neigt sich über die Höhe der Lamelle (_bieg Grad je Kante), so fängt die Wölbung Licht */
       if (el._bieg) { const nb = (g) => { const m = mul(Mf, RX(g)), a = ap(m, 0, 0, 1), z0 = ap(m, 0, 0, 0); return norm([a[0] - z0[0], a[1] - z0[1], a[2] - z0[2]]); }; it.n1 = nb(-el._bieg); it.n2 = nb(el._bieg); it.nAchse = 1; }
       items.push(it);
+      if (LAIBUNG_GETEILT.test(role) && el._bgc !== 'transparent') laibungAussen(it, f, stage, items);
       const pr = !DBG.ohneFalz && falzPartner(role); if (pr) falz(el, pr, Mf, f, o, !sash);
       if (glas) glasKinder(el, Mf, f, op, sash);
       if (glas && sash) { if (sash.classList.contains('demo-F')) glanz(el, Mf, f, op, sash); else sash._glc = ''; }
@@ -1198,6 +1214,24 @@ window.Buehne3D = (function () {
   }
   const FALZ = { 'el-front': 'el-back', 'ol-front': 'ol-back', 'ul-front': 'ul-back', kf: 'kfb', kfu: 'kfub' };
   const falzPartner = (role) => FALZ[role] || (role.indexOf('sf-in-') === 0 ? 'sf-out-' + role.slice(6) : role.indexOf('mul-') === 0 ? 'mulb-' + role.slice(4) : '');
+  /* Außenlaibung wie die Fassade (Inhaber, 6.11.2026: Aufbau und Elemente realistischer): von der Außenkante des Rahmens bis zur
+     Fassade trägt die Laibung deren Putz und Farbe, bei Klinker die Steine mit durchlaufenden Schichten, bei Holz die Bretter; innen
+     bleibt der helle Innenputz. Vorher war die ganze Laibung heller Einheitsputz und las sich außen als Papierstreifen neben dem Rahmen.
+     Dieselbe Fläche in zwei Teilen (Licht, Kontaktschatten und Schatten wie bisher), der äußere mit dem Stoff der Fassade */
+  const LAIBUNG_GETEILT = /^(rev-[tlr]|rs-\d+)$/;
+  function laibungAussen(it, f, stage, items) {
+    const v = stage._v; if (!v || f.c || stage.classList.contains('raum-licht')) return;
+    const wo = stage.querySelector('[data-r="wall-out"]'); if (!wo || !wo._f) return;
+    const quer = it.role === 'rev-l' || it.role === 'rev-r', a = v.d + v.fd, tief = quer ? f.W : f.H;
+    if (!(a > 0.5 && a < tief - 0.5)) return;
+    const e = quer ? { x: 0, o: HAUCH, u: HAUCH } : it.role === 'rev-t' ? { x: HAUCH, o: 0, u: 0 } : { x: 0, o: 0, u: 0 };
+    const rechteck = (x0, y0, x1, y1) => [x0, y0, x1, y0, x1, y1, x0, y0, x1, y1, x0, y1];
+    it.tri = quer ? rechteck(-e.x, -e.o, a, f.H + e.u) : rechteck(-e.x, -e.o, f.W + e.x, a);
+    /* Muster an die Fassade anschließen: an den Seiten laufen die Schichten des Klinkers um die Ecke (Fassade gespiegelt, rotateY 180) */
+    const wf = wo._tf && wo._tf.jetzt ? wo._tf.jetzt : wo._f;
+    items.push(Object.assign({}, it, { tri: quer ? rechteck(a, -e.o, f.W + e.x, f.H + e.u) : rechteck(-e.x, a, f.W + e.x, f.H + e.u), st: flaecheStoff(wo, stage),
+      artO: quer ? [0, f.y - wf.y] : [(wf.x + wf.W) - (f.x + f.W), 0], _sch: null, partner: it, aussenTeil: true }));
+  }
   function aoFuer(role, f, stage) {
     const v = stage._v; if (!v) return null;
     const d = v.d, fd = v.fd, r = Math.max(4, fd * 0.9), dF = d + 1 + HAUCH, s = v.s || 0.2, loch = f.c && f.c.t === 'hole' ? f.c.r : null;
@@ -1374,13 +1408,15 @@ window.Buehne3D = (function () {
   }
   /* Laibung aus Streifen (Formen): Normalen an den Stoßkanten gemittelt, damit Bögen glatt schattiert sind */
   function glatt(items) {
-    const rs = items.filter((it) => it.role && it.role.indexOf('rs-') === 0 && it.W > 0.05).sort((a, b) => +a.role.slice(3) - +b.role.slice(3));
+    const rs = items.filter((it) => it.role && it.role.indexOf('rs-') === 0 && it.W > 0.05 && !it.aussenTeil).sort((a, b) => +a.role.slice(3) - +b.role.slice(3));
     const nrm = (it) => { const a = ap(it.M, 0, 0, 1), b = ap(it.M, 0, 0, 0); return norm([a[0] - b[0], a[1] - b[1], a[2] - b[2]]); };
     const N = rs.map(nrm), n = rs.length;
     rs.forEach((it, k) => {
       const v = N[(k - 1 + n) % n], h = N[(k + 1) % n], m = N[k], nah = (a) => a[0] * m[0] + a[1] * m[1] + a[2] * m[2] > 0.82;
       it.n1 = nah(v) ? norm([v[0] + m[0], v[1] + m[1], v[2] + m[2]]) : m; it.n2 = nah(h) ? norm([h[0] + m[0], h[1] + m[1], h[2] + m[2]]) : m;
     });
+    /* der äußere Teil einer geteilten Laibung (laibungAussen) folgt den geglätteten Normalen seines inneren Teils */
+    items.forEach((it) => { if (it.partner) { it.n1 = it.partner.n1; it.n2 = it.partner.n2; } });
   }
   /* Schattenkarte aus Sicht der sichtbaren Sonne: Kasten um die Öffnung, alles Undurchsichtige wirft Schatten */
   function schattenMalen(B, seite, v) {
@@ -1481,7 +1517,7 @@ window.Buehne3D = (function () {
       const k = Math.max(0.02, MASSSTAB), f = st.artFarbe;
       gl.uniform4f(u.uArt, st.art[0], k, it.senk ? 2 : it.W >= it.H ? 1 : 2, st.art[1]); gl.uniform3f(u.uArtC, f[0], f[1], f[2]);
       /* Muster an das der Nachbarfläche anschließen (Blende des Aufsatzkastens in der Fassade): Versatz in örtlichen Pixeln */
-      const ao = it.el && it.el._artVers; gl.uniform2f(u.uArtO, ao ? ao[0] : 0, ao ? ao[1] : 0);
+      const ao = it.artO || (it.el && it.el._artVers); gl.uniform2f(u.uArtO, ao ? ao[0] : 0, ao ? ao[1] : 0);
       const c = fc; if (c && c.t === 'hole' && st.art[0] === 4) gl.uniform4f(u.uBand, c.r[0], c.r[1], c.r[2], c.r[3]); else gl.uniform4f(u.uBand, 0, 0, 0, 0);
     } else gl.uniform4f(u.uArt, 0, 0, 0, 0);
     AO.fill(0); if (it.ao) it.ao.forEach((a, i) => { if (i < 4) AO.set(a, i * 4); });

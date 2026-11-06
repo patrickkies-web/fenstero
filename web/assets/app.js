@@ -1728,6 +1728,10 @@ function w3dLayout(stage, w, o, gr) {
   face(q('wall-in'), wallW, wallH, -wallW / 2, -wallH / 2, 0, '', '0 0', wandLoch(false));
   face(q('wall-out'), wallW, wallH, -wallW / 2, -wallH / 2, -T, 'rotateY(180deg)', '50% 50%', wandLoch(true));
   const bankZone = 'linear-gradient(180deg, transparent 0 ' + px(d) + ', #9a9fa4 ' + px(d) + ' ' + px(d + fd) + ', transparent ' + px(d + fd) + ')';
+  /* Außenlaibung im Ton der Fassade (6.11.2026), wie in der WebGL-Bühne (buehne.js, laibungAussen): das CSS-Modell steht, bis die
+     Grafik bereit ist, und auf Geräten ohne WebGL; ab der Außenkante des Rahmens je Seite im Licht etwas heller oder dunkler */
+  const fTon = fassadeTon(w) || FASSADE_STD[w.fassade] || (w.fassade === 'wdvs' ? '#aea89f' : '#a0978a'), laibA = T > 0 ? n1((d + fd) / T * 100) + '%' : '101%';
+  stage.style.setProperty('--laib-a', laibA); stage.style.setProperty('--laib-l', mischHex(fTon, '#ffffff', 0.05)); stage.style.setProperty('--laib-r', mischHex(fTon, '#000000', 0.14)); stage.style.setProperty('--laib-t', mischHex(fTon, '#000000', 0.28));
   if (G) {
     /* Laibung als Streifen: je Umrisskante eine Fläche, die in die Wand hineinreicht; Farbe nach Blickrichtung, unten die Bank */
     const P = gO.pts, n = P.length;
@@ -1742,7 +1746,7 @@ function w3dLayout(stage, w, o, gr) {
       el._ang = ang;
       face(el, len > 0.01 ? len + 0.8 : 0, T, a[0], a[1], 0, 'rotateZ(' + n1(ang) + 'deg) rotateX(-90deg)', '0 0');
       const unten = !gO.rund && k > FORM_O && k < n - 1;
-      el._bgc = unten ? 'transparent' : revFarbe(Math.atan2(dx, -dy) * 180 / Math.PI); el._bgi = unten ? bankZone : '';
+      el._bgc = unten ? 'transparent' : revFarbe(Math.atan2(dx, -dy) * 180 / Math.PI); el._bgi = unten ? bankZone : 'linear-gradient(180deg, transparent ' + laibA + ', ' + mischHex(fTon, '#000000', 0.16) + ' 0), linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(0, 0, 0, .07))';
       el.style.backgroundColor = el._bgc; el.style.backgroundImage = el._bgi;
     }
   } else {
