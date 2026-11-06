@@ -3349,11 +3349,18 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .dna .wz-kapitel button { min-height: 48px; font-size: 14px }
 /* Menüknopf auf der Bühne der Wünsche (Inhaber, 5.11.2026) und sein Bogen „Alles an deinem Fenster“: links unter dem Chip, Glas wie die
    Knöpfe der Bühne; im Bogen oben hellblau „An deinem Haus“ (Farbe der Einladung), darunter je Kapitel die Einstellungen */
-.dna .wz-buehne .wz-menue-knopf { position: absolute; z-index: 5; left: 12px; top: 56px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; color: var(--weiss); cursor: pointer;
-  background: rgba(32, 32, 34, .55); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, .18); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 -1px 0 rgba(7, 9, 10, .4); transition: transform 160ms var(--dna-druck) }
-.dna .wz-buehne .wz-menue-knopf svg { width: 20px; height: 20px }
-.dna .wz-buehne .wz-menue-knopf:active { transform: scale(.94) }
-.dna .wz-buehne .wz-menue-knopf:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px }
+/* Menü als Pille rechts unter der Bühne (6.11.2026), die Notiz rechts neben der Überschrift */
+.dna .wz-frage .wz-menue-pille { position: relative; isolation: isolate; display: inline-flex; align-items: center; gap: 6px; height: 44px; margin: -8px 0; padding: 0 14px 0 11px; border: 0; border-radius: 999px; cursor: pointer;
+  background: transparent; color: var(--schwarz); font: 500 14px/1 var(--font-sans); transition: transform 160ms var(--dna-druck) }
+/* Ziel 44 px, sichtbar eine 36-px-Pille (die Zeile bleibt so hoch wie mit dem Kicker allein) */
+.dna .wz-frage .wz-menue-pille::before { content: ""; position: absolute; inset: 4px 0; z-index: -1; border-radius: 999px; background: var(--weiss); box-shadow: inset 0 0 0 1.5px #dcdbe1 }
+.dna .wz-frage .wz-menue-pille svg { width: 18px; height: 18px }
+.dna .wz-frage .wz-menue-pille:active { transform: scale(.96); transition-duration: 0s }
+.dna .wz-frage .wz-menue-pille:focus-visible { outline: 0 }
+.dna .wz-frage .wz-menue-pille:focus-visible::before { box-shadow: inset 0 0 0 1.5px #dcdbe1, 0 0 0 2px var(--weiss), 0 0 0 4px var(--schwarz) }
+.dna .wz-frage .wz-titelzeile { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px }
+.dna .wz-frage .wz-titelzeile h1 { flex: 1; min-width: 0 }
+.dna .wz-frage .wz-titelzeile .nz-knopf { align-self: flex-start; margin: -2px -4px 0 0 }
 .dna .wz-menue-name { margin: -4px 0 14px; font: 400 13px/1.35 var(--font-sans); color: var(--silbergrau) }
 .dna .wz-menue-haus { --hb-tinte: #0d2440; --hb-tinte-2: #3b5470; display: flex; align-items: center; gap: 12px; width: 100%; margin: 0 0 18px; padding: 14px 14px 14px 16px; border: 0; border-radius: 20px; text-align: left; cursor: pointer; color: var(--hb-tinte);
   background: radial-gradient(120% 120% at 0% 0%, #eef6ff 0, #dcebfc 46%, #cbe1f8 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 0 0 1px rgba(29, 79, 140, .10); transition: transform 160ms var(--dna-druck) }
@@ -3375,7 +3382,7 @@ html.dna-voll .fb .qoffen[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px v
 .dna .wz-menue-zeile small { font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .dna .wz-menue-pfeil { flex: none; display: grid; place-items: center; width: 20px; color: var(--silbergrau) }
 .dna .wz-menue-pfeil svg path { stroke: currentColor }
-@media (prefers-reduced-motion: reduce) { .dna .wz-buehne .wz-menue-knopf, .dna .wz-menue-haus, .dna .wz-menue-zeile { transition: none } }
+@media (prefers-reduced-motion: reduce) { .dna .wz-frage .wz-menue-pille, .dna .wz-menue-haus, .dna .wz-menue-zeile { transition: none } }
 
 /* Fuß: Pille und Zurück 48 statt 52, überall */
 .dna .dna-pille { height: 48px; padding: 0 22px; font-size: 14px }

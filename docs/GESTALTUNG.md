@@ -703,9 +703,12 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     neuen Elements, Aufteilung und Rettungsweg folgen dem; das gemessene alte Element bleibt Messwert (Aufmaßblatt, Klärungsliste, Schilder
     beim Messen). Geprüft über 6 Arten × Formen × 8 Sonnenschutz × 6 Messwege (Prüfsuite 16 und 32). Die Einbaufuge ist verputzt hell
     statt dunkel, damit sie sich nicht als Spalt liest.
-  - Menüknopf in der Bühne der Wünsche (Telefon und Laptop, links unter dem Chip): Bogen „Alles an deinem Fenster“ mit hellblauer Zeile
+  - Menü der Wünsche: Bogen „Alles an deinem Fenster“ mit hellblauer Zeile
     „An deinem Haus“ (speichert ein neues oder geändertes Element und öffnet das Hausbild), darunter je Kapitel jede Frage mit der Wahl;
-    Antippen springt dorthin (`wzMenue`, `q-sprung`).
+    Antippen springt dorthin (`wzMenue`, `q-sprung`). Seit 6.11.2026 (Inhaber: „den Menüreiter … unten rechts unter das Bild, mit
+    Aufschrift ‚Menü‘“) eine weiße Pille „Menü“ mit drei Strichen rechts in der Zeile unter der Bühne, neben dem Kicker (sichtbar 36 px,
+    Tippfläche 44 px); der Stift der Notiz steht eine Zeile tiefer rechts neben der Überschrift, unter der Pille (`.wz-titelzeile`).
+    Gleich bei Wünschen und Lage, Telefon und Laptop.
   - 3-D-Bühne (6.11.2026, Inhaber: den Punkt mit dem größten Einfluss auf den Realismus und dann den zweitgrößten): 1. Glas von außen
     wie echtes Klarglas: eigene Spiegelwelt im Shader (`spiegel` in buehne.js: Himmel vom hellen Horizont zum Blau, Wolken, Baumreihe mit
     unruhiger Kante, Rasen), auf einen Bildpunkt scharf, kräftiger Fresnel, dahinter ein dunkler Raum mit etwas Tiefe. 2. Licht und

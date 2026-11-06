@@ -4978,15 +4978,15 @@ if (teil(22)) {
   await frageB('material', {}, 'normal');
   /* Wünsche im Look der Design-DNA (27.10.2026): das Kapitel steht im Band (Name, Stationen, „3 von 7“), Antippen öffnet „Direkt zu einem
      Thema“ mit allen sieben Kapiteln; über der Frage nur noch „Frage i von n“ */
-  const kl = await p.evaluate(() => { const band = document.querySelector('.wz-band'); return { label: band.getAttribute('aria-label'), jetzt: band.querySelector('b').textContent, stationen: band.querySelectorAll('.lg-band i').length, haken: band.querySelectorAll('.lg-band i.fertig').length, kicker: document.querySelector('.qdock .hd .eyebrow').textContent, tools: Array.from(document.querySelectorAll('.qdock .hd-tools > *')).map((x) => x.className.split(' ')[0]).join(',') }; });
+  const kl = await p.evaluate(() => { const band = document.querySelector('.wz-band'); return { label: band.getAttribute('aria-label'), jetzt: band.querySelector('b').textContent, stationen: band.querySelectorAll('.lg-band i').length, haken: band.querySelectorAll('.lg-band i.fertig').length, kicker: document.querySelector('.qdock .hd .eyebrow').textContent, tools: Array.from(document.querySelectorAll('.qdock .hd-tools > *')).map((x) => x.className.split(' ')[0]).join(','), notiz: !!document.querySelector('.qdock .wz-titelzeile > .nz-knopf') }; });
   await p.click('.wz-band'); await p.waitForSelector('.wz-bogen');
   const kb = await p.evaluate(() => { const b = Array.from(document.querySelectorAll('.wz-kapitel .ql')); return { namen: b.map((x) => x.childNodes[1].textContent).join('|'), jetzt: b.filter((x) => x.getAttribute('aria-current') === 'step').map((x) => x.childNodes[1].textContent).join(), fokus: document.activeElement.classList.contains('wz-rund') }; });
   await p.click('.wz-kapitel .ql[data-kap="sonne"]'); await p.waitForTimeout(500);
   const kl2 = await p.evaluate(() => { const c = qCurrent(), kicker = document.querySelector('.qdock .hd .eyebrow').textContent, jetzt = document.querySelector('.wz-band b').textContent, bogen = !!document.querySelector('.wz-bogen'); S.wohin = true; render(); const wo = Array.from(document.querySelectorAll('.wo-abschnitte .chip')).map((x) => x.textContent).join('|'); S.wohin = false; render(); return { q: S.q, erste: c.list.find((q) => q.kap === 'sonne').id, kicker: kicker, jetzt: jetzt, bogen: bogen, wohin: wo }; });
-  ok(/^Kapitel 4 von 9: Material und Farbe\. Direkt zu einem Thema$/.test(kl.label) && kl.jetzt === 'Material & Farbe' && kl.stationen === 9 && kl.haken === 3 && /^Frage 1 von \d+$/.test(kl.kicker) && kl.tools === 'nz-knopf' &&
+  ok(/^Kapitel 4 von 9: Material und Farbe\. Direkt zu einem Thema$/.test(kl.label) && kl.jetzt === 'Material & Farbe' && kl.stationen === 9 && kl.haken === 3 && /^Frage 1 von \d+$/.test(kl.kicker) && kl.tools === 'wz-menue-pille' && kl.notiz &&
     kb.namen === 'Aufbau|Lage|Öffnung|Material & Farbe|Glas & Sprossen|Griff & Schutz|Sonnenschutz|Fensterbank|Extras' && kb.jetzt === 'Material & Farbe' && kb.fokus &&
     kl2.q === kl2.erste && /^Frage 1 von \d+$/.test(kl2.kicker) && kl2.jetzt === 'Sonnenschutz' && !kl2.bogen && kl2.wohin === kb.namen,
-    'Ein Kapitelkonzept (Design-DNA): Band mit neun Stationen, erledigte gefüllt, das laufende benannt; Antippen öffnet „Direkt zu einem Thema“ mit denselben Kapiteln und springt auf die erste sichtbare Frage; Kicker „Frage i von n“ mit Notiz daneben, ohne Tiefe (' + kl.kicker + ' → ' + kl2.kicker + ')');
+    'Ein Kapitelkonzept (Design-DNA): Band mit neun Stationen, erledigte gefüllt, das laufende benannt; Antippen öffnet „Direkt zu einem Thema“ mit denselben Kapiteln und springt auf die erste sichtbare Frage; Kicker „Frage i von n“ mit der Menü-Pille daneben, die Notiz neben der Überschrift, ohne Tiefe (' + kl.kicker + ' → ' + kl2.kicker + ')');
   // Die Tiefe-Pille entfällt mit dem Hauptweg (2.11.2026); geprüft in Abschnitt 32 und oben (kl.tools)
   // Notiz an einer Detailfrage (Griffmodell) und Beschriftung jeder Detailangabe beim Betrieb
   await frageB('griffM', {}, 'genau');
@@ -5068,13 +5068,14 @@ if (teil(22)) {
   ok(eM0.q === 'kvd' && eM0.kvd === 'kvd' && eM1.kvd === 'kvd' && eM2 === 'extras' && (eM1.q !== 'kvd' || eM1.pille === 'Fertig'), 'Entwurf: die Wahl aus der freiwilligen Liste übersteht das Neuladen; „Fertig“ führt zur Liste zurück (' + JSON.stringify([eM0, eM1, eM2]) + ')');
   /* Nacharbeit nach dem Merge von #46 (Prüfbefunde app): Zeilen und Chips mit i, „Mehr zu …“, Tiefe-Pille mitten in den Detailfragen,
      angefangenes Fenster beim Senden, letzter Schritt der Führung, Zurück-Taste bei der KI-Einwilligung */
-  // Glas-Extras mit Symbol und i: jede Zeile 44 px (vorher 341 px je Option mit riesigen Symbolen), Haken untereinander
+  /* Glas-Extras mit Symbol und i: jede Zeile 44 px (vorher 341 px je Option mit riesigen Symbolen), Haken untereinander; seit 6.11.2026
+     steht die Überschrift eine Zeile unter der Menü-Pille, daher 640 statt 600 px */
   const gx = {};
   for (const t of ['genau', 'normal']) {
     await frageB('glasfn', { glasfn: ['sicht'] }, t);
     gx[t] = await p.evaluate(() => { const d = document.querySelector('.qdock'); return { zeilen: Array.from(d.querySelectorAll('.qlist > .qli')).map((x) => Math.round(x.getBoundingClientRect().height)), ci: Array.from(d.querySelectorAll('.qlist .ci')).map((x) => Math.round(x.getBoundingClientRect().width)), sh: d.scrollHeight, haken: new Set(Array.from(d.querySelectorAll('.qlist .mark')).map((x) => Math.round(x.getBoundingClientRect().left))).size, i: d.querySelectorAll('.qlist .qci-i[data-act="gloss"]').length }; });
   }
-  ok(gx.genau.zeilen.length === 7 && gx.normal.zeilen.length === 7 && gx.genau.zeilen.concat(gx.normal.zeilen).every((h) => h >= 44 && h <= 56) && gx.genau.ci.concat(gx.normal.ci).every((w) => w === 20) && gx.genau.sh < 600 && gx.genau.haken === 1 && gx.genau.i === 7,
+  ok(gx.genau.zeilen.length === 7 && gx.normal.zeilen.length === 7 && gx.genau.zeilen.concat(gx.normal.zeilen).every((h) => h >= 44 && h <= 56) && gx.genau.ci.concat(gx.normal.ci).every((w) => w === 20) && gx.genau.sh < 640 && gx.genau.haken === 1 && gx.genau.i === 7,
     'Glas-Extras mit Symbol und i („Alles im Detail“ und „Die üblichen Wünsche“): Zeilen 44 bis 56 px, Symbole 20 px, Haken untereinander, Dock ' + gx.genau.sh + ' px statt 2.500 (' + gx.genau.zeilen.join('/') + ')');
   // Chips mit i: Beschriftung ganz vor dem i (sonst Zeilen), das i auf dem gedrückten Chip hell mit dunklem Zeichen; 390 und 360 px
   const chipsI = [];
@@ -5444,12 +5445,12 @@ if (teil(32)) {
   /* c9) Menüknopf in der Bühne der Wünsche (Inhaber, 5.11.2026): Übersicht aller Einstellungen mit der Wahl, Antippen springt dorthin;
      hellblau „An deinem Haus“ (speichert ein neues Fenster vorher) */
   await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Küche'; S.win = w; S.editIdx = -1; S.windows = []; S.q = 'fa'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(400);
-  await p.tap('.wz-buehne .wz-menue-knopf'); await p.waitForTimeout(400);
+  await p.tap('.wz-frage .wz-menue-pille'); await p.waitForTimeout(400);
   const me1 = await p.evaluate(() => ({ offen: !!document.querySelector('.wz-menue'), zeilen: document.querySelectorAll('.wz-menue-zeile').length, farbe: ((document.querySelector('.wz-menue-zeile[data-v="fa"] small') || {}).textContent || ''), jetzt: (document.querySelector('.wz-menue-zeile[aria-current="step"]') || {}).getAttribute ? document.querySelector('.wz-menue-zeile[aria-current="step"]').getAttribute('data-v') : '', haus: !!document.querySelector('.wz-menue-haus') }));
   await p.tap('.wz-menue-zeile[data-v="glas"]'); await p.waitForTimeout(400);
   const me2 = await p.evaluate(() => ({ q: S.q, offen: !!document.querySelector('.wz-menue') }));
   let me3 = { screen: 'ohne Hausbild' };
-  if (me1.haus) { await p.tap('.wz-buehne .wz-menue-knopf'); await p.waitForTimeout(300); await p.tap('.wz-menue-haus'); await p.waitForTimeout(600); me3 = await p.evaluate(() => ({ screen: S.screen, n: S.windows.length })); await p.evaluate(() => go('home')); }
+  if (me1.haus) { await p.tap('.wz-frage .wz-menue-pille'); await p.waitForTimeout(300); await p.tap('.wz-menue-haus'); await p.waitForTimeout(600); me3 = await p.evaluate(() => ({ screen: S.screen, n: S.windows.length })); await p.evaluate(() => go('home')); }
   ok(me1.offen && me1.zeilen >= 10 && /Anthrazitgrau/.test(me1.farbe) && me1.jetzt === 'fa' && me2.q === 'glas' && !me2.offen && (!me1.haus || (me3.screen === 'hausbild' && me3.n === 1)), 'Menüknopf in der Bühne: Übersicht aller Einstellungen mit der Wahl, Antippen springt dorthin; „An deinem Haus“ speichert und öffnet das Hausbild (' + JSON.stringify([me1, me2, me3]) + ')');
   /* c7) Fenster als Kacheln oben in der Liste (Inhaber, 4.11.2026: „Symbole oben … abgeschnitten“): am Telefon höchstens vier, alle ganz im Bild */
   const kach = [];
