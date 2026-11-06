@@ -103,6 +103,14 @@ const foto = async (page, name) => { if (BILDER) await page.screenshot({ path: B
 const codeAusNachricht = async (page) => { const h = await page.getAttribute('a[href^="https://wa.me/"]', 'href'); const m = /(AM1\.[A-Za-z0-9_-]+)/.exec(decodeURIComponent(h || '')); return m ? m[1] : ''; };
 const telefon = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'de-DE' };
 /* Neuer Ablauf (Inhaber, 2.11.2026): Start → Form am Modell → Weg zu den Maßen; „Geführt messen“ führt zu den Fotos */
+/* Schritt 1: seit 6.11.2026 öffnet die eigene App ohne Fenster gleich die Wahl des Elements (keine Willkommensseite, Inhaber); sonst
+   (Liste, Kundenlink) über „Neues Fenster“ */
+async function neuesFenster(pg) {
+  if (await pg.locator('.scr[data-screen="start"]').count()) return;
+  /* angefangenes Fenster ohne Liste: die App setzt es fort; neu über „Neu beginnen“ in der Übersicht */
+  if (await pg.locator('[data-act="new"]').count()) await pg.click('[data-act="new"]'); else { await pg.click('.lg-kopf [data-act="wohin"], .hdr-wo'); await pg.click('.sheet [data-act="neu-beginnen"]'); }
+  await pg.waitForSelector('.scr[data-screen="start"]');
+}
 async function zuDenFotos(pg) {
   await pg.click('.scr[data-screen="start"] .lg-weiter'); await pg.waitForSelector('.scr[data-screen="frage"]');
   await pg.evaluate(() => { S.q = 'massweg'; render(true); }); await pg.waitForSelector('.mw-zeile[data-v="messen"]');
@@ -359,8 +367,8 @@ if (teil(3)) {
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
-  const start = await page.evaluate(() => document.body.innerText);
-  ok(/Erstes Fenster ausmessen/.test(start), 'Eigenes Projekt startet leer');
+  const start = await page.evaluate(() => ({ screen: S.screen, n: S.windows.length, text: document.body.innerText, wl: !!document.querySelector('.wl-kopf') }));
+  ok(start.screen === 'start' && start.n === 0 && !start.wl && /Was planst du\?/.test(start.text), 'Eigenes Projekt startet leer, ohne Willkommensseite gleich bei Schritt 1 „Was planst du?“ (Inhaber, 6.11.2026)');
   ok(await page.locator('.foot-links.recht a[href="/impressum/"]').count() === 1, 'App-Start verlinkt Impressum');
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'App: kein seitliches Scrollen bei 390 px');
   await foto(page, 'app-start');
@@ -368,8 +376,7 @@ if (teil(3)) {
   // Testfoto als JPEG im Browser erzeugen
   const jpeg = Buffer.from(await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 900; c.height = 1200; const g = c.getContext('2d'); g.fillStyle = '#e9e3da'; g.fillRect(0, 0, 900, 1200); g.fillStyle = '#ffffff'; g.fillRect(220, 200, 460, 760); g.fillStyle = '#a9c8e8'; g.fillRect(250, 230, 190, 700); g.fillRect(460, 230, 190, 700); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; }), 'base64');
 
-  await page.click('[data-act="new"]');
-  await page.waitForSelector('.scr[data-screen="start"]');
+  await neuesFenster(page);
   ok(await page.locator('.st-stelle [role="radio"][data-act="situation"]').count() === 3 && await page.locator('.st-bento [role="radio"][data-act="art"]').count() === 6 && await page.locator('.st-bento [data-act="art"][data-v="haustuer"]').count() === 0 && /Schritt\s1\svon\s6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen, neu oder nachrüsten) und das Element (Fenster, Balkon- oder Terrassentür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand); die Haustür vorerst ausgeblendet (Inhaber, 3.11.2026)');
   await zuDenFotos(page);
   await page.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
@@ -488,7 +495,7 @@ if (teil(3)) {
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   const posts2 = [];
   p2.on('request', (r) => { if (r.url().includes('/api/ki?')) posts2.push(r.url()); });
-  await p2.click('[data-act="new"]'); await p2.waitForSelector('.scr[data-screen="start"]'); await zuDenFotos(p2);
+  await neuesFenster(p2); await zuDenFotos(p2);
   await p2.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpeg });
   await p2.waitForSelector('.fx-dialog');
   await p2.click('.fx-nein');
@@ -540,10 +547,10 @@ if (teil(3)) {
   const hat = (...teile) => signale.some((x) => teile.every((t) => x.split('&').includes(t)));
   ok(hat('s=W', 'n=start') && hat('s=W', 'n=szene-weg') && !signale.some((x) => /mail|name=|\d{4,}/.test(x)), 'Startseite meldet „geöffnet“ und die erreichte Szene, ohne Kennung und ohne Inhalte (' + signale.length + ' Signale)');
   await sp3.goto(BASE + '/app/', { waitUntil: 'networkidle', referer: BASE + '/' }); await sp3.waitForTimeout(300);
-  await sp3.click('[data-act="new"]'); await sp3.waitForSelector('.scr[data-screen="start"]'); await sp3.waitForTimeout(300);
+  await neuesFenster(sp3); await sp3.waitForTimeout(300);
   const gl = sp3.locator('[data-act="gloss"]').first(); if (await gl.count()) { await gl.click({ force: true }); await sp3.waitForTimeout(300); }
   await sp3.evaluate(() => go('fotos')); await sp3.waitForTimeout(300);
-  ok(hat('s=K', 'n=home') && hat('s=K', 'n=start', 'h=startseite') && hat('s=K', 'n=fotos', 'v=start', 'd=k') && (await gl.count() === 0 || hat('s=K', 'v=start', 'z=hilfe')), 'App meldet Folien mit Herkunft „Startseite“, die Verweildauer der vorigen Folie als Stufe und Hilfe auf der Folie');
+  ok(hat('s=K', 'n=start', 'h=startseite') && hat('s=K', 'n=fotos', 'v=start', 'd=k') && (await gl.count() === 0 || hat('s=K', 'v=start', 'z=hilfe')), 'App meldet Folien mit Herkunft „Startseite“, die Verweildauer der vorigen Folie als Stufe und Hilfe auf der Folie');
   const vorher = signale.length; await sp3.evaluate(() => go('start')); await sp3.evaluate(() => go('fotos')); await sp3.waitForTimeout(300);
   ok(signale.length - vorher <= 1, 'Jede Folie zählt je Tab einmal (nur noch die Dauer von „Fotos“ kommt dazu)');
   /* beim echten Seitenwechsel ist die Seite schon weg, bevor die Prüfung mitlesen kann; „pagehide“ auslösen wie der Browser */
@@ -885,7 +892,7 @@ if (teil(6)) {
   // Alle Maße da: die Maßlinien zeichnen sich nacheinander
   await p2.evaluate(() => { S.betrieb = null; });
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
-  await p2.click('[data-act="new"]'); await p2.waitForTimeout(200);
+  await neuesFenster(p2); await p2.waitForTimeout(200);
   await p2.evaluate(() => { S.win.mo = { hm: 1480, wm: 1370, hl: '', hr: '', wt: '', wb: '' }; go('rest'); });
   for (let i = 0; i < 4; i++) await randWieMitte(p2);
   await p2.waitForTimeout(400);
@@ -895,15 +902,15 @@ if (teil(6)) {
   // Bewegtbilder (Lottie) in Tokenfarben, Haptik, Scroll-Bindung
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   ok(await p2.evaluate(() => !!(window.lottie && window.Lottie && window.Haptik && window.Scroll && window.Lottie.bereit())), 'Spieler sowie Lottie-, Haptik- und Scroll-Bausteine geladen');
-  await p2.click('[data-act="gloss"][data-k="referenz"]'); await p2.waitForTimeout(700);
+  /* „Wie genau ist das?“ stand auf der Willkommensseite (bis 6.11.2026); das Blatt selbst bleibt (Glossar) */
+  await p2.evaluate(() => { S.gloss = 'referenz'; S.glossIndex = false; render(); }); await p2.waitForTimeout(700);
   ok(await p2.evaluate(() => { const e = document.querySelector('.sheet [data-lottie="messen"]'); return !!(e && e._lottie && !e._lottie.isPaused && e.querySelector('svg') && !e.querySelector('.lottie-still')); }), 'Glossar „Wie genau“: das Messen läuft als Bewegtbild in Schleife, Standbild ist ersetzt');
   ok(await p2.evaluate(() => { const st = Array.from(document.querySelectorAll('.sheet [data-lottie="messen"] svg [stroke]')).map((x) => x.getAttribute('stroke')); return st.some((c) => /rgb\(255,\s*138,\s*91\)|#ff8a5b/i.test(c)) && st.some((c) => /rgb\(243,\s*242,\s*238\)|#f3f2ee/i.test(c)); }), 'Bewegtbild trägt die Tokenfarben (Schrift, Maueröffnung)');
   ok(await p2.evaluate(() => window.Haptik.an() === true && window.Haptik.tick() === true), 'Haptik: am Telefon nach einer Berührung ein kurzes Tippen');
   await p2.evaluate(() => { S.gloss = null; render(); }); await p2.waitForTimeout(200);
-  const sp = await p2.evaluate(async () => { const hs = document.querySelector('.hero-scene'), sc = document.querySelector('.scroll'); if (!hs || !sc) return null; const a = hs.style.getPropertyValue('--sp'); sc.scrollTop = 260; await new Promise((r) => setTimeout(r, 250)); return [a, hs.style.getPropertyValue('--sp')]; });
-  ok(sp && sp[1] && sp[0] !== sp[1], 'Startbild folgt dem Scrollen (Scroll-Bindung setzt --sp)');
+  /* „Startbild folgt dem Scrollen“ entfällt mit der Willkommensseite (Inhaber, 6.11.2026: die App beginnt bei Schritt 1) */
   const ctx3 = await browser.newContext({ ...telefon, reducedMotion: 'reduce' }), p3 = await neueSeite(ctx3);
-  await p3.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await p3.click('[data-act="gloss"][data-k="referenz"]'); await p3.waitForTimeout(700);
+  await p3.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await p3.evaluate(() => { S.gloss = 'referenz'; S.glossIndex = false; render(); }); await p3.waitForTimeout(700);
   ok(await p3.evaluate(() => { const e = document.querySelector('.sheet [data-lottie="messen"]'); return !!(e && e._lottie && e._lottie.isPaused && e._lottie.currentFrame >= e._lottie.totalFrames - 2) && window.Haptik.an() === false; }), 'Bei „weniger Bewegung“: Bewegtbild steht auf dem Endbild, Haptik aus');
   sauber(p3, 'Bewegtbilder ohne Fehler');
   await ctx3.close();
@@ -1037,7 +1044,7 @@ if (teil(6)) {
   ok(buehne && await p5.evaluate(() => window.__b === document.getElementById('w3d') && getComputedStyle(document.querySelector('.w3d-hint')).backdropFilter === 'none'), 'Flüssig: bei gleicher Struktur bleibt die Bühne stehen, der Hinweis am Modell rechnet keinen Weichzeichner');
   // Neue Öffnung: Start → Fotos → Einzeichnen (Ecke ziehen, Lupe) → Maße → Ergebnis mit Lage
   await p5.goto(BASE + '/app/', { waitUntil: 'networkidle' });
-  await p5.click('[data-act="new"]'); await p5.waitForSelector('.scr[data-screen="start"]');
+  await neuesFenster(p5);
   await p5.click('[data-act="situation"][data-v="neu"]'); await p5.waitForTimeout(300);
   await p5.click('[data-act="art"][data-v="fenster"]'); await p5.waitForTimeout(200);
   const startNeu = await p5.evaluate(() => ({ neu: S.win.neu, note: !!document.querySelector('.scr[data-screen="start"] .st-stelle-text .st-punkt') && !!document.querySelector('.st-rahmen'), bar: document.querySelector('.lg-weiter').textContent }));
@@ -1749,7 +1756,7 @@ if (teil(9)) {
   const ctx2 = await browser.newContext({ ...telefon, acceptDownloads: true });
   const ap = await neueSeite(ctx2);
   await ap.goto(BASE + '/app/', { waitUntil: 'networkidle' });
-  await ap.evaluate(() => { S.windows = demoProject().slice(0, 1); persist(); render(true); });
+  await ap.evaluate(() => { S.windows = demoProject().slice(0, 1); persist(); S.screen = 'home'; render(true); }); // ohne Fenster stand Schritt 1 (seit 6.11.2026)
   const vorher = await ap.evaluate(() => localStorage.getItem('aufmass.v1'));
   ok(await ap.locator('[data-act="tour-start"]').count() === 1, 'App-Startseite mit angefangenem Aufmaß: „Führung starten“ bleibt erreichbar (unter der Liste)');
   await ap.click('[data-act="tour-start"]'); await ap.waitForSelector('.scr[data-screen="tour"]');
@@ -1862,7 +1869,9 @@ if (teil(10)) {
   await page.evaluate(() => { location.hash = 'tour'; }); await page.waitForTimeout(400);
   ok(tour1 && await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour'), 'Seite für Fensterbauer ohne Tour, Registrierung und „Kostenlos starten“ des Betriebsbereichs; /#tour öffnet die Tour weiterhin, auch als Sprungmarke auf der Startseite');
   await page.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
-  ok(await page.locator('.vorab').count() === 0 && await page.locator('a[href$="/ratgeber/fenster-ausmessen/"]').count() >= 1 && await page.locator('a[href$="/fensterbauer"]').count() >= 1, 'App mit JavaScript: Textfassung weg, Anleitung verlinkt, Fensterbauer kommen in ihre Ansicht');
+  /* seit 6.11.2026 beginnt die App bei Schritt 1 (ohne Willkommensseite); die Anleitung steht in der Übersicht */
+  const vorabWeg = await page.locator('.vorab').count() === 0; await page.click('.lg-kopf [data-act="wohin"]'); await page.waitForTimeout(300);
+  ok(vorabWeg && await page.evaluate(() => S.screen === 'start') && await page.locator('.sheet.wohin a[href$="/ratgeber/fenster-ausmessen/"]').count() >= 1, 'App mit JavaScript: Textfassung weg, Schritt 1 statt Willkommensseite, Anleitung in der Übersicht verlinkt');
   sauber(page, 'Startseite und App mit Textfassung ohne Fehler');
   await ctx.close();
   const nojs = await browser.newContext(Object.assign({}, telefon, { javaScriptEnabled: false })), np = await nojs.newPage();
@@ -2937,7 +2946,7 @@ if (teil(14)) {
     ok(leerGrenze.n === 0 && leerGrenze.a === 50 && leerGrenze.h1 === 'Deine Fenster.' && /kein Fenster erfasst/.test(leerGrenze.stand) && leerGrenze.neu && !leerGrenze.bar && await page.evaluate(() => /gibt es nicht mehr/.test(S.toast) && S.screen === 'home'), 'An der Grenze und alles gelöscht: kein Startbild mit totem Knopf, sondern die Erklärung mit „Neues Aufmaß beginnen“; Löschen eines verschwundenen Fensters meldet sich ehrlich');
     await page.click('.note.grenze [data-act="aufmass-neu"]'); await page.waitForSelector('.neu-frage');
     await page.click('[data-act="aufmass-neu-ja"]'); await page.waitForTimeout(250);
-    ok(await page.evaluate(() => S.windows.length === 0 && angelegt() === 0 && !FREI() && /Erstes Fenster ausmessen/.test(document.body.textContent)), 'Für ein weiteres Haus: neues Aufmaß nach Rückfrage, die Freischaltung gilt nur für das alte');
+    ok(await page.evaluate(() => S.windows.length === 0 && angelegt() === 0 && !FREI() && S.screen === 'start' && /Was planst du\?/.test(document.body.textContent)), 'Für ein weiteres Haus: neues Aufmaß nach Rückfrage, die Freischaltung gilt nur für das alte; es geht gleich bei Schritt 1 weiter (ohne Willkommensseite)');
     // 7 Tage frei, danach vier gespeicherte Änderungen, dann fest
     await fensterAnlegen(page, [['Gaube', 900, 1100]]);
     await page.evaluate(() => { S.windows[0].t0 = Date.now() - 8 * 864e5; persist(); });
@@ -3223,8 +3232,11 @@ if (teil(15)) {
     ok(bereit, 'Testserver mit Konten läuft: ' + B6);
     const c1 = await browser.newContext(telefon), s1 = await neueSeite(c1, B6);
     await s1.goto(B6 + '/app/', { waitUntil: 'networkidle' }); await s1.waitForTimeout(300);
-    const start = await s1.evaluate(() => ({ anmelden: !!document.querySelector('.hero [data-act="anmelden"], .wl-kopf [data-act="anmelden"]'), text: document.querySelector('.hero, .wl-kopf').textContent }));
-    ok(start.anmelden && /Schon ein Aufmaß gesichert\?/.test(start.text), 'Startbild als Gast: „Schon ein Aufmaß gesichert? Anmelden“');
+    /* seit 6.11.2026 ohne Willkommensseite: Schritt 1 steht sofort, „Anmelden“ steht in der Übersicht */
+    await s1.click('.lg-kopf [data-act="wohin"]'); await s1.waitForTimeout(250);
+    const start = await s1.evaluate(() => { const a = document.querySelector('.sheet.wohin [data-act="anmelden"]'); return { screen: S.screen, anmelden: !!a, text: a ? a.textContent : '' }; });
+    ok(start.screen === 'start' && start.anmelden && /Schon ein Aufmaß gesichert\?/.test(start.text), 'Gast ohne Fenster: Schritt 1, in der Übersicht „Schon ein Aufmaß gesichert? Anmelden“');
+    await s1.evaluate(() => { S.wohin = false; render(); });
     await fensterAnlegen(s1, [['Wohnzimmer', 1230, 1410], ['Küche', 1010, 1210]]); await s1.waitForTimeout(300);
     const gast = await s1.evaluate(() => { const k = document.querySelector('.konto-karte'), l = document.querySelector('.liste-in'); return { text: k ? k.textContent : '', nachListe: !!(k && l && k.getBoundingClientRect().top > l.getBoundingClientRect().bottom), vorDatei: !!(k && document.querySelector('.datei-card') && k.getBoundingClientRect().top < document.querySelector('.datei-card').getBoundingClientRect().top), offen: S.sync.offen, ks: !!KS }; });
     ok(/Nur auf diesem Gerät/.test(gast.text) && /Aufmaß sichern/.test(gast.text) && gast.nachListe && gast.vorDatei && gast.offen && !gast.ks, 'Gast mit Fenstern: Karte „Nur auf diesem Gerät · Aufmaß sichern“ direkt unter der Liste; noch nichts auf dem Server');
@@ -3252,7 +3264,7 @@ if (teil(15)) {
     // zweites Gerät: Anmelden, die Liste ist da; Änderung kommt zurück aufs erste Gerät
     const c2 = await browser.newContext(telefon), s2 = await neueSeite(c2, B6);
     await s2.goto(B6 + '/app/', { waitUntil: 'networkidle' }); await s2.waitForTimeout(250);
-    await s2.click('.hero [data-act="anmelden"], .wl-kopf [data-act="anmelden"]'); await s2.waitForSelector('#s-mail');
+    await s2.click('.lg-kopf [data-act="wohin"]'); await s2.click('.sheet.wohin [data-act="anmelden"]'); await s2.waitForSelector('#s-mail');
     ok(await s2.locator('[data-in="sc"]').count() === 0 && /Weiter mit deinem Aufmaß/.test(await s2.evaluate(() => document.body.innerText)), 'Anmelden auf einem anderen Gerät: nur E-Mail und Code, ohne erneute Zustimmung');
     await anmelden(s2, mail6, false);
     await s2.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 }); await s2.waitForTimeout(300);
@@ -3297,7 +3309,7 @@ if (teil(15)) {
     await s1.evaluate(() => go('meinkonto')); await s1.waitForTimeout(200);
     await s1.click('[data-act="konto-frage"][data-v="abmelden"]'); await s1.waitForTimeout(150);
     const frage = await s1.evaluate(() => (document.querySelector('.neu-frage') || {}).textContent || '');
-    await s1.click('[data-act="konto-abmelden-ja"]'); await s1.waitForFunction(() => !KS && S.screen === 'home', null, { timeout: 8000 });
+    await s1.click('[data-act="konto-abmelden-ja"]'); await s1.waitForFunction(() => !KS && (S.screen === 'home' || S.screen === 'start'), null, { timeout: 8000 }); // ohne Fenster gleich Schritt 1 (6.11.2026)
     const ab = await s1.evaluate(() => ({ n: S.windows.length, speicher: localStorage.getItem('aufmass.v1'), sitzung: localStorage.getItem('aufmass.kunde'), toast: S.toast }));
     ok(/bleibt in deinem Konto/.test(frage) && ab.n === 0 && !ab.sitzung && (!ab.speicher || JSON.parse(ab.speicher).windows.length === 0) && /Abgemeldet/.test(ab.toast), 'Abmelden fragt nach; danach ist das Aufmaß von diesem Gerät weg, im Konto bleibt es');
     // Anmeldelink aus der E-Mail (#access_token=…): in dem Browser, der den Code angefordert hat, ohne Rückfrage
@@ -3338,14 +3350,14 @@ if (teil(15)) {
     // Konto löschen
     await s2.evaluate(() => go('meinkonto')); await s2.waitForTimeout(200);
     await s2.click('[data-act="konto-frage"][data-v="loeschen"]'); await s2.waitForTimeout(150); await s2.click('[data-act="konto-loeschen-ja"]');
-    await s2.waitForFunction(() => !KS && S.screen === 'home', null, { timeout: 8000 });
+    await s2.waitForFunction(() => !KS && (S.screen === 'home' || S.screen === 'start'), null, { timeout: 8000 }); // ohne Fenster gleich Schritt 1
     const weg = await fetch(B6 + '/api/kunde/aufmasse', { headers: { authorization: 'Bearer ' + tok6, accept: 'application/json' } }).then((r) => r.json());
     ok(weg.ok && weg.aufmasse.length === 0 && await s2.evaluate(() => S.windows.length === 0), 'Konto löschen: alle Aufmaße weg, auf dem Gerät auch');
     // Gerät 1 hat noch eine Kopie (Anmeldung abgelaufen): nach neuem Anmelden kommt das gelöschte Aufmaß nicht zurück, es geht auch hier weg
     const vorher1 = await s1.evaluate(() => S.windows.length);
     await s1.evaluate(() => sichernStart('anmelden')); await s1.waitForSelector('#s-mail');
     await anmelden(s1, mail6, false);
-    await s1.waitForFunction(() => KS && S.windows.length === 0 && S.screen === 'home', null, { timeout: 8000 }); await s1.waitForTimeout(300);
+    await s1.waitForFunction(() => KS && S.windows.length === 0 && (S.screen === 'home' || S.screen === 'start'), null, { timeout: 8000 }); await s1.waitForTimeout(300); // ohne Fenster Schritt 1
     const zurueck = await s1.evaluate(async () => ({ toast: S.toast, liste: (await kontoJson('/api/kunde/aufmasse')).aufmasse.length }));
     ok(vorher1 >= 1 && /gelöscht/.test(zurueck.toast) && zurueck.liste === 0, 'Gelöschtes Konto: ein Gerät mit alter Kopie legt das Aufmaß nach neuem Anmelden nicht wieder an, sondern nimmt es weg');
     // Konto voll (20 Aufmaße): Das Aufmaß dieses Geräts bleibt hier, gilt nicht als gesichert, Abmelden würde es nicht wegwerfen;
@@ -4300,7 +4312,7 @@ if (teil(18)) {
   try {
     const fotosMachen = async (s) => {
       const jpg = Buffer.from(await s.evaluate(() => { const c = document.createElement('canvas'); c.width = 900; c.height = 1200; const g = c.getContext('2d'); g.fillStyle = '#e9e3da'; g.fillRect(0, 0, 900, 1200); g.fillStyle = '#fff'; g.fillRect(220, 200, 460, 760); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; }), 'base64');
-      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await zuDenFotos(s);
+      await neuesFenster(s); await zuDenFotos(s);
       await s.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
       await s.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg });
       if (await s.waitForSelector('.fx-dialog', { timeout: 3000 }).then(() => true, () => false)) await s.click('.fx-ja');
@@ -4464,7 +4476,7 @@ if (teil(19)) {
     const bis = async (s, fn, ms, arg) => { const ende = Date.now() + (ms || 10000); while (Date.now() < ende) { if (await s.evaluate(fn, arg)) return true; await new Promise((r) => setTimeout(r, 200)); } return false; };
     const jpg = Buffer.from(jpegs[0], 'base64');
     const fotosMachen = async (s) => {
-      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await zuDenFotos(s);
+      await neuesFenster(s); await zuDenFotos(s);
       await s.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
       await s.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg });
       if (await s.waitForSelector('.fx-dialog', { timeout: 2500 }).then(() => true, () => false)) await s.click('.fx-ja');
@@ -5117,7 +5129,7 @@ if (teil(22)) {
   await ctxE.close();
   // Führung, letzter Schritt: die Box „Für den Fensterbauer“ steht im Vorschaublatt (vorher traf sie die Regel des Farbblatts .fb)
   const ctxT = await browser.newContext(telefon), pT = await neueSeite(ctxT);
-  await pT.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await pT.click('.hero [data-act="tour-start"], .wl-kopf [data-act="tour-start"]'); await pT.waitForTimeout(400);
+  await pT.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await pT.click('.lg-kopf [data-act="wohin"]'); await pT.click('.sheet.wohin [data-act="tour-start"]'); /* Führung aus der Übersicht: seit 6.11.2026 ohne Willkommensseite */ await pT.waitForTimeout(400);
   await pT.evaluate(() => tourGehe(TOUR.length - 1)); await pT.waitForTimeout(1200);
   const tbB = await pT.evaluate(() => { const b = document.querySelector('.tb-box.tb-fb'), bl = b && b.closest('.tb-blatt'); if (!b || !bl) return null; const r = b.getBoundingClientRect(), rb = bl.getBoundingClientRect(); return { drin: r.left >= rb.left && r.right <= rb.right && r.top >= rb.top && r.bottom <= rb.bottom, pos: getComputedStyle(b).position, alt: document.querySelectorAll('.tb-box.fb').length }; });
   ok(tbB && tbB.drin && tbB.pos === 'static' && !tbB.alt, 'Führung, letzter Schritt: „Für den Fensterbauer“ steht im Vorschaublatt, nicht über dem Titel');
@@ -5127,7 +5139,7 @@ if (teil(22)) {
   const ctxK = await browser.newContext(telefon), pK = await neueSeite(ctxK);
   await pK.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   const jpegK = Buffer.from(await pK.evaluate(() => { const c = document.createElement('canvas'); c.width = 600; c.height = 800; const g = c.getContext('2d'); g.fillStyle = '#e9e3da'; g.fillRect(0, 0, 600, 800); g.fillStyle = '#a9c8e8'; g.fillRect(150, 150, 300, 500); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; }), 'base64');
-  await pK.click('[data-act="new"]'); await pK.waitForSelector('.scr[data-screen="start"]'); await zuDenFotos(pK);
+  await neuesFenster(pK); await zuDenFotos(pK);
   await pK.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
   await pK.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpegK });
   const kiOffen = await pK.waitForSelector('.fx-dialog', { timeout: 5000 }).then(() => true, () => false);

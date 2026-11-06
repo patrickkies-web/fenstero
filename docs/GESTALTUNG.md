@@ -703,6 +703,13 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     neuen Elements, Aufteilung und Rettungsweg folgen dem; das gemessene alte Element bleibt Messwert (Aufmaßblatt, Klärungsliste, Schilder
     beim Messen). Geprüft über 6 Arten × Formen × 8 Sonnenschutz × 6 Messwege (Prüfsuite 16 und 32). Die Einbaufuge ist verputzt hell
     statt dunkel, damit sie sich nicht als Spalt liest.
+  - Keine Willkommensseite mehr (6.11.2026, Inhaber: „Diese Seite brauche ich überhaupt nicht … sofort losgehen mit der Auswahl des
+    Elements“): im eigenen Aufmaß ohne Fenster öffnet die App gleich Schritt 1 „Was planst du?“ (`leerStart`, `leerEinstieg` in render),
+    ein angefangenes Fenster (Entwurf) geht dort weiter, wo es stand; mit Fenstern die Liste wie bisher. Zurück auf Schritt 1 ohne Liste
+    führt zur Startseite der Website (Knopf und Zurück-Taste). Was nur auf der Willkommensseite stand, steht in der Übersicht: „Führung
+    starten“, „Schon ein Aufmaß gesichert? Anmelden“ bzw. „Dein Konto“, „Anleitung: Fenster ausmessen“. Die gemerkte Anmeldung lädt das
+    letzte Aufmaß im Hintergrund; ein schon begonnenes neues Fenster bleibt dabei erhalten, hat die App Schritt 1 nur von selbst geöffnet,
+    zeigt sie danach die Liste. Kundenlink, Instanzen, Testansicht und Führung bleiben unverändert.
   - Menü der Wünsche: Bogen „Alles an deinem Fenster“ mit hellblauer Zeile
     „An deinem Haus“ (speichert ein neues oder geändertes Element und öffnet das Hausbild), darunter je Kapitel jede Frage mit der Wahl;
     Antippen springt dorthin (`wzMenue`, `q-sprung`). Seit 6.11.2026 (Inhaber: „den Menüreiter … unten rechts unter das Bild, mit
@@ -784,7 +791,7 @@ Code: `web/assets/hausbild.js` und `hausbild.css`, Server `functions/api/hausbil
   Glas als echte Isolierverglasung, die Himmel und Umgebung vor dem Haus perspektivisch und leicht unruhig spiegelt, oben heller, unten
   dunkler, mit einer Ahnung des dunklen Raums dahinter; Ornamentglas bleibt blickdicht. Probe mit FLUX.2 [klein] 9B am Beispielhaus:
   docs/profis/bilder/2026-11-04-ki-glas-vorher-nachher.jpg (je zwei Läufe mit altem und neuem Auftrag, dazu einer mit Rollladen).
-  Vorher/Nachher am Beispielhaus auf der Willkommensseite, in „Gespeichert“ und in der Liste; die Einladung ab dem ersten gespeicherten
+  Vorher/Nachher am Beispielhaus in „Gespeichert“ und in der Liste (bis 6.11.2026 auch auf der Willkommensseite); die Einladung ab dem ersten gespeicherten
   Fenster. In „Gespeichert“ steht „Dieses Fenster“ (Maße, Wünsche, Kopieren, Löschen, Themen) über der Einladung und „Wie geht es weiter?“.
 - **Lenkung zum Aufmaßblatt (Inhaber, 3.11.2026: jede Generierung kostet; Konzept docs/konzepte/2026-11-03-conversion-funnel.md):** Die
   Einladung erscheint erst, wenn ein Fenster vollständige Maße hat. Fünf KI-Vorschauen (je ein Durchgang mit allen gesetzten Fenstern) sind frei,

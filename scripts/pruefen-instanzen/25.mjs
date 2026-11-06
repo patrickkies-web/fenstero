@@ -300,8 +300,11 @@ export default async (h) => {
   /* ---------- 25.10 Hauptdomain-App unverändert ---------- */
   const ctxH = await desktop(), sH = await h.neueSeite(ctxH, X.base('localhost'));
   await sH.goto(X.base('localhost') + '/app/', { waitUntil: 'networkidle' }); await sH.waitForTimeout(400);
-  const hd = await sH.evaluate(() => ({ inst: !!(window.KONFIG && window.KONFIG.instanz), betrieb: S.betrieb, text: document.body.innerText, recht: Array.from(document.querySelectorAll('.foot-links.recht a')).map((a) => a.getAttribute('href')).join(' ') }));
-  ok(!hd.inst && hd.betrieb === null && /Dein erstes Fenster/.test(hd.text) && /Führung starten/.test(hd.text) && /\/agb\//.test(hd.recht) && /\/widerruf\//.test(hd.recht), '25.10 Hauptdomain: eigene App wie bisher (eeziframes-Start „Dein erstes Fenster“ seit 3.11.2026, Führung, AGB und Widerruf in den Rechtslinks)');
+  const hd = await sH.evaluate(() => ({ inst: !!(window.KONFIG && window.KONFIG.instanz), betrieb: S.betrieb, screen: S.screen, text: document.body.innerText, recht: Array.from(document.querySelectorAll('.foot-links.recht a')).map((a) => a.getAttribute('href')).join(' ') }));
+  /* seit 6.11.2026 ohne Willkommensseite: die App beginnt bei Schritt 1 „Was planst du?“, die Führung steht in der Übersicht */
+  await sH.click('.lg-kopf [data-act="wohin"]'); await sH.waitForTimeout(300);
+  const hdF = await sH.evaluate(() => !!document.querySelector('.sheet.wohin [data-act="tour-start"]'));
+  ok(!hd.inst && hd.betrieb === null && hd.screen === 'start' && /Was planst du\?/.test(hd.text) && hdF && /\/agb\//.test(hd.recht) && /\/widerruf\//.test(hd.recht), '25.10 Hauptdomain: eigene App beginnt bei Schritt 1 „Was planst du?“ (ohne Willkommensseite, 6.11.2026), Führung in der Übersicht, AGB und Widerruf in den Rechtslinks');
   h.sauber(sH, '25.10 Hauptdomain ohne Fehler'); await ctxH.close();
 
   /* ---------- 25.11 Testansicht für Fensterbauer (/app/?ausprobieren[=<paket>] auf der Hauptdomain) ----------

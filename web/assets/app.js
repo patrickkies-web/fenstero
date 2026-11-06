@@ -2976,6 +2976,7 @@ function teilungVorschlagen(w, meldung) {
 function toast(msg) { S.toast = msg; render(); clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = ''; render(); }, 1900 + Math.min(4000, Math.max(0, String(msg || '').length - 40) * 45)); } // längere Meldungen bleiben länger stehen (bis drei Zeilen)
 function render(fresh) {
   if (NEU_LADEN && RUHIG.includes(S.screen)) { location.reload(); return; } // Anmeldung in einem anderen Tab geändert (siehe unten)
+  if (S.screen === 'home' && !LEER_START && leerStart()) { leerEinstieg(); if (S.screen !== 'home') return; } // ohne Fenster gleich Schritt 1
   NACHZEICHNEN = false; clearTimeout(nachzeichnenTimer);
   if (INST && S.sent && !S.sent.kurz && S.screen !== 'gesendet') instanzKuerzen(); // Bestätigung verlassen: nur Nummer und Datum bleiben
   const root = $app(), scroller = root.querySelector('.scroll'), keep = !fresh && scroller ? scroller.scrollTop : 0, fokus = fresh ? null : fokusMerken(root);
@@ -3153,6 +3154,18 @@ function winCard(x, i, live, hide) { const d = derive(x), tag = live ? 'button' 
 /* Startbild der App: Foto ohne Rahmen, das weich in den Grund ausläuft (app.css .hero-foto), mit den drei Schritten als Chips;
    das Foto liegt in web/bilder/foto/ (docs/BILDER.md) */
 const FOTO_START = '<figure class="hero-foto"><img src="/bilder/foto/app-start.webp" width="1120" height="1400" alt="Drei Waschbären im Wohnzimmer: einer fotografiert mit dem Handy die Maueröffnung samt Zollstock, einer tippt auf dem Sofa seine Wünsche an, einer lehnt sich zufrieden zurück" fetchpriority="high" decoding="async"><div class="chips"><span class="chip haken">Fotografieren</span><span class="chip haken">Messen</span><span class="chip haken">Wünschen</span></div></figure>';
+/* Ohne Fenster keine Willkommensseite (Inhaber, 6.11.2026: „Diese Seite brauche ich überhaupt nicht … sofort losgehen mit der Auswahl
+   des Elements“): im eigenen Aufmaß ohne Fenster führt die Startansicht gleich zur Wahl des Elements (Schritt 1), ein angefangenes Fenster
+   (Entwurf) geht dort weiter, wo es stand. Nicht im Kundenlink, in Instanzen, in der Testansicht, in der Führung und an der Grenze der
+   Fenster. Führung und Anmelden stehen seitdem in der Übersicht (wohinBlatt) */
+const leerStart = () => !S.betrieb && !INST && !PROBE && !S.tour && !S.windows.length && neuMoeglich() && location.hash !== '#fuehrung';
+let LEER_START = false, EINSTIEG_AUSMESSEN = false;
+function leerEinstieg() {
+  LEER_START = true;
+  try { if (entwurfLesen()) entwurfFortsetzen(); else newWin(); } finally { LEER_START = false; }
+  /* von selbst begonnen (nicht über „Jetzt konfigurieren“): lädt die gemerkte Anmeldung gleich ein Aufmaß, zeigt die App dessen Liste */
+  S.autoStart = !EINSTIEG_AUSMESSEN && S.screen === 'start';
+}
 SCREENS.home = () => {
   if (S.betrieb) return linkHome();
   if (S.windows.length || angelegt() >= GRENZE.fenster) return homeAufmassDna(); // an der Grenze ohne Fenster: dort steht „Neues Aufmaß beginnen“
@@ -3430,9 +3443,10 @@ function startDna() {
   const stelle = '<div class="lg-karte lg-hell st-stelle-karte"><div class="lg-feld"><span class="dna-label" id="st-stelle-l">Die Stelle</span><h2 class="st-weiss-titel">Ersetzen, neu oder nachrüsten? <span>Danach planst du am Modell.</span></h2><div class="st-stelle" role="radiogroup" aria-labelledby="st-stelle-l">' +
     OPT.situation.map((x) => { const an = x.k === stelleK; return '<button type="button" role="radio" data-act="situation" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '">' + esc(x.k === 'ersatz' ? 'Ersetzen' : x.label) + '</button>'; }).join('') + '</div>' +
     '<p class="st-stelle-text" aria-live="polite">' + ST_STELLE[stelleK] + (neu ? ' <button type="button" class="ulink" data-act="gloss" data-k="neuoeffnung">Mehr erfahren</button>' : '') + '</p></div></div>';
-  const zurLanding = PROBE && PROBE_LANDING && !S.windows.length, zur = zurLanding ? ['probe-landing', PROBE_DIREKT ? 'Zurück zur Seite für Fensterbauer' : 'Zurück zur Website von Fensterbau Brandt'] : ['back', 'Zurück: Aufmaß']; // Testansicht: die Beispielseite ist die Website des Betriebs
+  /* ohne Liste (noch kein Fenster, leerStart) führt Zurück zur Startseite der Website, nicht in eine Schleife über die Startansicht */
+  const zurLanding = PROBE && PROBE_LANDING && !S.windows.length, zurWeb = !zurLanding && leerStart(), zur = zurLanding ? ['probe-landing', PROBE_DIREKT ? 'Zurück zur Seite für Fensterbauer' : 'Zurück zur Website von Fensterbau Brandt'] : zurWeb ? ['zur-startseite', 'Zurück zur Startseite von eeziframes'] : ['back', 'Zurück: Aufmaß']; // Testansicht: die Beispielseite ist die Website des Betriebs
   const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="' + zur[0] + '" aria-label="' + zur[1] + '">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="wuensche">Weiter' + pfeil + '</button></div>';
-  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(zur) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + probeInfo() + bento + '<div class="st-weiss">' + stelle + fuss + rechtLinks() + '</div></div></div>', back: ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
+  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(zur) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + probeInfo() + bento + '<div class="st-weiss">' + stelle + fuss + rechtLinks() + '</div></div></div>', back: zurWeb ? ['Startseite', 'zur-startseite'] : ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
 }
 /* Nach dem Zeichnen: Wechsel erst einblenden, wenn das neue Bild bereit ist; Wischen an die Bühne binden */
 function stZeigen() {
@@ -6876,9 +6890,12 @@ function wohinBlatt() {
   if (S.windows.length && !(lk && S.sent)) { // nach dem Senden lassen sich die Fenster nicht mehr öffnen: keine Liste mit toten Knöpfen
     h += '<p class="eyebrow wo-k">' + (lk ? 'Deine Fenster für ' + esc(S.betrieb.name || 'deinen Fensterbauer') : 'Deine Fenster') + ' · ' + S.windows.length + '</p><div class="gindex wo-fenster">' + S.windows.map((x, i) => '<button type="button" data-act="wohin-fenster" data-i="' + i + '"' + (wiz && i === S.editIdx ? ' aria-current="true"' : '') + '><span class="wo-ic">' + svgIcon(miniWin(x), 36) + '</span><span><b>' + esc(x.name || 'Fenster ' + (i + 1)) + '</b><small>' + esc('Pos. ' + (i + 1) + ' · ' + fensterStatus(x)) + (wiz && i === S.editIdx ? ' · gerade offen' : '') + '</small></span>' + CHEV + '</button>').join('') + '</div>';
   }
+  /* ohne Liste (leerStart): statt „Zur Fensterliste“ die Führung und das Anmelden, die bis 6.11.2026 auf der Willkommensseite standen */
+  const ohneListe = leerStart(), konto = ohneListe && kontoBereit() ? (KS ? '<button type="button" class="link wo-web" data-act="go" data-v="meinkonto">Dein Konto (' + esc(KS.mail) + ')</button>' : '<button type="button" class="link wo-web" data-act="anmelden">Schon ein Aufmaß gesichert? Anmelden</button>') : '';
   h += '<div class="wo-knoepfe">' + (wiz && nameDa(w) && fensterOffen() ? '<button type="button" class="btn primary" data-act="wohin-speichern">Speichern und zur Liste</button>' : '') +
-    '<button type="button" class="btn ghost" data-act="wohin-liste">' + (S.screen === 'home' ? 'Zur Liste' : INST ? 'Zur Startseite' : lk ? 'Zur Startseite des Aufmaßes' : 'Zur Fensterliste') + '</button>' +
-    (lk ? (PROBE ? '<a class="link wo-web" href="' + PROBE_FB + '">Testansicht beenden: zur Seite für Fensterbauer</a>' : '') : '<button type="button" class="link wo-web" data-act="wohin-web">Zur Startseite von eeziframes</button>') + '</div></div>';
+    /* angefangenes Fenster ohne Liste: neu beginnen statt fortsetzen (stand als „Neues Fenster ausmessen“ auf der Willkommensseite) */
+    (ohneListe ? (wiz && S.editIdx < 0 && entwurfInhalt(w) ? '<button type="button" class="btn ghost" data-act="neu-beginnen">Neu beginnen, ohne dieses Fenster</button>' : '') + '<button type="button" class="btn ghost" data-act="tour-start">Führung starten, ohne eigene Maße</button>' + konto : '<button type="button" class="btn ghost" data-act="wohin-liste">' + (S.screen === 'home' ? 'Zur Liste' : INST ? 'Zur Startseite' : lk ? 'Zur Startseite des Aufmaßes' : 'Zur Fensterliste') + '</button>') +
+    (lk ? (PROBE ? '<a class="link wo-web" href="' + PROBE_FB + '">Testansicht beenden: zur Seite für Fensterbauer</a>' : '') : (INST ? '' : '<a class="link wo-web" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen</a>') + '<button type="button" class="link wo-web" data-act="wohin-web">Zur Startseite von eeziframes</button>') + '</div></div>';
   return h;
 }
 /* Status eines Fensters in Listen: nur vollständig oder offen, keine Angaben (die stehen im Aufmaßblatt) */
@@ -6937,6 +6954,7 @@ function zurueckTaste() {
   if (S.screen === 'messen' && S.mess && S.mess.pad) { messZu(); return true; } // Zifferntasten beim Messen: erst das Blatt zu
   if (S.screen === 'rest' && S.rest && S.rest.pad) { restZu(); return true; }
   if (S.screen === 'home' && !S.tour) return false;
+  if (S.screen === 'start' && leerStart()) return false; // Schritt 1 ohne Liste: die App verlassen, wie früher auf der Startansicht
   act('back', document.body);
   return true;
 }
@@ -7398,6 +7416,9 @@ async function projektOeffnen(k, still) {
 }
 async function projektOeffnenJetzt(k, still) {
   if (!KS) return false;
+  /* Gemerkte Anmeldung lädt beim Start das letzte Aufmaß (still): ein neues Fenster, an dem schon gearbeitet wird, bleibt (seit es keine
+     Willkommensseite mehr gibt, steht Schritt 1 sofort); hat die App Schritt 1 nur von selbst geöffnet, zeigt sie danach die Liste */
+  const neuHier = still && S.editIdx < 0 && imAssistenten(), zurListe = neuHier && S.autoStart && S.screen === 'start';
   if (S.kauf && S.kauf.kennung === k && S.windows.length) { if (!still) go('home'); return true; }
   if (kontoAn() && (S.sync.offen || S.sync.p || S.sync.voll)) { const a = await entwurfAbgleichen(); if (a === 'fehler') { toast(S.sync.voll ? VOLL_TEXT : 'Dein aktuelles Aufmaß ist noch nicht gesichert. Bitte gleich noch einmal.'); return false; } }
   const r = await kontoJson('/api/kunde/aufmass/' + encodeURIComponent(k));
@@ -7407,12 +7428,12 @@ async function projektOeffnenJetzt(k, still) {
   clearTimeout(S.sync.timer); S.sync = syncNeu();
   S.windows = []; takeWindows(r.entwurf.windows || []);
   S.proj = normProj(Object.assign({}, PROJ0, r.entwurf.proj || {})); S.projTs = Number(r.entwurf.projTs) || 0; S.stand = Number(r.entwurf.stand) || 0;
-  S.kauf = { kennung: k, mail: KS.mail, agb: true, konto: KS.mail, pay: '', widerruf: false, paid: false, err: {} }; S.teil = null; S.angelegt = 0; S.editIdx = -1; S.win = baseWin();
+  S.kauf = { kennung: k, mail: KS.mail, agb: true, konto: KS.mail, pay: '', widerruf: false, paid: false, err: {} }; S.teil = null; S.angelegt = 0; S.editIdx = -1; if (!neuHier || zurListe) S.win = baseWin();
   bezahltUebernehmen(r.bezahlt); metaUebernehmen(r.meta);
   S.sync.geladen = true; S.sync.ok = true; S.sync.zuletzt = Date.now(); S.sync.fp = entwurfFp(); S.sync.pfp = stabil(S.proj); S.sync.bekannt = S.windows.map((w) => w.wid);
   lokalSpeichern(); bilderZurueck(k);
   const hinweis = platz ? 'Aufmaß geöffnet' : 'Aufmaß geöffnet. Für die Bilder der Lage im vorigen war auf diesem Gerät kein Platz.';
-  if (!still) { go('home'); toast(hinweis); } else { render(); if (!platz) toast(hinweis); }
+  if (!still || zurListe) { S.autoStart = false; go('home'); if (!still || !platz) toast(hinweis); } else { render(); if (!platz) toast(hinweis); }
   return true;
 }
 /* Nach dem Anmelden: Aufmaß dieses Geräts ins Konto bringen, sonst das zuletzt bearbeitete aus dem Konto holen. Ein Aufmaß, das
@@ -7998,6 +8019,7 @@ function masseTauschen(w) {
 const NUMF = { w: 1, h: 1, bru: 1, laib: 1, anzahl: 1, breite: 1 };
 function act(name, el) {
   const v = el.getAttribute('data-v'), f = el.getAttribute('data-f'), w = S.win;
+  S.autoStart = false; // jede Handlung: Schritt 1 ist nicht mehr nur von selbst geöffnet (projektOeffnenJetzt)
   if (window.EzSchritt) { const z = name === 'gloss' || name === 'gindex' ? 'hilfe' : name === 'back' || name === 'qprev' || name === 'tour-zurueck' ? 'zurueck' : name === 'offen' ? 'weissnicht' : name === 'mass-tausch' || name === 'masse-korr' ? 'fehler' : ''; if (z) EzSchritt.zeichen(z); }
   const n = (x) => { const k = parseInt(x, 10); return isNaN(k) ? x : k; };
   /* In der Führung: Gesperrtes erklärt sich, alles, was das eigene Projekt verändern würde, bleibt aus */
@@ -8134,7 +8156,7 @@ function act(name, el) {
     /* Übersicht aller Fenster aus den Wünschen (Knopf oben links): bei ungespeicherten Änderungen erst das Blatt „Noch nicht gespeichert“ */
     case 'liste': { S.qMass = null; return verlassen({ art: 'home' }); }
     case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg();
-      if (masseAendernHier() && ((S.screen === 'frage' && S.q === 'massweg') || S.screen === 'fotos' || (S.screen === 'planmasse' && S.win.neu))) return masseZurueck(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'md-zurueck') return window.MessenDna.zurueck(); if (b === 'mess-back') { S.mess.step = 3; S.mess.pad = false; S.mess.msg = null; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
+      if (masseAendernHier() && ((S.screen === 'frage' && S.q === 'massweg') || S.screen === 'fotos' || (S.screen === 'planmasse' && S.win.neu))) return masseZurueck(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'md-zurueck') return window.MessenDna.zurueck(); if (b === 'mess-back') { S.mess.step = 3; S.mess.pad = false; S.mess.msg = null; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'zur-startseite') { location.assign(PORTAL_URL); return; } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
     case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: zeit(), aend: 0, ts: zeit() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); S.designVorher = null; persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
     case 'new': if (INST && S.betrieb && S.sent) return instanzWeitere(); if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg());
       if (INST && S.instZu) return go('home');
@@ -8146,6 +8168,8 @@ function act(name, el) {
     case 'probe-kunde': S.probeSicht = 'kunde'; return render(true);
     case 'probe-blatt': return probeBlatt();
     case 'probe-landing': if (PROBE_LANDING) location.assign(PROBE_LANDING); return;
+    case 'zur-startseite': location.assign(PORTAL_URL); return; // Schritt 1 ohne Liste: Zurück zur Website
+    case 'neu-beginnen': entwurfWeg(); return newWin(); // Übersicht ohne Liste: das angefangene Fenster verwerfen, Schritt 1 neu
     case 'probe-neu': instanzVergessen(); return toast('Noch einmal von vorn: Ihre Testdaten sind gelöscht.');
     case 'inst-vergessen': return instanzVergessen();
     case 'inst-pdf': return anfragePdf();
@@ -8742,7 +8766,7 @@ async function dateiSpeichern(data, name) {
 function boot() {
   LINK_TOKEN = tokenAusAdresse(); // Anmeldelink: Schlüssel gleich aus Adresse und Verlauf nehmen, verarbeitet wird er in serverStart
   /* Einstieg von der Website (#ausmessen): den Anker gleich aus der Adresse nehmen, bevor verlaufBinden die Falle stellt (sonst bliebe er im Verlauf und jeder Neuladen begänne wieder ein Fenster) */
-  const ausmessen = location.hash === '#ausmessen';
+  const ausmessen = location.hash === '#ausmessen'; EINSTIEG_AUSMESSEN = ausmessen;
   if (ausmessen) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } }
   restore();
   vmVorgaben();
@@ -8790,7 +8814,7 @@ function boot() {
   else if (PROBE) probeEinstieg(); // Testansicht für Fensterbauer: gleich die erste Folie mit dem Infobereich
   /* Einstieg von der Website („Jetzt ausmessen“, /app/#ausmessen): gleich der erste Schritt statt der Startseite der App; ein angefangenes
      Fenster wird fortgesetzt, ein Kundenlink hat Vorrang */
-  else if (ausmessen && !S.betrieb) { if (KS) { EINSTIEG_NEU = true; setTimeout(einstiegNach, 8000); } else einstiegNeu(); }
+  else if (ausmessen && !S.betrieb && !imAssistenten()) { if (KS) { EINSTIEG_NEU = true; setTimeout(einstiegNach, 8000); } else einstiegNeu(); } // ohne Fenster steht Schritt 1 schon (leerStart)
   serverStart();
   AI.init().then((ok) => { S.aiOk = ok; if (S.screen === 'fotos') render(); });
   DLP = (async () => { try { DL = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { DL = null; } return DL; })();

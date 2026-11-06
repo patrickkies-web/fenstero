@@ -357,6 +357,9 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   „Geführt neu messen“. Ohne Häkchen wird nicht gespeichert; geänderte Maße wollen neu bestätigt werden. Ohne Maße steht dieselbe Kachel
   einmal als Hinweis und sperrt nicht. Die Speichern-Knöpfe bleiben unten im Bogen stehen.
 - Start-Folie (Inhaber, 2.11.2026): Balkontür (zweiflügelig) und Hebe-Schiebe-Tür als seine Fotos in Anthrazit, wie das Fenster.
+- Keine Willkommensseite in der App (Inhaber, 6.11.2026: „Diese Seite brauche ich überhaupt nicht“): „Jetzt konfigurieren“ und jeder
+  Einstieg ohne Fenster führen sofort zu Schritt 1 „Was planst du?“. Keine Begrüßungs- oder Zwischenseite vor dem Konfigurator bauen;
+  Nebenwege (Führung, Anmelden, Anleitung) gehören in die Übersicht.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
